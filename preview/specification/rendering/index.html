@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feature/include-coria-native-mxl</code>
-  , gebouwd 2026-09-05 18:26 CEST.
+   — branch <code>cursor/ehm-accidens-diatonic-cursor</code>
+  , gebouwd 2026-09-17 23:53 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -227,6 +227,14 @@
     
     <a href="https://orthodox-ronl.github.io/VSA-demo/" target="_blank" rel="noopener" title="VSA-demo" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/orthodox-ronl/VSA-tooling" target="_blank" rel="noopener" title="VSA-tooling — GitHub-repository" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M176 56v40h160V56c0-4.4-3.6-8-8-8H184c-4.4 0-8 3.6-8 8m-48 40V56c0-30.9 25.1-56 56-56h144c30.9 0 56 25.1 56 56v40h28.1c12.7 0 24.9 5.1 33.9 14.1l51.9 51.9c9 9 14.1 21.2 14.1 33.9V272H376v-16c0-13.3-10.7-24-24-24s-24 10.7-24 24v16H184v-16c0-13.3-10.7-24-24-24s-24 10.7-24 24v16H0v-76.1C0 183.2 5.1 171 14.1 162L66 110.1c9-9 21.2-14.1 33.9-14.1zM0 416v-96h136v16c0 13.3 10.7 24 24 24s24-10.7 24-24v-16h144v16c0 13.3 10.7 24 24 24s24-10.7 24-24v-16h136v96c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64"/></svg>
     </a>
   
 </div>
@@ -4125,7 +4133,7 @@ Zie <code>src/vsa/musicxml_renderer.py</code>, <code>src/vsa/pitch_resolver.py</
 </tr>
 <tr>
 <td><code>tempo</code></td>
-<td><code>100 BPM</code></td>
+<td><code>120 BPM</code></td>
 </tr>
 <tr>
 <td><code>duration-model</code></td>
@@ -4188,8 +4196,25 @@ mode="major"
 <p>Als geen <code>do</code>-parameter aanwezig is, wordt de default <code>F4</code> gebruikt.</p>
 <h4 id="toonhoogteberekening-per-noot">Toonhoogteberekening per noot<a class="headerlink" href="#toonhoogteberekening-per-noot" title="Permanent link">&para;</a></h4>
 <p>Elke <a class="og-termref" href="/VSA-tooling/preview/terminologie/muzikale-positie" title="Muzikale positie: de kleinste muzikale eenheid binnen VSA-notatie: één relatieve toonhoogtebeweging (één EHM), één duur (één ELM) en een koppeling aan één zangelement in een VSA-scope.">muzikale positie</a> correspondeert met één MusicXML <code>&lt;note&gt;</code>.</p>
-<p>De pitch wordt cumulatief berekend:</p>
-<div class="highlight"><pre><span></span><code>starttoon + EHM1 + EHM2 + ... + EHMn
+<p>De absolute toonhoogte volgt twee lagen (zelfde model als
+<a href="../semantics/#interpretatie-van-ehms">Interpretatie van EHMs</a>):</p>
+<ol>
+<li><strong>Diatonische cursor</strong> — alleen basisbewegingen (<code>/</code>, <code>\</code>, <code>-</code>, <code>~</code>, …)
+   verplaatsen de laddergraad t.o.v. <code>do</code> / modus (<code>-</code>/<code>~</code> = nul stappen).</li>
+<li><strong>Klinkende toon</strong> — halftoon-prefix zet MusicXML <code>&lt;alter&gt;</code> op díe noot;
+   <code>~</code>/<code>-</code> zonder nieuwe prefix, en ongescopte recite, herhalen de vorige
+   klinkende toon (inclusief alter). Een latere ladderstap gebruikt weer de
+   natuurlijke graad tenzij die EHM zelf een prefix heeft.</li>
+</ol>
+<div class="highlight"><pre><span></span><code>cursor₀ = beginmarkering t.o.v. do
+klank₀ = laddertoon(cursor₀)
+voor elke EHMₙ:
+    cursor ← cursor + ladderstappen(EHMₙ)
+    als ladderstappen=0 en geen nieuwe prefix:
+        pitchₙ ← klankₙ₋₁          # zelfde toon voor de zanger
+    anders:
+        pitchₙ ← laddertoon(cursor) + alter(prefix)
+    klankₙ ← pitchₙ
 </code></pre></div>
 <p>Daarbij worden <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHMs</a> geïnterpreteerd binnen de <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> en modus.</p>
 <h4 id="ritme-en-duur">Ritme en duur<a class="headerlink" href="#ritme-en-duur" title="Permanent link">&para;</a></h4>
@@ -4302,7 +4327,7 @@ af.</p>
 </tr>
 <tr>
 <td><a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a></td>
-<td>cumulatief berekende pitch</td>
+<td>laddergraad-cursor + optioneel <code>&lt;alter&gt;</code></td>
 </tr>
 <tr>
 <td><a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-lengte-modifier" title="Enkelvoudige lengte-modifier: een Lengte-modifier die uit precies één geldige ELM bestaat en daarmee precies een duurpositie representeert.">ELM</a></td>
@@ -4324,7 +4349,7 @@ af.</p>
 <li>EHM- en ELM-aantallen inconsistent zijn;</li>
 <li>een onbekende <a class="og-termref" href="/VSA-tooling/preview/terminologie/modifier" title="Modifier: een tekenreeks die binnen een VSA-scope als Hoogte-modifier voor het zangelement of als Lengte-modifier na het zangelement wordt geparseerd.">modifier</a> voorkomt;</li>
 <li>geen geldige toonhoogte kan worden afgeleid;</li>
-<li>een halve ladderstap wordt gebruikt waar de modus dit niet toestaat;</li>
+<li>een chromatische alteratie (halftoon-prefix) die de implementatie of modus niet toestaat;</li>
 <li>de implementatie geen mappingstrategie heeft voor de gekozen modus.</li>
 </ul>
 <p>In alle gevallen moet een foutmelding minimaal bevatten:</p>
@@ -7199,7 +7224,7 @@ local_heights = height_markers[1:]
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-05
+        Bijgewerkt: 2026-09-17
         
       </p>
       
