@@ -149,7 +149,7 @@ alleen de diatonische cursor weer omhoog naar do. Zelfde-toonlettergrepen
 (`{ri}` of ongescopte `ri`) houden de klinkende toon vast — zonder `#-` te
 hoeven schrijven. Zichtbaar via eindmarkering `[:]` en MusicXML (`B#` → … → `C`).
 
-Bestand: [`examples/docs-walkthroughs/halftoon-accidens-cursor.vsa`](../../examples/docs-walkthroughs/halftoon-accidens-cursor.vsa)
+Bestand: `examples/docs-walkthroughs/halftoon-accidens-cursor.vsa`
 
 ```text
 [:] {+\neer}{/terug_} op do. [:]
