@@ -13,6 +13,6 @@ Bij tegenstrijdigheid gelden [Specificaties](../specification/README.md) en
 | [uitgaveprofielen.md](https://github.com/orthodox-ronl/VSA-tooling/blob/focus-on-tooling/docs/plans/uitgaveprofielen.md)    | [Samenstelling](@bron) / uitgaveprofielen (alleen in git; veel interne repo-links). |
 | [gebruikseisen-dragers.md](gebruikseisen-dragers.md)                                                                             | UX-eisen papier / tablet / telefoon.                                                |
 | [docs-content-publiek-en-paginatypen.md](docs-content-publiek-en-paginatypen.md)                                                 | Pointer naar org-plan in bron (persona’s, paginatypen, werkplan).                   |
-| [specification-vsa-templates/](../specification-vsa-templates/)                                                                  | Draft-spec melodietemplates (frasen, recite, SATB); later → `specification/`.       |
+| [specification-vsa-templates](../specification-vsa-templates/README.md)                                                          | Draft-spec melodietemplates (frasen, recite, SATB); later → `specification/`.       |
 
 TEv2 in docs: [TEv2 in tool-docs](../guides/tev2-docs.md).

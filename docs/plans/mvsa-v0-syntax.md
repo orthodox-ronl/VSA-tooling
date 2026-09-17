@@ -3,8 +3,8 @@
 | Veld | Waarde |
 | ---- | ------ |
 | **Status** | niet-normatief werkontwerp |
-| **Doel** | Intypbare SATB + lyrics in VSCode; later koppelbaar aan [vsa-templates](../specification-vsa-templates/) zonder nodeloos typwerk |
-| **Gerelateerd** | [vsa-polyphony-proposal.md](vsa-polyphony-proposal.md), [specification-vsa-templates/](../specification-vsa-templates/) |
+| **Doel** | Intypbare SATB + lyrics in VSCode; later koppelbaar aan [vsa-templates](../specification-vsa-templates/README.md) zonder nodeloos typwerk |
+| **Gerelateerd** | [vsa-polyphony-proposal.md](vsa-polyphony-proposal.md), [specification-vsa-templates](../specification-vsa-templates/README.md) |
 
 Dit document legt **laag 1** vast: hoe je een mvsa-bestand leest en typt.
 Templates (laag 2/3) komen alleen aan bod waar de syntax daarop moet anticiperen
@@ -366,7 +366,7 @@ mag je aan het eind van een maat een laddergraad als eindanker toevoegen.
 
 Zelfde bestandsvorm: een `tropaar-toon-4`-stemtemplate is dan een set
 S/A/T/B-regels per frase; per tropaar schrijf je vooral nieuwe L-regels met `~`.
-YAML in [`library/tropaar-toon-4/`](../specification-vsa-templates/library/tropaar-toon-4/)
+YAML in [`library/tropaar-toon-4/`](../specification-vsa-templates/library/tropaar-toon-4/README.md)
 blijft voorlopig leidend tot mvsa die rol overneemt.
 
 ---
@@ -407,5 +407,5 @@ blijft voorlopig leidend tot mvsa die rol overneemt.
 2. §2 (relatief vs. do-re-mi + ankers).
 3. §6 Alleluia toon 8 (`~` + beide hoogtestijlen).
 4. §7 vrije SATB (1:1 L-stukken ↔ hoogte-stukken).
-5. Daarna [tropaar-toon-4](../specification-vsa-templates/library/tropaar-toon-4/)
+5. Daarna [tropaar-toon-4](../specification-vsa-templates/library/tropaar-toon-4/README.md)
    als je stemregels als formule-slots wilt hergebruiken.
