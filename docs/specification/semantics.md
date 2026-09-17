@@ -198,13 +198,32 @@ De [do-context](@) bepaalt dus het startpunt. De modus bepaalt de interne struct
 
 ### Interpretatie van EHMs
 
-Een [EHM](@) is een operator op de actuele toonladderpositie. Een [EHM](@) bestaat uit een optionele halftoon-prefix en een basisbeweging. Het semantische effect is:
+Een [EHM](@) is een operator op de actuele toonladderpositie. Een [EHM](@)
+bestaat uit een optionele halftoon-prefix (accidens) en een basisbeweging.
 
-```
-netto beweging = basisbeweging + prefix_delta
-```
+Twee lagen worden strikt gescheiden:
 
-waarbij `prefix_delta` gelijk is aan +½ toon voor prefix `#` (of alias `+`, `♯`) en −½ toon voor prefix `b` (of alias `♭`).
+1. **Diatonische cursor** — de actuele toonladdergraad t.o.v. de
+   [do-context](@) en modus. Alleen basisbewegingen (`/`, `\`, `-`, `~`, en
+   gestapelde strepen) verplaatsen deze cursor.
+2. **Accidens / halftoon-prefix** (`#` / `+` / `♯`, `b` / `♭`) — tijdelijke
+   wijziging van de **klinkende toon** op de graad *ná* toepassing van de
+   basisbeweging van díe [EHM](@). De prefix verandert de diatonische cursor
+   niet.
+
+**Zelfde toon behouden:** een [EHM](@) zonder ladderstap en zonder nieuwe
+prefix (`~`, `-`, of impliciet `~`), én ongescopte reciteertekst, neemt de
+**klinkende toon van de voorgaande noot** over — inclusief accidens. Zo klinken
+`{+\go}{ri}{/os}` en `{+\go}ri{/os}` hetzelfde (Cis blijft op `ri` zonder
+`#-` te schrijven). Een latere ladderstap (`/`, `\`, …) start vanaf de
+natuurlijke graad, tenzij díe [EHM](@) opnieuw een prefix heeft.
+
+`+` is een spelling/alias van `#` (zelfde semantiek), geen aparte operator.
+
+Dit is **niet** een cumulatief “netto = basis ± ½ toon”-model waarin de
+prefix de cursor chromatisch verschuift. Een reeks `#\` daarna `/` brengt de
+cursor terug op de startgraad; de klinkende eindtoon (zonder nieuwe prefix)
+is weer de natuurlijke laddertoon.
 
 #### Basisbewegingen
 
@@ -220,21 +239,53 @@ waarbij `prefix_delta` gelijk is aan +½ toon voor prefix `#` (of alias `+`, `�
 | `\\\`    | verplaats drie graden omlaag |
 | `\\\\`   | verplaats vier graden omlaag |
 | `\\\\\`  | verplaats vijf graden omlaag |
-| `-`      | behoud de huidige toonhoogte |
-| `~`      | behoud de huidige toonhoogte |
+| `-`      | behoud de huidige graad      |
+| `~`      | behoud de huidige graad      |
 
-#### Halftoon-prefix combinaties (voorbeelden)
+#### Halftoon-prefix: cursor vs. klinkende toon (normatief)
 
-| [EHM](@) | Basisbeweging | Prefix | Netto effect                  |
-| -------- | ------------- | ------ | ----------------------------- |
-| `#/`     | +1 graad      | +½     | +1 graad + ½ toon omhoog      |
-| `b/`     | +1 graad      | −½     | +1 graad − ½ toon (= +½ toon) |
-| `#\`     | −1 graad      | +½     | −1 graad + ½ toon (= −½ toon) |
-| `b\`     | −1 graad      | −½     | −1 graad − ½ toon             |
-| `#-`     | 0 graden      | +½     | +½ toon (chromatisch omhoog)  |
-| `b-`     | 0 graden      | −½     | −½ toon (chromatisch omlaag)  |
+| [EHM](@) | Cursor (basis) | Accidens op aankomsttoon | Daarna |
+| -------- | -------------- | ------------------------ | ------ |
+| `#/`     | +1 graad       | kruis                    | volgende ladderstap: natuurlijke nieuwe graad; `~`/`-`/recite: zelfde klinktoon |
+| `b/`     | +1 graad       | mol                      | idem |
+| `#\`     | −1 graad       | kruis                    | idem |
+| `b\`     | −1 graad       | mol                      | idem |
+| `#-`     | 0              | kruis op huidige graad   | `~`/`-`/recite houden die klinktoon |
+| `b-`     | 0              | mol op huidige graad     | `~`/`-`/recite houden die klinktoon |
 
-[EHMs](@) worden sequentieel toegepast. Bij [blokmetadata](@) `do="C4"` en `mode="major"` produceert de EHM-reeks `/`, `\\`, `///` de toonreeks:
+#### Acceptatievoorbeelden (normatief)
+
+Met `do="C4"` en `mode="major"`, startcursor op do (graad 0):
+
+| Reeks | Cursor na reeks | Klinkende tonen (spelling) | Eindklank = start? |
+| ----- | --------------- | -------------------------- | ------------------ |
+| `#\` daarna `/` | do (0) | B3# (ti met kruis), daarna C4 | ja |
+| `b/` | re (1) | D♭4 | nee (cursor op re) |
+| `b/` daarna `-` | re (1) | D♭4, daarna D♭4 (zelfde toon) | — |
+| `#-` | do (0) | C#4 | cursor ongewijzigd |
+| `b-` | do (0) | C♭4 | cursor ongewijzigd |
+
+Met startmarkering `[/:]` (graad = re = D4):
+
+| Reeks | Klinkende tonen | Cursor-eind |
+| ----- | --------------- | ----------- |
+| `{+\go}{ri}{/os}` | D→C♯→C♯→D | weer re |
+| `{+\go}ri{/os}` (ongescopte `ri`) | D→C♯→C♯→D | weer re |
+
+Met `do="F4"` en `mode="major"` (non-C, enharmoniek):
+
+| Reeks | Cursor na reeks | Klinkende tonen (spelling) | Eindklank = start? |
+| ----- | --------------- | -------------------------- | ------------------ |
+| `#\` daarna `/` | do (0) | E4# (ti met kruis), daarna F4 | ja |
+| `b/` | re (1) | G♭4 | cursor op re |
+
+Contrast met het afgewezen float-model: onder “netto = basis ± ½” zou
+`+\` gevolgd door `/` klinken als `b/` (blijvend een half trede verschoven).
+In dit model is dat **niet** zo: `#\`+`/` herstelt cursor én natuurlijke
+laddertoon.
+
+[EHMs](@) worden sequentieel toegepast. Bij [blokmetadata](@) `do="C4"` en
+`mode="major"` produceert de EHM-reeks `/`, `\\`, `///` de toonreeks:
 
 ```text
 C4 → D4 → B3 → E4
@@ -242,18 +293,25 @@ C4 → D4 → B3 → E4
 
 Hierbij wordt uitgegaan van opeenvolgende toonladderstappen binnen de gekozen modus.
 
+MusicXML-export: de diatonische graad bepaalt `<step>` / octaaf via de
+modus; de halftoon-prefix bepaalt `<alter>` op díe noot. Zelfde-toon
+voortzetting (`~`/`-`/recite) herhaalt de vorige klinkende toon (inclusief
+`<alter>`).
+
 ### Geldigheid van halftoon-prefix combinaties
 
-Een [EHM](@) met halftoon-prefix is semantisch geldig als het resulterende interval (basisbeweging ± ½ toon) zinvol is binnen de [do-context](@) en modus. Een prefix mag nooit standalone voorkomen; hij moet altijd onmiddellijk voorafgaan aan een basisbeweging.
+Een [EHM](@) met halftoon-prefix is syntactisch alleen geldig wanneer de
+prefix onmiddellijk vóór een basisbeweging staat (geen standalone `#`/`b`).
 
-Semantische geldigheid vereist dat:
+Semantisch:
 
-1. de basisbeweging zelf geldig is binnen de huidige toonladderpositie en modus;
-2. de aanvullende ½ toon een gedefinieerd interval oplevert (de modus staat een dergelijke chromatische aanpassing toe).
+1. de basisbeweging verplaatst (of behoudt) de **diatonische cursor** zoals
+   zonder prefix;
+2. de prefix is een tijdelijk **accidens** op de aankomstgraad (MusicXML
+   `<alter>`); of een gegeven modus/export die spelling weigert, is een
+   aparte geldigheidsregel — zij verschuift de cursor niet.
 
-Als aan voorwaarde 2 niet is voldaan, is de [EHM](@) een semantische fout.
-
-Voorbeeld van zo'n semantische fout:
+Voorbeeld (geen cursorvergiftiging):
 
 ```text
 ::: vsa-notatie
@@ -264,9 +322,20 @@ mode="major"
 :::
 ```
 
-Als de actuele positie op `mi` staat en de overgang `mi → fa` al een kleine stap is, dan brengt `#/` de melodie een extra ½ toon buiten de toonladder. Als de modus hiervoor geen gedefinieerde subpositie heeft, is dit een semantische fout.
+Start op `mi` (`[//:]`): `#/` zet de cursor op `fa` met kruis (klinkend F#
+bij do=C). De volgende [EHM](@) start vanaf natuurlijke `fa`, niet vanaf een
+“½-trede tussen mi en fa”.
 
-De onderscheiding tussen een halftoon-prefix op een basisbeweging en een zelfstandige chromatische aanpassing (`#-`, `b-`) heeft ook semantisch gevolgen voor MusicXML-export: `b-` beschrijft een chromatische verschuiving op de huidige positie, terwijl `b/` een combinatie is van een ladderstap en een halvering.
+`#-` / `b-` blijven “chromatisch op huidige graad, cursor ongewijzigd”.
+`b/` is één ladderstap omhoog plus mol op de aankomstgraad — niet een
+verschuiving van de diatonische cursor met een half trede.
+
+Een historische schrijfwijze zoals `{-\…}` is geen geldige [EHM](@)
+(syntaxfout).
+
+Hoogte-markeringen (`[…:]`) controleren de **diatonische cursor**. Een
+accidens-prefix op een markering wijzigt die cursorcontrole niet; de
+canonieke herstelmarkering is steeds graad-only (`[:]`, `[/:]`, `[\\:]`, …).
 
 ### Interpretatie van ELMs
 

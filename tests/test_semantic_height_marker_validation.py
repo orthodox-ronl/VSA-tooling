@@ -1,14 +1,20 @@
 """Tests voor semantische validatie van hoogte-markeringen.
 
 Elke lokale markering ([X:] na de eerste) wordt gecontroleerd tegen de
-cumulatieve hoogte berekend uit alle tussenliggende EHMs.
+cumulatieve diatonische laddergraad berekend uit alle tussenliggende EHMs.
+Accidens-prefixen bewegen die cursor niet.
 """
-
-import pytest
 
 from vsa.parser import Parser
 from vsa.semantic_validator import SemanticValidator, SemanticValidationOptions
-from vsa.height_markers import _pitch_of_ehm, _pitch_of_ehm_list, _marker_for_pitch
+from vsa.height_markers import (
+    _degree_of_ehm,
+    _degree_of_ehm_list,
+    _marker_for_degree,
+    _pitch_of_ehm,
+    _pitch_of_ehm_list,
+    _marker_for_pitch,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -21,86 +27,71 @@ def _validate(source: str):
 
 
 # ---------------------------------------------------------------------------
-# Pitch-rekenkundige helpers
+# Graad-rekenkundige helpers
 # ---------------------------------------------------------------------------
 
-class TestPitchHelpers:
+class TestDegreeHelpers:
     def test_empty_ehm_is_zero(self):
-        assert _pitch_of_ehm("") == 0.0
+        assert _degree_of_ehm("") == 0
 
     def test_neutral_is_zero(self):
-        assert _pitch_of_ehm("-") == 0.0
-        assert _pitch_of_ehm("~") == 0.0
+        assert _degree_of_ehm("-") == 0
+        assert _degree_of_ehm("~") == 0
 
     def test_single_rise(self):
-        assert _pitch_of_ehm("/") == 1.0
+        assert _degree_of_ehm("/") == 1
 
     def test_double_rise(self):
-        assert _pitch_of_ehm("//") == 2.0
+        assert _degree_of_ehm("//") == 2
 
     def test_single_fall(self):
-        assert _pitch_of_ehm("\\") == -1.0
+        assert _degree_of_ehm("\\") == -1
 
     def test_double_fall(self):
-        assert _pitch_of_ehm("\\\\") == -2.0
+        assert _degree_of_ehm("\\\\") == -2
 
-    def test_sharp_prefix_adds_half(self):
-        assert _pitch_of_ehm("+/") == 1.5
-        assert _pitch_of_ehm("#/") == 1.5
-        assert _pitch_of_ehm("♯/") == 1.5
+    def test_accidental_does_not_change_degree(self):
+        assert _degree_of_ehm("+/") == 1
+        assert _degree_of_ehm("#/") == 1
+        assert _degree_of_ehm("♯/") == 1
+        assert _degree_of_ehm("b\\") == -1
+        assert _degree_of_ehm("♭\\") == -1
+        assert _degree_of_ehm("+-") == 0
+        assert _degree_of_ehm("#-") == 0
+        assert _degree_of_ehm("b-") == 0
+        assert _degree_of_ehm("+\\") == -1
+        assert _degree_of_ehm("#\\") == -1
+        assert _degree_of_ehm("b/") == 1
+        assert _degree_of_ehm("+//") == 2
 
-    def test_flat_prefix_subtracts_half(self):
-        assert _pitch_of_ehm("b\\") == -1.5
-        assert _pitch_of_ehm("♭\\") == -1.5
-
-    def test_sharp_on_neutral_is_half(self):
-        assert _pitch_of_ehm("+-") == 0.5
-        assert _pitch_of_ehm("#-") == 0.5
-
-    def test_flat_on_neutral_is_minus_half(self):
-        assert _pitch_of_ehm("b-") == -0.5
-
-    def test_sharp_on_fall_is_minus_half(self):
-        assert _pitch_of_ehm("+\\") == -0.5
-        assert _pitch_of_ehm("#\\") == -0.5
-
-    def test_flat_on_rise_is_plus_half(self):
-        assert _pitch_of_ehm("b/") == 0.5
-
-    def test_double_plus_sharp(self):
-        assert _pitch_of_ehm("+//") == 2.5
-
-    def test_list_sums(self):
-        assert _pitch_of_ehm_list(["/", "\\"]) == 0.0
-        assert _pitch_of_ehm_list(["//", "/"]) == 3.0
-        # b\ = -0.5 + (-1) = -1.5; #\ = +0.5 + (-1) = -0.5; sum = -2.0
-        assert _pitch_of_ehm_list(["b\\", "#\\"]) == -2.0
+    def test_list_sums_degrees_only(self):
+        assert _degree_of_ehm_list(["/", "\\"]) == 0
+        assert _degree_of_ehm_list(["//", "/"]) == 3
+        # b\ and #\ each move −1 degree; accidentals ignored → −2
+        assert _degree_of_ehm_list(["b\\", "#\\"]) == -2
 
     def test_empty_list_is_zero(self):
-        assert _pitch_of_ehm_list([]) == 0.0
+        assert _degree_of_ehm_list([]) == 0
+
+    def test_legacy_aliases(self):
+        assert _pitch_of_ehm("#\\") == _degree_of_ehm("#\\")
+        assert _pitch_of_ehm_list(["b/", "-"]) == _degree_of_ehm_list(["b/", "-"])
 
 
-class TestMarkerForPitch:
+class TestMarkerForDegree:
     def test_zero(self):
-        assert _marker_for_pitch(0.0) == "[:]"
+        assert _marker_for_degree(0) == "[:]"
 
-    def test_positive_integer(self):
-        assert _marker_for_pitch(1.0) == "[/:]"
-        assert _marker_for_pitch(3.0) == "[///:]"
+    def test_positive(self):
+        assert _marker_for_degree(1) == "[/:]"
+        assert _marker_for_degree(3) == "[///:]"
 
-    def test_negative_integer(self):
-        assert _marker_for_pitch(-1.0) == "[\\:]"
-        assert _marker_for_pitch(-2.0) == "[\\\\:]"
+    def test_negative(self):
+        assert _marker_for_degree(-1) == "[\\:]"
+        assert _marker_for_degree(-2) == "[\\\\:]"
 
-    def test_positive_half(self):
-        assert _marker_for_pitch(0.5) == "[+-:]"
-        assert _marker_for_pitch(1.5) == "[+/:]"
-        assert _marker_for_pitch(2.5) == "[+//:]"
-
-    def test_negative_half(self):
-        assert _marker_for_pitch(-0.5) == "[b-:]"
-        assert _marker_for_pitch(-1.5) == "[b\\:]"
-        assert _marker_for_pitch(-2.5) == "[b\\\\:]"
+    def test_legacy_alias(self):
+        assert _marker_for_pitch(2) == "[//:]"
 
 
 # ---------------------------------------------------------------------------
@@ -186,39 +177,48 @@ class TestHeightMarkerValidation:
         ]
         assert len(mismatches) == 1
 
-    def test_halftone_consistent(self):
-        # [:] {+\aap.}{#\noot_}{b\mies} [b\\:]
-        # 0 + (-0.5) + (-0.5) + (-1.5) = -2.5; [b\\:] = -0.5 + -2 = -2.5 → OK
-        result = _validate("[:]  {+\\aap.}{#\\noot_}{b\\mies} [b\\\\:]")
+    def test_accidental_sequence_tracks_degree_only(self):
+        # [:] {+\aap.}{#\noot_}{b\mies} [\\\:]
+        # degrees: 0 + (−1) + (−1) + (−1) = −3 → OK
+        result = _validate(r"[:]  {+\aap.}{#\noot_}{b\mies} [\\\:]")
         assert result.ok
 
-    def test_halftone_mismatch(self):
-        # [:] {+\aap} [:]  →  0 + (-0.5) = -0.5, maar markering zegt 0
-        result = _validate("[:] {+\\aap} [:]")
+    def test_sharp_down_then_up_matches_do_marker(self):
+        # Canonical regression: #\\ then / returns to do — not b/-height.
+        result = _validate(r"[:] {#\aap}{/noot} [:]")
+        assert result.ok
+
+    def test_plus_down_then_up_matches_do_marker(self):
+        result = _validate(r"[:] {+\aap}{/noot} [:]")
+        assert result.ok
+
+    def test_accidental_mismatch_uses_degree_hint(self):
+        # [:] {+\aap} [:]  → degree −1, but marker says 0
+        result = _validate(r"[:] {+\aap} [:]")
         codes = [d.code for d in result.diagnostics]
         assert "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH" in codes
-
-    def test_halftone_mismatch_hint(self):
-        result = _validate("[:] {+\\aap} [:]")
         mismatch = next(
             d for d in result.diagnostics
             if d.code == "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH"
         )
-        assert "[b-:]" in mismatch.hint_nl
+        assert "[\\:]" in mismatch.hint_nl
+        assert "[b-:]" not in mismatch.hint_nl
+
+    def test_flat_up_leaves_cursor_on_re(self):
+        result = _validate(r"[:] {b/aap} [/:]")
+        assert result.ok
+
+    def test_chromatic_dash_does_not_move_marker(self):
+        result = _validate(r"[:] {#-aap}{b-noot} [:]")
+        assert result.ok
 
     def test_line_column_points_to_wrong_marker(self):
-        # Marker staat op regel 2, kolom 5
-        source = "[//:]\n    [:] {/aap}"
-        result = _validate(source)
-        # Er is geen mismatch hier want start=2, {:}=0 met EHM na markering
-        # Juiste test: fout op regel 1 kolom 7 (het foute [:] op eerste regel)
         source2 = "[//:] {/aap} [:]"
         result2 = _validate(source2)
         mismatch = next(
             d for d in result2.diagnostics
             if d.code == "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH"
         )
-        # Markering staat aan het eind, dus kolom > 1
         assert mismatch.column > 1
 
     def test_severity_overridable_to_warning(self):

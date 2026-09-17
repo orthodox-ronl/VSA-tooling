@@ -306,7 +306,7 @@ class MusicXMLRenderer:
     def _fill_part(self, part: ET.Element, document: Document) -> None:
         do_str = self._meta.get("do", "F4")
         mode = self._meta.get("mode", "major")
-        tempo_str = self._meta.get("tempo", "100")
+        tempo_str = self._meta.get("tempo", "120")
         duration_model = self._meta.get("duration-model", "default")
         meter_str = self._meta.get("meter", "")
         reciting_mode = self._meta.get("reciting-mode", RECITING_MODE_QUARTERS)
@@ -337,7 +337,7 @@ class MusicXMLRenderer:
             """Emit reciting-tone note(s) for buffered unscopped text."""
             if not pending_tokens:
                 return
-            reciting_pitch = resolver.current_pitch  # no degree advance
+            reciting_pitch = resolver.current_pitch  # last sounding, incl. alter
 
             if (
                 reciting_mode == RECITING_MODE_WHOLE
@@ -517,7 +517,7 @@ class MusicXMLRenderer:
         try:
             bpm = int(float(tempo_str))
         except (ValueError, TypeError):
-            bpm = 100
+            bpm = 120
 
         direction = ET.SubElement(measure, "direction", placement="above")
         dt = ET.SubElement(direction, "direction-type")

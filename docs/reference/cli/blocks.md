@@ -77,7 +77,7 @@ Verwachte output (verkort):
     "metadata": {
       "do": "C4",
       "mode": "major",
-      "tempo": "100",
+      "tempo": "120",
       "musicxml-profile": "playback"
     },
     "body": "[:] {/Hei_}{/lig_} is de Heer. [:]",

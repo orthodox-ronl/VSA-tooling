@@ -1,0 +1,26 @@
+---
+muziek:
+  do: C4
+  mode: major
+  validate-ending: true
+identificatie:
+  title: Liturgikon-kruis als tijdelijk accidens
+  language: nl
+---
+<!--
+  Demonstratie bij docs/guides/liturgikon-notatie.md
+  (Relatie tussen de Liturgikon-notatie en VSA).
+
+  Liturgikon: een kruis (+) is een extra halve toon.
+  VSA: +/# is accidens op de aankomstgraad, geen blijvende chromatische cursor.
+
+  Frase A: plus-backslash daarna slash, eindmarker do.
+  Cursor do -> ti -> do; klinkend B# -> C. Oud float-model zou eindmarker do afkeuren.
+
+  Frase B: b-slash daarna neutraal, eindmarker re.
+  Mol blijft op de zelfde-toonnoot (Db daarna Db); cursor op re.
+-->
+
+[:] {+\neer}{/terug_} op do. [:]
+
+[:] {b/om}{-hoog_} op re. [/:]
