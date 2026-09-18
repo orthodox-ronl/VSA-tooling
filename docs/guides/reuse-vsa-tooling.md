@@ -113,14 +113,15 @@ jobs:
 | ------------------------ | -------------------- | ------------------------------------------------ |
 | `artifact_name`          | ja                   | Naam van `upload-artifact` in de build-job       |
 | `publish_dir`            | nee (default `site`) | Downloadpad; moet `index.html` bevatten          |
-| `destination_dir`        | nee                  | `preview` voor preview; leeg voor productie-root |
+| `destination_dir`        | nee                  | subdirectory op gh-pages (bijv. `preview` of branch-slug); leeg = root |
 | `url_prefix`             | ja                   | Publiek pad voor linkcheck, bv. `/koor/preview/` |
-| `keep_files`             | nee (default `true`) | `true` als preview en productie `gh-pages` delen |
+| `keep_files`             | nee (default `true`) | `true` als subdirectory-deploys en productie `gh-pages` delen |
 | `skip_publication_check` | nee                  | Alleen als de caller zelf al heeft gecontroleerd |
 | `pages_url`              | nee                  | URL in log na deploy                             |
 | `vsa_tooling_ref`        | nee (default `main`) | Ref voor check-script                            |
 
-Productie-deploy (root van `gh-pages`, preview-map behouden):
+Productie-deploy (root van `gh-pages`; sibling-mappen zoals `preview/` en
+branch-previews die niet in de nieuwe site-build zitten blijven behouden):
 
 ```yaml
   deploy:
