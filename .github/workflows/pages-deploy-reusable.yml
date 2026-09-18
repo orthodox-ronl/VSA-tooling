@@ -28,8 +28,9 @@ on:
         type: string
       keep_files:
         description: >-
-          peaceiris keep_files for subdirectory deploys (e.g. /preview/).
-          Root deploys always wipe gh-pages and re-attach existing preview/ first.
+          peaceiris keep_files for subdirectory deploys (e.g. /preview/ or
+          /{branch}/). Root deploys always wipe gh-pages and re-attach sibling
+          deploy dirs (preview/, branch previews) that are not in the new site.
         required: false
         default: false
         type: boolean
@@ -93,31 +94,41 @@ jobs:
             --site-dir "${{ inputs.publish_dir }}" \
             --url-prefix "${{ inputs.url_prefix }}"
 
-      # Productie (root) en preview delen gh-pages. peaceiris heeft geen
-      # "wis alles behalve X"; daarom: bestaande preview/ meenemen in publish_dir
-      # en daarna keep_files=false (schone root, geen wezen zoals oude indexen).
-      - name: Carry forward preview/ from current gh-pages
+      # Productie (root) en subdirectory-deploys (preview/, branch-previews)
+      # delen gh-pages. peaceiris heeft geen "wis alles behalve X"; daarom:
+      # top-level mappen die niet in de nieuwe site-build zitten meenemen in
+      # publish_dir, daarna keep_files=false (schone root, geen wezen).
+      - name: Carry forward sibling deploy dirs from current gh-pages
         if: inputs.destination_dir == ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          dest="${{ inputs.publish_dir }}/preview"
+          publish_dir="${{ inputs.publish_dir }}"
           tmp=_gh_pages_snap
           rm -rf "$tmp"
           if git clone --depth 1 --branch gh-pages \
               "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
               "$tmp"; then
-            if [ -d "$tmp/preview" ]; then
-              rm -rf "$dest"
-              cp -a "$tmp/preview" "$dest"
-              echo "Carried forward preview/ from current gh-pages"
-            else
-              echo "No preview/ on gh-pages yet"
+            carried=0
+            for dir in "$tmp"/*/; do
+              [ -d "$dir" ] || continue
+              name="$(basename "$dir")"
+              if [ -e "$publish_dir/$name" ]; then
+                echo "Skip carry-forward $name/ (present in new site build)"
+                continue
+              fi
+              rm -rf "$publish_dir/$name"
+              cp -a "$dir" "$publish_dir/$name"
+              echo "Carried forward $name/"
+              carried=$((carried + 1))
+            done
+            if [ "$carried" -eq 0 ]; then
+              echo "No sibling deploy dirs to carry forward"
             fi
             rm -rf "$tmp"
           else
-            echo "No gh-pages branch yet (or clone failed); skipping preview carry-forward"
+            echo "No gh-pages branch yet (or clone failed); skipping sibling carry-forward"
           fi
 
       - name: Deploy to GitHub Pages (subdirectory)

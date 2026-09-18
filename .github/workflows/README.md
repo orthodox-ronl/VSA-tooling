@@ -43,10 +43,11 @@ Handmatig: `release-artifacts`, `docs-build` (`workflow_dispatch`).
 | Publiceert | Ja (`pages-deploy-reusable`; MRG auto-commit + `[skip ci]`)                           |
 | Lokaal     | `build`                                                         |
 
-Productie (main → root): de reusable workflow kopieert eerst bestaande
-`/preview/` in de nieuwe site-build en deployt daarna met `keep_files=false`
-(schone root, geen wezen zoals oude `terminologie/index.html`). Preview-deploys
-vervangen alleen `/preview/` (`keep_files=false` + `destination_dir`).
+Productie (main → root): de reusable workflow kopieert eerst sibling-deploys
+van `gh-pages` (bijv. `/preview/`, `/{branch}/`) die niet in de nieuwe
+site-build zitten, en deployt daarna met `keep_files=false` (schone root,
+geen wezen zoals oude `terminologie/index.html`). Subdirectory-deploys
+vervangen alleen hun `destination_dir` (`keep_files` naar keuze).
 
 ### `vsa-ci.yml` — VSA CI
 
