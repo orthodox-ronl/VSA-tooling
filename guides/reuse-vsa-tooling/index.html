@@ -2148,6 +2148,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/voorbeelden/kruis-en-mol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kruis en mol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/voorbeelden/fouten/" class="md-nav__link">
         
   
@@ -3280,7 +3308,7 @@
   <span class="md-ellipsis">
     
   
-    Voorstel voor toekomstige meerstemmige uitbreiding van VSA
+    Meerstemmige VSA — eerdere schets (vervangen)
   
 
     
@@ -3525,7 +3553,7 @@ overgeslagen) en pusht via <code>peaceiris/actions-gh-pages@v4</code> naar <code
 <tr>
 <td><code>destination_dir</code></td>
 <td>nee</td>
-<td><code>preview</code> voor preview; leeg voor productie-root</td>
+<td>subdirectory op gh-pages (bijv. <code>preview</code> of branch-slug); leeg = root</td>
 </tr>
 <tr>
 <td><code>url_prefix</code></td>
@@ -3535,7 +3563,7 @@ overgeslagen) en pusht via <code>peaceiris/actions-gh-pages@v4</code> naar <code
 <tr>
 <td><code>keep_files</code></td>
 <td>nee (default <code>true</code>)</td>
-<td><code>true</code> als preview en productie <code>gh-pages</code> delen</td>
+<td><code>true</code> als subdirectory-deploys en productie <code>gh-pages</code> delen</td>
 </tr>
 <tr>
 <td><code>skip_publication_check</code></td>
@@ -3554,7 +3582,8 @@ overgeslagen) en pusht via <code>peaceiris/actions-gh-pages@v4</code> naar <code
 </tr>
 </tbody>
 </table>
-<p>Productie-deploy (root van <code>gh-pages</code>, preview-map behouden):</p>
+<p>Productie-deploy (root van <code>gh-pages</code>; sibling-mappen zoals <code>preview/</code> en
+branch-previews die niet in de nieuwe site-build zitten blijven behouden):</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">deploy</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
 <span class="w">    </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">orthodox-ronl/VSA-tooling/.github/workflows/pages-deploy-reusable.yml@main</span>
@@ -3628,7 +3657,7 @@ zangstuk-formaat: <a href="https://orthodox-ronl.github.io/bron/specs/">bron —
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-05
+        Bijgewerkt: 2026-09-18
         
       </p>
       

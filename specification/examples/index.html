@@ -1494,6 +1494,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Relatie tussen de Liturgikon-notatie en VSA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#praktijkvoorbeeld-kruis-daarna-omhoog-eindigt-weer-op-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Praktijkvoorbeeld: kruis daarna omhoog eindigt weer op do
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2339,6 +2356,34 @@
     
   
     Glyphs-overzicht
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/voorbeelden/kruis-en-mol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kruis en mol
   
 
     
@@ -3375,7 +3420,7 @@
   <span class="md-ellipsis">
     
   
-    Voorstel voor toekomstige meerstemmige uitbreiding van VSA
+    Meerstemmige VSA — eerdere schets (vervangen)
   
 
     
@@ -3525,6 +3570,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Relatie tussen de Liturgikon-notatie en VSA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#praktijkvoorbeeld-kruis-daarna-omhoog-eindigt-weer-op-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Praktijkvoorbeeld: kruis daarna omhoog eindigt weer op do
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3812,7 +3874,7 @@ Ze kunnen ook gemakkelijk aan bestaande boeken worden toegevoegd.</p>
 <tr>
 <td><code>#</code>/<code>b</code> als prefix</td>
 <td>Extra halve toon bovenop een bestaande beweging</td>
-<td>Prefix-modifier vóór een basisbeweging; <code>#</code> = +½, <code>b</code> = −½; aliases: <code>+</code>/<code>♯</code> voor <code>#</code>, <code>♭</code> voor <code>b</code></td>
+<td>Accidens-prefix vóór een basisbeweging; wijzigt alleen de klinkende aankomsttoon, niet de diatonische cursor; aliases: <code>+</code>/<code>♯</code> voor <code>#</code>, <code>♭</code> voor <code>b</code></td>
 </tr>
 <tr>
 <td>Lege posities</td>
@@ -3836,50 +3898,107 @@ Ze kunnen ook gemakkelijk aan bestaande boeken worden toegevoegd.</p>
 </tr>
 </tbody>
 </table>
-<p>Het grootste inhoudelijke verschil betreft de halftoon-modificatoren. In het Liturgikon staat dat een kruis (+) een <em>extra</em> stijging van een halve toon betekent bovenop een bestaande richtingspijl, en een mol (♭) een <em>extra</em> daling. <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> volgt deze semantiek: <code>#</code> (alias <code>+</code>, <code>♯</code>) en <code>b</code> (alias <code>♭</code>) zijn prefix-modificatoren die altijd gecombineerd worden met een basisbeweging (<code>/</code>, <code>\</code>, <code>-</code>, <code>~</code>, of meerdere pijlen).</p>
+<p>Het grootste inhoudelijke verschil betreft de halftoon-modificatoren. In het
+Liturgikon staat dat een kruis (<code>+</code>) een <em>extra</em> stijging van een halve toon
+betekent, en een mol (<code>♭</code>) een <em>extra</em> daling. <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> formaliseert dat als
+twee lagen: de <strong>diatonische cursor</strong> (alleen basisbewegingen) en een
+<strong>tijdelijk accidens</strong> op de aankomstgraad (<code>#</code>/<code>+</code>/<code>♯</code>, <code>b</code>/<code>♭</code>) dat de
+cursor niet chromatisch meeschuift. Zelfde-toon (<code>~</code>/<code>-</code>/recite) houdt de
+klinkende toon inclusief accidens; een latere ladderstap zonder prefix landt
+op de natuurlijke graad. Uitgebreide uitleg:
+<a href="../../guides/liturgikon-notatie/#wat-een-kruis-en-een-mol-in-vsa-doen">Wat een kruis en een mol in VSA doen</a>,
+<a href="../semantics/#interpretatie-van-ehms">Interpretatie van EHMs</a>,
+<a href="../../reference/voorbeelden/kruis-en-mol/">Kruis en mol</a>.</p>
 <p>Voorbeelden van de correspondentie:</p>
 <table>
 <thead>
 <tr>
 <th>Liturgikon</th>
 <th><a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a></th>
-<th>Netto beweging</th>
+<th>Cursor</th>
+<th>Klinkend op aankomsttoon</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>+</code> op <code>/</code></td>
 <td><code>#/</code></td>
-<td>+1 graad + ½ toon</td>
+<td>+1 graad</td>
+<td>kruis</td>
 </tr>
 <tr>
 <td><code>♭</code> op <code>/</code></td>
 <td><code>b/</code></td>
-<td>+1 graad − ½ toon</td>
+<td>+1 graad</td>
+<td>mol</td>
 </tr>
 <tr>
 <td><code>+</code> op <code>\</code></td>
 <td><code>#\</code></td>
-<td>−1 graad + ½ toon</td>
+<td>−1 graad</td>
+<td>kruis</td>
 </tr>
 <tr>
 <td><code>♭</code> op <code>\</code></td>
 <td><code>b\</code></td>
-<td>−1 graad − ½ toon</td>
+<td>−1 graad</td>
+<td>mol</td>
 </tr>
 <tr>
 <td><code>+</code> op <code>-</code></td>
 <td><code>#-</code></td>
-<td>½ toon omhoog (chromatisch)</td>
+<td>ongewijzigd</td>
+<td>kruis (chromatisch)</td>
 </tr>
 <tr>
 <td><code>♭</code> op <code>-</code></td>
 <td><code>b-</code></td>
-<td>½ toon omlaag (chromatisch)</td>
+<td>ongewijzigd</td>
+<td>mol (chromatisch)</td>
 </tr>
 </tbody>
 </table>
 <p>Een standalone <code>#</code> of <code>b</code> zonder basisbeweging is niet geldig in <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a>. Als een historische notatie een kruis of mol plaatst bij een toon zonder expliciete richtingspijl, moet dit in <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> worden uitgeschreven als <code>#-</code> of <code>b-</code>.</p>
+<h4 id="praktijkvoorbeeld-kruis-daarna-omhoog-eindigt-weer-op-do">Praktijkvoorbeeld: kruis daarna omhoog eindigt weer op do<a class="headerlink" href="#praktijkvoorbeeld-kruis-daarna-omhoog-eindigt-weer-op-do" title="Permanent link">&para;</a></h4>
+<p>Het Liturgikon-citaat (“extra stijging van een halve toon”) lijkt op een
+lineair “basis ± ½”-model. Als je dat letterlijk in de <strong>cursor</strong> zou stoppen,
+dan zou <code>{+\neer}{/terug}</code> klinken als een enkele <code>{b/…}</code>: je komt niet terug
+op de begintoons. Dat is funest voor eindcontrole en later voor meerstemmige
+cursors.</p>
+<p>In <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> is <code>+</code> een kruis op de aankomstgraad (hier: ti), en <code>/</code> beweegt
+alleen de diatonische cursor weer omhoog naar do. Zelfde-toonlettergrepen
+(<code>{ri}</code> of ongescopte <code>ri</code>) houden de klinkende toon vast — zonder <code>#-</code> te
+hoeven schrijven. Zichtbaar via eindmarkering <code>[:]</code> en MusicXML (<code>B#</code> → … → <code>C</code>).</p>
+<p>Bestand: <code>examples/docs-walkthroughs/halftoon-accidens-cursor.vsa</code>
+(spiegel van de uitleg in <a href="../../guides/liturgikon-notatie/#praktijkvoorbeeld-kruis-daarna-omhoog-eindigt-weer-op-do">Liturgikon-notatie</a>).</p>
+<div class="highlight"><pre><span></span><code>[:] {+\neer}{/terug_} op do. [:]
+
+[:] {b/om}{-hoog_} op re. [/:]
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Frase</th>
+<th>Wat je hoort / ziet (do=C4)</th>
+<th>Wat validatie checkt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A <code>{+\neer}{/terug}</code></td>
+<td>B♯, dan C; eindklank = start</td>
+<td>eindmarkering <code>[:]</code> = graad do → OK</td>
+</tr>
+<tr>
+<td>B <code>{b/om}{-hoog}</code></td>
+<td>D♭, dan D♭ (zelfde toon houdt mol)</td>
+<td>eindmarkering <code>[/:]</code> = graad re → OK</td>
+</tr>
+</tbody>
+</table>
+<p>Controleer lokaal:</p>
+<div class="highlight"><pre><span></span><code>vsa validate examples\docs-walkthroughs\halftoon-accidens-cursor.vsa
+</code></pre></div>
 <p>Bij omzetting van historische notaties naar <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> kunnen de volgende situaties optreden:</p>
 <ul>
 <li>historische notaties laten sommige toonladderinformatie impliciet, terwijl <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> die expliciet moet modelleren;</li>
@@ -4167,7 +4286,7 @@ Ze kunnen ook gemakkelijk aan bestaande boeken worden toegevoegd.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-01
+        Bijgewerkt: 2026-09-18
         
       </p>
       
