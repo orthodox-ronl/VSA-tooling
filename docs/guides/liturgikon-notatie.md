@@ -105,39 +105,112 @@ Ze kunnen ook gemakkelijk aan bestaande boeken worden toegevoegd.
 
 ### Relatie tussen de Liturgikon-notatie en VSA
 
-Onderstaande tekst is mogelijk niet geheel correct en moet wellicht worden gereviseerd.
-
 De [VSA-notatie](@bron) is sterk geïnspireerd door de vereenvoudigde neumennotatie zoals beschreven in het Nederlands Liturgikon (1968), maar is daar niet volledig identiek aan. [VSA](@) formaliseert en generaliseert verschillende aspecten van deze praktijknotatie om parsing, validatie, rendering en export naar formaten zoals SVG en MusicXML mogelijk te maken.
 
 De belangrijkste verschillen zijn:
 
-| Onderwerp     | Liturgikon-notatie                              | [VSA](@)                                                |
-| ------------- | ----------------------------------------------- | ------------------------------------------------------- |
-| Doel          | Praktische zanghulp voor menselijke zangers     | Formele, machine-verwerkbare notatie                    |
-| Syntax        | Geen formele grammatica                         | Volledig formele syntax (EBNF)                          |
-| Structuur     | Markeringen direct boven/onder tekst            | Gestructureerde [scopes](@) `{...}`                     |
-| Toonhoogte    | Relatieve intervalnotatie                       | Relatieve toonladder-notatie binnen een [do-context](@) |
-| `+/` en `-\`  | Extra halve toon bovenop een bestaande beweging | Zelfstandige halve ladderstap                           |
-| Lege posities | Impliciet                                       | Expliciet via `~`                                       |
-| Melisma       | Impliciet / ad hoc                              | Formeel model via samengestelde [modifiers](@)          |
-| Validatie     | Alleen muzikaal gehoor                          | Syntactische en semantische validatie                   |
-| Export        | Niet voorzien                                   | SVG en MusicXML                                         |
+| Onderwerp          | Liturgikon-notatie                              | [VSA](@)                                                                                            |
+| ------------------ | ----------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Doel               | Praktische zanghulp voor menselijke zangers     | Formele, machine-verwerkbare notatie                                                                |
+| Syntax             | Geen formele grammatica                         | Volledig formele syntax (EBNF)                                                                      |
+| Structuur          | Markeringen direct boven/onder tekst            | Gestructureerde [scopes](@) `{...}`                                                                 |
+| Toonhoogte         | Relatieve intervalnotatie                       | Relatieve toonladder-notatie binnen een [do-context](@)                                             |
+| `#`/`b` als prefix | Extra halve toon bovenop een bestaande beweging | Accidens-prefix vóór een basisbeweging; wijzigt alleen de klinkende aankomsttoon, niet de diatonische cursor; aliases: `+`/`♯` voor `#`, `♭` voor `b` |
+| Lege posities      | Impliciet                                       | Expliciet via `~`                                                                                   |
+| Melisma            | Impliciet / ad hoc                              | Formeel model via samengestelde [modifiers](@)                                                      |
+| Validatie          | Alleen muzikaal gehoor                          | Syntactische en semantische validatie                                                               |
+| Export             | Niet voorzien                                   | SVG en MusicXML                                                                                     |
 
-Het grootste inhoudelijke verschil betreft de interpretatie van `+/` en `-\`.
-In het Liturgikon staat dat een kruis (+) een *extra* stijging van een halve toon betekent
-(en een mol (b) een *extra* daling van een halve toon). Dit wordt gestaafd door 
-het bijbehorende voorbeeld. Echter, een dergelijke notatie maakt het dan onmogelijk 
-om een halve ladderstap omhoog of omlaag te gaan. 
-De zangpraktijk van de auteur is dat `+/` en `-\` (ook?) worden gebruikt om 
-een stijging/daling van een halve toon mee aan te geven. Dat is ook zoals zij in [VSA](@)
-worden geïnterpreteerd: als zelfstandige relatieve toonhoogtebewegingen van een halve
-ladderstap.
+#### Wat een kruis en een mol in VSA doen
 
-Bij omzetting van historische notaties naar [VSA](@) kunnen daardoor de volgende situaties optreden:
+In het Liturgikon staat dat een kruis (`+`) een *extra* stijging van een
+halve toon betekent bovenop een bestaande richtingspijl, en een mol (`♭`)
+een *extra* daling. Die formulering is bedoeld voor zangers die op het
+blad lezen. [VSA](@) moet dezelfde muzikale bedoeling machineleesbaar
+maken, en splitst daarom twee lagen strikt:
 
-- een historische `+/` moet soms worden herschreven als een combinatie van een hele en halve beweging;
-- de exacte melodische uitkomst kan afhankelijk zijn van de gekozen modus en [do-context](@);
+1. **Diatonische cursor** — waar je op de toonladder staat (do, re, mi, …).
+   Alleen de basisbeweging (`/`, `\`, `-`, `~`, gestapelde pijlen) verplaatst
+   die cursor.
+2. **Accidens (kruis of mol)** — een tijdelijke wijziging van de
+   **klinkende** toon op de graad *ná* die basisbeweging. De prefix
+   (`#` / `+` / `♯`, of `b` / `♭`) schuift de cursor **niet** chromatisch mee.
+
+Concreet:
+
+- `{+/syllabe}` = één ladderstap omhoog, **én** een kruis op de aankomsttoon.
+- `{+\syllabe}` = één ladderstap omlaag, **én** een kruis op de aankomsttoon.
+- `{#-syllabe}` = cursor blijft staan; alleen een kruis op de huidige graad.
+- Zelfde-toon (`{ri}`, `{-…}`, `{~…}`, of ongescopte tekst) houdt de
+  **klinkende** toon vast, inclusief een eerder kruis of mol — zonder dat je
+  `#-` opnieuw hoeft te schrijven.
+- Een latere ladderstap zonder nieuwe prefix landt weer op de **natuurlijke**
+  laddertoon van die graad (het accidens “verdampt” met de cursorstap).
+
+Dat is **niet** het afgewezen model “netto = basis ± ½ toon”, waarin de
+prefix de cursor blijvend een half trede verschuift. Onder dat model zou
+`{+\neer}{/terug}` eindigen alsof je `{b/…}` had gezongen, en zou een
+eindmarkering `[:]` ten onrechte falen. Zie
+[Interpretatie van EHMs](../specification/semantics.md#interpretatie-van-ehms)
+en het werkvoorbeeld
+[Kruis en mol](../reference/voorbeelden/kruis-en-mol.md).
+
+**Herstelteken:** het Liturgikon gebruikt `+` en `♭` soms ook als
+herstellingsteken op het blad. [VSA](@) heeft geen aparte
+“herstelteken”-prefix. Terugkeer naar de natuurlijke laddertoon gebeurt
+door een ladderstap **zonder** nieuwe halftoon-prefix. Bij MusicXML-export
+schrijft de tool wél een zichtbaar `<accidental>natural</accidental>`
+wanneer die terugkeer in dezelfde maat op dezelfde nootletter nodig is
+(bijvoorbeeld C♯ → D → C).
+
+Voorbeelden van de correspondentie:
+
+| Liturgikon | [VSA](@) | Cursor            | Klinkend op aankomsttoon    |
+| ---------- | -------- | ----------------- | --------------------------- |
+| `+` op `/` | `#/`     | +1 graad          | kruis                       |
+| `♭` op `/` | `b/`     | +1 graad          | mol                         |
+| `+` op `\` | `#\`     | −1 graad          | kruis                       |
+| `♭` op `\` | `b\`     | −1 graad          | mol                         |
+| `+` op `-` | `#-`     | ongewijzigd       | kruis (chromatisch)         |
+| `♭` op `-` | `b-`     | ongewijzigd       | mol (chromatisch)           |
+
+Een standalone `#` of `b` zonder basisbeweging is niet geldig in [VSA](@). Als een historische notatie een kruis of mol plaatst bij een toon zonder expliciete richtingspijl, moet dit in [VSA](@) worden uitgeschreven als `#-` of `b-`.
+
+#### Praktijkvoorbeeld: kruis daarna omhoog eindigt weer op do
+
+Het Liturgikon-citaat (“extra stijging van een halve toon”) lijkt op een
+lineair “basis ± ½”-model. Als je dat letterlijk in de **cursor** zou stoppen,
+dan zou `{+\neer}{/terug}` klinken als een enkele `{b/…}`: je komt niet terug
+op de begintoons. Dat is funest voor eindcontrole en later voor meerstemmige
+cursors.
+
+In [VSA](@) is `+` een kruis op de aankomstgraad (hier: ti), en `/` beweegt
+alleen de diatonische cursor weer omhoog naar do. Zelfde-toonlettergrepen
+(`{ri}` of ongescopte `ri`) houden de klinkende toon vast — zonder `#-` te
+hoeven schrijven. Zichtbaar via eindmarkering `[:]` en MusicXML (`B#` → … → `C`).
+
+Bestand: `examples/docs-walkthroughs/halftoon-accidens-cursor.vsa`
+
+```text
+[:] {+\neer}{/terug_} op do. [:]
+
+[:] {b/om}{-hoog_} op re. [/:]
+```
+
+| Frase | Wat je hoort / ziet (do=C4) | Wat validatie checkt |
+| ----- | --------------------------- | -------------------- |
+| A `{+\neer}{/terug}` | B♯, dan C; eindklank = start | eindmarkering `[:]` = graad do → OK |
+| B `{b/om}{-hoog}` | D♭, dan D♭ (zelfde toon houdt mol) | eindmarkering `[/:]` = graad re → OK |
+
+Controleer lokaal:
+
+```cmd
+vsa validate examples\docs-walkthroughs\halftoon-accidens-cursor.vsa
+```
+
+Bij omzetting van historische notaties naar [VSA](@) kunnen de volgende situaties optreden:
+
 - historische notaties laten sommige toonladderinformatie impliciet, terwijl [VSA](@) die expliciet moet modelleren;
 - melismatische passages moeten in [VSA](@) soms explicieter worden gespecificeerd dan in historische bronnen.
 
-[VSA](@) moet daarom worden gezien als een geformaliseerde afleiding van deze historische praktijknotatie, niet als een exacte reproductie ervan.
+[VSA](@) moet worden gezien als een geformaliseerde afleiding van deze historische praktijknotatie, niet als een exacte reproductie ervan.

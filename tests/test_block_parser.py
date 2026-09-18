@@ -30,7 +30,7 @@ mode="minor"
     assert len(blocks) == 1
     assert blocks[0].metadata["do"] == "C4"
     assert blocks[0].metadata["mode"] == "minor"
-    assert blocks[0].effective_metadata()["tempo"] == "100"
+    assert blocks[0].effective_metadata()["tempo"] == "120"
 
 
 def test_parse_multiple_blocks():

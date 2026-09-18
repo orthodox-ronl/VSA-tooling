@@ -31,8 +31,11 @@ voortekst [:] tekst {/zin_} [/:] meer {/tekst_} [//:] natekst.
 Status: `Geïmplementeerd`
 
 - Elke lokale hoogte-markering (`[X:]` na de eerste) wordt vergeleken met de
-  cumulatieve hoogte op basis van alle tussenliggende EHMs van zangelementen.
-- Halftoon-prefixen (`+`, `#`, `♯` = +0.5; `b`, `♭` = −0.5) tellen mee.
+  cumulatieve **diatonische** laddergraad op basis van alle tussenliggende
+  EHMs van zangelementen.
+- Halftoon-prefixen (`+`, `#`, `♯`, `b`, `♭`) zijn tijdelijke accidentals op
+  de aankomsttoon; zij bewegen de diatonische cursor (en dus de
+  marker-controle) niet.
 - Foutcode: `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`.
 - Foutmelding bevat berekende hoogte, gedeclareerde hoogte, regelnummer, kolom
   en de canonieke correcte markering als directe herstelactie.

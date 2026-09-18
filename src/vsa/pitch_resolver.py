@@ -2,13 +2,31 @@
 Resolves VSA EHMs (Enkelvoudige Hoogte-Modifiers) to absolute
 :class:`~vsa.music.Pitch` objects.
 
-The resolution algorithm (VSA-spec §8.2.3–8.2.4):
+Two layers are kept strictly separate:
+
+1. **Diatonic cursor** — the current scale degree relative to ``do`` / mode.
+   Only base motions (``/``, ``\\``, ``-``, ``~``, and stacked slashes) move it.
+   (``-`` / ``~`` move by zero steps.)
+2. **Sounding pitch** — what the singer hears / MusicXML exports.
+
+Accidental prefixes (``#`` / ``+`` / ``♯``, ``b`` / ``♭``) apply to the pitch
+*after* the base motion of that EHM.  They do **not** change the diatonic
+cursor: the next *moving* EHM starts from the unaltered degree.
+
+Same-tone continuation (``~``, ``-``, or unscoped reciting text) keeps the
+**previous sounding pitch**, including any accidental — so ``{+\\go}{ri}``
+and ``{+\\go}ri`` both sustain the raised tone without writing ``#-``.
+A later ladder step (``/``, ``\\``, …) uses the natural degree again unless
+that EHM carries its own prefix.
+
+Resolution algorithm:
 
 1. The ``do`` block parameter (e.g. ``"F4"``) defines the tonic.
 2. The ``mode`` block parameter (e.g. ``"major"``) defines the scale.
-3. The first pitch marker in the piece sets the starting scale degree.
-4. Each subsequent EHM moves the current scale degree by its ladder-step count
-   and optionally adds a chromatic alteration (``#`` / ``b`` prefix).
+3. The first pitch marker sets the starting scale degree (accidental prefixes
+   on the marker do not shift the degree).
+4. Each subsequent EHM advances the degree by its ladder-step count; stay
+   without a new prefix reuses the last sounding pitch.
 
 Scale degree 0 = do, degree 1 = re, … degree 6 = ti; degree 7 = do an octave
 higher, degree -1 = ti an octave lower, etc.
@@ -136,8 +154,13 @@ def ehm_to_motion(ehm: str) -> tuple[int, float]:
     """Decompose an EHM string into ``(ladder_steps, chromatic_alter)``.
 
     ``ladder_steps`` is the integer number of scale-degree steps (positive =
-    up, negative = down, 0 = stay).  ``chromatic_alter`` is ``+1.0`` for a
-    sharp prefix, ``-1.0`` for a flat prefix, ``0.0`` otherwise.
+    up, negative = down, 0 = stay).  Only this component advances the
+    diatonic cursor.
+
+    ``chromatic_alter`` is ``+1.0`` for a sharp prefix (``#`` / ``+`` / ``♯``),
+    ``-1.0`` for a flat prefix (``b`` / ``♭``), ``0.0`` otherwise.  It affects
+    only the sounding pitch of *this* EHM (MusicXML ``alter``), never the
+    cursor for the next EHM.  ``+`` is a spelling alias of ``#``.
 
     Examples::
 
@@ -145,7 +168,9 @@ def ehm_to_motion(ehm: str) -> tuple[int, float]:
         ehm_to_motion("//")  → (2, 0.0)
         ehm_to_motion("\\\\") → (-2, 0.0)
         ehm_to_motion("#/")  → (1, 1.0)
+        ehm_to_motion("+/")  → (1, 1.0)   # alias of #
         ehm_to_motion("b\\\\") → (-2, -1.0)
+        ehm_to_motion("#-")  → (0, 1.0)
         ehm_to_motion("-")   → (0, 0.0)
         ehm_to_motion("~")   → (0, 0.0)
     """
@@ -197,6 +222,7 @@ class PitchResolver:
         self._do = do
         self._intervals = intervals
         self._degree: int = 0
+        self._last_sounding: Pitch | None = None
 
     @classmethod
     def from_metadata(cls, metadata: dict) -> "PitchResolver":
@@ -217,6 +243,9 @@ class PitchResolver:
     def apply_start_marker(self, ehm_list: list[str]) -> None:
         """Set the starting scale degree from the first pitch marker's EHMs."""
         self._degree = pitch_marker_degree(ehm_list)
+        self._last_sounding = degree_to_pitch(
+            self._do, self._degree, self._intervals
+        )
 
     @property
     def current_degree(self) -> int:
@@ -224,23 +253,39 @@ class PitchResolver:
 
     @property
     def current_pitch(self) -> Pitch:
+        """Pitch for reciting / same-tone continuation (includes last alter)."""
+        if self._last_sounding is not None:
+            return self._last_sounding
         return degree_to_pitch(self._do, self._degree, self._intervals)
 
     def resolve_ehm(self, ehm: str) -> Pitch:
         """Apply ``ehm`` to the current degree and return the resulting
         :class:`~vsa.music.Pitch`.
 
-        The internal degree counter is advanced by the ladder-step count.
-        A chromatic prefix (``#`` / ``b``) adds ±1.0 to the ``alter`` field
-        of the natural scale note.
+        The internal degree counter is advanced only by the ladder-step count.
+        A chromatic prefix adds ±1.0 to the natural scale note's ``alter``.
+        Stay (``~`` / ``-``) without a new prefix reuses the previous sounding
+        pitch so accidentals persist across same-tone syllables and melisma
+        holds — without poisoning the diatonic cursor for the next step.
         """
         steps, chromatic = ehm_to_motion(ehm)
         self._degree += steps
+
+        if steps == 0 and chromatic == 0.0 and self._last_sounding is not None:
+            return self._last_sounding
+
         natural = degree_to_pitch(self._do, self._degree, self._intervals)
         if chromatic != 0.0:
-            new_alter = natural.alter + chromatic
-            return Pitch(step=natural.step, octave=natural.octave, alter=new_alter)
-        return natural
+            pitched = Pitch(
+                step=natural.step,
+                octave=natural.octave,
+                alter=natural.alter + chromatic,
+            )
+        else:
+            pitched = natural
+        self._last_sounding = pitched
+        return pitched
+
 
 
 def key_fifths(do: Pitch, mode: str) -> int:

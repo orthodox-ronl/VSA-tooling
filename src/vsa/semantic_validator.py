@@ -4,8 +4,8 @@ from .diagnostics import DiagnosticCollection
 from .height_markers import (
     height_marker_refs,
     height_marker_mismatch_detail,
-    _pitch_of_ehm_list,
-    _marker_for_pitch,
+    _degree_of_ehm_list,
+    _marker_for_degree,
 )
 
 DOC_BASE = "docs/guides/validation.md"
@@ -110,14 +110,15 @@ class SemanticValidator:
                 )
 
     def _validate_height_marker_sequence(self, diagnostics: DiagnosticCollection) -> None:
-        """Controleert of elke lokale hoogte-markering overeenkomt met de berekende hoogte.
+        """Controleert of elke lokale hoogte-markering overeenkomt met de berekende graad.
 
-        De eerste markering geeft de beginhoogte. Elke volgende markering
-        (rol 'local_height') wordt vergeleken met de cumulatieve hoogte op
-        basis van alle EHMs van de tussenliggende zangelementen.
+        De eerste markering geeft de begin-laddergraad. Elke volgende markering
+        (rol 'local_height') wordt vergeleken met de cumulatieve diatonische
+        cursor op basis van alle EHMs van de tussenliggende zangelementen.
+        Accidens-prefixen (`#`/`+`/`b`) bewegen die cursor niet.
 
         Na elke markering — ook bij een mismatch — wordt de *gedeclareerde*
-        hoogte als uitgangspunt voor het volgende segment genomen. Zo worden
+        graad als uitgangspunt voor het volgende segment genomen. Zo worden
         vervolgfouten die alleen voortkomen uit een eerdere foute markering
         niet apart gerapporteerd.
         """
@@ -127,23 +128,23 @@ class SemanticValidator:
 
         code = "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH"
         nodes = self.document.nodes
-        current_pitch: float = _pitch_of_ehm_list(markers[0].ehm)
+        current_degree: int = _degree_of_ehm_list(markers[0].ehm)
         prev_index: int = markers[0].index
 
         for ref in markers[1:]:
-            computed_pitch = current_pitch
+            computed_degree = current_degree
             for node in nodes[prev_index + 1 : ref.index]:
                 if type(node).__name__ == "ScopeNode":
                     ehm = getattr(node, "height_modifier", [])
-                    computed_pitch += _pitch_of_ehm_list(ehm)
+                    computed_degree += _degree_of_ehm_list(ehm)
 
-            declared: float = _pitch_of_ehm_list(ref.ehm)
-            if declared != computed_pitch:
-                correct = _marker_for_pitch(computed_pitch)
+            declared: int = _degree_of_ehm_list(ref.ehm)
+            if declared != computed_degree:
+                correct = _marker_for_degree(computed_degree)
                 line, col = self._line_column(ref.node.start)
                 diagnostics.add(
                     code=code,
-                    message_nl=height_marker_mismatch_detail(declared, computed_pitch),
+                    message_nl=height_marker_mismatch_detail(declared, computed_degree),
                     line=line,
                     column=col,
                     severity=self._severity(code),
@@ -152,5 +153,5 @@ class SemanticValidator:
                     doc_url=DOC_BASE,
                 )
 
-            current_pitch = declared
+            current_degree = declared
             prev_index = ref.index

@@ -43,15 +43,19 @@ Syntactische fouten worden gedetecteerd vóór semantische validatie.
 
 Een semantische fout treedt op wanneer de invoer syntactisch geldig is,
 maar niet voldoet aan de betekenisregels van [VSA](@).
-De laatste twee voorbeelden gaan uit van een [do-context](@) 
+Het voorbeeld met `{+\neer}` gaat uit van een [do-context](@)
 met parameters `do="C4"` en `mode="major"`.
 
-| Voorbeeld          | Fout                                                                                      |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| `{/&\tekst_}`      | [hoogte-modifier](@) bevat twee posities; [lengte-modifier](@) bevat één positie          |
-| `[//:] tekst [/:]` | eindmarkering komt niet overeen met berekende eindtoon, indien eindcontrole actief is     |
-| `[//:] {+/tekst}`  | halve stap toegepast op een overgang waarvoor geen verdere onderverdeling is gedefinieerd |
-| `[///:] {-\tekst}` | halve stap toegepast op een overgang waarvoor geen verdere onderverdeling is gedefinieerd |
+| Voorbeeld              | Fout                                                                                                      |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `{/&\tekst_}`          | [hoogte-modifier](@) bevat twee posities; [lengte-modifier](@) bevat één positie                          |
+| `[//:] tekst [/:]`     | eindmarkering komt niet overeen met berekende eindgraad, indien eindcontrole actief is                    |
+| `[:] {+\neer} [:]`     | hoogte-markering mismatch: cursor staat op ti (graad −1), markering declareert do; accidens telt niet mee |
+
+Halftoon-prefixen (`#`/`+`/`b`) zijn tijdelijke accidentals op de aankomsttoon.
+Zij bewegen de diatonische cursor niet; marker-controle vergelijkt alleen
+laddergraden. Zie [Interpretatie van EHMs](semantics.md#interpretatie-van-ehms).
+Een verouderde schrijfwijze zoals `{-\tekst}` is geen geldige [EHM](@) (syntaxfout).
 
 ---
 

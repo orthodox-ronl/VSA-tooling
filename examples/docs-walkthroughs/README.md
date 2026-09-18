@@ -19,6 +19,7 @@ bronnaam. Herkomst staat in deze README.
 | `svg-glyphs-overzicht.vsa`    | Breed glyph-/syntaxoverzicht → SVG            | Oude Hugo-demo `voorbeelden/rendering/glyphs-basis`                   |
 | `svg-glyphs-hoogte.vsa`       | Compacte hoogtemarkers                        | Zelfde herkomst (sectie hoogtemarkers)                                |
 | `svg-glyphs-lengte.vsa`       | Compacte lengtemarkers                        | Zelfde herkomst (sectie lengtemarkers)                                |
+| `halftoon-accidens-cursor.vsa` | Liturgikon-kruis: accidens ≠ chromatische cursor; eindmarkers OK | Uitleg in `docs/guides/liturgikon-notatie.md` + `examples.md` |
 | `validate-unclosed-scope.vsa` | Bewuste syntaxfout voor `vsa validate`        | Zelfde patroon als `expected-fail/unclosed-scope.vsa`                 |
 | `coria-oefenlink/`            | Markdown + VSA + Coria-sibling voor oefenlink | Lokale kopie van tropaar zondag toon 3 (koormap Groningen / VSA-demo) |
 

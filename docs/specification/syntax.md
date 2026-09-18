@@ -12,7 +12,7 @@ VSA-[zangstukken](@bron) worden beschreven in een zo genaamd `Hugo Markdown blok
 ::: vsa-notatie
 do="F4"
 mode="major"
-tempo="100"
+tempo="120"
 validate-ending="true"
 duration-model="default"
 
@@ -28,7 +28,7 @@ Een aantal parameters van de bloksyntax hebben normatieve defaultwaarde, wat het
 | ----------------- | -------------- | ----------------------------------------------------------------------------- |
 | `do`              | `F4`           | absolute starttoon voor interpretatie en MusicXML-export                      |
 | `mode`            | `major`        | modusdefinitie voor toonladderinterpretatie                                   |
-| `tempo`           | `100`          | tempo voor MusicXML-export                                                    |
+| `tempo`           | `120`          | tempo voor MusicXML-export                                                    |
 | `validate-ending` | `true`         | controleer een aanwezige eindtoonhoogte-markering tegen de berekende eindtoon |
 | `duration-model`  | `default`      | mapping van ELM-duurwaarden naar MusicXML-durationwaarden                     |
 
@@ -191,27 +191,42 @@ Een [EHM](@) beschrijft één relatieve toonhoogtebeweging of een lege grafische
 
 #### Halftoon-prefix
 
-Een halftoon-prefix modificeert het resultaat van de basisbeweging met een halve toon omhoog (`#`) of omlaag (`b`). De prefix staat altijd onmiddellijk vóór een basisbeweging; een standalone prefix is niet geldig.
+Een halftoon-prefix is een **accidens** op de aankomsttoon van de
+basisbeweging: kruis (`#`) of mol (`b`). De prefix staat altijd
+onmiddellijk vóór een basisbeweging; een standalone prefix is niet geldig.
 
-| Prefix | Alias(es) | Betekenis | Visuele rendering           |
-| ------ | --------- | --------- | --------------------------- |
-| `#`    | `+`, `♯`  | +½ toon   | `+` links van de basisglyph |
-| `b`    | `♭`       | −½ toon   | `♭` links van de basisglyph |
+De prefix wijzigt **niet** de diatonische cursor. Alleen de basisbeweging
+(`/`, `\`, `-`, `~`, …) verplaatst de laddergraad. Zelfde-toon (`~`/`-` of
+ongescopte tekst) houdt de vorige **klinkende** toon vast (inclusief
+accidens). Een latere ladderstap start vanaf de natuurlijke graad tenzij
+opnieuw een prefix. Zie
+[Interpretatie van EHMs](semantics.md#interpretatie-van-ehms).
+
+`+` en `♯` zijn spelling/aliassen van `#` (zelfde semantiek). `♭` is een
+alias van `b`.
+
+| Prefix | Alias(es) | Semantiek                         | Visuele rendering           |
+| ------ | --------- | --------------------------------- | --------------------------- |
+| `#`    | `+`, `♯`  | kruis/accidens op aankomsttoon    | `+` links van de basisglyph |
+| `b`    | `♭`       | mol/accidens op aankomsttoon      | `♭` links van de basisglyph |
 
 Voorbeelden van gecombineerde [EHMs](@):
 
-| [EHM](@) | Basisbeweging | Prefix | Netto beweging        | Voorbeeld    |
-| -------- | ------------- | ------ | --------------------- | ------------ |
-| `#/`     | +1 trede      | +½     | +1½ toon omhoog       | `{#/tekst}`  |
-| `b/`     | +1 trede      | −½     | +½ toon omhoog        | `{b/tekst}`  |
-| `#\`     | −1 trede      | +½     | −½ toon omlaag        | `{#\tekst}`  |
-| `b\`     | −1 trede      | −½     | −1½ toon omlaag       | `{b\tekst}`  |
-| `#-`     | 0 (unisono)   | +½     | +½ toon (chromatisch) | `{#-tekst}`  |
-| `b-`     | 0 (unisono)   | −½     | −½ toon (chromatisch) | `{b-tekst}`  |
-| `#//`    | +2 treden     | +½     | +2½ toon omhoog       | `{#//tekst}` |
-| `b\\`    | −2 treden     | −½     | −2½ toon omlaag       | `{b\\tekst}` |
+| [EHM](@) | Cursor (basis) | Accidens     | Voorbeeld    |
+| -------- | -------------- | ------------ | ------------ |
+| `#/`     | +1 trede       | kruis        | `{#/tekst}`  |
+| `b/`     | +1 trede       | mol          | `{b/tekst}`  |
+| `#\`     | −1 trede       | kruis        | `{#\tekst}`  |
+| `b\`     | −1 trede       | mol          | `{b\tekst}`  |
+| `#-`     | 0 (unisono)    | kruis        | `{#-tekst}`  |
+| `b-`     | 0 (unisono)    | mol          | `{b-tekst}`  |
+| `#//`    | +2 treden      | kruis        | `{#//tekst}` |
+| `b\\`    | −2 treden      | mol          | `{b\\tekst}` |
 
-Alle combinaties van een halftoon-prefix met een basisbeweging zijn syntactisch geldig. De semantische geldigheid hangt af van de [do-context](@) en modus (zie [Geldigheid van halftoon-prefix combinaties](semantics.md#geldigheid-van-halftoon-prefix-combinaties)).
+Alle combinaties van een halftoon-prefix met een basisbeweging zijn
+syntactisch geldig. De semantische geldigheid hangt af van de
+[do-context](@) en modus (zie
+[Geldigheid van halftoon-prefix combinaties](semantics.md#geldigheid-van-halftoon-prefix-combinaties)).
 
 ### Enkelvoudige Lengte-Modifiers (ELMs)
 

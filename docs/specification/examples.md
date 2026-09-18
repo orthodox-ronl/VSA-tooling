@@ -188,26 +188,69 @@ De belangrijkste verschillen zijn:
 | Syntax             | Geen formele grammatica                         | Volledig formele syntax (EBNF)                                                                      |
 | Structuur          | Markeringen direct boven/onder tekst            | Gestructureerde [scopes](@) `{...}`                                                                 |
 | Toonhoogte         | Relatieve intervalnotatie                       | Relatieve toonladder-notatie binnen een [do-context](@)                                             |
-| `#`/`b` als prefix | Extra halve toon bovenop een bestaande beweging | Prefix-modifier vóór een basisbeweging; `#` = +½, `b` = −½; aliases: `+`/`♯` voor `#`, `♭` voor `b` |
+| `#`/`b` als prefix | Extra halve toon bovenop een bestaande beweging | Accidens-prefix vóór een basisbeweging; wijzigt alleen de klinkende aankomsttoon, niet de diatonische cursor; aliases: `+`/`♯` voor `#`, `♭` voor `b` |
 | Lege posities      | Impliciet                                       | Expliciet via `~`                                                                                   |
 | Melisma            | Impliciet / ad hoc                              | Formeel model via samengestelde [modifiers](@)                                                      |
 | Validatie          | Alleen muzikaal gehoor                          | Syntactische en semantische validatie                                                               |
 | Export             | Niet voorzien                                   | SVG en MusicXML                                                                                     |
 
-Het grootste inhoudelijke verschil betreft de halftoon-modificatoren. In het Liturgikon staat dat een kruis (+) een *extra* stijging van een halve toon betekent bovenop een bestaande richtingspijl, en een mol (♭) een *extra* daling. [VSA](@) volgt deze semantiek: `#` (alias `+`, `♯`) en `b` (alias `♭`) zijn prefix-modificatoren die altijd gecombineerd worden met een basisbeweging (`/`, `\`, `-`, `~`, of meerdere pijlen).
+Het grootste inhoudelijke verschil betreft de halftoon-modificatoren. In het
+Liturgikon staat dat een kruis (`+`) een *extra* stijging van een halve toon
+betekent, en een mol (`♭`) een *extra* daling. [VSA](@) formaliseert dat als
+twee lagen: de **diatonische cursor** (alleen basisbewegingen) en een
+**tijdelijk accidens** op de aankomstgraad (`#`/`+`/`♯`, `b`/`♭`) dat de
+cursor niet chromatisch meeschuift. Zelfde-toon (`~`/`-`/recite) houdt de
+klinkende toon inclusief accidens; een latere ladderstap zonder prefix landt
+op de natuurlijke graad. Uitgebreide uitleg:
+[Wat een kruis en een mol in VSA doen](../guides/liturgikon-notatie.md#wat-een-kruis-en-een-mol-in-vsa-doen),
+[Interpretatie van EHMs](semantics.md#interpretatie-van-ehms),
+[Kruis en mol](../reference/voorbeelden/kruis-en-mol.md).
 
 Voorbeelden van de correspondentie:
 
-| Liturgikon | [VSA](@) | Netto beweging              |
-| ---------- | -------- | --------------------------- |
-| `+` op `/` | `#/`     | +1 graad + ½ toon           |
-| `♭` op `/` | `b/`     | +1 graad − ½ toon           |
-| `+` op `\` | `#\`     | −1 graad + ½ toon           |
-| `♭` op `\` | `b\`     | −1 graad − ½ toon           |
-| `+` op `-` | `#-`     | ½ toon omhoog (chromatisch) |
-| `♭` op `-` | `b-`     | ½ toon omlaag (chromatisch) |
+| Liturgikon | [VSA](@) | Cursor            | Klinkend op aankomsttoon    |
+| ---------- | -------- | ----------------- | --------------------------- |
+| `+` op `/` | `#/`     | +1 graad          | kruis                       |
+| `♭` op `/` | `b/`     | +1 graad          | mol                         |
+| `+` op `\` | `#\`     | −1 graad          | kruis                       |
+| `♭` op `\` | `b\`     | −1 graad          | mol                         |
+| `+` op `-` | `#-`     | ongewijzigd       | kruis (chromatisch)         |
+| `♭` op `-` | `b-`     | ongewijzigd       | mol (chromatisch)           |
 
 Een standalone `#` of `b` zonder basisbeweging is niet geldig in [VSA](@). Als een historische notatie een kruis of mol plaatst bij een toon zonder expliciete richtingspijl, moet dit in [VSA](@) worden uitgeschreven als `#-` of `b-`.
+
+#### Praktijkvoorbeeld: kruis daarna omhoog eindigt weer op do
+
+Het Liturgikon-citaat (“extra stijging van een halve toon”) lijkt op een
+lineair “basis ± ½”-model. Als je dat letterlijk in de **cursor** zou stoppen,
+dan zou `{+\neer}{/terug}` klinken als een enkele `{b/…}`: je komt niet terug
+op de begintoons. Dat is funest voor eindcontrole en later voor meerstemmige
+cursors.
+
+In [VSA](@) is `+` een kruis op de aankomstgraad (hier: ti), en `/` beweegt
+alleen de diatonische cursor weer omhoog naar do. Zelfde-toonlettergrepen
+(`{ri}` of ongescopte `ri`) houden de klinkende toon vast — zonder `#-` te
+hoeven schrijven. Zichtbaar via eindmarkering `[:]` en MusicXML (`B#` → … → `C`).
+
+Bestand: `examples/docs-walkthroughs/halftoon-accidens-cursor.vsa`
+(spiegel van de uitleg in [Liturgikon-notatie](../guides/liturgikon-notatie.md#praktijkvoorbeeld-kruis-daarna-omhoog-eindigt-weer-op-do)).
+
+```text
+[:] {+\neer}{/terug_} op do. [:]
+
+[:] {b/om}{-hoog_} op re. [/:]
+```
+
+| Frase | Wat je hoort / ziet (do=C4) | Wat validatie checkt |
+| ----- | --------------------------- | -------------------- |
+| A `{+\neer}{/terug}` | B♯, dan C; eindklank = start | eindmarkering `[:]` = graad do → OK |
+| B `{b/om}{-hoog}` | D♭, dan D♭ (zelfde toon houdt mol) | eindmarkering `[/:]` = graad re → OK |
+
+Controleer lokaal:
+
+```cmd
+vsa validate examples\docs-walkthroughs\halftoon-accidens-cursor.vsa
+```
 
 Bij omzetting van historische notaties naar [VSA](@) kunnen de volgende situaties optreden:
 

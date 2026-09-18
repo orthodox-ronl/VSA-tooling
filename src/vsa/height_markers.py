@@ -4,30 +4,23 @@ from dataclasses import dataclass
 from typing import Literal
 
 from vsa.ast import Document, HeightMarkerNode, PitchMarkerNode
-
-# Halftoon-prefixen: canonical "#" = +0.5, canonical "b" = -0.5
-_SHARP_CANONICAL = "#"
-_FLAT_CANONICAL = "b"
-_SHARP_PREFIX_CHARS: frozenset[str] = frozenset("+#♯")
-_FLAT_PREFIX_CHARS: frozenset[str] = frozenset("b♭")
+from vsa.pitch_resolver import ehm_to_motion
 
 
-def _pitch_of_ehm(ehm: str) -> float:
-    """Berekent de pitchbijdrage van één EHM-waarde als float (halftoon = ±0.5)."""
-    if not ehm:
-        return 0.0
-    halftone = 0.0
-    base = ehm
-    if ehm[0] in _SHARP_PREFIX_CHARS:
-        halftone, base = +0.5, ehm[1:]
-    elif ehm[0] in _FLAT_PREFIX_CHARS:
-        halftone, base = -0.5, ehm[1:]
-    return halftone + base.count("/") - base.count("\\")
+def _degree_of_ehm(ehm: str) -> int:
+    """Laddergraad-delta van één EHM (accidens-prefix telt niet mee)."""
+    steps, _chromatic = ehm_to_motion(ehm)
+    return steps
 
 
-def _pitch_of_ehm_list(ehm_list: list[str]) -> float:
-    """Berekent de cumulatieve pitchbijdrage van een lijst EHM-waarden."""
-    return sum(_pitch_of_ehm(e) for e in ehm_list)
+def _degree_of_ehm_list(ehm_list: list[str]) -> int:
+    """Cumulatieve laddergraad-delta van een lijst EHM-waarden."""
+    return sum(_degree_of_ehm(e) for e in ehm_list)
+
+
+# Backwards-compatible aliases (degree-only; no float ½-tone cursor).
+_pitch_of_ehm = _degree_of_ehm
+_pitch_of_ehm_list = _degree_of_ehm_list
 
 
 def _format_pitch_delta(delta: float) -> str:
@@ -45,27 +38,23 @@ def height_marker_mismatch_detail(declared: float, computed: float) -> str:
     return f"computed = marker {sign} {_format_pitch_delta(abs(delta))}"
 
 
-def _marker_for_pitch(pitch: float) -> str:
-    """Geeft de canonieke hoogte-markeringsstring voor een gegeven pitchwaarde.
+def _marker_for_degree(degree: int) -> str:
+    """Canonieke hoogte-markeringsstring voor een diatonische laddergraad.
 
-    Voorbeelden: 0 → '[:]', 2 → '[//:]', -1.5 → '[b\\:]', 0.5 → '[+-:]'
+    Voorbeelden: 0 → '[:]', 2 → '[//:]', -1 → '[\\:]'.
+    Accidens-prefixen horen niet in de canonieke marker: zij wijzigen alleen
+    de klinkende toon van een EHM, niet de cursor die markeringen controleren.
     """
-    if pitch == 0.0:
+    if degree == 0:
         return "[:]"
-    n = int(pitch)       # truncatie naar nul (bijv. int(-2.5) == -2)
-    half = pitch - n     # 0.0 of ±0.5
     backslash = "\\"
-    if half == 0.0:
-        if n > 0:
-            return f"[{'/' * n}:]"
-        return f"[{backslash * abs(n)}:]"
-    # Halftoon-geval
-    if pitch > 0:
-        # +0.5 → [+-:], +1.5 → [+/:], +2.5 → [+//:]
-        return "[+-:]" if n == 0 else f"[+{'/' * n}:]"
-    else:
-        # -0.5 → [b-:], -1.5 → [b\:], -2.5 → [b\\:]
-        return "[b-:]" if n == 0 else f"[b{backslash * abs(n)}:]"
+    if degree > 0:
+        return f"[{'/' * degree}:]"
+    return f"[{backslash * abs(degree)}:]"
+
+
+# Alias used by older call sites / tests.
+_marker_for_pitch = _marker_for_degree
 
 
 HeightMarkerRole = Literal["start_height", "local_height"]

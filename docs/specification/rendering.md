@@ -150,7 +150,7 @@ MusicXML-export gebruikt dezelfde defaults als de Hugo [blokmetadata](@) in [Syn
 | ----------------------- | ---------------------- |
 | `do`                    | `F4`                   |
 | `mode`                  | `major`                |
-| `tempo`                 | `100 BPM`              |
+| `tempo`                 | `120 BPM`              |
 | `duration-model`        | `default`              |
 | `validate-ending`       | `true`                 |
 | `reciting-mode`         | `quarters`             |
@@ -190,10 +190,31 @@ Als geen `do`-parameter aanwezig is, wordt de default `F4` gebruikt.
 
 Elke [muzikale positie](@) correspondeert met één MusicXML `<note>`.
 
-De pitch wordt cumulatief berekend:
+De absolute toonhoogte volgt twee lagen (zelfde model als
+[Interpretatie van EHMs](semantics.md#interpretatie-van-ehms)):
+
+1. **Diatonische cursor** — alleen basisbewegingen (`/`, `\`, `-`, `~`, …)
+   verplaatsen de laddergraad t.o.v. `do` / modus (`-`/`~` = nul stappen).
+2. **Klinkende toon** — halftoon-prefix zet MusicXML `<alter>` op díe noot;
+   `~`/`-` zonder nieuwe prefix, en ongescopte recite, herhalen de vorige
+   klinkende toon (inclusief alter). Een latere ladderstap gebruikt weer de
+   natuurlijke graad tenzij die EHM zelf een prefix heeft.
+3. **Zichtbaar voorteken** — als de klinkende alteratie afwijkt van de
+   toonsoort of van een eerder voorteken op dezelfde nootletter in dezelfde
+   maat, schrijft de exporter `<accidental>` (`sharp`, `flat`, of
+   `natural` als herstelteken). Herhaalde zelfde alteratie in dezelfde maat
+   krijgt geen tweede zichtbaar teken.
 
 ```text
-starttoon + EHM1 + EHM2 + ... + EHMn
+cursor₀ = beginmarkering t.o.v. do
+klank₀ = laddertoon(cursor₀)
+voor elke EHMₙ:
+    cursor ← cursor + ladderstappen(EHMₙ)
+    als ladderstappen=0 en geen nieuwe prefix:
+        pitchₙ ← klankₙ₋₁          # zelfde toon voor de zanger
+    anders:
+        pitchₙ ← laddertoon(cursor) + alter(prefix)
+    klankₙ ← pitchₙ
 ```
 
 Daarbij worden [EHMs](@) geïnterpreteerd binnen de [do-context](@) en modus.
@@ -269,7 +290,7 @@ Voor elke [muzikale positie](@) geldt:
 | [VSA](@)                                      | MusicXML                   |
 | --------------------------------------------- | -------------------------- |
 | [muzikale positie](@)                         | één `<note>`               |
-| [EHM](@)                                      | cumulatief berekende pitch |
+| [EHM](@)                                      | laddergraad-cursor + optioneel `<alter>` |
 | [ELM](@)                                      | duration                   |
 | [zangelement](@)                              | lyric                      |
 | meerdere posities binnen één [zangelement](@) | melisma                    |
@@ -281,7 +302,7 @@ MusicXML-export moet worden geweigerd of als ongeldig gemarkeerd wanneer:
 - EHM- en ELM-aantallen inconsistent zijn;
 - een onbekende [modifier](@) voorkomt;
 - geen geldige toonhoogte kan worden afgeleid;
-- een halve ladderstap wordt gebruikt waar de modus dit niet toestaat;
+- een chromatische alteratie (halftoon-prefix) die de implementatie of modus niet toestaat;
 - de implementatie geen mappingstrategie heeft voor de gekozen modus.
 
 In alle gevallen moet een foutmelding minimaal bevatten:

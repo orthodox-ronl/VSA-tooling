@@ -11,7 +11,7 @@ END_MARKER = ":::"
 DEFAULT_METADATA = {
     "do": "F4",
     "mode": "major",
-    "tempo": "100",
+    "tempo": "120",
     "validate-ending": "true",
     "duration-model": "default",
     "reciting-mode": "quarters",
