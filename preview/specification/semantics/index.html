@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/ehm-accidens-diatonic-cursor</code>
-  , gebouwd 2026-09-17 23:53 CEST.
+   — branch <code>ci/gh-pages-carry-sibling-dirs</code>
+  , gebouwd 2026-09-18 07:16 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1339,21 +1339,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#halftoon-prefix-cursor-vs-klinkende-toon-normatief" class="md-nav__link">
+  <a href="#halftoon-prefix-combinaties-voorbeelden" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Halftoon-prefix: cursor vs. klinkende toon (normatief)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#acceptatievoorbeelden-normatief" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Acceptatievoorbeelden (normatief)
+        Halftoon-prefix combinaties (voorbeelden)
       
     </span>
   </a>
@@ -3627,21 +3616,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#halftoon-prefix-cursor-vs-klinkende-toon-normatief" class="md-nav__link">
+  <a href="#halftoon-prefix-combinaties-voorbeelden" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Halftoon-prefix: cursor vs. klinkende toon (normatief)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#acceptatievoorbeelden-normatief" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Acceptatievoorbeelden (normatief)
+        Halftoon-prefix combinaties (voorbeelden)
       
     </span>
   </a>
@@ -3876,29 +3854,10 @@ Lydisch:   G G G K G G K
 </code></pre></div>
 <p>De <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> bepaalt dus het startpunt. De modus bepaalt de interne structuur van de toonladder.</p>
 <h3 id="interpretatie-van-ehms">Interpretatie van EHMs<a class="headerlink" href="#interpretatie-van-ehms" title="Permanent link">&para;</a></h3>
-<p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> is een operator op de actuele toonladderpositie. Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a>
-bestaat uit een optionele halftoon-prefix (accidens) en een basisbeweging.</p>
-<p>Twee lagen worden strikt gescheiden:</p>
-<ol>
-<li><strong>Diatonische cursor</strong> — de actuele toonladdergraad t.o.v. de
-   <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> en modus. Alleen basisbewegingen (<code>/</code>, <code>\</code>, <code>-</code>, <code>~</code>, en
-   gestapelde strepen) verplaatsen deze cursor.</li>
-<li><strong>Accidens / halftoon-prefix</strong> (<code>#</code> / <code>+</code> / <code>♯</code>, <code>b</code> / <code>♭</code>) — tijdelijke
-   wijziging van de <strong>klinkende toon</strong> op de graad <em>ná</em> toepassing van de
-   basisbeweging van díe <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a>. De prefix verandert de diatonische cursor
-   niet.</li>
-</ol>
-<p><strong>Zelfde toon behouden:</strong> een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> zonder ladderstap en zonder nieuwe
-prefix (<code>~</code>, <code>-</code>, of impliciet <code>~</code>), én ongescopte reciteertekst, neemt de
-<strong>klinkende toon van de voorgaande noot</strong> over — inclusief accidens. Zo klinken
-<code>{+\go}{ri}{/os}</code> en <code>{+\go}ri{/os}</code> hetzelfde (Cis blijft op <code>ri</code> zonder
-<code>#-</code> te schrijven). Een latere ladderstap (<code>/</code>, <code>\</code>, …) start vanaf de
-natuurlijke graad, tenzij díe <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> opnieuw een prefix heeft.</p>
-<p><code>+</code> is een spelling/alias van <code>#</code> (zelfde semantiek), geen aparte operator.</p>
-<p>Dit is <strong>niet</strong> een cumulatief “netto = basis ± ½ toon”-model waarin de
-prefix de cursor chromatisch verschuift. Een reeks <code>#\</code> daarna <code>/</code> brengt de
-cursor terug op de startgraad; de klinkende eindtoon (zonder nieuwe prefix)
-is weer de natuurlijke laddertoon.</p>
+<p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> is een operator op de actuele toonladderpositie. Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> bestaat uit een optionele halftoon-prefix en een basisbeweging. Het semantische effect is:</p>
+<div class="highlight"><pre><span></span><code>netto beweging = basisbeweging + prefix_delta
+</code></pre></div>
+<p>waarbij <code>prefix_delta</code> gelijk is aan +½ toon voor prefix <code>#</code> (of alias <code>+</code>, <code>♯</code>) en −½ toon voor prefix <code>b</code> (of alias <code>♭</code>).</p>
 <h4 id="basisbewegingen">Basisbewegingen<a class="headerlink" href="#basisbewegingen" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -3950,179 +3909,76 @@ is weer de natuurlijke laddertoon.</p>
 </tr>
 <tr>
 <td><code>-</code></td>
-<td>behoud de huidige graad</td>
+<td>behoud de huidige toonhoogte</td>
 </tr>
 <tr>
 <td><code>~</code></td>
-<td>behoud de huidige graad</td>
+<td>behoud de huidige toonhoogte</td>
 </tr>
 </tbody>
 </table>
-<h4 id="halftoon-prefix-cursor-vs-klinkende-toon-normatief">Halftoon-prefix: cursor vs. klinkende toon (normatief)<a class="headerlink" href="#halftoon-prefix-cursor-vs-klinkende-toon-normatief" title="Permanent link">&para;</a></h4>
+<h4 id="halftoon-prefix-combinaties-voorbeelden">Halftoon-prefix combinaties (voorbeelden)<a class="headerlink" href="#halftoon-prefix-combinaties-voorbeelden" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
 <th><a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a></th>
-<th>Cursor (basis)</th>
-<th>Accidens op aankomsttoon</th>
-<th>Daarna</th>
+<th>Basisbeweging</th>
+<th>Prefix</th>
+<th>Netto effect</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>#/</code></td>
 <td>+1 graad</td>
-<td>kruis</td>
-<td>volgende ladderstap: natuurlijke nieuwe graad; <code>~</code>/<code>-</code>/recite: zelfde klinktoon</td>
+<td>+½</td>
+<td>+1 graad + ½ toon omhoog</td>
 </tr>
 <tr>
 <td><code>b/</code></td>
 <td>+1 graad</td>
-<td>mol</td>
-<td>idem</td>
+<td>−½</td>
+<td>+1 graad − ½ toon (= +½ toon)</td>
 </tr>
 <tr>
 <td><code>#\</code></td>
 <td>−1 graad</td>
-<td>kruis</td>
-<td>idem</td>
+<td>+½</td>
+<td>−1 graad + ½ toon (= −½ toon)</td>
 </tr>
 <tr>
 <td><code>b\</code></td>
 <td>−1 graad</td>
-<td>mol</td>
-<td>idem</td>
+<td>−½</td>
+<td>−1 graad − ½ toon</td>
 </tr>
 <tr>
 <td><code>#-</code></td>
-<td>0</td>
-<td>kruis op huidige graad</td>
-<td><code>~</code>/<code>-</code>/recite houden die klinktoon</td>
+<td>0 graden</td>
+<td>+½</td>
+<td>+½ toon (chromatisch omhoog)</td>
 </tr>
 <tr>
 <td><code>b-</code></td>
-<td>0</td>
-<td>mol op huidige graad</td>
-<td><code>~</code>/<code>-</code>/recite houden die klinktoon</td>
+<td>0 graden</td>
+<td>−½</td>
+<td>−½ toon (chromatisch omlaag)</td>
 </tr>
 </tbody>
 </table>
-<h4 id="acceptatievoorbeelden-normatief">Acceptatievoorbeelden (normatief)<a class="headerlink" href="#acceptatievoorbeelden-normatief" title="Permanent link">&para;</a></h4>
-<p>Met <code>do="C4"</code> en <code>mode="major"</code>, startcursor op do (graad 0):</p>
-<table>
-<thead>
-<tr>
-<th>Reeks</th>
-<th>Cursor na reeks</th>
-<th>Klinkende tonen (spelling)</th>
-<th>Eindklank = start?</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>#\</code> daarna <code>/</code></td>
-<td>do (0)</td>
-<td>B3# (ti met kruis), daarna C4</td>
-<td>ja</td>
-</tr>
-<tr>
-<td><code>b/</code></td>
-<td>re (1)</td>
-<td>D♭4</td>
-<td>nee (cursor op re)</td>
-</tr>
-<tr>
-<td><code>b/</code> daarna <code>-</code></td>
-<td>re (1)</td>
-<td>D♭4, daarna D♭4 (zelfde toon)</td>
-<td>—</td>
-</tr>
-<tr>
-<td><code>#-</code></td>
-<td>do (0)</td>
-<td>C#4</td>
-<td>cursor ongewijzigd</td>
-</tr>
-<tr>
-<td><code>b-</code></td>
-<td>do (0)</td>
-<td>C♭4</td>
-<td>cursor ongewijzigd</td>
-</tr>
-</tbody>
-</table>
-<p>Met startmarkering <code>[/:]</code> (graad = re = D4):</p>
-<table>
-<thead>
-<tr>
-<th>Reeks</th>
-<th>Klinkende tonen</th>
-<th>Cursor-eind</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>{+\go}{ri}{/os}</code></td>
-<td>D→C♯→C♯→D</td>
-<td>weer re</td>
-</tr>
-<tr>
-<td><code>{+\go}ri{/os}</code> (ongescopte <code>ri</code>)</td>
-<td>D→C♯→C♯→D</td>
-<td>weer re</td>
-</tr>
-</tbody>
-</table>
-<p>Met <code>do="F4"</code> en <code>mode="major"</code> (non-C, enharmoniek):</p>
-<table>
-<thead>
-<tr>
-<th>Reeks</th>
-<th>Cursor na reeks</th>
-<th>Klinkende tonen (spelling)</th>
-<th>Eindklank = start?</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>#\</code> daarna <code>/</code></td>
-<td>do (0)</td>
-<td>E4# (ti met kruis), daarna F4</td>
-<td>ja</td>
-</tr>
-<tr>
-<td><code>b/</code></td>
-<td>re (1)</td>
-<td>G♭4</td>
-<td>cursor op re</td>
-</tr>
-</tbody>
-</table>
-<p>Contrast met het afgewezen float-model: onder “netto = basis ± ½” zou
-<code>+\</code> gevolgd door <code>/</code> klinken als <code>b/</code> (blijvend een half trede verschoven).
-In dit model is dat <strong>niet</strong> zo: <code>#\</code>+<code>/</code> herstelt cursor én natuurlijke
-laddertoon.</p>
-<p><a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHMs</a> worden sequentieel toegepast. Bij <a class="og-termref" href="/VSA-tooling/preview/terminologie/metadata" title="Metadata: gegevens die als gestructureerde blokparameters of YAML-frontmatter bij VSA-bronmateriaal staan, verwerking of identificatie sturen en zelf niet tot de zichtbare VSA-notatie behoren.">blokmetadata</a> <code>do="C4"</code> en
-<code>mode="major"</code> produceert de EHM-reeks <code>/</code>, <code>\\</code>, <code>///</code> de toonreeks:</p>
+<p><a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHMs</a> worden sequentieel toegepast. Bij <a class="og-termref" href="/VSA-tooling/preview/terminologie/metadata" title="Metadata: gegevens die als gestructureerde blokparameters of YAML-frontmatter bij VSA-bronmateriaal staan, verwerking of identificatie sturen en zelf niet tot de zichtbare VSA-notatie behoren.">blokmetadata</a> <code>do="C4"</code> en <code>mode="major"</code> produceert de EHM-reeks <code>/</code>, <code>\\</code>, <code>///</code> de toonreeks:</p>
 <div class="highlight"><pre><span></span><code>C4 → D4 → B3 → E4
 </code></pre></div>
 <p>Hierbij wordt uitgegaan van opeenvolgende toonladderstappen binnen de gekozen modus.</p>
-<p>MusicXML-export: de diatonische graad bepaalt <code>&lt;step&gt;</code> / octaaf via de
-modus; de halftoon-prefix bepaalt <code>&lt;alter&gt;</code> op díe noot. Zelfde-toon
-voortzetting (<code>~</code>/<code>-</code>/recite) herhaalt de vorige klinkende toon (inclusief
-<code>&lt;alter&gt;</code>).</p>
 <h3 id="geldigheid-van-halftoon-prefix-combinaties">Geldigheid van halftoon-prefix combinaties<a class="headerlink" href="#geldigheid-van-halftoon-prefix-combinaties" title="Permanent link">&para;</a></h3>
-<p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> met halftoon-prefix is syntactisch alleen geldig wanneer de
-prefix onmiddellijk vóór een basisbeweging staat (geen standalone <code>#</code>/<code>b</code>).</p>
-<p>Semantisch:</p>
+<p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> met halftoon-prefix is semantisch geldig als het resulterende interval (basisbeweging ± ½ toon) zinvol is binnen de <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> en modus. Een prefix mag nooit standalone voorkomen; hij moet altijd onmiddellijk voorafgaan aan een basisbeweging.</p>
+<p>Semantische geldigheid vereist dat:</p>
 <ol>
-<li>de basisbeweging verplaatst (of behoudt) de <strong>diatonische cursor</strong> zoals
-   zonder prefix;</li>
-<li>de prefix is een tijdelijk <strong>accidens</strong> op de aankomstgraad (MusicXML
-   <code>&lt;alter&gt;</code>); of een gegeven modus/export die spelling weigert, is een
-   aparte geldigheidsregel — zij verschuift de cursor niet.</li>
+<li>de basisbeweging zelf geldig is binnen de huidige toonladderpositie en modus;</li>
+<li>de aanvullende ½ toon een gedefinieerd interval oplevert (de modus staat een dergelijke chromatische aanpassing toe).</li>
 </ol>
-<p>Voorbeeld (geen cursorvergiftiging):</p>
+<p>Als aan voorwaarde 2 niet is voldaan, is de <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> een semantische fout.</p>
+<p>Voorbeeld van zo'n semantische fout:</p>
 <div class="highlight"><pre><span></span><code>::: vsa-notatie
 do="C4"
 mode="major"
@@ -4130,17 +3986,8 @@ mode="major"
 [//:] {#/tekst}
 :::
 </code></pre></div>
-<p>Start op <code>mi</code> (<code>[//:]</code>): <code>#/</code> zet de cursor op <code>fa</code> met kruis (klinkend F#
-bij do=C). De volgende <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> start vanaf natuurlijke <code>fa</code>, niet vanaf een
-“½-trede tussen mi en fa”.</p>
-<p><code>#-</code> / <code>b-</code> blijven “chromatisch op huidige graad, cursor ongewijzigd”.
-<code>b/</code> is één ladderstap omhoog plus mol op de aankomstgraad — niet een
-verschuiving van de diatonische cursor met een half trede.</p>
-<p>Een historische schrijfwijze zoals <code>{-\…}</code> is geen geldige <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a>
-(syntaxfout).</p>
-<p>Hoogte-markeringen (<code>[…:]</code>) controleren de <strong>diatonische cursor</strong>. Een
-accidens-prefix op een markering wijzigt die cursorcontrole niet; de
-canonieke herstelmarkering is steeds graad-only (<code>[:]</code>, <code>[/:]</code>, <code>[\\:]</code>, …).</p>
+<p>Als de actuele positie op <code>mi</code> staat en de overgang <code>mi → fa</code> al een kleine stap is, dan brengt <code>#/</code> de melodie een extra ½ toon buiten de toonladder. Als de modus hiervoor geen gedefinieerde subpositie heeft, is dit een semantische fout.</p>
+<p>De onderscheiding tussen een halftoon-prefix op een basisbeweging en een zelfstandige chromatische aanpassing (<code>#-</code>, <code>b-</code>) heeft ook semantisch gevolgen voor MusicXML-export: <code>b-</code> beschrijft een chromatische verschuiving op de huidige positie, terwijl <code>b/</code> een combinatie is van een ladderstap en een halvering.</p>
 <h3 id="interpretatie-van-elms">Interpretatie van ELMs<a class="headerlink" href="#interpretatie-van-elms" title="Permanent link">&para;</a></h3>
 <p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-lengte-modifier" title="Enkelvoudige lengte-modifier: een Lengte-modifier die uit precies één geldige ELM bestaat en daarmee precies een duurpositie representeert.">ELM</a> bepaalt de duur van één <a class="og-termref" href="/VSA-tooling/preview/terminologie/muzikale-positie" title="Muzikale positie: de kleinste muzikale eenheid binnen VSA-notatie: één relatieve toonhoogtebeweging (één EHM), één duur (één ELM) en een koppeling aan één zangelement in een VSA-scope.">muzikale positie</a> ten opzichte van de standaardduur.</p>
 <table>
@@ -4286,7 +4133,7 @@ maar mogen door <a class="og-termref" href="/VSA-tooling/preview/terminologie/re
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-17
+        Bijgewerkt: 2026-09-01
         
       </p>
       
