@@ -218,6 +218,33 @@ prefix (`~`, `-`, of impliciet `~`), én ongescopte reciteertekst, neemt de
 `#-` te schrijven). Een latere ladderstap (`/`, `\`, …) start vanaf de
 natuurlijke graad, tenzij díe [EHM](@) opnieuw een prefix heeft.
 
+#### Tot hoever werkt de halftoon? (normatief)
+
+In **klassieke muzieknotatie** geldt een voorteken (kruis, mol) tot de
+**volgende maatstreep**, of tot een **herstelteken** / nieuw voorteken op
+dezelfde nootletter. Alle latere noten van die letter in dezelfde maat
+blijven gewijzigd, ook als je tussendoor andere tonen zingt.
+
+In **[VSA](@)** is dat **anders**. Een halftoon-prefix geldt alleen voor:
+
+1. de **aankomsttoon** van díe [EHM](@), en
+2. elke **onmiddellijk volgende zelfde-toon** (`~`, `-`, impliciet `~`,
+   ongescopte recite) — zolang er geen nieuwe ladderstap komt.
+
+De halftoon stopt bij de **eerste volgende ladderstap** (`/`, `\`, `//`, …)
+zonder nieuwe prefix: die landt op de **natuurlijke** laddertoon van de
+nieuwe graad. Een maatstreep (`//`, `[*]`, …) **beëindigt het VSA-accidens
+niet**; zelfde-toon na een maatstreep houdt de chromatische klinktoon vast.
+
+| Situatie | Klassieke notatie | [VSA](@) |
+| -------- | ----------------- | -------- |
+| C♯, daarna opnieuw C in dezelfde maat (via andere toon ertussen) | C blijft kruis tot maatstreep of ♮ | terugkeer via `\` / `/` zonder prefix → **natuurlijke** C |
+| C♯, daarna zelfde toon (`-` / recite) | C♯ | C♯ |
+| C♯, maatstreep, daarna opnieuw C zonder nieuw teken | meestal natuurlijke C | zelfde-toon na maatstreep → **nog steeds** C♯ |
+
+Werkvoorbeelden: [Halftoon-prefix combinaties (voorbeelden)](#halftoon-prefix-combinaties-voorbeelden)
+en [Kruis en mol](../reference/voorbeelden/kruis-en-mol.md#tot-hoever-werkt-de-halftoon).
+
 `+` is een spelling/alias van `#` (zelfde semantiek), geen aparte operator.
 
 Dit is **niet** een cumulatief “netto = basis ± ½ toon”-model waarin de
@@ -296,7 +323,12 @@ Hierbij wordt uitgegaan van opeenvolgende toonladderstappen binnen de gekozen mo
 MusicXML-export: de diatonische graad bepaalt `<step>` / octaaf via de
 modus; de halftoon-prefix bepaalt `<alter>` op díe noot. Zelfde-toon
 voortzetting (`~`/`-`/recite) herhaalt de vorige klinkende toon (inclusief
-`<alter>`).
+`<alter>`). Daarnaast schrijft de exporter een zichtbaar
+`<accidental>` (kruis, mol, of `natural` als herstelteken) wanneer de
+klinkende alteratie afwijkt van de toonsoort of van een eerder voorteken
+op dezelfde nootletter in dezelfde maat. Zo krijgt C♯ → D → C in één maat
+op de laatste C een herstelteken, terwijl `{+\go}{ri}` het kruis slechts
+één keer toont.
 
 ### Geldigheid van halftoon-prefix combinaties
 
@@ -336,6 +368,137 @@ Een historische schrijfwijze zoals `{-\…}` is geen geldige [EHM](@)
 Hoogte-markeringen (`[…:]`) controleren de **diatonische cursor**. Een
 accidens-prefix op een markering wijzigt die cursorcontrole niet; de
 canonieke herstelmarkering is steeds graad-only (`[:]`, `[/:]`, `[\\:]`, …).
+
+### Halftoon-prefix combinaties (voorbeelden)
+
+Onderstaande frasen laten zien wat een kruis of mol **doet** en wat het
+**niet** doet — vooral **tot hoever** de halftoon klinkt. Werkvoorbeeld met
+CLI: [Kruis en mol](../reference/voorbeelden/kruis-en-mol.md).
+
+#### Tot hoever klinkt het kruis? Contrast met maatstreep-regel
+
+Met `do="C4"`, start `[:]`. In klassieke notatie zou één kruis op C alle
+latere C’s in de maat wijzigen tot een herstelteken of maatstreep. In
+[VSA](@) niet.
+
+**A — halftoon stopt bij de volgende ladderstap (zelfde maat):**
+
+```text
+[:] {#-Cis}{/Re}{\Do} [:]
+```
+
+| Lettergreep | Klinkend | Waarom |
+| ----------- | -------- | ------ |
+| Cis | C♯ | `#-` zet kruis op do |
+| Re | D | `/` = ladderstap → natuurlijke re |
+| Do | C | `\` = ladderstap → **natuurlijke** do (geen blijvend kruis op C) |
+
+In klassieke notatie zou de laatste C in dezelfde maat nog C♯ zijn tenzij
+een ♮ geschreven staat. [VSA](@) hoeft geen herstelteken-prefix: de
+ladderstap zonder prefix is genoeg. MusicXML-export zet wél een zichtbaar
+`natural` op die laatste C, zodat de partituur dezelfde klinkende reeks toont.
+
+**B — halftoon blijft op zelfde-toon, ook over een maatstreep:**
+
+```text
+[:] {#-Cis}{-nog} // {-verder} [:]
+```
+
+| Lettergreep | Klinkend | Waarom |
+| ----------- | -------- | ------ |
+| Cis | C♯ | `#-` |
+| nog | C♯ | `-` = zelfde toon |
+| (maatstreep) | — | beëindigt het VSA-accidens **niet** |
+| verder | C♯ | `-` na maatstreep houdt nog steeds Cis |
+
+In klassieke notatie zou `verder` zonder nieuw kruis meestal natuurlijke C
+zijn. In [VSA](@) blijft de klinkende toon chromatisch tot er een
+ladderstap zonder prefix komt.
+
+**C — na maatstreep wél natuurlijk, omdat er een ladderstap is:**
+
+```text
+[:] {#-Cis} // {/Re} [:]
+```
+
+| Lettergreep | Klinkend | Waarom |
+| ----------- | -------- | ------ |
+| Cis | C♯ | `#-` |
+| Re | D | `/` na de maatstreep → natuurlijke re; cursor op re |
+
+#### Kruis op een dalende stap, daarna omhoog — cursor en natuurlijke toon herstellen
+
+Met `do="C4"`, start `[:]`:
+
+```text
+[:] {+\neer}{/terug} [:]
+```
+
+| Stap | [EHM](@) | Cursor | Klinkend | Toelichting |
+| ---- | -------- | ------ | -------- | ----------- |
+| 1 | `+\` (`#\`) | ti | B♯ | ladderstap omlaag + kruis op aankomst |
+| 2 | `/` | do | C | ladderstap omhoog; **geen** prefix → natuurlijke do |
+
+De eindmarkering `[:]` slaagt: cursor en klinkende eindtoon zijn weer do.
+Onder het afgewezen “basis ± ½”-model zou stap 2 klinken als D♭ en zou de
+eindcontrole falen.
+
+#### Mol omhoog, daarna zelfde toon — accidens blijft klinken
+
+```text
+[:] {b/om}{-hoog} [/:]
+```
+
+| Stap | [EHM](@) | Cursor | Klinkend | Toelichting |
+| ---- | -------- | ------ | -------- | ----------- |
+| 1 | `b/` | re | D♭ | ladderstap omhoog + mol |
+| 2 | `-` | re | D♭ | zelfde toon: mol blijft zonder `b-` opnieuw |
+
+Eindmarkering `[/:]` controleert alleen de **graad** re, niet of re mol of
+natuurlijk klinkt.
+
+#### Gregos-achtig: kruis vasthouden op de volgende lettergreep
+
+```text
+[/:] {+\go}{ri}{/os} [/:]
+```
+
+| Lettergreep | Bron | Klinkend (start re = D) |
+| ----------- | ---- | ----------------------- |
+| go | `+\` | C♯ |
+| ri | impliciet `~` | C♯ (zelfde klinktoon) |
+| os | `/` | D (natuurlijke re) |
+
+`{+\go}ri{/os}` (ongescopte `ri`) klinkt hetzelfde.
+
+#### Herstelteken in MusicXML op dezelfde nootletter
+
+```text
+[:] {#-Cis}{/Re}{\Do} [:]
+```
+
+| Noot | `<alter>` | Zichtbaar `<accidental>` |
+| ---- | --------- | ------------------------ |
+| Cis | `1` | `sharp` |
+| Re | (geen) | (geen) |
+| Do | (geen) | `natural` (herstelteken) |
+
+[VSA](@) heeft geen aparte herstelteken-prefix; de natuurlijke C volgt uit
+`\` zonder prefix. De MusicXML-export voegt het herstelteken toe zodat de
+partituur dezelfde semantiek toont als de klinkende toonreeks.
+
+#### Combinatietabel (snelle referentie)
+
+| [EHM](@) | Cursor | Accidens | Typisch gebruik |
+| -------- | ------ | -------- | --------------- |
+| `#/` of `+/` | +1 | kruis | chromatische stijging |
+| `b/` | +1 | mol | chromatische stijging met mol |
+| `#\` of `+\` | −1 | kruis | chromatische daling (Liturgikon-`+` op `\`) |
+| `b\` | −1 | mol | chromatische daling met mol |
+| `#-` of `+-` | 0 | kruis | kruis op huidige graad |
+| `b-` | 0 | mol | mol op huidige graad |
+| `-` / `~` na accidens | 0 | (geen nieuwe) | houdt klinkende toon inclusief accidens |
+| `/` of `\` na accidens | ±1 | (geen) | natuurlijke nieuwe graad |
 
 ### Interpretatie van ELMs
 

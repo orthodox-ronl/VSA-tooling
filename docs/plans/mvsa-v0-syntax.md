@@ -4,14 +4,38 @@
 | ---- | ------ |
 | **Status** | niet-normatief werkontwerp |
 | **Doel** | Intypbare SATB + lyrics in VSCode; later koppelbaar aan [vsa-templates](../specification-vsa-templates/README.md) zonder nodeloos typwerk |
-| **Gerelateerd** | [vsa-polyphony-proposal.md](vsa-polyphony-proposal.md), [specification-vsa-templates](../specification-vsa-templates/README.md) |
+| **Vervangt** | het eerdere [vsa-polyphony-proposal.md](vsa-polyphony-proposal.md) (alleen nog doorverwijzing + wat daaruit open blijft) |
+| **Gerelateerd** | [specification-vsa-templates](../specification-vsa-templates/README.md) |
 
-Dit document legt **laag 1** vast: hoe je een mvsa-bestand leest en typt.
+Dit document is het **werkplan voor meerstemmige invoer (mvsa)**. Het neemt de
+doelen van de eerdere polyfonie-schets over en kiest een concrete schrijfsyntax
+(L-regel + stemregels). Wat uit die schets nog niet is besloten, staat in §10.
+
 Templates (laag 2/3) komen alleen aan bod waar de syntax daarop moet anticiperen
 (`~` voor de [reciteertoon](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)).
 
 Bij tegenstrijdigheid met de officiële VSA-specificatie wint die specificatie
 tot dit plan is overgenomen.
+
+### Doelen (uit de eerdere schets, hier gehandhaafd)
+
+- weinig typwerk als dezelfde melodie nieuwe tekst krijgt;
+- tekst niet vier keer dupliceren over S/A/T/B;
+- stemmen synchroon houden;
+- formulematige orthodoxe praktijk (glas/toon → vaste slots → tekst erop);
+- bekende VSA-tekens (EHM/ELM) hergebruiken waar dat helpt — zonder de
+  eenstemmige VSA-syntax stiekem te herdefiniëren.
+
+Formule-pad in het kort:
+
+```text
+toon/glas  →  melodieformule (stemregels / template)
+           →  tekstprojectie (L-regel, o.a. met ~)
+           →  SATB-uitwerking
+```
+
+Dat pad dekt wat de oude schets “tekstprojectie + SATB-overlays” noemde; de
+*schrijfwijze* is nu L + stemmen, niet `${n}` in de stemregel.
 
 ---
 
@@ -380,15 +404,28 @@ blijft voorlopig leidend tot mvsa die rol overneemt.
 | Brokgrens stem | Alleen spaties; `-` op de stemregel = EHM “zelfde toon” |
 | Accolades in L | **Nee** in mvsa v0 |
 | Maatstreep | `\|`; herhaling `\|:` / `:\|` |
-| Recite | prefix `~`; ook `~Al-le-lu-ia~Al-le-lu-ia` toegestaan, spatie aanbevolen |
+| Recite | prefix `~` op L; ook `~Al-le-lu-ia~Al-le-lu-ia` toegestaan, spatie aanbevolen |
 | Hoogte schrijven | **EHM en/of do-re-mi**; mix met ankers toegestaan |
 | `@start` | Alleen nodig (of handig) in **relatieve** stijl; niet verplicht bij pure do-re-mi |
 | Ankers | Begin + tussendoor + eind horen bij relatieve stijl; bij do-re-mi volstaat opschrijven |
 | Label-start | `[-:S]`, `[\6:T]` blijft equivalent aan `@start` |
+| Tekstbron | Één **L-regel** (niet genummerde `${n}`-placeholders in stemregels) |
+| Stemmen t.o.v. elkaar | In v0 **gelijkwaardig** uitgeschreven; overlays t.o.v. S = open punt (§10) |
+
+### Bewust verlaten uit de eerdere polyfonie-schets
+
+| Oude schets | Waarom niet meer leidend |
+| ----------- | ------------------------ |
+| Tekst via `${1}`, `${2}` in S/A/T/B + aparte `1=…`-lijst | Vervangen door één L-regel; minder indirection, beter leesbaar in VSCode |
+| S als enige canonieke bron, A/T/B alleen als afwijking | Kan later als *suiker* (§10); v0 eist het niet |
+| `~` / `-` als “onzichtbare vs zichtbare standaard-glyph” in stemmarkup | **`~` op L is nu reciteertoon.** Die glyph-semantiek mag terugkomen onder **andere** tekens (§10) |
+| Accolades `{…}` met gemengde EHM+ELM+placeholder | In mvsa: ELM in L, EHM op de stem; geen `{}` in L |
 
 ---
 
 ## 10. Open punten (bewust later)
+
+### Uit mvsa v0 zelf
 
 - Parser: precieze grens van een `~`-run bij streepjes vs. spaties vs. plakvorm.
 - Optionele template-slots overslaan (`?` / open / link).
@@ -399,6 +436,20 @@ blijft voorlopig leidend tot mvsa die rol overneemt.
   laddergraad (klinkt / zet de lopende toon).
 - Officiële opname in `specification/` na experimenten.
 
+### Nog meenemen uit de eerdere polyfonie-schets
+
+Deze ideeën zijn **niet** verworpen; ze staan alleen nog niet in de v0-syntax.
+
+1. **Overlays t.o.v. S** — A/T/B als afwijking van de sopraan (`=S`, interval t.o.v. S, of “alleen waar anders”) om homofoon typwerk te verminderen. Past op “S canoniek + overlays” uit de oude schets.
+2. **Zichtbare vs. structurele standaardtoon** — per stem kunnen markeren of een
+   standaardhoogte wél of geen glyph krijgt (oude betekenis van `~` vs `-` in
+   die schets). Mag **niet** opnieuw `~` heten (dat is recite op L). Nieuwe
+   tekens of stem-opties kiezen.
+3. **Batch-tekst buiten het bestand** — tabel of lijst van tekstsegmenten die op
+   vaste muziekslots landen (geest van `${n}`), bv. veel troparen op één
+   stemtemplate zonder elke L handmatig in hetzelfde bestand te zetten. Alleen
+   nodig als L-per-bestand te zwaar blijkt voor corpuswerk; anders overbodig.
+
 ---
 
 ## 11. Leesvolgorde voor VSCode
@@ -407,5 +458,6 @@ blijft voorlopig leidend tot mvsa die rol overneemt.
 2. §2 (relatief vs. do-re-mi + ankers).
 3. §6 Alleluia toon 8 (`~` + beide hoogtestijlen).
 4. §7 vrije SATB (1:1 L-stukken ↔ hoogte-stukken).
-5. Daarna [tropaar-toon-4](../specification-vsa-templates/library/tropaar-toon-4/README.md)
+5. §9–§10 (beslissingen + wat uit de oude schets nog open staat).
+6. Daarna [tropaar-toon-4](../specification-vsa-templates/library/tropaar-toon-4/README.md)
    als je stemregels als formule-slots wilt hergebruiken.

@@ -199,6 +199,11 @@ De absolute toonhoogte volgt twee lagen (zelfde model als
    `~`/`-` zonder nieuwe prefix, en ongescopte recite, herhalen de vorige
    klinkende toon (inclusief alter). Een latere ladderstap gebruikt weer de
    natuurlijke graad tenzij die EHM zelf een prefix heeft.
+3. **Zichtbaar voorteken** — als de klinkende alteratie afwijkt van de
+   toonsoort of van een eerder voorteken op dezelfde nootletter in dezelfde
+   maat, schrijft de exporter `<accidental>` (`sharp`, `flat`, of
+   `natural` als herstelteken). Herhaalde zelfde alteratie in dezelfde maat
+   krijgt geen tweede zichtbaar teken.
 
 ```text
 cursor₀ = beginmarkering t.o.v. do

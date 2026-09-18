@@ -1,130 +1,22 @@
-# Voorstel voor toekomstige meerstemmige uitbreiding van VSA
+# Meerstemmige VSA — eerdere schets (vervangen)
 
-{{ Maak de volgende wijzigingen (gooi geen dingen weg die niet veranderd/aangepast zijn, omdat die allemaal ooit een doel hadden en er dus niet voor niets staan. Je moet zeker weten dat als je iets niet meer opneemt, dat een doublure is, of dat je hetzelfde op een betere/duidelijk manier verwoordt voor het lezerspubliek! Laat het weten als je tegen grenzen aanloopt die het je onmogelijk maken deze taak te volbrengen, en wat ik daar aan kan doen.):
-1. 
-}}
+| Veld | Waarde |
+| ---- | ------ |
+| **Status** | vervangen — niet meer uitwerken |
+| **Lees hier** | [mvsa-v0-syntax.md](mvsa-v0-syntax.md) |
 
-## Uitgangspunt
+Dit bestand was het eerste toekomstvoorstel voor meerstemmige VSA
+(placeholders `${n}`, S als canonieke bron, overlays, `~`/`-` als
+glyph-zichtbaarheid).
 
-De huidige [VSA-notatie](@bron) richt zich op een melodische hoofdstem waarbij de melodie direct boven en onder de tekst wordt genoteerd.
+**Die schrijfideeën zijn geïntegreerd of bewust herzien in**
+[mvsa-v0-syntax.md](mvsa-v0-syntax.md) (L-regel + stemregels, `~` = reciteertoon).
 
-In de orthodoxe praktijk bestaan echter meestal meerdere stemmen (S, A, T, B) die dezelfde tekst zingen, vaak met min of meer vergelijkbare ritmische structuur en (vooral) afwijkende toonhoogtebewegingen. Ook is de orthodoxe praktijk dat [zangstukken](@bron) als troparen, kondaken, stichieren e.d. een klein aantal melodielijnen hebben die cyclisch worden uitgevoerd over het (grotere aantal) strofes van zo'n [zangstuk](@bron), met nog een of twee melodielijnen die voor de laatste (twee) strofe(s) word(en) gebruikt.
+Drie punten uit *deze* schets staan daar nog als **open** (§10 “Nog meenemen
+uit de eerdere polyfonie-schets”):
 
-Doelen van een toekomstige uitbreiding:
+1. overlays van A/T/B t.o.v. S;
+2. zichtbare vs. structurele standaardtoon (andere tekens dan `~`);
+3. eventuele batch-tekst buiten het bestand (geest van `${n}`).
 
-- de hoeveelheid typwerk minimaliseren voor beheerders die andere teksten op een bestaande melodie willen schrijven;
-- minimale duplicatie van tekst;
-- behoud van synchronisatie tussen stemmen;
-- compatibiliteit met bestaande [VSA-notatie](@bron);
-- ondersteuning van formulematige orthodoxe zangpraktijk.
-
----
-
-## Kernidee
-
-De melodische hoofdstem wordt de canonieke bron.
-
-Andere stemmen worden beschreven als overlays of afwijkingen op dezelfde muzikale tijdlijn.
-
-Tekstsegmenten worden expliciet gekoppeld aan genummerde placeholders.
-
-Voorbeeld:
-
-{{voorbeeld eerst nog beter uitwerken zodat het klopt}}
-
-```markdown
-S: ${1} {/&/${2}_&_} {\\${2}} {~${3}-} {}
-A: {\${1}_} {-${2}} {~${3}-}
-T: {-${1}_} {\${2}} {~${3}-}
-B: {\\${1}_} {\\${2}} {~${3}-}
-```
-
-Tekstsegmenten:
-
-```text
-1=Ter
-2=wijl
-3=de steen door de israëlie
-4=ten
-5=ver
-6=ze
-7=geld
-8=was
-```
-
-Alle stemmen blijven hierdoor automatisch tekstueel synchroon.
-
----
-
-## Betekenis van placeholders
-
-Een placeholder representeert een tekstsegment dat op een [muzikale positie](@) wordt geprojecteerd.
-
-De mappinglaag koppelt:
-
-```text
-placeholder -> tekstsegment
-```
-
-aan:
-
-```text
-muzikale positie -> EHM + ELM
-```
-
-Hierdoor kunnen:
-
-- dezelfde teksten over meerdere stemmen worden verdeeld;
-- melodische formules worden hergebruikt;
-- SATB-structuren compact worden beschreven.
-
----
-
-## Rol van `~` en `-`
-
-De [modifiers](@) `~` en `-` blijven beide belangrijk.
-
-### `~`
-
-Betekenis:
-
-- semantisch aanwezig;
-- standaardtoon of standaardduur;
-- [renderer](@) toont geen [glyph](@) (of onzichtbaar).
-
-### `-`
-
-Betekenis:
-
-- semantisch gelijk aan standaardtoon of standaardduur;
-- [renderer](@) toont een zichtbare [glyph](@).
-
-Daardoor kunnen implementaties per stem bepalen:
-
-- welke [muzikale posities](@) expliciet zichtbaar zijn;
-- welke alleen structureel aanwezig zijn.
-
----
-
-## Relatie met orthodoxe toon-/glaspraktijk
-
-Orthodoxe tonen (glas 1 t/m 8) functioneren vaak als formulebibliotheken.
-
-Een toekomstige uitbreiding van [VSA](@) kan daarom werken met:
-
-```text
-toon/glas
-    -> melodieformules
-        -> tekstprojectie
-            -> SATB-overlays
-```
-
-Daardoor hoeven melodieën niet steeds volledig opnieuw genoteerd te worden.
-
----
-
-## Status
-
-Dit document beschrijft een toekomstig uitbreidingsvoorstel voor [VSA](@).
-
-Het maakt nadrukkelijk geen onderdeel uit van de huidige eenstemmige VSA-specificatie.
+Werk daar verder in het mvsa-document; breid dit bestand niet opnieuw uit.

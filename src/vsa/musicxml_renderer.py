@@ -465,6 +465,8 @@ class MusicXMLRenderer:
         if not measures:
             measures = [([], "light-heavy")]
 
+        fifths = key_fifths(resolver._do, mode)
+
         # ── Emit measures ─────────────────────────────────────────────────────
         for measure_idx, (notes, bar_style) in enumerate(measures):
             m = ET.SubElement(part, "measure", number=str(measure_idx + 1))
@@ -473,9 +475,11 @@ class MusicXMLRenderer:
                 self._add_attributes(m, resolver, mode, meter_str)
                 self._add_tempo_direction(m, tempo_str)
 
+            # Maatgebonden voortekens: hersteltekens (natural) na kruis/mol.
+            measure_alters: dict[str, int] = {}
             note_events = _assign_beams(notes) if self._is_playback else notes
             for ev in note_events:
-                self._add_note(m, ev, language)
+                self._add_note(m, ev, language, fifths=fifths, measure_alters=measure_alters)
 
             if bar_style != "regular" or not self._is_playback:
                 bl = ET.SubElement(m, "barline", location="right")
@@ -531,6 +535,9 @@ class MusicXMLRenderer:
         measure: ET.Element,
         ev: dict[str, Any],
         language: str,
+        *,
+        fifths: int = 0,
+        measure_alters: dict[str, int] | None = None,
     ) -> None:
         note_el = ET.SubElement(measure, "note")
 
@@ -550,13 +557,24 @@ class MusicXMLRenderer:
             ET.SubElement(note_el, "type").text = duration.note_type
             for _ in range(duration.dots):
                 ET.SubElement(note_el, "dot")
-            ET.SubElement(note_el, "stem").text = "up"
-            for beam_number, beam_type in ev.get("beams", []):
-                ET.SubElement(note_el, "beam", number=str(beam_number)).text = beam_type
         else:
             ET.SubElement(note_el, "type").text = duration.note_type
             for _ in range(duration.dots):
                 ET.SubElement(note_el, "dot")
+
+        # Zichtbaar voorteken / herstelteken t.o.v. toonsoort + eerdere noten
+        # in dezelfde maat (MusicXML <accidental>, o.a. natural na kruis/mol).
+        if measure_alters is not None:
+            accidental_name = _visible_accidental(
+                pitch.step, pitch.alter, fifths, measure_alters
+            )
+            if accidental_name is not None:
+                ET.SubElement(note_el, "accidental").text = accidental_name
+
+        if self._is_playback:
+            ET.SubElement(note_el, "stem").text = "up"
+            for beam_number, beam_type in ev.get("beams", []):
+                ET.SubElement(note_el, "beam", number=str(beam_number)).text = beam_type
 
         melisma_first = ev.get("melisma_first", False)
         melisma_middle = ev.get("melisma_middle", False)
@@ -644,6 +662,53 @@ def _syllables_from_tokens(tokens: list[str]) -> list[tuple[str, str]]:
 def _format_alter(alter: float) -> str:
     """Format an alter value: integers without decimal point."""
     return str(int(alter)) if alter == int(alter) else f"{alter:.1f}"
+
+
+# Circle-of-fifths order: sharps FCGDAEB, flats BEADGCF.
+_SHARP_ORDER = ("F", "C", "G", "D", "A", "E", "B")
+
+_ALTER_ACCIDENTAL_MUSICXML: dict[int, str] = {
+    0: "natural",
+    1: "sharp",
+    -1: "flat",
+    2: "double-sharp",
+    -2: "double-flat",
+}
+
+
+def _key_alter_for_step(step: str, fifths: int) -> int:
+    """Alter implied by the key signature for a diatonic step (0 if none)."""
+    if fifths > 0:
+        return 1 if step in _SHARP_ORDER[:fifths] else 0
+    if fifths < 0:
+        flat_order = tuple(reversed(_SHARP_ORDER))
+        return -1 if step in flat_order[:(-fifths)] else 0
+    return 0
+
+
+def _alter_as_int(alter: float) -> int:
+    """Convert a Pitch.alter float to the nearest MusicXML integer alter."""
+    return int(alter) if alter == int(alter) else int(round(alter))
+
+
+def _visible_accidental(
+    step: str,
+    alter: float,
+    fifths: int,
+    measure_alters: dict[str, int],
+) -> str | None:
+    """Return MusicXML accidental name if a visible sign is required.
+
+    Tracks measure-local accidentals so a return to the key-signature pitch
+    after a sharp/flat emits ``natural`` (herstelteken) on the same step.
+    Updates *measure_alters* when a new alter becomes active for *step*.
+    """
+    sounding = _alter_as_int(alter)
+    written = measure_alters.get(step, _key_alter_for_step(step, fifths))
+    if sounding == written:
+        return None
+    measure_alters[step] = sounding
+    return _ALTER_ACCIDENTAL_MUSICXML.get(sounding)
 
 
 def _assign_beams(notes: list[dict[str, Any]]) -> list[dict[str, Any]]:

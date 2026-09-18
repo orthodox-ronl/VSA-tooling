@@ -194,7 +194,17 @@ De belangrijkste verschillen zijn:
 | Validatie          | Alleen muzikaal gehoor                          | Syntactische en semantische validatie                                                               |
 | Export             | Niet voorzien                                   | SVG en MusicXML                                                                                     |
 
-Het grootste inhoudelijke verschil betreft de halftoon-modificatoren. In het Liturgikon staat dat een kruis (+) een *extra* stijging van een halve toon betekent bovenop een bestaande richtingspijl, en een mol (♭) een *extra* daling. [VSA](@) formaliseert dat als een **tijdelijk accidens op de aankomstgraad**: `#` (alias `+`, `♯`) en `b` (alias `♭`) staan vóór een basisbeweging (`/`, `\`, `-`, `~`, of meerdere pijlen), maar schuiven de diatonische cursor niet chromatisch mee. Zie [Interpretatie van EHMs](semantics.md#interpretatie-van-ehms).
+Het grootste inhoudelijke verschil betreft de halftoon-modificatoren. In het
+Liturgikon staat dat een kruis (`+`) een *extra* stijging van een halve toon
+betekent, en een mol (`♭`) een *extra* daling. [VSA](@) formaliseert dat als
+twee lagen: de **diatonische cursor** (alleen basisbewegingen) en een
+**tijdelijk accidens** op de aankomstgraad (`#`/`+`/`♯`, `b`/`♭`) dat de
+cursor niet chromatisch meeschuift. Zelfde-toon (`~`/`-`/recite) houdt de
+klinkende toon inclusief accidens; een latere ladderstap zonder prefix landt
+op de natuurlijke graad. Uitgebreide uitleg:
+[Wat een kruis en een mol in VSA doen](../guides/liturgikon-notatie.md#wat-een-kruis-en-een-mol-in-vsa-doen),
+[Interpretatie van EHMs](semantics.md#interpretatie-van-ehms),
+[Kruis en mol](../reference/voorbeelden/kruis-en-mol.md).
 
 Voorbeelden van de correspondentie:
 

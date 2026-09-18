@@ -8,8 +8,8 @@ Bij tegenstrijdigheid gelden [Specificaties](../specification/README.md) en
 
 | Document                                                                                                                         | Onderwerp                                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| [vsa-polyphony-proposal.md](vsa-polyphony-proposal.md)                                                                           | Voorstel meerstemmige VSA-uitbreiding.                                              |
-| [mvsa-v0-syntax.md](mvsa-v0-syntax.md)                                                                                           | mvsa v0: L zonder `{}`, stem-EHM’s, `~`-recite, starttoon (`@start` / `[-:S]`).   |
+| [mvsa-v0-syntax.md](mvsa-v0-syntax.md)                                                                                           | mvsa v0: meerstemmige invoer (L + stemmen); vervangt de oude polyfonie-schets. |
+| [vsa-polyphony-proposal.md](vsa-polyphony-proposal.md)                                                                           | Alleen doorverwijzing; open restpunten staan in mvsa §10.                       |
 | [uitgaveprofielen.md](https://github.com/orthodox-ronl/VSA-tooling/blob/focus-on-tooling/docs/plans/uitgaveprofielen.md)    | [Samenstelling](@bron) / uitgaveprofielen (alleen in git; veel interne repo-links). |
 | [gebruikseisen-dragers.md](gebruikseisen-dragers.md)                                                                             | UX-eisen papier / tablet / telefoon.                                                |
 | [docs-content-publiek-en-paginatypen.md](docs-content-publiek-en-paginatypen.md)                                                 | Pointer naar org-plan in bron (persona’s, paginatypen, werkplan).                   |

@@ -121,7 +121,47 @@ De belangrijkste verschillen zijn:
 | Validatie          | Alleen muzikaal gehoor                          | Syntactische en semantische validatie                                                               |
 | Export             | Niet voorzien                                   | SVG en MusicXML                                                                                     |
 
-Het grootste inhoudelijke verschil betreft de halftoon-modificatoren. In het Liturgikon staat dat een kruis (+) een *extra* stijging van een halve toon betekent bovenop een bestaande richtingspijl, en een mol (♭) een *extra* daling. [VSA](@) formaliseert dat als een **tijdelijk accidens op de aankomstgraad**: `#` (alias `+`, `♯`) en `b` (alias `♭`) staan vóór een basisbeweging (`/`, `\`, `-`, `~`, of meerdere pijlen), maar schuiven de diatonische cursor niet chromatisch mee. Zie [Interpretatie van EHMs](../specification/semantics.md#interpretatie-van-ehms).
+#### Wat een kruis en een mol in VSA doen
+
+In het Liturgikon staat dat een kruis (`+`) een *extra* stijging van een
+halve toon betekent bovenop een bestaande richtingspijl, en een mol (`♭`)
+een *extra* daling. Die formulering is bedoeld voor zangers die op het
+blad lezen. [VSA](@) moet dezelfde muzikale bedoeling machineleesbaar
+maken, en splitst daarom twee lagen strikt:
+
+1. **Diatonische cursor** — waar je op de toonladder staat (do, re, mi, …).
+   Alleen de basisbeweging (`/`, `\`, `-`, `~`, gestapelde pijlen) verplaatst
+   die cursor.
+2. **Accidens (kruis of mol)** — een tijdelijke wijziging van de
+   **klinkende** toon op de graad *ná* die basisbeweging. De prefix
+   (`#` / `+` / `♯`, of `b` / `♭`) schuift de cursor **niet** chromatisch mee.
+
+Concreet:
+
+- `{+/syllabe}` = één ladderstap omhoog, **én** een kruis op de aankomsttoon.
+- `{+\syllabe}` = één ladderstap omlaag, **én** een kruis op de aankomsttoon.
+- `{#-syllabe}` = cursor blijft staan; alleen een kruis op de huidige graad.
+- Zelfde-toon (`{ri}`, `{-…}`, `{~…}`, of ongescopte tekst) houdt de
+  **klinkende** toon vast, inclusief een eerder kruis of mol — zonder dat je
+  `#-` opnieuw hoeft te schrijven.
+- Een latere ladderstap zonder nieuwe prefix landt weer op de **natuurlijke**
+  laddertoon van die graad (het accidens “verdampt” met de cursorstap).
+
+Dat is **niet** het afgewezen model “netto = basis ± ½ toon”, waarin de
+prefix de cursor blijvend een half trede verschuift. Onder dat model zou
+`{+\neer}{/terug}` eindigen alsof je `{b/…}` had gezongen, en zou een
+eindmarkering `[:]` ten onrechte falen. Zie
+[Interpretatie van EHMs](../specification/semantics.md#interpretatie-van-ehms)
+en het werkvoorbeeld
+[Kruis en mol](../reference/voorbeelden/kruis-en-mol.md).
+
+**Herstelteken:** het Liturgikon gebruikt `+` en `♭` soms ook als
+herstellingsteken op het blad. [VSA](@) heeft geen aparte
+“herstelteken”-prefix. Terugkeer naar de natuurlijke laddertoon gebeurt
+door een ladderstap **zonder** nieuwe halftoon-prefix. Bij MusicXML-export
+schrijft de tool wél een zichtbaar `<accidental>natural</accidental>`
+wanneer die terugkeer in dezelfde maat op dezelfde nootletter nodig is
+(bijvoorbeeld C♯ → D → C).
 
 Voorbeelden van de correspondentie:
 
