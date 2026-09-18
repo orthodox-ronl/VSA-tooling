@@ -79,18 +79,19 @@ def test_docs_pages_main_deploys_root_preview_subdir():
     assert "destination_dir=preview" in text
 
 
-def test_pages_deploy_reusable_carries_forward_preview_on_root():
-    """Root-deploy wist gh-pages schoon en zet bestaande /preview/ terug."""
+def test_pages_deploy_reusable_carries_forward_sibling_dirs_on_root():
+    """Root-deploy wist gh-pages schoon en zet sibling-deploys (preview/, branches) terug."""
     text = REUSABLE.read_text(encoding="utf-8")
 
-    assert "Carry forward preview/ from current gh-pages" in text
-    assert "Carried forward preview/" in text
+    assert "Carry forward sibling deploy dirs from current gh-pages" in text
+    assert 'echo "Carried forward $name/"' in text
+    assert "No sibling deploy dirs to carry forward" in text
     # Root peaceiris: altijd keep_files false (na carry-forward).
     assert "keep_files: false" in text
 
 
 def test_docs_pages_keep_files_false_with_preview_carry_forward():
-    """main en preview zetten keep_files=false; preview blijft via reusable carry-forward."""
+    """main en preview zetten keep_files=false; siblings blijven via reusable carry-forward."""
     text = DOCS_PAGES.read_text(encoding="utf-8")
 
     assert 'echo "keep_files=true"' not in text
