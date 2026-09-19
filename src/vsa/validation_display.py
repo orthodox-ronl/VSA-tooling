@@ -30,8 +30,31 @@ _SHORT_MESSAGES_NL: dict[str, str] = {
 
 
 def validation_location_label(message: ValidationMessage) -> str:
-    filename = Path(message.source).name
-    return f"{filename}:{message.line}:{message.column}"
+    """Return ``pad:regel:kolom`` with a navigable path when possible."""
+    path_label = _source_path_label(message.source)
+    return f"{path_label}:{message.line}:{message.column}"
+
+
+def _source_path_label(source: str) -> str:
+    raw = (source or "").strip()
+    if not raw:
+        return "<onbekend>"
+
+    path = Path(raw)
+    try:
+        cwd = Path.cwd().resolve()
+        resolved = path.resolve() if path.is_absolute() else (cwd / path).resolve()
+        try:
+            relative = resolved.relative_to(cwd)
+            return relative.as_posix()
+        except ValueError:
+            pass
+        if path.is_absolute():
+            return resolved.as_posix()
+    except OSError:
+        pass
+
+    return raw.replace("\\", "/")
 
 
 def validation_short_message(message: ValidationMessage) -> str:
@@ -79,5 +102,13 @@ def format_validation_message(
     if source_line is not None:
         lines.append(source_line)
         lines.append(" " * max(0, message.column - 1) + "^")
+
+    hint = (getattr(message, "hint_nl", "") or "").strip()
+    if hint:
+        lines.append(f"Hint: {hint}")
+
+    doc_url = (getattr(message, "doc_url", "") or "").strip()
+    if doc_url:
+        lines.append(f"Zie: {doc_url}")
 
     return lines
