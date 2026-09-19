@@ -14,4 +14,5 @@ De CLI-referentie is opgesplitst in losse man-pagina's per subcommando.
 | `build-markdown`       | [cli/build-markdown.md](cli/build-markdown.md)       |
 | `pdf`                  | [cli/pdf.md](cli/pdf.md)                             |
 | `resolve-catalogus`    | [cli/resolve-catalogus.md](cli/resolve-catalogus.md) |
+| `syllabify`            | [cli/syllabify.md](cli/syllabify.md)                 |
 | `musicxml`             | [cli/musicxml.md](cli/musicxml.md)                   |

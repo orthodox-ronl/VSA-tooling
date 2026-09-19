@@ -17,6 +17,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | [Hugo-output](@) genereren                | [`vsa build-markdown …`](../reference/cli/build-markdown.md)                                     |
 | Markdown + VSA naar A4-PDF                | [`vsa pdf <bestand.md>`](../reference/cli/pdf.md)                                                |
 | `zoek=`-includes oplossen naar catalogus  | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                    |
+| Lettergreepstreepjes in ongescoopte tekst | [`vsa syllabify <bestand.vsa>`](../reference/cli/syllabify.md)                                   |
 | MusicXML exporteren                       | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md)                          |
 
 ## Exitcodes
