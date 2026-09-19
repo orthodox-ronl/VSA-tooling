@@ -12,6 +12,7 @@ dependencies = [
     # Installeer altijd eerst orthodox-ronl/bron (scripts/bootstrap.cmd).
     "catalogus>=0.1.0",
     "markdown>=3.5",
+    "pyphen>=0.14",
 ]
 
 [project.scripts]

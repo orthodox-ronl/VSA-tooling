@@ -151,6 +151,7 @@ nav:
       - reference/cli/build-markdown.md
       - reference/cli/pdf.md
       - reference/cli/resolve-catalogus.md
+      - reference/cli/syllabify.md
       - reference/cli/musicxml.md
     - Grammatica: reference/grammar.md
     - Tokens: reference/tokens.md

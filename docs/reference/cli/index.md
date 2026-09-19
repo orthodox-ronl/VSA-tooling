@@ -65,6 +65,7 @@ echo %ERRORLEVEL%
 | [`build-markdown`](build-markdown.md)            | Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.                         |
 | [`pdf`](pdf.md)                                  | Render één Markdownbestand (VSA, includes, pagebreaks) naar A4-PDF.                        |
 | [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).               |
+| [`syllabify`](syllabify.md)                      | Zet lettergreepstreepjes in ongescoopte VSA-tekst (Pyphen nl_NL).                          |
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                  |
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
@@ -79,10 +80,10 @@ voor het volledige overzicht.
 
 | Script                    | Doel                                                       |
 | ------------------------- | ---------------------------------------------------------- |
-| `test`   | Installeert de lokale omgeving (`.venv`, `vsa`, pytest).   |
+| `test`                    | Installeert de lokale omgeving (`.venv`, `vsa`, pytest).   |
 | `scripts\test.cmd`        | Draait de pytest-suite.                                    |
 | `scripts\ci.cmd`          | Draait de volledige lokale CI (pytest + consumer-minimal). |
-| `serve`  | Serveert deze MkDocs-documentatie lokaal.                  |
+| `serve`                   | Serveert deze MkDocs-documentatie lokaal.                  |
 
 ## Diagnosevolgorde
 
