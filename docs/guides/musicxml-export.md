@@ -209,7 +209,8 @@ MuseScore na roundtrip.
 
 SVG is het blad: strofenummers en refreincues blijven zichtbaar. Playback-MXL
 is alleen zang. Scopeloze segmenten tussen hoogte-markeringen (blad-aanwijzing
-zoals `2.` of `Door …`) krijgen geen noten en geen lyrics. Extra
+zoals `2.` of `Door …`) krijgen één hele-nootrust (4 tellen) zonder lyrics —
+een pauze vergelijkbaar met een dubbele maatstreep in MSCZ. Extra
 debug-hoogte-markeringen blijven checkpoints en knippen de zang niet af; zie
 [Ongescopte tekst](../specification/rendering.md#ongescopte-tekst-reciteertoon).
 

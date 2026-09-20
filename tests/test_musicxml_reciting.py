@@ -31,6 +31,20 @@ def _lyric_texts(xml: str) -> list[str]:
     return [text for text, _ in _lyrics(xml)]
 
 
+def _whole_rests(xml: str) -> list[ET.Element]:
+    root = ET.fromstring(xml.split("dtd\">", 1)[-1])
+    rests = []
+    for note in root.iter("note"):
+        if note.find("rest") is None:
+            continue
+        assert note.find("pitch") is None
+        assert note.find("lyric") is None
+        assert note.findtext("type") == "whole"
+        assert note.findtext("duration") == "16"
+        rests.append(note)
+    return rests
+
+
 def test_syllables_from_token_hyphen():
     assert _syllables_from_token("mel-se") == [("mel-", "begin"), ("se", "end")]
     assert _syllables_from_token("a-b-c") == [
@@ -77,14 +91,15 @@ def test_reciting_whole_mode_long_sequence():
     assert any(t == "een twee drie vier" for t, _ in lyrics)
 
 
-def test_playback_skips_blad_aanwijzing_outside_sung_segments():
-    """Strofenummer and refreincue must not become Coria lyrics/notes."""
+def test_playback_blad_aanwijzing_becomes_whole_rest():
+    """Strofenummer and refreincue: whole rest (4 beats), not sung lyrics."""
     doc = Parser("2. [:] {/Heer} [:] Door ...").parse()
     xml = MusicXMLRenderer(metadata={"do": "F4", "mode": "major"}).render(doc)
     texts = _lyric_texts(xml)
     assert texts == ["Heer"]
     assert not any("2" in t for t in texts)
     assert not any("Door" in t for t in texts)
+    assert len(_whole_rests(xml)) == 2
 
 
 def test_playback_debug_height_markers_do_not_drop_sung_material():
@@ -92,12 +107,14 @@ def test_playback_debug_height_markers_do_not_drop_sung_material():
     doc = Parser("[:] {/a} [/:] {/b} [:]").parse()
     xml = MusicXMLRenderer(metadata={"do": "F4", "mode": "major"}).render(doc)
     assert _lyric_texts(xml) == ["a", "b"]
+    assert _whole_rests(xml) == []
 
 
 def test_playback_recite_word_inside_sung_segment_kept():
     doc = Parser("[:] Juich {/voor} [:]").parse()
     xml = MusicXMLRenderer(metadata={"do": "F4", "mode": "major"}).render(doc)
     assert _lyric_texts(xml) == ["Juich", "voor"]
+    assert _whole_rests(xml) == []
 
 
 def test_html_comment_absent_from_svg_and_musicxml():

@@ -32,10 +32,12 @@ the ``reciting-mode`` metadata parameter (see §8.2.7 in the spec).
 In the ``playback`` profile, the document is split into segments bounded
 by hoogte-markeringen (plus the spans before the first and after the last
 marker).  A segment without any ``ScopeNode`` is blad-aanwijzing (strofe-
-nummer, refreincue, …): no notes and no lyrics.  Segments that contain at
-least one scope keep current behaviour (unscoped words → reciteertoon).
-The ``engraving`` profile does not apply this filter.  Hoogte-markeringen
-remain pitch checkpoints, not phrase brackets for sung vs. cue text.
+nummer, refreincue, …): one whole-note rest (4 beats, no lyrics) instead of
+sung notes — a pause comparable to a double barline break in MSCZ export.
+Segments that contain at least one scope keep current behaviour (unscoped
+words → reciteertoon).  The ``engraving`` profile does not apply this filter.
+Hoogte-markeringen remain pitch checkpoints, not phrase brackets for sung
+vs. cue text.
 
 Hyphens within a token (``mel-se``) split into separate quarter notes with
 MusicXML ``syllabic`` begin/middle/end and a trailing hyphen on the lyric
@@ -112,6 +114,17 @@ _BEAMABLE_TYPES = frozenset({"16th", "eighth"})
 _PUNCT_ONLY_RE = re.compile(r"^\W+$")
 
 
+def _segments_between_height_markers(nodes: list[Node]) -> list[list[int]]:
+    """Node-index lists for spans between hoogte-markeringen (and before/after)."""
+    segments: list[list[int]] = [[]]
+    for index, node in enumerate(nodes):
+        if isinstance(node, PitchMarkerNode):
+            segments.append([])
+        else:
+            segments[-1].append(index)
+    return segments
+
+
 def _sung_segment_node_indices(nodes: list[Node]) -> set[int]:
     """Indices of nodes in segments that contain at least one ScopeNode.
 
@@ -119,18 +132,28 @@ def _sung_segment_node_indices(nodes: list[Node]) -> set[int]:
     (``PitchMarkerNode``), including the span before the first marker and
     after the last.  Markers themselves are boundaries, not segment content.
     """
-    segments: list[list[int]] = [[]]
-    for index, node in enumerate(nodes):
-        if isinstance(node, PitchMarkerNode):
-            segments.append([])
-        else:
-            segments[-1].append(index)
-
     sung: set[int] = set()
-    for segment in segments:
+    for segment in _segments_between_height_markers(nodes):
         if any(isinstance(nodes[i], ScopeNode) for i in segment):
             sung.update(segment)
     return sung
+
+
+def _blad_aanwijzing_rest_node_indices(nodes: list[Node]) -> set[int]:
+    """First non-empty TextNode index of each scopeless (blad-aanwijzing) segment.
+
+    Playback emits one whole-note rest at each of these indices.
+    """
+    rest_at: set[int] = set()
+    for segment in _segments_between_height_markers(nodes):
+        if any(isinstance(nodes[i], ScopeNode) for i in segment):
+            continue
+        for index in segment:
+            node = nodes[index]
+            if isinstance(node, TextNode) and node.text.strip():
+                rest_at.add(index)
+                break
+    return rest_at
 
 
 class MusicXMLExportError(ValueError):
@@ -362,10 +385,12 @@ class MusicXMLRenderer:
         # Unscopped whitespace tokens accumulated between barlines / scopes.
         pending_tokens: list[str] = []
 
-        # Playback: skip blad-aanwijzing segments (no ScopeNode between markers).
-        sung_indices: set[int] | None = (
-            _sung_segment_node_indices(document.nodes) if self._is_playback else None
-        )
+        # Playback: blad-aanwijzing segments → whole rest (no sung text).
+        sung_indices: set[int] | None = None
+        rest_indices: set[int] | None = None
+        if self._is_playback:
+            sung_indices = _sung_segment_node_indices(document.nodes)
+            rest_indices = _blad_aanwijzing_rest_node_indices(document.nodes)
 
         def flush_pending_words() -> None:
             """Emit reciting-tone note(s) for buffered unscopped text."""
@@ -403,8 +428,16 @@ class MusicXMLRenderer:
 
             if isinstance(node, TextNode):
                 if sung_indices is not None and node_index not in sung_indices:
-                    # Blad-aanwijzing (strofenummer, refreincue, …): SVG shows
-                    # this text; playback MusicXML must not sing it.
+                    # Blad-aanwijzing: one whole rest per cue segment (4 beats).
+                    if rest_indices is not None and node_index in rest_indices:
+                        flush_pending_words()
+                        events.append({
+                            "type": "note",
+                            "rest": True,
+                            "duration": Duration(note_type="whole"),
+                            "text": "",
+                            "is_melisma": False,
+                        })
                     continue
                 # Split text by whitespace; classify each token.
                 for token in node.text.split():
@@ -578,15 +611,18 @@ class MusicXMLRenderer:
         measure_alters: dict[str, int] | None = None,
     ) -> None:
         note_el = ET.SubElement(measure, "note")
-
-        pitch: Pitch = ev["pitch"]
         duration: Duration = ev["duration"]
+        is_rest = bool(ev.get("rest"))
 
-        p_el = ET.SubElement(note_el, "pitch")
-        ET.SubElement(p_el, "step").text = pitch.step
-        if pitch.alter != 0.0:
-            ET.SubElement(p_el, "alter").text = _format_alter(pitch.alter)
-        ET.SubElement(p_el, "octave").text = str(pitch.octave)
+        if is_rest:
+            ET.SubElement(note_el, "rest")
+        else:
+            pitch: Pitch = ev["pitch"]
+            p_el = ET.SubElement(note_el, "pitch")
+            ET.SubElement(p_el, "step").text = pitch.step
+            if pitch.alter != 0.0:
+                ET.SubElement(p_el, "alter").text = _format_alter(pitch.alter)
+            ET.SubElement(p_el, "octave").text = str(pitch.octave)
 
         ET.SubElement(note_el, "duration").text = str(duration.divisions_value)
 
@@ -599,6 +635,9 @@ class MusicXMLRenderer:
             ET.SubElement(note_el, "type").text = duration.note_type
             for _ in range(duration.dots):
                 ET.SubElement(note_el, "dot")
+
+        if is_rest:
+            return
 
         # Zichtbaar voorteken / herstelteken t.o.v. toonsoort + eerdere noten
         # in dezelfde maat (MusicXML <accidental>, o.a. natural na kruis/mol).
@@ -754,6 +793,9 @@ def _assign_beams(notes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     result = [dict(note) for note in notes]
     index = 0
     while index < len(result):
+        if result[index].get("rest"):
+            index += 1
+            continue
         note_type = result[index]["duration"].note_type
         if note_type not in _BEAMABLE_TYPES:
             index += 1
@@ -762,6 +804,7 @@ def _assign_beams(notes: list[dict[str, Any]]) -> list[dict[str, Any]]:
         group_start = index
         while (
             index < len(result)
+            and not result[index].get("rest")
             and result[index]["duration"].note_type in _BEAMABLE_TYPES
         ):
             index += 1

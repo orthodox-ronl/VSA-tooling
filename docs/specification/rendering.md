@@ -298,15 +298,15 @@ elke volgende is een lokale checkpoint op die positie in dezelfde melodische
 lijn. Extra debug-markeringen midden in een strofe blijven dus geldig en
 knippen de zang niet af.
 
-| Segmentinhoud                                            | MusicXML-playback                                               |
-| -------------------------------------------------------- | --------------------------------------------------------------- |
-| minstens één [zangelement-scope](@)                      | gezongen: scopes als noten; ongescopte woorden als reciteertoon |
-| geen scope, alleen tekst en whitespace (blad-aanwijzing) | geen noten en geen lyrics                                       |
+| Segmentinhoud                                            | MusicXML-playback                                                               |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| minstens één [zangelement-scope](@)                      | gezongen: scopes als noten; ongescopte woorden als reciteertoon                 |
+| geen scope, alleen tekst en whitespace (blad-aanwijzing) | één hele-nootrust (4 tellen), geen lyrics — pauze tussen gezongen segmenten     |
 
-Voorbeelden van blad-aanwijzing die Coria daardoor niet zingt: `2.`, `3.`,
-`refrein:`, `Ps. 131:`, `Door …` (visuele geheugensteun voor een eerder
-genoteerd refrein). Reciteerwoorden **binnen** een segment mét scopes
-(`Juich` in `[:] Juich {/voor} [:]`) blijven klinken.
+Voorbeelden van blad-aanwijzing die Coria daardoor niet zingt, maar wel als
+hele-nootrust hoort: `2.`, `3.`, `refrein:`, `Ps. 131:`, `Door …` (visuele
+geheugensteun voor een eerder genoteerd refrein). Reciteerwoorden **binnen**
+een segment mét scopes (`Juich` in `[:] Juich {/voor} [:]`) blijven klinken.
 
 Een stuk **zonder** hoogte-markeringen maar **met** scopes is één segment met
 scopes: alles gezongen (huidig gedrag). Pitched cues met scopes
@@ -398,8 +398,9 @@ Ongeacht profiel geldt pitch-resolutie, [ELM](@)→duur, reciteertoon voor
 ongescopte tekst **binnen gezongen segmenten**, syllabische splitsing met `-`,
 slur over melisma, barlines op `*`, `/`, `//` en formele [control tokens](@), en
 conditionele tempo-markering (alleen bij expliciet `tempo` in [metadata](@)).
-In profiel `playback` worden scopeloze segmenten (blad-aanwijzing) weggelaten;
-zie [Ongescopte tekst](#ongescopte-tekst-reciteertoon).
+In profiel `playback` worden scopeloze segmenten (blad-aanwijzing) als
+hele-nootrust (4 tellen) geëmitteerd zonder lyrics; zie
+[Ongescopte tekst](#ongescopte-tekst-reciteertoon).
 
 ##### Profiel `playback`
 
@@ -407,18 +408,18 @@ Geoptimaliseerd voor compatibiliteit met MuseScore-roundtrip en Coria. Het
 volgt structureel het patroon van door MuseScore opgeslagen MusicXML 4.0
 partwise-bestanden.
 
-| Aspect                 | Gedrag                                                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `<part-list>`          | `score-instrument`, `midi-device`, `midi-instrument` (General MIDI)                                                             |
-| `<defaults>`           | **niet** geëmitteerd                                                                                                            |
-| `<encoding><supports>` | `accidental`, `beam`, `stem` = yes; `print` new-page/new-system = no                                                            |
-| `<note>`               | `<voice>1</voice>`, `<stem>up</stem>` op elke noot                                                                              |
-| Beaming                | Automatisch voor opeenvolgende `eighth`- en `16th`-noten in één maat                                                            |
-| Melisma-lyrics         | Alleen op eerste noot: `<text>` + `<extend/>` (zonder `type`); midden- en eindnoten **geen** `<lyric>`                          |
-| Slur                   | `type="start"` met `orientation="over"` en `placement="above"`; `type="stop"` op laatste noot                                   |
-| Maatstrepen            | Alleen `light-light` (dubbele streep `//`) en `light-heavy` (slot); **geen** expliciete `regular` tussen maten                  |
-| `xml:lang` op lyrics   | niet geëmitteerd                                                                                                                |
-| Blad-aanwijzing        | Scopeloze segmenten tussen [hoogte-markeringen](@) → geen noten/lyrics (zie [Ongescopte tekst](#ongescopte-tekst-reciteertoon)) |
+| Aspect                 | Gedrag                                                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<part-list>`          | `score-instrument`, `midi-device`, `midi-instrument` (General MIDI)                                                                                     |
+| `<defaults>`           | **niet** geëmitteerd                                                                                                                                    |
+| `<encoding><supports>` | `accidental`, `beam`, `stem` = yes; `print` new-page/new-system = no                                                                                    |
+| `<note>`               | `<voice>1</voice>`, `<stem>up</stem>` op elke noot                                                                                                      |
+| Beaming                | Automatisch voor opeenvolgende `eighth`- en `16th`-noten in één maat                                                                                    |
+| Melisma-lyrics         | Alleen op eerste noot: `<text>` + `<extend/>` (zonder `type`); midden- en eindnoten **geen** `<lyric>`                                                  |
+| Slur                   | `type="start"` met `orientation="over"` en `placement="above"`; `type="stop"` op laatste noot                                                           |
+| Maatstrepen            | Alleen `light-light` (dubbele streep `//`) en `light-heavy` (slot); **geen** expliciete `regular` tussen maten                                          |
+| `xml:lang` op lyrics   | niet geëmitteerd                                                                                                                                        |
+| Blad-aanwijzing        | Scopeloze segmenten tussen [hoogte-markeringen](@) → één hele-nootrust (4 tellen), geen lyrics (zie [Ongescopte tekst](#ongescopte-tekst-reciteertoon)) |
 
 MIDI-parameters ([blokmetadata](@) / `muziek`-sectie):
 
