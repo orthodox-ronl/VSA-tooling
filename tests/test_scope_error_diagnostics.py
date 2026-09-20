@@ -97,8 +97,9 @@ def test_halftoon_prefix_after_base_reports_specific_error_and_caret(tmp_path: P
     assert message.column == 3
 
     lines = format_validation_message(message, source_line=source_line)
-    assert lines[-2] == source_line
-    assert lines[-1] == "  ^"
+    assert source_line in lines
+    caret_index = lines.index(source_line) + 1
+    assert lines[caret_index] == "  ^"
 
 
 def test_plain_b_after_base_is_sung_text_not_halftoon_postfix_error(tmp_path: Path):
