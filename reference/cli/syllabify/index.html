@@ -27,7 +27,7 @@
     
     
       
-        <title>vsa syllabify — lettergreepstreepjes in ongescoopte VSA-tekst - VSA-tooling — documentatie</title>
+        <title>vsa syllabify — lettergreepstreepjes in VSA-tekst - VSA-tooling — documentatie</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#vsa-syllabify-lettergreepstreepjes-in-ongescoopte-vsa-tekst" class="md-skip">
+        <a href="#vsa-syllabify-lettergreepstreepjes-in-vsa-tekst" class="md-skip">
           Ga naar inhoud
         </a>
       
@@ -129,7 +129,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              vsa syllabify — lettergreepstreepjes in ongescoopte VSA-tekst
+              vsa syllabify — lettergreepstreepjes in VSA-tekst
             
           </span>
         </div>
@@ -2571,7 +2571,7 @@
   <span class="md-ellipsis">
     
   
-    vsa syllabify — lettergreepstreepjes in ongescoopte VSA-tekst
+    vsa syllabify — lettergreepstreepjes in VSA-tekst
   
 
     
@@ -2589,7 +2589,7 @@
   <span class="md-ellipsis">
     
   
-    vsa syllabify — lettergreepstreepjes in ongescoopte VSA-tekst
+    vsa syllabify — lettergreepstreepjes in VSA-tekst
   
 
     
@@ -3352,6 +3352,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../plans/mvsa-v0-syntax/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa v0 — meerstemmige invoer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -3514,28 +3542,33 @@
   
 
 
-<h1 id="vsa-syllabify-lettergreepstreepjes-in-ongescoopte-vsa-tekst"><code>vsa syllabify</code> — lettergreepstreepjes in ongescoopte VSA-tekst<a class="headerlink" href="#vsa-syllabify-lettergreepstreepjes-in-ongescoopte-vsa-tekst" title="Permanent link">&para;</a></h1>
+<h1 id="vsa-syllabify-lettergreepstreepjes-in-vsa-tekst"><code>vsa syllabify</code> — lettergreepstreepjes in VSA-tekst<a class="headerlink" href="#vsa-syllabify-lettergreepstreepjes-in-vsa-tekst" title="Permanent link">&para;</a></h1>
 <p>Voeg orthografische lettergreepstreepjes toe aan woorden in de
 <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a>-brontekst, zodat de bestaande MusicXML-export elk deel als eigen
 kwartnoot kan zetten (belangrijk voor Coria: elke lettergreep heeft minstens
-één noot nodig). Met <code>--unsyllabify</code> doe je het omgekeerde: streepjes weer
-weghalen.</p>
+één noot nodig, en streepjes markeren waar een woord doorloopt). Met
+<code>--unsyllabify</code> doe je het omgekeerde: streepjes weer weghalen.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>vsa syllabify [-h] [--dry-run | --in-place] [--extension EXT] [--unsyllabify] path
 </code></pre></div>
 <h2 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h2>
 <p>Reciteertekst staat in veel <a class="og-termref" href="/bron/terms/vsa-bestand" title="vsa-bestand: Een bestand met de extensie <code>.vsa</code> waarvan de inhoud uitsluitend syntactisch geldige Vsa-notatie bevat — d.w.z. door de Vsa-tooling foutloos wordt geparseerd en gevalideerd.">vsa-bestanden</a> als één woord
 (<code>lijden</code>, <code>onbederfelijke</code>). Cadensstukken zitten vaak al in scopes
-(<code>marte{la_}{/ren}</code>). <code>vsa syllabify</code> hypheneert <strong>alleen</strong> de platte tekst
-buiten <code>{…}</code> (AST-<code>TextNode</code>-inhoud) met Pyphen (<code>nl_NL</code>).</p>
+(<code>marte{la_}{/ren}</code>). <code>vsa syllabify</code> hypheneert elk woord met Pyphen
+(<code>nl_NL</code>), inclusief woorden die over platte tekst en scopes heen lopen.</p>
+<p>Tussen <strong>alle</strong> lettergrepen van hetzelfde woord komt een streepje — ook op
+de grens tussen tekst en <code>{…}</code>, en tussen opeenvolgende scopes. Zo wordt
+<code>Jo{+\han_}{/nes_}</code> → <code>Jo-{+\han_}-{/nes_}</code>.</p>
 <ul>
-<li>Scopes, toonhoogtemarkers (<code>[…:]</code>), YAML-frontmatter en HTML-comments
-  blijven staan.</li>
+<li>De inhoud van scopes (zangelement, <a class="og-termref" href="/VSA-tooling/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a>, <a class="og-termref" href="/VSA-tooling/terminologie/enkelvoudige-lengte-modifier" title="Enkelvoudige lengte-modifier: een Lengte-modifier die uit precies één geldige ELM bestaat en daarmee precies een duurpositie representeert.">ELM</a>) blijft onaangeroerd;
+  alleen brugstreepjes <code>-</code> eromheen worden gezet of weggehaald.</li>
+<li>Toonhoogtemarkers (<code>[…:]</code>), YAML-frontmatter en HTML-comments blijven staan.</li>
 <li>Binnen scopes blijft <code>-</code> een <a class="og-termref" href="/VSA-tooling/terminologie/enkelvoudige-lengte-modifier" title="Enkelvoudige lengte-modifier: een Lengte-modifier die uit precies één geldige ELM bestaat en daarmee precies een duurpositie representeert.">ELM</a>; daar wordt niets gewijzigd — ook
   niet bij <code>--unsyllabify</code>.</li>
-<li>Een woord dat al <code>-</code> bevat (handmatige zing-deling) blijft bij hypheneren
-  ongemoeid; bij <code>--unsyllabify</code> verdwijnen die streepjes wél uit ongescoopte
-  tekst.</li>
+<li>Een woord dat al <code>-</code> bevat en helemaal buiten scopes staat (handmatige
+  zing-deling) blijft bij hypheneren ongemoeid; bij <code>--unsyllabify</code>
+  verdwijnen die streepjes wél. Over scope-grenzen heen worden breekpunten
+  opnieuw uit Pyphen afgeleid.</li>
 <li>Dit is <strong>geen</strong> automatische stap bij <code>vsa musicxml</code>: bron en product
   blijven voorspelbaar. Na schrijven vernieuw je <code>.vsa.mxl</code> via
   <code>scripts\vsa-products.cmd</code> of <code>scripts\check.cmd</code>.</li>
@@ -3616,9 +3649,9 @@ bij <code>--extension .syl.vsa</code>) worden overgeslagen, zodat je geen
 <tr>
 <td><code>--unsyllabify</code></td>
 <td>Nee</td>
-<td>Verwijder lettergreepstreepjes uit ongescoopte tekst i.p.v. ze toe te voegen.</td>
+<td>Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes) i.p.v. ze toe te voegen.</td>
 <td>Uit (hypheneren)</td>
-<td>Scopes / ELM-<code>-</code> blijven staan.</td>
+<td>Scope-inhoud / ELM-<code>-</code> blijven staan.</td>
 </tr>
 <tr>
 <td><code>-h</code>, <code>--help</code></td>
@@ -3672,7 +3705,7 @@ vsa syllabify examples\minimal --in-place
 vsa syllabify pad\naar\xyz.vsa --extension .syl.vsa
 </code></pre></div>
 <p>Dat schrijft <code>pad\naar\xyz.syl.vsa</code>. Zelfde resultaat met <code>--extension syl.vsa</code>.</p>
-<p>Lettergreepstreepjes weer verwijderen (alleen TextNode-tekst):</p>
+<p>Lettergreepstreepjes weer verwijderen (brugstreepjes rond scopes inbegrepen):</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa syllabify pad\naar\xyz.syl.vsa --unsyllabify --in-place
 </code></pre></div>
@@ -3703,8 +3736,18 @@ scripts\vsa-products.cmd
 </tr>
 <tr>
 <td><code>marte{la_}{/ren}</code></td>
-<td><code>mar-te{la_}{/ren}</code></td>
+<td><code>mar-te-{la_}-{/ren}</code></td>
 <td><code>marte{la_}{/ren}</code></td>
+</tr>
+<tr>
+<td><code>Jo{+\han_}{/nes_}</code></td>
+<td><code>Jo-{+\han_}-{/nes_}</code></td>
+<td><code>Jo{+\han_}{/nes_}</code></td>
+</tr>
+<tr>
+<td><code>{/heb}ben</code></td>
+<td><code>{/heb}-ben</code></td>
+<td><code>{/heb}ben</code></td>
 </tr>
 </tbody>
 </table>
