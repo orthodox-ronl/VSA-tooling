@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>feat/validation-error-display</code>
-  , gebouwd 2026-09-19 21:28 CEST.
+  , gebouwd 2026-09-20 15:51 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2639,6 +2639,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Beschrijving">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schrijfmodi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schrijfmodi
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3414,6 +3431,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Beschrijving">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schrijfmodi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schrijfmodi
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3489,9 +3523,10 @@
 <p>Voeg orthografische lettergreepstreepjes toe aan woorden in de
 <a class="og-termref" href="/VSA-tooling/preview/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a>-brontekst, zodat de bestaande MusicXML-export elk deel als eigen
 kwartnoot kan zetten (belangrijk voor Coria: elke lettergreep heeft minstens
-één noot nodig).</p>
+één noot nodig). Met <code>--unsyllabify</code> doe je het omgekeerde: streepjes weer
+weghalen.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>vsa syllabify [-h] [--dry-run | --in-place] path
+<div class="highlight"><pre><span></span><code>vsa syllabify [-h] [--dry-run | --in-place] [--extension EXT] [--unsyllabify] path
 </code></pre></div>
 <h2 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h2>
 <p>Reciteertekst staat in veel <a class="og-termref" href="/bron/terms/vsa-bestand" title="vsa-bestand: Een bestand met de extensie <code>.vsa</code> waarvan de inhoud uitsluitend syntactisch geldige Vsa-notatie bevat — d.w.z. door de Vsa-tooling foutloos wordt geparseerd en gevalideerd.">vsa-bestanden</a> als één woord
@@ -3501,14 +3536,48 @@ buiten <code>{…}</code> (AST-<code>TextNode</code>-inhoud) met Pyphen (<code>n
 <ul>
 <li>Scopes, toonhoogtemarkers (<code>[…:]</code>), YAML-frontmatter en HTML-comments
   blijven staan.</li>
-<li>Binnen scopes blijft <code>-</code> een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-lengte-modifier" title="Enkelvoudige lengte-modifier: een Lengte-modifier die uit precies één geldige ELM bestaat en daarmee precies een duurpositie representeert.">ELM</a>; daar wordt niets gewijzigd.</li>
-<li>Een woord dat al <code>-</code> bevat (handmatige zing-deling) blijft ongemoeid.</li>
+<li>Binnen scopes blijft <code>-</code> een <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-lengte-modifier" title="Enkelvoudige lengte-modifier: een Lengte-modifier die uit precies één geldige ELM bestaat en daarmee precies een duurpositie representeert.">ELM</a>; daar wordt niets gewijzigd — ook
+  niet bij <code>--unsyllabify</code>.</li>
+<li>Een woord dat al <code>-</code> bevat (handmatige zing-deling) blijft bij hypheneren
+  ongemoeid; bij <code>--unsyllabify</code> verdwijnen die streepjes wél uit ongescoopte
+  tekst.</li>
 <li>Dit is <strong>geen</strong> automatische stap bij <code>vsa musicxml</code>: bron en product
-  blijven voorspelbaar. Na <code>--in-place</code> vernieuw je <code>.vsa.mxl</code> via
+  blijven voorspelbaar. Na schrijven vernieuw je <code>.vsa.mxl</code> via
   <code>scripts\vsa-products.cmd</code> of <code>scripts\check.cmd</code>.</li>
 </ul>
+<p><code>path</code> mag één <code>.vsa</code>-bestand zijn of een <strong>map</strong>. Bij een map zoekt het
+commando recursief alle <code>*.vsa</code>-bestanden (zoals <a href="../validate/"><code>vsa validate</code></a>
+dat voor <code>.vsa</code> doet).</p>
 <p>Orthografische hyphenatie is niet altijd dezelfde als liturgische
 zing-deling; controleer twijfelgevallen handmatig.</p>
+<h3 id="schrijfmodi">Schrijfmodi<a class="headerlink" href="#schrijfmodi" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Modus</th>
+<th>Gedrag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Geen schrijfflag / <code>--dry-run</code></td>
+<td>Niets schrijven. Eén bestand: resultaat op stdout. Map: statusregels.</td>
+</tr>
+<tr>
+<td><code>--in-place</code></td>
+<td>Overschrijf elk bronbestand.</td>
+</tr>
+<tr>
+<td><code>--extension EXT</code></td>
+<td>Schrijf naast het bronbestand: <code>xyz.vsa</code> → <code>xyz</code> + genormaliseerde EXT.</td>
+</tr>
+</tbody>
+</table>
+<p><code>--in-place</code> en <code>--extension</code> mag je niet combineren. Met <code>--extension</code> mag
+je wel <code>--dry-run</code> gebruiken om alleen te tonen wat er zou gebeuren.</p>
+<p>Bestanden waarvan de naam al op de doelextensie eindigt (bijv. <code>xyz.syl.vsa</code>
+bij <code>--extension .syl.vsa</code>) worden overgeslagen, zodat je geen
+<code>xyz.syl.syl.vsa</code> krijgt.</p>
 <h2 id="argumenten-en-opties">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -3524,23 +3593,37 @@ zing-deling; controleer twijfelgevallen handmatig.</p>
 <tr>
 <td><code>path</code></td>
 <td>Ja</td>
-<td>Pad naar een <code>.vsa</code>-bestand.</td>
+<td>Pad naar een <code>.vsa</code>-bestand of een map met <code>.vsa</code>-bestanden.</td>
 <td>—</td>
-<td>Moet een bestaand <code>.vsa</code> zijn.</td>
+<td>Moet bestaan.</td>
 </tr>
 <tr>
 <td><code>--dry-run</code></td>
 <td>Nee</td>
-<td>Toon het resultaat op stdout; schrijf het bestand niet.</td>
-<td>Gedrag zonder <code>--in-place</code> (preview)</td>
+<td>Toon het resultaat zonder bestanden te schrijven.</td>
+<td>Gedrag zonder schrijfmodus (preview)</td>
 <td>Mutueel exclusief met <code>--in-place</code>.</td>
 </tr>
 <tr>
 <td><code>--in-place</code></td>
 <td>Nee</td>
-<td>Schrijf het gehypheneerde resultaat terug naar <code>path</code>.</td>
+<td>Schrijf het resultaat terug naar elk bronbestand.</td>
 <td>Uit</td>
-<td>Mutueel exclusief met <code>--dry-run</code>.</td>
+<td>Niet combineren met <code>--extension</code>.</td>
+</tr>
+<tr>
+<td><code>--extension EXT</code></td>
+<td>Nee</td>
+<td>Schrijf naar sibling-bestanden met deze extensie (<code>.syl.vsa</code> of <code>syl.vsa</code> → <code>xyz.syl.vsa</code>).</td>
+<td>Uit</td>
+<td>Moet eindigen op <code>.vsa</code>; niet met <code>--in-place</code>.</td>
+</tr>
+<tr>
+<td><code>--unsyllabify</code></td>
+<td>Nee</td>
+<td>Verwijder lettergreepstreepjes uit ongescoopte tekst i.p.v. ze toe te voegen.</td>
+<td>Uit (hypheneren)</td>
+<td>Scopes / ELM-<code>-</code> blijven staan.</td>
 </tr>
 <tr>
 <td><code>-h</code>, <code>--help</code></td>
@@ -3553,11 +3636,13 @@ zing-deling; controleer twijfelgevallen handmatig.</p>
 </table>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Zonder <code>--in-place</code></strong> (en met <code>--dry-run</code>): gehypheneerde brontekst op
+<li><strong>Eén bestand, dry-run</strong>: gehypheneerde (of ont-syllabifyde) brontekst op
   <strong>stdout</strong>; op <strong>stderr</strong> een regel
-  <code>(dry-run — N lettergreepstreepje(s); bestand niet geschreven)</code>.</li>
-<li><strong>Met <code>--in-place</code></strong>: bestand bijgewerkt indien nodig; op stdout
-  <code>&lt;pad&gt;: N lettergreepstreepje(s) toegevoegd</code> of <code>&lt;pad&gt;: geen wijzigingen</code>.</li>
+  <code>(dry-run — N lettergreepstreepje(s) toegevoegd|verwijderd; bestand niet geschreven)</code>.</li>
+<li><strong>Map, dry-run</strong>: per bestand een statusregel op stdout, bijv.
+  <code>pad\a.vsa -&gt; pad\a.syl.vsa: 2 lettergreepstreepje(s) toegevoegd (dry-run)</code>.</li>
+<li><strong>Schrijven (<code>--in-place</code> of <code>--extension</code>)</strong>: per bestand een statusregel
+  op stdout (<code>&lt;bron&gt;: …</code> of <code>&lt;bron&gt; -&gt; &lt;doel&gt;: …</code>).</li>
 </ul>
 <h2 id="exit-status">Exit status<a class="headerlink" href="#exit-status" title="Permanent link">&para;</a></h2>
 <table>
@@ -3570,20 +3655,33 @@ zing-deling; controleer twijfelgevallen handmatig.</p>
 <tbody>
 <tr>
 <td><code>0</code></td>
-<td>Syllabificatie gelukt (ook bij geen wijziging).</td>
+<td>Alle bestanden verwerkt (ook bij geen wijziging of overgeslagen siblings).</td>
 </tr>
 <tr>
 <td><code>1</code></td>
-<td>Bestand ontbreekt, geen <code>.vsa</code>, of parserfout.</td>
+<td>Pad ontbreekt, geen <code>.vsa</code> gevonden, ongeldige flags/extensie, of parserfout.</td>
 </tr>
 </tbody>
 </table>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
-<p>Preview:</p>
+<p>Preview van één bestand:</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa syllabify examples\minimal\voorbeeld.vsa --dry-run
 </code></pre></div>
-<p>In-place, daarna MusicXML-product vernieuwen:</p>
+<p>Hele map in-place hypheneren:</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa syllabify examples\minimal --in-place
+</code></pre></div>
+<p>Naar sibling-extensie <code>.syl.vsa</code> (bron blijft ongewijzigd):</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa syllabify pad\naar\xyz.vsa --extension .syl.vsa
+</code></pre></div>
+<p>Dat schrijft <code>pad\naar\xyz.syl.vsa</code>. Zelfde resultaat met <code>--extension syl.vsa</code>.</p>
+<p>Lettergreepstreepjes weer verwijderen (alleen TextNode-tekst):</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa syllabify pad\naar\xyz.syl.vsa --unsyllabify --in-place
+</code></pre></div>
+<p>Na schrijven MusicXML-product vernieuwen:</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa syllabify pad\naar\bestand.vsa --in-place
 scripts\vsa-products.cmd
@@ -3593,21 +3691,25 @@ scripts\vsa-products.cmd
 <thead>
 <tr>
 <th>Voor</th>
-<th>Na</th>
+<th>Na (syllabify)</th>
+<th>Na (<code>--unsyllabify</code>)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>lijden</code></td>
 <td><code>lij-den</code></td>
+<td><code>lijden</code></td>
 </tr>
 <tr>
 <td><code>onbederfelijke</code></td>
 <td><code>on-be-der-fe-lij-ke</code></td>
+<td><code>onbederfelijke</code></td>
 </tr>
 <tr>
 <td><code>marte{la_}{/ren}</code></td>
 <td><code>mar-te{la_}{/ren}</code></td>
+<td><code>marte{la_}{/ren}</code></td>
 </tr>
 </tbody>
 </table>
@@ -3647,7 +3749,7 @@ scripts\vsa-products.cmd
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-19
+        Bijgewerkt: 2026-09-20
         
       </p>
       
