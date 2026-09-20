@@ -3918,6 +3918,12 @@ Handmatig shortcodes schrijven is niet nodig in content-source.</p>
 <p>Standaard gebruikt <a href="../../reference/cli/musicxml/"><code>vsa musicxml</code></a> het <strong><code>playback</code></strong>-profiel. Dat is bedoeld
 voor afspelen en import zonder handmatige opschoning — onder andere Coria en
 MuseScore na roundtrip.</p>
+<p>SVG is het blad: strofenummers en refreincues blijven zichtbaar. Playback-MXL
+is alleen zang. Scopeloze segmenten tussen hoogte-markeringen (blad-aanwijzing
+zoals <code>2.</code> of <code>Door …</code>) krijgen één hele-nootrust (4 tellen) zonder lyrics —
+een pauze vergelijkbaar met een dubbele maatstreep in MSCZ. Extra
+debug-hoogte-markeringen blijven checkpoints en knippen de zang niet af; zie
+<a href="../../specification/rendering/#ongescopte-tekst-reciteertoon">Ongescopte tekst</a>.</p>
 <p>Kies <strong><code>engraving</code></strong> als je de partituur verder wilt bewerken en expliciete
 maatstrepen, typografie-hints of gedetailleerde melisma-lijnen nodig hebt:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">muziek</span><span class="p">:</span>
@@ -3977,7 +3983,7 @@ maatstrepen, typografie-hints of gedetailleerde melisma-lijnen nodig hebt:</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-18
+        Bijgewerkt: 2026-09-20
         
       </p>
       
