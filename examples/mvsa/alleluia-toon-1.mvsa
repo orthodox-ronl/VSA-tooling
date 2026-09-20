@@ -1,0 +1,24 @@
+# Alleluia toon 1 — mvsa-experiment (niet door `vsa` geparsed)
+#
+# Plan: docs/plans/mvsa-v0-syntax.md §7
+# Doel: vrije SATB, 1:1 L-stukken ↔ hoogte-stukken, geen recite-`~`.
+#
+# Oorspronkelijke schets (drie maten; L nog met VSA-accolades; +\ later #\):
+#
+# [:Lyr] Al-{le.&.}-{lu_}-{i_}-{a_}, al-le-{lu_}-{ia} | {Al-&-&-&.&.&-}-{le}-{lu_&_}-{ia__} | {Al-&-&-&.&.&-}-{le}-{lu_&_}-{ia__} |
+#  [-:S]     -&/     /     \    +\   /  /   /     \   |    \&/&\&\&/&/        \&-     \     |    \&/&\&\&/&/        \&/2    \     |
+# [\3:A]             /3    \2        /  /2            |    \&/&\&\&/&/        \&-     \2    |    \&/&\&\&/&/        \&/2    \     |
+# [\6:T]     -&/     /     \    \    /  /   /     \   |  -&-&-&\2&/2&/        \&\     \     |  -&-&-&\2&/2&/                      |
+# [\8:B]                   /    \3   /3 \   \4&/2 /2  |  \3&-&-&/&\&/3        \3&-    /3    |  \3&-&-&/&\&/3        \3&-    /3    |
+#
+# Omzetting in het plan: eerste twee maten; accolades weg; +\ → #\;
+# ontbrekende A-hoogten ingevuld als `-` (zelfde toon). Derde maat blijft
+# alleen in het commentaar hierboven tot die meegenomen wordt.
+
+@start S=- A=\3 T=\6 B=\8
+
+L: Al- le.&. lu_ i_ a_ , al- le- lu_ ia | Al-&-&-&.&.&- le lu_&_ ia__ |
+S: -&/ /     \   #\ /  /  /  \         | \/&\/&\\&\/&/  \&-  \       |
+A: -   -     /3  \2 -  /  /2 -         | \/&\/&\\&\/&/  \&-  \2      |
+T: -&/ /     \   \  /  /  /  \         | -&-&-&\2&/2&/  \&\  \       |
+B: -   -     /   \3 /3 \  \4&/2 /2     | \3&-&-&/&\/&/3 \3&- /3      |

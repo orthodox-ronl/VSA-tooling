@@ -1,0 +1,71 @@
+# 8a Trisagion (Slav) — Hemelum → mvsa-experiment (compact hergebruik)
+#
+# Bron: VSA-demo
+#   content-source/praktijk/oefenhoek/bibliotheek/8-trisagion/8a-slav/hemelum/
+#   8-trisagion-8a-slav-hemelum.mxl   (G majeur, SATB; divisions=1 → 1 = kwart)
+#
+# MusicXML-check (pitch + duur, alle stemmen):
+#   m1–4  vs m5–8   → NIET hetzelfde (andere nootdeling NL vs Slav.)
+#   m3–8  vs m11–16 → WEL hetzelfde (exacte kopie op S/A/T/B)
+#
+# ELM (duur op L), standaard = kwart:
+#   ~ / - = 1×   _. = 3×   _ = 2×   __ = 4×   (en .  ..  -.  ~. …)
+# Melisma-vorm A: slots met &  (elk slot een ELM), bv. li~&~  Ster~&~&~  God_.&_.
+# Recite: ~prefix op L; hele run = één hoogte-stuk per stem.
+#
+# Niet door `vsa` geparsed. Syntax-schets: plan §11.
+
+@do G4
+@mode major
+
+# =============================================================================
+# Hergebruik (kort)
+#   @:naam   L: / L':   @voices =:naam   @:nieuw = :a[3-4] + :b
+# =============================================================================
+
+# --- @:nl1  ≈ maten 1–4 (NL + SATB; nootgetrouw t.o.v. MXL) ---------------
+
+@:nl1
+
+# m1: O | Hei_. | li over twee kwarten (S/A: toonwisseling; T/B: één noot d=2) | ge | God_.&_.
+# m2: hei-li-ge | Ster over drie kwarten (S/A: a-b-c; T/B: aanhouden) | ke_.
+# m3: recite hei-li-ge en On (zelfde toon) | sterf'_. | lij | ke_.
+# m4: ont | ferm~&~ | U | o_ | ver_ | ons__
+
+L: O Hei_.-li~&~-ge God_.&_. | hei- li- ge Ster~&~&~-ke_. | ~hei-li-ge ~On-sterf'_.-lij-ke_. | ont-ferm~&~ U  o_-ver_ ons__ |
+S: f#4 g4 f#4&g4 a4 g4&a4    | b4  b4  b4 a4&b4&c5   b4   | b4         b4  d5       b4  a4   | a4  b4&a4   g4 f#4 f#4 g4    |
+A: d#4 e4 d#4&d#4 f#4 e4&f#4 | g4  g4  g4 f#4&g4&a4  g4   | g4         g4  b4       g4  f#4  | f#4 g4&f#4  e4 d#4 d#4 e4    |
+T: b3  b3 b3&-    b3  b3&d4  | d4  d4  d4 d4&-&-     d4   | d4         d4  d4       d4  d4   | d4  d4&-    b3 b3  b3  b3    |
+B: b2  e3 b2&-    b2  e3&f#3 | g3  g3  g3 d3&-&-     g3   | g3         g3  g3       g3  d3   | d3  g3&d3   e3 b2  b2  e3    |
+
+# Toelichting m1 “li~&~”: S f#4→g4, A d#4→d#4, T/B houden (tweede slot `-`).
+# Toelichting m2 “Ster~&~&~”: S/A drie tonen; T/B `d4&-&-` / `d3&-&-`.
+# Toelichting m3: hei/li/ge/On allemaal dezelfde toon → twee ~-runs.
+
+# --- @:slav1  ≈ maten 5–8 (twee L-lagen; stemmen = nl1-grid) ---------------
+# L/L' volgen de *event-as van @:nl1* (tekstprojectie), niet de herverdeelde
+# MXL-ritmiek van m5–8.
+
+@:slav1
+
+# Zelfde event-as als @:nl1 (5+5+5+6). Eerste event ≈ NL “O” (hier herhaald Свя/Svja).
+L:  Свя~ Свя_.-тый~&~-же Бо_.&_. | Свя- тый Креп~&~&~ кый_. | ~Свя-тый ~Без смерт'_. ный_. | По- ми~&~ луй_ нас__ |
+L': Svja~ Svja_.-tyj~&~-že Bo_.&_. | Svja- tyj Krep~&~&~ kyj_. | ~Svja-tyj ~Bez smert'_. nyj_. | Po- mi~&~ luj_ nas__ |
+
+@voices =:nl1
+
+# --- @:dox  ≈ maten 9–10 ---------------------------------------------------
+# m9: lange recite op één toon, daarna Geest_. (zelfde toon, langere duur).
+# m10: recite tot “en.”, daarna A_ en men_ als aparte events (A_ ≠ recite).
+
+@:dox
+
+L: ~Eer-aan-de-Va-der,-de-Zoon-en-de-Hei-li-ge Geest_. | ~nu-en-al-tijd-en-in-de-eeuw-en-der-eeuw-en. A_ men_ |
+S: f#4                                             f#4 | f#4                                          f#4  g4 |
+A: d#4                                             d#4 | d#4                                          d#4  e4 |
+T: b3                                              b3  | b3                                           b3   b3 |
+B: b2                                              b2  | b2                                           b2   e3 |
+
+# --- @:final  ≈ maten 11–16 = maten 3–8 (MXL: exact gelijk) -----------------
+
+@:final = :nl1[3-4] + :slav1

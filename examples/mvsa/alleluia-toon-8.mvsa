@@ -1,0 +1,87 @@
+# Alleluia toon 8 — mvsa-experiment (niet door `vsa` geparsed)
+#
+# Plan: docs/plans/mvsa-v0-syntax.md §6, §2.2–§2.4
+#
+# Oorspronkelijke schets (één L-regel, nog VSA-accolades):
+#
+#   L: ~Al-le-lu-ia,~Al-le-lu-ia,~al-{le}-{lu_&-&-&_&}{i_}{\a__}
+#
+# Bij @do F4 major, schrijfoctaaf 0 (F4…E5):
+#   do=F4  re=G4  mi=A4  fa=Bb4  so/sol=C5  la=D5  si/ti=E5
+#   F3=do-/f-   C3=so-2/c-2   (niet c- — ongemarkeerde c is C5)
+#   G5=re+/g+ 
+
+# =============================================================================
+# Octaaf-wrap (waarom de bas `-` en `-2` mengt)
+#
+# do-re-mi springt bij **do**. si zit boven in het do-octaaf (E5), dus
+# si- (E4) is één toon onder do (F4). Dat klopt.
+#
+# a–g zonder cijfer deelt dátzelfde do-octaaf, zodat c = so = C5.
+# De buur van c (C5) is dan **b** (B4), niet b- (B3). b- naast c zetten
+# is de ABC-wrap-bij-C (b3 naast c4). Die wrap mag, maar alleen met
+# wetenschappelijk cijfer: c3, b3. Kale c blijft C5, anders is c ≠ so.
+#
+# Zelfde bas G3 G3 G3 E3 · F3 D3 C3 F3 · G3 A3:
+#
+#   oct 0:      re- re- re- si-2  do-&la-2&so-2&do-  re- mi-
+#               g-  g-  g-  e-2   f-&d-2&c-2&f-      g-  a-
+#   @oct B=-1:  re  re  re  si-   do&la-&so-&do      re  mi
+#               g   g   g   e-    f&d-&c-&f          g   a
+#   bladcijfer: g3  g3  g3  e3    f3&d3&c3&f3        g3  a3
+#
+# Voorstel: SATB-bas in do-re-mi of mix → @oct B=-1 (nooit -2).
+# ABC van het blad → g3/e3/c3 (wrap bij C, cijfer van de partituur).
+# =============================================================================
+
+@do F4
+@mode major
+
+# --- Schets 1: do-re-mi, schrijfoctaaf 0 ---
+
+L: ~Al-le-lu-ia, ~Al-le-lu-ia, al- le-       lu_&-&-&_      i_  a__  |
+S:  fa            fa           fa  so       mi&do&re&mi     fa   mi  |
+A:  re            re           re  re      do&fa-&si-&do    re  si-  |
+T:  la-          la-1          la- so-    so-&mi-&so-&so-   la- so-# |
+B:  re-          re-           re- si-2  do-&la-2&so-2&do-  re-  mi- |
+
+# --- Schets 2: mix toonnamen, zelfde muziek (bas nu met -2 op c/d/e) ---
+# Tenor d/c/c# zonder suffix: bij oct 0 = D5/C5; bedoeld als D4/C4 → zie schets 3.
+
+L: ~Al-le-lu-ia, ~Al-le-lu-ia, al- le-    lu_&-&-&_     i_  a__ |
+S:  Bb            Bb           Bb  so    mi&do&re&mi    fa  mi  |
+A:  g             g            g   re   do&fa-&si-&do   re  si- |
+T:  d             d            d   c      c&a-&c&c      d   c#  |
+B:  g-            g-           g-  e-2   f-&d-2&c-2&f-  g-  a-  |
+
+# --- Schets 3: zelfde muziek, @oct T=-1 B=-1 (bas zonder -2) ---
+
+@oct S=0 A=0 T=-1 B=-1
+
+L: ~Al-le-lu-ia, ~Al-le-lu-ia, al- le-    lu_&-&-&_      i_  a__ |
+S:  fa            fa           fa  so    mi&do&re&mi     fa  mi  |
+A:  re            re           re  re    do&fa-&si-&do   re  si- |
+T:  la            la           la  so    so&mi&so&so     la  so# |
+B:  re            re           re  si-   do&la-&so-&do   re  mi  |
+
+L: ~Al-le-lu-ia, ~Al-le-lu-ia, al- le-    lu_&-&-&_      i_  a__ |
+S:  Bb            Bb           Bb  c     a&f&g&a         Bb  a   |
+A:  g             g            g   g     f&bb-&e-&f      g   e-  |
+T:  d             d            d   c     c&a&c&c         d   c#  |
+B:  g             g            g   e-    f&d-&c-&f       g   a   |
+
+# Zelfde frase, bas in bladcijfers (wrap bij C; @oct telt niet op het cijfer):
+
+L: ~Al-le-lu-ia, ~Al-le-lu-ia, al- le-    lu_&-&-&_      i_  a__ |
+S:  Bb            Bb           Bb  c     a&f&g&a         Bb  a   |
+A:  g             g            g   g     f&bb-&e-&f      g   e-  |
+T:  d             d            d   c     c&a&c&c         d   c#  |
+B:  g3            g3           g3  e3    f3&d3&c3&f3     g3  a3  |
+
+# --- Schets 4: zelfde muziek, EHM na een beginanker ---
+
+L: ~Al-le-lu-ia, ~Al-le-lu-ia, al- le-    lu_&-&-&_     i_  a__ |
+S:  fa           -             -   /     \2&\2&/&/      /   \   |
+A:  re           -             -   -     \&\4&/3&/      /   \2  |
+T:  la-          -             -   \     -&\2&/2&-      /   #\  |
+B:  re-          -             -   \2    /&\2&\&/3      /   /   |
