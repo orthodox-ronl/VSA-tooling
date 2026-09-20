@@ -225,17 +225,17 @@ Elke [ELM](@) binnen een [lengte-modifier](@) bepaalt de duur van een [muzikale 
 
 Mapping naar MusicXML bij `duration-model="default"`:
 
-| [ELM](@) | MusicXML-duur         |
-| -------- | --------------------- |
-| `~`      | kwartnoot             |
-| `-`      | kwartnoot             |
-| `-.`     | gepunteerde kwartnoot |
-| `~.`     | gepunteerde kwartnoot |
-| `_`      | halve noot            |
+| [ELM](@) | MusicXML-duur          |
+| -------- | ---------------------- |
+| `~`      | kwartnoot              |
+| `-`      | kwartnoot              |
+| `-.`     | gepunteerde kwartnoot  |
+| `~.`     | gepunteerde kwartnoot  |
+| `_`      | halve noot             |
 | `_.`     | gepunteerde halve noot |
-| `__`     | hele noot             |
-| `.`      | achtste noot          |
-| `..`     | zestiende noot        |
+| `__`     | hele noot              |
+| `.`      | achtste noot           |
+| `..`     | zestiende noot         |
 
 Andere duration-modellen mogen hiervan afwijken. Als meerdere [ELMs](@) aanwezig zijn binnen één [zangelement-scope](@), krijgt elke [muzikale positie](@) haar eigen duurwaarde.
 
@@ -260,7 +260,8 @@ aparte syllabe-tekst.
 
 Tekst buiten [zangelement-scopes](@) heeft in [VSA](@) geen eigen toonhoogte of duur. Bij
 MusicXML-export wordt zulk tekstmateriaal omgezet naar **reciteertoon**: noten
-op de laatst bekende toonhoogte.
+op de laatst bekende toonhoogte — **mits** het bijbehorende segment gezongen
+materiaal is (zie hieronder bij profiel `playback`).
 
 Parameter `reciting-mode` (in [blokmetadata](@) of YAML-frontmatter onder `muziek`):
 
@@ -283,17 +284,51 @@ voorafgaande noot geplakt.
 Barline-markeringen `*`, `/` en `//` in platte tekst sluiten de huidige maat
 af.
 
+**Blad-aanwijzing versus zang (alleen profiel `playback`)**
+
+SVG toont het blad: strofenummers, refreincues en andere zichtbare
+blad-aanwijzingen blijven in de tekening. MusicXML-playback (bijv. Coria) is
+alleen gezongen tekst.
+
+De documentstroom wordt verdeeld in **segmenten**, begrensd door
+[hoogte-markeringen](@) (plus het stuk vóór de eerste markering en het stuk na
+de laatste). Hoogte-markeringen zijn **geen** begin/eind-haakjes van
+gezongen versus niet-gezongen tekst: de eerste markering zet de beginhoogte;
+elke volgende is een lokale checkpoint op die positie in dezelfde melodische
+lijn. Extra debug-markeringen midden in een strofe blijven dus geldig en
+knippen de zang niet af.
+
+| Segmentinhoud                                            | MusicXML-playback                                               |
+| -------------------------------------------------------- | --------------------------------------------------------------- |
+| minstens één [zangelement-scope](@)                      | gezongen: scopes als noten; ongescopte woorden als reciteertoon |
+| geen scope, alleen tekst en whitespace (blad-aanwijzing) | geen noten en geen lyrics                                       |
+
+Voorbeelden van blad-aanwijzing die Coria daardoor niet zingt: `2.`, `3.`,
+`refrein:`, `Ps. 131:`, `Door …` (visuele geheugensteun voor een eerder
+genoteerd refrein). Reciteerwoorden **binnen** een segment mét scopes
+(`Juich` in `[:] Juich {/voor} [:]`) blijven klinken.
+
+Een stuk **zonder** hoogte-markeringen maar **met** scopes is één segment met
+scopes: alles gezongen (huidig gedrag). Pitched cues met scopes
+(`Ver{//los} {\\ons}`) blijven klinken; dat is bewust buiten deze regel.
+
+Het profiel `engraving` past deze filter niet toe: ongescopte tekst blijft
+daar reciteertoon zoals voorheen.
+
+HTML-commentaar (`<!-- … -->`) is bron-only: niet in SVG en niet in MusicXML.
+Commentaar is geen vervanging voor zichtbare blad-aanwijzingen.
+
 #### Conversieregel per muzikale positie
 
 Voor elke [muzikale positie](@) geldt:
 
-| [VSA](@)                                      | MusicXML                   |
-| --------------------------------------------- | -------------------------- |
-| [muzikale positie](@)                         | één `<note>`               |
+| [VSA](@)                                      | MusicXML                                 |
+| --------------------------------------------- | ---------------------------------------- |
+| [muzikale positie](@)                         | één `<note>`                             |
 | [EHM](@)                                      | laddergraad-cursor + optioneel `<alter>` |
-| [ELM](@)                                      | duration                   |
-| [zangelement](@)                              | lyric                      |
-| meerdere posities binnen één [zangelement](@) | melisma                    |
+| [ELM](@)                                      | duration                                 |
+| [zangelement](@)                              | lyric                                    |
+| meerdere posities binnen één [zangelement](@) | melisma                                  |
 
 #### Foutafhandeling bij export
 
@@ -359,10 +394,12 @@ selecteerbaar via `musicxml-profile` in [blokmetadata](@), YAML-frontmatter
 
 ##### Gemeenschappelijk gedrag
 
-Ongeacht profiel geldt pitch-resolutie, [ELM](@)→duur, reciteertoon,
-syllabische splitsing met `-`, slur over melisma, barlines op `*`, `/`, `//` en
-formele [control tokens](@), en conditionele tempo-markering (alleen bij expliciet
-`tempo` in [metadata](@)).
+Ongeacht profiel geldt pitch-resolutie, [ELM](@)→duur, reciteertoon voor
+ongescopte tekst **binnen gezongen segmenten**, syllabische splitsing met `-`,
+slur over melisma, barlines op `*`, `/`, `//` en formele [control tokens](@), en
+conditionele tempo-markering (alleen bij expliciet `tempo` in [metadata](@)).
+In profiel `playback` worden scopeloze segmenten (blad-aanwijzing) weggelaten;
+zie [Ongescopte tekst](#ongescopte-tekst-reciteertoon).
 
 ##### Profiel `playback`
 
@@ -370,17 +407,18 @@ Geoptimaliseerd voor compatibiliteit met MuseScore-roundtrip en Coria. Het
 volgt structureel het patroon van door MuseScore opgeslagen MusicXML 4.0
 partwise-bestanden.
 
-| Aspect                 | Gedrag                                                                                                         |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `<part-list>`          | `score-instrument`, `midi-device`, `midi-instrument` (General MIDI)                                            |
-| `<defaults>`           | **niet** geëmitteerd                                                                                           |
-| `<encoding><supports>` | `accidental`, `beam`, `stem` = yes; `print` new-page/new-system = no                                           |
-| `<note>`               | `<voice>1</voice>`, `<stem>up</stem>` op elke noot                                                             |
-| Beaming                | Automatisch voor opeenvolgende `eighth`- en `16th`-noten in één maat                                           |
-| Melisma-lyrics         | Alleen op eerste noot: `<text>` + `<extend/>` (zonder `type`); midden- en eindnoten **geen** `<lyric>`         |
-| Slur                   | `type="start"` met `orientation="over"` en `placement="above"`; `type="stop"` op laatste noot                  |
-| Maatstrepen            | Alleen `light-light` (dubbele streep `//`) en `light-heavy` (slot); **geen** expliciete `regular` tussen maten |
-| `xml:lang` op lyrics   | niet geëmitteerd                                                                                               |
+| Aspect                 | Gedrag                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `<part-list>`          | `score-instrument`, `midi-device`, `midi-instrument` (General MIDI)                                                             |
+| `<defaults>`           | **niet** geëmitteerd                                                                                                            |
+| `<encoding><supports>` | `accidental`, `beam`, `stem` = yes; `print` new-page/new-system = no                                                            |
+| `<note>`               | `<voice>1</voice>`, `<stem>up</stem>` op elke noot                                                                              |
+| Beaming                | Automatisch voor opeenvolgende `eighth`- en `16th`-noten in één maat                                                            |
+| Melisma-lyrics         | Alleen op eerste noot: `<text>` + `<extend/>` (zonder `type`); midden- en eindnoten **geen** `<lyric>`                          |
+| Slur                   | `type="start"` met `orientation="over"` en `placement="above"`; `type="stop"` op laatste noot                                   |
+| Maatstrepen            | Alleen `light-light` (dubbele streep `//`) en `light-heavy` (slot); **geen** expliciete `regular` tussen maten                  |
+| `xml:lang` op lyrics   | niet geëmitteerd                                                                                                                |
+| Blad-aanwijzing        | Scopeloze segmenten tussen [hoogte-markeringen](@) → geen noten/lyrics (zie [Ongescopte tekst](#ongescopte-tekst-reciteertoon)) |
 
 MIDI-parameters ([blokmetadata](@) / `muziek`-sectie):
 

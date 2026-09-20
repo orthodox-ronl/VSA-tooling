@@ -207,6 +207,12 @@ Standaard gebruikt [`vsa musicxml`](../reference/cli/musicxml.md) het **`playbac
 voor afspelen en import zonder handmatige opschoning — onder andere Coria en
 MuseScore na roundtrip.
 
+SVG is het blad: strofenummers en refreincues blijven zichtbaar. Playback-MXL
+is alleen zang. Scopeloze segmenten tussen hoogte-markeringen (blad-aanwijzing
+zoals `2.` of `Door …`) krijgen geen noten en geen lyrics. Extra
+debug-hoogte-markeringen blijven checkpoints en knippen de zang niet af; zie
+[Ongescopte tekst](../specification/rendering.md#ongescopte-tekst-reciteertoon).
+
 Kies **`engraving`** als je de partituur verder wilt bewerken en expliciete
 maatstrepen, typografie-hints of gedetailleerde melisma-lijnen nodig hebt:
 

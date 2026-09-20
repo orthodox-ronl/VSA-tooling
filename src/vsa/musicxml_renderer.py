@@ -29,6 +29,14 @@ Whitespace-separated tokens in ``TextNode`` content that are not barline
 markers become reciting-tone notes on the current pitch.  Configure via
 the ``reciting-mode`` metadata parameter (see §8.2.7 in the spec).
 
+In the ``playback`` profile, the document is split into segments bounded
+by hoogte-markeringen (plus the spans before the first and after the last
+marker).  A segment without any ``ScopeNode`` is blad-aanwijzing (strofe-
+nummer, refreincue, …): no notes and no lyrics.  Segments that contain at
+least one scope keep current behaviour (unscoped words → reciteertoon).
+The ``engraving`` profile does not apply this filter.  Hoogte-markeringen
+remain pitch checkpoints, not phrase brackets for sung vs. cue text.
+
 Hyphens within a token (``mel-se``) split into separate quarter notes with
 MusicXML ``syllabic`` begin/middle/end and a trailing hyphen on the lyric
 text where conventional (``mel-`` + ``se``).
@@ -59,7 +67,7 @@ import xml.etree.ElementTree as ET
 from datetime import date
 from typing import Any
 
-from .ast import ControlTokenNode, Document, PitchMarkerNode, ScopeNode, TextNode
+from .ast import ControlTokenNode, Document, Node, PitchMarkerNode, ScopeNode, TextNode
 from .duration_model import UnknownELM, elm_to_duration
 from .music import Duration, Pitch
 from .pitch_resolver import PitchResolver, key_fifths
@@ -102,6 +110,27 @@ _BEAMABLE_TYPES = frozenset({"16th", "eighth"})
 # own note.  Barline markers (*  /  //) are already checked first, so they
 # are not caught here.
 _PUNCT_ONLY_RE = re.compile(r"^\W+$")
+
+
+def _sung_segment_node_indices(nodes: list[Node]) -> set[int]:
+    """Indices of nodes in segments that contain at least one ScopeNode.
+
+    Segments are spans of the document stream between hoogte-markeringen
+    (``PitchMarkerNode``), including the span before the first marker and
+    after the last.  Markers themselves are boundaries, not segment content.
+    """
+    segments: list[list[int]] = [[]]
+    for index, node in enumerate(nodes):
+        if isinstance(node, PitchMarkerNode):
+            segments.append([])
+        else:
+            segments[-1].append(index)
+
+    sung: set[int] = set()
+    for segment in segments:
+        if any(isinstance(nodes[i], ScopeNode) for i in segment):
+            sung.update(segment)
+    return sung
 
 
 class MusicXMLExportError(ValueError):
@@ -333,6 +362,11 @@ class MusicXMLRenderer:
         # Unscopped whitespace tokens accumulated between barlines / scopes.
         pending_tokens: list[str] = []
 
+        # Playback: skip blad-aanwijzing segments (no ScopeNode between markers).
+        sung_indices: set[int] | None = (
+            _sung_segment_node_indices(document.nodes) if self._is_playback else None
+        )
+
         def flush_pending_words() -> None:
             """Emit reciting-tone note(s) for buffered unscopped text."""
             if not pending_tokens:
@@ -363,11 +397,15 @@ class MusicXMLRenderer:
                     })
             pending_tokens.clear()
 
-        for node in document.nodes:
+        for node_index, node in enumerate(document.nodes):
             if isinstance(node, PitchMarkerNode):
-                continue  # already handled above
+                continue  # already handled above; not notes
 
             if isinstance(node, TextNode):
+                if sung_indices is not None and node_index not in sung_indices:
+                    # Blad-aanwijzing (strofenummer, refreincue, …): SVG shows
+                    # this text; playback MusicXML must not sing it.
+                    continue
                 # Split text by whitespace; classify each token.
                 for token in node.text.split():
                     if token in _TEXT_BARLINE_PATTERNS:
