@@ -1,4 +1,4 @@
-"""Lettergreepstreepjes in VSA-brontekst (alleen ongescoopte TextNode-inhoud)."""
+"""Lettergreepstreepjes in VSA-brontekst (TextNode + grenzen met scopes)."""
 
 from __future__ import annotations
 
@@ -7,12 +7,9 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from .ast import TextNode
+from .ast import ScopeNode, TextNode
 from .parser import Parser
-from .vsa_comments import (
-    COMMENT_ONLY_LINE_RE,
-    strip_vsa_html_comments_with_offset_map,
-)
+from .vsa_comments import COMMENT_ONLY_LINE_RE
 from .yaml_frontmatter import parse_vsa_frontmatter_with_body_offset
 
 _BARLINE_TOKENS = frozenset({"/", "//", "*"})
@@ -28,6 +25,27 @@ class SyllabifyResult:
     text: str
     changed: bool
     replacements: int
+
+
+@dataclass(frozen=True)
+class _Atom:
+    """Bronfragment: platte tekst, scope, of scheiding (spatie/barline/marker)."""
+
+    kind: str  # 'text' | 'scope' | 'sep'
+    source: str
+    plain: str = ""
+
+
+@dataclass(frozen=True)
+class _ContentPart:
+    """Bijdrage aan één woord (scope of tekstkern, zonder brugstreepjes)."""
+
+    kind: str  # 'text' | 'scope'
+    source: str
+    plain: str
+    prefix: str = ""
+    core: str = ""
+    suffix: str = ""
 
 
 @lru_cache(maxsize=1)
@@ -49,6 +67,15 @@ def hyphenate_dutch_word(word: str) -> str:
     return _dutch_dic().inserted(word)
 
 
+def dutch_hyphen_positions(word: str) -> list[int]:
+    """Pyphen-breekposities (index vóór het teken waar ``-`` komt)."""
+    if not word or "-" in word:
+        return []
+    if not any(ch.isalpha() for ch in word):
+        return []
+    return list(_dutch_dic().positions(word))
+
+
 def dehyphenate_dutch_word(word: str) -> str:
     """Verwijder lettergreepstreepjes uit een woordkern."""
     if not word or "-" not in word:
@@ -67,13 +94,13 @@ def unsyllabify_plain_text(text: str) -> str:
 
 
 def syllabify_vsa_body(body: str) -> SyllabifyResult:
-    """Hypheneer alleen ``TextNode``-inhoud in een VSA-body (zonder frontmatter)."""
-    return _transform_vsa_body(body, syllabify_plain_text)
+    """Hypheneer woorden in een VSA-body, inclusief streepjes op scope-grenzen."""
+    return _transform_vsa_body(body, unsyllabify=False)
 
 
 def unsyllabify_vsa_body(body: str) -> SyllabifyResult:
-    """Verwijder lettergreepstreepjes alleen uit ``TextNode``-inhoud."""
-    return _transform_vsa_body(body, unsyllabify_plain_text)
+    """Verwijder lettergreepstreepjes, inclusief brugstreepjes rond scopes."""
+    return _transform_vsa_body(body, unsyllabify=True)
 
 
 def syllabify_vsa_source(text: str) -> SyllabifyResult:
@@ -82,7 +109,7 @@ def syllabify_vsa_source(text: str) -> SyllabifyResult:
 
 
 def unsyllabify_vsa_source(text: str) -> SyllabifyResult:
-    """Verwijder lettergreepstreepjes uit VSA-brontekst; scopes blijven onaangeroerd."""
+    """Verwijder lettergreepstreepjes uit VSA-brontekst; scope-inhoud blijft intact."""
     return _transform_vsa_source(text, unsyllabify_vsa_body)
 
 
@@ -166,10 +193,30 @@ def _transform_vsa_source(text: str, body_fn) -> SyllabifyResult:
     )
 
 
-def _transform_vsa_body(body: str, plain_fn) -> SyllabifyResult:
+def _transform_vsa_body(body: str, *, unsyllabify: bool) -> SyllabifyResult:
     document = Parser(body).parse()
-    replacements = 0
+    atoms = _atoms_from_document(body, document)
     pieces: list[str] = []
+    replacements = 0
+
+    for kind, group in _group_runs(atoms):
+        if kind == "sep":
+            pieces.append("".join(atom.source for atom in group))
+            continue
+        new_run, n = _transform_word_run(group, unsyllabify=unsyllabify)
+        replacements += n
+        pieces.append(new_run)
+
+    new_body = "".join(pieces)
+    return SyllabifyResult(
+        text=new_body,
+        changed=new_body != body,
+        replacements=replacements,
+    )
+
+
+def _atoms_from_document(body: str, document) -> list[_Atom]:
+    atoms: list[_Atom] = []
     cursor = 0
 
     for node in document.nodes:
@@ -179,43 +226,54 @@ def _transform_vsa_body(body: str, plain_fn) -> SyllabifyResult:
             raise ValueError(
                 f"Overlappende AST-offsets bij {node.start} (cursor={cursor})"
             )
-        pieces.append(body[cursor : node.start])
-        segment = body[node.start : node.end]
-        if isinstance(node, TextNode):
-            new_segment, n = _transform_text_segment(segment, node.text, plain_fn)
-            replacements += n
-            pieces.append(new_segment)
+        if node.start > cursor:
+            atoms.extend(_atoms_from_text_segment(body[cursor : node.start]))
+
+        if isinstance(node, ScopeNode):
+            atoms.append(
+                _Atom("scope", body[node.start : node.end], plain=node.text)
+            )
+        elif isinstance(node, TextNode):
+            atoms.extend(_atoms_from_text_segment(body[node.start : node.end]))
         else:
-            pieces.append(segment)
+            atoms.append(_Atom("sep", body[node.start : node.end]))
         cursor = node.end
 
-    pieces.append(body[cursor:])
-    new_body = "".join(pieces)
-    return SyllabifyResult(
-        text=new_body,
-        changed=new_body != body,
-        replacements=replacements,
-    )
+    if cursor < len(body):
+        atoms.extend(_atoms_from_text_segment(body[cursor:]))
+    return atoms
 
 
-def _transform_text_segment(
-    segment: str,
-    expected_stripped: str,
-    plain_fn,
-) -> tuple[str, int]:
-    stripped, _offset_map = strip_vsa_html_comments_with_offset_map(segment)
-    if stripped != expected_stripped or "<!--" in segment:
-        return _transform_preserving_comments(segment, plain_fn)
-
-    new_text = plain_fn(segment)
-    return new_text, _count_hyphen_delta(segment, new_text)
+def _atoms_from_text_segment(segment: str) -> list[_Atom]:
+    if not segment:
+        return []
+    if "<!--" in segment:
+        return _atoms_from_text_with_comments(segment)
+    return _atoms_from_plain_text(segment)
 
 
-def _transform_preserving_comments(segment: str, plain_fn) -> tuple[str, int]:
-    out: list[str] = []
-    replacements = 0
+def _atoms_from_plain_text(segment: str) -> list[_Atom]:
+    atoms: list[_Atom] = []
+    for match in _TOKEN_RE.finditer(segment):
+        token = match.group(0)
+        if token.isspace() or token in _BARLINE_TOKENS:
+            atoms.append(_Atom("sep", token))
+        else:
+            atoms.append(_Atom("text", token))
+    return atoms
+
+
+def _atoms_from_text_with_comments(segment: str) -> list[_Atom]:
+    atoms: list[_Atom] = []
     index = 0
     length = len(segment)
+    plain_parts: list[str] = []
+
+    def flush_plain() -> None:
+        if not plain_parts:
+            return
+        atoms.extend(_atoms_from_plain_text("".join(plain_parts)))
+        plain_parts.clear()
 
     while index < length:
         line_start = index
@@ -236,39 +294,161 @@ def _transform_preserving_comments(segment: str, plain_fn) -> tuple[str, int]:
 
         line_content = segment[line_start:line_end]
         if COMMENT_ONLY_LINE_RE.match(line_content + line_ending):
-            out.append(line_content + line_ending)
+            flush_plain()
+            atoms.append(_Atom("sep", line_content + line_ending))
             index = next_index
             continue
 
         content_index = 0
-        plain_parts: list[str] = []
-
-        def flush_plain() -> None:
-            nonlocal replacements
-            if not plain_parts:
-                return
-            plain = "".join(plain_parts)
-            plain_parts.clear()
-            new_plain = plain_fn(plain)
-            replacements += _count_hyphen_delta(plain, new_plain)
-            out.append(new_plain)
-
         while content_index < len(line_content):
             if line_content[content_index : content_index + 4] == "<!--":
                 comment_end = line_content.find("-->", content_index)
                 if comment_end >= 0:
                     flush_plain()
-                    out.append(line_content[content_index : comment_end + 3])
+                    atoms.append(
+                        _Atom("sep", line_content[content_index : comment_end + 3])
+                    )
                     content_index = comment_end + 3
                     continue
             plain_parts.append(line_content[content_index])
             content_index += 1
 
         flush_plain()
-        out.append(line_ending)
+        if line_ending:
+            atoms.append(_Atom("sep", line_ending))
         index = next_index
 
-    return "".join(out), replacements
+    return atoms
+
+
+def _group_runs(atoms: list[_Atom]):
+    current: list[_Atom] = []
+    for atom in atoms:
+        if atom.kind == "sep":
+            if current:
+                yield "word", current
+                current = []
+            yield "sep", [atom]
+        else:
+            current.append(atom)
+    if current:
+        yield "word", current
+
+
+def _transform_word_run(
+    atoms: list[_Atom], *, unsyllabify: bool
+) -> tuple[str, int]:
+    original = "".join(atom.source for atom in atoms)
+    if unsyllabify:
+        new = _unsyllabify_word_run(atoms)
+    else:
+        new = _syllabify_word_run(atoms)
+    return new, _count_hyphen_delta(original, new)
+
+
+def _content_parts(atoms: list[_Atom]) -> list[_ContentPart]:
+    parts: list[_ContentPart] = []
+    for atom in atoms:
+        if atom.kind == "scope":
+            parts.append(_ContentPart("scope", atom.source, atom.plain))
+            continue
+        parsed = _parse_text_part(atom.source)
+        if parsed is not None:
+            parts.append(parsed)
+    return parts
+
+
+def _parse_text_part(source: str) -> _ContentPart | None:
+    """Tekstatom zonder brugstreepjes; ``None`` als het atom alleen ``-`` is."""
+    if source == "-":
+        return None
+
+    match = _WORD_CORE_RE.match(source)
+    if not match:
+        return _ContentPart("text", source, source.replace("-", ""), core=source)
+
+    prefix, core, suffix = match.group(1), match.group(2), match.group(3)
+
+    while prefix.startswith("-"):
+        prefix = prefix[1:]
+    if suffix and set(suffix) == {"-"}:
+        suffix = ""
+
+    if not core and not prefix and not suffix:
+        return None
+
+    plain = core.replace("-", "")
+    return _ContentPart("text", source, plain, prefix=prefix, core=core, suffix=suffix)
+
+
+def _syllabify_word_run(atoms: list[_Atom]) -> str:
+    parts = _content_parts(atoms)
+    if not parts:
+        return "".join(atom.source for atom in atoms)
+
+    if len(parts) == 1 and parts[0].kind == "text":
+        part = parts[0]
+        return f"{part.prefix}{hyphenate_dutch_word(part.core)}{part.suffix}"
+
+    plain = "".join(part.plain for part in parts)
+    if not plain or not any(ch.isalpha() for ch in plain):
+        return "".join(atom.source for atom in atoms)
+
+    # Bestaande interne streepjes in één tekstdeel: hergebruik die breekpunten
+    # alleen wanneer het hele woord uit één tekstdeel bestaat (hierboven).
+    # Over scope-grenzen heen altijd Pyphen op het samengestelde woord.
+    positions = set(dutch_hyphen_positions(plain))
+    return _render_syllabified_parts(parts, positions)
+
+
+def _render_syllabified_parts(parts: list[_ContentPart], positions: set[int]) -> str:
+    out: list[str] = []
+    offset = 0
+    last_index = len(parts) - 1
+
+    for index, part in enumerate(parts):
+        start = offset
+        end = offset + len(part.plain)
+
+        if part.kind == "scope":
+            out.append(part.source)
+        else:
+            internal = sorted(p - start for p in positions if start < p < end)
+            chunk = _insert_hyphens(part.plain, internal)
+            out.append(f"{part.prefix}{chunk}{part.suffix}")
+
+        if index < last_index and end in positions:
+            out.append("-")
+
+        offset = end
+
+    return "".join(out)
+
+
+def _insert_hyphens(text: str, positions: list[int]) -> str:
+    if not positions:
+        return text
+    pieces: list[str] = []
+    prev = 0
+    for pos in positions:
+        pieces.append(text[prev:pos])
+        prev = pos
+    pieces.append(text[prev:])
+    return "-".join(pieces)
+
+
+def _unsyllabify_word_run(atoms: list[_Atom]) -> str:
+    parts = _content_parts(atoms)
+    if not parts:
+        return "".join(atom.source for atom in atoms)
+
+    out: list[str] = []
+    for part in parts:
+        if part.kind == "scope":
+            out.append(part.source)
+        else:
+            out.append(f"{part.prefix}{dehyphenate_dutch_word(part.core)}{part.suffix}")
+    return "".join(out)
 
 
 def _count_hyphen_delta(before: str, after: str) -> int:

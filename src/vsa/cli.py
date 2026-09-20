@@ -134,8 +134,8 @@ def _build_parser():
     syllabify = subparsers.add_parser(
         "syllabify",
         help=(
-            "Zet of verwijder lettergreepstreepjes in ongescoopte VSA-tekst "
-            "(Pyphen nl_NL; scopes ongemoeid)."
+            "Zet of verwijder lettergreepstreepjes in VSA-tekst "
+            "(Pyphen nl_NL; ook brugstreepjes op scope-grenzen)."
         ),
     )
     syllabify.add_argument(
@@ -167,8 +167,8 @@ def _build_parser():
         "--unsyllabify",
         action="store_true",
         help=(
-            "Verwijder lettergreepstreepjes uit ongescoopte tekst "
-            "(scopes en ELM-'-' blijven staan)."
+            "Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes; "
+            "scope-inhoud en ELM-'-' blijven staan)."
         ),
     )
 

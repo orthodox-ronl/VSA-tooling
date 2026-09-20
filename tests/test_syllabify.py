@@ -46,16 +46,33 @@ def test_scopes_and_frontmatter_untouched() -> None:
     result = syllabify_vsa_source(source)
     assert result.changed
     assert "marte{la_}{/ren}" not in result.text
-    assert "mar-te{la_}{/ren}" in result.text
-    assert "{/heb}ben" in result.text
+    assert "mar-te-{la_}-{/ren}" in result.text
+    assert "{/heb}-ben" in result.text
     assert "lij-den" in result.text
     assert "on-be-der-fe-lij-ke" in result.text
     assert "mach-te-lo-ze" in result.text
     assert result.text.startswith("---\nidentificatie:")
 
 
+def test_junction_hyphens_across_scopes() -> None:
+    source = "Voorloper van de Verlosser Jo{+\\han_}{/nes_}\n"
+    result = syllabify_vsa_source(source)
+    assert (
+        result.text
+        == "Voor-lo-per van de Ver-los-ser Jo-{+\\han_}-{/nes_}\n"
+    )
+    back = unsyllabify_vsa_source(result.text)
+    assert back.text == source
+
+
+def test_unsyllabify_removes_junction_hyphens() -> None:
+    source = "lij-den mar-te-{la_}-{/ren} Al-&-\n"
+    result = unsyllabify_vsa_source(source)
+    assert result.text == "lijden marte{la_}{/ren} Al-&-\n"
+
+
 def test_unsyllabify_leaves_scope_elms() -> None:
-    source = "lij-den mar-te{la_}{/ren} Al-&-\n"
+    source = "lij-den mar-te-{la_}-{/ren} Al-&-\n"
     result = unsyllabify_vsa_source(source)
     assert "lijden" in result.text
     assert "marte{la_}{/ren}" in result.text
@@ -147,7 +164,7 @@ def test_cli_directory_in_place(tmp_path: Path, capsys) -> None:
 
 def test_cli_unsyllabify_in_place(tmp_path: Path) -> None:
     path = tmp_path / "voorbeeld.vsa"
-    path.write_text("lij-den mar-te{la_}\n", encoding="utf-8")
+    path.write_text("lij-den mar-te-{la_}\n", encoding="utf-8")
     assert main(["syllabify", str(path), "--unsyllabify", "--in-place"]) == 0
     assert path.read_text(encoding="utf-8") == "lijden marte{la_}\n"
 

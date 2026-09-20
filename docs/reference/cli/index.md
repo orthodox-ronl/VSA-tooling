@@ -65,7 +65,7 @@ echo %ERRORLEVEL%
 | [`build-markdown`](build-markdown.md)            | Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.                         |
 | [`pdf`](pdf.md)                                  | Render één Markdownbestand (VSA, includes, pagebreaks) naar A4-PDF.                        |
 | [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).               |
-| [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in ongescoopte VSA-tekst (bestand/map; Pyphen nl_NL).                 |
+| [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).       |
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                  |
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en

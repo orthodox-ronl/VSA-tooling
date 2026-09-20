@@ -1,10 +1,10 @@
-# `vsa syllabify` — lettergreepstreepjes in ongescoopte VSA-tekst
+# `vsa syllabify` — lettergreepstreepjes in VSA-tekst
 
 Voeg orthografische lettergreepstreepjes toe aan woorden in de
 [VSA](@)-brontekst, zodat de bestaande MusicXML-export elk deel als eigen
 kwartnoot kan zetten (belangrijk voor Coria: elke lettergreep heeft minstens
-één noot nodig). Met `--unsyllabify` doe je het omgekeerde: streepjes weer
-weghalen.
+één noot nodig, en streepjes markeren waar een woord doorloopt). Met
+`--unsyllabify` doe je het omgekeerde: streepjes weer weghalen.
 
 ## Synopsis
 
@@ -16,16 +16,22 @@ vsa syllabify [-h] [--dry-run | --in-place] [--extension EXT] [--unsyllabify] pa
 
 Reciteertekst staat in veel [vsa-bestanden](@bron) als één woord
 (`lijden`, `onbederfelijke`). Cadensstukken zitten vaak al in scopes
-(`marte{la_}{/ren}`). `vsa syllabify` hypheneert **alleen** de platte tekst
-buiten `{…}` (AST-`TextNode`-inhoud) met Pyphen (`nl_NL`).
+(`marte{la_}{/ren}`). `vsa syllabify` hypheneert elk woord met Pyphen
+(`nl_NL`), inclusief woorden die over platte tekst en scopes heen lopen.
 
-- Scopes, toonhoogtemarkers (`[…:]`), YAML-frontmatter en HTML-comments
-  blijven staan.
+Tussen **alle** lettergrepen van hetzelfde woord komt een streepje — ook op
+de grens tussen tekst en `{…}`, en tussen opeenvolgende scopes. Zo wordt
+`Jo{+\han_}{/nes_}` → `Jo-{+\han_}-{/nes_}`.
+
+- De inhoud van scopes (zangelement, [EHM](@), [ELM](@)) blijft onaangeroerd;
+  alleen brugstreepjes `-` eromheen worden gezet of weggehaald.
+- Toonhoogtemarkers (`[…:]`), YAML-frontmatter en HTML-comments blijven staan.
 - Binnen scopes blijft `-` een [ELM](@); daar wordt niets gewijzigd — ook
   niet bij `--unsyllabify`.
-- Een woord dat al `-` bevat (handmatige zing-deling) blijft bij hypheneren
-  ongemoeid; bij `--unsyllabify` verdwijnen die streepjes wél uit ongescoopte
-  tekst.
+- Een woord dat al `-` bevat en helemaal buiten scopes staat (handmatige
+  zing-deling) blijft bij hypheneren ongemoeid; bij `--unsyllabify`
+  verdwijnen die streepjes wél. Over scope-grenzen heen worden breekpunten
+  opnieuw uit Pyphen afgeleid.
 - Dit is **geen** automatische stap bij `vsa musicxml`: bron en product
   blijven voorspelbaar. Na schrijven vernieuw je `.vsa.mxl` via
   `scripts\vsa-products.cmd` of `scripts\check.cmd`.
@@ -60,7 +66,7 @@ bij `--extension .syl.vsa`) worden overgeslagen, zodat je geen
 | `--dry-run`       | Nee       | Toon het resultaat zonder bestanden te schrijven.                                                 | Gedrag zonder schrijfmodus (preview) | Mutueel exclusief met `--in-place`.              |
 | `--in-place`      | Nee       | Schrijf het resultaat terug naar elk bronbestand.                                                 | Uit                                  | Niet combineren met `--extension`.               |
 | `--extension EXT` | Nee       | Schrijf naar sibling-bestanden met deze extensie (`.syl.vsa` of `syl.vsa` → `xyz.syl.vsa`).       | Uit                                  | Moet eindigen op `.vsa`; niet met `--in-place`.  |
-| `--unsyllabify`   | Nee       | Verwijder lettergreepstreepjes uit ongescoopte tekst i.p.v. ze toe te voegen.                     | Uit (hypheneren)                     | Scopes / ELM-`-` blijven staan.                  |
+| `--unsyllabify`   | Nee       | Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes) i.p.v. ze toe te voegen.           | Uit (hypheneren)                     | Scope-inhoud / ELM-`-` blijven staan.            |
 | `-h`, `--help`    | Nee       | Toon hulp voor dit subcommando.                                                                   | —                                    | —                                                |
 
 ## Output
@@ -105,7 +111,7 @@ vsa syllabify pad\naar\xyz.vsa --extension .syl.vsa
 
 Dat schrijft `pad\naar\xyz.syl.vsa`. Zelfde resultaat met `--extension syl.vsa`.
 
-Lettergreepstreepjes weer verwijderen (alleen TextNode-tekst):
+Lettergreepstreepjes weer verwijderen (brugstreepjes rond scopes inbegrepen):
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -122,8 +128,10 @@ scripts\vsa-products.cmd
 
 Voorbeeldtransformatie:
 
-| Voor               | Na (syllabify)        | Na (`--unsyllabify`) |
-| ------------------ | --------------------- | -------------------- |
-| `lijden`           | `lij-den`             | `lijden`             |
-| `onbederfelijke`   | `on-be-der-fe-lij-ke` | `onbederfelijke`     |
-| `marte{la_}{/ren}` | `mar-te{la_}{/ren}`   | `marte{la_}{/ren}`   |
+| Voor                       | Na (syllabify)                  | Na (`--unsyllabify`)     |
+| -------------------------- | ------------------------------- | ------------------------ |
+| `lijden`                   | `lij-den`                       | `lijden`                 |
+| `onbederfelijke`           | `on-be-der-fe-lij-ke`           | `onbederfelijke`         |
+| `marte{la_}{/ren}`         | `mar-te-{la_}-{/ren}`           | `marte{la_}{/ren}`       |
+| `Jo{+\han_}{/nes_}`        | `Jo-{+\han_}-{/nes_}`           | `Jo{+\han_}{/nes_}`      |
+| `{/heb}ben`                | `{/heb}-ben`                    | `{/heb}ben`              |
