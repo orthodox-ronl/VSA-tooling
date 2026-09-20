@@ -26,7 +26,12 @@ from .svg_renderer import SVGRenderer
 from .validation_display import format_validation_message
 from .validation_runner import validate_path
 from .resolve_catalogus import ResolveCatalogusError, write_resolved_markdown
-from .syllabify import syllabify_vsa_source
+from .syllabify import (
+    iter_vsa_files,
+    normalize_output_extension,
+    output_path_for,
+    transform_vsa_source,
+)
 from .yaml_frontmatter import frontmatter_to_block_metadata, parse_vsa_frontmatter
 
 
@@ -129,21 +134,42 @@ def _build_parser():
     syllabify = subparsers.add_parser(
         "syllabify",
         help=(
-            "Zet lettergreepstreepjes in ongescoopte VSA-tekst "
+            "Zet of verwijder lettergreepstreepjes in ongescoopte VSA-tekst "
             "(Pyphen nl_NL; scopes ongemoeid)."
         ),
     )
-    syllabify.add_argument("path", help="VSA-bestand (.vsa)")
+    syllabify.add_argument(
+        "path",
+        help="VSA-bestand (.vsa) of map (recursief alle .vsa).",
+    )
     syllabify_out = syllabify.add_mutually_exclusive_group()
     syllabify_out.add_argument(
         "--dry-run",
         action="store_true",
-        help="Toon resultaat op stdout zonder bestand te schrijven (default).",
+        help="Toon resultaat zonder bestanden te schrijven (default zonder schrijfmodus).",
     )
     syllabify_out.add_argument(
         "--in-place",
         action="store_true",
-        help="Schrijf het gehypheneerde resultaat terug naar path.",
+        help="Schrijf het resultaat terug naar elk bronbestand.",
+    )
+    syllabify.add_argument(
+        "--extension",
+        metavar="EXT",
+        default=None,
+        help=(
+            "Schrijf naast het bronbestand met deze extensie "
+            "(bijv. .syl.vsa of syl.vsa: xyz.vsa wordt xyz.syl.vsa). "
+            "Niet combineren met --in-place."
+        ),
+    )
+    syllabify.add_argument(
+        "--unsyllabify",
+        action="store_true",
+        help=(
+            "Verwijder lettergreepstreepjes uit ongescoopte tekst "
+            "(scopes en ELM-'-' blijven staan)."
+        ),
     )
 
     musicxml = subparsers.add_parser("musicxml")
@@ -452,44 +478,92 @@ def _cmd_pdf(args, config):
 
 def _cmd_syllabify(args) -> int:
     source_path = Path(args.path)
-    if not source_path.is_file():
-        print(f"Bestand niet gevonden: {source_path}", file=sys.stderr)
-        return 1
-    if source_path.suffix.lower() != ".vsa":
+    if args.in_place and args.extension:
         print(
-            f"syllabify verwacht een .vsa-bestand, kreeg: {source_path}",
+            "syllabify: gebruik --in-place of --extension, niet beide.",
             file=sys.stderr,
         )
         return 1
 
-    original = source_path.read_text(encoding="utf-8")
+    extension: str | None = None
+    if args.extension is not None:
+        try:
+            extension = normalize_output_extension(args.extension)
+        except ValueError as exc:
+            print(f"syllabify: {exc}", file=sys.stderr)
+            return 1
+
+    write_mode = bool(args.in_place or extension)
+    # --dry-run forceert geen schrijven; zonder schrijfmodus is default dry-run.
+    dry_run = args.dry_run or not write_mode
+
     try:
-        result = syllabify_vsa_source(original)
-    except Exception as exc:
-        print(f"{source_path}: {exc}", file=sys.stderr)
+        files = iter_vsa_files(source_path)
+    except FileNotFoundError:
+        print(f"Pad niet gevonden: {source_path}", file=sys.stderr)
+        return 1
+    except ValueError as exc:
+        print(f"syllabify: {exc}", file=sys.stderr)
         return 1
 
-    if args.in_place:
-        if result.changed:
-            source_path.write_text(result.text, encoding="utf-8")
+    if not files:
+        print(f"Geen .vsa-bestanden gevonden onder: {source_path}", file=sys.stderr)
+        return 1
+
+    multi = len(files) > 1 or source_path.is_dir()
+    any_error = False
+    verb = "verwijderd" if args.unsyllabify else "toegevoegd"
+
+    for file_path in files:
+        try:
+            target = output_path_for(file_path, extension)
+        except ValueError as exc:
+            print(f"{file_path}: {exc}", file=sys.stderr)
+            any_error = True
+            continue
+
+        if extension is not None and file_path.name.lower().endswith(extension.lower()):
+            print(
+                f"{file_path}: overgeslagen (naam eindigt al op {extension})",
+                file=sys.stderr,
+            )
+            continue
+
+        original = file_path.read_text(encoding="utf-8")
+        try:
+            result = transform_vsa_source(original, unsyllabify=args.unsyllabify)
+        except Exception as exc:
+            print(f"{file_path}: {exc}", file=sys.stderr)
+            any_error = True
+            continue
+
         status = (
-            f"{result.replacements} lettergreepstreepje(s) toegevoegd"
+            f"{result.replacements} lettergreepstreepje(s) {verb}"
             if result.changed
             else "geen wijzigingen"
         )
-        print(f"{source_path}: {status}")
-        return 0
 
-    # Default en --dry-run: toon resultaat, schrijf niets.
-    sys.stdout.write(result.text)
-    if not result.text.endswith("\n"):
-        sys.stdout.write("\n")
-    print(
-        f"(dry-run — {result.replacements} lettergreepstreepje(s); "
-        "bestand niet geschreven)",
-        file=sys.stderr,
-    )
-    return 0
+        if dry_run:
+            if multi:
+                print(f"{file_path} -> {target}: {status} (dry-run)")
+            else:
+                sys.stdout.write(result.text)
+                if not result.text.endswith("\n"):
+                    sys.stdout.write("\n")
+                print(
+                    f"(dry-run — {status}; bestand niet geschreven)",
+                    file=sys.stderr,
+                )
+            continue
+
+        if result.changed or target != file_path:
+            target.write_text(result.text, encoding="utf-8")
+        if target == file_path:
+            print(f"{file_path}: {status}")
+        else:
+            print(f"{file_path} -> {target}: {status}")
+
+    return 1 if any_error else 0
 
 
 def _cmd_resolve_catalogus(args) -> int:
