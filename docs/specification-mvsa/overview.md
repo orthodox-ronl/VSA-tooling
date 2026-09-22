@@ -9,7 +9,7 @@ gezongen tekst**, soms in meerdere talen of transliteraties tegelijk. Eenstemmig
 [VSA](@) mengt tekst en hoogte in één regel (`{/in}`). Voor meerstemmig typwerk
 in VSCode scheidt **mvsa** die rollen:
 
-- **lyrics-regels** (`L:`, `L1:`, …): tekst, duur ([ELM](enkelvoudige-lengte-modifier@)),
+- **lyrics-regels** (`L:`, `L1:`, …): tekst, duur ([ELM](@)),
   melisma, [reciteertoon](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md);
 - **stemregels** (`S:`, `A:`, `T:`, `B:`, `S1:`, …): alleen toonhoogte.
 
@@ -56,7 +56,7 @@ bij rendering/export, niet bij mvsa-brontekst.
 | `@mode`   | `major`                |
 | `@oct`    | `0` voor elke stem     |
 
-Zie [Semantiek — directives](semantics.md#directives-domodeoct).
+Zie [Semantiek — directives](semantics.md#directives-do-mode-oct).
 
 ## Termen in deze specificatie
 

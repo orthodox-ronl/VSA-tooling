@@ -13,8 +13,8 @@ Lees eerst: [Doel en scope](overview.md).
 
 | Map                                                                    | Rol                                                      |
 | ---------------------------------------------------------------------- | -------------------------------------------------------- |
-| [`docs/specification/`](../specification/)                             | Normatieve eenstemmige [VSA](@) 1.0                      |
-| [`docs/specification-vsa-templates/`](../specification-vsa-templates/) | Draft melodietemplates (YAML)                            |
+| [`docs/specification/`](../specification/README.md)                             | Normatieve eenstemmige [VSA](@) 1.0                      |
+| [`docs/specification-vsa-templates/`](../specification-vsa-templates/README.md) | Draft melodietemplates (YAML)                            |
 | **`docs/specification-mvsa/`** (deze)                                  | Draft mvsa-syntax en -semantiek                          |
 | [`docs/plans/mvsa-v0-syntax.md`](../plans/mvsa-v0-syntax.md)           | Werkplan / geschiedenis; bij conflict wint deze draft    |
 

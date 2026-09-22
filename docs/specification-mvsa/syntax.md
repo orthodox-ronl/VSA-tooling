@@ -14,7 +14,7 @@ hieronder aangegeven.
 | Soort regel  | Vorm                                                                                 |
 | ------------ | ------------------------------------------------------------------------------------ |
 | Commentaar   | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
-| Directive    | Regel die begint met `@` (zie [Semantiek](semantics.md#directives-domodeoct))        |
+| Directive    | Regel die begint met `@` (zie [Semantiek](semantics.md#directives-do-mode-oct))        |
 | Sectiekop    | `@sectie` + spatie + id                                                              |
 | LSATB-inhoud | Begint met een LSATB-marker                                                          |
 
@@ -150,7 +150,7 @@ Die hele run is **één** lengte-positie voor de stemmen.
 L: ~hei-li-ge ~On sterf'_. …
 ```
 
-Zie [Semantiek — pitfalls rond `~`](semantics.md#pitfalls-rond-).
+Zie [Semantiek — pitfalls rond `~`](semantics.md#pitfalls-rond).
 
 ### ELM’s
 
