@@ -1,0 +1,19 @@
+# Voorbeelden (draft)
+
+Normatieve of semi-normatieve voorbeelden staan als experimentele bestanden
+onder [`examples/mvsa/`](../../examples/mvsa/). Die map is **geen** invoer voor
+`vsa validate` zolang er geen mvsa-parser is.
+
+| Bestand                                                                                        | Wat het illustreert                                                           |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`alleluia-toon-8.mvsa`](../../examples/mvsa/alleluia-toon-8.mvsa)                             | Recite, laddergraden, toonnamen, `@oct`, EHM                                  |
+| [`alleluia-toon-1.mvsa`](../../examples/mvsa/alleluia-toon-1.mvsa)                             | Vrije SATB, relatief                                                          |
+| [`kleine-intocht-zondag-hemelum.mvsa`](../../examples/mvsa/kleine-intocht-zondag-hemelum.mvsa) | Omzetting uit MusicXML; absolute octaafcijfers                                |
+| [`trisagion-8a-slav-hemelum.mvsa`](../../examples/mvsa/trisagion-8a-slav-hemelum.mvsa)         | ELM’s, melisma, recite; experimenteel blokhergebruik (nog **niet** normatief) |
+
+Werkplan met woordenlijst en achtergrond:
+[`docs/plans/mvsa-v0-syntax.md`](../plans/mvsa-v0-syntax.md).
+
+Bij het bijwerken van voorbeelden: streef naar de canonieke vorm uit
+[Syntax](syntax.md) (woordstreepjes, `|` / `||` op alle LSATB-regels). Oudere
+schetsen in hetzelfde bestand mogen als commentaar blijven staan.

@@ -16,8 +16,9 @@ Deze tabel legt vast uit welke bestaande documenten de geconsolideerde specifica
 
 | Bron                                                                | Reden                                                                          |
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `docs/plans/mvsa-v0-syntax.md`                                  | werkontwerp meerstemmige invoer (mvsa); niet normatief                         |
-| `docs/plans/vsa-polyphony-proposal.md`                          | vervangen door mvsa-v0; alleen doorverwijzing + open restpunten                |
+| `docs/specification-mvsa/`                                          | draft mvsa; nog niet normatief VSA 1.0; zie die map                            |
+| `docs/plans/mvsa-v0-syntax.md`                                      | werkontwerp/geschiedenis mvsa; bij conflict wint `specification-mvsa/`         |
+| `docs/plans/vsa-polyphony-proposal.md`                              | vervangen door mvsa; alleen doorverwijzing + open restpunten                   |
 | `docs/spec/vsa-spec-v1.md` (historisch, zie `git show 9ff66f94^:…`) | oudere versie; vervangen door consolidatie in deze map                         |
 | `docs/todo*.md`                                                     | open werk; hoort in proces/history, niet in normatieve specificatie            |
 | `docs/architecture/parser-stap-*.md` / `docs/history/parser-steps/` | implementatiegeschiedenis                                                      |

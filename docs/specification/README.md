@@ -26,3 +26,6 @@ buiten deze map.
 | [Versioning](versioning.md)         | Versiebeleid van de specificatie.                                                                                                                    |
 | [Traceability](traceability.md)     | Herkomst van de geconsolideerde onderdelen.                                                                                                          |
 | [Open punten](open-points.md)       | Bekende open specificatievragen.                                                                                                                     |
+
+Draft meerstemmige invoer (nog niet VSA 1.0):
+[`docs/specification-mvsa/`](../specification-mvsa/README.md).

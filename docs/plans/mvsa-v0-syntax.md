@@ -2,20 +2,24 @@
 
 | Veld            | Waarde                                                                                                                                    |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**      | niet-normatief werkontwerp                                                                                                                |
+| **Status**      | werkontwerp / geschiedenis; draft-spec is leidend                                                                                         |
 | **Doel**        | Intypbare SATB + lyrics in VSCode; later koppelbaar aan [vsa-templates](../specification-vsa-templates/README.md) zonder nodeloos typwerk |
 | **Vervangt**    | het eerdere [vsa-polyphony-proposal.md](vsa-polyphony-proposal.md) (alleen nog doorverwijzing + wat daaruit open blijft)                  |
+| **Draft-spec**  | [`docs/specification-mvsa/`](../specification-mvsa/README.md)                                                                             |
 | **Gerelateerd** | [specification-vsa-templates](../specification-vsa-templates/README.md)                                                                   |
 
-Dit document is het **werkplan voor meerstemmige invoer (mvsa)**. Het neemt de
-doelen van de eerdere polyfonie-schets over en kiest een concrete schrijfsyntax
-(L-regel + stemregels). Wat uit die schets nog niet is besloten, staat in §10.
+Dit document is het **werkplan** voor meerstemmige invoer (mvsa): achtergrond,
+experimenten en eerdere beslissingen. De **draft-specificatie** staat in
+[`docs/specification-mvsa/`](../specification-mvsa/README.md). Bij conflict over
+mvsa-regels wint die draft. Wat uit de oude polyfonie-schets nog open is, staat
+in §10 en in [specification-mvsa/open-points.md](../specification-mvsa/open-points.md).
 
 Templates (laag 2/3) komen alleen aan bod waar de syntax daarop moet anticiperen
 (`~` voor de [reciteertoon](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)).
 
-Bij tegenstrijdigheid met de officiële VSA-specificatie wint die specificatie
-tot dit plan is overgenomen.
+Bij tegenstrijdigheid met de officiële **eenstemmige** VSA-specificatie over
+gedeelde tekens wint die VSA-spec tot de mvsa-draft die keuzes expliciet
+overneemt of afwijkt.
 
 ### Doelen (uit de eerdere schets, hier gehandhaafd)
 
@@ -563,25 +567,33 @@ blijft voorlopig leidend tot mvsa die rol overneemt.
 
 ## 9. Beslissingen vastgelegd in dit plan
 
+Normatieve formulering (canonieke vorm, secties, sticky directives):
+[`docs/specification-mvsa/`](../specification-mvsa/README.md).
+Samenvatting hieronder; bij conflict wint de draft-spec.
+
 | Onderwerp                | Keuze                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Melisma in L             | Vorm **A** (één L-stuk: `Al-&-&-&.&.&-`)                                                                                                 |
-| Woordstreepjes           | `barm-har_`, `barm har_`, `barm- har_` alle drie ok; op de **L-regel** scheiden streepjes én spaties L-stukken (plus ELM+letters)        |
+| Melisma in L             | Vorm **A** (één L-stuk: `Al-&-&-&.&.&-` of ELM-`~`: `Ster~&~&~`)                                                                         |
+| Woordstreepjes           | Canoniek: `-` tussen lettergrepen van hetzelfde woord; geen `-` tussen woorden; kuiser mag tolerant input herstellen                     |
 | Brokgrens stem           | Alleen spaties; kale `-` = EHM “zelfde toon”; `so-` = octaafsuffix                                                                       |
 | Accolades in L           | **Nee** in mvsa v0                                                                                                                       |
-| Maatstreep               | `\|`; herhaling `\|:` / `:\|`                                                                                                            |
-| Recite                   | prefix `~` op L; ook `~Al-le-lu-ia~Al-le-lu-ia` toegestaan, spatie aanbevolen                                                            |
+| Maatstreep               | `\|`; herhaling `\|:` / `:\|`; sectie-einde `\|\|` / `:\|\|` op **alle** LSATB-regels                                                    |
+| Sectie                   | Optioneel `@sectie` *id*; eindigt alleen bij `\|\|` / `:\|\|`; meerdere LSATB-systemen per sectie toegestaan                             |
+| LSATB-systeem            | Aaneengesloten `[LSATB]\d*:`-regels; eindigt op `\|` of `\|\|`; vaste marker-volgorde binnen de sectie                                   |
+| Directives               | Sticky `@do` / `@mode` / `@oct` (defaults `F4` / `major` / `0`); geldig vanaf eerstvolgend LSATB-systeem                                 |
+| Recite                   | prefix `~` op L; ELM-`~` blijft duur 1×; beide rollen mogen niet verward worden                                                          |
 | Hoogte schrijven         | **EHM en/of laddergraad** (do-re-mi én toonnamen a–g); mix toegestaan                                                                    |
 | Laddergraad-namen        | `so` = `sol`; `si` = `ti`; toonnamen `f`/`Bb`/`fis`/`bes` bij gegeven `@do`                                                              |
 | Octaafsuffix             | `so-` = `so-1`; altijd ±12 halve tonen. Ongemarkeerd = do-octaaf. C3/D3/E3 bij do=F: `c-2`/`so-2`, niet `c-`.                            |
 | Octaafcijfer (a–g)       | optioneel `g3` `c3` `bb3`: wetenschappelijk, wrap bij C, negeert `@oct`; niet op do-re-mi                                                |
 | Kruis/mol op laddergraad | achter de naam: `#` / `b` (`fa#`, `sib`); `+`/`-` = octaaf, geen kruis                                                                   |
-| Schrijfoctaaf            | `@oct` of `B[-1]:` — suffix telt t.o.v. die stem; weglaten = 0 voor alle stemmen                                                         |
+| Schrijfoctaaf            | `@oct` (canonieke vorm); suffix telt t.o.v. die stem; weglaten = 0 voor alle stemmen                                                     |
 | `@start`                 | Alleen nodig (of handig) in **relatieve** stijl; niet verplicht bij pure laddergraden                                                    |
 | Ankers                   | Begin + tussendoor + eind horen bij relatieve stijl; bij laddergraden volstaat opschrijven                                               |
-| Label-start              | `[-:S]`, `[\6:T]` blijft equivalent aan `@start`; `T[-1]:` is schrijfoctaaf (§2.4)                                                       |
-| Tekstbron                | Één **L-regel** (niet genummerde `${n}`-placeholders in stemregels)                                                                      |
+| Label-start              | `[-:S]`, `[\6:T]` blijft equivalent aan `@start`; oudere `T[-1]:`-schrijfoctaaf → voorkeur `@oct`                                        |
+| Tekstbron                | Één of meer lyrics-regels (`L` / `L1` / …); geen `${n}`-placeholders in stemregels                                                       |
 | Stemmen t.o.v. elkaar    | In v0 **gelijkwaardig** uitgeschreven; overlays t.o.v. S = open punt (§10)                                                               |
+| Blokhergebruik           | **Niet** in v0-norm; experiment blijft in `examples/mvsa/`                                                                               |
 
 ### Bewust verlaten uit de eerdere polyfonie-schets
 
@@ -596,17 +608,20 @@ blijft voorlopig leidend tot mvsa die rol overneemt.
 
 ## 10. Open punten (bewust later)
 
+Korte lijst ook in
+[specification-mvsa/open-points.md](../specification-mvsa/open-points.md).
+
 ### Uit mvsa v0 zelf
 
 - Parser: precieze grens van een `~`-run bij streepjes vs. spaties vs. plakvorm.
 - Optionele template-slots overslaan (`?` / open / link).
 - Chromatische `+`/`b` vs `#` in **eenstemmige VSA-EHM**. Op mvsa-laddergraden:
   `+`/`-` = octaaf, kruis/mol = `#`/`b` of `fis`/`bes` (§2.2.2).
-- Systeemscheiding: lege regel vs. `@system`.
 - Of een eindanker een *extra* hoogte-stuk is (alleen controle) of het *laatste*
   klinkende event mag vervangen — nu: anker **is** een gewoon hoogte-stuk met
   laddergraad (klinkt / zet de lopende toon).
-- Officiële opname in `specification/` na experimenten.
+- Kuiser + CLI (`vsa validate` voor `.mvsa`); daarna eventueel opname onder
+  `docs/specification/` wanneer de draft stabiel is.
 
 ### Nog meenemen uit de eerdere polyfonie-schets
 
@@ -648,13 +663,17 @@ events heeft, en of `@include` een alias van `=` mag zijn.
 
 ---
 
-## 12. Leesvolgorde voor VSCode
+## 12. Leesvolgorde
 
-1. Woordenlijst bovenaan.
-2. §2 (EHM vs laddergraad, toonnamen, schrijfoctaaf).
-3. §6 Alleluia toon 8 (`~` + beide hoogtestijlen).
-4. §7 vrije SATB (1:1 L-stukken ↔ hoogte-stukken).
+1. Draft-spec: [Doel en scope](../specification-mvsa/overview.md) →
+   [Syntax](../specification-mvsa/syntax.md) →
+   [Semantiek](../specification-mvsa/semantics.md).
+2. Dit plan: woordenlijst + §2 (EHM vs laddergraad, toonnamen, schrijfoctaaf).
+3. §6 Alleluia toon 8 (`~` + beide hoogtestijlen) en
+   `examples/mvsa/alleluia-toon-8.mvsa`.
+4. §7 vrije SATB + `examples/mvsa/alleluia-toon-1.mvsa`.
 5. §9–§10 (beslissingen + open punten).
-6. §11 blokhergebruik + `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`.
+6. §11 blokhergebruik + `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`
+   (experimenteel, niet normatief).
 7. Daarna [tropaar-toon-4](../specification-vsa-templates/library/tropaar-toon-4/README.md)
    als je stemregels als formule-slots wilt hergebruiken.

@@ -131,6 +131,15 @@ nav:
     - Conformiteit: specification-vsa-templates/conformance.md
     - Open punten: specification-vsa-templates/open-points.md
     - Versionering: specification-vsa-templates/versioning.md
+  - mvsa (draft):
+    - Overzicht: specification-mvsa/README.md
+    - Doel en scope: specification-mvsa/overview.md
+    - Syntax: specification-mvsa/syntax.md
+    - Semantiek: specification-mvsa/semantics.md
+    - Validatie: specification-mvsa/validation.md
+    - Voorbeelden: specification-mvsa/examples.md
+    - Open punten: specification-mvsa/open-points.md
+    - Versionering: specification-mvsa/versioning.md
   - Referentie:
     - Overzicht: reference/README.md
     - Voorbeelden:
