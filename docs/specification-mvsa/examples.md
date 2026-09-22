@@ -1,8 +1,12 @@
 # Voorbeelden (draft)
 
 Normatieve of semi-normatieve voorbeelden staan als experimentele bestanden
-onder [`examples/mvsa/`](../../examples/mvsa/). Die map is **geen** invoer voor
-`vsa validate` zolang er geen mvsa-parser is.
+onder [`examples/mvsa/`](../../examples/mvsa/). Valideren:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa validate examples\mvsa
+```
 
 | Bestand                                                                                        | Wat het illustreert                                                           |
 | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |

@@ -1,9 +1,16 @@
 # mvsa-experimenten
 
-De map `examples/mvsa` is **geen** invoer voor `vsa validate` zolang er geen
-mvsa-parser is. De `.mvsa`-bestanden volgen de draft-spec
+De map `examples/mvsa` is **geen** invoer voor `vsa validate` (eenstemmig).
+Wel:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa validate examples\mvsa
+```
+
+De `.mvsa`-bestanden volgen de draft-spec
 [`docs/specification-mvsa/`](../../docs/specification-mvsa/README.md).
-Achtergrond en eerdere schetsen:
+Achtergrond:
 [`docs/plans/mvsa-v0-syntax.md`](../../docs/plans/mvsa-v0-syntax.md).
 
 Open de `.mvsa`-bestanden in VSCode met een **monospace**-lettertype.

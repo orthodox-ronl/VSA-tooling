@@ -1,7 +1,7 @@
 # Specificatie mvsa (draft)
 
-**Status:** draft v0 (werkontwerp overgenomen uit experimenten; nog geen
-parser/CLI).
+**Status:** draft v0 (structuur + sync via `vsa mvsa validate`; nog geen
+export).
 
 Deze map is de specificatie van **mvsa**: meerstemmige invoer als
 tekstbestanden (typisch `.mvsa`) met lyrics-regels en stemregels, bedoeld voor
@@ -35,8 +35,9 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 
 ## Bewust buiten scope (nu)
 
-- Werkende parser of `vsa`-subcommanden voor `.mvsa`;
 - MusicXML-/MSCZ-export uit mvsa;
 - Blokhergebruik (`@voices`, secties kopiëren);
 - Overlays van A/T/B t.o.v. S;
 - Pagina-layout (MuseScore-“systemen” op een blad).
+
+Wel beschikbaar: `vsa mvsa validate` (structuur + sync-telling).

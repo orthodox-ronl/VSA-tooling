@@ -1,7 +1,16 @@
 # Validatie (draft)
 
-**Status:** draft v0. Er is nog geen `vsa`-commando dat `.mvsa` valideert; deze
-regels zijn het contract voor een toekomstige validator.
+**Status:** draft v0.
+
+## CLI
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa validate examples\mvsa
+vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+```
+
+Exitcode `0` = geen errors (warnings mogen). Exitcode `1` = minstens één error.
 
 ## Ernst (voorstel)
 
@@ -31,18 +40,19 @@ regels zijn het contract voor een toekomstige validator.
 
 ## Directives
 
-8. Onbekende `@`-directives: error of warning (v0: error voor alles behalve
-   `@do`, `@mode`, `@oct`, `@sectie`).
+8. Onbekende `@`-directives: error (v0 toegestaan: `@do`, `@mode`, `@oct`,
+   `@sectie`, `@start`).
 9. `@do` / `@mode` / `@oct` met ongeldige waarde: error.
 
 ## Canonieke vorm (warning)
 
-10. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden.
+10. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden
+    (nog niet volledig geautomatiseerd).
 11. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
     had kunnen syncen — of, na kuiser, alsnog inconsistent: error.
 
 ## Buiten v0-validatie
 
 - Muzikale “juistheid” t.o.v. een blad (alleen telling en vorm);
-- blokhergebruik-referenties;
+- blokhergebruik-referenties (`@voices`, `L'`, deelbereiken);
 - export naar MusicXML/MSCZ.

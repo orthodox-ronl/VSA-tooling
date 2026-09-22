@@ -8,7 +8,7 @@
 | Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                            | Alleen als corpuswerk het vraagt                                               |
 | Chromatische `+` in eenstemmige VSA-EHM | Los van mvsa-laddergraden (waar `+` = octaaf)                           | Via VSA 1.0-spec                                                               |
 | Kuiser-implementatie                    | Gedrag is beschreven; tool nog niet                                     | Tooling-traject                                                                |
-| Parser / CLI                            | Geen `.mvsa`-validate of export in v0-draft                             | Na stabiele syntax                                                             |
+| Parser / CLI                            | `vsa mvsa validate` dekt structuur + sync; geen export                  | Uitbreiden (kuiser-warnings, export)                                           |
 | Template-brug                           | Koppeling aan [vsa-templates](../specification-vsa-templates/README.md) | Later                                                                          |
 
 Werkplan-restpunten:

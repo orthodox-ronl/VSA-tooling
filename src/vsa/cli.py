@@ -233,6 +233,20 @@ def _build_parser():
         help="template.yaml of map met template.yaml-bestanden.",
     )
 
+    mvsa = subparsers.add_parser(
+        "mvsa",
+        help="mvsa draft: meerstemmige .mvsa-bestanden valideren.",
+    )
+    mvsa_sub = mvsa.add_subparsers(dest="mvsa_command")
+    m_validate = mvsa_sub.add_parser(
+        "validate",
+        help="Valideer .mvsa (structuur + sync-telling; draft-spec).",
+    )
+    m_validate.add_argument(
+        "path",
+        help=".mvsa-bestand of map met .mvsa-bestanden.",
+    )
+
     pdf = subparsers.add_parser(
         "pdf",
         help="Render een Markdownbestand (VSA, includes, pagebreaks) naar PDF.",
@@ -305,6 +319,9 @@ def _run(args):
 
     if args.command == "template":
         return _cmd_template(args)
+
+    if args.command == "mvsa":
+        return _cmd_mvsa(args)
 
     if args.command == "pdf":
         return _cmd_pdf(args, config)
@@ -773,6 +790,44 @@ def _cmd_template(args) -> int:
         return _cmd_template_validate(args)
     print("Gebruik: vsa template validate <pad>", file=sys.stderr)
     return 1
+
+
+def _cmd_mvsa(args) -> int:
+    if getattr(args, "mvsa_command", None) == "validate":
+        return _cmd_mvsa_validate(args)
+    print("Gebruik: vsa mvsa validate <pad>", file=sys.stderr)
+    return 1
+
+
+def _cmd_mvsa_validate(args) -> int:
+    from .mvsa_validate import (
+        collect_mvsa_files,
+        format_diagnostic,
+        validate_mvsa_path,
+    )
+
+    path = Path(args.path)
+    if not path.exists():
+        print(f"Pad niet gevonden: {path}", file=sys.stderr)
+        return 1
+    files = collect_mvsa_files(path)
+    if not files:
+        print(f"Geen .mvsa gevonden onder {path}", file=sys.stderr)
+        return 1
+    errors = 0
+    for mvsa_path in files:
+        diags = validate_mvsa_path(mvsa_path)
+        fatal = [d for d in diags if d.severity == "error"]
+        for d in diags:
+            print(format_diagnostic(d, mvsa_path), file=sys.stderr if d.severity == "error" else sys.stdout)
+        if fatal:
+            errors += 1
+            continue
+        print(f"{mvsa_path}: OK")
+    if errors:
+        print(f"{errors} mvsa-bestand(en) ongeldig", file=sys.stderr)
+        return 1
+    return 0
 
 
 def _cmd_template_validate(args) -> int:
