@@ -1,6 +1,6 @@
 # Specificatie mvsa (draft)
 
-**Status:** draft v0 (`vsa mvsa validate` + MusicXML-export + `normalize`).
+**Status:** draft v0 (`validate` + MusicXML + MSCZ + import + `normalize`).
 
 Deze map is de specificatie van **mvsa**: meerstemmige invoer als
 tekstbestanden (typisch `.mvsa`) met lyrics-regels en stemregels, bedoeld voor
@@ -38,7 +38,7 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 - Blokhergebruik (`@voices`, secties kopiëren);
 - Overlays van A/T/B t.o.v. S;
 - Pagina-layout (MuseScore-“systemen” op een blad);
-- MSCZ-export; parallelle `L1` als tweede lyric-nummer
+- Parallelle `L1` als tweede lyric-nummer
   (MSCZ/import/normalize: [mvsa-conversions](../plans/mvsa-conversions.md)).
 
-Wel beschikbaar: `vsa mvsa validate`, `vsa mvsa musicxml`, `vsa mvsa normalize`.
+Wel beschikbaar: `vsa mvsa validate`, `musicxml`, `mscz`, `import`, `normalize`.

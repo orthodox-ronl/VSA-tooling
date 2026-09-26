@@ -8,7 +8,7 @@
 | Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                            | Alleen als corpuswerk het vraagt                                               |
 | Chromatische `+` in eenstemmige VSA-EHM | Los van mvsa-laddergraden (waar `+` = octaaf)                           | Via VSA 1.0-spec                                                               |
 | Kuiser-implementatie                    | Gedrag is beschreven; tool nog niet                                     | Tooling-traject ([mvsa-conversions](../plans/mvsa-conversions.md) stap 2)      |
-| Parser / CLI                            | `validate` + `musicxml` + `normalize` (SATB; één L-laag)                | MSCZ; import; bron-commands — zie [mvsa-conversions](../plans/mvsa-conversions.md) |
+| Parser / CLI                            | Top-level `mvsa`/`mxl`/`mscz` + `vsa mvsa …`                             | klaar (stap 5) — zie [mvsa-conversions](../plans/mvsa-conversions.md) |
 | Template-brug                           | Koppeling aan [vsa-templates](../specification-vsa-templates/README.md) | Later                                                                          |
 
 Conversies / canonieke vormen (matrix + diagonaal):

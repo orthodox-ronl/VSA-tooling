@@ -22,9 +22,9 @@ canonieke vorm brengen (zelfde formaat).
 | Bron ↓ \ Doel → | `.vsa` | `.mvsa` | `.mxl` / `.musicxml` | `.mscz` |
 | --------------- | ------ | ------- | -------------------- | ------- |
 | **`.vsa`** | **normalize** (canonieke VSA-schrijfvorm; bestaand pad waar relevant) | — (niet v0; eenstemmig ≠ mvsa) | `vsa musicxml` (bestaat) | via MXL of template-pad (bestaat deels voor corpus) |
-| **`.mvsa`** | — | **`normalize`** (pitch-vorm + `@oct`/layout) | `mvsa musicxml` (bestaat deels) | **nieuw** (keten of native) |
-| **`.mxl` / `.musicxml`** | — (later / out of scope tenzij nodig) | **`import`** → mvsa | **normalize** (ons playback-/engraving-profiel) | MuseScore CLI / workflow |
-| **`.mscz`** | — | **`import`** → mvsa | export uit MuseScore / tooling | **normalize** (ons partituur-profiel; beperkt wat wij vastleggen) |
+| **`.mvsa`** | — | **`normalize`** (pitch-vorm + `@oct`/layout) | `mvsa musicxml` (bestaat) | **`mscz`** via mxl→MuseScore (bestaat) |
+| **`.mxl` / `.musicxml`** | — (later / out of scope tenzij nodig) | **`import`** → mvsa (bestaat) | **normalize** (ons playback-/engraving-profiel) | MuseScore CLI / workflow |
+| **`.mscz`** | — | **`import`** → mvsa (via mxl; bestaat) | export uit MuseScore / tooling | **normalize** (ons partituur-profiel; beperkt wat wij vastleggen) |
 
 Legenda status in dit traject:
 
@@ -97,33 +97,12 @@ Elke conversie-entry leest één brontype:
 | Command | Bron | Acties (richting) |
 | ------- | ---- | ----------------- |
 | `vsa` | `.vsa` | validate, musicxml, svg, …; later `normalize` waar zinvol |
-| `mvsa` | `.mvsa` | validate, musicxml, mscz, **normalize**, … |
-| `mxl` | `.mxl` / `.musicxml` | import → mvsa; normalize (profiel); → mscz |
-| `mscz` | `.mscz` | import → mvsa; normalize (profiel); → mxl |
+| `mvsa` / `vsa mvsa` | `.mvsa` | validate, musicxml, mscz, import, normalize |
+| `mxl` | `.mxl` / `.musicxml` | import → mvsa; mscz (MuseScore) |
+| `mscz` | `.mscz` | import → mvsa; mxl (MuseScore) |
 
-**Transitie:** bestaande `vsa mvsa …` en `vsa musicxml` blijven werken tot de
-top-level commands stabiel zijn (alias of wrapper). Windows: voorkeur voor
-duidelijke cmd-voorbeelden per broncommand in man-pagina’s.
-
-Huidig (tot migratie):
-
-```text
-vsa mvsa validate PATH
-vsa mvsa musicxml PATH [-o OUT] [--section ID]
-```
-
-Gepland (namen mogen licht afwijken; wel `--help` + man-pagina):
-
-```text
-mvsa validate PATH
-mvsa musicxml PATH [-o OUT] [--section ID] [--profile playback|engraving]
-mvsa mscz PATH [-o OUT] [--section ID]
-mvsa normalize PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style {@oct,marker}
-mxl import PATH [-o OUT] --pitch … --octave-style …
-mscz import PATH [-o OUT] --pitch … --octave-style …
-```
-
-Tot top-level `mvsa` bestaat: zelfde subcommando’s onder `vsa mvsa …`.
+**Transitie:** `vsa mvsa …` blijft de volledige alias van top-level `mvsa`.
+Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
 
 ---
 
@@ -131,7 +110,7 @@ Tot top-level `mvsa` bestaat: zelfde subcommando’s onder `vsa mvsa …`.
 
 | Onderwerp | Keuze in dit plan |
 | --------- | ----------------- |
-| MSCZ uit mvsa | Eerst **keten** `mvsa → mxl → mscz` (MuseScore CLI), documenteren; native MSCX alleen als partituur-layout MusicXML overleeft niet |
+| MSCZ uit mvsa | **Keten** `mvsa → mxl → mscz` (MuseScore CLI) — geïmplementeerd; native MSCX alleen als partituur-layout MusicXML overleeft niet |
 | Octaaf in output | Altijd `@oct` in gegenereerde canonieke mvsa |
 | Import | Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ |
 | Scope | Geen `@voices` / blokhergebruik tenzij export het eist |
@@ -161,28 +140,47 @@ vsa mvsa normalize PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style @oct
 identiek; ook `doremi → abc → doremi` en `--pitch vsa` pitch-equivalent
 (`tests/test_mvsa_normalize.py`).
 
-### Stap 3 — MSCZ-export uit mvsa
+### Stap 3 — MSCZ-export uit mvsa ✅
 
-Keten documenteren + CLI `mvsa mscz` (of `vsa mvsa mscz`). Coria blijft via
-`.mxl` playback-profiel.
+Keten: `.mvsa` → `.mxl` → MuseScore CLI → `.mscz`.
 
-**Criterium:** gegenereerde `.mscz` opent in MuseScore 4 en toont SATB + lyrics
-bruikbaar voor de partituur-workflow (niet alleen “toevallig open”).
+```text
+vsa mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
+```
 
-### Stap 4 — Import (score → mvsa)
+- Module: `vsa.mvsa_mscz` + gedeelde `vsa.musescore_cli`.
+- Geen native MSCX-schrijver in deze slice.
 
-`mxl import` / `mscz import` met `--pitch` en `--octave-style @oct`.
+**Criterium (gehaald):** met MuseScore 4 lokaal schrijft
+`export_mvsa_to_mscz` een `.mscz` met `.mscx` erin
+(`tests/test_mvsa_mscz.py`; skip als MuseScore ontbreekt).
 
-**Criterium:** roundtrip `mvsa → mxl → mvsa` (gekozen pitch) pitch/duur-equivalent
-op een fixture uit `examples/mvsa/`; output onder `generated/`.
+### Stap 4 — Import (score → mvsa) ✅
 
-### Stap 5 — Bron-commands + man-pagina’s
+```text
+vsa mvsa import PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style @oct
+```
 
-Top-level `mvsa` / `mxl` / `mscz` (of `.cmd`-wrappers); `docs/reference/cli/`
-bijwerken; oude paden als alias.
+- Bron: `.mxl` / `.musicxml` direct; `.mscz` via MuseScore → mxl.
+- Top-level `mxl import` / `mscz import` volgt tot stap 5 (nu onder `vsa mvsa import`).
 
-**Criterium:** `mvsa -h`, `mxl -h`, `mscz -h` tonen de matrix-acties; voorbeelden
-in docs gebruiken Windows `cmd`-blokken.
+**Criterium (gehaald):** roundtrip `mvsa → mxl → mvsa` pitch-equivalent op
+`alleluia-toon-8.canonieke.mvsa` sectie `schets2-oct-doremi` voor `--pitch
+doremi` en `abc` (`tests/test_mvsa_import.py`).
+
+### Stap 5 — Bron-commands + man-pagina’s ✅
+
+Top-level console-scripts + `scripts\*.cmd`:
+
+| Command | Bron | Acties |
+| ------- | ---- | ------ |
+| `mvsa` / `vsa mvsa` | `.mvsa` | validate, musicxml, mscz, import, normalize |
+| `mxl` | `.mxl`/`.musicxml` | import → mvsa; mscz |
+| `mscz` | `.mscz` | import → mvsa; mxl |
+
+**Criterium (gehaald):** `mvsa -h`, `mxl -h`, `mscz -h` tonen matrix-acties;
+man-pagina’s `docs/reference/cli/{mvsa,mxl,mscz}.md`; oude `vsa mvsa …` blijft
+werken.
 
 ---
 

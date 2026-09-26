@@ -163,6 +163,8 @@ nav:
       - reference/cli/syllabify.md
       - reference/cli/musicxml.md
       - reference/cli/mvsa.md
+      - reference/cli/mxl.md
+      - reference/cli/mscz.md
     - Grammatica: reference/grammar.md
     - Tokens: reference/tokens.md
     - Metadata: reference/metadata.md
