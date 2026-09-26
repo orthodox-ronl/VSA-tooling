@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-26 09:39 CEST.
+  , gebouwd 2026-09-26 09:52 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2919,7 +2919,63 @@
   <span class="md-ellipsis">
     
   
-    vsa mvsa — meerstemmige .mvsa (draft)
+    vsa mvsa / mvsa — meerstemmige .mvsa (draft)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/mxl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mxl — conversies met MusicXML als bron
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/mscz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mscz — conversies met MuseScore als bron
   
 
     
@@ -3762,7 +3818,7 @@
   <a href="#stap-3-mscz-export-uit-mvsa" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stap 3 — MSCZ-export uit mvsa
+        Stap 3 — MSCZ-export uit mvsa ✅
       
     </span>
   </a>
@@ -3773,7 +3829,7 @@
   <a href="#stap-4-import-score-mvsa" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stap 4 — Import (score → mvsa)
+        Stap 4 — Import (score → mvsa) ✅
       
     </span>
   </a>
@@ -3784,7 +3840,7 @@
   <a href="#stap-5-bron-commands-man-paginas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stap 5 — Bron-commands + man-pagina’s
+        Stap 5 — Bron-commands + man-pagina’s ✅
       
     </span>
   </a>
@@ -4009,7 +4065,7 @@
   <a href="#stap-3-mscz-export-uit-mvsa" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stap 3 — MSCZ-export uit mvsa
+        Stap 3 — MSCZ-export uit mvsa ✅
       
     </span>
   </a>
@@ -4020,7 +4076,7 @@
   <a href="#stap-4-import-score-mvsa" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stap 4 — Import (score → mvsa)
+        Stap 4 — Import (score → mvsa) ✅
       
     </span>
   </a>
@@ -4031,7 +4087,7 @@
   <a href="#stap-5-bron-commands-man-paginas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stap 5 — Bron-commands + man-pagina’s
+        Stap 5 — Bron-commands + man-pagina’s ✅
       
     </span>
   </a>
@@ -4147,20 +4203,20 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td><strong><code>.mvsa</code></strong></td>
 <td>—</td>
 <td><strong><code>normalize</code></strong> (pitch-vorm + <code>@oct</code>/layout)</td>
-<td><code>mvsa musicxml</code> (bestaat deels)</td>
-<td><strong>nieuw</strong> (keten of native)</td>
+<td><code>mvsa musicxml</code> (bestaat)</td>
+<td><strong><code>mscz</code></strong> via mxl→MuseScore (bestaat)</td>
 </tr>
 <tr>
 <td><strong><code>.mxl</code> / <code>.musicxml</code></strong></td>
 <td>— (later / out of scope tenzij nodig)</td>
-<td><strong><code>import</code></strong> → mvsa</td>
+<td><strong><code>import</code></strong> → mvsa (bestaat)</td>
 <td><strong>normalize</strong> (ons playback-/engraving-profiel)</td>
 <td>MuseScore CLI / workflow</td>
 </tr>
 <tr>
 <td><strong><code>.mscz</code></strong></td>
 <td>—</td>
-<td><strong><code>import</code></strong> → mvsa</td>
+<td><strong><code>import</code></strong> → mvsa (via mxl; bestaat)</td>
 <td>export uit MuseScore / tooling</td>
 <td><strong>normalize</strong> (ons partituur-profiel; beperkt wat wij vastleggen)</td>
 </tr>
@@ -4313,38 +4369,24 @@ hergebruik van <code>digit*</code>.</p>
 <td>validate, musicxml, svg, …; later <code>normalize</code> waar zinvol</td>
 </tr>
 <tr>
-<td><code>mvsa</code></td>
+<td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, musicxml, mscz, <strong>normalize</strong>, …</td>
+<td>validate, musicxml, mscz, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
 <td><code>.mxl</code> / <code>.musicxml</code></td>
-<td>import → mvsa; normalize (profiel); → mscz</td>
+<td>import → mvsa; mscz (MuseScore)</td>
 </tr>
 <tr>
 <td><code>mscz</code></td>
 <td><code>.mscz</code></td>
-<td>import → mvsa; normalize (profiel); → mxl</td>
+<td>import → mvsa; mxl (MuseScore)</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Transitie:</strong> bestaande <code>vsa mvsa …</code> en <code>vsa musicxml</code> blijven werken tot de
-top-level commands stabiel zijn (alias of wrapper). Windows: voorkeur voor
-duidelijke cmd-voorbeelden per broncommand in man-pagina’s.</p>
-<p>Huidig (tot migratie):</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa validate PATH
-vsa mvsa musicxml PATH [-o OUT] [--section ID]
-</code></pre></div>
-<p>Gepland (namen mogen licht afwijken; wel <code>--help</code> + man-pagina):</p>
-<div class="highlight"><pre><span></span><code>mvsa validate PATH
-mvsa musicxml PATH [-o OUT] [--section ID] [--profile playback|engraving]
-mvsa mscz PATH [-o OUT] [--section ID]
-mvsa normalize PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style {@oct,marker}
-mxl import PATH [-o OUT] --pitch … --octave-style …
-mscz import PATH [-o OUT] --pitch … --octave-style …
-</code></pre></div>
-<p>Tot top-level <code>mvsa</code> bestaat: zelfde subcommando’s onder <code>vsa mvsa …</code>.</p>
+<p><strong>Transitie:</strong> <code>vsa mvsa …</code> blijft de volledige alias van top-level <code>mvsa</code>.
+Windows: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>, <code>scripts\mscz.cmd</code>.</p>
 <hr />
 <h2 id="4-trade-offs-kort">4. Trade-offs (kort)<a class="headerlink" href="#4-trade-offs-kort" title="Permanent link">&para;</a></h2>
 <table>
@@ -4357,7 +4399,7 @@ mscz import PATH [-o OUT] --pitch … --octave-style …
 <tbody>
 <tr>
 <td>MSCZ uit mvsa</td>
-<td>Eerst <strong>keten</strong> <code>mvsa → mxl → mscz</code> (MuseScore CLI), documenteren; native MSCX alleen als partituur-layout MusicXML overleeft niet</td>
+<td><strong>Keten</strong> <code>mvsa → mxl → mscz</code> (MuseScore CLI) — geïmplementeerd; native MSCX alleen als partituur-layout MusicXML overleeft niet</td>
 </tr>
 <tr>
 <td>Octaaf in output</td>
@@ -4391,20 +4433,58 @@ verwijzen ernaar; diagonaal is expliciet in de matrix.</p>
 <code>schets2-oct-doremi</code>: <code>normalize --pitch abc</code> → validate OK → MusicXML-pitches
 identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code> pitch-equivalent
 (<code>tests/test_mvsa_normalize.py</code>).</p>
-<h3 id="stap-3-mscz-export-uit-mvsa">Stap 3 — MSCZ-export uit mvsa<a class="headerlink" href="#stap-3-mscz-export-uit-mvsa" title="Permanent link">&para;</a></h3>
-<p>Keten documenteren + CLI <code>mvsa mscz</code> (of <code>vsa mvsa mscz</code>). Coria blijft via
-<code>.mxl</code> playback-profiel.</p>
-<p><strong>Criterium:</strong> gegenereerde <code>.mscz</code> opent in MuseScore 4 en toont SATB + lyrics
-bruikbaar voor de partituur-workflow (niet alleen “toevallig open”).</p>
-<h3 id="stap-4-import-score-mvsa">Stap 4 — Import (score → mvsa)<a class="headerlink" href="#stap-4-import-score-mvsa" title="Permanent link">&para;</a></h3>
-<p><code>mxl import</code> / <code>mscz import</code> met <code>--pitch</code> en <code>--octave-style @oct</code>.</p>
-<p><strong>Criterium:</strong> roundtrip <code>mvsa → mxl → mvsa</code> (gekozen pitch) pitch/duur-equivalent
-op een fixture uit <code>examples/mvsa/</code>; output onder <code>generated/</code>.</p>
-<h3 id="stap-5-bron-commands-man-paginas">Stap 5 — Bron-commands + man-pagina’s<a class="headerlink" href="#stap-5-bron-commands-man-paginas" title="Permanent link">&para;</a></h3>
-<p>Top-level <code>mvsa</code> / <code>mxl</code> / <code>mscz</code> (of <code>.cmd</code>-wrappers); <code>docs/reference/cli/</code>
-bijwerken; oude paden als alias.</p>
-<p><strong>Criterium:</strong> <code>mvsa -h</code>, <code>mxl -h</code>, <code>mscz -h</code> tonen de matrix-acties; voorbeelden
-in docs gebruiken Windows <code>cmd</code>-blokken.</p>
+<h3 id="stap-3-mscz-export-uit-mvsa">Stap 3 — MSCZ-export uit mvsa ✅<a class="headerlink" href="#stap-3-mscz-export-uit-mvsa" title="Permanent link">&para;</a></h3>
+<p>Keten: <code>.mvsa</code> → <code>.mxl</code> → MuseScore CLI → <code>.mscz</code>.</p>
+<div class="highlight"><pre><span></span><code>vsa mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
+</code></pre></div>
+<ul>
+<li>Module: <code>vsa.mvsa_mscz</code> + gedeelde <code>vsa.musescore_cli</code>.</li>
+<li>Geen native MSCX-schrijver in deze slice.</li>
+</ul>
+<p><strong>Criterium (gehaald):</strong> met MuseScore 4 lokaal schrijft
+<code>export_mvsa_to_mscz</code> een <code>.mscz</code> met <code>.mscx</code> erin
+(<code>tests/test_mvsa_mscz.py</code>; skip als MuseScore ontbreekt).</p>
+<h3 id="stap-4-import-score-mvsa">Stap 4 — Import (score → mvsa) ✅<a class="headerlink" href="#stap-4-import-score-mvsa" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>vsa mvsa import PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style @oct
+</code></pre></div>
+<ul>
+<li>Bron: <code>.mxl</code> / <code>.musicxml</code> direct; <code>.mscz</code> via MuseScore → mxl.</li>
+<li>Top-level <code>mxl import</code> / <code>mscz import</code> volgt tot stap 5 (nu onder <code>vsa mvsa import</code>).</li>
+</ul>
+<p><strong>Criterium (gehaald):</strong> roundtrip <code>mvsa → mxl → mvsa</code> pitch-equivalent op
+<code>alleluia-toon-8.canonieke.mvsa</code> sectie <code>schets2-oct-doremi</code> voor <code>--pitch
+doremi</code> en <code>abc</code> (<code>tests/test_mvsa_import.py</code>).</p>
+<h3 id="stap-5-bron-commands-man-paginas">Stap 5 — Bron-commands + man-pagina’s ✅<a class="headerlink" href="#stap-5-bron-commands-man-paginas" title="Permanent link">&para;</a></h3>
+<p>Top-level console-scripts + <code>scripts\*.cmd</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Bron</th>
+<th>Acties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mvsa</code> / <code>vsa mvsa</code></td>
+<td><code>.mvsa</code></td>
+<td>validate, musicxml, mscz, import, normalize</td>
+</tr>
+<tr>
+<td><code>mxl</code></td>
+<td><code>.mxl</code>/<code>.musicxml</code></td>
+<td>import → mvsa; mscz</td>
+</tr>
+<tr>
+<td><code>mscz</code></td>
+<td><code>.mscz</code></td>
+<td>import → mvsa; mxl</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Criterium (gehaald):</strong> <code>mvsa -h</code>, <code>mxl -h</code>, <code>mscz -h</code> tonen matrix-acties;
+man-pagina’s <code>docs/reference/cli/{mvsa,mxl,mscz}.md</code>; oude <code>vsa mvsa …</code> blijft
+werken.</p>
 <hr />
 <h2 id="6-bewust-later-buiten-slice">6. Bewust later / buiten slice<a class="headerlink" href="#6-bewust-later-buiten-slice" title="Permanent link">&para;</a></h2>
 <ul>

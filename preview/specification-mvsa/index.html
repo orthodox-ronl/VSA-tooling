@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-26 09:39 CEST.
+  , gebouwd 2026-09-26 09:52 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3002,7 +3002,63 @@
   <span class="md-ellipsis">
     
   
-    vsa mvsa — meerstemmige .mvsa (draft)
+    vsa mvsa / mvsa — meerstemmige .mvsa (draft)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli/mxl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mxl — conversies met MusicXML als bron
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli/mscz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mscz — conversies met MuseScore als bron
   
 
     
@@ -3803,7 +3859,7 @@
 
 
 <h1 id="specificatie-mvsa-draft">Specificatie mvsa (draft)<a class="headerlink" href="#specificatie-mvsa-draft" title="Permanent link">&para;</a></h1>
-<p><strong>Status:</strong> draft v0 (<code>vsa mvsa validate</code> + MusicXML-export + <code>normalize</code>).</p>
+<p><strong>Status:</strong> draft v0 (<code>validate</code> + MusicXML + MSCZ + import + <code>normalize</code>).</p>
 <p>Deze map is de specificatie van <strong>mvsa</strong>: meerstemmige invoer als
 tekstbestanden (typisch <code>.mvsa</code>) met lyrics-regels en stemregels, bedoeld voor
 VSCode en tooling.</p>
@@ -3885,10 +3941,10 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.</p>
 <li>Blokhergebruik (<code>@voices</code>, secties kopiëren);</li>
 <li>Overlays van A/T/B t.o.v. S;</li>
 <li>Pagina-layout (MuseScore-“systemen” op een blad);</li>
-<li>MSCZ-export; parallelle <code>L1</code> als tweede lyric-nummer
+<li>Parallelle <code>L1</code> als tweede lyric-nummer
   (MSCZ/import/normalize: <a href="../plans/mvsa-conversions/">mvsa-conversions</a>).</li>
 </ul>
-<p>Wel beschikbaar: <code>vsa mvsa validate</code>, <code>vsa mvsa musicxml</code>, <code>vsa mvsa normalize</code>.</p>
+<p>Wel beschikbaar: <code>vsa mvsa validate</code>, <code>musicxml</code>, <code>mscz</code>, <code>import</code>, <code>normalize</code>.</p>
 
 
 
