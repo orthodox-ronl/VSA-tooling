@@ -25,6 +25,7 @@ Rollen en toon: [bron — schrijfconventies](https://orthodox-ronl.github.io/bro
 | Sectie                                              | Wat je er vindt                                                                                         |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | [Starten](getting-started/README.md)                | Lokaal ontwikkelen: omgeving, `vsa --version`, valideren en een SVG maken.                              |
+| [Formaten & CLI](formats/index.md)                  | `.vsa` / `.mvsa` / `.mxl` / `.mscz`, conversiematrix, `mvsa`/`mxl`/`mscz` en `.cmd`-scripts.           |
 | [Handleidingen](manuals/index.md)                   | Taakgerichte uitleg (CLI-taken, validatie, export, consumer-site).                                      |
 | [Specificaties](specification/README.md)            | Normatieve VSA-taal- en toolcontracts.                                                                  |
 | [Referentie](reference/README.md)                   | Naslag: voorbeelden, CLI man-pagina’s, tokens, [diagnostics](@) en outputs.                             |
@@ -37,6 +38,7 @@ Rollen en toon: [bron — schrijfconventies](https://orthodox-ronl.github.io/bro
 | Vraag                                                      | Ga naar                                                                                      |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Hoe gebruik ik de VSA-CLI of bouw ik een consumer-site?    | [Starten](getting-started/README.md) of [Handleidingen](manuals/index.md)                    |
+| Welk formaat / welk `mvsa`/`mxl`/`mscz`-commando?          | [Formaten & CLI](formats/index.md)                                                           |
 | Wat moet de taal/tool formeel doen?                        | [Specificaties](specification/README.md)                                                     |
 | Org-specs, [zangstuk](@bron)-formaat, glossary             | [bron — documentatie](https://orthodox-ronl.github.io/bron/)                            |
 

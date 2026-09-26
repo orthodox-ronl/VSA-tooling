@@ -42,3 +42,4 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
   (MSCZ/import/normalize: [mvsa-conversions](../plans/mvsa-conversions.md)).
 
 Wel beschikbaar: `vsa mvsa validate`, `musicxml`, `mscz`, `import`, `normalize`.
+Navigatiehub: [Formaten & CLI](../formats/index.md).
