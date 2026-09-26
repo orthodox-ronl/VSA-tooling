@@ -23,7 +23,7 @@ class Pitch:
 @dataclass(frozen=True)
 class Duration:
     """MusicXML note duration derived from an ELM."""
-    note_type: str  # "quarter", "half", "whole", "eighth", "16th"
+    note_type: str  # "quarter", "half", "whole", "breve", "eighth", "16th"
     dots: int = 0   # 0 = normal, 1 = dotted
 
     # MusicXML <duration> in divisions (divisions-per-quarter = 4)
@@ -38,6 +38,7 @@ class Duration:
             "quarter": 4,
             "half": 8,
             "whole": 16,
+            "breve": 32,
         }[self.note_type]
         if self.dots == 1:
             base = base + base // 2

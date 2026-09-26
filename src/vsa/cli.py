@@ -235,16 +235,75 @@ def _build_parser():
 
     mvsa = subparsers.add_parser(
         "mvsa",
-        help="mvsa draft: meerstemmige .mvsa-bestanden valideren.",
+        help="mvsa draft: .mvsa valideren of naar MusicXML exporteren.",
+        description=(
+            "Draft-tooling voor meerstemmige .mvsa-bestanden "
+            "(L + SATB). Zie docs/specification-mvsa/."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "subcommando's:\n"
+            "  validate PATH\n"
+            "      Valideer .mvsa (bestand of map).\n"
+            "  musicxml PATH [-o OUTPUT] [--section SECTION]\n"
+            "      Exporteer naar SATB MusicXML (.mxl/.musicxml).\n"
+            "\n"
+            "voorbeelden:\n"
+            "  vsa mvsa validate examples\\mvsa\n"
+            "  vsa mvsa musicxml lied.mvsa -o out.mxl --section schets1\n"
+            "\n"
+            "Hulp per subcommando: vsa mvsa validate -h | vsa mvsa musicxml -h"
+        ),
     )
-    mvsa_sub = mvsa.add_subparsers(dest="mvsa_command")
+    mvsa_sub = mvsa.add_subparsers(
+        dest="mvsa_command",
+        required=True,
+        metavar="{validate,musicxml}",
+    )
     m_validate = mvsa_sub.add_parser(
         "validate",
         help="Valideer .mvsa (structuur + sync-telling; draft-spec).",
+        description=(
+            "Controleer .mvsa-bestanden op structuur, maatstrepen en "
+            "sync-telling L tegen stemmen (draft-spec docs/specification-mvsa/)."
+        ),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     m_validate.add_argument(
         "path",
         help=".mvsa-bestand of map met .mvsa-bestanden.",
+    )
+    m_musicxml = mvsa_sub.add_parser(
+        "musicxml",
+        help="Exporteer .mvsa naar SATB MusicXML (.mxl/.musicxml).",
+        description=(
+            "Exporteer een .mvsa-bestand naar SATB MusicXML. "
+            "Optioneel een @sectie-id; anders alle secties achter elkaar."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa musicxml examples\\mvsa\\kleine-intocht-zondag-hemelum.mvsa\n"
+            "  vsa mvsa musicxml lied.mvsa -o generated\\lied.mxl\n"
+            "  vsa mvsa musicxml lied.mvsa --section schets-a-bladcijfer -o out.mxl"
+        ),
+    )
+    m_musicxml.add_argument(
+        "path",
+        help=".mvsa-bestand om te exporteren.",
+    )
+    m_musicxml.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help="Uitvoerbestand (default: <stem>.mxl naast het bronbestand).",
+    )
+    m_musicxml.add_argument(
+        "--section",
+        metavar="SECTION",
+        default=None,
+        help="Alleen deze @sectie-id exporteren (default: alle secties).",
     )
 
     pdf = subparsers.add_parser(
@@ -795,7 +854,16 @@ def _cmd_template(args) -> int:
 def _cmd_mvsa(args) -> int:
     if getattr(args, "mvsa_command", None) == "validate":
         return _cmd_mvsa_validate(args)
-    print("Gebruik: vsa mvsa validate <pad>", file=sys.stderr)
+    if getattr(args, "mvsa_command", None) == "musicxml":
+        return _cmd_mvsa_musicxml(args)
+    # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
+    print(
+        "Gebruik: vsa mvsa {validate,musicxml} …\n"
+        "  vsa mvsa validate PATH\n"
+        "  vsa mvsa musicxml PATH [-o OUTPUT] [--section SECTION]\n"
+        "Hulp: vsa mvsa -h | vsa mvsa musicxml -h",
+        file=sys.stderr,
+    )
     return 1
 
 
@@ -827,6 +895,32 @@ def _cmd_mvsa_validate(args) -> int:
     if errors:
         print(f"{errors} mvsa-bestand(en) ongeldig", file=sys.stderr)
         return 1
+    return 0
+
+
+def _cmd_mvsa_musicxml(args) -> int:
+    from .mvsa_musicxml import MvsaExportError, export_mvsa_path
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+    from .musicxml_package import musicxml_output_suffix
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = Path(args.output) if args.output else path.with_suffix(".mxl")
+    if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
+        out = out.with_suffix(musicxml_output_suffix(path=out))
+    try:
+        export_mvsa_path(path, out, section_id=args.section)
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaExportError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
     return 0
 
 

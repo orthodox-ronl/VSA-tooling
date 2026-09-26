@@ -11,7 +11,7 @@
 # ELM (duur op L), standaard = kwart:
 #   ~ / - = 1×   _. = 3×   _ = 2×   __ = 4×   (en .  ..  -.  ~. …)
 # Melisma-vorm A: slots met &  (elk slot een ELM), bv. li~&~  Ster~&~&~  God_.&_.
-# Recite: ~prefix op L; hele run = één hoogte-stuk per stem.
+# Recite: ( … ) op L; optionele ELM na ); hele groep = één hoogte-stuk per stem.
 #
 # Niet door `vsa` geparsed. Canonieke vorm: docs/specification-mvsa/
 # Experimenteel (nog NIET normatief): @:naam, L', @voices, deelbereiken — plan §11.
@@ -34,40 +34,40 @@
 # m3: recite hei-li-ge en On (zelfde toon) | sterf'_. | lij | ke_.
 # m4: ont | ferm~&~ | U | o_ | ver_ | ons__
 
-L: O   Hei_.-li~&~-ge  God_.&_. | hei-li-ge  Ster~&~&~-ke_. | ~hei-li-ge ~On sterf'_.-lij-ke_. | ont-ferm~&~ U o_-ver_ ons__ ||
-S: f#4 g4     f#4&g4  a4  g4&a4    | b4  b4 b4  a4&b4&c5   b4   | b4         b4  d5       b4  a4   | a4   b4&a4  g4 f#4 f#4  g4    ||
-A: d#4 e4     d#4&d#4 f#4 e4&f#4   | g4  g4 g4  f#4&g4&a4  g4   | g4         g4  b4       g4  f#4  | f#4  g4&f#4 e4 d#4 d#4  e4    ||
-T: b3  b3     b3&-    b3  b3&d4    | d4  d4 d4  d4&-&-     d4   | d4         d4  d4       d4  d4   | d4   d4&-   b3 b3  b3   b3    ||
-B: b2  e3     b2&-    b2  e3&f#3   | g3  g3 g3  d3&-&-     g3   | g3         g3  g3       g3  d3   | d3   g3&d3  e3 b2  b2   e3    ||
+L: O   Hei_.-li~&~  -ge  God_.&_. | (hei-li-ge) Ster~&~&~-ke_. | (hei-li-ge On)-sterf'_.-lij-ke_. | ont-ferm~&~ U  o_ -ver_ ons__ ||
+S: f#4 g4    f#4&g4  a4  g4&a4    | b4          a4&b4&c5  b4   | b4             d5       b4  a4   | a4  b4&a4   g4 f#4 f#4  g4    ||
+A: d#4 e4    d#4&d#4 f#4 e4&f#4   | g4          f#4&g4&a4 g4   | g4             b4       g4  f#4  | f#4 g4&f#4  e4 d#4 d#4  e4    ||
+T: b3  b3    b3&-    b3  b3&d4    | d4          d4&-&-    d4   | d4             d4       d4  d4   | d4  d4&-    b3 b3  b3   b3    ||
+B: b2  e3    b2&-    b2  e3&f#3   | g3          d3&-&-    g3   | g3             g3       g3  d3   | d3  g3&d3   e3 b2  b2   e3    ||
 
 # Toelichting m1 “li~&~”: S f#4→g4, A d#4→d#4, T/B houden (tweede slot `-`).
 # Toelichting m2 “Ster~&~&~”: S/A drie tonen; T/B `d4&-&-` / `d3&-&-`.
-# Toelichting m3: hei/li/ge/On allemaal dezelfde toon → twee ~-runs.
+# Toelichting m3: hei/li/ge/On allemaal dezelfde toon → twee recite-groepen.
 
 # --- slav1 ≈ maten 5–8 (tekstprojectie op nl1-stemgrid; uitgeschreven) ------
 # Experimenteel L'/@voices blijft in commentaar; v0-validator eist stemregels.
 
 @sectie slav1
 
-# Zelfde event-as als nl1 (5+5+5+6). Stemmen = kopie van nl1 (geen @voices in v0).
-L: Свя Свя_.-тый~&~-же Бо_.&_. | Свя-ты-й Креп~&~&~-кый_. | ~Свя-тый ~Без смерт'_.-ны-й_. | По-ми~&~ У лу-й_ нас__ ||
-S: f#4 g4     f#4&g4  a4  g4&a4    | b4  b4 b4  a4&b4&c5   b4   | b4         b4  d5       b4  a4   | a4   b4&a4  g4 f#4 f#4  g4    ||
-A: d#4 e4     d#4&d#4 f#4 e4&f#4   | g4  g4 g4  f#4&g4&a4  g4   | g4         g4  b4       g4  f#4  | f#4  g4&f#4 e4 d#4 d#4  e4    ||
-T: b3  b3     b3&-    b3  b3&d4    | d4  d4 d4  d4&-&-     d4   | d4         d4  d4       d4  d4   | d4   d4&-   b3 b3  b3   b3    ||
-B: b2  e3     b2&-    b2  e3&f#3   | g3  g3 g3  d3&-&-     g3   | g3         g3  g3       g3  d3   | d3   g3&d3  e3 b2  b2   e3    ||
+# Dit lijkt op nl1, maar is toch behoorlijk anders vanwege het kerkslavisch.
+L: Свя-тый_. Бо~&~&~   -же__ | Свя-тый_.  Креп~&~&~-кый__ | Свя-тый_.&-&_. | Без-смерт'-ный | По-ми_-луй_-нас__ ||
+S: f#4 g4    f#4&g4&a4  g4   | a4  b4     a4&b4&c5  b4    | b4  d5&b4&a4   | a4  b4     a4  | g4 f#4 f#4  g4    ||
+A: d#4 e4    d#4&-&f#4  e4   | f#4 g4     f#4&g4&a4 g4    | g4  b4&g4&f#4  | f#4 g4     f#4 | e4 d#4 d#4  e4    ||
+T: b3  b3    b3&-&b3    b3   | d4  d4     d4&-&-    d4    | d4  d4&d4&d4   | d4  d4     d4  | b3 b3  b3   b3    ||
+B: b2  e3    b2&-&b2    e3   | f#3 g3     d3&-&-    g3    | g3  g3&g3&d3   | d3  g3     d3  | e3 b2  b2   e3    ||
 
 # EXPERIMENT (niet in draft-spec v0) — parallelle L' + stemhergebruik:
-# L': Svja_.-tyj~&~-že Bo_.&_. | Svja-tyj Krep~&~&~-kyj_. | ~Svja-tyj ~Bez smert'_. nyj_. | Po-mi~&~ luj_ nas__ ||
+# L': Svja_.-tyj~&~-že Bo_.&_. | Svja-tyj Krep~&~&~-kyj_. | (Svja-tyj) (Bez) smert'_. nyj_. | Po-mi~&~ luj_ nas__ ||
 # @voices =:nl1
 
 # --- doxologie ≈ maten 9–10 -------------------------------------------------
 
 @sectie doxologie
-L: ~Eer-aan-de-Va-der,-de-Zoon-en-de-Hei-li-ge Geest_. | ~nu-en-al-tijd-en-in-de-eeuw-en-der-eeuw-en. A_ men_ ||
-S: f#4                                         f#4     | f#4                                          f#4 g4  ||
-A: d#4                                         d#4     | d#4                                          d#4 e4  ||
-T: b3                                          b3      | b3                                           b3  b3  ||
-B: b2                                          b2      | b2                                           b2  e3  ||
+L: (Eer-aan-de-Va-der,-de-Zoon-en-de-Hei-li-ge) Geest_. | (nu-en-al-tijd-en-in-de-eeuw-en-der-eeuw-en.) A_  men_ ||
+S: f#4                                          f#4     | f#4                                           f#4 g4   ||
+A: d#4                                          d#4     | d#4                                           d#4 e4   ||
+T: b3                                           b3      | b3                                            b3  b3   ||
+B: b2                                           b2      | b2                                            b2  e3   ||
 
 # --- @:final  ≈ maten 11–16 = maten 3–8 (MXL: exact gelijk) -----------------
 

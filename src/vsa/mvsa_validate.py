@@ -1,6 +1,6 @@
 """mvsa draft-v0: parse + structure/sync-validatie.
 
-Zie ``docs/specification-mvsa/``. Geen MusicXML-export; geen blokhergebruik.
+Zie ``docs/specification-mvsa/``. Blokhergebruik buiten scope.
 """
 
 from __future__ import annotations
@@ -455,106 +455,9 @@ def _voice_position_slots(measure: str) -> list[int]:
 
 def _l_position_slots(measure: str) -> list[int]:
     """Return slot-count per lengte-positie in one L measure."""
-    s = measure.strip()
-    if not s:
-        return []
-    positions: list[int] = []
-    i = 0
-    n = len(s)
+    from .mvsa_parse import parse_l_positions
 
-    while i < n:
-        if s[i].isspace():
-            i += 1
-            continue
-        # Lone punctuation (not start of ELM): skip
-        if s[i] in ",;:!?":
-            i += 1
-            continue
-        if s[i] == ".":
-            # ELM "." / ".." handled in piece; lone "." skip
-            is_elm_dot = False
-            for e in _ELMS:
-                if s.startswith(e, i) and e in (".", "..", "_.", "-.", "~."):
-                    is_elm_dot = True
-                    break
-            if not is_elm_dot:
-                i += 1
-                continue
-
-        recite = False
-        if s[i] == "~" and i + 1 < n and _is_syllable_char(s[i + 1]):
-            recite = True
-            i += 1
-
-        # Spurious " -syllable" after a space: treat leading '-' as hyphen glue, not a slot.
-        if s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
-            i += 1
-
-        slots = 0
-        while True:
-            while i < n and (_is_syllable_char(s[i]) or s[i] in "'’ʹ"):
-                i += 1
-
-            piece_slots = 0
-            while True:
-                elm = None
-                for e in _ELMS:
-                    if not s.startswith(e, i):
-                        continue
-                    if e == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
-                        continue
-                    if e == "~" and i + 1 < n and _is_syllable_char(s[i + 1]):
-                        continue
-                    elm = e
-                    break
-                if elm is None:
-                    break
-                i += len(elm)
-                piece_slots += 1
-                if i < n and s[i] == "&":
-                    i += 1
-                    continue
-                break
-
-            if piece_slots:
-                slots += piece_slots
-            elif not recite:
-                slots += 1
-
-            # Comma (etc.) inside a recite run: skip and keep the run together.
-            if recite and i < n and s[i] in ",;":
-                i += 1
-                if i < n and s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
-                    i += 1
-                    continue
-                if i < n and _is_syllable_char(s[i]):
-                    continue
-
-            if i < n and s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
-                i += 1
-                if recite:
-                    continue
-                if not slots:
-                    slots = 1
-                positions.append(slots)
-                slots = 0
-                continue
-
-            if i < n and _is_syllable_char(s[i]):
-                break
-
-            break
-
-        if recite and not slots:
-            slots = 1
-        if slots:
-            positions.append(slots)
-
-    return positions
-
-
-def _is_syllable_char(c: str) -> bool:
-    return c.isalpha() or c in "ëïöüáéíóúýčšžňĚĎŤ#№"
+    return [max(1, len(p.elms)) if p.elms else 1 for p in parse_l_positions(measure)]
 
 
 # ---------------------------------------------------------------------------
