@@ -88,6 +88,23 @@ nav:
   - Home: index.md
   - Starten:
     - Lokaal ontwikkelen: getting-started/README.md
+  - Formaten & CLI:
+    - Overzicht: formats/index.md
+    - Bestandsformaten:
+      - .vsa: formats/vsa.md
+      - .mvsa: formats/mvsa.md
+      - .mxl / .musicxml: formats/mxl.md
+      - .mscz: formats/mscz.md
+      - .midi / .mid: formats/midi.md
+    - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
+    - Commando's:
+      - CLI-overzicht: reference/cli/index.md
+      - mvsa: reference/cli/mvsa.md
+      - mxl: reference/cli/mxl.md
+      - mscz: reference/cli/mscz.md
+      - vsa musicxml: reference/cli/musicxml.md
+    - Scripts (cmd): formats/scripts.md
+    - Conversieplan: plans/mvsa-conversions.md
   - Handleidingen:
     - Overzicht: manuals/index.md
     - Consumer-site — waar hoort wat: manuals/consumer-site.md
@@ -162,6 +179,9 @@ nav:
       - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
       - reference/cli/musicxml.md
+      - reference/cli/mvsa.md
+      - reference/cli/mxl.md
+      - reference/cli/mscz.md
     - Grammatica: reference/grammar.md
     - Tokens: reference/tokens.md
     - Metadata: reference/metadata.md
@@ -181,6 +201,7 @@ nav:
     - plans/gebruikseisen-dragers.md
     - plans/docs-content-publiek-en-paginatypen.md
     - mvsa v0 — meerstemmige invoer: plans/mvsa-v0-syntax.md
+    - mvsa-conversies (mxl/mscz/normalize): plans/mvsa-conversions.md
     - plans/vsa-polyphony-proposal.md
 
 extra_css:

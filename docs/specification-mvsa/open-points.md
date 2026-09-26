@@ -7,9 +7,12 @@
 | Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                | Later                                                                          |
 | Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                            | Alleen als corpuswerk het vraagt                                               |
 | Chromatische `+` in eenstemmige VSA-EHM | Los van mvsa-laddergraden (waar `+` = octaaf)                           | Via VSA 1.0-spec                                                               |
-| Kuiser-implementatie                    | Gedrag is beschreven; tool nog niet                                     | Tooling-traject                                                                |
-| Parser / CLI                            | `vsa mvsa validate` dekt structuur + sync; geen export                  | Uitbreiden (kuiser-warnings, export)                                           |
+| Kuiser-implementatie                    | Gedrag is beschreven; tool nog niet                                     | Tooling-traject ([mvsa-conversions](../plans/mvsa-conversions.md) stap 2)      |
+| Parser / CLI                            | Top-level `mvsa`/`mxl`/`mscz` + `vsa mvsa …`                             | klaar (stap 5) — zie [mvsa-conversions](../plans/mvsa-conversions.md) |
 | Template-brug                           | Koppeling aan [vsa-templates](../specification-vsa-templates/README.md) | Later                                                                          |
 
-Werkplan-restpunten:
+Conversies / canonieke vormen (matrix + diagonaal):
+[`docs/plans/mvsa-conversions.md`](../plans/mvsa-conversions.md).
+
+Werkplan-restpunten syntax:
 [`docs/plans/mvsa-v0-syntax.md` §10](../plans/mvsa-v0-syntax.md).

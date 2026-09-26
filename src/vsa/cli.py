@@ -235,16 +235,232 @@ def _build_parser():
 
     mvsa = subparsers.add_parser(
         "mvsa",
-        help="mvsa draft: meerstemmige .mvsa-bestanden valideren.",
+        help="mvsa draft: valideren, normaliseren, MusicXML of MSCZ.",
+        description=(
+            "Draft-tooling voor meerstemmige .mvsa-bestanden "
+            "(L + SATB). Zie docs/specification-mvsa/."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "subcommando's:\n"
+            "  validate PATH\n"
+            "      Valideer .mvsa (bestand of map).\n"
+            "  musicxml PATH [-o OUTPUT] [--section SECTION]\n"
+            "      Exporteer naar SATB MusicXML (.mxl/.musicxml).\n"
+            "  mscz PATH [-o OUTPUT] [--section SECTION]\n"
+            "      Exporteer naar MuseScore (.mscz) via .mxl.\n"
+            "  import PATH [-o OUTPUT] --pitch {doremi,abc,vsa}\n"
+            "      Importeer .mxl/.mscz naar .mvsa.\n"
+            "  normalize PATH [-o OUTPUT] --pitch {doremi,abc,vsa}\n"
+            "      Herschrijf stemhoogten naar canonieke spelling.\n"
+            "\n"
+            "voorbeelden:\n"
+            "  vsa mvsa validate examples\\mvsa\n"
+            "  vsa mvsa musicxml lied.mvsa -o out.mxl --section schets1\n"
+            "  vsa mvsa mscz lied.mvsa -o out.mscz\n"
+            "  vsa mvsa import out.mxl -o out.mvsa --pitch doremi\n"
+            "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch abc\n"
+            "\n"
+            "Top-level alias: mvsa …  (ook: mxl … / mscz … voor andere bronnen).\n"
+            "\n"
+            "Hulp: vsa mvsa validate -h | vsa mvsa musicxml -h | "
+            "vsa mvsa mscz -h | vsa mvsa import -h | vsa mvsa normalize -h"
+        ),
     )
-    mvsa_sub = mvsa.add_subparsers(dest="mvsa_command")
+    mvsa_sub = mvsa.add_subparsers(
+        dest="mvsa_command",
+        required=True,
+        metavar="{validate,musicxml,mscz,import,normalize}",
+    )
     m_validate = mvsa_sub.add_parser(
         "validate",
         help="Valideer .mvsa (structuur + sync-telling; draft-spec).",
+        description=(
+            "Controleer .mvsa-bestanden op structuur, maatstrepen en "
+            "sync-telling L tegen stemmen (draft-spec docs/specification-mvsa/)."
+        ),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     m_validate.add_argument(
         "path",
         help=".mvsa-bestand of map met .mvsa-bestanden.",
+    )
+    m_musicxml = mvsa_sub.add_parser(
+        "musicxml",
+        help="Exporteer .mvsa naar SATB MusicXML (.mxl/.musicxml).",
+        description=(
+            "Exporteer een .mvsa-bestand naar SATB MusicXML. "
+            "Optioneel een @sectie-id; anders alle secties achter elkaar."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa musicxml examples\\mvsa\\kleine-intocht-zondag-hemelum.mvsa\n"
+            "  vsa mvsa musicxml lied.mvsa -o generated\\lied.mxl\n"
+            "  vsa mvsa musicxml lied.mvsa --section schets-a-bladcijfer -o out.mxl"
+        ),
+    )
+    m_musicxml.add_argument(
+        "path",
+        help=".mvsa-bestand om te exporteren.",
+    )
+    m_musicxml.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help="Uitvoerbestand (default: <stem>.mxl naast het bronbestand).",
+    )
+    m_musicxml.add_argument(
+        "--section",
+        metavar="SECTION",
+        default=None,
+        help="Alleen deze @sectie-id exporteren (default: alle secties).",
+    )
+    m_mscz = mvsa_sub.add_parser(
+        "mscz",
+        help="Exporteer .mvsa naar MuseScore (.mscz) via MusicXML.",
+        description=(
+            "Keten: .mvsa -> .mxl -> MuseScore CLI -> .mscz. "
+            "Vereist MuseScore 4 (of 3) op PATH of standaard Windows-pad. "
+            "Zie docs/plans/mvsa-conversions.md."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa mscz examples\\mvsa\\alleluia-toon-8.canonieke.mvsa\n"
+            "  vsa mvsa mscz lied.mvsa -o generated\\lied.mscz "
+            "--section schets2-oct-doremi\n"
+            "  vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\\lied.mxl"
+        ),
+    )
+    m_mscz.add_argument(
+        "path",
+        help=".mvsa-bestand om te exporteren.",
+    )
+    m_mscz.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help="Uitvoer-.mscz (default: <stem>.mscz naast het bronbestand).",
+    )
+    m_mscz.add_argument(
+        "--section",
+        metavar="SECTION",
+        default=None,
+        help="Alleen deze @sectie-id exporteren (default: alle secties).",
+    )
+    m_mscz.add_argument(
+        "--musescore",
+        metavar="PATH",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto-detectie).",
+    )
+    m_mscz.add_argument(
+        "--keep-mxl",
+        metavar="PATH",
+        default=None,
+        help="Bewaar ook het tussenliggende .mxl op dit pad.",
+    )
+    m_import = mvsa_sub.add_parser(
+        "import",
+        help="Importeer .mxl/.musicxml/.mscz naar .mvsa.",
+        description=(
+            "Lees SATB MusicXML (of MSCZ via MuseScore) en schrijf .mvsa. "
+            "Kies stem-spelling met --pitch. Zie docs/plans/mvsa-conversions.md."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa import generated\\lied.mxl -o generated\\lied.import.mvsa "
+            "--pitch doremi\n"
+            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch abc"
+        ),
+    )
+    m_import.add_argument(
+        "path",
+        help=".mxl, .musicxml, .xml of .mscz bronbestand.",
+    )
+    m_import.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help="Uitvoer-.mvsa (default: <stem>.import.mvsa).",
+    )
+    m_import.add_argument(
+        "--pitch",
+        choices=["doremi", "abc", "vsa"],
+        required=True,
+        help="Doel-spelling op stemregels.",
+    )
+    m_import.add_argument(
+        "--octave-style",
+        choices=["@oct", "marker"],
+        default="@oct",
+        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+    )
+    m_import.add_argument(
+        "--section",
+        metavar="SECTION",
+        default="import",
+        help="Id voor @sectie in de output (default: import).",
+    )
+    m_import.add_argument(
+        "--musescore",
+        metavar="PATH",
+        default=None,
+        help="Pad naar MuseScore (alleen bij .mscz-bron).",
+    )
+    m_import.add_argument(
+        "--no-align",
+        action="store_true",
+        help="Sla canonieke kolomuitlijning over.",
+    )
+    m_normalize = mvsa_sub.add_parser(
+        "normalize",
+        help="Normaliseer stemhoogte-spelling (.mvsa -> .mvsa).",
+        description=(
+            "Herschrijf S/A/T/B naar doremi, abc (wetenschappelijk cijfer) "
+            "of vsa (EHM). Behoudt L-semantiek en @oct. Zie "
+            "docs/plans/mvsa-conversions.md."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa normalize examples\\mvsa\\alleluia-toon-8.canonieke.mvsa "
+            "--pitch abc -o generated\\alleluia.abc.mvsa\n"
+            "  vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct"
+        ),
+    )
+    m_normalize.add_argument(
+        "path",
+        help=".mvsa-bestand om te normaliseren.",
+    )
+    m_normalize.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help="Uitvoerbestand (default: <stem>.normalized.mvsa).",
+    )
+    m_normalize.add_argument(
+        "--pitch",
+        choices=["doremi", "abc", "vsa"],
+        required=True,
+        help="Doel-spelling op stemregels.",
+    )
+    m_normalize.add_argument(
+        "--octave-style",
+        choices=["@oct", "marker"],
+        default="@oct",
+        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+    )
+    m_normalize.add_argument(
+        "--no-align",
+        action="store_true",
+        help="Sla canonieke kolomuitlijning over.",
     )
 
     pdf = subparsers.add_parser(
@@ -795,7 +1011,25 @@ def _cmd_template(args) -> int:
 def _cmd_mvsa(args) -> int:
     if getattr(args, "mvsa_command", None) == "validate":
         return _cmd_mvsa_validate(args)
-    print("Gebruik: vsa mvsa validate <pad>", file=sys.stderr)
+    if getattr(args, "mvsa_command", None) == "musicxml":
+        return _cmd_mvsa_musicxml(args)
+    if getattr(args, "mvsa_command", None) == "mscz":
+        return _cmd_mvsa_mscz(args)
+    if getattr(args, "mvsa_command", None) == "import":
+        return _cmd_mvsa_import(args)
+    if getattr(args, "mvsa_command", None) == "normalize":
+        return _cmd_mvsa_normalize(args)
+    # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
+    print(
+        "Gebruik: vsa mvsa {validate,musicxml,mscz,import,normalize} …\n"
+        "  vsa mvsa validate PATH\n"
+        "  vsa mvsa musicxml PATH [-o OUTPUT] [--section SECTION]\n"
+        "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
+        "  vsa mvsa import PATH --pitch {doremi,abc,vsa} [-o OUTPUT]\n"
+        "  vsa mvsa normalize PATH --pitch {doremi,abc,vsa} [-o OUTPUT]\n"
+        "Hulp: vsa mvsa -h | vsa mvsa import -h",
+        file=sys.stderr,
+    )
     return 1
 
 
@@ -827,6 +1061,132 @@ def _cmd_mvsa_validate(args) -> int:
     if errors:
         print(f"{errors} mvsa-bestand(en) ongeldig", file=sys.stderr)
         return 1
+    return 0
+
+
+def _cmd_mvsa_musicxml(args) -> int:
+    from .mvsa_musicxml import MvsaExportError, export_mvsa_path
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+    from .musicxml_package import musicxml_output_suffix
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = Path(args.output) if args.output else path.with_suffix(".mxl")
+    if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
+        out = out.with_suffix(musicxml_output_suffix(path=out))
+    try:
+        export_mvsa_path(path, out, section_id=args.section)
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaExportError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
+    return 0
+
+
+def _cmd_mvsa_mscz(args) -> int:
+    from .mvsa_mscz import MvsaMsczError, export_mvsa_to_mscz
+    from .mvsa_musicxml import MvsaExportError
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = Path(args.output) if args.output else path.with_suffix(".mscz")
+    keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
+    musescore = Path(args.musescore) if args.musescore else None
+    try:
+        export_mvsa_to_mscz(
+            path,
+            out,
+            section_id=args.section,
+            musescore=musescore,
+            keep_mxl=keep_mxl,
+        )
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaExportError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    except MvsaMsczError as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
+    if keep_mxl is not None:
+        print(f"MXL: {keep_mxl}")
+    return 0
+
+
+def _cmd_mvsa_import(args) -> int:
+    from .mvsa_import import MvsaImportError, import_score_path
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = (
+        Path(args.output)
+        if args.output
+        else path.with_name(f"{path.stem}.import.mvsa")
+    )
+    musescore = Path(args.musescore) if args.musescore else None
+    try:
+        import_score_path(
+            path,
+            out,
+            pitch=args.pitch,
+            octave_style=args.octave_style,
+            align=not args.no_align,
+            section_id=args.section,
+            musescore=musescore,
+        )
+    except MvsaImportError as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
+    return 0
+
+
+def _cmd_mvsa_normalize(args) -> int:
+    from .mvsa_normalize import MvsaNormalizeError, normalize_mvsa_path
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = (
+        Path(args.output)
+        if args.output
+        else path.with_name(f"{path.stem}.normalized.mvsa")
+    )
+    try:
+        normalize_mvsa_path(
+            path,
+            out,
+            pitch=args.pitch,
+            octave_style=args.octave_style,
+            align=not args.no_align,
+        )
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaNormalizeError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
     return 0
 
 

@@ -19,6 +19,8 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | `zoek=`-includes oplossen naar catalogus  | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                    |
 | Lettergreepstreepjes (bestand of map)     | [`vsa syllabify <pad>`](../reference/cli/syllabify.md)                                           |
 | MusicXML exporteren                       | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md)                          |
+| mvsa valideren (draft)                    | [`vsa mvsa validate <pad>`](../reference/cli/mvsa.md#vsa-mvsa-validate)                          |
+| mvsa → SATB MusicXML (draft)              | [`vsa mvsa musicxml <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)     |
 
 ## Exitcodes
 

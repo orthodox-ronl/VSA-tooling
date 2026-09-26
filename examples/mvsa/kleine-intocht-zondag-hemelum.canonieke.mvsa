@@ -1,0 +1,50 @@
+# Kleine intocht (zondag) — canonieke herschrijving (Hemelum)
+#
+# Basis: examples/mvsa/kleine-intocht-zondag-hemelum.mvsa.
+#
+# Keuzes:
+# - Duur alleen op L (ELM); stemregels alleen hoogte.
+# - Recite: ( … ) met optionele ELM na ); spaties tussen woorden;
+#   streepjes binnen woorden.
+# - Komma’s blijven bij de tekst (Komt_, tus_, den_,).
+# - Woordstreepje tussen Chris_ en tus_ (Chris_-tus_).
+#
+# Draft-spec: docs/specification-mvsa/
+
+@do F4
+@mode major
+
+# Posities per maat (L ↔ stemmen):
+#   1: 4  Komt_ | (laat-…-voor) | Chris_ | tus_,
+#   2: 1  (Zoon van God)_
+#   3: 4  (Die-…-uit) | de | do_ | den_,
+#   4: 5  (red-…-gen:) | al | le | lu_&_ | ja__
+
+# --- Schets A: bladcijfers (wetenschappelijk octaaf; @oct telt niet) ---
+
+@sectie schets-a-bladcijfer
+L: Komt_, (laat ons aan-bid-den en ne-der-val-len voor) Chris_-tus_, | (Zoon van God)_ | (Die op-ge-staan zijt uit) de do_ den_, | (red ons die tot U zin-gen:) al-le-lu_&_  ja__ ||
+S: bb4    bb4                                           a4     bb4   | bb4             | bb4                        g4 a4  a4    | a4                           a4 a4 bb4&a4 g4   ||
+A: g4     g4                                            f#4    g4    | g4              | g4                         e4 f4  f4    | f4                           f4 f4 g4&f4  e4   ||
+T: d4     d4                                            d4     d4    | d4              | d4                         c4 c4  c4    | c4                           c4 c4 c4&-   c4   ||
+B: g3     g3                                            d3     g3    | g3              | g3                         c3 f3  f3    | f3                           f3 f3 e3&f3  c3   ||
+
+# --- Schets B: do-re-mi + schrijfoctaaf ---
+
+@oct S=0 A=0 T=-1 B=-1
+
+@sectie schets-b-doremi
+L: Komt_, (laat ons aan-bid-den en ne-der-val-len voor) Chris_-tus_, | (Zoon van God)_ | (Die op-ge-staan zijt uit) de  do_ den_, | (red ons die tot U zin-gen:) al-le-lu_&_ ja__ ||
+S: fa     fa                                            mi     fa    | fa              | fa                         re  mi  mi    | mi                           mi mi fa&mi re   ||
+A: re     re                                            do#    re    | re              | re                         si- do  do    | do                           do do re&do si-  ||
+T: la     la                                            la     la    | la              | la                         so  so  so    | so                           so so so&-  so   ||
+B: re     re                                            la     re    | re              | re                         so  do  do    | do                           do do si&do so   ||
+
+# --- Schets C: a–g in do-octaaf (suffix; geen @oct, geen bladcijfer) ---
+
+@sectie schets-c-ag-suffix
+L: Komt_, (laat ons aan-bid-den en ne-der-val-len voor) Chris_-tus_, | (Zoon van God)_ | (Die op-ge-staan zijt uit) de  do_ den_, | (red ons die tot U zin-gen:) al-le-lu_&_  ja__ ||
+S: Bb     Bb                                            a      Bb    | Bb              | Bb                         g   a   a     | a                            a  a  Bb&a   g    ||
+A: g      g                                             f#     g     | g               | g                          e-  f   f     | f                            f  f  g&f    e-   ||
+T: d      d                                             d      d     | d               | d                          c-  c-  c-    | c-                           c- c- c-&-   c-   ||
+B: g-     g-                                            d-2    g-    | g-              | g-                         c-2 f-  f-    | f-                           f- f- e-2&f- c-2  ||

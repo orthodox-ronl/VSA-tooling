@@ -8,9 +8,13 @@
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
-Exitcode `0` = geen errors (warnings mogen). Exitcode `1` = minstens één error.
+`validate`: exitcode `0` = geen errors (warnings mogen). Exitcode `1` = minstens één error.
+
+`musicxml`: exporteert SATB MusicXML (`.mxl` of `.musicxml`). Faalt als validate
+errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
 
 ## Ernst (voorstel)
 
@@ -51,8 +55,12 @@ Exitcode `0` = geen errors (warnings mogen). Exitcode `1` = minstens één error
 11. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
     had kunnen syncen — of, na kuiser, alsnog inconsistent: error.
 
-## Buiten v0-validatie
+## Buiten v0-validatie / export-beperkingen
 
-- Muzikale “juistheid” t.o.v. een blad (alleen telling en vorm);
+- Volledige controle op enharmonische/`#`/`b`-spellingen t.o.v. `@mode` (norm
+  staat in [Syntax — kruis en mol](syntax.md#kruis-en-mol); tooling volgt
+  gefaseerd);
+- Muzikale “juistheid” t.o.v. een blad (alleen telling en vorm bij validate);
 - blokhergebruik-referenties (`@voices`, `L'`, deelbereiken);
-- export naar MusicXML/MSCZ.
+- parallelle lyric-nummers (`L1` als tweede `<lyric number>`);
+- MSCZ-export.

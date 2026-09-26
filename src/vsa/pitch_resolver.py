@@ -34,6 +34,8 @@ higher, degree -1 = ti an octave lower, etc.
 
 from __future__ import annotations
 
+import re
+
 from .music import Pitch
 
 # ── Step name tables ────────────────────────────────────────────────────────
@@ -162,11 +164,16 @@ def ehm_to_motion(ehm: str) -> tuple[int, float]:
     only the sounding pitch of *this* EHM (MusicXML ``alter``), never the
     cursor for the next EHM.  ``+`` is a spelling alias of ``#``.
 
+    Digit forms ``/3`` / ``\\2`` mean that many ladder steps (not stacked
+    slashes).  Pure stacks ``//`` / ``\\\\`` still count characters.
+
     Examples::
 
         ehm_to_motion("/")   → (1, 0.0)
         ehm_to_motion("//")  → (2, 0.0)
+        ehm_to_motion("/3")  → (3, 0.0)
         ehm_to_motion("\\\\") → (-2, 0.0)
+        ehm_to_motion("\\\\2") → (-2, 0.0)
         ehm_to_motion("#/")  → (1, 1.0)
         ehm_to_motion("+/")  → (1, 1.0)   # alias of #
         ehm_to_motion("b\\\\") → (-2, -1.0)
@@ -183,6 +190,19 @@ def ehm_to_motion(ehm: str) -> tuple[int, float]:
         chromatic, base = 1.0, ehm[1:]
     elif ehm[0] in _FLAT_CHARS:
         chromatic, base = -1.0, ehm[1:]
+
+    if not base or base in ("-", "~"):
+        return 0, chromatic
+
+    m = re.fullmatch(r"(/+)(\d*)|(\\+)(\d*)", base)
+    if m:
+        if m.group(1) is not None:
+            slashes, digits = m.group(1), m.group(2)
+            steps = int(digits) if digits else len(slashes)
+        else:
+            slashes, digits = m.group(3), m.group(4)
+            steps = -(int(digits) if digits else len(slashes))
+        return steps, chromatic
 
     steps = base.count("/") - base.count("\\")
     return steps, chromatic

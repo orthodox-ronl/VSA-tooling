@@ -65,14 +65,14 @@ Zie [Semantiek — directives](semantics.md#directives-do-mode-oct).
 | **mvsa-bestand** | Tekstbron (conventioneel `.mvsa`) met secties, systemen en directives. |
 | **Sectie** | Muzikale eenheid: een of meer LSATB-systemen, eindigend met ` |     | ` (of specialisatie) op alle lyrics-/stemregels van het laatste systeem. Optioneel met `@sectie`-*id*. |
 | **LSATB-systeem** | Maximale aaneengesloten reeks regels waarvan elke inhoudsregel begint met een LSATB-marker. Eindigt altijd op ` | ` of ` |     | ` (of specialisatie). |
-| **LSATB-marker**   | Label dat voldoet aan `[LSATB]\d*:` — precies één teken uit `LSATB`, optioneel cijfers, dan `:`. Voorbeelden: `L:`, `L1:`, `S:`, `S2:`, `B:`.                                                                       |
-| **Lyrics-regel**   | Regel met marker `L`, `L1`, `L2`, …                                                                                                                                                                                 |
-| **Stemregel**      | Regel met marker `S`/`A`/`T`/`B` (eventueel genummerd).                                                                                                                                                             |
-| **Maat**           | Segment tussen maatstrepen; in deze praktijk valt een maat samen met een frase.                                                                                                                                     |
-| **L-stuk**         | Brok op een lyrics-regel (grenzen: spatie, lettergreepstreepje, of ELM gevolgd door letters).                                                                                                                       |
-| **Hoogte-stuk**    | Brok op een stemregel (alleen spaties scheiden).                                                                                                                                                                    |
-| **Slot**           | Deel van een melisma-stuk, gescheiden door `&` binnen één brok; of de ene positie van een niet-melisma-stuk.                                                                                                        |
-| **Lengte-positie** | Telbare duur/hoogte-eenheid die lyrics en stemmen moeten delen: elk L-stuk is één positie t.o.v. de stemmen, behalve dat een recite-run (`~`… ) als **één** positie telt; binnen een melisma telt elk `&`-slot mee. |
+| **LSATB-marker**   | Label dat voldoet aan `[LSATB]\d*:` — precies één teken uit `LSATB`, optioneel cijfers, dan `:`. Voorbeelden: `L:`, `L1:`, `S:`, `S2:`, `B:`.                                                                           |
+| **Lyrics-regel**   | Regel met marker `L`, `L1`, `L2`, …                                                                                                                                                                                     |
+| **Stemregel**      | Regel met marker `S`/`A`/`T`/`B` (eventueel genummerd).                                                                                                                                                                 |
+| **Maat**           | Segment tussen maatstrepen; in deze praktijk valt een maat samen met een frase.                                                                                                                                         |
+| **L-stuk**         | Brok op een lyrics-regel (grenzen: spatie, lettergreepstreepje, of ELM gevolgd door letters).                                                                                                                           |
+| **Hoogte-stuk**    | Brok op een stemregel (alleen spaties scheiden).                                                                                                                                                                        |
+| **Slot**           | Deel van een melisma-stuk, gescheiden door `&` binnen één brok; of de ene positie van een niet-melisma-stuk.                                                                                                            |
+| **Lengte-positie** | Telbare duur/hoogte-eenheid die lyrics en stemmen moeten delen: elk L-stuk is één positie t.o.v. de stemmen, behalve dat een recite-groep (`( … )`) als **één** positie telt; binnen een melisma telt elk `&`-slot mee. |
 
 Uitgebreide voorbeelden en eerdere ontwerpnotities:
 [`docs/plans/mvsa-v0-syntax.md`](../plans/mvsa-v0-syntax.md).
