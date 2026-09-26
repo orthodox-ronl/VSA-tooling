@@ -10,9 +10,11 @@ Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 ## Synopsis
 
 ```text
-vsa mvsa [-h] {validate,musicxml} …
+vsa mvsa [-h] {validate,musicxml,normalize} …
 vsa mvsa validate [-h] path
 vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
+vsa mvsa normalize [-h] [-o OUTPUT] --pitch {doremi,abc,vsa}
+                   [--octave-style {@oct,marker}] [--no-align] path
 ```
 
 ## Subcommando's
@@ -21,6 +23,7 @@ vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
 | ------------------------------------ | ------------------------------------------------- |
 | [`validate`](#vsa-mvsa-validate)     | Structuur + sync-telling van `.mvsa` controleren. |
 | [`musicxml`](#vsa-mvsa-musicxml)     | Exporteer `.mvsa` naar SATB MusicXML.             |
+| [`normalize`](#vsa-mvsa-normalize)   | Herschrijf stemhoogten naar canonieke spelling.   |
 
 Hulp op de commandoregel:
 
@@ -28,10 +31,8 @@ Hulp op de commandoregel:
 vsa mvsa -h
 vsa mvsa validate -h
 vsa mvsa musicxml -h
+vsa mvsa normalize -h
 ```
-
-`vsa mvsa -h` toont ook een kort overzicht van de musicxml-opties
-(`-o`, `--section`).
 
 ---
 
@@ -142,8 +143,66 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
 Onbekende sectie-id of sync-fout in het `.mvsa`-bestand levert exitcode `1`
 en diagnostiek op stderr. Controleer eerst met `vsa mvsa validate`.
 
+---
+
+## `vsa mvsa normalize`
+
+### Synopsis
+
+```text
+vsa mvsa normalize [-h] [-o OUTPUT] --pitch {doremi,abc,vsa}
+                   [--octave-style {@oct,marker}] [--no-align] path
+```
+
+### Beschrijving
+
+Herschrijft **stemregels** (S/A/T/B) naar één gekozen hoogte-spelling. De
+L-regel (lyrics, ELM, recite, melisma) blijft semantisch gelijk. Sticky
+`@do` / `@mode` / `@oct` blijven staan (`--octave-style @oct`).
+
+| `--pitch` | Output op stemregels                                      |
+| --------- | --------------------------------------------------------- |
+| `doremi`  | Laddergraden t.o.v. `@do` / `@oct`                        |
+| `abc`     | Toonnamen met wetenschappelijk cijfer (`bb4`, `c5`, …)    |
+| `vsa`     | Eerste toon absoluut (doremi), daarna EHM (`/`, `\2`, …) |
+
+Kolom- en maatstreep-uitlijning gebeurt standaard (zelfde regels als
+`scripts/align_mvsa_columns.py`); zet `--no-align` om dat over te slaan.
+
+Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
+
+### Argumenten en opties
+
+| Naam                    | Verplicht | Betekenis                                      | Default                         |
+| ----------------------- | --------- | ---------------------------------------------- | ------------------------------- |
+| `path`                  | Ja        | Bron-`.mvsa`-bestand.                          | —                               |
+| `--pitch`               | Ja        | Doel-spelling: `doremi`, `abc`, of `vsa`.      | —                               |
+| `-o`, `--output`        | Nee       | Uitvoerpad.                                    | `<stem>.normalized.mvsa`        |
+| `--octave-style`        | Nee       | `@oct` (canoniek) of `marker` (nog niet klaar) | `@oct`                          |
+| `--no-align`            | Nee       | Geen kolomuitlijning na herschrijven.          | uit (wel alignen)               |
+
+### Output
+
+- **stdout**: `Geschreven: <pad>` bij succes.
+- **bestand**: genormaliseerde `.mvsa`.
+
+### Exit status
+
+| Exitcode | Betekenis                                    |
+| -------- | -------------------------------------------- |
+| `0`      | Normalisatie geschreven.                     |
+| `1`      | Pad ontbreekt, validatiefout, of normalisatiefout. |
+
+### Voorbeelden
+
+```cmd
+vsa mvsa normalize examples\mvsa\alleluia-toon-8.canonieke.mvsa --pitch abc -o generated\alleluia.abc.mvsa
+vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
+```
+
 ## Zie ook
 
 - Draft-spec: [specification-mvsa](../../specification-mvsa/README.md)
+- Conversieplan: [mvsa-conversions](../../plans/mvsa-conversions.md)
 - Voorbeelden: [examples/mvsa](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)
 - Eenstemmig: [`vsa validate`](validate.md), [`vsa musicxml`](musicxml.md)

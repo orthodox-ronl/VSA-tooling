@@ -182,6 +182,7 @@ nav:
     - plans/gebruikseisen-dragers.md
     - plans/docs-content-publiek-en-paginatypen.md
     - mvsa v0 — meerstemmige invoer: plans/mvsa-v0-syntax.md
+    - mvsa-conversies (mxl/mscz/normalize): plans/mvsa-conversions.md
     - plans/vsa-polyphony-proposal.md
 
 extra_css:

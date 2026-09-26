@@ -235,7 +235,7 @@ def _build_parser():
 
     mvsa = subparsers.add_parser(
         "mvsa",
-        help="mvsa draft: .mvsa valideren of naar MusicXML exporteren.",
+        help="mvsa draft: .mvsa valideren, normaliseren of naar MusicXML exporteren.",
         description=(
             "Draft-tooling voor meerstemmige .mvsa-bestanden "
             "(L + SATB). Zie docs/specification-mvsa/."
@@ -247,18 +247,22 @@ def _build_parser():
             "      Valideer .mvsa (bestand of map).\n"
             "  musicxml PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar SATB MusicXML (.mxl/.musicxml).\n"
+            "  normalize PATH [-o OUTPUT] --pitch {doremi,abc,vsa}\n"
+            "      Herschrijf stemhoogten naar canonieke spelling.\n"
             "\n"
             "voorbeelden:\n"
             "  vsa mvsa validate examples\\mvsa\n"
             "  vsa mvsa musicxml lied.mvsa -o out.mxl --section schets1\n"
+            "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch abc\n"
             "\n"
-            "Hulp per subcommando: vsa mvsa validate -h | vsa mvsa musicxml -h"
+            "Hulp: vsa mvsa validate -h | vsa mvsa musicxml -h | "
+            "vsa mvsa normalize -h"
         ),
     )
     mvsa_sub = mvsa.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,musicxml}",
+        metavar="{validate,musicxml,normalize}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -304,6 +308,50 @@ def _build_parser():
         metavar="SECTION",
         default=None,
         help="Alleen deze @sectie-id exporteren (default: alle secties).",
+    )
+    m_normalize = mvsa_sub.add_parser(
+        "normalize",
+        help="Normaliseer stemhoogte-spelling (.mvsa → .mvsa).",
+        description=(
+            "Herschrijf S/A/T/B naar doremi, abc (wetenschappelijk cijfer) "
+            "of vsa (EHM). Behoudt L-semantiek en @oct. Zie "
+            "docs/plans/mvsa-conversions.md."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa normalize examples\\mvsa\\alleluia-toon-8.canonieke.mvsa "
+            "--pitch abc -o generated\\alleluia.abc.mvsa\n"
+            "  vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct"
+        ),
+    )
+    m_normalize.add_argument(
+        "path",
+        help=".mvsa-bestand om te normaliseren.",
+    )
+    m_normalize.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help="Uitvoerbestand (default: <stem>.normalized.mvsa).",
+    )
+    m_normalize.add_argument(
+        "--pitch",
+        choices=["doremi", "abc", "vsa"],
+        required=True,
+        help="Doel-spelling op stemregels.",
+    )
+    m_normalize.add_argument(
+        "--octave-style",
+        choices=["@oct", "marker"],
+        default="@oct",
+        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+    )
+    m_normalize.add_argument(
+        "--no-align",
+        action="store_true",
+        help="Sla canonieke kolomuitlijning over.",
     )
 
     pdf = subparsers.add_parser(
@@ -856,12 +904,15 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_validate(args)
     if getattr(args, "mvsa_command", None) == "musicxml":
         return _cmd_mvsa_musicxml(args)
+    if getattr(args, "mvsa_command", None) == "normalize":
+        return _cmd_mvsa_normalize(args)
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
-        "Gebruik: vsa mvsa {validate,musicxml} …\n"
+        "Gebruik: vsa mvsa {validate,musicxml,normalize} …\n"
         "  vsa mvsa validate PATH\n"
         "  vsa mvsa musicxml PATH [-o OUTPUT] [--section SECTION]\n"
-        "Hulp: vsa mvsa -h | vsa mvsa musicxml -h",
+        "  vsa mvsa normalize PATH --pitch {doremi,abc,vsa} [-o OUTPUT]\n"
+        "Hulp: vsa mvsa -h | vsa mvsa normalize -h",
         file=sys.stderr,
     )
     return 1
@@ -917,6 +968,39 @@ def _cmd_mvsa_musicxml(args) -> int:
             print(format_diagnostic(d, path), file=sys.stderr)
         return 1
     except MvsaExportError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
+    return 0
+
+
+def _cmd_mvsa_normalize(args) -> int:
+    from .mvsa_normalize import MvsaNormalizeError, normalize_mvsa_path
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = (
+        Path(args.output)
+        if args.output
+        else path.with_name(f"{path.stem}.normalized.mvsa")
+    )
+    try:
+        normalize_mvsa_path(
+            path,
+            out,
+            pitch=args.pitch,
+            octave_style=args.octave_style,
+            align=not args.no_align,
+        )
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaNormalizeError as exc:
         loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
         print(f"{loc}ERROR: {exc}", file=sys.stderr)
         return 1

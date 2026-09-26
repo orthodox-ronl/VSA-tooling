@@ -40,7 +40,9 @@ _DEGREE_RE = re.compile(
 _NOTE_RE = re.compile(
     r"^([a-gA-G])(bb|b|#)?(\d+)?([+-]\d*)?$",
 )
-_EHM_RE = re.compile(r"^[+#b♯♭]*[/\\~\-]+$")
+_EHM_RE = re.compile(
+    r"^[+#b♯♭]*(?:(?:/+\d*|\\+\d*)|[/\\]+|[-~])$"
+)
 
 ALTER_ACCIDENTAL = {
     1.0: "sharp",
@@ -363,7 +365,7 @@ def _resolve_slot(
         resolver._last_sounding = pitch
         return pitch
 
-    if _EHM_RE.match(tok) or set(tok) <= set("\\/#b+-~"):
+    if _EHM_RE.match(tok) or set(tok) <= set("\\/#b+-~0123456789"):
         return resolver.resolve_ehm(tok)
 
     try:

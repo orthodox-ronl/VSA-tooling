@@ -67,7 +67,7 @@ echo %ERRORLEVEL%
 | [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).               |
 | [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).       |
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                  |
-| [`mvsa`](mvsa.md)                                | Draft: `.mvsa` valideren of naar SATB MusicXML exporteren (`validate` / `musicxml`).       |
+| [`mvsa`](mvsa.md)                                | Draft: `.mvsa` valideren, normaliseren (`--pitch`), of naar SATB MusicXML exporteren.     |
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze
