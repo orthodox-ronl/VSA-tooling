@@ -25,7 +25,7 @@ Rollen en toon: [bron — schrijfconventies](https://orthodox-ronl.github.io/bro
 | Sectie                                              | Wat je er vindt                                                                                         |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | [Starten](getting-started/README.md)                | Lokaal ontwikkelen: omgeving, `vsa --version`, valideren en een SVG maken.                              |
-| [Formaten & CLI](formats/index.md)                  | `.vsa` / `.mvsa` / `.mxl` / `.mscz`, conversiematrix, `mvsa`/`mxl`/`mscz` en `.cmd`-scripts.           |
+| [Formaten & CLI](formats/index.md)                  | `.vsa` / `.mvsa` / `.mxl` / `.mscz` / `.midi`, checklists, CLI en `.cmd`-scripts.           |
 | [Handleidingen](manuals/index.md)                   | Taakgerichte uitleg (CLI-taken, validatie, export, consumer-site).                                      |
 | [Specificaties](specification/README.md)            | Normatieve VSA-taal- en toolcontracts.                                                                  |
 | [Referentie](reference/README.md)                   | Naslag: voorbeelden, CLI man-pagina’s, tokens, [diagnostics](@) en outputs.                             |

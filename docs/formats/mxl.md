@@ -17,6 +17,11 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
 **onze** export-/importprofielen.
 
+**Normaalvorm (checklist):**
+[canonieke checklists — MXL](canonical-checklists.md#checklist-mxl-coria-playback)
+(Coria / `playback`). Gedeelde kern met MSCZ; afwijkingen alleen waar Coria
+het eist.
+
 ## Typische commando’s
 
 ```cmd

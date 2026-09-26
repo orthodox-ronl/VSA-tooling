@@ -95,6 +95,8 @@ nav:
       - .mvsa: formats/mvsa.md
       - .mxl / .musicxml: formats/mxl.md
       - .mscz: formats/mscz.md
+      - .midi / .mid: formats/midi.md
+    - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - Commando's:
       - CLI-overzicht: reference/cli/index.md
       - mvsa: reference/cli/mvsa.md

@@ -15,6 +15,10 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
 verwachten voor bruikbare SATB + lyrics.
 
+**Normaalvorm (checklist):**
+[canonieke checklists — MSCZ](canonical-checklists.md#checklist-mscz-partituur-musescore)
+(partituur). Gedeelde kern met MXL; layout/pitfalls extra.
+
 ## Typische commando’s
 
 ```cmd

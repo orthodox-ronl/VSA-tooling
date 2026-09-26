@@ -8,14 +8,18 @@ specificaties; dit is de navigatiehub.
 
 Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
-| Bron ↓ \ Doel → | `.vsa` | `.mvsa` | `.mxl` | `.mscz` |
-| --------------- | ------ | ------- | ------ | ------- |
-| **`.vsa`** | (waar relevant) | — | `vsa musicxml` | via mxl / templates |
-| **`.mvsa`** | — | `mvsa normalize` | `mvsa musicxml` | `mvsa mscz` |
-| **`.mxl`** | — | `mxl import` | — | `mxl mscz` |
-| **`.mscz`** | — | `mscz import` | `mscz mxl` | — |
+| Bron ↓ \ Doel → | `.vsa` | `.mvsa` | `.mxl` | `.mscz` | `.midi` |
+| --------------- | ------ | ------- | ------ | ------- | ------- |
+| **`.vsa`** | (waar relevant) | — | `vsa musicxml` | via mxl / templates | open |
+| **`.mvsa`** | — | `mvsa normalize` | `mvsa musicxml` | `mvsa mscz` | open |
+| **`.mxl`** | — | `mxl import` | (checklist) | `mxl mscz` | open |
+| **`.mscz`** | — | `mscz import` | `mscz mxl` | (checklist) | open |
+| **`.midi`** | — | — | — | — | (afspelen; CLI open) |
 
-Volledige matrix en keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
+- **`.midi` / `.mid`:** rol = een **variant** van een **zangstuk** afspelen.
+  CLI-command nog niet vastgelegd — zie [`.midi`](midi.md).
+- Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
+- Normaalvorm-checklists MXL/MSCZ: [canonieke checklists](canonical-checklists.md).
 
 ## Bestandsformaten
 
@@ -23,8 +27,9 @@ Volledige matrix en keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 | -------- | --- | -------------- | -------------------- |
 | [`.vsa`](vsa.md) | Eenstemmige VSA-bron | [Specificatie VSA](../specification/README.md) | [`vsa`](../reference/cli/index.md) |
 | [`.mvsa`](mvsa.md) | Meerstemmige tekstbron (draft) | [specification-mvsa](../specification-mvsa/README.md) | [`mvsa`](../reference/cli/mvsa.md) |
-| [`.mxl` / `.musicxml`](mxl.md) | MusicXML (Coria / bewerking) | [MusicXML-export](../guides/musicxml-export.md) | [`mxl`](../reference/cli/mxl.md) |
-| [`.mscz`](mscz.md) | MuseScore-partituur | Templates / MuseScore-keten | [`mscz`](../reference/cli/mscz.md) |
+| [`.mxl` / `.musicxml`](mxl.md) | MusicXML (Coria / bewerking) | [checklists](canonical-checklists.md) · [MusicXML-export](../guides/musicxml-export.md) | [`mxl`](../reference/cli/mxl.md) |
+| [`.mscz`](mscz.md) | MuseScore-partituur | [checklists](canonical-checklists.md) · templates | [`mscz`](../reference/cli/mscz.md) |
+| [`.midi` / `.mid`](midi.md) | Afspelen (variant van een zangstuk) | dunne checklist; CLI open | — (open) |
 
 ## Commando’s
 
@@ -34,8 +39,15 @@ Volledige matrix en keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 | `mvsa` ≡ `vsa mvsa` | `.mvsa` | [`mvsa`](../reference/cli/mvsa.md) |
 | `mxl` | `.mxl` / `.musicxml` | [`mxl`](../reference/cli/mxl.md) |
 | `mscz` | `.mscz` | [`mscz`](../reference/cli/mscz.md) |
+| *(open)* | `.midi` | [`.midi`](midi.md) |
 
 Na `pip install -e .` staan `vsa`, `mvsa`, `mxl` en `mscz` op PATH.
+
+## Bestandsnaamgeving (kort)
+
+In `generated/` bij voorkeur `stem.brontype.doeltype` (laatste = echte
+extensie), bv. `alleluia.mvsa.mxl`. CLI-`-o` mag simpel blijven. Details:
+[canonieke checklists — naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ## Windows `.cmd`-scripts
 

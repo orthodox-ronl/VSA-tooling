@@ -19,12 +19,18 @@ Rijen = **bron**, kolommen = **doel**. De **diagonaal** is normalisatie: een
 bestand waarin iets is gewijzigd of gemengd geschreven weer naar een gekozen
 canonieke vorm brengen (zelfde formaat).
 
-| Bron ↓ \ Doel → | `.vsa` | `.mvsa` | `.mxl` / `.musicxml` | `.mscz` |
-| --------------- | ------ | ------- | -------------------- | ------- |
-| **`.vsa`** | **normalize** (canonieke VSA-schrijfvorm; bestaand pad waar relevant) | — (niet v0; eenstemmig ≠ mvsa) | `vsa musicxml` (bestaat) | via MXL of template-pad (bestaat deels voor corpus) |
-| **`.mvsa`** | — | **`normalize`** (pitch-vorm + `@oct`/layout) | `mvsa musicxml` (bestaat) | **`mscz`** via mxl→MuseScore (bestaat) |
-| **`.mxl` / `.musicxml`** | — (later / out of scope tenzij nodig) | **`import`** → mvsa (bestaat) | **normalize** (ons playback-/engraving-profiel) | MuseScore CLI / workflow |
-| **`.mscz`** | — | **`import`** → mvsa (via mxl; bestaat) | export uit MuseScore / tooling | **normalize** (ons partituur-profiel; beperkt wat wij vastleggen) |
+| Bron ↓ \ Doel → | `.vsa` | `.mvsa` | `.mxl` / `.musicxml` | `.mscz` | `.midi` / `.mid` |
+| --------------- | ------ | ------- | -------------------- | ------- | ---------------- |
+| **`.vsa`** | **normalize** (waar relevant) | — (niet v0) | `vsa musicxml` | via MXL / templates | **open** (CLI n.t.b.) |
+| **`.mvsa`** | — | **`normalize`** | `mvsa musicxml` | **`mscz`** via mxl→MuseScore | **open** (CLI n.t.b.) |
+| **`.mxl` / `.musicxml`** | — | **`import`** | **normalize** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | MuseScore / `mxl mscz` | **open** |
+| **`.mscz`** | — | **`import`** (via mxl) | `mscz mxl` | **normalize** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | **open** |
+| **`.midi` / `.mid`** | — | — | — | — | afspelen; CLI open |
+
+**`.midi`:** rol = een **variant** van een **zangstuk** afspelen. Geen
+CLI-naam vastgelegd — zie [formats/midi.md](../formats/midi.md).
+
+Hub: [Formaten & CLI](../formats/index.md).
 
 Legenda status in dit traject:
 
@@ -42,8 +48,10 @@ Legenda status in dit traject:
   (kuiser / `align_mvsa_columns`).
 - **`.vsa` → `.vsa`:** alleen waar tooling al een canonieke schrijfvorm afdwingt
   of gaat afdwingen; geen scope-creep hier.
-- **`.mxl` → `.mxl` / `.mscz` → `.mscz`:** normaliseer naar *ons* profiel
-  (Coria-playback vs. partituur), niet herdefiniëren van MusicXML/MuseScore.
+- **`.mxl` → `.mxl` / `.mscz` → `.mscz`:** normaliseer naar de
+  [canonieke checklists](../formats/canonical-checklists.md) (Coria vs
+  partituur), niet herdefiniëren van MusicXML/MuseScore.
+- **`.midi`:** afspelen van een variant van een zangstuk; CLI open.
 
 ---
 
@@ -55,8 +63,9 @@ Wat **wij** vastleggen vs. externe standaarden:
 | ------- | ------------------------- | --------------- |
 | `.vsa` | Eenstemmige VSA 1.0-schrijfvorm | [`specification/`](../specification/README.md), bron-glossary |
 | `.mvsa` | LSATB, sync, recite, kolommen, directives; pitch-varianten equivalent | [`specification-mvsa/`](../specification-mvsa/README.md) |
-| `.mxl` / `.musicxml` | Exportprofielen `playback` (Coria) en `engraving`; geen volledige MusicXML-herdefinitie | [MusicXML-export](../guides/musicxml-export.md), [rendering](../specification/rendering.md#musicxml-export) |
-| `.mscz` | Partituur-workflow (SATB, layout-conventies die MusicXML kwijtraakt); geen MuseScore-formaat-spec | [vsa-templates](../specification-vsa-templates/README.md), pitfalls |
+| `.mxl` / `.musicxml` | Checklist Coria/`playback` (+ kern SATB/lyrics) | [canonieke checklists](../formats/canonical-checklists.md), [rendering](../specification/rendering.md#musicxml-export) |
+| `.mscz` | Checklist partituur (+ kern; MuseScore-pitfalls) | [canonieke checklists](../formats/canonical-checklists.md), [vsa-templates / pitfalls](../specification-vsa-templates/rendering-pitfalls.md) |
+| `.midi` / `.mid` | Afspelen van een variant van een zangstuk; CLI open | [formats/midi.md](../formats/midi.md) |
 
 ### Pitch op stemregels (mvsa; keuze bij export/normalisatie)
 
@@ -86,7 +95,10 @@ hergebruik van `digit*`.
 
 - Default CLI-output: eenvoudig (`-o out.mxl`, bron-stem → `.mxl`).
 - Optioneel in `generated/`: bron-extensie meenemen voor herkomst, bv.
-  `naam.mvsa.mxl`, `naam.mscz.mvsa`. Tools kijken naar de **laatste** extensie.
+  `naam.mvsa.mxl`, `naam.mscz.mvsa`, `naam.vsa.midi`.
+- Tools kijken naar de **laatste** extensie.
+- Normatieve korte tekst + checklist-context:
+  [canonieke checklists — naamgeving](../formats/canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ---
 
@@ -100,6 +112,7 @@ Elke conversie-entry leest één brontype:
 | `mvsa` / `vsa mvsa` | `.mvsa` | validate, musicxml, mscz, import, normalize |
 | `mxl` | `.mxl` / `.musicxml` | import → mvsa; mscz (MuseScore) |
 | `mscz` | `.mscz` | import → mvsa; mxl (MuseScore) |
+| *(open)* | `.midi` / `.mid` | afspelen; commandnaam n.t.b. |
 
 **Transitie:** `vsa mvsa …` blijft de volledige alias van top-level `mvsa`.
 Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
