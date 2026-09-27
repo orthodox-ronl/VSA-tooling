@@ -6,21 +6,24 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 
 ## Wat hoort hier
 
-| Onderwerp | Waar |
-| --------- | ---- |
-| Export vanuit `.vsa` | [`vsa musicxml`](../reference/cli/musicxml.md), [MusicXML-export](../guides/musicxml-export.md) |
-| Export vanuit `.mvsa` | [`mvsa musicxml`](../reference/cli/mvsa.md#vsa-mvsa-musicxml) |
-| Import → `.mvsa` | [`mxl import`](../reference/cli/mxl.md) |
-| → `.mscz` | [`mxl mscz`](../reference/cli/mxl.md) |
-| Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export) |
+| Onderwerp                | Waar                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| Export vanuit `.vsa`     | [`vsa musicxml`](../reference/cli/musicxml.md), [MusicXML-export](../guides/musicxml-export.md) |
+| Export vanuit `.mvsa`    | [`mvsa musicxml`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)                                   |
+| Import → `.mvsa`         | [`mxl import`](../reference/cli/mxl.md)                                                         |
+| → `.mscz`                | [`mxl mscz`](../reference/cli/mxl.md)                                                           |
+| Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                           |
 
 Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
 **onze** export-/importprofielen.
 
 **Normaalvorm (checklist):**
 [canonieke checklists — MXL](canonical-checklists.md#checklist-mxl-coria-playback)
-(Coria / `playback`). Gedeelde kern met MSCZ; afwijkingen alleen waar Coria
-het eist.
+(Coria / `playback`) — **vier aparte parts** S/A/T/B met lyrics per part;
+**geen** print-recite-collapse (M10). Same-pitch **melisma** wél samentrekken
+(S13/R7): één lettergreep op dezelfde toon → één noot of tie-keten. Semantiek
+deelt de kern met MSCZ; layout divergeert (partituur = twee balken).
+Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
 
 ## Typische commando’s
 

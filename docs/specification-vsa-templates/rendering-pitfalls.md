@@ -44,14 +44,15 @@ Canonieke voorbeelden (T4-11):
 
 ## MuseScore 4 (MSCZ)
 
-| Probleem                                                | Oorzaak                                                               | Regel                                                                                                                                                                           |
-| ------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Binnen-strofe-maatstrepen blijven zichtbaar             | `Measure/endBarLineVisible` wordt **genegeerd**                       | Maatstreep-zichtbaarheid alleen via `<BarLine><subtype>…</subtype><visible>0</visible></BarLine>` **in de voice**. Roundtrip verifiëren.                                        |
-| Layout-splits midden in strofe vs “één maat”            | `split_events_for_layout` voor instance                               | Instance: **één maat per strofe**, geen binnen-strofe-knip. Coria idem.                                                                                                         |
-| Recite-lyrics blijven gecentreerd ondanks `<align>left` | MS 4.7: horizontale plaatsing = **`position`**, niet (alleen) `align` | Eerste recite-lettergreep: **geen** `position=left` (default = gecentreerd op de nootkop). Overige body-lettergrepen op spacer-noten. `align` alleen = tekstinterne uitlijning. |
-| Maatsoort-getallen zichtbaar                            | TimeSig in maat nodig voor `len`, maar stijl toont ze                 | TimeSig mag in de maat; staff: `showTimeSig=0`, style: `genCourtesyTimesig=0`.                                                                                                  |
-| Stokken systematisch S/T omhoog, A/B omlaag             | Twee stemmen per balk                                                 | MSCZ: SA en TB als **één akkoordstem** per balk.                                                                                                                                |
-| “Invisible” rusten of style verdwijnen na opslaan       | MuseScore herschrijft bij save                                        | Niet steunen op roundtrip-behoud van Style; opnieuw genereren vanuit script is bron van waarheid.                                                                               |
+| Probleem                                                | Oorzaak                                                               | Regel                                                                                                                                                                                   |
+| ------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Binnen-strofe-maatstrepen blijven zichtbaar             | `Measure/endBarLineVisible` wordt **genegeerd**                       | Maatstreep-zichtbaarheid alleen via `<BarLine><subtype>…</subtype><visible>0</visible></BarLine>` **in de voice**. Roundtrip verifiëren.                                                |
+| Layout-splits midden in strofe vs “één maat”            | `split_events_for_layout` voor instance                               | Instance: **één maat per strofe**, geen binnen-strofe-knip. Coria idem.                                                                                                                 |
+| Recite-lyrics blijven gecentreerd ondanks `<align>left` | MS 4.7: horizontale plaatsing = **`position`**, niet (alleen) `align` | Eerste recite-lettergreep: **geen** `position=left` (default = gecentreerd op de nootkop). Overige body-lettergrepen op spacer-noten. `align` alleen = tekstinterne uitlijning.         |
+| Maatsoort-getallen zichtbaar                            | TimeSig in maat nodig voor `len`, maar stijl toont ze                 | TimeSig mag in de maat; staff: `showTimeSig=0`, style: `genCourtesyTimesig=0`.                                                                                                          |
+| Stokken systematisch S/T omhoog, A/B omlaag             | Twee stemmen per balk                                                 | **Canoniek** voor MSCZ: voice 1 + `<stem>up</stem>` (S/T), voice 2 + `<stem>down</stem>` (A/B), met `<backup/>`.                                                                        |
+| “Invisible” rusten of style verdwijnen na opslaan       | MuseScore herschrijft bij save                                        | Niet steunen op roundtrip-behoud van Style; opnieuw genereren vanuit script is bron van waarheid.                                                                                       |
+| “Corrupt score” / ongelijke stemmen na melisma-collapse | MusicXML `type=breve` of gestipte som (`half`+`dot`, `duration≠type`) | Partituur: zelfde-hoogte melisma alleen mergen naar ongestipte ≤ whole; maat-`len` gelijk over staves. Zie checklist S13 / leesbaarheid R7 (mvsa) en `headType` breve ≠ `durationType`. |
 
 ---
 
@@ -108,6 +109,16 @@ recite-collapse.
 Andere genres/tonen gebruiken dezelfde mapper (`map_vsa_to_template`) en
 renderers; de corpus-CLI is tropaar-toon-4 totdat hun `pitches_status` geen
 `provisional` meer is.
+
+## MVSA → MSCZ-partituur (niet template)
+
+Voor litanie/LSATB-export (`mvsa mscz`) gelden aparte normaalvorm-regels:
+geen mid-systeem-HBox, geen spacermaat met balklijnen, leidende `|:` zonder
+lege maat, `@tekst` als SystemText. Zie
+[canonieke checklists — MSCZ S14–S19](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
+en [MSCZ-leesbaarheid — cues](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade).
+Template-HBox aan **systeemeinde** (cycle-tekst e.d.) blijft een apart patroon
+en hoort niet mid-systeem.
 
 ## Regenereren
 

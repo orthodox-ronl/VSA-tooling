@@ -82,17 +82,21 @@ Een **systeem** is één muzikale “regelgroep”:
 Stemvolgorde is vrij; de L-regel mag tussen de stemmen staan. Een lege regel
 (of een expliciete systeemscheiding, nader te kiezen) scheidt systemen.
 
-Elke inhoudsregel begint met een label en een dubbele punt:
+Elke inhoudsregel begint met een **regelidentifier**: stemidentifier, optioneel
+een EHM, dan een dubbele punt:
 
 ```text
 L: …
-S: …
-A: …
-T: …
+S: …      # absoluut (geen EHM in de identifier)
+A-: …     # relatief: EHM "-" is beginanker
+T\6: …
 B: …
 ```
 
-Andere stem-id’s mogen (`cantus:`, `S1:`), zolang ze uniek zijn binnen het stuk.
+Andere stem-id’s mogen (`cantus:`, `S1:`), zolang ze uniek zijn binnen het
+systeem. Begint de stemidentifier met `L` of `l`, dan is het een lyrics-regel
+(`lyrics:` telt dus als lyrics). Het laatste teken van de stemidentifier mag
+geen `_` of `-` zijn (`S-:` = stem `S` + EHM `-`).
 
 ---
 
@@ -128,10 +132,10 @@ rest, en je ziet het eindpas.
 **Beginanker** — twee schrijfwijzen, zelfde betekenis:
 
 ```text
-# In het label (oorspronkelijk idee)
-[-:S]   …     # beginanker: nulstand t.o.v. de referentiestart van de do-context
-[\6:T]  …     # beginanker: zes diatonische stappen omlaag
-[/3:A]  …     # beginanker: drie stappen omhoog
+# In de regelidentifier (voorkeur)
+S-: …      # beginanker: nulstand t.o.v. de referentiestart van de do-context
+T\6: …     # beginanker: zes diatonische stappen omlaag
+A/3: …     # beginanker: drie stappen omhoog
 
 # Of centraal
 @start S=- A=\3 T=\6 B=\8
@@ -143,6 +147,9 @@ S: …
 | `-` als begin | Geen stap omhoog/omlaag t.o.v. de referentiestart (welke laddergraad dat is, volgt uit `do:` / stukafspraak, bv. “S opent op mi”). |
 | `\6` `/3`     | Zes omlaag / drie omhoog vanaf die referentiestart.                                                                                |
 | `/n` `\n`     | Zelfde sprongen *binnen* de regel.                                                                                                 |
+
+Oudere notatie `[-:S]` / `[\6:T]` in het label is vervangen door `S-:` /
+`T\6:`.
 
 **Tussen- en eindankers** in relatieve stijl: schrijf een **laddergraad** als
 hoogte-stuk. Dat zet de **lopende toon** van die stem opnieuw (en documenteert de
@@ -336,7 +343,7 @@ Geen stille SATB-defaults: wie `@oct` weglaat, heeft overal schrijfoctaaf **0**
 octaven nodig hebben — dan blijft `so` op S en `so` op B bewust een octaaf
 uit elkaar, en `so-` op S is dezelfde toon als `so` op T bij `T=-1`.
 
-`@start` / `[-:S]` blijft het **beginanker** in EHM-stijl. `@oct` zegt alleen
+`@start` / `S-:` blijft het **beginanker** in EHM-stijl. `@oct` zegt alleen
 in welk octaaf je **laddergraden** typt; het vervangt `@start` niet.
 
 ---
@@ -547,7 +554,10 @@ B: -   -     /   \3 /3 \  \4&/2 /2     | \3&-&-&/&\/&/3 \3&- /3      |
 ```
 
 Geen `~`: elk L-stuk (plus melisma-`&`) heeft matching hoogte-stukken. Optioneel
-mag je aan het eind van een maat een laddergraad als eindanker toevoegen.
+mag je aan het eind van een maat een **eindanker aan de maatstreep** plakken
+(`|mi`, `|/`, `|-`) — dat **checkt** alleen (geen lengte-positie). Zie
+[specification-mvsa/syntax.md](../specification-mvsa/syntax.md#eindanker-aan-de-maatstreep).
+Een kale streep is geen marker (geen VSA-`[:]`-equivalent).
 
 ---
 
@@ -590,7 +600,7 @@ Samenvatting hieronder; bij conflict wint de draft-spec.
 | Schrijfoctaaf            | `@oct` (canonieke vorm); suffix telt t.o.v. die stem; weglaten = 0 voor alle stemmen                                                     |
 | `@start`                 | Alleen nodig (of handig) in **relatieve** stijl; niet verplicht bij pure laddergraden                                                    |
 | Ankers                   | Begin + tussendoor + eind horen bij relatieve stijl; bij laddergraden volstaat opschrijven                                               |
-| Label-start              | `[-:S]`, `[\6:T]` blijft equivalent aan `@start`; oudere `T[-1]:`-schrijfoctaaf → voorkeur `@oct`                                        |
+| Label-start              | `S-:`, `T\6:` equivalent aan `@start`; oudere `T[-1]:`-schrijfoctaaf → voorkeur `@oct`                                                   |
 | Tekstbron                | Één of meer lyrics-regels (`L` / `L1` / …); geen `${n}`-placeholders in stemregels                                                       |
 | Stemmen t.o.v. elkaar    | In v0 **gelijkwaardig** uitgeschreven; overlays t.o.v. S = open punt (§10)                                                               |
 | Blokhergebruik           | **Niet** in v0-norm; experiment blijft in `examples/mvsa/`                                                                               |
@@ -618,8 +628,10 @@ Korte lijst ook in
 - Chromatische `+`/`b` vs `#` in **eenstemmige VSA-EHM**. Op mvsa-laddergraden:
   `+`/`-` = octaaf, kruis/mol = `#`/`b` of `fis`/`bes` (§2.2.2).
 - Of een eindanker een *extra* hoogte-stuk is (alleen controle) of het *laatste*
-  klinkende event mag vervangen — nu: anker **is** een gewoon hoogte-stuk met
-  laddergraad (klinkt / zet de lopende toon).
+  klinkende event mag vervangen — **besloten:** eindanker hangt aan de
+  maatstreep (`|mi`, `|/`), checkt alleen, telt niet als lengte-positie; zie
+  [syntax — eindanker](../specification-mvsa/syntax.md#eindanker-aan-de-maatstreep).
+  Laddergraad als gewoon hoogte-stuk blijft mogelijk en *zet* wél de lopende toon.
 - Kuiser + CLI (`vsa validate` voor `.mvsa`); daarna eventueel opname onder
   `docs/specification/` wanneer de draft stabiel is.
 

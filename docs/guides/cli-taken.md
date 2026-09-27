@@ -21,6 +21,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | MusicXML exporteren                       | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md)                          |
 | mvsa valideren (draft)                    | [`vsa mvsa validate <pad>`](../reference/cli/mvsa.md#vsa-mvsa-validate)                          |
 | mvsa → SATB MusicXML (draft)              | [`vsa mvsa musicxml <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)     |
+| `.mvsa` leren schrijven                   | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                      |
 
 ## Exitcodes
 

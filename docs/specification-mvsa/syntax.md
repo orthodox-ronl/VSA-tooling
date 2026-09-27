@@ -14,36 +14,77 @@ hieronder aangegeven.
 | Soort regel  | Vorm                                                                                 |
 | ------------ | ------------------------------------------------------------------------------------ |
 | Commentaar   | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
-| Directive    | Regel die begint met `@` (zie [Semantiek](semantics.md#directives-do-mode-oct))      |
+| Directive    | Regel die begint met `@` (zie [Keywords](keywords.md))                               |
 | Sectiekop    | `@sectie` + spatie + id                                                              |
-| LSATB-inhoud | Begint met een LSATB-marker                                                          |
+| LSATB-inhoud | Begint met een [regelidentifier](#regelidentifier)                                   |
 
-## 2. LSATB-marker
+## 2. Regelidentifier
 
 ```text
-marker ::= [LSATB] digit* ":"
+regelidentifier ::= stemidentifier [ EHM ] ":"
+stemidentifier  ::= [A-Za-z0-9_-]+   (* laatste teken mag geen "_" of "-" zijn *)
 ```
 
-| Marker             | Rol                                |
-| ------------------ | ---------------------------------- |
-| `L`, `L1`, `L2`, … | Lyrics                             |
-| `S`, `S1`, `S2`, … | Sopraan (of eerste/tweede sopraan) |
-| `A`, `A1`, …       | Alt                                |
-| `T`, `T1`, …       | Tenor                              |
-| `B`, `B1`, …       | Bas                                |
+Het deel vóór de eerste `:` op de regel is de regelidentifier-prefix. De parser
+kiest de **langste** suffix van die prefix die een geldige [EHM](@) is; de rest
+is de stemidentifier. Blijft er geen geldige EHM-suffix over, dan is de hele
+prefix de stemidentifier (geen EHM).
 
-Andere stem-id’s (`cantus:`) horen **niet** in v0. Na de dubbele punt volgt
-inhoud (hoogte- of lyrics-tekst), voorafgegaan door optionele spaties.
+| Voorbeeld   | Stemidentifier | EHM  | Rol                         |
+| ----------- | -------------- | ---- | --------------------------- |
+| `L:`        | `L`            | —    | Lyrics                      |
+| `L1:`       | `L1`           | —    | Lyrics                      |
+| `lyrics:`   | `lyrics`       | —    | Lyrics (begint met `l`)     |
+| `S:`        | `S`            | —    | Stem, **absolute** stijl    |
+| `S-:`       | `S`            | `-`  | Stem, **relatieve** stijl   |
+| `T\6:`      | `T`            | `\6` | Stem, relatief + beginanker |
+| `cantus:`   | `cantus`       | —    | Stem, absoluut              |
+| `S1/:`      | `S1`           | `/`  | Stem, relatief              |
+
+**Lyrics vs. stem:** begint de stemidentifier met `L` of `l`, dan is het een
+lyrics-regel; anders een stemregel. Elke id die met `l`/`L` begint telt dus als
+lyrics (`lyrics:`, `la:`). Een EHM in de regelidentifier van een lyrics-regel
+(`L/:`) is een **fout**.
+
+**Hoogtestijl (stemregel):**
+
+- **met** EHM in de regelidentifier → relatieve (vsa-achtige) stijl; die EHM is
+  het **beginanker** van de stem (zelfde rol als `@start` voor die stem);
+- **zonder** EHM → absolute stijl (do-re-mi of a–g).
+
+Op de regel zelf mogen hoogte-tokens nog mixen (EHM én laddergraden als ankers);
+de identifier zet alleen de default/start. Zie
+[Semantiek — absolute en relatieve hoogte](semantics.md#absolute-en-relatieve-hoogte).
+
+Gangbare stem-id’s in SATB-export: `S`, `A`, `T`, `B` (eventueel `S1`, …).
+Andere stem-id’s (`cantus:`) zijn syntactisch toegestaan; MusicXML/MSCZ-export
+verwacht voorlopig de SATB-letters.
+
+Het laatste teken van de stemidentifier mag geen `_` of `-` zijn, zodat `S-:`
+eenduidig “stem `S` + EHM `-`” is (niet stem-id `S-`). Ongeldig: `S_:`.
+
+Na de dubbele punt volgt inhoud (hoogte- of lyrics-tekst), voorafgegaan door
+optionele spaties.
 
 ## 3. LSATB-systeem
 
-Een **LSATB-systeem** is een aaneengesloten reeks inhoudsregels die elk met een
-LSATB-marker beginnen. Tussen twee systemen van **dezelfde sectie** mogen:
+Een **LSATB-systeem** is een reeks inhoudsregels die elk met een regelidentifier
+beginnen. Tussen de identifier-regels van **hetzelfde** systeem mogen (niet
+canoniek, wel toegestaan):
 
 - lege regels;
-- `#`-commentaar;
+- `#`-commentaar.
+
+Tussen twee systemen van **dezelfde sectie** mogen bovendien:
+
 - HTML-commentaar;
-- directives (`@do`, `@mode`, `@oct`, …).
+- directives (`@do`, `@mode`, `@oct`, `@title`, `@tekst`, `@---`, …).
+
+Een kale lege regel **scheidt geen** systemen (die mag midden in één systeem).
+Zet tussen vscode-systemen een `@`-regel, bv. `@---` of `@tekst "…"`.
+
+Canoniek staan de LSATB-regels **direct onder elkaar** zonder lege regels
+ertussen (zo schrijft tooling bij genereren / normalize).
 
 Een systeem:
 
@@ -126,6 +167,39 @@ v0 vereist **geen** `\|\|:` of `:\|\|:` als overgang naar een volgende sectie.
 Een nieuwe sectie begint altijd in een **nieuw** LSATB-systeem (nieuwe set
 regels), zodat die gecombineerde tekens niet nodig zijn.
 
+### Eindanker aan de maatstreep
+
+Op een **stemregel** mag direct na een maatstreep (zonder spatie) een
+**eindanker** staan: een [EHM](@) of een absolute laddergraad/toonnaam. Dat
+anker telt **niet** als lengte-positie.
+
+```text
+maatstreep-met-anker ::= bar-token [ hoogte ]
+hoogte               ::= EHM | laddergraad | toonnaam
+```
+
+| Schrijven | Betekenis                                                      |
+| --------- | -------------------------------------------------------------- |
+| `\|`      | Kale streep: **geen** hoogte-marker (geen check)               |
+| `\|mi`    | Streep + absolute check: lopende toon moet `mi` zijn           |
+| `\|/`     | Streep + EHM-check (zelfde EHM-inhoud als in VSA)              |
+| `\|-`     | Streep + EHM `-` (verwachte ladderpositie 0 t.o.v. schrijf-do) |
+| `\| mi`   | Spatie na streep: `mi` is een **gewoon** hoogte-stuk           |
+| `\|\|fa`  | Sectie-eindestreep met absolute check                          |
+
+Er is **geen** lege hoogte-marker (in VSA: `[:]`). Bij gebrek aan `[`…`:]`
+betekent een kale maatstreep eenvoudig: geen anker.
+
+**Semantiek:** een eindanker **checkt alleen**. Het zet de lopende toon niet
+opnieuw (dat doet wel een EHM in de
+[regelidentifier](#regelidentifier)). Mismatch → validate-error
+(`MVSA-BAR-ANKER`). Details:
+[Semantiek — ankers](semantics.md#ankers-zetten-vs-checken).
+
+Op **lyrics-regels** horen geen eindankers; daar blijft de kale streep. Voor
+sync van maatstrepen telt alleen het **bar-token** (zonder anker): `L` met `|`
+en `S` met `|mi` zijn synchroon.
+
 ## 5. Sectie
 
 ### Begin
@@ -134,7 +208,7 @@ Een sectie begint aan het begin van een tekstregel die niet tot een reeds
 begonnen sectie behoort, en wel met:
 
 - een sectiekop `@sectie` *id*, of
-- een LSATB-marker (anonieme sectie).
+- een regelidentifier (anonieme sectie).
 
 ```text
 @sectie nl1
@@ -146,19 +220,34 @@ S: …
 
 ### Einde
 
-De sectie eindigt wanneer op **alle** LSATB-regels van een systeem een
-sectie-eindestreep (`||` of `:||`) staat. Regels **daarna** horen niet meer bij
-die sectie (geen “trailing metadata” voor die sectie).
+Een sectie eindigt op een van deze manieren (de eerste is **canoniek**):
+
+1. **Sectie-eindestreep:** op **alle** LSATB-regels van een systeem staat
+   `||` of `:||`. Regels daarna horen niet meer bij die sectie.
+2. **Nieuwe `@sectie`:** een volgende `@sectie` *id* opent een nieuwe sectie en
+   **sluit daarmee impliciet** de vorige af, ook als die nog geen `||` had.
+   (Toegestaan in niet-canonieke bronnen; tooling mag een warning geven.)
+3. **Einde van het bestand (EOF):** een open sectie zonder `||` wordt bij EOF
+   als afgesloten beschouwd.
+4. **(Vooruitblik)** Het sluiten van een fenced blok `::: mvsa-notatie` …
+   `:::` (zodra die vorm in markdown/export landt) werkt hetzelfde als EOF voor
+   de open sectie in dat blok.
+
+Canoniek schrijf je dus nog steeds `||` (of `:||`) op het laatste systeem van
+elke sectie. Impliciete afsluiting via `@sectie` / EOF / fence is geldig voor
+validatie en export, maar niet de vorm die tooling bij genereren schrijft.
 
 ### Meerdere systemen per sectie
 
 Een lange sectie mag over meerdere LSATB-systemen worden gesplitst (leesbaarheid
 in de editor). Elk tussensysteem eindigt op `|` (of herhalingsspecialisatie die
-geen sectie-einde is). Alleen het **laatste** systeem van de sectie eindigt op
-`||` of `:||`.
+geen sectie-einde is). Canoniek eindigt alleen het **laatste** systeem van de
+sectie op `||` of `:||`; zonder die streep mag de sectie toch eindigen via
+`@sectie` / EOF zoals hierboven.
 
 Alle systemen in één sectie hebben hetzelfde aantal LSATB-regels en dezelfde
-marker-volgorde.
+regelidentifiers in dezelfde volgorde (zelfde stemidentifier én dezelfde
+optionele EHM per regel).
 
 ## 6. Lyrics-regel (L)
 
@@ -194,7 +283,9 @@ De kuiser mag eenvoudige fouten herstellen (bijvoorbeeld `hei- li- ge` →
 ### Melisma (vorm A)
 
 Meerdere slots op één lettergreep: één L-stuk met `&` tussen ELM-slots, bijvoorbeeld
-`Ster~&~&~` of `God_.&_.`.
+`Ster~&~&~` of `God_.&_.`. In de canonieke **MSCZ**/MusicXML-export staat de
+lyric op de **eerste** noot met een **extender** (`<extend/>`), zodat de zanger
+ziet hoe lang de lettergreep aanhoudt.
 
 ### Reciteertoon
 
@@ -209,13 +300,13 @@ De hele groep is **één** lengte-positie (één hoogte-stuk per stem). Er is
 **geen** leading `~` meer als recite-marker. Optioneel volgt **direct na** `)`
 een ELM voor de duur van die positie.
 
-| Onderdeel                     | Betekenis                                                           |
-| ----------------------------- | ------------------------------------------------------------------- |
-| `(` … `)`                     | Recite-run; spaties = woorden, `-` = lettergreepstreepjes           |
-| geen ELM na `)`               | Recite-standaardduur (export: breve / `\|\|O\|\|`)                  |
-| ELM na `)` (`_`, `~`, `.`, …) | Andere duur (`(Zoon van God)_`, `(Al-le-lu-ia,)~`)                  |
-| `)-` + lettergreep            | **Woordstreepje** over de recite-grens (niet ELM-`-`)               |
-| `~` elders op L               | Alleen **ELM-duur** (`hei~`, melisma-slots) — start **geen** recite |
+| Onderdeel                     | Betekenis                                                                                                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `(` … `)`                     | Recite-run; spaties = woorden, `-` = lettergreepstreepjes                                                                                                                      |
+| geen ELM na `)`               | Recite-standaardduur: **playback** = kwart per lettergreep; **MSCZ-print** bij `n ≥ 6` = 1–(n−2)–1 met breve-midden (zie [MSCZ-leesbaarheid](../formats/mscz-leesbaarheid.md)) |
+| ELM na `)` (`_`, `~`, `.`, …) | Andere duur op de randnoten / lettergrepen (`(Zoon van God)_`)                                                                                                                 |
+| `)-` + lettergreep            | **Woordstreepje** over de recite-grens (niet ELM-`-`)                                                                                                                          |
+| `~` elders op L               | Alleen **ELM-duur** (`hei~`, melisma-slots) — start **geen** recite                                                                                                            |
 
 Kale ELM-`-` na `)` voegt geen nuttige duur toe t.o.v. de standaard (zelfde
 kwart-duur als `~`). Zet een streepje **achter** de `)` alleen als het woord
@@ -316,12 +407,19 @@ komma’s bij de lettergreep vóór de `)`.
 
 Op een stemregel staan alleen **hoogte-stukken**, gescheiden door spaties:
 
-- relatief (EHM): `/`, `\`, `-`, `/3`, `#\`, …;
+- relatief (EHM): `/`, `\`, `-`, `/3`, `#\`, … — **unidirectioneel**
+  (alleen `/…` of alleen `\…`, eventueel met cijfer). Mixen zoals `\/` of
+  `/\` zijn **geen** EHM;
 - absoluut: laddergraden `do` `re` `mi` `fa` `so`/`sol` `la` `si`/`ti` en/of
   toonnamen `c`…`b`, `Bb`, `fis`, …;
 - octaaf: suffix `-` / `+` / `-1` / `+2` / … of wetenschappelijk cijfer op
   toonnamen (`g3`, `bb4`);
 - melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots).
+
+Of de regel **standaard** relatief of absoluut is, volgt uit de
+[regelidentifier](#regelidentifier): met EHM (`S-:`) relatief + beginanker;
+zonder EHM (`S:`) absoluut. Mix van EHM-stappen en laddergraden (ankers) op
+dezelfde regel blijft toegestaan.
 
 Geen lyrics en geen `_` / `.&.` op de stemregel — die horen in L.
 
@@ -350,10 +448,24 @@ Nederlandse toonnamen (`fis` `bes` `cis` …) zijn een alternatief voor
 
 #### Toonnamen (a–g)
 
-| Vorm        | Voorbeelden              | Betekenis                          |
-| ----------- | ------------------------ | ---------------------------------- |
-| kruis / mol | `f#` `fb` `bb` `Bb` `c#` | voorteken direct op de letter      |
-| + octaaf    | `f#-` `bb4` `c#-2`       | wetenschappelijk cijfer of suffix  |
+| Vorm        | Voorbeelden              | Betekenis                                                                 |
+| ----------- | ------------------------ | ------------------------------------------------------------------------- |
+| kruis / mol | `f#` `fb` `bb` `Bb` `c#` | voorteken direct op de letter                                             |
+| + octaaf    | `f#-` `bb4` `c#-2`       | wetenschappelijk cijfer of suffix (`-`/`+`/`-2`) t.o.v. het do-octaaf     |
+
+**Zonder cijfer** deelt a–g het **do-octaaf** van het schrijf-do
+(`@do` + `@oct`): het halfopen interval vanaf do tot één octaaf hoger.
+Bij `@do F4` is `c` = C5 (= so), niet C4. Dat is bewust dezelfde wrap als bij
+doremi (`so`), zodat `fa`≡`bb` en `so`≡`c` pitch-equivalent blijven. De
+wetenschappelijke C-wrap geldt **alleen** bij een cijfer (`c4` = C4, `c5` = C5)
+en negeert `@oct`.
+
+| Bij `@do F4` | Kale a–g | Met cijfer | doremi   |
+| ------------ | -------- | ---------- | -------- |
+| F4           | `f`      | `f4`       | `do`     |
+| Bb4          | `bb`     | `bb4`      | `fa`     |
+| C5           | `c`      | `c5`       | `so`     |
+| C4           | `c-`     | `c4`       | `so-`    |
 
 `b` / `B` alleen is de toonnaam **B** (Engels), niet Bes. Bes is `bb` / `Bb` /
 `bes`.

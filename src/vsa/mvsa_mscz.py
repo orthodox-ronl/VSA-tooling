@@ -1,8 +1,7 @@
-"""Export .mvsa to MuseScore .mscz via MusicXML intermediate (draft-v0).
+"""Export .mvsa to MuseScore .mscz via partituur MusicXML (draft-v0).
 
-Chain: ``.mvsa`` → ``.mxl`` (playback MusicXML) → MuseScore CLI → ``.mscz``.
-Native MSCX writing is out of scope for this slice; see
-``docs/plans/mvsa-conversions.md``.
+Chain: ``.mvsa`` → partituur ``.mxl`` (SA/TB, lege part-namen) → MuseScore CLI
+→ ``.mscz`` → strip stem-indicaties (Style + longName/shortName).
 """
 
 from __future__ import annotations
@@ -11,6 +10,7 @@ import os
 import tempfile
 from pathlib import Path
 
+from .mscz_partituur import MsczPartituurError, apply_partituur_mscz_conventions
 from .musescore_cli import (
     MuseScoreConvertError,
     MuseScoreNotFoundError,
@@ -18,6 +18,7 @@ from .musescore_cli import (
     require_musescore,
 )
 from .mvsa_musicxml import MvsaExportError, export_mvsa_path
+from .mvsa_parse import parse_mvsa
 from .mvsa_validate import MvsaValidationError
 
 __all__ = [
@@ -40,10 +41,10 @@ def export_mvsa_to_mscz(
     musescore: Path | None = None,
     keep_mxl: Path | None = None,
 ) -> Path:
-    """Export ``path`` (.mvsa) to ``out`` (.mscz).
+    """Export ``path`` (.mvsa) to checklist-conformant ``out`` (.mscz).
 
-    Writes an intermediate ``.mxl`` (temp, or ``keep_mxl`` if given), then
-    converts with MuseScore. Returns ``out``.
+    Intermediate MusicXML uses **partituur** layout (twee balken SA/TB).
+    Returns ``out``.
     """
     path = Path(path)
     out = Path(out)
@@ -63,14 +64,15 @@ def export_mvsa_to_mscz(
         mxl_path.parent.mkdir(parents=True, exist_ok=True)
     else:
         fd, name = tempfile.mkstemp(suffix=".mxl", prefix="mvsa-")
-        # Close handle immediately; Windows needs the file closed for MuseScore.
         os.close(fd)
         tmp_mxl = Path(name)
         mxl_path = tmp_mxl
 
     try:
         try:
-            export_mvsa_path(path, mxl_path, section_id=section_id)
+            export_mvsa_path(
+                path, mxl_path, section_id=section_id, layout="partituur"
+            )
         except (MvsaValidationError, MvsaExportError):
             raise
         except Exception as exc:
@@ -80,8 +82,49 @@ def export_mvsa_to_mscz(
             convert_with_musescore(mxl_path, out, musescore=musescore)
         except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
             raise MvsaMsczError(str(exc)) from exc
+
+        try:
+            from .bibliotheek_id import bibliotheek_id_from_path
+
+            doc = parse_mvsa(path.read_text(encoding="utf-8"))
+            # Geen mid-systeem-HBox vóór @tekst (accolade). Scheiding = ‖ +
+            # SystemText; lege spacer-maten worden weggestript.
+            apply_partituur_mscz_conventions(
+                out,
+                system_texts=_collect_staff_texts_from_doc(doc),
+                copyright=doc.copyright,
+                bibliotheek_id=bibliotheek_id_from_path(path),
+                title=doc.title,
+                composer=doc.composer,
+                bron=doc.bron,
+                ondertitel=doc.ondertitel,
+                tekstdichter=doc.tekstdichter,
+                arrangeur=doc.arrangeur,
+                vertaler=doc.vertaler,
+            )
+        except MsczPartituurError as exc:
+            raise MvsaMsczError(str(exc)) from exc
     finally:
         if tmp_mxl is not None:
             tmp_mxl.unlink(missing_ok=True)
 
     return out
+
+
+def _collect_staff_texts_from_doc(doc) -> list[str]:
+    from .mvsa_speelplan import format_speelplan_text
+
+    out: list[str] = []
+    if doc.speelplan:
+        out.append(format_speelplan_text(doc.speelplan))
+    for section in doc.sections:
+        if doc.speelplan and section.origin == "blok" and section.id:
+            out.append(section.id)
+        for system in section.systems:
+            out.extend(system.staff_texts)
+    return out
+
+
+def _collect_staff_texts(path: Path) -> list[str]:
+    """All ``@tekst`` strings in document order (for MSCZ SystemText promote)."""
+    return _collect_staff_texts_from_doc(parse_mvsa(path.read_text(encoding="utf-8")))

@@ -1,28 +1,44 @@
-"""Export .mvsa to multi-part SATB MusicXML (draft-v0)."""
+"""Export .mvsa to multi-part SATB MusicXML (draft-v0).
+
+Layouts (canonieke checklists):
+
+- ``playback`` — vier parts Soprano/Alto/Tenor/Bass (Coria / ``.mxl``).
+- ``partituur`` — twee parts SA + TB, **twee voices** per balk (S/T stok
+  omhoog, A/B stok omlaag), **lege** part-namen (tussenbestand / bron voor
+  MuseScore-``.mscz``).
+"""
 
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Literal
 from xml.sax.saxutils import escape
 
 from .duration_model import elm_to_duration
 from .music import Duration, Pitch
 from .musicxml_package import write_musicxml_output
 from .mvsa_parse import (
+    HEIGHT_DEGREE_RE,
+    HEIGHT_EHM_RE,
+    HEIGHT_NOTE_RE,
     LPosition,
     StickyContext,
     VoicePosition,
     parse_mvsa,
 )
+from .mvsa_validate import is_lyrics_stem
 from .mvsa_validate import MvsaValidationError
 from .pitch_resolver import (
     PitchResolver,
     degree_to_pitch,
     key_fifths,
     parse_pitch_string,
+    pitch_in_do_octave,
 )
+
+MvsaLayout = Literal["playback", "partituur"]
 
 PARTS = (
     {"id": "P1", "name": "Soprano", "abbr": "S", "clef": ("G", "2"), "voice": "S"},
@@ -31,18 +47,16 @@ PARTS = (
     {"id": "P4", "name": "Bass", "abbr": "B", "clef": ("F", "4"), "voice": "B"},
 )
 
+# Partituur: twee balken; part-name leeg (geen stem-indicaties op het blad).
+PARTITUUR_PARTS = (
+    {"id": "P1", "clef": ("G", "2"), "upper": "S", "lower": "A"},
+    {"id": "P2", "clef": ("F", "4"), "upper": "T", "lower": "B"},
+)
+
 # Prefix accidental, name, then either oct[+acc] or acc[+oct]
-_DEGREE_RE = re.compile(
-    r"^(#|b)?(do|re|mi|fa|sol|so|la|si|ti)"
-    r"(?:([+-]\d*)(#|b)?|(#|b)([+-]\d*)?)?$",
-    re.IGNORECASE,
-)
-_NOTE_RE = re.compile(
-    r"^([a-gA-G])(bb|b|#)?(\d+)?([+-]\d*)?$",
-)
-_EHM_RE = re.compile(
-    r"^[+#b♯♭]*(?:(?:/+\d*|\\+\d*)|[/\\]+|[-~])$"
-)
+_DEGREE_RE = HEIGHT_DEGREE_RE
+_NOTE_RE = HEIGHT_NOTE_RE
+_EHM_RE = HEIGHT_EHM_RE
 
 ALTER_ACCIDENTAL = {
     1.0: "sharp",
@@ -53,15 +67,13 @@ ALTER_ACCIDENTAL = {
 
 _DEGREE_INDEX = {"do": 0, "re": 1, "mi": 2, "fa": 3, "sol": 4, "la": 5, "ti": 6}
 
-# Reciteertoon on the page: breve (||O||); playback/spacing uses breve divisions.
-_RECITE_DURATION = Duration(note_type="breve", dots=0)
-
 
 @dataclass
 class LyricSyllable:
     text: str
     syllabic: str = "single"
     number: int = 1
+    extend: bool = False  # MusicXML <extend/> (melisma-lijn na lettergreep)
 
 
 @dataclass
@@ -70,6 +82,27 @@ class NoteEvent:
     duration: Duration
     lyrics: list[LyricSyllable] = field(default_factory=list)
     recite: bool = False
+    spacer: bool = False  # onzichtbare kop, zichtbare lyric (partituur-recite)
+    duration_divisions: int | None = None  # override MusicXML <duration>
+    stemless: bool = False  # stokloos (||O||-midden of spacer)
+    breve_head: bool = False  # print als ||O||; metrisch = duration (niet type=breve)
+    slur_start: bool = False  # melisma-boog start (S2) — alleen bij toonwissels
+    slur_stop: bool = False  # melisma-boog eind
+    tie_start: bool = False  # same-pitch hold-keten (I2)
+    tie_stop: bool = False
+
+
+# Partituur-print: recite met ≥6 lettergrepen → 1-(n-2)-1 (randnoten + ||O||).
+# Midden: stokloos met breve-kop; metrisch = randduur (geen MusicXML type=breve —
+# MuseScore rekt die anders tot 8/4 en blaas maten op).
+RECITE_PRINT_COLLAPSE_MIN = 6
+
+# Cue-spacer (legacy / peiling): minimale onzichtbare maat. Partituur/MSCZ
+# gebruikt voor mid-flow ``@tekst`` géén spacermaat en géén mid-systeem-HBox.
+CUE_GAP_DURATION_DIVS = 1
+CUE_GAP_NOTE_TYPE = "16th"
+PAUSE_LYRIC = "[PAUZE]"
+PAUSE_DURATION_DIVS = 16  # whole @ divisions=4
 
 
 class MvsaExportError(Exception):
@@ -83,8 +116,12 @@ def export_mvsa_to_musicxml(
     *,
     title: str = "mvsa",
     section_id: str | None = None,
+    layout: MvsaLayout = "playback",
+    source_path: Path | None = None,
 ) -> str:
     """Validate + export. Raises MvsaValidationError or MvsaExportError."""
+    if layout not in ("playback", "partituur"):
+        raise MvsaExportError(f"onbekende layout {layout!r}")
     doc = parse_mvsa(text)
     errors = [d for d in doc.diagnostics if d.severity == "error"]
     if errors:
@@ -95,18 +132,130 @@ def export_mvsa_to_musicxml(
         sections = [s for s in sections if s.id == section_id]
         if not sections:
             raise MvsaExportError(f"sectie {section_id!r} niet gevonden")
+    else:
+        from .mvsa_speelplan import sections_for_layout
+
+        sections = sections_for_layout(doc, layout=layout)
 
     voice_measures: dict[str, list[list[NoteEvent]]] = {
         p["voice"]: [] for p in PARTS
     }
+    bar_styles: list[str] = []
+    measure_left_styles: list[str | None] = []
+    measure_staff_texts: list[list[str]] = []
+    measure_new_system: list[bool] = []
+    score_started = False
     for section in sections:
         for system in section.systems:
-            events_by_voice = _system_to_events(system)
+            events_by_voice = _system_to_events(system, layout=layout)
             for voice, measures in events_by_voice.items():
                 voice_measures[voice].extend(measures)
+            for mi, bundle in enumerate(system.measures):
+                bar_styles.append(_mvsa_bar_to_style(bundle.final_bar))
+                left = None
+                if mi == 0 and bundle.start_bar:
+                    left = _mvsa_bar_to_style(bundle.start_bar)
+                measure_left_styles.append(left)
+                if mi == 0:
+                    texts = list(getattr(system, "staff_texts", None) or [])
+                    # Partituur + speelplan: bloknummer op eerste maat van het blok.
+                    if (
+                        layout == "partituur"
+                        and doc.speelplan
+                        and section.origin == "blok"
+                        and section.id
+                        and system is section.systems[0]
+                    ):
+                        texts = [section.id, *texts]
+                    measure_staff_texts.append(texts)
+                    # Alleen ``@mscz-newline`` forceert een MuseScore-systeembreuk.
+                    wants_break = bool(getattr(system, "mscz_newline", False))
+                    measure_new_system.append(wants_break and score_started)
+                else:
+                    measure_staff_texts.append([])
+                    measure_new_system.append(False)
+            if system.measures:
+                score_started = True
+
+    # Fase 1: speeltekst bovenaan partituur (bladvorm).
+    if layout == "partituur" and doc.speelplan and measure_staff_texts:
+        from .mvsa_speelplan import format_speelplan_text
+
+        speel = format_speelplan_text(doc.speelplan)
+        measure_staff_texts[0] = [speel, *measure_staff_texts[0]]
+    # Wrap lange ``@tekst`` (``...`` → nieuwe regel) vóór breedte-schatting.
+    for i, texts in enumerate(measure_staff_texts):
+        if texts:
+            measure_staff_texts[i] = [wrap_tekst_at_ellipsis(t) for t in texts]
+
+    measure_widths: list[int | None] = [None] * len(measure_staff_texts)
+    if layout == "partituur":
+        _prepare_partituur_tekst_frames(
+            bar_styles,
+            measure_staff_texts,
+            measure_new_system,
+            measure_widths,
+        )
+        # Witruimte vóór mid-flow @tekst: dubbele maatstreep + SystemText.
+        # Geen MusicXML-spacermaat (lege balklijnen) en geen mid-systeem-HBox
+        # (MuseScore tekent dan een accolade middenin het systeem).
+        measure_cue_gap = [False] * len(measure_staff_texts)
+        measure_pauze = [False] * len(measure_staff_texts)
+    else:
+        measure_cue_gap = [False] * max(
+            len(measure_staff_texts),
+            max((len(ms) for ms in voice_measures.values()), default=0),
+        )
+        measure_pauze = _insert_playback_pauze_measures(
+            voice_measures,
+            bar_styles,
+            measure_staff_texts,
+            measure_left_styles,
+        )
+
+    from .bibliotheek_id import bibliotheek_id_from_path
 
     ctx = sections[0].systems[0].context if sections and sections[0].systems else StickyContext()
-    return _emit_score(voice_measures, title=title, context=ctx)
+    effective_title = doc.title if doc.title else title
+    meta = {
+        "composer": getattr(doc, "composer", None),
+        "copyright": getattr(doc, "copyright", None),
+        "bron": getattr(doc, "bron", None),
+        "ondertitel": getattr(doc, "ondertitel", None),
+        "tekstdichter": getattr(doc, "tekstdichter", None),
+        "arrangeur": getattr(doc, "arrangeur", None),
+        "vertaler": getattr(doc, "vertaler", None),
+        "bibliotheek_id": bibliotheek_id_from_path(source_path),
+    }
+    if layout == "partituur":
+        return _emit_score_partituur(
+            voice_measures,
+            title=effective_title,
+            context=ctx,
+            bar_styles=bar_styles,
+            measure_left_styles=measure_left_styles,
+            measure_staff_texts=measure_staff_texts,
+            measure_new_system=measure_new_system,
+            measure_cue_gap=measure_cue_gap,
+            measure_widths=measure_widths,
+            meta=meta,
+        )
+    xml = _emit_score_playback(
+        voice_measures,
+        title=effective_title,
+        context=ctx,
+        bar_styles=bar_styles,
+        measure_left_styles=measure_left_styles,
+        measure_staff_texts=measure_staff_texts,
+        measure_new_system=measure_new_system,
+        measure_cue_gap=measure_cue_gap,
+        measure_pauze=measure_pauze,
+        meta=meta,
+    )
+    from .musicxml_coria_timing import finalize_coria_musicxml
+
+    # Timing al in emit ([PAUZE]); hier alleen sanitize + accidentals + geen DOCTYPE.
+    return finalize_coria_musicxml(xml, apply_timing=False)
 
 
 def export_mvsa_path(
@@ -114,29 +263,51 @@ def export_mvsa_path(
     out: Path,
     *,
     section_id: str | None = None,
+    layout: MvsaLayout = "playback",
 ) -> None:
     text = path.read_text(encoding="utf-8")
     xml = export_mvsa_to_musicxml(
-        text, title=path.stem, section_id=section_id
+        text,
+        title=path.stem,
+        section_id=section_id,
+        layout=layout,
+        source_path=path,
     )
     write_musicxml_output(out, xml)
 
 
-def _system_to_events(system) -> dict[str, list[list[NoteEvent]]]:
+def _system_to_events(
+    system,
+    *,
+    layout: MvsaLayout = "playback",
+) -> dict[str, list[list[NoteEvent]]]:
     ctx: StickyContext = system.context
-    lyric_marker = next((m for m in system.markers if m == "L" or m.startswith("L")), None)
+    lyric_marker = next(
+        (m for m in system.markers if is_lyrics_stem(m)),
+        None,
+    )
     if lyric_marker is None:
-        raise MvsaExportError("geen lyrics-regel L in systeem", line=system.start_line)
+        raise MvsaExportError("geen lyrics-regel in systeem", line=system.start_line)
 
-    voice_markers = [m for m in system.markers if m[0] in "SATB"]
+    voice_markers = [m for m in system.markers if not is_lyrics_stem(m)]
+    non_satb = [m for m in voice_markers if not re.fullmatch(r"[SATB]\d*", m)]
+    if non_satb:
+        raise MvsaExportError(
+            "MusicXML-export ondersteunt alleen stem-ids S/A/T/B "
+            f"(eventueel met cijfer), niet {non_satb}",
+            line=system.start_line,
+        )
+
     resolvers: dict[str, PitchResolver] = {}
+    line_ehms = getattr(system, "line_ehms", {}) or {}
     for m in voice_markers:
         letter = m[0]
-        resolvers[letter] = PitchResolver.from_metadata(
-            {"do": ctx.do, "mode": ctx.mode}
-        )
+        resolvers[letter] = _voice_resolver(ctx, letter)
         if ctx.start:
             _apply_start(resolvers[letter], ctx.start, letter)
+        line_ehm = line_ehms.get(m)
+        if line_ehm is not None:
+            _apply_line_ehm(resolvers[letter], line_ehm)
 
     result: dict[str, list[list[NoteEvent]]] = {m[0]: [] for m in voice_markers}
     for p in PARTS:
@@ -166,6 +337,9 @@ def _system_to_events(system) -> dict[str, list[list[NoteEvent]]]:
                     ctx,
                     letter,
                     opens_hyphen=next_continues,
+                    layout=layout,
+                    line=system.line_nos.get(vm, system.start_line),
+                    marker=vm,
                 )
                 measure_events[letter].extend(notes)
 
@@ -178,21 +352,47 @@ def _system_to_events(system) -> dict[str, list[list[NoteEvent]]]:
     return result
 
 
+def writing_do_pitch(ctx: StickyContext, letter: str) -> Pitch:
+    """``@do`` shifted by ``@oct`` for this voice (schrijf-do)."""
+    do_p = parse_pitch_string(ctx.do)
+    shift = ctx.oct_for(letter)
+    if shift == 0:
+        return do_p
+    return Pitch(step=do_p.step, octave=do_p.octave + shift, alter=do_p.alter)
+
+
+def _voice_resolver(ctx: StickyContext, letter: str) -> PitchResolver:
+    """PitchResolver whose do is the stem's schrijf-do (``@do`` + ``@oct``)."""
+    do_p = writing_do_pitch(ctx, letter)
+    return PitchResolver.from_metadata({"do": str(do_p), "mode": ctx.mode})
+
+
+def _expand_start_ehm(ehm: str) -> list[str]:
+    """Normalize identifier/@start EHM to PitchResolver.apply_start_marker args."""
+    raw = ehm.strip()
+    if re.fullmatch(r"\\+\d+", raw) or re.fullmatch(r"/+\d+", raw):
+        ch = raw[0]
+        n = int(raw.lstrip("\\/"))
+        raw = ch * n
+    if raw in ("", "-"):
+        return []
+    return [raw]
+
+
+def _apply_line_ehm(resolver: PitchResolver, ehm: str) -> None:
+    """Apply beginanker from a stemregelidentifier (overrides prior @start)."""
+    resolver.apply_start_marker(_expand_start_ehm(ehm))
+
+
 def _apply_start(resolver: PitchResolver, start_rest: str, letter: str) -> None:
     """Parse ``@start S=- A=\\3 T=\\6 B=\\8`` for this voice."""
     for part in start_rest.split():
         if "=" not in part:
             continue
         key, _, val = part.partition("=")
-        if key.strip().upper().startswith(letter):
-            ehm = val.strip()
-            if re.fullmatch(r"\\+\d+", ehm) or re.fullmatch(r"/+\d+", ehm):
-                ch = ehm[0]
-                n = int(ehm.lstrip("\\/"))
-                ehm = ch * n
-            resolver.apply_start_marker([ehm] if ehm not in ("", "-") else [])
-            if ehm == "-":
-                resolver.apply_start_marker([])
+        key = key.strip()
+        if key == letter or key.upper().startswith(letter.upper()):
+            resolver.apply_start_marker(_expand_start_ehm(val.strip()))
             return
     resolver.apply_start_marker([])
 
@@ -230,27 +430,58 @@ def _position_to_notes(
     letter: str,
     *,
     opens_hyphen: bool = False,
+    layout: MvsaLayout = "playback",
+    line: int = 0,
+    marker: str = "",
 ) -> list[NoteEvent]:
     elms = list(lpos.elms) if lpos.elms else ["~"]
     slots = list(vpos.slots) if vpos.slots else ["-"]
 
     if lpos.recite:
-        pitch = _resolve_slot(slots[0] if slots else "-", resolver, ctx, letter)
-        # No ELM after ')' → breve (recite default). Explicit ELM → that duration.
+        pitch = _resolve_slot(
+            slots[0] if slots else "-",
+            resolver,
+            ctx,
+            letter,
+            line=line,
+            marker=marker,
+        )
+        # Playback/Coria (M10): één noot per lettergreep.
+        # Partituur (R2): bij ≥6 lettergrepen 1-(n-2)-1 met ||O||-midden.
         if lpos.elms:
-            dur = elm_to_duration(lpos.elms[0])
+            base_dur = elm_to_duration(lpos.elms[0])
         else:
-            dur = _RECITE_DURATION
-        lyrics: list[LyricSyllable] = []
-        if lpos.syllables:
-            text = _join_lyric_text(lpos.syllables, lpos.links)
-            syl = "single"
-            if lpos.continues_word:
+            base_dur = elm_to_duration("~")  # kwart per lettergreep / rantrand
+        syllables = list(lpos.syllables) if lpos.syllables else [""]
+        n = len(syllables)
+        out_notes: list[NoteEvent] = []
+        for i, syl_text in enumerate(syllables):
+            opens = i + 1 < n and i < len(lpos.links) and lpos.links[i]
+            continues = (i == 0 and lpos.continues_word) or (
+                i > 0 and i - 1 < len(lpos.links) and lpos.links[i - 1]
+            )
+            if continues and opens:
+                syl = "middle"
+            elif continues:
                 syl = "end"
-            lyrics.append(LyricSyllable(text=text, syllabic=syl, number=1))
-        return [
-            NoteEvent(pitch=pitch, duration=dur, lyrics=lyrics, recite=True)
-        ]
+            elif opens:
+                syl = "begin"
+            else:
+                syl = "single"
+            lyrics: list[LyricSyllable] = []
+            if syl_text:
+                lyrics.append(LyricSyllable(text=syl_text, syllabic=syl, number=1))
+            out_notes.append(
+                NoteEvent(
+                    pitch=pitch,
+                    duration=base_dur,
+                    lyrics=lyrics,
+                    recite=True,
+                )
+            )
+        if layout == "partituur" and n >= RECITE_PRINT_COLLAPSE_MIN:
+            return _collapse_recite_for_partituur(out_notes, edge_dur=base_dur)
+        return out_notes
 
     n = max(len(elms), len(slots))
     while len(elms) < n:
@@ -263,7 +494,15 @@ def _position_to_notes(
     primary_syl = _syllabic_for_position(lpos, opens_hyphen=opens_hyphen)
 
     for si, (elm, slot) in enumerate(zip(elms, slots)):
-        pitch = _resolve_slot(slot, resolver, ctx, letter, last_pitch=last_pitch)
+        pitch = _resolve_slot(
+            slot,
+            resolver,
+            ctx,
+            letter,
+            last_pitch=last_pitch,
+            line=line,
+            marker=marker,
+        )
         last_pitch = pitch
         dur = elm_to_duration(elm)
         lyrics: list[LyricSyllable] = []
@@ -273,14 +512,352 @@ def _position_to_notes(
                 if n > 1 and syl == "single":
                     syl = "begin"
                 lyrics.append(
-                    LyricSyllable(text=lpos.syllables[0], syllabic=syl)
+                    LyricSyllable(
+                        text=lpos.syllables[0],
+                        syllabic=syl,
+                        extend=n > 1,
+                    )
                 )
             else:
                 text = _join_lyric_text(lpos.syllables, lpos.links)
                 syl = primary_syl if primary_syl != "single" else "begin"
-                lyrics.append(LyricSyllable(text=text, syllabic=syl))
-        notes.append(NoteEvent(pitch=pitch, duration=dur, lyrics=lyrics))
-    return notes
+                lyrics.append(
+                    LyricSyllable(text=text, syllabic=syl, extend=n > 1)
+                )
+        notes.append(
+            NoteEvent(
+                pitch=pitch,
+                duration=dur,
+                lyrics=lyrics,
+                slur_start=(n > 1 and si == 0),
+                slur_stop=(n > 1 and si == n - 1),
+            )
+        )
+    # Same-pitch melisma (S13/R7): playback én partituur — zingen als één toon.
+    # Recite-print-collapse blijft partituur-only (M10).
+    return _collapse_same_pitch_melisma(notes)
+
+
+def _pitch_equal(a: Pitch, b: Pitch) -> bool:
+    return a.step == b.step and a.octave == b.octave and a.alter == b.alter
+
+
+def _note_divs(ev: NoteEvent) -> int:
+    if ev.duration_divisions is not None:
+        return ev.duration_divisions
+    return ev.duration.divisions_value
+
+
+_DIVS_TO_DURATION: dict[int, Duration] = {
+    1: Duration(note_type="16th", dots=0),
+    2: Duration(note_type="eighth", dots=0),
+    3: Duration(note_type="eighth", dots=1),
+    4: Duration(note_type="quarter", dots=0),
+    6: Duration(note_type="quarter", dots=1),
+    8: Duration(note_type="half", dots=0),
+    12: Duration(note_type="half", dots=1),
+    16: Duration(note_type="whole", dots=0),
+    # Geen 32→breve: MuseScore zet durationType=breve en rekt de maat (corrupt).
+}
+
+# Melisma-collapse mag alleen deze (zonder punt): MuseScore dropte dots
+# bij senza-misura-import → stem-len mismatch → “corrupt score”.
+_COLLAPSE_SAFE_DIVS = frozenset({1, 2, 4, 8, 16})
+_PACK_ORDER = (16, 8, 4, 2, 1)
+
+
+def _duration_from_divs(divs: int) -> tuple[Duration, int | None]:
+    """Map divisions → (Duration, optional duration_divisions override).
+
+    Nooit MusicXML ``type=breve``: MuseScore gebruikt dat als maatbreedte
+    (vaak 8/4) en stemmen lopen uit sync.
+    """
+    if divs in _DIVS_TO_DURATION:
+        return _DIVS_TO_DURATION[divs], None
+    return Duration(note_type="quarter", dots=0), divs
+
+
+def _pack_safe_divs(total: int) -> list[int]:
+    """Split ``total`` into ongestipte standaardduuren ≤ whole (I1+I2)."""
+    if total <= 0:
+        return []
+    parts: list[int] = []
+    remaining = total
+    for size in _PACK_ORDER:
+        while remaining >= size:
+            parts.append(size)
+            remaining -= size
+    return parts
+
+
+def _pack_same_pitch_run(run: list[NoteEvent]) -> list[NoteEvent]:
+    """One same-pitch melisma run → one note or a tie-chain (I2)."""
+    first = run[0]
+    total = sum(_note_divs(n) for n in run)
+    parts = _pack_safe_divs(total)
+    if not parts:
+        return [
+            NoteEvent(
+                pitch=first.pitch,
+                duration=first.duration,
+                lyrics=list(first.lyrics),
+                recite=first.recite,
+                spacer=first.spacer,
+                duration_divisions=first.duration_divisions,
+                stemless=first.stemless,
+            )
+        ]
+    out: list[NoteEvent] = []
+    for i, divs in enumerate(parts):
+        dur, div_override = _duration_from_divs(divs)
+        lyrics = list(first.lyrics) if i == 0 else []
+        out.append(
+            NoteEvent(
+                pitch=first.pitch,
+                duration=dur,
+                lyrics=lyrics,
+                recite=first.recite,
+                spacer=first.spacer,
+                duration_divisions=div_override,
+                stemless=first.stemless,
+                tie_start=(i < len(parts) - 1),
+                tie_stop=(i > 0),
+            )
+        )
+    return out
+
+
+def _collapse_same_pitch_melisma(notes: list[NoteEvent]) -> list[NoteEvent]:
+    """Same-pitch melisma → collapse and/or tie-keten (S13/R7).
+
+    Geldt voor playback (``.mxl``) én partituur (MSCZ).
+
+    **I1:** alleen ongestipte ≤ whole; nooit ``type=breve`` / gestipte sommen.
+    **I2:** som > whole → tie-keten (wholes + rest) i.p.v. heraangeslagen hakken.
+    Slur alleen bij toonwissels binnen het melisma; pure hold → ties, geen slur.
+    """
+    if len(notes) <= 1:
+        return notes
+
+    runs: list[list[NoteEvent]] = []
+    for note in notes:
+        if runs and _pitch_equal(runs[-1][-1].pitch, note.pitch):
+            runs[-1].append(note)
+        else:
+            runs.append([note])
+
+    packed: list[NoteEvent] = []
+    for run in runs:
+        packed.extend(_pack_same_pitch_run(run))
+
+    n = len(packed)
+    if n == 1:
+        only = packed[0]
+        lyrics = [
+            LyricSyllable(
+                text=ly.text,
+                syllabic=ly.syllabic if ly.syllabic != "begin" else "single",
+                number=ly.number,
+                extend=False,
+            )
+            for ly in only.lyrics
+        ]
+        return [
+            NoteEvent(
+                pitch=only.pitch,
+                duration=only.duration,
+                lyrics=lyrics,
+                recite=only.recite,
+                spacer=only.spacer,
+                duration_divisions=only.duration_divisions,
+                stemless=only.stemless,
+                tie_start=only.tie_start,
+                tie_stop=only.tie_stop,
+            )
+        ]
+
+    use_slur = any(
+        not _pitch_equal(packed[i].pitch, packed[i + 1].pitch)
+        for i in range(n - 1)
+    )
+    out: list[NoteEvent] = []
+    for i, note in enumerate(packed):
+        lyrics = list(note.lyrics)
+        if i == 0 and lyrics:
+            lyrics = [
+                LyricSyllable(
+                    text=ly.text,
+                    syllabic="begin" if ly.syllabic == "single" else ly.syllabic,
+                    number=ly.number,
+                    extend=True,
+                )
+                for ly in lyrics
+            ]
+        elif i > 0:
+            lyrics = []
+        out.append(
+            NoteEvent(
+                pitch=note.pitch,
+                duration=note.duration,
+                lyrics=lyrics,
+                recite=note.recite,
+                spacer=note.spacer,
+                duration_divisions=note.duration_divisions,
+                stemless=note.stemless,
+                slur_start=(use_slur and i == 0),
+                slur_stop=(use_slur and i == n - 1),
+                tie_start=note.tie_start,
+                tie_stop=note.tie_stop,
+            )
+        )
+    return out
+
+
+def _collapse_recite_for_partituur(
+    notes: list[NoteEvent],
+    *,
+    edge_dur: Duration,
+) -> list[NoteEvent]:
+    """Printmodel 1-(n-2)-1 met spacers (model A) voor ``n ≥ RECITE_PRINT_COLLAPSE_MIN``.
+
+    Eerste en laatste lettergreep: zichtbare randnoot (``edge_dur``).
+    Midden: één stokloze breve (``||O||``) met de **eerste** midden-lettergreep
+    gecentreerd; overige midden-lettergrepen elk op een spacer-noot (onzichtbare
+    kop, **zichtbare** lyric — geen ``print-object=no`` op de hele noot).
+    Elke slot duurt ``edge_dur``, zodat de speelduur = ``n ×`` rand = Coria.
+    Geen melisma-extender onder de recite-body.
+    """
+    n = len(notes)
+    if n < RECITE_PRINT_COLLAPSE_MIN:
+        return notes
+    first = notes[0]
+    last = notes[-1]
+    middle = notes[1:-1]
+    # Midden: stokloos + breve-kop in MSCZ; metrisch = edge (geen type=breve).
+    out: list[NoteEvent] = [
+        NoteEvent(
+            pitch=first.pitch,
+            duration=edge_dur,
+            lyrics=list(first.lyrics),
+            recite=True,
+        ),
+        NoteEvent(
+            pitch=middle[0].pitch,
+            duration=edge_dur,
+            lyrics=list(middle[0].lyrics),
+            recite=True,
+            stemless=True,
+            breve_head=True,
+        ),
+    ]
+    for body in middle[1:]:
+        out.append(
+            NoteEvent(
+                pitch=body.pitch,
+                duration=edge_dur,
+                lyrics=list(body.lyrics),
+                recite=True,
+                spacer=True,
+                stemless=True,
+            )
+        )
+    out.append(
+        NoteEvent(
+            pitch=last.pitch,
+            duration=edge_dur,
+            lyrics=list(last.lyrics),
+            recite=True,
+        )
+    )
+    return out
+
+
+def _mvsa_bar_to_style(token: str) -> str:
+    """MVSA-maatstreep → interne bar-code voor MusicXML-export.
+
+    Codes:
+    - ``regular`` / ``light-light`` / ``none`` — alleen streepstijl
+    - ``repeat-start`` — ``|:`` (forward-repeat als *linker* streep van de volgende maat)
+    - ``repeat-end`` — ``:|`` (backward-repeat rechts)
+    - ``repeat-end-section`` — ``:||`` (sectie-einde + backward-repeat)
+    """
+    t = (token or "|").strip()
+    if t == "|:":
+        return "repeat-start"
+    if t == ":|":
+        return "repeat-end"
+    if t == ":||":
+        return "repeat-end-section"
+    if t == "||":
+        return "light-light"
+    return "regular"
+
+
+def _is_section_end_bar(style: str) -> bool:
+    """``||`` / ``:||`` (en afgeleide pauzestrepen) — dubbele streep / Coria-pauze."""
+    return style in ("light-light", "repeat-end-section")
+
+
+def _right_bar_style(mi: int, n_measures: int, bar_styles: list[str]) -> str:
+    """Sectie-``||`` → ``light-light``; cue-spacer → ``none``; slot = ``light-heavy``."""
+    raw = bar_styles[mi] if 0 <= mi < len(bar_styles) else "regular"
+    if raw == "repeat-start":
+        # Start-herhaling hoort links op de *volgende* maat; rechts hier gewoon.
+        raw = "regular"
+    elif raw == "repeat-end":
+        return "light-heavy"
+    elif raw == "repeat-end-section":
+        return "light-light"
+    if raw in ("light-light", "none"):
+        return raw
+    if mi == n_measures - 1:
+        return "light-heavy"
+    return raw
+
+
+def _emit_measure_barlines(
+    out: list[str],
+    mi: int,
+    n_measures: int,
+    bar_styles: list[str],
+    *,
+    left_style: str | None = None,
+    pauzes: list[bool] | None = None,
+) -> None:
+    """Linker forward-repeat (na ``|:``) + rechter streep (eventueel backward).
+
+    Linker streep komt van ``start_bar`` (leidende ``|:`` zonder lege maat) of
+    van de vorige maat die op ``|:`` eindigde. Pauzematen tussen ``|:`` en de
+    koormaat worden overgeslagen.
+    """
+    need_forward = left_style == "repeat-start"
+    if not need_forward:
+        j = mi - 1
+        while j >= 0 and pauzes and j < len(pauzes) and pauzes[j]:
+            j -= 1
+        prev = bar_styles[j] if j >= 0 and j < len(bar_styles) else None
+        need_forward = prev == "repeat-start"
+    if need_forward:
+        out.append(
+            '<barline location="left">'
+            "<bar-style>heavy-light</bar-style>"
+            '<repeat direction="forward"/>'
+            "</barline>"
+        )
+    raw = bar_styles[mi] if 0 <= mi < len(bar_styles) else "regular"
+    style = _right_bar_style(mi, n_measures, bar_styles)
+    repeat_dir: str | None = None
+    if raw in ("repeat-end", "repeat-end-section"):
+        repeat_dir = "backward"
+    if repeat_dir:
+        out.append(
+            f'<barline location="right"><bar-style>{style}</bar-style>'
+            f'<repeat direction="{repeat_dir}"/></barline>'
+        )
+    else:
+        out.append(
+            f'<barline location="right"><bar-style>{style}</bar-style></barline>'
+        )
 
 
 def _resolve_slot(
@@ -290,6 +867,8 @@ def _resolve_slot(
     letter: str,
     *,
     last_pitch: Pitch | None = None,
+    line: int = 0,
+    marker: str = "",
 ) -> Pitch:
     tok = token.strip()
     if tok in ("-", "~"):
@@ -317,13 +896,13 @@ def _resolve_slot(
         elif suffix:
             oct_delta = int(suffix)
         if oct_s is not None:
-            octave = int(oct_s) + oct_delta
+            pitch = Pitch(step=step, octave=int(oct_s) + oct_delta, alter=alter)
         else:
-            # a–g without digit: do-octaaf (+ @oct + suffix)
-            do_p = parse_pitch_string(ctx.do)
-            octave = do_p.octave + ctx.oct_for(letter) + oct_delta
-        pitch = Pitch(step=step, octave=octave, alter=alter)
-        resolver._last_sounding = pitch
+            # a–g zonder cijfer: do-octaaf [schrijf-do, +12) — ``c`` bij F4 = C5.
+            pitch = pitch_in_do_octave(
+                resolver._do, step, alter, oct_delta=oct_delta
+            )
+        resolver.set_absolute_pitch(pitch)
         return pitch
 
     if deg_m:
@@ -344,11 +923,12 @@ def _resolve_slot(
         if name == "si":
             name = "ti"
         idx = _DEGREE_INDEX[name]
-        shift = ctx.oct_for(letter)
+        # resolver._do is already schrijf-do (@do + @oct); suffix is extra only
+        shift = 0
         if oct_off in ("-", "+"):
-            shift += -1 if oct_off == "-" else 1
+            shift = -1 if oct_off == "-" else 1
         elif oct_off:
-            shift += int(oct_off)
+            shift = int(oct_off)
         if chrom == "#":
             chrom_alter = 1.0
         elif chrom == "b":
@@ -365,35 +945,258 @@ def _resolve_slot(
         resolver._last_sounding = pitch
         return pitch
 
-    if _EHM_RE.match(tok) or set(tok) <= set("\\/#b+-~0123456789"):
+    if _EHM_RE.fullmatch(tok):
         return resolver.resolve_ehm(tok)
 
     try:
         pitch = parse_pitch_string(tok[0].upper() + tok[1:] if tok[0].islower() else tok)
-        resolver._last_sounding = pitch
+        resolver.set_absolute_pitch(pitch)
         return pitch
     except ValueError as exc:
-        raise MvsaExportError(f"onbekende hoogte-token {tok!r}") from exc
+        where = f"{marker}: " if marker else ""
+        raise MvsaExportError(
+            f"{where}onbekende hoogte-token {tok!r}",
+            line=line,
+        ) from exc
 
 
-def _emit_score(
+def wrap_tekst_at_ellipsis(text: str) -> str:
+    """Lange cue: vanaf eerste ``...`` een nieuwe regel (``...`` op regel 2)."""
+    idx = text.find("...")
+    if idx <= 0:
+        return text
+    before = text[:idx].rstrip()
+    after = text[idx:].lstrip()
+    if not before:
+        return text
+    return f"{before}\n{after}"
+
+
+def estimate_cue_width_tenths(texts: list[str]) -> int:
+    """MusicXML measure ``width`` in tenths — ruim genoeg voor de cue-regels."""
+    lines: list[str] = []
+    for t in texts:
+        lines.extend(t.splitlines() or [t])
+    max_len = max((len(line) for line in lines), default=0)
+    return max(80, max_len * 14)
+
+
+def _prepare_partituur_tekst_frames(
+    bar_styles: list[str],
+    measure_staff_texts: list[list[str]],
+    measure_new_system: list[bool],
+    measure_widths: list[int | None],
+) -> None:
+    """Mid-flow ``@tekst``: vorige maat dubbele streep; maatbreedte voor de cue.
+
+    Herhalingen (``:|``) blijven ``repeat-end`` (light-heavy + backward).
+    Geen HBox/spacermaat: MuseScore tekent daar mid-systeem-accolades of
+    lege balklijnen. Scheiding = ``‖`` + SystemText (+ optioneel ``@mscz-newline``).
+    """
+    n = len(measure_staff_texts)
+    while len(bar_styles) < n:
+        bar_styles.append("regular")
+    while len(measure_new_system) < n:
+        measure_new_system.append(False)
+    while len(measure_widths) < n:
+        measure_widths.append(None)
+
+    for i in range(n):
+        texts = measure_staff_texts[i]
+        if not texts:
+            continue
+        measure_widths[i] = estimate_cue_width_tenths(texts)
+        starts_system = i == 0 or measure_new_system[i]
+        if starts_system:
+            continue
+        if i > 0:
+            prev = bar_styles[i - 1]
+            if prev not in (
+                "repeat-start",
+                "repeat-end",
+                "repeat-end-section",
+                "light-light",
+                "none",
+            ):
+                bar_styles[i - 1] = "light-light"
+
+
+def _emit_staff_text_directions(out: list[str], texts: list[str]) -> None:
+    """Staff-tekst boven de balk; newlines in ``words`` voor wrap bij ``...``."""
+    for text in texts:
+        out.append('<direction placement="above">')
+        out.append("<direction-type>")
+        # Escape per regel; behoud echte newlines in de XML-tekstnode.
+        escaped = escape(text)
+        out.append(f'<words justify="left" default-x="0">{escaped}</words>')
+        out.append("</direction-type>")
+        out.append("</direction>")
+
+
+def _insert_playback_pauze_measures(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+    bar_styles: list[str],
+    measure_staff_texts: list[list[str]],
+    measure_left_styles: list[str | None] | None = None,
+) -> list[bool]:
+    """``[PAUZE]``-maten voor Coria: na sectie-einde én vóór mid-flow ``@tekst``.
+
+    - Na ``||`` / ``:||`` (``light-light`` / ``repeat-end-section``).
+    - Vóór een koormaat met ``@tekst`` als die niet de eerste maat is en de
+      vorige maat nog geen sectie-eindestreep had (geen dubbele pauze).
+    Cue-teksten van de volgende koormaat verhuizen naar de pauzemaat.
+    """
+    n = max(
+        len(bar_styles),
+        len(measure_staff_texts),
+        max((len(ms) for ms in voice_measures.values()), default=0),
+    )
+    while len(bar_styles) < n:
+        bar_styles.append("regular")
+    while len(measure_staff_texts) < n:
+        measure_staff_texts.append([])
+    if measure_left_styles is not None:
+        while len(measure_left_styles) < n:
+            measure_left_styles.append(None)
+    for measures in voice_measures.values():
+        while len(measures) < n:
+            measures.append([])
+
+    insert_after: set[int] = {
+        i for i in range(n - 1) if _is_section_end_bar(bar_styles[i])
+    }
+    # Mid-flow @tekst: pauze vóór die koormaat (= insert na i-1), tenzij
+    # sectie-einde die pauze al triggert.
+    for i in range(1, n):
+        if not measure_staff_texts[i]:
+            continue
+        if _is_section_end_bar(bar_styles[i - 1]):
+            continue
+        insert_after.add(i - 1)
+
+    pauze = [False] * n
+    for i in sorted(insert_after, reverse=True):
+        # Cue van de volgende koormaat → op de pauzemaat.
+        cues = list(measure_staff_texts[i + 1])
+        measure_staff_texts[i + 1] = []
+        for measures in voice_measures.values():
+            measures.insert(i + 1, [])
+        bar_styles.insert(i + 1, "light-light")
+        measure_staff_texts.insert(i + 1, cues)
+        if measure_left_styles is not None:
+            measure_left_styles.insert(i + 1, None)
+        pauze.insert(i + 1, True)
+    return pauze
+
+
+def _emit_cue_gap_rest(out: list[str], *, voice: int | None = None) -> None:
+    """Onzichtbare minimale rust voor een cue-spacermaat."""
+    voice_xml = f"<voice>{voice}</voice>" if voice is not None else ""
+    out.append(
+        f'<note print-object="no"><rest/><duration>{CUE_GAP_DURATION_DIVS}</duration>'
+        f"{voice_xml}<type>{CUE_GAP_NOTE_TYPE}</type></note>"
+    )
+
+
+def _emit_pauze_rest(out: list[str], *, with_lyric: bool) -> None:
+    """Whole-rest + optioneel ``[PAUZE]``-lyric (Coria-playback)."""
+    lyric_xml = ""
+    if with_lyric:
+        lyric_xml = (
+            f'<lyric number="1"><syllabic>single</syllabic>'
+            f"<text>{PAUSE_LYRIC}</text></lyric>"
+        )
+    out.append(
+        f"<note><rest/><duration>{PAUSE_DURATION_DIVS}</duration>"
+        f"<type>whole</type>{lyric_xml}</note>"
+    )
+
+
+def _emit_identification(out: list[str], meta: dict[str, str | None] | None) -> None:
+    """MusicXML ``<identification>``: creators, rights, source."""
+    if not meta:
+        return
+    creators: list[tuple[str, str]] = []
+    for key, mxml_type in (
+        ("composer", "composer"),
+        ("tekstdichter", "lyricist"),
+        ("arrangeur", "arranger"),
+        ("vertaler", "translator"),
+    ):
+        value = (meta.get(key) or "").strip()
+        if value:
+            creators.append((mxml_type, value))
+    rights = (meta.get("copyright") or "").strip()
+    bib = (meta.get("bibliotheek_id") or "").strip()
+    if bib:
+        rights = (
+            f"{rights}\nBibliotheek-id: {bib}".strip()
+            if rights
+            else f"Bibliotheek-id: {bib}"
+        )
+    source = (meta.get("bron") or "").strip()
+    if not creators and not rights and not source:
+        return
+    out.append("<identification>")
+    for mxml_type, value in creators:
+        out.append(f'<creator type="{mxml_type}">{escape(value)}</creator>')
+    if rights:
+        out.append(f"<rights>{escape(rights)}</rights>")
+    if source:
+        out.append(f"<source>{escape(source)}</source>")
+    out.append("</identification>")
+
+
+def _emit_work_and_movement(
+    out: list[str], title: str, meta: dict[str, str | None] | None
+) -> None:
+    out.append(f"<work><work-title>{escape(title)}</work-title></work>")
+    ondertitel = ((meta or {}).get("ondertitel") or "").strip()
+    if ondertitel:
+        out.append(f"<movement-title>{escape(ondertitel)}</movement-title>")
+
+def _emit_score_playback(
     voice_measures: dict[str, list[list[NoteEvent]]],
     *,
     title: str,
     context: StickyContext,
+    bar_styles: list[str] | None = None,
+    measure_left_styles: list[str | None] | None = None,
+    measure_staff_texts: list[list[str]] | None = None,
+    measure_new_system: list[bool] | None = None,
+    measure_cue_gap: list[bool] | None = None,
+    measure_pauze: list[bool] | None = None,
+    meta: dict[str, str | None] | None = None,
 ) -> str:
     do_p = parse_pitch_string(context.do)
     fifths = key_fifths(do_p, context.mode)
     n_measures = max((len(ms) for ms in voice_measures.values()), default=0)
+    styles = list(bar_styles or [])
+    left_styles = list(measure_left_styles or [])
+    staff_texts = list(measure_staff_texts or [])
+    new_systems = list(measure_new_system or [])
+    cue_gaps = list(measure_cue_gap or [])
+    pauzes = list(measure_pauze or [])
+    while len(left_styles) < n_measures:
+        left_styles.append(None)
+    while len(staff_texts) < n_measures:
+        staff_texts.append([])
+    while len(new_systems) < n_measures:
+        new_systems.append(False)
+    while len(cue_gaps) < n_measures:
+        cue_gaps.append(False)
+    while len(pauzes) < n_measures:
+        pauzes.append(False)
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN"',
         '  "http://www.musicxml.org/dtds/partwise.dtd">',
         '<score-partwise version="3.1">',
-        f"<work><work-title>{escape(title)}</work-title></work>",
-        "<part-list>",
     ]
+    _emit_work_and_movement(out, title, meta)
+    _emit_identification(out, meta)
+    out.append("<part-list>")
     for part in PARTS:
         out.append(f'<score-part id="{part["id"]}">')
         out.append(f"<part-name>{part['name']}</part-name>")
@@ -403,7 +1206,7 @@ def _emit_score(
 
     for part in PARTS:
         voice = part["voice"]
-        measures = voice_measures.get(voice, [])
+        measures = list(voice_measures.get(voice, []))
         while len(measures) < n_measures:
             measures.append([])
         out.append(f'<part id="{part["id"]}">')
@@ -420,16 +1223,32 @@ def _emit_score(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
-            if not events:
+            # Staff-tekst alleen op de bovenste balk (Soprano).
+            if part["voice"] == "S":
+                if new_systems[mi]:
+                    out.append('<print new-system="yes"/>')
+                if staff_texts[mi]:
+                    _emit_staff_text_directions(out, staff_texts[mi])
+            if pauzes[mi]:
+                # Lyric op alle parts (Coria toont het niet onder rust; wel voor
+                # toekomstige eigen player / inspectie).
+                _emit_pauze_rest(out, with_lyric=True)
+            elif cue_gaps[mi]:
+                _emit_cue_gap_rest(out)
+            elif not events:
                 out.append(
                     '<note><rest/><duration>16</duration><type>whole</type></note>'
                 )
             else:
                 for ev in events:
                     _emit_note(out, ev, fifths=fifths)
-            style = "light-heavy" if mi == n_measures - 1 else "regular"
-            out.append(
-                f'<barline location="right"><bar-style>{style}</bar-style></barline>'
+            _emit_measure_barlines(
+                out,
+                mi,
+                n_measures,
+                styles,
+                left_style=left_styles[mi],
+                pauzes=pauzes,
             )
             out.append("</measure>")
         out.append("</part>")
@@ -437,7 +1256,190 @@ def _emit_score(
     return "\n".join(out)
 
 
+def _emit_score_partituur(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+    *,
+    title: str,
+    context: StickyContext,
+    bar_styles: list[str] | None = None,
+    measure_left_styles: list[str | None] | None = None,
+    measure_staff_texts: list[list[str]] | None = None,
+    measure_new_system: list[bool] | None = None,
+    measure_cue_gap: list[bool] | None = None,
+    measure_widths: list[int | None] | None = None,
+    meta: dict[str, str | None] | None = None,
+) -> str:
+    """Twee balken SA/TB: voice 1 (S/T) stok omhoog, voice 2 (A/B) stok omlaag."""
+    do_p = parse_pitch_string(context.do)
+    fifths = key_fifths(do_p, context.mode)
+    n_measures = max((len(ms) for ms in voice_measures.values()), default=0)
+    styles = list(bar_styles or [])
+    left_styles = list(measure_left_styles or [])
+    staff_texts = list(measure_staff_texts or [])
+    new_systems = list(measure_new_system or [])
+    cue_gaps = list(measure_cue_gap or [])
+    widths = list(measure_widths or [])
+    while len(left_styles) < n_measures:
+        left_styles.append(None)
+    while len(staff_texts) < n_measures:
+        staff_texts.append([])
+    while len(new_systems) < n_measures:
+        new_systems.append(False)
+    while len(cue_gaps) < n_measures:
+        cue_gaps.append(False)
+    while len(widths) < n_measures:
+        widths.append(None)
+
+    out: list[str] = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN"',
+        '  "http://www.musicxml.org/dtds/partwise.dtd">',
+        '<score-partwise version="3.1">',
+    ]
+    _emit_work_and_movement(out, title, meta)
+    _emit_identification(out, meta)
+    out.append("<part-list>")
+    out.append(
+        '<part-group type="start" number="1">'
+        "<group-symbol>bracket</group-symbol></part-group>"
+    )
+    for part in PARTITUUR_PARTS:
+        out.append(f'<score-part id="{part["id"]}">')
+        out.append("<part-name></part-name>")
+        out.append("<part-abbreviation></part-abbreviation>")
+        out.append("</score-part>")
+    out.append('<part-group type="stop" number="1"/>')
+    out.append("</part-list>")
+
+    for part in PARTITUUR_PARTS:
+        upper_ms = list(voice_measures.get(part["upper"], []))
+        lower_ms = list(voice_measures.get(part["lower"], []))
+        while len(upper_ms) < n_measures:
+            upper_ms.append([])
+        while len(lower_ms) < n_measures:
+            lower_ms.append([])
+        with_lyrics = part["upper"] == "S"
+        top_staff = part["upper"] == "S"
+        out.append(f'<part id="{part["id"]}">')
+        for mi in range(n_measures):
+            upper = upper_ms[mi]
+            lower = lower_ms[mi]
+            wattr = f' width="{widths[mi]}"' if widths[mi] else ""
+            out.append(f'<measure number="{mi + 1}"{wattr}>')
+            if mi == 0:
+                clef_sign, clef_line = part["clef"]
+                out.append("<attributes>")
+                out.append("<divisions>4</divisions>")
+                out.append(f"<key><fifths>{fifths}</fifths></key>")
+                out.append("<time><senza-misura/></time>")
+                out.append(
+                    f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
+                )
+                out.append("</attributes>")
+            if top_staff:
+                if new_systems[mi]:
+                    out.append('<print new-system="yes"/>')
+                if staff_texts[mi]:
+                    _emit_staff_text_directions(out, staff_texts[mi])
+            if cue_gaps[mi]:
+                _emit_cue_gap_rest(out, voice=1)
+            elif not upper and not lower:
+                out.append(
+                    '<note><rest/><duration>16</duration>'
+                    "<type>whole</type><voice>1</voice></note>"
+                )
+            else:
+                _emit_staff_voices(
+                    out,
+                    upper,
+                    lower,
+                    fifths=fifths,
+                    with_lyrics=with_lyrics,
+                )
+            _emit_measure_barlines(
+                out,
+                mi,
+                n_measures,
+                styles,
+                left_style=left_styles[mi],
+            )
+            out.append("</measure>")
+        out.append("</part>")
+    out.append("</score-partwise>")
+    return "\n".join(out)
+
+
+def _emit_staff_voices(
+    out: list[str],
+    upper: list[NoteEvent],
+    lower: list[NoteEvent],
+    *,
+    fifths: int,
+    with_lyrics: bool,
+) -> None:
+    """Voice 1 (stok omhoog) → backup → voice 2 (stok omlaag)."""
+    for ev in upper:
+        _emit_single_note(
+            out,
+            ev,
+            fifths=fifths,
+            chord=False,
+            with_lyrics=with_lyrics,
+            voice=1,
+            stem="up",
+        )
+    total_u = sum(_note_divs(ev) for ev in upper)
+    if upper and lower:
+        out.append(f"<backup><duration>{total_u}</duration></backup>")
+    elif not upper and lower:
+        # Alleen lower: write as voice 2 without backup.
+        pass
+    for ev in lower:
+        _emit_single_note(
+            out,
+            ev,
+            fifths=fifths,
+            chord=False,
+            with_lyrics=False,
+            voice=2,
+            stem="down",
+        )
+
+
 def _emit_note(out: list[str], ev: NoteEvent, *, fifths: int) -> None:
+    _emit_single_note(
+        out, ev, fifths=fifths, chord=False, with_lyrics=True, voice=1, stem="up"
+    )
+
+
+def _emit_chord(
+    out: list[str],
+    primary: NoteEvent,
+    secondary: NoteEvent | None,
+    *,
+    fifths: int,
+    with_lyrics: bool,
+) -> None:
+    """Legacy chord emit — prefer ``_emit_staff_voices`` for partituur."""
+    _emit_staff_voices(
+        out,
+        [primary],
+        [secondary] if secondary is not None else [],
+        fifths=fifths,
+        with_lyrics=with_lyrics,
+    )
+
+
+def _emit_single_note(
+    out: list[str],
+    ev: NoteEvent,
+    *,
+    fifths: int,
+    chord: bool,
+    with_lyrics: bool,
+    voice: int = 1,
+    stem: str = "up",
+) -> None:
     p = ev.pitch
     d = ev.duration
     alt = f"<alter>{int(p.alter)}</alter>" if p.alter else ""
@@ -446,18 +1448,62 @@ def _emit_note(out: list[str], ev: NoteEvent, *, fifths: int) -> None:
         accidental = f"<accidental>{ALTER_ACCIDENTAL[p.alter]}</accidental>"
     dots = "".join("<dot/>" for _ in range(d.dots))
     lyric_xml = ""
-    for ly in ev.lyrics:
-        lyric_xml += (
-            f'<lyric number="{ly.number}">'
-            f"<syllabic>{escape(ly.syllabic)}</syllabic>"
-            f"<text>{escape(ly.text)}</text></lyric>"
-        )
+    if with_lyrics:
+        for ly in ev.lyrics:
+            extend_xml = "<extend/>" if ly.extend else ""
+            lyric_xml += (
+                f'<lyric number="{ly.number}">'
+                f"<syllabic>{escape(ly.syllabic)}</syllabic>"
+                f"<text>{escape(ly.text)}</text>{extend_xml}</lyric>"
+            )
     out.append("<note>")
+    if chord:
+        out.append("<chord/>")
     out.append(
         f"<pitch><step>{p.step}</step>{alt}<octave>{p.octave}</octave></pitch>"
     )
-    out.append(f"<duration>{d.divisions_value}</duration>")
-    out.append(f"<type>{d.note_type}</type>{dots}{accidental}{lyric_xml}")
+    divs = (
+        ev.duration_divisions
+        if ev.duration_divisions is not None
+        else d.divisions_value
+    )
+    out.append(f"<duration>{divs}</duration>")
+    if ev.tie_start:
+        out.append('<tie type="start"/>')
+    if ev.tie_stop:
+        out.append('<tie type="stop"/>')
+    out.append(f"<voice>{voice}</voice>")
+    out.append(f"<type>{d.note_type}</type>{dots}{accidental}")
+    if ev.spacer:
+        # Onzichtbare kop, wél lyrics (``print-object=no`` op <note> verbergt
+        # lyrics in MuseScore-PDF — zie templates: visible=0 + play=0 in MSCZ).
+        out.append("<stem>none</stem>")
+        out.append("<notehead>none</notehead>")
+    elif ev.stemless or ev.breve_head:
+        # ||O||-midden: stokloos; breve-kop zet MSCZ-postprocess (headType).
+        out.append("<stem>none</stem>")
+    else:
+        out.append(f"<stem>{stem}</stem>")
+    if lyric_xml:
+        out.append(lyric_xml)
+    needs_notations = (
+        not chord
+        and (ev.slur_start or ev.slur_stop or ev.tie_start or ev.tie_stop)
+    )
+    if needs_notations:
+        out.append("<notations>")
+        if ev.slur_start:
+            placement = "above" if stem == "up" else "below"
+            out.append(
+                f'<slur type="start" number="{voice}" placement="{placement}"/>'
+            )
+        if ev.slur_stop:
+            out.append(f'<slur type="stop" number="{voice}"/>')
+        if ev.tie_start:
+            out.append('<tied type="start"/>')
+        if ev.tie_stop:
+            out.append('<tied type="stop"/>')
+        out.append("</notations>")
     out.append("</note>")
 
 

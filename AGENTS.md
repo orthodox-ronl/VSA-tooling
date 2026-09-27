@@ -83,10 +83,10 @@ Define verifiable success criteria (tests, validate, build) and loop until they 
 
 | Vereiste | Versie / tool                                                                     |
 | -------- | --------------------------------------------------------------------------------- |
-| Python   | 3.14 (`.\scripts` op PATH; geen bootstrap-stap) |
-| Tests    | `test` / pytest |
-| Docs     | `serve` / `build` (MkDocs Material) |
-| bron     | sibling `../bron` of `vendor/bron` (**catalogus**) |
+| Python   | 3.14 (`.\scripts` op PATH; geen bootstrap-stap)                                   |
+| Tests    | `test` / pytest                                                                   |
+| Docs     | `serve` / `build` (MkDocs Material)                                               |
+| bron     | sibling `../bron` of `vendor/bron` (**catalogus**)                                |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -146,12 +146,12 @@ Opruimen in deze repo: `clean`. Overzicht: `scripts/README.md`.
 
 ### Documentatiesite (MkDocs)
 
-| Script | Doel |
-| ------ | ---- |
-| `serve` | Snelle preview zonder TEv2 |
-| `serve-tev2` | Preview met TermRefs (CI-parity) |
+| Script            | Doel                                |
+| ----------------- | ----------------------------------- |
+| `serve`           | Snelle preview zonder TEv2          |
+| `serve-tev2`      | Preview met TermRefs (CI-parity)    |
 | `build --no-tev2` | `mkdocs build --strict` zonder TEv2 |
-| `build` | TEv2 + TermRef-check + MkDocs (CI) |
+| `build`           | TEv2 + TermRef-check + MkDocs (CI)  |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -186,6 +186,12 @@ Hergebruik: `docs/guides/reuse-vsa-tooling.md`.
 **VSA-templates / instance (MSCZ·MXL):** bij layout- of recite-wijzigingen eerst
 [`docs/specification-vsa-templates/rendering-pitfalls.md`](docs/specification-vsa-templates/rendering-pitfalls.md)
 lezen (maatstrepen, collapse-regels, MuseScore `position`, Coria vs print).
+
+**MVSA → MXL/MSCZ:** canonieke contracten in
+[`docs/formats/canonical-checklists.md`](docs/formats/canonical-checklists.md)
+(M-reeks Coria, S-reeks partituur). Same-pitch melisma samentrekken geldt voor
+**beide** (M5a/S13); recite-print-collapse alleen partituur (M10). Cursor-regel:
+`.cursor/rules/mvsa-export-contracten.mdc`.
 
 ### Belangrijke grenzen
 
@@ -245,11 +251,13 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 
 ## Cursor-regels
 
-| Regel                                 | Doel                             |
-| ------------------------------------- | -------------------------------- |
-| `orthodox-ronl-terminologie.mdc` | Glossary + R1–R5                 |
-| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker       |
-| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron |
+| Regel                                 | Doel                                |
+| ------------------------------------- | ----------------------------------- |
+| `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                    |
+| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker          |
+| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron    |
+| `documentatie-duidelijkheid.mdc`      | Leesbare docs                       |
+| `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13) |
 
 Na bulk-tabellen: `python scripts/align_markdown_tables.py <pad>`.
 

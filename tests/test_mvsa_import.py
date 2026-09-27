@@ -13,7 +13,7 @@ from vsa.mvsa_validate import validate_mvsa_text
 from vsa.musicxml_package import write_musicxml_output
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "mvsa"
-ALLELUIA = EXAMPLES / "alleluia-toon-8.canonieke.mvsa"
+ALLELUIA = EXAMPLES / "alleluia-toon-8.mvsa"
 
 
 def _part_pitches(xml: str, part_id: str) -> list[tuple[str, str, str]]:
@@ -31,7 +31,7 @@ def _all_pitches(xml: str) -> dict[str, list[tuple[str, str, str]]]:
 
 def test_roundtrip_mvsa_mxl_mvsa_pitch_doremi(tmp_path: Path):
     text = ALLELUIA.read_text(encoding="utf-8")
-    section = "schets2-oct-doremi"
+    section = "schets3-oct-doremi"
     before = export_mvsa_to_musicxml(text, section_id=section)
     mxl = tmp_path / "schets2.mxl"
     write_musicxml_output(mxl, before)
@@ -46,7 +46,7 @@ def test_roundtrip_mvsa_mxl_mvsa_pitch_doremi(tmp_path: Path):
 
 def test_roundtrip_mvsa_mxl_mvsa_pitch_abc(tmp_path: Path):
     text = ALLELUIA.read_text(encoding="utf-8")
-    section = "schets2-oct-doremi"
+    section = "schets3-oct-doremi"
     before = export_mvsa_to_musicxml(text, section_id=section)
     mxl = tmp_path / "schets2.mxl"
     write_musicxml_output(mxl, before)

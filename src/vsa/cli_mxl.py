@@ -43,7 +43,7 @@ def _build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "subcommando's:\n"
-            "  import PATH --pitch {doremi,abc,vsa} [-o OUT]\n"
+            "  import PATH --pitch {doremi,a-g,vsa} [-o OUT]\n"
             "      Importeer naar .mvsa.\n"
             "  mscz PATH [-o OUT] [--musescore PATH]\n"
             "      Converteer naar .mscz via MuseScore.\n"
@@ -74,9 +74,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     imp.add_argument(
         "--pitch",
-        choices=["doremi", "abc", "vsa"],
+        choices=["doremi", "a-g", "abc", "vsa"],
         required=True,
-        help="Doel-spelling op stemregels.",
+        help="Doel-spelling (a-g = toonnamen met cijfer; abc = alias).",
     )
     imp.add_argument(
         "--octave-style",
@@ -116,7 +116,14 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
+    import os
+    import tempfile
+
+    from .mscz_partituur import MsczPartituurError, apply_partituur_mscz_conventions
+    from .musicxml_package import write_musicxml_output
+    from .musicxml_satb_layout import ensure_partituur_musicxml
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
+    from .mvsa_import import read_musicxml_file
 
     path = Path(ns.path)
     if not path.is_file():
@@ -132,11 +139,25 @@ def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
     if out.suffix.lower() != ".mscz":
         out = out.with_suffix(".mscz")
     musescore = Path(ns.musescore) if ns.musescore else None
+
+    fd, tmp_name = tempfile.mkstemp(suffix=".mxl", prefix="mxl-partituur-")
+    os.close(fd)
+    tmp_mxl = Path(tmp_name)
     try:
-        convert_with_musescore(path, out, musescore=musescore)
-    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-        print(f"{path}: ERROR: {exc}", file=sys.stderr)
-        return 1
+        try:
+            xml = read_musicxml_file(path)
+            partituur = ensure_partituur_musicxml(xml)
+            write_musicxml_output(tmp_mxl, partituur)
+            convert_with_musescore(tmp_mxl, out, musescore=musescore)
+            apply_partituur_mscz_conventions(out)
+        except (MuseScoreNotFoundError, MuseScoreConvertError, MsczPartituurError) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            return 1
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            return 1
+    finally:
+        tmp_mxl.unlink(missing_ok=True)
     print(f"Geschreven: {out}")
     return 0
 

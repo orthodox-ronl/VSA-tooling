@@ -70,6 +70,48 @@ def _pitch_to_midi(p: Pitch) -> int:
     return 12 * (p.octave + 1) + _NATURAL_SEMITONES[p.step] + int(p.alter)
 
 
+def pitch_in_do_octave(
+    do: Pitch,
+    step: str,
+    alter: float = 0.0,
+    *,
+    oct_delta: int = 0,
+) -> Pitch:
+    """Place ``step``/``alter`` in the writing octave ``[do, do+12)``.
+
+    a–g without a scientific octave digit share the **do-octaaf** (not the
+    scientific octave of the letter ``do``). Example: ``@do F4`` → bare ``c``
+    is C5 (= so), not C4.
+    """
+    step = step.upper()
+    do_midi = _pitch_to_midi(do)
+    chosen: Pitch | None = None
+    for octv in range(do.octave - 1, do.octave + 3):
+        candidate = Pitch(step=step, octave=octv, alter=alter)
+        midi = _pitch_to_midi(candidate)
+        if do_midi <= midi < do_midi + 12:
+            chosen = candidate
+            break
+    if chosen is None:
+        # Fallback: nearest pitch to do in either direction.
+        best: Pitch | None = None
+        best_dist = 10**9
+        for octv in range(0, 9):
+            candidate = Pitch(step=step, octave=octv, alter=alter)
+            dist = abs(_pitch_to_midi(candidate) - do_midi)
+            if dist < best_dist:
+                best_dist = dist
+                best = candidate
+        chosen = best if best is not None else Pitch(step=step, octave=do.octave, alter=alter)
+    if oct_delta:
+        return Pitch(
+            step=chosen.step,
+            octave=chosen.octave + oct_delta,
+            alter=chosen.alter,
+        )
+    return chosen
+
+
 def parse_pitch_string(s: str) -> Pitch:
     """Parse a pitch string such as ``"F4"``, ``"Bb4"``, ``"C#5"`` into a
     :class:`~vsa.music.Pitch`.
@@ -144,6 +186,37 @@ def degree_to_pitch(do: Pitch, degree: int, intervals: list[int]) -> Pitch:
 
     actual_octave = target_midi // 12 - 1
     return Pitch(step=step, octave=actual_octave, alter=alter)
+
+
+def pitch_to_degree_and_chrom(
+    do: Pitch, pitch: Pitch, intervals: list[int]
+) -> tuple[int, float]:
+    """Map sounding pitch to scale degree + chromatic alter vs the natural tone."""
+    target = _pitch_to_midi(pitch)
+    for deg in range(-36, 37):
+        natural = degree_to_pitch(do, deg, intervals)
+        if natural.step != pitch.step:
+            continue
+        chrom = pitch.alter - natural.alter
+        if _pitch_to_midi(
+            Pitch(step=natural.step, octave=natural.octave, alter=natural.alter + chrom)
+        ) == target:
+            return deg, chrom
+    for deg in range(-36, 37):
+        natural = degree_to_pitch(do, deg, intervals)
+        for chrom in (0.0, 1.0, -1.0, 2.0, -2.0):
+            if (
+                _pitch_to_midi(
+                    Pitch(
+                        step=natural.step,
+                        octave=natural.octave,
+                        alter=natural.alter + chrom,
+                    )
+                )
+                == target
+            ):
+                return deg, chrom
+    raise ValueError(f"kan toon {pitch} niet op ladder vanaf {do} plaatsen")
 
 
 # ── EHM decomposition ────────────────────────────────────────────────────────
@@ -266,6 +339,16 @@ class PitchResolver:
         self._last_sounding = degree_to_pitch(
             self._do, self._degree, self._intervals
         )
+
+    def set_absolute_pitch(self, pitch: Pitch) -> None:
+        """Record an absolute pitch and sync the diatonic cursor to it.
+
+        Needed so a later EHM (``/``, ``\\``, …) steps from this tone, not
+        from a stale degree left at do.
+        """
+        deg, _chrom = pitch_to_degree_and_chrom(self._do, pitch, self._intervals)
+        self._degree = deg
+        self._last_sounding = pitch
 
     @property
     def current_degree(self) -> int:

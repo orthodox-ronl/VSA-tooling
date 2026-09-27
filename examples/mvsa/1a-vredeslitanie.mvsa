@@ -1,0 +1,55 @@
+# Vredeslitanie — mvsa-experiment
+#
+# Doelen:
+# - kijken hoe makkelijk dat is iņ te typen
+# - kijken of/hoe `@tekst` werkt
+
+@title "(1a) Vredeslitanie"
+
+@ondertitel   "stukje ondertitel"
+@composer     "stukje composer"
+@tekstdichter "stukje tekstdichter"
+@arrangeur    "stukje arrangeur"
+@vertaler     "stukje vertaler"
+@bron         "stukje bron"
+@copyright    "stukje copyright"
+
+
+@do F4
+@mode major
+@oct S=0 A=0 T=0 B=-1
+
+@tekst "P: Gezegend ... der eeuwen"
+L: A_-men_ |
+S:  a  -   |
+A:  f  -   |
+T:  c  -   |
+B:  f  -   |
+
+@tekst "P: Laat ons de Heer in vrede bidden"
+L:  Heer ont-ferm_ U__  |
+S:  a    -   -     -    |
+A:  f    -   -     -    |
+T:  c    -   -     -    |
+B:  f    -   -     -    |
+@mscz-newline
+L: |:  Heer ont-ferm_ U__  |  Heer ont-ferm_ U__  :|
+S: |:  a    -   \     /    |  a    -   /     \    :|a
+A: |:  f    -   \     /    |  f    -   \     /    :|f
+T: |:  c    -   -     -    |  c    -   -     -    :|c
+B: |:  f    -   c     f    |  f    -   c     f    :|f
+
+@mscz-newline
+@tekst "P: Onze Alheilige ... ons leven aan"
+L:  Aan_ U_, O_ Heer__ |
+S:  a    bb  -     a   |
+A:  f    -   e     f   |
+T:  c    d   c     -   |
+B:  f    bb- c     f   |
+
+@tekst "P: Want van U ... der eeuwen"
+L: A__-men__ ||
+S:  a   -    ||
+A:  f   -    ||
+T:  c   -    ||
+B:  f   -    ||

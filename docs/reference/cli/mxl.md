@@ -10,17 +10,17 @@ Alias voor import: [`vsa mvsa import`](mvsa.md#vsa-mvsa-import).
 
 ```text
 mxl [-h] {import,mscz} …
-mxl import [-h] [-o OUTPUT] --pitch {doremi,abc,vsa}
+mxl import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
            [--octave-style {@oct,marker}] [--section SECTION] [--no-align] path
 mxl mscz [-h] [-o OUTPUT] [--musescore PATH] path
 ```
 
 ## Subcommando's
 
-| Subcommando | Doel |
-| ----------- | ---- |
-| `import` | Importeer naar `.mvsa` (zelfde pad als `vsa mvsa import`). |
-| `mscz` | Converteer naar `.mscz` via MuseScore CLI. |
+| Subcommando | Doel                                                                   |
+| ----------- | ---------------------------------------------------------------------- |
+| `import`    | Importeer naar `.mvsa` (zelfde pad als `vsa mvsa import`).             |
+| `mscz`      | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore. |
 
 ## Voorbeelden
 

@@ -11,7 +11,7 @@ MSCZ→mxl→mvsa-keten).
 
 ```text
 mscz [-h] {import,mxl} …
-mscz import [-h] [-o OUTPUT] --pitch {doremi,abc,vsa}
+mscz import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
             [--octave-style {@oct,marker}] [--section SECTION]
             [--musescore PATH] [--no-align] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
@@ -19,15 +19,15 @@ mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
 
 ## Subcommando's
 
-| Subcommando | Doel |
-| ----------- | ---- |
-| `import` | Importeer naar `.mvsa` (via MuseScore → temp `.mxl`). |
-| `mxl` | Exporteer naar `.mxl` via MuseScore CLI. |
+| Subcommando | Doel                                                                 |
+| ----------- | -------------------------------------------------------------------- |
+| `import`    | Importeer naar `.mvsa` (via MuseScore → temp `.mxl`).                |
+| `mxl`       | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts. |
 
 ## Voorbeelden
 
 ```cmd
-mscz import generated\alleluia-schets2.mscz --pitch abc -o generated\from-mscz.mvsa
+mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
 ```
 

@@ -14,7 +14,7 @@ from .mvsa_parse import (
     _read_elms,
     parse_l_positions,
 )
-from .mvsa_validate import MARKER_RE, _split_bars
+from .mvsa_validate import is_lyrics_stem, parse_regelidentifier, _split_bars
 
 
 def _l_position_spans(measure: str) -> list[tuple[int, int]]:
@@ -213,7 +213,7 @@ def _align_system_contents(contents: dict[str, str], order: list[str]) -> dict[s
                 f"maat-telling verschilt: {order[0]}={n_seg} vs {m}={len(splits[m].segments)}"
             )
 
-    l_marker = next(m for m in order if m == "L" or m.startswith("L"))
+    l_marker = next(m for m in order if is_lyrics_stem(m))
     ref_bars = splits[l_marker].bar_tokens
     for m in order:
         if splits[m].bar_tokens != ref_bars:
@@ -221,13 +221,18 @@ def _align_system_contents(contents: dict[str, str], order: list[str]) -> dict[s
                 f"maatstrepen verschillen: {l_marker}={ref_bars} vs {m}={splits[m].bar_tokens}"
             )
 
+    # Preserve stem eindankers; L should have none.
+    anchors_by_marker = {
+        m: list(splits[m].bar_anchors) for m in order
+    }
+
     out_segs: dict[str, list[str]] = {m: [] for m in order}
 
     for si in range(n_seg):
         l_toks = _l_tokens(splits[l_marker].segments[si])
         voice_order = [m for m in order if m != l_marker]
         voice_rows = [_voice_tokens(splits[m].segments[si]) for m in voice_order]
-        extra_l = [m for m in order if m != l_marker and (m == "L" or m.startswith("L"))]
+        extra_l = [m for m in order if m != l_marker and is_lyrics_stem(m)]
         if extra_l:
             raise ValueError("meerdere L-regels: aligner ondersteunt één L per systeem")
         l_line, v_lines = _build_aligned_measure(l_toks, voice_rows)
@@ -247,7 +252,10 @@ def _align_system_contents(contents: dict[str, str], order: list[str]) -> dict[s
             parts.append(seg.rstrip().ljust(widths[i]))
             if i < len(ref_bars):
                 parts.append(" ")
-                parts.append(ref_bars[i])
+                anchor = ""
+                if i < len(anchors_by_marker[m]) and anchors_by_marker[m][i]:
+                    anchor = anchors_by_marker[m][i] or ""
+                parts.append(ref_bars[i] + anchor)
                 if i + 1 < n_seg:
                     parts.append(" ")
         result[m] = "".join(parts).rstrip()
@@ -261,26 +269,26 @@ def align_mvsa_text(text: str) -> str:
     while i < len(lines):
         line = lines[i]
         raw = line.rstrip("\n\r")
-        if MARKER_RE.match(raw.lstrip()):
-            system_lines: list[tuple[str, str, str]] = []
+        rid0 = parse_regelidentifier(raw.lstrip())
+        if rid0:
+            system_lines: list[tuple[str, str | None, str, str]] = []
             j = i
             while j < len(lines):
                 r = lines[j].rstrip("\n\r")
-                m = MARKER_RE.match(r.lstrip())
-                if not m:
+                rid = parse_regelidentifier(r.lstrip())
+                if not rid:
                     break
-                key = f"{m.group(1)}{m.group(2)}"
-                content = r.lstrip()[len(m.group(0)) :].lstrip()
+                content = r.lstrip()[rid.match_end :].lstrip()
                 eol = lines[j][len(r) :]
-                system_lines.append((key, content, eol or "\n"))
+                system_lines.append((rid.stem_id, rid.ehm, content, eol or "\n"))
                 j += 1
             if not system_lines:
                 out.append(line)
                 i += 1
                 continue
-            order = [mk for mk, _, _ in system_lines]
-            contents = {mk: c for mk, c, _ in system_lines}
-            if not any(k == "L" or k.startswith("L") for k in order):
+            order = [mk for mk, _, _, _ in system_lines]
+            contents = {mk: c for mk, _, c, _ in system_lines}
+            if not any(is_lyrics_stem(k) for k in order):
                 out.extend(lines[i:j])
                 i = j
                 continue
@@ -291,8 +299,9 @@ def align_mvsa_text(text: str) -> str:
                 print(f"skip system @ line {i + 1}: {exc}", file=sys.stderr)
                 i = j
                 continue
-            for mk, _, eol in system_lines:
-                out.append(f"{mk}: {aligned[mk]}{eol}")
+            for mk, ehm, _, eol in system_lines:
+                label = f"{mk}{ehm}" if ehm else mk
+                out.append(f"{label}: {aligned[mk]}{eol}")
             i = j
             continue
         out.append(line)

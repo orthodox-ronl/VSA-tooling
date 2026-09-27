@@ -1,10 +1,10 @@
 # mvsa ↔ MusicXML/MSCZ — conversies en canonieke vormen
 
-| Veld            | Waarde                                                                                         |
-| --------------- | ---------------------------------------------------------------------------------------------- |
-| **Status**      | werkplan                                                                                       |
-| **Doel**        | Betrouwbare conversies tussen `.mvsa`, `.mxl`/`.musicxml` en `.mscz`, plus normalisatie (diagonaal) |
-| **Draft-spec**  | [`docs/specification-mvsa/`](../specification-mvsa/README.md)                                  |
+| Veld            | Waarde                                                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**      | werkplan                                                                                                                                        |
+| **Doel**        | Betrouwbare conversies tussen `.mvsa`, `.mxl`/`.musicxml` en `.mscz`, plus normalisatie (diagonaal)                                             |
+| **Draft-spec**  | [`docs/specification-mvsa/`](../specification-mvsa/README.md)                                                                                   |
 | **Gerelateerd** | [mvsa-v0-syntax](mvsa-v0-syntax.md), [MusicXML-export](../guides/musicxml-export.md), [vsa-templates](../specification-vsa-templates/README.md) |
 
 Dit is het **werkplan** voor conversietooling. Normatieve mvsa-schrijfregels
@@ -19,13 +19,13 @@ Rijen = **bron**, kolommen = **doel**. De **diagonaal** is normalisatie: een
 bestand waarin iets is gewijzigd of gemengd geschreven weer naar een gekozen
 canonieke vorm brengen (zelfde formaat).
 
-| Bron ↓ \ Doel → | `.vsa` | `.mvsa` | `.mxl` / `.musicxml` | `.mscz` | `.midi` / `.mid` |
-| --------------- | ------ | ------- | -------------------- | ------- | ---------------- |
-| **`.vsa`** | **normalize** (waar relevant) | — (niet v0) | `vsa musicxml` | via MXL / templates | **open** (CLI n.t.b.) |
-| **`.mvsa`** | — | **`normalize`** | `mvsa musicxml` | **`mscz`** via mxl→MuseScore | **open** (CLI n.t.b.) |
-| **`.mxl` / `.musicxml`** | — | **`import`** | **normalize** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | MuseScore / `mxl mscz` | **open** |
-| **`.mscz`** | — | **`import`** (via mxl) | `mscz mxl` | **normalize** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | **open** |
-| **`.midi` / `.mid`** | — | — | — | — | afspelen; CLI open |
+| Bron ↓ \ Doel →          | `.vsa`                        | `.mvsa`                | `.mxl` / `.musicxml`                                                                             | `.mscz`                                                                                                 | `.midi` / `.mid`      |
+| ------------------------ | ----------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | --------------------- |
+| **`.vsa`**               | **normalize** (waar relevant) | — (niet v0)            | `vsa musicxml`                                                                                   | via MXL / templates                                                                                     | **open** (CLI n.t.b.) |
+| **`.mvsa`**              | —                             | **`normalize`**        | `mvsa musicxml`                                                                                  | **`mscz`** via mxl→MuseScore                                                                            | **open** (CLI n.t.b.) |
+| **`.mxl` / `.musicxml`** | —                             | **`import`**           | **normalize** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | MuseScore / `mxl mscz`                                                                                  | **open**              |
+| **`.mscz`**              | —                             | **`import`** (via mxl) | `mscz mxl`                                                                                       | **normalize** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | **open**              |
+| **`.midi` / `.mid`**     | —                             | —                      | —                                                                                                | —                                                                                                       | afspelen; CLI open    |
 
 **`.midi`:** rol = een **variant** van een **zangstuk** afspelen. Geen
 CLI-naam vastgelegd — zie [formats/midi.md](../formats/midi.md).
@@ -34,18 +34,18 @@ Hub: [Formaten & CLI](../formats/index.md).
 
 Legenda status in dit traject:
 
-| Cel | Betekenis |
-| --- | --------- |
-| **bestaat** | Werkende CLI / script in deze repo |
-| **nieuw** | Te bouwen in dit plan |
-| **diagonaal** | Zelfde formaat → canonieke vorm |
-| **—** | Bewust niet in v0 van dit plan |
+| Cel           | Betekenis                          |
+| ------------- | ---------------------------------- |
+| **bestaat**   | Werkende CLI / script in deze repo |
+| **nieuw**     | Te bouwen in dit plan              |
+| **diagonaal** | Zelfde formaat → canonieke vorm    |
+| **—**         | Bewust niet in v0 van dit plan     |
 
 **Diagonaal (expliciet):**
 
-- **`.mvsa` → `.mvsa`:** hoogte-spelling (`doremi` / `abc` / `vsa`),
-  octaafstijl (`@oct` vs. later marker), kolom- + maatstreep-uitlijning
-  (kuiser / `align_mvsa_columns`).
+- **`.mvsa` → `.mvsa`:** default **behoud noteernamen** (`preserve`); optioneel
+  herschrijven naar `doremi` / `a-g` (alias `abc`) / `vsa`; octaafstijl (`@oct` vs. later
+  marker); kolom- + maatstreep-uitlijning (kuiser / `align_mvsa_columns`).
 - **`.vsa` → `.vsa`:** alleen waar tooling al een canonieke schrijfvorm afdwingt
   of gaat afdwingen; geen scope-creep hier.
 - **`.mxl` → `.mxl` / `.mscz` → `.mscz`:** normaliseer naar de
@@ -59,30 +59,31 @@ Legenda status in dit traject:
 
 Wat **wij** vastleggen vs. externe standaarden:
 
-| Formaat | Wat canoniek is (van ons) | Waar vastgelegd |
-| ------- | ------------------------- | --------------- |
-| `.vsa` | Eenstemmige VSA 1.0-schrijfvorm | [`specification/`](../specification/README.md), bron-glossary |
-| `.mvsa` | LSATB, sync, recite, kolommen, directives; pitch-varianten equivalent | [`specification-mvsa/`](../specification-mvsa/README.md) |
-| `.mxl` / `.musicxml` | Checklist Coria/`playback` (+ kern SATB/lyrics) | [canonieke checklists](../formats/canonical-checklists.md), [rendering](../specification/rendering.md#musicxml-export) |
-| `.mscz` | Checklist partituur (+ kern; MuseScore-pitfalls) | [canonieke checklists](../formats/canonical-checklists.md), [vsa-templates / pitfalls](../specification-vsa-templates/rendering-pitfalls.md) |
-| `.midi` / `.mid` | Afspelen van een variant van een zangstuk; CLI open | [formats/midi.md](../formats/midi.md) |
+| Formaat              | Wat canoniek is (van ons)                                             | Waar vastgelegd                                                                                                                              |
+| -------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.vsa`               | Eenstemmige VSA 1.0-schrijfvorm                                       | [`specification/`](../specification/README.md), bron-glossary                                                                                |
+| `.mvsa`              | LSATB, sync, recite, kolommen, directives; pitch-varianten equivalent | [`specification-mvsa/`](../specification-mvsa/README.md)                                                                                     |
+| `.mxl` / `.musicxml` | Checklist Coria/`playback`: vier parts S/A/T/B                        | [canonieke checklists](../formats/canonical-checklists.md), [rendering](../specification/rendering.md#musicxml-export)                       |
+| `.mscz`              | Checklist partituur: twee balken SA/TB, geen stem-labels              | [canonieke checklists](../formats/canonical-checklists.md), [vsa-templates / pitfalls](../specification-vsa-templates/rendering-pitfalls.md) |
+| `.midi` / `.mid`     | Afspelen van een variant van een zangstuk; CLI open                   | [formats/midi.md](../formats/midi.md)                                                                                                        |
 
 ### Pitch op stemregels (mvsa; keuze bij export/normalisatie)
 
-| Id | Betekenis |
-| -- | --------- |
-| `doremi` | Laddergraden `do` `re` `mi` … (+ octaafsuffix / `#`/`b`) |
-| `abc` | Toonnamen `a`–`g` / `bb` / `f#` (+ wetenschappelijk cijfer of suffix) |
-| `vsa` | Relatief: EHM `/` `\` `-` `/3` … op stemregels |
+| Id         | Betekenis                                                                |
+| ---------- | ------------------------------------------------------------------------ |
+| `preserve` | **Default** bij `.mvsa` → `.mvsa`: laat bronspelling staan               |
+| `doremi`   | Laddergraden `do` `re` `mi` … (+ octaafsuffix / `#`/`b`); import-default |
+| `a-g`      | Toonnamen `a`–`g` / `bb` / `f#` (+ wetenschappelijk cijfer); CLI-alias: `abc` |
+| `vsa`      | Relatief: EHM `/` `\` `-` `/3` … op stemregels                           |
 
-L-regel (lyrics, ELM, recite, melisma) blijft semantisch gelijk; alleen
-hoogte-spelling op S/A/T/B verandert.
+L-regel (lyrics, ELM, recite, melisma) blijft semantisch gelijk. Alleen bij
+expliciete herschrijf-`pitch` verandert de hoogte-spelling op S/A/T/B.
 
 ### Octaafstijl (mvsa)
 
-| Stijl | Betekenis | Rol in gegenereerde output |
-| ----- | --------- | -------------------------- |
-| `@oct` | Schrijfoctaaf per stem (`@oct T=-1 B=-1`) | **Canoniek** in tooling-output |
+| Stijl                             | Betekenis                                                | Rol in gegenereerde output                        |
+| --------------------------------- | -------------------------------------------------------- | ------------------------------------------------- |
+| `@oct`                            | Schrijfoctaaf per stem (`@oct T=-1 B=-1`)                | **Canoniek** in tooling-output                    |
 | Marker (voorstel `T-1:` / `S+1:`) | Zelfde *bedoeling* als schrijfoctaaf — **niet** `@start` | Optionele invoer; kuiser normaliseert naar `@oct` |
 
 **Besluit (plan):** `T-1:` (als we die marker later toestaan) = equivalent aan
@@ -106,13 +107,13 @@ hergebruik van `digit*`.
 
 Elke conversie-entry leest één brontype:
 
-| Command | Bron | Acties (richting) |
-| ------- | ---- | ----------------- |
-| `vsa` | `.vsa` | validate, musicxml, svg, …; later `normalize` waar zinvol |
-| `mvsa` / `vsa mvsa` | `.mvsa` | validate, musicxml, mscz, import, normalize |
-| `mxl` | `.mxl` / `.musicxml` | import → mvsa; mscz (MuseScore) |
-| `mscz` | `.mscz` | import → mvsa; mxl (MuseScore) |
-| *(open)* | `.midi` / `.mid` | afspelen; commandnaam n.t.b. |
+| Command             | Bron                 | Acties (richting)                                         |
+| ------------------- | -------------------- | --------------------------------------------------------- |
+| `vsa`               | `.vsa`               | validate, musicxml, svg, …; later `normalize` waar zinvol |
+| `mvsa` / `vsa mvsa` | `.mvsa`              | validate, musicxml, mscz, import, normalize               |
+| `mxl`               | `.mxl` / `.musicxml` | import → mvsa; mscz (MuseScore)                           |
+| `mscz`              | `.mscz`              | import → mvsa; mxl (MuseScore)                            |
+| *(open)*            | `.midi` / `.mid`     | afspelen; commandnaam n.t.b.                              |
 
 **Transitie:** `vsa mvsa …` blijft de volledige alias van top-level `mvsa`.
 Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
@@ -121,12 +122,13 @@ Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
 
 ## 4. Trade-offs (kort)
 
-| Onderwerp | Keuze in dit plan |
-| --------- | ----------------- |
-| MSCZ uit mvsa | **Keten** `mvsa → mxl → mscz` (MuseScore CLI) — geïmplementeerd; native MSCX alleen als partituur-layout MusicXML overleeft niet |
-| Octaaf in output | Altijd `@oct` in gegenereerde canonieke mvsa |
-| Import | Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ |
-| Scope | Geen `@voices` / blokhergebruik tenzij export het eist |
+| Onderwerp        | Keuze in dit plan                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| MSCZ uit mvsa    | **Keten** `mvsa → partituur-mxl (SA/TB) → mscz` + strip labels — checklist-conform                                               |
+| MXL ↔ MSCZ CLI   | `mxl mscz` → partituur; `mscz mxl` → vier Coria-parts                                                                            |
+| Octaaf in output | Altijd `@oct` in gegenereerde canonieke mvsa                                                                                     |
+| Import           | Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ                                                          |
+| Scope            | Geen `@voices` / blokhergebruik tenzij export het eist                                                                           |
 
 ---
 
@@ -140,32 +142,35 @@ verwijzen ernaar; diagonaal is expliciet in de matrix.
 ### Stap 2 — `normalize` (diagonaal `.mvsa` → `.mvsa`) ✅
 
 ```text
-vsa mvsa normalize PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style @oct
+vsa mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa}] --octave-style @oct
 ```
 
-- Herschrijf stemhoogten; behoud L-semantiek; kolom-/maatstreep-align (tenzij
-  `--no-align`).
+- **Default `--pitch preserve`:** noteernamen op S/A/T/B blijven zoals in de
+  `.mvsa`-bron; alleen canonieke kolomuitlijning. Expliciet `doremi` / `a-g` /
+  `vsa` herschrijft hoogten.
+- Import uit `.mxl`/`.mscz` gebruikt **`doremi`** als default (geen bronnotatie
+  om te bewaren).
 - Marker-octaaf-schrijven nog niet (`--octave-style marker` → foutmelding).
 - EHM-cijfervormen `/3` / `\2` worden bij resolve ondersteund.
 
-**Criterium (gehaald):** `alleluia-toon-8.canonieke.mvsa` sectie
-`schets2-oct-doremi`: `normalize --pitch abc` → validate OK → MusicXML-pitches
+**Criterium (gehaald):** `preserve` houdt bladcijfer/do-re-mi/mix intact;
+`schets2-oct-doremi`: `normalize --pitch a-g` → validate OK → MusicXML-pitches
 identiek; ook `doremi → abc → doremi` en `--pitch vsa` pitch-equivalent
 (`tests/test_mvsa_normalize.py`).
 
 ### Stap 3 — MSCZ-export uit mvsa ✅
 
-Keten: `.mvsa` → `.mxl` → MuseScore CLI → `.mscz`.
+Keten: `.mvsa` → **partituur**-`.mxl` (SA/TB, lege part-namen) → MuseScore CLI
+→ `.mscz` → stem-indicaties uit.
 
 ```text
 vsa mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
 ```
 
-- Module: `vsa.mvsa_mscz` + gedeelde `vsa.musescore_cli`.
-- Geen native MSCX-schrijver in deze slice.
+- Module: `vsa.mvsa_mscz` + `vsa.mscz_partituur` + `vsa.musescore_cli`.
+- Playback/Coria blijft `mvsa musicxml` (vier parts).
 
-**Criterium (gehaald):** met MuseScore 4 lokaal schrijft
-`export_mvsa_to_mscz` een `.mscz` met `.mscx` erin
+**Criterium (gehaald):** met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
 (`tests/test_mvsa_mscz.py`; skip als MuseScore ontbreekt).
 
 ### Stap 4 — Import (score → mvsa) ✅
@@ -179,17 +184,17 @@ vsa mvsa import PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style @oct
 
 **Criterium (gehaald):** roundtrip `mvsa → mxl → mvsa` pitch-equivalent op
 `alleluia-toon-8.canonieke.mvsa` sectie `schets2-oct-doremi` voor `--pitch
-doremi` en `abc` (`tests/test_mvsa_import.py`).
+doremi` en `a-g` (`tests/test_mvsa_import.py`).
 
 ### Stap 5 — Bron-commands + man-pagina’s ✅
 
 Top-level console-scripts + `scripts\*.cmd`:
 
-| Command | Bron | Acties |
-| ------- | ---- | ------ |
-| `mvsa` / `vsa mvsa` | `.mvsa` | validate, musicxml, mscz, import, normalize |
-| `mxl` | `.mxl`/`.musicxml` | import → mvsa; mscz |
-| `mscz` | `.mscz` | import → mvsa; mxl |
+| Command             | Bron               | Acties                                      |
+| ------------------- | ------------------ | ------------------------------------------- |
+| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, musicxml, mscz, import, normalize |
+| `mxl`               | `.mxl`/`.musicxml` | import → mvsa; mscz                         |
+| `mscz`              | `.mscz`            | import → mvsa; mxl                          |
 
 **Criterium (gehaald):** `mvsa -h`, `mxl -h`, `mscz -h` tonen matrix-acties;
 man-pagina’s `docs/reference/cli/{mvsa,mxl,mscz}.md`; oude `vsa mvsa …` blijft

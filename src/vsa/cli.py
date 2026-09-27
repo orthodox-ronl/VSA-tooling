@@ -249,17 +249,18 @@ def _build_parser():
             "      Exporteer naar SATB MusicXML (.mxl/.musicxml).\n"
             "  mscz PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar MuseScore (.mscz) via .mxl.\n"
-            "  import PATH [-o OUTPUT] --pitch {doremi,abc,vsa}\n"
+            "  import PATH [-o OUTPUT] --pitch {doremi,a-g,vsa}\n"
             "      Importeer .mxl/.mscz naar .mvsa.\n"
-            "  normalize PATH [-o OUTPUT] --pitch {doremi,abc,vsa}\n"
-            "      Herschrijf stemhoogten naar canonieke spelling.\n"
+            "  normalize PATH [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}]\n"
+            "      Canoniseer .mvsa (default: behoud noteernamen; optioneel herschrijf).\n"
             "\n"
             "voorbeelden:\n"
             "  vsa mvsa validate examples\\mvsa\n"
             "  vsa mvsa musicxml lied.mvsa -o out.mxl --section schets1\n"
             "  vsa mvsa mscz lied.mvsa -o out.mscz\n"
             "  vsa mvsa import out.mxl -o out.mvsa --pitch doremi\n"
-            "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch abc\n"
+            "  vsa mvsa normalize lied.mvsa -o out.mvsa\n"
+            "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch a-g\n"
             "\n"
             "Top-level alias: mvsa …  (ook: mxl … / mscz … voor andere bronnen).\n"
             "\n"
@@ -375,7 +376,7 @@ def _build_parser():
             "voorbeelden:\n"
             "  vsa mvsa import generated\\lied.mxl -o generated\\lied.import.mvsa "
             "--pitch doremi\n"
-            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch abc"
+            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g"
         ),
     )
     m_import.add_argument(
@@ -391,9 +392,9 @@ def _build_parser():
     )
     m_import.add_argument(
         "--pitch",
-        choices=["doremi", "abc", "vsa"],
+        choices=["doremi", "a-g", "abc", "vsa"],
         required=True,
-        help="Doel-spelling op stemregels.",
+        help="Doel-spelling op stemregels (a-g = toonnamen met cijfer; abc = alias).",
     )
     m_import.add_argument(
         "--octave-style",
@@ -420,17 +421,22 @@ def _build_parser():
     )
     m_normalize = mvsa_sub.add_parser(
         "normalize",
-        help="Normaliseer stemhoogte-spelling (.mvsa -> .mvsa).",
+        help="Normaliseer .mvsa (uitlijning; optioneel herschrijf hoogten).",
         description=(
-            "Herschrijf S/A/T/B naar doremi, abc (wetenschappelijk cijfer) "
-            "of vsa (EHM). Behoudt L-semantiek en @oct. Zie "
-            "docs/plans/mvsa-conversions.md."
+            "Canoniseer een .mvsa-bestand. Default --pitch preserve: "
+            "noteernamen op S/A/T/B blijven zoals in de bron; alleen "
+            "kolomuitlijning. Met --pitch doremi|a-g|vsa herschrijf je "
+            "hoogten (abc blijft alias van a-g). "
+            "(Import uit .mxl/.mscz gebruikt doremi als default.) "
+            "Zie docs/plans/mvsa-conversions.md."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa normalize examples\\mvsa\\alleluia-toon-8.canonieke.mvsa "
-            "--pitch abc -o generated\\alleluia.abc.mvsa\n"
+            "  vsa mvsa normalize examples\\mvsa\\alleluia-toon-8.mvsa "
+            "-o generated\\alleluia.normalized.mvsa\n"
+            "  vsa mvsa normalize examples\\mvsa\\alleluia-toon-8.mvsa "
+            "--pitch a-g -o generated\\alleluia.ag.mvsa\n"
             "  vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct"
         ),
     )
@@ -447,9 +453,13 @@ def _build_parser():
     )
     m_normalize.add_argument(
         "--pitch",
-        choices=["doremi", "abc", "vsa"],
-        required=True,
-        help="Doel-spelling op stemregels.",
+        choices=["preserve", "doremi", "a-g", "abc", "vsa"],
+        default=None,
+        help=(
+            "Doel-spelling op stemregels. Default bij .mvsa-bron: preserve "
+            "(namen ongewijzigd). doremi / a-g / vsa herschrijven hoogten; "
+            "abc is alias van a-g."
+        ),
     )
     m_normalize.add_argument(
         "--octave-style",
@@ -1025,8 +1035,8 @@ def _cmd_mvsa(args) -> int:
         "  vsa mvsa validate PATH\n"
         "  vsa mvsa musicxml PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
-        "  vsa mvsa import PATH --pitch {doremi,abc,vsa} [-o OUTPUT]\n"
-        "  vsa mvsa normalize PATH --pitch {doremi,abc,vsa} [-o OUTPUT]\n"
+        "  vsa mvsa import PATH --pitch {doremi,a-g,vsa} [-o OUTPUT]\n"
+        "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa}] [-o OUTPUT]\n"
         "Hulp: vsa mvsa -h | vsa mvsa import -h",
         file=sys.stderr,
     )

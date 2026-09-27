@@ -16,10 +16,17 @@ Achtergrond:
 
 Open de `.mvsa`-bestanden in VSCode met een **monospace**-lettertype.
 
+Tijdelijke afgeleiden (later weer weg): naast elk bronbestand staan
+`*.mvsa.mvsa` (normalize, default **preserve** = zelfde noteernamen),
+`*.mvsa.mxl`, `*.mvsa.mscz`, `*.mvsa.pdf` (MuseScore-partituur voor
+zangers) — **overschrijf de originelen niet**. Lokaal bouwen:
+`make.cmd naam` of `make.cmd all` (PDF vereist MuseScore 4).
+Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
+
 | Bestand                              | Wat je ziet                                                                                         |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | `alleluia-toon-8.mvsa`               | Reciteertoon (`(…)`) + cadens; do-re-mi / a–g / `@oct` / EHM; canonieke `@sectie` + `\|\|`.         |
-| `alleluia-toon-1.mvsa`               | Vrije SATB, relatief.                                                                               |
+| `alleluia-toon-1.mvsa`               | `@blok` + `@speelplan 1,2,1,2,1,3`; relatieve SATB.                                                 |
 | `kleine-intocht-zondag-hemelum.mvsa` | Omzetting VSA-demo MusicXML; absolute `bb4`/`g3`, `@oct`, mix.                                      |
 | `trisagion-8a-slav-hemelum.mvsa`     | Canonieke secties + **experimenteel** blokhergebruik (`@voices`, `L'` — nog niet normatief).        |
 

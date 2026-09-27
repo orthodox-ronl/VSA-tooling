@@ -13,8 +13,11 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
 | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [`alleluia-toon-8.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/alleluia-toon-8.mvsa)                             | Recite, laddergraden, toonnamen, `@oct`, EHM                                  |
 | [`alleluia-toon-1.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/alleluia-toon-1.mvsa)                             | Vrije SATB, relatief                                                          |
-| [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa) | Omzetting uit MusicXML; absolute octaafcijfers                                |
+| [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa) | Omzetting uit MusicXML; absolute octaafcijfers (`S:` zonder EHM)              |
 | [`trisagion-8a-slav-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/trisagion-8a-slav-hemelum.mvsa)         | ELM’s, melisma, recite; experimenteel blokhergebruik (nog **niet** normatief) |
+
+Regelidentifiers (`L:`, `S:`, optioneel `S-:` / `T\6:`): zie
+[Syntax — regelidentifier](syntax.md#regelidentifier).
 
 Werkplan met woordenlijst en achtergrond:
 [`docs/plans/mvsa-v0-syntax.md`](../plans/mvsa-v0-syntax.md).

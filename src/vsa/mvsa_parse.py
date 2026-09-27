@@ -13,16 +13,23 @@ from typing import Any
 from .mvsa_validate import (
     ALLOWED_DIRECTIVES,
     ALLOWED_MODES,
+    BLOK_ID_RE,
+    DIRECTIVE_NAME_RE,
     DO_RE,
     HTML_COMMENT_RE,
-    MARKER_RE,
     OCT_ASSIGN_RE,
     SECTIE_ID_RE,
+    STICKY_DIRECTIVES,
+    STRING_META_DIRECTIVES,
     MvsaDiagnostic,
     _BarSplit,
     _ELMS,
     _split_bars,
     _validate_directive_value,
+    is_lyrics_stem,
+    is_noop_separator_directive,
+    parse_regelidentifier,
+    parse_tekst_argument,
 )
 
 DEGREE_NAMES = {
@@ -37,6 +44,23 @@ DEGREE_NAMES = {
     "ti": 6,
 }
 
+# Hoogte-tokens op stemregels (gedeeld door validate + MusicXML-export).
+HEIGHT_DEGREE_RE = re.compile(
+    r"^(#|b)?(do|re|mi|fa|sol|so|la|si|ti)"
+    r"(?:([+-]\d*)(#|b)?|(#|b)([+-]\d*)?)?$",
+    re.IGNORECASE,
+)
+HEIGHT_NOTE_RE = re.compile(
+    r"^([a-gA-G])(bb|b|#)?(\d+)?([+-]\d*)?$",
+)
+HEIGHT_EHM_RE = re.compile(
+    # Unidirectioneel: alleen /… of alleen \… (optioneel cijfer), of stay -/~.
+    # Geen mix zoals \/ of /\ — dat is geen EHM.
+    r"^[+#b♯♭]*(?:/+\d*|\\+\d*|[-~])$"
+)
+# ELM-duur op L; op stem alleen '-' / '~' (aanhouden), nooit '_' / '.' / …
+_STEM_DURATION_ELMS = frozenset(e for e in _ELMS if e not in ("-", "~"))
+
 
 def _is_syllable_char(c: str) -> bool:
     return c.isalpha() or c in "ëïöüáéíóúýčšžňĚĎŤ#№"
@@ -46,11 +70,14 @@ def _is_syllable_char(c: str) -> bool:
 class StickyContext:
     do: str = "F4"
     mode: str = "major"
-    oct: dict[str, int] = field(default_factory=dict)  # voice letter -> shift
+    oct: dict[str, int] = field(default_factory=dict)  # stem_id -> shift
     start: str | None = None  # raw @start rest
 
     def oct_for(self, marker: str) -> int:
-        letter = marker[0]
+        if marker in self.oct:
+            return self.oct[marker]
+        # SATB-compat: ``S1`` deelt default met ``S`` als alleen letter gezet is.
+        letter = marker[0] if marker else ""
         return self.oct.get(letter, 0)
 
 
@@ -80,7 +107,11 @@ class MeasureBundle:
 
     lyrics: dict[str, list[LPosition]]  # marker -> positions
     voices: dict[str, list[VoicePosition]]
-    final_bar: str
+    final_bar: str  # bare bar token
+    # stem_id -> eindanker glued to this measure's bar (None = kale streep)
+    bar_anchors: dict[str, str | None] = field(default_factory=dict)
+    # Linker streep van deze maat (bv. leidende ``|:`` zonder lege voorafgaande maat)
+    start_bar: str | None = None
 
 
 @dataclass
@@ -92,6 +123,12 @@ class ParsedSystem:
     ends_section: bool
     context: StickyContext
     measures: list[MeasureBundle] = field(default_factory=list)
+    line_ehms: dict[str, str | None] = field(default_factory=dict)
+    identities: list[str] = field(default_factory=list)
+    # ``@tekst``-waarden die direct vóór dit systeem stonden (volgorde behouden).
+    staff_texts: list[str] = field(default_factory=list)
+    # ``@mscz-newline`` vóór dit systeem → MuseScore new-system bij MSCZ-export.
+    mscz_newline: bool = False
 
 
 @dataclass
@@ -99,12 +136,29 @@ class ParsedSection:
     id: str | None
     start_line: int
     systems: list[ParsedSystem] = field(default_factory=list)
+    # ``blok`` | ``sectie`` | None (anonieme sectie)
+    origin: str | None = None
 
 
 @dataclass
 class ParsedDocument:
     sections: list[ParsedSection]
     diagnostics: list[MvsaDiagnostic]
+    title: str | None = None
+    composer: str | None = None
+    copyright: str | None = None
+    bron: str | None = None
+    ondertitel: str | None = None
+    tekstdichter: str | None = None
+    arrangeur: str | None = None
+    vertaler: str | None = None
+    # Gereserveerd (nog niet in export).
+    toon: str | None = None
+    taal: str | None = None
+    genre: str | None = None
+    opmerkingen: str | None = None
+    speelplan: list[str] | None = None
+    speelplan_line: int | None = None
 
 
 def parse_mvsa(text: str) -> ParsedDocument:
@@ -115,7 +169,13 @@ def parse_mvsa(text: str) -> ParsedDocument:
 
     sections: list[ParsedSection] = []
     current: ParsedSection | None = None
-    pending_sectie: tuple[str, int] | None = None
+    # (id, line, origin) — origin is ``blok`` | ``sectie``
+    pending_sectie: tuple[str, int, str] | None = None
+    pending_staff_texts: list[tuple[str, int]] = []  # (text, line_no)
+    pending_mscz_newline: list[int] = []  # line numbers
+    doc_meta: dict[str, str] = {}
+    speelplan: list[str] | None = None
+    speelplan_line: int | None = None
     ctx = StickyContext()
     i = 0
     n = len(lines)
@@ -132,7 +192,19 @@ def parse_mvsa(text: str) -> ParsedDocument:
             name, _, rest = stripped[1:].partition(" ")
             name = name.strip()
             rest = rest.strip()
-            if name == "sectie":
+            if is_noop_separator_directive(name, rest):
+                pass  # no-op: breekt wel het LSATB-systeem
+            elif not name or not DIRECTIVE_NAME_RE.fullmatch(name):
+                diagnostics.append(
+                    MvsaDiagnostic(
+                        "MVSA-DIRECTIVE",
+                        f"ongeldige @-keyword {name!r} "
+                        f"(verwacht [A-Za-z][A-Za-z-_]* of @---)",
+                        line_no,
+                        severity="warning",
+                    )
+                )
+            elif name == "sectie":
                 if not rest or not SECTIE_ID_RE.match(rest):
                     diagnostics.append(
                         MvsaDiagnostic(
@@ -149,67 +221,148 @@ def parse_mvsa(text: str) -> ParsedDocument:
                     ):
                         diagnostics.append(
                             MvsaDiagnostic(
-                                "MVSA-SECTIE-OPEN",
-                                f"nieuwe @sectie {rest!r} terwijl vorige niet met || eindigde",
+                                "MVSA-SECTIE-IMPLICIT",
+                                f"sectie impliciet afgesloten door @sectie {rest!r} "
+                                f"(canoniek: || of :|| op het laatste systeem)",
                                 line_no,
+                                severity="warning",
                             )
                         )
-                    pending_sectie = (rest, line_no)
+                    pending_sectie = (rest, line_no, "sectie")
                     current = None
+            elif name == "blok":
+                if not rest or not BLOK_ID_RE.match(rest):
+                    diagnostics.append(
+                        MvsaDiagnostic(
+                            "MVSA-BLOK-ID",
+                            f"ongeldige @blok-id {rest!r} "
+                            f"(verwacht [1-9][0-9]* of [a-z][a-z0-9_-]*)",
+                            line_no,
+                        )
+                    )
+                else:
+                    if (
+                        current is not None
+                        and current.systems
+                        and not current.systems[-1].ends_section
+                    ):
+                        diagnostics.append(
+                            MvsaDiagnostic(
+                                "MVSA-SECTIE-IMPLICIT",
+                                f"sectie impliciet afgesloten door @blok {rest!r} "
+                                f"(canoniek: || of :|| op het laatste systeem)",
+                                line_no,
+                                severity="warning",
+                            )
+                        )
+                    pending_sectie = (rest, line_no, "blok")
+                    current = None
+            elif name == "speelplan":
+                from .mvsa_speelplan import parse_speelplan_argument
+
+                ids, err = parse_speelplan_argument(rest)
+                if err:
+                    diagnostics.append(
+                        MvsaDiagnostic(
+                            "MVSA-SPEELPLAN-SYNTAX",
+                            f"ongeldig @speelplan: {err}",
+                            line_no,
+                        )
+                    )
+                elif speelplan is not None:
+                    diagnostics.append(
+                        MvsaDiagnostic(
+                            "MVSA-SPEELPLAN-MULTI",
+                            "meer dan één @speelplan in dit bestand",
+                            line_no,
+                        )
+                    )
+                else:
+                    speelplan = ids
+                    speelplan_line = line_no
             elif name in ALLOWED_DIRECTIVES:
                 _validate_directive_value(name, rest, line_no, diagnostics)
-                _apply_directive(ctx, name, rest)
+                if name in STICKY_DIRECTIVES:
+                    _apply_directive(ctx, name, rest)
+                elif name == "tekst":
+                    value = parse_tekst_argument(rest)
+                    if value is not None:
+                        pending_staff_texts.append((value, line_no))
+                elif name == "mscz-newline":
+                    if not rest:
+                        pending_mscz_newline.append(line_no)
+                elif name in STRING_META_DIRECTIVES:
+                    value = parse_tekst_argument(rest)
+                    if value is not None:
+                        doc_meta[name] = value
             else:
                 diagnostics.append(
                     MvsaDiagnostic(
                         "MVSA-DIRECTIVE",
-                        f"onbekende directive @{name}",
+                        f"onbekende @-keyword @{name} (experimenteel; "
+                        f"nog niet in de specificatie)",
                         line_no,
+                        severity="warning",
                     )
                 )
             i += 1
             continue
 
-        if not MARKER_RE.match(stripped):
+        if not parse_regelidentifier(stripped):
             diagnostics.append(
                 MvsaDiagnostic(
                     "MVSA-LINE",
-                    f"regel hoort commentaar, directive of LSATB-marker te zijn: {stripped[:40]!r}",
+                    f"regel hoort commentaar, directive of regelidentifier te zijn: {stripped[:40]!r}",
                     line_no,
                 )
             )
             i += 1
             continue
 
-        system_lines: list[tuple[int, str, str]] = []
+        system_lines: list[tuple[int, str, str, str | None, bool, str]] = []
         while i < n:
             s2 = lines[i].strip()
-            if not s2 or s2.startswith("#") or s2.startswith("@"):
+            # Lege regels en #-commentaar mogen tussen LSATB-markers (niet canoniek).
+            if not s2 or s2.startswith("#"):
+                i += 1
+                continue
+            if s2.startswith("@"):
                 break
-            m2 = MARKER_RE.match(s2)
-            if not m2:
+            rid = parse_regelidentifier(s2)
+            if not rid:
                 break
-            marker = f"{m2.group(1)}{m2.group(2)}"
-            content = s2[m2.end() :].lstrip()
-            system_lines.append((i + 1, marker, content))
+            if rid.is_lyrics and rid.ehm is not None:
+                diagnostics.append(
+                    MvsaDiagnostic(
+                        "MVSA-EHM-L",
+                        f"lyrics-regelidentifier mag geen EHM bevatten: {rid.prefix!r}",
+                        i + 1,
+                    )
+                )
+            content = s2[rid.match_end :].lstrip()
+            system_lines.append(
+                (i + 1, rid.stem_id, content, rid.ehm, rid.is_lyrics, rid.identity)
+            )
             i += 1
 
         if not system_lines:
             i += 1
             continue
 
-        markers = [m for _, m, _ in system_lines]
+        markers = [m for _, m, _, _, _, _ in system_lines]
+        identities = [ident for *_, ident in system_lines]
         if len(markers) != len(set(markers)):
             diagnostics.append(
                 MvsaDiagnostic(
                     "MVSA-MARKER-DUP",
-                    f"dubbele marker in LSATB-systeem: {markers}",
+                    f"dubbele stemidentifier in LSATB-systeem: {markers}",
                     system_lines[0][0],
                 )
             )
 
-        line_map = {m: c for _, m, c in system_lines}
-        line_nos = {m: ln for ln, m, _ in system_lines}
+        line_map = {m: c for _, m, c, _, _, _ in system_lines}
+        line_nos = {m: ln for ln, m, _, _, _, _ in system_lines}
+        line_ehms = {m: ehm for _, m, _, ehm, _, _ in system_lines}
         ends, final_bars = _ends_section(system_lines, diagnostics)
 
         system = ParsedSystem(
@@ -219,17 +372,26 @@ def parse_mvsa(text: str) -> ParsedDocument:
             line_nos=line_nos,
             ends_section=ends,
             context=deepcopy(ctx),
+            line_ehms=line_ehms,
+            identities=identities,
+            staff_texts=[t for t, _ in pending_staff_texts],
+            mscz_newline=bool(pending_mscz_newline),
         )
+        pending_staff_texts.clear()
+        pending_mscz_newline.clear()
         system.measures = _build_measures(system, diagnostics)
 
         if current is None:
-            sid = pending_sectie[0] if pending_sectie else None
-            start = pending_sectie[1] if pending_sectie else system.start_line
-            current = ParsedSection(id=sid, start_line=start)
+            if pending_sectie:
+                sid, start, origin = pending_sectie
+            else:
+                sid, start, origin = None, system.start_line, None
+            current = ParsedSection(id=sid, start_line=start, origin=origin)
             sections.append(current)
             pending_sectie = None
         elif pending_sectie is not None:
-            current = ParsedSection(id=pending_sectie[0], start_line=pending_sectie[1])
+            sid, start, origin = pending_sectie
+            current = ParsedSection(id=sid, start_line=start, origin=origin)
             sections.append(current)
             pending_sectie = None
 
@@ -238,24 +400,69 @@ def parse_mvsa(text: str) -> ParsedDocument:
             current = None
 
     if pending_sectie is not None:
+        sid, start, origin = pending_sectie
+        label = "@blok" if origin == "blok" else "@sectie"
         diagnostics.append(
             MvsaDiagnostic(
-                "MVSA-SECTIE-EMPTY",
-                f"@sectie {pending_sectie[0]!r} zonder LSATB-systeem",
-                pending_sectie[1],
+                "MVSA-BLOK-EMPTY" if origin == "blok" else "MVSA-SECTIE-EMPTY",
+                f"{label} {sid!r} zonder LSATB-systeem",
+                start,
+            )
+        )
+    for _, tekst_line in pending_staff_texts:
+        diagnostics.append(
+            MvsaDiagnostic(
+                "MVSA-TEKST",
+                "@tekst zonder volgend LSATB-systeem",
+                tekst_line,
+                severity="warning",
+            )
+        )
+    for nl_line in pending_mscz_newline:
+        diagnostics.append(
+            MvsaDiagnostic(
+                "MVSA-MSCZ-NEWLINE",
+                "@mscz-newline zonder volgend LSATB-systeem",
+                nl_line,
+                severity="warning",
             )
         )
     if current is not None and current.systems and not current.systems[-1].ends_section:
         diagnostics.append(
             MvsaDiagnostic(
-                "MVSA-SECTIE-END",
-                "laatste sectie eindigt niet met || (of :||) op alle LSATB-regels",
+                "MVSA-SECTIE-IMPLICIT",
+                "sectie impliciet afgesloten door einde van het bestand "
+                "(canoniek: || of :|| op het laatste systeem)",
                 current.systems[-1].start_line,
+                severity="warning",
             )
         )
 
     _validate_sync(sections, diagnostics)
-    return ParsedDocument(sections=sections, diagnostics=diagnostics)
+    doc = ParsedDocument(
+        sections=sections,
+        diagnostics=diagnostics,
+        title=doc_meta.get("title"),
+        composer=doc_meta.get("composer"),
+        copyright=doc_meta.get("copyright"),
+        bron=doc_meta.get("bron"),
+        ondertitel=doc_meta.get("ondertitel"),
+        tekstdichter=doc_meta.get("tekstdichter"),
+        arrangeur=doc_meta.get("arrangeur"),
+        vertaler=doc_meta.get("vertaler"),
+        toon=doc_meta.get("toon"),
+        taal=doc_meta.get("taal"),
+        genre=doc_meta.get("genre"),
+        opmerkingen=doc_meta.get("opmerkingen"),
+        speelplan=speelplan,
+        speelplan_line=speelplan_line,
+    )
+    from .mvsa_bar_anchors import collect_bar_anchor_diagnostics
+    from .mvsa_speelplan import collect_speelplan_diagnostics
+
+    diagnostics.extend(collect_bar_anchor_diagnostics(doc))
+    diagnostics.extend(collect_speelplan_diagnostics(doc))
+    return doc
 
 
 def _apply_directive(ctx: StickyContext, name: str, rest: str) -> None:
@@ -267,16 +474,17 @@ def _apply_directive(ctx: StickyContext, name: str, rest: str) -> None:
         for part in rest.split():
             m = OCT_ASSIGN_RE.match(part)
             if m:
-                ctx.oct[m.group(1)] = int(m.group(3))
+                ctx.oct[m.group(1)] = int(m.group(2))
     elif name == "start":
         ctx.start = rest or None
 
 
 def _ends_section(
-    system_lines: list[tuple[int, str, str]], diagnostics: list[MvsaDiagnostic]
+    system_lines: list[tuple], diagnostics: list[MvsaDiagnostic]
 ) -> tuple[bool, list[str | None]]:
     endings: list[str | None] = []
-    for line_no, marker, content in system_lines:
+    for item in system_lines:
+        line_no, marker, content = item[0], item[1], item[2]
         bars = _split_bars(content)
         if not bars.bar_tokens:
             diagnostics.append(
@@ -329,19 +537,41 @@ def _build_measures(
         return []
 
     n = next(iter(counts.values()))
+    leadings = {m: sp.leading_bar for m, sp in splits.items()}
+    if len(set(leadings.values())) != 1:
+        diagnostics.append(
+            MvsaDiagnostic(
+                "MVSA-MEASURE-COUNT",
+                f"ongelijke leidende maatstreep in systeem: {leadings}",
+                system.start_line,
+            )
+        )
+        return []
+    leading_bar = next(iter(leadings.values()))
     bundles: list[MeasureBundle] = []
     for mi in range(n):
         lyrics: dict[str, list[LPosition]] = {}
         voices: dict[str, list[VoicePosition]] = {}
         final_bar = next(iter(splits.values())).bar_tokens[mi]
+        anchors: dict[str, str | None] = {}
         for marker, sp in splits.items():
             seg = sp.segments[mi]
-            if marker[0] == "L":
+            if is_lyrics_stem(marker):
                 lyrics[marker] = parse_l_positions(seg)
             else:
                 voices[marker] = parse_voice_positions(seg)
+            if mi < len(sp.bar_anchors):
+                anchors[marker] = sp.bar_anchors[mi]
+            else:
+                anchors[marker] = None
         bundles.append(
-            MeasureBundle(lyrics=lyrics, voices=voices, final_bar=final_bar)
+            MeasureBundle(
+                lyrics=lyrics,
+                voices=voices,
+                final_bar=final_bar,
+                bar_anchors=anchors,
+                start_bar=leading_bar if mi == 0 else None,
+            )
         )
     return bundles
 
@@ -352,20 +582,24 @@ def _validate_sync(
     for section in sections:
         if not section.systems:
             continue
-        expected = section.systems[0].markers
+        expected = section.systems[0].identities or section.systems[0].markers
         for system in section.systems:
-            if system.markers != expected:
+            got = system.identities or system.markers
+            if got != expected:
                 diagnostics.append(
                     MvsaDiagnostic(
                         "MVSA-MARKERS",
-                        f"marker-volgorde wijkt af: verwacht {expected}, kreeg {system.markers}",
+                        f"regelidentifier-volgorde wijkt af: verwacht {expected}, kreeg {got}",
                         system.start_line,
                     )
                 )
             if not system.measures:
                 continue
             # Prefer primary L as reference
-            ref = next((m for m in system.markers if m[0] == "L"), system.markers[0])
+            ref = next(
+                (m for m in system.markers if is_lyrics_stem(m)),
+                system.markers[0],
+            )
             for mi, bundle in enumerate(system.measures):
                 ref_slots = _slot_seq(bundle, ref)
                 for marker in system.markers:
@@ -380,6 +614,54 @@ def _validate_sync(
                                 system.line_nos.get(marker, system.start_line),
                             )
                         )
+                _validate_voice_height_tokens(system, mi, bundle, diagnostics)
+
+
+def _validate_voice_height_tokens(
+    system: ParsedSystem,
+    measure_index: int,
+    bundle: MeasureBundle,
+    diagnostics: list[MvsaDiagnostic],
+) -> None:
+    for marker, positions in bundle.voices.items():
+        line_no = system.line_nos.get(marker, system.start_line)
+        for pi, vpos in enumerate(positions):
+            for si, slot in enumerate(vpos.slots):
+                if is_valid_height_slot(slot):
+                    continue
+                diagnostics.append(
+                    MvsaDiagnostic(
+                        "MVSA-HOOGTE",
+                        f"{marker}: onbekende hoogte-token {slot!r} "
+                        f"(maat {measure_index + 1}, positie {pi + 1}, slot {si + 1})",
+                        line_no,
+                    )
+                )
+
+
+def is_valid_height_slot(token: str) -> bool:
+    """True if ``token`` is a stem height slot (EHM, absolute, hold), not an L-ELM."""
+    tok = token.strip()
+    if not tok:
+        return False
+    if tok in ("-", "~"):
+        return True
+    if tok in _STEM_DURATION_ELMS:
+        return False
+    if HEIGHT_NOTE_RE.fullmatch(tok) and not HEIGHT_DEGREE_RE.fullmatch(tok):
+        return True
+    if HEIGHT_DEGREE_RE.fullmatch(tok):
+        return True
+    if HEIGHT_EHM_RE.fullmatch(tok):
+        return True
+    try:
+        from .pitch_resolver import parse_pitch_string
+
+        candidate = tok[0].upper() + tok[1:] if tok[0].islower() else tok
+        parse_pitch_string(candidate)
+        return True
+    except ValueError:
+        return False
 
 
 def _slot_seq(bundle: MeasureBundle, marker: str) -> list[int]:
@@ -425,6 +707,10 @@ def _strip_one(token: str) -> str:
         matched = False
         for e in _ELMS:
             if s.endswith(e) and len(s) > len(e):
+                # EHM ``+-`` / ``#-`` / ``b-``: trailing ``-``/``~`` is stay, not
+                # ELM-duur (anders blijft alleen ``+``/``#`` over → validate-fout).
+                if e in ("-", "~") and HEIGHT_EHM_RE.fullmatch(s):
+                    break
                 # Don't strip octave suffix "-" from degrees/names: ``si-``, ``g-``
                 # ELM "-" at end of ``si-`` is ambiguous; prefer pitch+oct over ELM
                 # when remainder looks like a pitch. Strip ``_`` ``__`` ``_.`` etc.
@@ -512,10 +798,15 @@ def parse_l_positions(measure: str) -> list[LPosition]:
             continues_word = True
             i += 1
 
+        # Leading ELM vóór de lettergreep (bijv. ``~Al``, ``_Geest``).
+        progress_at = i
+        leading_elms, i = _read_elms(s, i)
+
         syllables: list[str] = []
         links: list[bool] = []
         elms: list[str] = []
         pending_link: bool | None = None
+        used_leading = False
 
         while True:
             if i >= n:
@@ -540,6 +831,9 @@ def parse_l_positions(measure: str) -> list[LPosition]:
 
             if piece_elms:
                 elms.extend(piece_elms)
+            elif not used_leading and leading_elms:
+                elms.extend(leading_elms)
+                used_leading = True
             else:
                 elms.append("~")
 
@@ -579,6 +873,9 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                     continues_word=continues_word,
                 )
             )
+        elif i == progress_at:
+            # Onverwacht teken (geen ELM, geen lettergreep): voorkom oneindige lus.
+            i += 1
 
     return positions
 
@@ -645,8 +942,6 @@ def _read_elms(
             if e == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
                 continue
             if e == "-" and not allow_bare_dash:
-                continue
-            if e == "~" and i + 1 < n and _is_syllable_char(s[i + 1]):
                 continue
             elm = e
             break

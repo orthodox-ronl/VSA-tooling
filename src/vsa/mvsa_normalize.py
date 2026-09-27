@@ -11,21 +11,39 @@ from pathlib import Path
 
 from .music import Pitch
 from .mvsa_align import align_mvsa_text
-from .mvsa_musicxml import MvsaExportError, _apply_start, _resolve_slot
+from .mvsa_musicxml import (
+    MvsaExportError,
+    _apply_line_ehm,
+    _apply_start,
+    _resolve_slot,
+    _voice_resolver,
+)
 from .mvsa_parse import parse_mvsa
-from .mvsa_validate import MARKER_RE, MvsaValidationError, _split_bars
+from .mvsa_validate import (
+    MvsaValidationError,
+    _split_bars,
+    is_lyrics_stem,
+    parse_regelidentifier,
+)
 from .pitch_resolver import (
     PitchResolver,
     _SCALE_INTERVALS,
-    _pitch_to_midi,
-    degree_to_pitch,
     parse_pitch_string,
+    pitch_to_degree_and_chrom as _pitch_to_degree_and_chrom,
 )
 
-PITCH_FORMS = ("doremi", "abc", "vsa")
+# Canonieke interne waarden (``abc`` = a–g mét wetenschappelijk cijfer).
+PITCH_FORMS = ("preserve", "doremi", "abc", "vsa")
+# CLI/docs-voorkeur: ``a-g``; ``abc`` blijft alias.
+PITCH_FORM_ALIASES = {"a-g": "abc", "ag": "abc"}
 OCTAVE_STYLES = ("@oct", "marker")
 
 _DEGREE_LABELS = ("do", "re", "mi", "fa", "so", "la", "si")
+
+# Default when normalizing an existing ``.mvsa``: keep note spellings as written.
+DEFAULT_MVSA_PITCH = "preserve"
+# Default when importing / converting from a non-``.mvsa`` source.
+DEFAULT_IMPORT_PITCH = "doremi"
 
 
 class MvsaNormalizeError(Exception):
@@ -34,22 +52,39 @@ class MvsaNormalizeError(Exception):
         super().__init__(message)
 
 
+def canonicalize_pitch_form(pitch: str) -> str:
+    """Map CLI aliases (``a-g``) to canonieke forms (``abc``)."""
+    return PITCH_FORM_ALIASES.get(pitch, pitch)
+
+
+def pitch_form_choices(*, include_preserve: bool) -> list[str]:
+    """Argparse choices: prefer documenting ``a-g``; keep ``abc`` as alias."""
+    base = ["doremi", "a-g", "abc", "vsa"]
+    if include_preserve:
+        return ["preserve", *base]
+    return base
+
+
 def normalize_mvsa_text(
     text: str,
     *,
-    pitch: str = "doremi",
+    pitch: str = DEFAULT_MVSA_PITCH,
     octave_style: str = "@oct",
     align: bool = True,
 ) -> str:
     """Return normalized mvsa text.
 
-    ``octave_style=@oct`` keeps existing ``@oct`` directives and writes relative
-    ladder degrees / scientific ABC against that writing octave. ``marker`` is
-    reserved (not implemented in this slice).
+    ``pitch=preserve`` (default for ``.mvsa`` → ``.mvsa``) keeps stem token
+    spellings unchanged and only applies optional column alignment.
+    ``doremi`` / ``abc`` (alias ``a-g``) / ``vsa`` rewrite heights.
+    ``octave_style=@oct`` keeps existing ``@oct`` directives when rewriting.
+    ``marker`` is reserved.
     """
+    pitch = canonicalize_pitch_form(pitch)
     if pitch not in PITCH_FORMS:
         raise MvsaNormalizeError(
-            f"onbekende --pitch {pitch!r}; kies uit {', '.join(PITCH_FORMS)}"
+            f"onbekende --pitch {pitch!r}; kies uit "
+            f"preserve, doremi, a-g (of abc), vsa"
         )
     if octave_style not in OCTAVE_STYLES:
         raise MvsaNormalizeError(
@@ -66,26 +101,31 @@ def normalize_mvsa_text(
     if errors:
         raise MvsaValidationError(errors)
 
-    # (system_start_line, marker) -> new voice content (without "S: " prefix)
-    rewrites: dict[tuple[int, str], str] = {}
+    if pitch == "preserve":
+        return align_mvsa_text(text) if align else text
+
+    # (system_start_line, marker) -> (new voice content, output ehm | None)
+    rewrites: dict[tuple[int, str], tuple[str, str | None]] = {}
 
     for section in doc.sections:
         for system in section.systems:
             ctx = system.context
-            voice_markers = [m for m in system.markers if m[0] in "SATB"]
+            voice_markers = [m for m in system.markers if not is_lyrics_stem(m)]
             if not voice_markers:
                 continue
 
             do_p = parse_pitch_string(ctx.do)
             intervals = _SCALE_INTERVALS[ctx.mode]
             resolvers: dict[str, PitchResolver] = {}
+            line_ehms = getattr(system, "line_ehms", {}) or {}
             for vm in voice_markers:
                 letter = vm[0]
-                resolvers[letter] = PitchResolver.from_metadata(
-                    {"do": ctx.do, "mode": ctx.mode}
-                )
+                resolvers[letter] = _voice_resolver(ctx, letter)
                 if ctx.start:
                     _apply_start(resolvers[letter], ctx.start, letter)
+                line_ehm = line_ehms.get(vm)
+                if line_ehm is not None:
+                    _apply_line_ehm(resolvers[letter], line_ehm)
 
             last_pitch: dict[str, Pitch | None] = {vm[0]: None for vm in voice_markers}
             prev_degree: dict[str, int | None] = {vm[0]: None for vm in voice_markers}
@@ -94,7 +134,7 @@ def normalize_mvsa_text(
             for bundle in system.measures:
                 for vm in voice_markers:
                     letter = vm[0]
-                    writing_oct = ctx.oct_for(letter)
+                    writing_oct = ctx.oct_for(vm)
                     tokens: list[str] = []
                     for vpos in bundle.voices.get(vm, []):
                         slot_out: list[str] = []
@@ -134,6 +174,7 @@ def normalize_mvsa_text(
                         tokens.append("&".join(slot_out))
                     new_segs[vm].append(" ".join(tokens))
 
+            out_ehm: str | None = "-" if pitch == "vsa" else None
             for vm in voice_markers:
                 bars = _split_bars(system.lines[vm])
                 parts: list[str] = []
@@ -141,10 +182,16 @@ def normalize_mvsa_text(
                 for i, seg in enumerate(segs):
                     parts.append(seg)
                     if i < len(bars.bar_tokens):
-                        parts.append(f" {bars.bar_tokens[i]}")
+                        anchor = ""
+                        if i < len(bars.bar_anchors) and bars.bar_anchors[i]:
+                            anchor = bars.bar_anchors[i] or ""
+                        parts.append(f" {bars.bar_tokens[i]}{anchor}")
                         if i + 1 < len(segs):
                             parts.append(" ")
-                rewrites[(system.start_line, vm)] = "".join(parts).rstrip()
+                rewrites[(system.start_line, vm)] = (
+                    "".join(parts).rstrip(),
+                    out_ehm,
+                )
 
     out_lines = _apply_rewrites(text, rewrites)
     if align:
@@ -156,10 +203,21 @@ def normalize_mvsa_path(
     path: Path,
     out: Path,
     *,
-    pitch: str = "doremi",
+    pitch: str | None = None,
     octave_style: str = "@oct",
     align: bool = True,
 ) -> None:
+    """Normalize ``path`` to ``out``.
+
+    When *pitch* is omitted, ``.mvsa`` sources default to ``preserve`` (keep
+    note names). Pass an explicit form to rewrite.
+    """
+    if pitch is None:
+        pitch = (
+            DEFAULT_MVSA_PITCH
+            if path.suffix.lower() == ".mvsa"
+            else DEFAULT_IMPORT_PITCH
+        )
     text = path.read_text(encoding="utf-8")
     normalized = normalize_mvsa_text(
         text, pitch=pitch, octave_style=octave_style, align=align
@@ -172,31 +230,10 @@ def pitch_to_degree_and_chrom(
     do: Pitch, pitch: Pitch, intervals: list[int]
 ) -> tuple[int, float]:
     """Map sounding pitch to scale degree + chromatic alter vs the natural tone."""
-    target = _pitch_to_midi(pitch)
-    for deg in range(-36, 37):
-        natural = degree_to_pitch(do, deg, intervals)
-        if natural.step != pitch.step:
-            continue
-        chrom = pitch.alter - natural.alter
-        if _pitch_to_midi(
-            Pitch(step=natural.step, octave=natural.octave, alter=natural.alter + chrom)
-        ) == target:
-            return deg, chrom
-    for deg in range(-36, 37):
-        natural = degree_to_pitch(do, deg, intervals)
-        for chrom in (0.0, 1.0, -1.0, 2.0, -2.0):
-            if (
-                _pitch_to_midi(
-                    Pitch(
-                        step=natural.step,
-                        octave=natural.octave,
-                        alter=natural.alter + chrom,
-                    )
-                )
-                == target
-            ):
-                return deg, chrom
-    raise MvsaNormalizeError(f"kan toon {pitch} niet op ladder vanaf {do} plaatsen")
+    try:
+        return _pitch_to_degree_and_chrom(do, pitch, intervals)
+    except ValueError as exc:
+        raise MvsaNormalizeError(str(exc)) from exc
 
 
 def _format_pitch(
@@ -291,7 +328,7 @@ def _chrom_prefix(chrom: float) -> str:
 
 
 def _apply_rewrites(
-    text: str, rewrites: dict[tuple[int, str], str]
+    text: str, rewrites: dict[tuple[int, str], tuple[str, str | None]]
 ) -> str:
     """Replace voice lines in systems that appear in ``rewrites``."""
     lines = text.splitlines(keepends=True)
@@ -299,27 +336,28 @@ def _apply_rewrites(
     i = 0
     while i < len(lines):
         raw = lines[i].rstrip("\n\r")
-        if not MARKER_RE.match(raw.lstrip()):
+        if not parse_regelidentifier(raw.lstrip()):
             out.append(lines[i])
             i += 1
             continue
 
         j = i
-        system_lines: list[tuple[int, str, str]] = []
+        system_lines: list[tuple[int, str, str | None, str]] = []
         while j < len(lines):
             r = lines[j].rstrip("\n\r")
-            m = MARKER_RE.match(r.lstrip())
-            if not m:
+            rid = parse_regelidentifier(r.lstrip())
+            if not rid:
                 break
-            key = f"{m.group(1)}{m.group(2)}"
             eol = lines[j][len(r) :] or "\n"
-            system_lines.append((j + 1, key, eol))
+            system_lines.append((j + 1, rid.stem_id, rid.ehm, eol))
             j += 1
 
         start_line = system_lines[0][0]
-        for ln, key, eol in system_lines:
-            if key[0] in "SATB" and (start_line, key) in rewrites:
-                out.append(f"{key}: {rewrites[(start_line, key)]}{eol}")
+        for ln, key, ehm, eol in system_lines:
+            if not is_lyrics_stem(key) and (start_line, key) in rewrites:
+                content, out_ehm = rewrites[(start_line, key)]
+                label = f"{key}{out_ehm}" if out_ehm else key
+                out.append(f"{label}: {content}{eol}")
             else:
                 out.append(lines[ln - 1])
         i = j

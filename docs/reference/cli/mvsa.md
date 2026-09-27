@@ -20,8 +20,8 @@ mvsa validate [-h] path
 mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--keep-mxl PATH] path
-mvsa import [-h] [-o OUTPUT] --pitch {doremi,abc,vsa} …
-mvsa normalize [-h] [-o OUTPUT] --pitch {doremi,abc,vsa} …
+mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
+mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
 ```
 
 ## Subcommando's
@@ -32,7 +32,7 @@ mvsa normalize [-h] [-o OUTPUT] --pitch {doremi,abc,vsa} …
 | [`musicxml`](#vsa-mvsa-musicxml)     | Exporteer `.mvsa` naar SATB MusicXML.             |
 | [`mscz`](#vsa-mvsa-mscz)             | Exporteer `.mvsa` naar MuseScore (`.mscz`).       |
 | [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` naar `.mvsa`.          |
-| [`normalize`](#vsa-mvsa-normalize)   | Herschrijf stemhoogten naar canonieke spelling.   |
+| [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen). |
 
 Hulp op de commandoregel:
 
@@ -171,11 +171,12 @@ vsa mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 Exporteert **één** `.mvsa`-bestand naar MuseScore (`.mscz`) via de keten:
 
 ```text
-.mvsa  →  .mxl (MusicXML, playback)  →  MuseScore CLI  →  .mscz
+.mvsa  →  .mxl (partituur: SA/TB, lege part-namen)  →  MuseScore CLI  →  .mscz
+       →  stem-indicaties uit (Style + lege namen)
 ```
 
-Dit is bewust **geen** native MSCX-schrijver; layout die MusicXML niet
-overleeft (Style/VBox) volgt MuseScore’s eigen import. Voor Coria-playback
+Dit voldoet aan de [MSCZ-checklist](../../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
+(twee balken, geen S/Soprano-labels). Voor Coria-playback (vier parts)
 blijft [`vsa mvsa musicxml`](#vsa-mvsa-musicxml) het primaire pad.
 
 Vereist MuseScore 4 (of 3): op `PATH` als `MuseScore4` / `mscore`, of het
@@ -187,13 +188,13 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam                 | Verplicht | Betekenis                                              | Default                            |
-| -------------------- | --------- | ------------------------------------------------------ | ---------------------------------- |
-| `path`               | Ja        | Bron-`.mvsa`-bestand.                                  | —                                  |
+| Naam                 | Verplicht | Betekenis                                              | Default                             |
+| -------------------- | --------- | ------------------------------------------------------ | ----------------------------------- |
+| `path`               | Ja        | Bron-`.mvsa`-bestand.                                  | —                                   |
 | `-o`, `--output`     | Nee       | Uitvoer-`.mscz`.                                       | `<stem>.mscz` naast het bronbestand |
-| `--section SECTION`  | Nee       | Alleen deze `@sectie`-id.                              | Alle secties                       |
-| `--musescore PATH`   | Nee       | Pad naar MuseScore-executable.                         | Auto-detectie                      |
-| `--keep-mxl PATH`    | Nee       | Bewaar ook het tussenliggende `.mxl`.                  | temp (wordt verwijderd)            |
+| `--section SECTION`  | Nee       | Alleen deze `@sectie`-id.                              | Alle secties                        |
+| `--musescore PATH`   | Nee       | Pad naar MuseScore-executable.                         | Auto-detectie                       |
+| `--keep-mxl PATH`    | Nee       | Bewaar ook het tussenliggende `.mxl`.                  | temp (wordt verwijderd)             |
 
 ### Output
 
@@ -202,9 +203,9 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Exit status
 
-| Exitcode | Betekenis                                                         |
-| -------- | ----------------------------------------------------------------- |
-| `0`      | MSCZ geschreven.                                                  |
+| Exitcode | Betekenis                                                            |
+| -------- | -------------------------------------------------------------------- |
+| `0`      | MSCZ geschreven.                                                     |
 | `1`      | Pad ontbreekt, validatiefout, MuseScore ontbreekt, of conversiefout. |
 
 ### Voorbeelden
@@ -222,7 +223,7 @@ vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\lied.mxl
 ### Synopsis
 
 ```text
-vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,abc,vsa}
+vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
                 [--octave-style {@oct,marker}] [--section SECTION]
                 [--musescore PATH] [--no-align] path
 ```
@@ -231,10 +232,10 @@ vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,abc,vsa}
 
 Importeert een partituur naar `.mvsa`:
 
-| Bron | Pad |
-| ---- | --- |
-| `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4) |
-| `.mscz` | Eerst MuseScore CLI → temp `.mxl`, daarna zelfde parser |
+| Bron                          | Pad                                                     |
+| ----------------------------- | ------------------------------------------------------- |
+| `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4)                             |
+| `.mscz`                       | Eerst MuseScore CLI → temp `.mxl`, daarna zelfde parser |
 
 Stemhoogten worden in de gekozen `--pitch`-vorm geschreven; `@do` / `@mode`
 komen uit de toonsoort (majeur-aanname); `@oct` wordt per stem afgeleid.
@@ -242,21 +243,21 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
 
 ### Argumenten en opties
 
-| Naam                 | Verplicht | Betekenis                         | Default              |
-| -------------------- | --------- | --------------------------------- | -------------------- |
-| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.   | —                    |
-| `--pitch`            | Ja        | `doremi`, `abc`, of `vsa`.        | —                    |
-| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                  | `<stem>.import.mvsa` |
-| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)     | `@oct`               |
-| `--section`          | Nee       | `@sectie`-id in de output         | `import`             |
-| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)       | auto                 |
-| `--no-align`         | Nee       | Geen kolomuitlijning              | uit                  |
+| Naam                 | Verplicht | Betekenis                                   | Default              |
+| -------------------- | --------- | ------------------------------------------- | -------------------- |
+| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.             | —                    |
+| `--pitch`            | Ja        | `doremi`, `a-g` (of alias `abc`), of `vsa`. | —                    |
+| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                            | `<stem>.import.mvsa` |
+| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)               | `@oct`               |
+| `--section`          | Nee       | `@sectie`-id in de output                   | `import`             |
+| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                 | auto                 |
+| `--no-align`         | Nee       | Geen kolomuitlijning                        | uit                  |
 
 ### Voorbeelden
 
 ```cmd
 vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
-vsa mvsa import lied.mscz -o lied.mvsa --pitch abc
+vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
 ```
 
 ---
@@ -266,21 +267,34 @@ vsa mvsa import lied.mscz -o lied.mvsa --pitch abc
 ### Synopsis
 
 ```text
-vsa mvsa normalize [-h] [-o OUTPUT] --pitch {doremi,abc,vsa}
+vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}]
                    [--octave-style {@oct,marker}] [--no-align] path
 ```
 
 ### Beschrijving
 
-Herschrijft **stemregels** (S/A/T/B) naar één gekozen hoogte-spelling. De
-L-regel (lyrics, ELM, recite, melisma) blijft semantisch gelijk. Sticky
-`@do` / `@mode` / `@oct` blijven staan (`--octave-style @oct`).
+Canoniseert een **bestaand** `.mvsa`-bestand (uitlijning; optioneel
+hoogte-spelling). De L-regel (lyrics, ELM, recite, melisma) blijft
+semantisch gelijk. Sticky `@do` / `@mode` / `@oct` blijven staan.
 
-| `--pitch` | Output op stemregels                                      |
-| --------- | --------------------------------------------------------- |
-| `doremi`  | Laddergraden t.o.v. `@do` / `@oct`                        |
-| `abc`     | Toonnamen met wetenschappelijk cijfer (`bb4`, `c5`, …)    |
-| `vsa`     | Eerste toon absoluut (doremi), daarna EHM (`/`, `\2`, …) |
+**Default bij bron `.mvsa`:** `--pitch preserve` — de **namen/notaties van
+noten blijven zoals in de bron** (bladcijfer, do-re-mi, a–g, EHM, …). Alleen
+kolom- en maatstreep-uitlijning gebeurt standaard. Zo blijf je
+meerdere schetsen met verschillende spellingen in één bestand intact.
+
+Wil je wél herschrijven naar één vorm, geef dan expliciet `--pitch doremi`,
+`a-g` of `vsa`. (`abc` is een alias van `a-g`.)
+
+**Import uit een ander formaat** (`.mxl` / `.mscz` via `mvsa import` / `mxl
+import`): daar is `--pitch` verplicht of default **`doremi`** — er is dan
+geen “bronnotatie” om te bewaren.
+
+| `--pitch`   | Gedrag                                                                |
+| ----------- | --------------------------------------------------------------------- |
+| `preserve`  | **Default** voor `.mvsa` → `.mvsa`: stemtokens ongewijzigd; wel align |
+| `doremi`    | Laddergraden t.o.v. `@do` / `@oct`                                    |
+| `a-g`       | Toonnamen met wetenschappelijk cijfer (`bb4`, `c5`, …); alias: `abc`  |
+| `vsa`       | Eerste toon absoluut (doremi), daarna EHM (`/`, `\2`, …)              |
 
 Kolom- en maatstreep-uitlijning gebeurt standaard (zelfde regels als
 `scripts/align_mvsa_columns.py`); zet `--no-align` om dat over te slaan.
@@ -289,13 +303,13 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam                    | Verplicht | Betekenis                                      | Default                         |
-| ----------------------- | --------- | ---------------------------------------------- | ------------------------------- |
-| `path`                  | Ja        | Bron-`.mvsa`-bestand.                          | —                               |
-| `--pitch`               | Ja        | Doel-spelling: `doremi`, `abc`, of `vsa`.      | —                               |
-| `-o`, `--output`        | Nee       | Uitvoerpad.                                    | `<stem>.normalized.mvsa`        |
-| `--octave-style`        | Nee       | `@oct` (canoniek) of `marker` (nog niet klaar) | `@oct`                          |
-| `--no-align`            | Nee       | Geen kolomuitlijning na herschrijven.          | uit (wel alignen)               |
+| Naam                    | Verplicht | Betekenis                                                            | Default                         |
+| ----------------------- | --------- | -------------------------------------------------------------------- | ------------------------------- |
+| `path`                  | Ja        | Bron-`.mvsa`-bestand.                                                | —                               |
+| `--pitch`               | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` om te herschrijven | `preserve` bij `.mvsa`-bron     |
+| `-o`, `--output`        | Nee       | Uitvoerpad.                                                          | `<stem>.normalized.mvsa`        |
+| `--octave-style`        | Nee       | `@oct` (canoniek) of `marker` (nog niet klaar)                       | `@oct`                          |
+| `--no-align`            | Nee       | Geen kolomuitlijning.                                                | uit (wel alignen)               |
 
 ### Output
 
@@ -304,15 +318,16 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Exit status
 
-| Exitcode | Betekenis                                    |
-| -------- | -------------------------------------------- |
-| `0`      | Normalisatie geschreven.                     |
+| Exitcode | Betekenis                                          |
+| -------- | -------------------------------------------------- |
+| `0`      | Normalisatie geschreven.                           |
 | `1`      | Pad ontbreekt, validatiefout, of normalisatiefout. |
 
 ### Voorbeelden
 
 ```cmd
-vsa mvsa normalize examples\mvsa\alleluia-toon-8.canonieke.mvsa --pitch abc -o generated\alleluia.abc.mvsa
+vsa mvsa normalize examples\mvsa\alleluia-toon-8.canonieke.mvsa -o generated\alleluia.normalized.mvsa
+vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
 vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 ```
 

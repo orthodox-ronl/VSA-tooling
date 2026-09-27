@@ -97,6 +97,7 @@ nav:
       - .mscz: formats/mscz.md
       - .midi / .mid: formats/midi.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
+    - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
     - Commando's:
       - CLI-overzicht: reference/cli/index.md
       - mvsa: reference/cli/mvsa.md
@@ -108,6 +109,7 @@ nav:
   - Handleidingen:
     - Overzicht: manuals/index.md
     - Consumer-site — waar hoort wat: manuals/consumer-site.md
+    - mvsa schrijven 101: guides/mvsa-schrijven-101.md
     - Gebruikershandleiding: guides/user-guide.md
     - CLI-taken: guides/cli-taken.md
     - Validatie: guides/validation.md
@@ -153,6 +155,8 @@ nav:
     - Doel en scope: specification-mvsa/overview.md
     - Syntax: specification-mvsa/syntax.md
     - Semantiek: specification-mvsa/semantics.md
+    - Keywords (@…): specification-mvsa/keywords.md
+    - Speelplan: specification-mvsa/speelplan.md
     - Validatie: specification-mvsa/validation.md
     - Voorbeelden: specification-mvsa/examples.md
     - Open punten: specification-mvsa/open-points.md

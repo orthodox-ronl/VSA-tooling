@@ -11,19 +11,21 @@ Taakgerichte documentatie voor werken met de [VSA-tooling](@bron). Dit is het
 
 ## Leespad
 
-| Stap | Pagina                                           | Wanneer                                                          |
-| ---- | ------------------------------------------------ | ---------------------------------------------------------------- |
-| 1    | [Starten](../getting-started/README.md)          | Omgeving en eerste `vsa`-commando’s                              |
-| 2    | [Gebruikershandleiding](../guides/user-guide.md) | Tour: welke taak → welke pagina                                  |
-| 3    | [CLI-taken](../guides/cli-taken.md)              | Commando kiezen zonder flags te lezen                            |
-| 4    | [Validatie](../guides/validation.md)             | [Diagnostische meldingen](@) en [severity](@) / [ernstniveau](@) |
-| 5    | [SVG exporteren](../guides/svg-export.md)        | [VSA-notatie](@bron) als afbeelding / Hugo                       |
-| 6    | [Integratie](../integratie/index.md)             | Gebruik in andere repo’s / CI                                    |
+| Stap | Pagina                                                | Wanneer                                                          |
+| ---- | ----------------------------------------------------- | ---------------------------------------------------------------- |
+| 1    | [Starten](../getting-started/README.md)               | Omgeving en eerste `vsa`-commando’s                              |
+| 2    | [mvsa schrijven 101](../guides/mvsa-schrijven-101.md) | `.mvsa` typen: L, stemmen, `@`-woorden, octaven                  |
+| 3    | [Gebruikershandleiding](../guides/user-guide.md)      | Tour: welke taak → welke pagina                                  |
+| 4    | [CLI-taken](../guides/cli-taken.md)                   | Commando kiezen zonder flags te lezen                            |
+| 5    | [Validatie](../guides/validation.md)                  | [Diagnostische meldingen](@) en [severity](@) / [ernstniveau](@) |
+| 6    | [SVG exporteren](../guides/svg-export.md)             | [VSA-notatie](@bron) als afbeelding / Hugo                       |
+| 7    | [Integratie](../integratie/index.md)                  | Gebruik in andere repo’s / CI                                    |
 
 ## Overige handleidingen
 
 | Pagina                                                              | Wat je er vindt                                      |
 | ------------------------------------------------------------------- | ---------------------------------------------------- |
+| [mvsa schrijven 101](../guides/mvsa-schrijven-101.md)               | Tutorial: L/stemmen, notatie, octaven, taken.        |
 | [MusicXML-export](../guides/musicxml-export.md)                     | Export naar MusicXML / Coria.                        |
 | [Rendering en fonts](../guides/rendering-fonts.md)                  | Fonts en SVG-metrics.                                |
 | [Parochie-lokaal VSA](../guides/parochie-lokaal-vsa.md)             | Catalogus-includes (tool-kant).                      |

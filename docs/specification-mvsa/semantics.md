@@ -29,9 +29,10 @@ S: … a4&b4&c5 …
 T: … d4&-&- …
 ```
 
-`d4&-&-` betekent semantisch hetzelfde als `d4&d4&d4`. Bij export naar MusicXML
-of MSCZ mag tooling dat samentrekken tot **één aangehouden noot** waarvan de
-duur de som is van de slot-duren.
+`d4&-&-` betekent semantisch hetzelfde als `d4&d4&d4`. Bij export naar **MSCZ**
+(partituur) trekt tooling opeenvolgende melisma-noten op dezelfde hoogte samen
+tot **één noot** waarvan de duur de som is van de slot-duren. Playback-``.mxl``
+houdt de slots apart (Coria).
 
 ## Reciteertoon
 
@@ -50,7 +51,10 @@ duur — daarom een apart L-stuk).
 
 ## Directives: `@do`, `@mode`, `@oct`
 
-Deze regels mogen:
+Praktische beschrijving van alle gedefinieerde `@`-keywords (inclusief
+`@title`, `@tekst`, `@sectie`, `@start`): [Keywords](keywords.md).
+
+Deze sticky toon-directives mogen:
 
 - bovenaan het bestand;
 - aan het begin van een sectie (vóór of na `@sectie`);
@@ -71,20 +75,36 @@ Ontbrekende stem in `@oct` → `0` voor die stem.
 
 ### Schrijfoctaaf
 
-`@oct B=-1` verschuift het do-octaaf van de bas: een laddergraad zonder suffix
-klinkt één octaaf lager dan bij `@oct B=0`. Een suffix `-` / `+` / `-2` telt
-**extra** t.o.v. dat schrijfoctaaf.
+`@oct B=-1` verschuift het **schrijf-do** van de bas: laddergraden zonder
+suffix, beginankers (`B-:` / `T\5:`), EHM-eindankers (`||-`, `||\3`) en
+**toonnamen a–g zonder wetenschappelijk cijfer** tellen t.o.v. dat schrijf-do
+(`@do` + `@oct` voor die stem). Een suffix `-` / `+` / `-2` op een laddergraad
+of toonnaam telt **extra** t.o.v. het schrijfoctaaf.
 
-Wetenschappelijke cijfers op toonnamen (`g3`, `bb4`) zijn absoluut (wrap bij C)
-en **negeren** `@oct`.
+**Do-octaaf:** a–g zonder cijfer liggen in het halfopen interval
+`[schrijf-do, schrijf-do + 12)`. Bij `@do F4` is `c` = C5 (= so), niet C4.
+
+Wetenschappelijke cijfers op toonnamen (`g3`, `bb4`, `c4`) zijn absoluut
+(wrap bij C) en **negeren** `@oct`.
 
 ## Absolute en relatieve hoogte
 
 Zie ook het werkplan
-[`mvsa-v0-syntax.md` §2](../plans/mvsa-v0-syntax.md).
+[`mvsa-v0-syntax.md` §2](../plans/mvsa-v0-syntax.md) en
+[Syntax — regelidentifier](syntax.md#regelidentifier).
 
-- **EHM** op de stemregel: relatief t.o.v. de lopende toon van die stem.
-- **Laddergraad / toonnaam:** zet de lopende toon absoluut t.o.v. `@do`.
+De **regelidentifier** zet de default/start van een stemregel:
+
+| Regelidentifier | Stijl-default                         | Beginanker                                                      |
+| --------------- | ------------------------------------- | --------------------------------------------------------------- |
+| `S:` (geen EHM) | Absoluut (do-re-mi of a–g)            | Geen; eerste absolute token zet de lopende toon                 |
+| `S-:` / `T\6:`  | Relatief (vsa-achtig)                 | De EHM in de identifier (zelfde rol als `@start` voor die stem) |
+
+Daarnaast op de regel zelf:
+
+- **EHM** in een hoogte-stuk: relatief t.o.v. de lopende toon van die stem.
+- **Laddergraad / toonnaam:** zet de lopende toon absoluut t.o.v. het
+  schrijf-do (`@do` + `@oct`; anker, ook op een relatieve regel).
 - Mix per stem of per hoogte-stuk is toegestaan.
 - Op laddergraden: `+` / `-` achter de naam = **octaaf**, geen kruis. Kruis/mol:
   `#` / `b` (prefix of suffix; ook gecombineerd met octaaf als `so-#` / `fa#-`)
@@ -93,6 +113,33 @@ Zie ook het werkplan
 
 Octaafsuffix `so-` = `so-1`; kale `-`/`+` betekent −1 / +1. Andere octaven
 vereisen een cijfer (`so-2`).
+
+`@start S=-` en `S-:` betekenen voor stem `S` hetzelfde beginanker; de
+identifier-vorm is de voorkeur als de EHM bij die stemregel hoort.
+
+## Ankers: zetten vs. checken
+
+| Plaats                          | Rol                                                             | Voorbeeld     |
+| ------------------------------- | --------------------------------------------------------------- | ------------- |
+| EHM in de **regelidentifier**   | **Zet** de lopende toon (beginanker), zoals `@start`            | `S-:`, `T\6:` |
+| Token **aan de maatstreep**     | **Checkt** alleen de lopende toon na die maat; wijzigt die niet | `\|mi`, `\|/` |
+| Laddergraad als **hoogte-stuk** | Zet de lopende toon (klinkt / telt als lengte-positie)          | `… mi \|`     |
+
+### Eindanker (maatstreep)
+
+Vorm en disambiguatie:
+[Syntax — eindanker aan de maatstreep](syntax.md#eindanker-aan-de-maatstreep).
+
+- **Kale streep** (`|`, `||`, …): geen marker, geen check. (Geen equivalent van
+  VSA-`[:]`: die lege vorm bestaat in mvsa niet.)
+- **EHM** na de streep (`|/`, `|-`, `|\6`, …): dezelfde EHM-inhoud als in VSA
+  (zonder `[`…`:]`). De verwachte ladderpositie is die van de EHM t.o.v. het
+  **schrijf-do** van die stem (`@do` + `@oct`); die wordt vergeleken met de
+  berekende lopende toon van de stem na de maat.
+- **Absoluut** (`|mi`, `||fa`, `|g4`, …): verwachte toon absoluut t.o.v. het
+  schrijf-do / wetenschappelijk octaaf.
+
+Bij mismatch: error. Bij match: de lopende toon blijft ongewijzigd (geen reset).
 
 ## Pitfalls rond `~`
 
@@ -121,7 +168,7 @@ woordstreepjes veranderen.
 | ---------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
 | Woordstreepjes         | `-` tussen lettergrepen van één woord; geen `-` tussen woorden                                   | Mag spaties rond streepjes normaliseren                         |
 | Maat-/sectiestrepen    | Op alle LSATB-regels op dezelfde posities                                                        | Mag strepen van één regel naar de andere kopiëren als eenduidig |
-| **Kolomuitlijning**    | Zie [Syntax — canonieke kolomuitlijning](syntax.md#canonieke-kolomuitlijning-lsatb)               | Mag losser zijn; gegenereerde output en voorbeelden zijn strikt |
+| **Kolomuitlijning**    | Zie [Syntax — canonieke kolomuitlijning](syntax.md#canonieke-kolomuitlijning-lsatb)              | Mag losser zijn; gegenereerde output en voorbeelden zijn strikt |
 | Directives             | Sticky tot overrule                                                                              | —                                                               |
 
 **Semantiek** (sync-telling) hangt niet van kolommen af: ongelijke spaties mogen

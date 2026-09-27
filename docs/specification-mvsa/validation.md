@@ -26,14 +26,23 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
 
 ## Structuur
 
-1. Elke LSATB-inhoudsregel begint met een geldige marker `[LSATB]\d*:`.
-2. Binnen een sectie hebben alle LSATB-systemen dezelfde markers in dezelfde
-   volgorde.
+1. Elke LSATB-inhoudsregel begint met een geldige
+   [regelidentifier](syntax.md#regelidentifier): `stemidentifier` + optionele
+   EHM + `:`. De stemidentifier is `[A-Za-z0-9_-]+` en eindigt niet op `_` of
+   `-`. Begint die met `L`/`l`, dan is het een lyrics-regel; anders een
+   stemregel. Een EHM op een lyrics-regelidentifier (`L/:`) is een **error**.
+2. Binnen een sectie hebben alle LSATB-systemen dezelfde regelidentifiers
+   (inclusief eventuele EHM) in dezelfde volgorde.
 3. Elk LSATB-systeem eindigt op elke LSATB-regel met `|` of `||` (of
    toegestane specialisatie).
-4. Een sectie eindigt alleen als alle LSATB-regels van dat systeem `||` of
-   `:||` tonen op de eindpositie.
+4. Een sectie eindigt door: (a) `||` of `:||` op alle LSATB-regels van een
+   systeem (canoniek); of (b) een nieuwe `@sectie` die de vorige impliciet
+   afsluit; of (c) einde van het bestand (EOF); later ook het sluiten van een
+   `::: mvsa-notatie`-fence. Ontbrekende `||` vóór (b)/(c) mag een **warning**
+   zijn (niet-canoniek), geen error.
 5. `@sectie` *id* voldoet aan `[a-z][a-z0-9_-]*`.
+5a. `@blok` / `@speelplan`: zie [Speelplan](speelplan.md) (ids, geen herhaalstrepen
+    in speelplan-blokken, expansie vs bladvorm).
 
 ## Sync
 
@@ -41,18 +50,34 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    lengte-posities (recite = 1; melisma-slots tellen mee).
 7. Parallelle lyrics (`L` en `L1` in hetzelfde systeem) hebben per maat dezelfde
    positietelling.
+8. Elk hoogte-slot op een stemregel is een geldig hoogte-token (EHM, absolute
+   toon/laddergraad, of aanhouden `-`/`~`). L-duur-ELM’s zoals `_` op de stem
+   zijn een **error** (`MVSA-HOOGTE`), met marker, maat, positie en slot.
+8a. Optioneel eindanker direct na een maatstreep (geen spatie): zie
+   [Syntax — eindanker](syntax.md#eindanker-aan-de-maatstreep). Ongeldige anker-
+   tekst of mismatch met de berekende lopende toon: **error** (`MVSA-BAR-ANKER`).
+   Een kale streep is geen anker. Lyrics-regels met een anker-suffix: error.
 
-## Directives
+## Directives / keywords
 
-8. Onbekende `@`-directives: error (v0 toegestaan: `@do`, `@mode`, `@oct`,
-   `@sectie`, `@start`).
-9. `@do` / `@mode` / `@oct` met ongeldige waarde: error.
+9. Onbekende `@`-keywords (geldige vorm, niet in
+   [Keywords](keywords.md)): **warning**. Ongeldige keyword-vorm (bijv. `@1foo`):
+   ook **warning**. Gedefinieerd in v0: sticky (`@do`, `@mode`, `@oct`,
+   `@start`), layout (`@tekst`, `@mscz-newline`, `@sectie`, `@blok`,
+   `@speelplan`, `@---`), actieve metadata (`@title`, `@ondertitel`,
+   `@composer`, `@tekstdichter`, `@arrangeur`, `@vertaler`, `@bron`,
+   `@copyright`), en gereserveerde metadata (`@toon`, `@taal`, `@genre`,
+   `@opmerkingen`).
+10. Sticky / `@tekst` / metadata met ongeldige waarde: **error**
+    (`MVSA-META` voor string-metadata). `@mscz-newline` met argumenten:
+    **error**. `@tekst` of `@mscz-newline` zonder volgend LSATB-systeem:
+    **warning**.
 
 ## Canonieke vorm (warning)
 
-10. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden
+11. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden
     (nog niet volledig geautomatiseerd).
-11. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
+12. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
     had kunnen syncen — of, na kuiser, alsnog inconsistent: error.
 
 ## Buiten v0-validatie / export-beperkingen

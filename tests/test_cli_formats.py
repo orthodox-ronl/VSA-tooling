@@ -38,4 +38,4 @@ def test_mscz_help_lists_matrix_actions(capsys):
 
 
 def test_mvsa_validate_alias_works():
-    assert mvsa_main(["validate", "examples/mvsa/alleluia-toon-8.canonieke.mvsa"]) == 0
+    assert mvsa_main(["validate", "examples/mvsa/alleluia-toon-8.mvsa"]) == 0

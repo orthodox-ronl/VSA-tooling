@@ -23,6 +23,7 @@ from .mvsa_align import align_mvsa_text
 from .mvsa_normalize import (
     OCTAVE_STYLES,
     PITCH_FORMS,
+    canonicalize_pitch_form,
     format_abc_scientific,
     format_doremi,
     format_ehm,
@@ -99,9 +100,11 @@ def import_score_to_mvsa(
     musescore: Path | None = None,
 ) -> str:
     """Read ``.mxl`` / ``.musicxml`` / ``.mscz`` and return mvsa text."""
+    pitch = canonicalize_pitch_form(pitch)
     if pitch not in PITCH_FORMS:
         raise MvsaImportError(
-            f"onbekende --pitch {pitch!r}; kies uit {', '.join(PITCH_FORMS)}"
+            f"onbekende --pitch {pitch!r}; kies uit "
+            f"doremi, a-g (of abc), vsa"
         )
     if octave_style not in OCTAVE_STYLES:
         raise MvsaImportError(
