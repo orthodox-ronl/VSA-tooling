@@ -321,7 +321,7 @@ L: A_-men_ |
   dubbele maatstreep vóór de cue);
 - sectiegrenzen in de bron — dat is `||` / `@sectie`;
 - scheiding van vscode-blokken zonder MSCZ-layout — dan volstaat een **lege
-  regel** (of optioneel `@---`).
+  regel** (optioneel `@---` met commentaar).
 
 **Gedrag.** Geldt alleen voor het eerstvolgende LSATB-systeem (niet sticky).
 Op het eerste systeem van de partituur is een explicit new-system overbodig
@@ -407,10 +407,10 @@ zodra tooling die gaat tonen.
 
 ## `@---`
 
-**Wat het is.** Een **no-op** die een LSATB-systeem afbreekt, net als een lege
-regel. Handig als je bij de scheiding **commentaar op dezelfde regel** wilt
-zetten (`@--- tweede couplet`). Voor een gewone scheiding tussen
-vscode-systemen volstaat een **lege regel**; `@---` is dan niet nodig. Voor een
+**Wat het is.** Optionele **no-op** die een LSATB-systeem afbreekt — hetzelfde
+effect als een **lege regel**. Voor een gewone scheiding tussen vscode-systemen
+volstaat die lege regel; `@---` is vooral handig als je bij de scheiding
+**commentaar op dezelfde regel** wilt (`@--- tweede couplet`). Voor een
 **nieuwe MuseScore-regel** op het blad: gebruik `@mscz-newline`, niet alleen
 `@---` of een lege regel.
 
@@ -418,7 +418,17 @@ vscode-systemen volstaat een **lege regel**; `@---` is dan niet nodig. Voor een
 (wordt genegeerd, geen error/warning), bv. `@--- tweede systeem` of
 `@ --- zie Liturgikon p.12`.
 
-**Wel gebruiken** als je commentaar wilt meenemen bij de scheiding:
+**Gewone scheiding** (voorkeur: lege regel):
+
+```text
+L: Heer_ … |
+S: a     … |
+
+L: Heer_ … ||
+S: a     … ||
+```
+
+**Wel `@---` gebruiken** als je commentaar wilt meenemen bij de scheiding:
 
 ```text
 L: Heer_ … |
@@ -432,18 +442,9 @@ S: a     … ||
 …
 ```
 
-Zonder commentaar is dit equivalent:
-
-```text
-L: Heer_ … |
-S: a     … |
-
-L: Heer_ … ||
-S: a     … ||
-```
-
 **Niet gebruiken** als zichtbare inhoud op het blad — daarvoor is `@tekst`.
 Ook niet als vervanging van `@mscz-newline` (dat forceert de MSCZ-regelsprong).
+Zonder commentaar is `@---` overbodig naast een lege regel.
 
 ---
 

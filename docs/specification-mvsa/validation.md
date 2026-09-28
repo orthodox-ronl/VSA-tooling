@@ -37,9 +37,9 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    toegestane specialisatie).
 3a. Een **lege regel** binnen of direct na LSATB-inhoud **eindigt** het lopende
     LSATB-systeem. Lege regels horen dus **niet** tussen `L:` en `S:` van
-    hetzelfde systeem; gebruik ze om twee systemen te scheiden (of zet
-    `@---` / een andere directive). `#`-commentaar mag wél tussen markers van
-    hetzelfde systeem.
+    hetzelfde systeem; wél tussen twee systemen (primaire scheiding). Optioneel
+    mag `@---` (met commentaar) of een andere directive hetzelfde doen.
+    `#`-commentaar mag wél tussen markers van hetzelfde systeem.
 4. Een sectie eindigt door: (a) `||` of `:||` op alle LSATB-regels van een
    systeem (canoniek); of (b) een nieuwe `@sectie` die de vorige impliciet
    afsluit; of (c) einde van het bestand (EOF); later ook het sluiten van een

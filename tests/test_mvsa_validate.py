@@ -147,6 +147,7 @@ S: do ||
 
 
 def test_validate_noop_separator_splits_systems():
+    """``@---`` blijft een geldige (optionele) systemscheider naast lege regels."""
     text = """\
 @do F4
 @mode major

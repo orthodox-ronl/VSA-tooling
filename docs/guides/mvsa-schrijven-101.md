@@ -50,8 +50,8 @@ B: do-  re-  mi- ||
 Elk **LSATB-systeem** is één blok: `L:` plus de stemregels die bij die frase
 horen, afgesloten met dezelfde maatstrepen (`|` of `||`) op alle regels.
 Zet **geen lege regel** tussen `L:` en de stemmen — een lege regel **eindigt**
-het systeem. Tussen twee systemen mag wél een lege regel (of `@tekst` /
-`@mscz-newline` / `@---`).
+het systeem. Tussen twee systemen: een **lege regel** (voorkeur), of
+een `@-` directive, zoals `@---` met commentaar.
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -76,7 +76,8 @@ horen **vóór** of **tussen** LSATB-systemen — niet tussen `L:` en `S:`.
 | `@titel` e.d. | Metadata voor MSCZ-kop (titel, componist, …)                             | zie keywords-lijst   |
 
 Sticky: `@do` / `@mode` / `@oct` gelden vanaf het **eerstvolgende** LSATB-systeem
-tot je ze opnieuw zet.
+tot je ze opnieuw zet. Systemen scheiden doe je met een **lege regel**; `@---`
+is alleen nodig als je commentaar op die scheidingsregel wilt.
 
 ??? tip "Voorbeeld: typische SATB-kop"
     ```text

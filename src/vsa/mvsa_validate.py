@@ -282,7 +282,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
             name = name.strip()
             rest = rest.strip()
             if is_noop_separator_directive(name, rest):
-                pass  # no-op: breekt wel het LSATB-systeem
+                pass  # optionele no-op; lege regel scheidt systemen al
             elif not name or not DIRECTIVE_NAME_RE.fullmatch(name):
                 diagnostics.append(
                     MvsaDiagnostic(

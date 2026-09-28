@@ -74,8 +74,9 @@ mag alleen `#`-commentaar (geen lege regels).
 
 Een **lege regel** (alleen spaties/tabs, of helemaal leeg) **eindigt** het
 lopende LSATB-systeem. Daarna mag een nieuw systeem beginnen, of iets anders
-(`@`-directive, `#`-commentaar, HTML-commentaar, …). Zo scheid je twee
-vscode-systemen zonder `@---`.
+(`@`-directive, `#`-commentaar, HTML-commentaar, …). De **canonieke**
+scheiding tussen vscode-systemen is die lege regel; `@---` is optioneel
+(vooral met commentaar erna).
 
 Tussen twee systemen van **dezelfde sectie** mogen verder:
 
@@ -84,9 +85,7 @@ Tussen twee systemen van **dezelfde sectie** mogen verder:
 - directives (`@do`, `@mode`, `@oct`, `@title`, `@tekst`, `@---`, …).
 
 Canoniek staan de LSATB-regels van één systeem **direct onder elkaar** (geen
-lege regels ertussen; zo schrijft tooling bij genereren / normalize). Een
-expliciete `@---` blijft toegestaan als no-op-scheider (vooral met commentaar
-erna), maar is niet nodig als er al een lege regel staat.
+lege regels ertussen; zo schrijft tooling bij genereren / normalize).
 
 Een systeem:
 

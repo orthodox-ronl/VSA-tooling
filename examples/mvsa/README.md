@@ -31,4 +31,5 @@ Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 | `trisagion-8a-slav-hemelum.mvsa`     | Canonieke secties + **experimenteel** blokhergebruik (`@voices`, `L'` — nog niet normatief).        |
 
 Canonieke vorm (draft): woordstreepjes tussen lettergrepen van hetzelfde woord;
-maatstrepen op alle LSATB-regels; sectie-einde `||` op alle LSATB-regels.
+maatstrepen op alle LSATB-regels; sectie-einde `||` op alle LSATB-regels;
+**lege regel** tussen vscode-systemen (geen `@---` nodig).

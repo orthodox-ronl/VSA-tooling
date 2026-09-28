@@ -582,29 +582,29 @@ Normatieve formulering (canonieke vorm, secties, sticky directives):
 [`docs/specification-mvsa/`](../specification-mvsa/README.md).
 Samenvatting hieronder; bij conflict wint de draft-spec.
 
-| Onderwerp                | Keuze                                                                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Melisma in L             | Vorm **A** (één L-stuk: `Al-&-&-&.&.&-` of ELM-`~`: `Ster~&~&~`)                                                                         |
-| Woordstreepjes           | Canoniek: `-` tussen lettergrepen van hetzelfde woord; geen `-` tussen woorden; kuiser mag tolerant input herstellen                     |
-| Brokgrens stem           | Alleen spaties; kale `-` = EHM “zelfde toon”; `so-` = octaafsuffix                                                                       |
-| Accolades in L           | **Nee** in mvsa v0                                                                                                                       |
-| Maatstreep               | `\|`; herhaling `\|:` / `:\|`; sectie-einde `\|\|` / `:\|\|` op **alle** LSATB-regels                                                    |
-| Sectie                   | Optioneel `@sectie` *id*; eindigt alleen bij `\|\|` / `:\|\|`; meerdere LSATB-systemen per sectie toegestaan                             |
-| LSATB-systeem            | Aaneengesloten `[LSATB]\d*:`-regels; eindigt op `\|` of `\|\|`; vaste marker-volgorde binnen de sectie                                   |
-| Directives               | Sticky `@do` / `@mode` / `@oct` (defaults `F4` / `major` / `0`); geldig vanaf eerstvolgend LSATB-systeem                                 |
-| Recite                   | prefix `~` op L; ELM-`~` blijft duur 1×; beide rollen mogen niet verward worden                                                          |
-| Hoogte schrijven         | **EHM en/of laddergraad** (do-re-mi én toonnamen a–g); mix toegestaan                                                                    |
-| Laddergraad-namen        | `so` = `sol`; `si` = `ti`; toonnamen `f`/`Bb`/`fis`/`bes` bij gegeven `@do`                                                              |
-| Octaafsuffix             | `so-` = `so-1`; altijd ±12 halve tonen. Ongemarkeerd = do-octaaf. C3/D3/E3 bij do=F: `c-2`/`so-2`, niet `c-`.                            |
-| Octaafcijfer (a–g)       | optioneel `g3` `c3` `bb3`: wetenschappelijk, wrap bij C, negeert `@oct`; niet op do-re-mi                                                |
-| Kruis/mol op laddergraad | achter de naam: `#` / `b` (`fa#`, `sib`); `+`/`-` = octaaf, geen kruis                                                                   |
-| Schrijfoctaaf            | `@oct` (canonieke vorm); suffix telt t.o.v. die stem; weglaten = 0 voor alle stemmen                                                     |
-| `@start`                 | Alleen nodig (of handig) in **relatieve** stijl; niet verplicht bij pure laddergraden                                                    |
-| Ankers                   | Begin + tussendoor + eind horen bij relatieve stijl; bij laddergraden volstaat opschrijven                                               |
-| Label-start              | `S-:`, `T\6:` equivalent aan `@start`; oudere `T[-1]:`-schrijfoctaaf → voorkeur `@oct`                                                   |
-| Tekstbron                | Één of meer lyrics-regels (`L` / `L1` / …); geen `${n}`-placeholders in stemregels                                                       |
-| Stemmen t.o.v. elkaar    | In v0 **gelijkwaardig** uitgeschreven; overlays t.o.v. S = open punt (§10)                                                               |
-| Blokhergebruik           | **Niet** in v0-norm; experiment blijft in `examples/mvsa/`                                                                               |
+| Onderwerp                | Keuze                                                                                                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Melisma in L             | Vorm **A** (één L-stuk: `Al-&-&-&.&.&-` of ELM-`~`: `Ster~&~&~`)                                                                                                                         |
+| Woordstreepjes           | Canoniek: `-` tussen lettergrepen van hetzelfde woord; geen `-` tussen woorden; kuiser mag tolerant input herstellen                                                                     |
+| Brokgrens stem           | Alleen spaties; kale `-` = EHM “zelfde toon”; `so-` = octaafsuffix                                                                                                                       |
+| Accolades in L           | **Nee** in mvsa v0                                                                                                                                                                       |
+| Maatstreep               | `\|`; herhaling `\|:` / `:\|`; sectie-einde `\|\|` / `:\|\|` op **alle** LSATB-regels                                                                                                    |
+| Sectie                   | Optioneel `@sectie` *id*; eindigt alleen bij `\|\|` / `:\|\|`; meerdere LSATB-systemen per sectie toegestaan                                                                             |
+| LSATB-systeem            | Aaneengesloten identifier-regels; **lege regel eindigt** het systeem; `#` ertussen mag; eindigt op `\|` of `\|\|`; vaste marker-volgorde binnen de sectie; `@---` optioneel (commentaar) |
+| Directives               | Sticky `@do` / `@mode` / `@oct` (defaults `F4` / `major` / `0`); geldig vanaf eerstvolgend LSATB-systeem                                                                                 |
+| Recite                   | prefix `~` op L; ELM-`~` blijft duur 1×; beide rollen mogen niet verward worden                                                                                                          |
+| Hoogte schrijven         | **EHM en/of laddergraad** (do-re-mi én toonnamen a–g); mix toegestaan                                                                                                                    |
+| Laddergraad-namen        | `so` = `sol`; `si` = `ti`; toonnamen `f`/`Bb`/`fis`/`bes` bij gegeven `@do`                                                                                                              |
+| Octaafsuffix             | `so-` = `so-1`; altijd ±12 halve tonen. Ongemarkeerd = do-octaaf. C3/D3/E3 bij do=F: `c-2`/`so-2`, niet `c-`.                                                                            |
+| Octaafcijfer (a–g)       | optioneel `g3` `c3` `bb3`: wetenschappelijk, wrap bij C, negeert `@oct`; niet op do-re-mi                                                                                                |
+| Kruis/mol op laddergraad | achter de naam: `#` / `b` (`fa#`, `sib`); `+`/`-` = octaaf, geen kruis                                                                                                                   |
+| Schrijfoctaaf            | `@oct` (canonieke vorm); suffix telt t.o.v. die stem; weglaten = 0 voor alle stemmen                                                                                                     |
+| `@start`                 | Alleen nodig (of handig) in **relatieve** stijl; niet verplicht bij pure laddergraden                                                                                                    |
+| Ankers                   | Begin + tussendoor + eind horen bij relatieve stijl; bij laddergraden volstaat opschrijven                                                                                               |
+| Label-start              | `S-:`, `T\6:` equivalent aan `@start`; oudere `T[-1]:`-schrijfoctaaf → voorkeur `@oct`                                                                                                   |
+| Tekstbron                | Één of meer lyrics-regels (`L` / `L1` / …); geen `${n}`-placeholders in stemregels                                                                                                       |
+| Stemmen t.o.v. elkaar    | In v0 **gelijkwaardig** uitgeschreven; overlays t.o.v. S = open punt (§10)                                                                                                               |
+| Blokhergebruik           | **Niet** in v0-norm; experiment blijft in `examples/mvsa/`                                                                                                                               |
 
 ### Bewust verlaten uit de eerdere polyfonie-schets
 
