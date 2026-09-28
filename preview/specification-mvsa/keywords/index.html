@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 10:00 CEST.
+  , gebouwd 2026-09-28 12:23 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4877,7 +4877,7 @@ horen:</p>
 </tr>
 <tr>
 <td><strong><code>@---</code></strong></td>
-<td>No-op regelscheider tussen LSATB-systemen (geen warning)</td>
+<td>No-op regelscheider tussen LSATB-systemen; optioneel commentaar erna (geen warning)</td>
 </tr>
 </tbody>
 </table>
@@ -5228,13 +5228,15 @@ scheiding tussen vscode-systemen in dezelfde sectie wanneer je geen <code>@tekst
 of andere directive nodig hebt. Lege regels alleen doen dat <strong>niet</strong>. Voor een
 <strong>nieuwe MuseScore-regel</strong> op het blad: gebruik <code>@mscz-newline</code>, niet alleen
 <code>@---</code>.</p>
-<p><strong>Vorm.</strong> <code>@---</code> of <code>@ ---</code> (geen argumenten).</p>
+<p><strong>Vorm.</strong> <code>@---</code> of <code>@ ---</code>. Optioneel <strong>commentaar</strong> erna op dezelfde regel
+(wordt genegeerd, geen error/warning), bv. <code>@--- tweede systeem</code> of
+<code>@ --- zie Liturgikon p.12</code>.</p>
 <p><strong>Wel gebruiken</strong> tussen twee LSATB-blokken van dezelfde sectie:</p>
 <div class="highlight"><pre><span></span><code>L: Heer_ … |
 S: a     … |
 …
 
-@---
+@--- volgende couplet
 
 L: Heer_ … ||
 S: a     … ||
@@ -5286,7 +5288,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-28
         
       </p>
       
