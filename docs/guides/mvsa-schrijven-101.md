@@ -49,6 +49,9 @@ B: do-  re-  mi- ||
 
 Elk **LSATB-systeem** is één blok: `L:` plus de stemregels die bij die frase
 horen, afgesloten met dezelfde maatstrepen (`|` of `||`) op alle regels.
+Zet **geen lege regel** tussen `L:` en de stemmen — een lege regel **eindigt**
+het systeem. Tussen twee systemen mag wél een lege regel (of `@tekst` /
+`@mscz-newline` / `@---`).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -349,6 +352,7 @@ CLI-detail: [mvsa-referentie](../reference/cli/mvsa.md). Formaten-hub:
 | Fout                                      | Wat er misgaat                         | Richting                                      |
 | ----------------------------------------- | -------------------------------------- | --------------------------------------------- |
 | `@do` tussen `L:` en `S:`                 | keyword midden in systeem              | `@`-regels vóór of tussen systemen            |
+| Lege regel tussen `L:` en `S:`            | systeem eindigt te vroeg               | geen lege regels binnen één LSATB-blok        |
 | Kale `c` verwachten als C4 bij `@do F4`   | do-octaaf → C5                         | schrijf `c4` of `c-` / `so-` voor C4          |
 | Verschillende maatstrepen op L vs S | sync-fout | zelfde ` | ` / ` |     | ` op alle regels |
 | Recite zonder `( … )`        | elke lettergreep aparte toon nodig | haakjes om de recite-groep |

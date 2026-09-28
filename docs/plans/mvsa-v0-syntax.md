@@ -79,8 +79,9 @@ Een **systeem** is één muzikale “regelgroep”:
 - één regel per **stem** (alleen toonhoogte),
 - optioneel metadata (`@do`, `@oct`, `@start`, …).
 
-Stemvolgorde is vrij; de L-regel mag tussen de stemmen staan. Een lege regel
-(of een expliciete systeemscheiding, nader te kiezen) scheidt systemen.
+Stemvolgorde is vrij; de L-regel mag tussen de stemmen staan. Een **lege regel**
+scheidt systemen (geen lege regels binnen één LSATB-blok). Optioneel blijft
+`@---` als no-op-scheider met commentaar.
 
 Elke inhoudsregel begint met een **regelidentifier**: stemidentifier, optioneel
 een EHM, dan een dubbele punt:

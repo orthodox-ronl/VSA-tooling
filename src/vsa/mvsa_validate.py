@@ -80,9 +80,10 @@ ALLOWED_MODES = frozenset({"major", "minor"})
 
 
 def is_noop_separator_directive(name: str, rest: str) -> bool:
-    """True for ``@---`` / ``@ ---`` (no-op LSATB-systemscheider).
+    """True for ``@---`` / ``@ ---`` (optionele no-op LSATB-systemscheider).
 
-    Trailing text na de streepjes is **commentaar** en wordt genegeerd, bv.
+    Een lege regel scheidt systemen al; ``@---`` is vooral nuttig met
+    trailing commentaar na de streepjes (genegeerd), bv.
     ``@--- volgende frase`` of ``@ --- zie blad 2``.
     """
     if name == "---":
@@ -377,11 +378,13 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
             i += 1
             continue
 
-        # Start or continue a system: consume LSATB lines (lege/# ertussen OK).
+        # Consume LSATB lines: #-commentaar mag ertussen; lege regel eindigt het systeem.
         system_lines: list[_RawLine] = []
         while i < n:
             s2 = lines[i].strip()
-            if not s2 or s2.startswith("#"):
+            if not s2:
+                break
+            if s2.startswith("#"):
                 i += 1
                 continue
             if s2.startswith("@"):

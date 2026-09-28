@@ -22,7 +22,7 @@ Het keyword zelf volgt: eerste teken een letter, daarna letters, `-` of `_`
 | **Gedefinieerd** (deze pagina) | Tooling kent de betekenis; foute argumenten → **error**                                        |
 | **Onbekend** (nog niet hier)   | Mag je gebruiken om te experimenteren; validate meldt een **warning**, geen error              |
 | **Ongeldige keyword-vorm**     | Bijv. `@1foo` of `@` alleen → **warning** (geen error); export gaat door                       |
-| **`@---`**                     | No-op regelscheider tussen LSATB-systemen; optioneel commentaar erna (geen warning)            |
+| **`@---`**                     | Optionele no-op-scheider tussen LSATB-systemen (lege regel volstaat); commentaar erna OK       |
 
 Keyword-regels mogen:
 
@@ -320,8 +320,8 @@ L: A_-men_ |
 - cues zonder regelsprong — alleen `@tekst` volstaat (export zet desnoods een
   dubbele maatstreep vóór de cue);
 - sectiegrenzen in de bron — dat is `||` / `@sectie`;
-- scheiding van vscode-blokken zonder MSCZ-layout — dan volstaat `@---` of
-  een andere directive.
+- scheiding van vscode-blokken zonder MSCZ-layout — dan volstaat een **lege
+  regel** (of optioneel `@---`).
 
 **Gedrag.** Geldt alleen voor het eerstvolgende LSATB-systeem (niet sticky).
 Op het eerste systeem van de partituur is een explicit new-system overbodig
@@ -407,17 +407,18 @@ zodra tooling die gaat tonen.
 
 ## `@---`
 
-**Wat het is.** Een **no-op** die wél een LSATB-systeem afbreekt. Handig als
-scheiding tussen vscode-systemen in dezelfde sectie wanneer je geen `@tekst`
-of andere directive nodig hebt. Lege regels alleen doen dat **niet**. Voor een
+**Wat het is.** Een **no-op** die een LSATB-systeem afbreekt, net als een lege
+regel. Handig als je bij de scheiding **commentaar op dezelfde regel** wilt
+zetten (`@--- tweede couplet`). Voor een gewone scheiding tussen
+vscode-systemen volstaat een **lege regel**; `@---` is dan niet nodig. Voor een
 **nieuwe MuseScore-regel** op het blad: gebruik `@mscz-newline`, niet alleen
-`@---`.
+`@---` of een lege regel.
 
 **Vorm.** `@---` of `@ ---`. Optioneel **commentaar** erna op dezelfde regel
 (wordt genegeerd, geen error/warning), bv. `@--- tweede systeem` of
 `@ --- zie Liturgikon p.12`.
 
-**Wel gebruiken** tussen twee LSATB-blokken van dezelfde sectie:
+**Wel gebruiken** als je commentaar wilt meenemen bij de scheiding:
 
 ```text
 L: Heer_ … |
@@ -429,6 +430,16 @@ S: a     … |
 L: Heer_ … ||
 S: a     … ||
 …
+```
+
+Zonder commentaar is dit equivalent:
+
+```text
+L: Heer_ … |
+S: a     … |
+
+L: Heer_ … ||
+S: a     … ||
 ```
 
 **Niet gebruiken** als zichtbare inhoud op het blad — daarvoor is `@tekst`.

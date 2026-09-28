@@ -40,23 +40,68 @@ B: do re ||
     assert validate_mvsa_text(text) == []
 
 
-def test_validate_blank_lines_between_lsatb_ok():
-    """Lege regels / # tussen LSATB-markers: toegestaan (niet canoniek)."""
+def test_validate_hash_comment_between_lsatb_ok():
+    """``#``-commentaar tussen LSATB-markers van hetzelfde systeem: toegestaan."""
     text = """\
 @do F4
 @mode major
 
 @sectie demo
 L: a_ b_ ||
-
 # stemmen
 S: do re ||
-
 A: do re ||
 T: do re ||
 B: do re ||
 """
     assert validate_mvsa_text(text) == []
+
+
+def test_validate_blank_line_separates_systems():
+    """Lege regel eindigt een LSATB-systeem; daarna mag een nieuw systeem."""
+    text = """\
+@do F4
+@mode major
+@sectie demo
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+L: b_ ||
+S: re ||
+A: re ||
+T: re ||
+B: re ||
+"""
+    diags = validate_mvsa_text(text)
+    errors = [d for d in diags if d.severity == "error"]
+    assert errors == [], errors
+    assert not any(d.code == "MVSA-MARKER-DUP" for d in diags)
+
+
+def test_validate_blank_line_inside_system_splits():
+    """Lege regel midden in L/S/A/T/B breekt het systeem (marker-volgorde)."""
+    text = """\
+@do F4
+@mode major
+@sectie demo
+L: a_ b_ |
+
+S: do re |
+A: do re |
+T: do re |
+B: do re |
+
+L: c_ ||
+S: mi ||
+A: mi ||
+T: mi ||
+B: mi ||
+"""
+    diags = validate_mvsa_text(text)
+    assert any(d.code == "MVSA-MARKERS" for d in diags), diags
 
 
 def test_validate_sync_mismatch():

@@ -322,8 +322,11 @@ def parse_mvsa(text: str) -> ParsedDocument:
         system_lines: list[tuple[int, str, str, str | None, bool, str]] = []
         while i < n:
             s2 = lines[i].strip()
-            # Lege regels en #-commentaar mogen tussen LSATB-markers (niet canoniek).
-            if not s2 or s2.startswith("#"):
+            # Lege regel = einde van dit LSATB-systeem (scheidt vscode-systemen).
+            if not s2:
+                break
+            # #-commentaar mag tussen markers van hetzelfde systeem.
+            if s2.startswith("#"):
                 i += 1
                 continue
             if s2.startswith("@"):

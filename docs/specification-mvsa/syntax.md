@@ -68,24 +68,25 @@ optionele spaties.
 
 ## 3. LSATB-systeem
 
-Een **LSATB-systeem** is een reeks inhoudsregels die elk met een regelidentifier
-beginnen. Tussen de identifier-regels van **hetzelfde** systeem mogen (niet
-canoniek, wel toegestaan):
+Een **LSATB-systeem** is een aaneengesloten reeks inhoudsregels die elk met een
+regelidentifier beginnen. Tussen de identifier-regels van **hetzelfde** systeem
+mag alleen `#`-commentaar (geen lege regels).
 
-- lege regels;
-- `#`-commentaar.
+Een **lege regel** (alleen spaties/tabs, of helemaal leeg) **eindigt** het
+lopende LSATB-systeem. Daarna mag een nieuw systeem beginnen, of iets anders
+(`@`-directive, `#`-commentaar, HTML-commentaar, …). Zo scheid je twee
+vscode-systemen zonder `@---`.
 
-Tussen twee systemen van **dezelfde sectie** mogen bovendien:
+Tussen twee systemen van **dezelfde sectie** mogen verder:
 
-- HTML-commentaar;
+- lege regels (één of meer);
+- `#`- of HTML-commentaar;
 - directives (`@do`, `@mode`, `@oct`, `@title`, `@tekst`, `@---`, …).
 
-Een kale lege regel **scheidt geen** systemen (die mag midden in één systeem).
-Zet tussen vscode-systemen een `@`-regel, bv. `@---` (optioneel commentaar
-erna).
-
-Canoniek staan de LSATB-regels **direct onder elkaar** zonder lege regels
-ertussen (zo schrijft tooling bij genereren / normalize).
+Canoniek staan de LSATB-regels van één systeem **direct onder elkaar** (geen
+lege regels ertussen; zo schrijft tooling bij genereren / normalize). Een
+expliciete `@---` blijft toegestaan als no-op-scheider (vooral met commentaar
+erna), maar is niet nodig als er al een lege regel staat.
 
 Een systeem:
 
