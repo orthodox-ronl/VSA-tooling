@@ -49,7 +49,8 @@ bij rendering/export, niet bij mvsa-brontekst.
 
 - Vervanging van eenstemmige VSA 1.0;
 - blokhergebruik en template-projectie als norm;
-- CLI-werkstromen en kuiser-implementatie (wel: gedragseisen voor canonieke vorm);
+- CLI-werkstromen en kuiser-**tool** (gedragseisen voor canonieke vorm staan in
+  syntax/semantiek; implementatie: [open-points](open-points.md));
 - volledige gelijkschakeling van chromatische `+` in eenstemmige VSA-EHM.
 
 ## Defaults

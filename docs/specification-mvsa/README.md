@@ -33,7 +33,7 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 | [Speelplan](speelplan.md)        | `@blok` / `@speelplan`: bladvorm vs klinkende vorm  |
 | [Validatie](validation.md)       | Geldigheidsregels (draft)                           |
 | [Voorbeelden](examples.md)       | Pointers naar `examples/mvsa/`                      |
-| [Open punten](open-points.md)    | Bewust later                                        |
+| [Open punten](open-points.md)    | Centrale backlog (nu + later)                       |
 | [Versionering](versioning.md)    | Draft-versiebeleid                                  |
 
 ## Bewust buiten scope (nu)
