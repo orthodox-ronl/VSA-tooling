@@ -1,6 +1,9 @@
 # Alleluia toon 2
 
 @title "Alleluia - Toon 2"
+@composer     "Traditioneel"
+@tekstdichter "bron: koormap Hemelum"
+@copyright "CC BY-SA 4.0"
 
 @do F4
 @mode major

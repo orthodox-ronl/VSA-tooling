@@ -1,6 +1,9 @@
 # Alleluia toon 8
 
 @title "Alleluia - Toon 8"
+@composer     "Traditioneel"
+@tekstdichter "bron: koormap Hemelum"
+@copyright "CC BY-SA 4.0"
 
 @do F4
 @mode major

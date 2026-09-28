@@ -80,11 +80,16 @@ ALLOWED_MODES = frozenset({"major", "minor"})
 
 
 def is_noop_separator_directive(name: str, rest: str) -> bool:
-    """True for ``@---`` or ``@ ---`` (no-op LSATB-systemscheider)."""
-    if name == "---" and not rest:
+    """True for ``@---`` / ``@ ---`` (no-op LSATB-systemscheider).
+
+    Trailing text na de streepjes is **commentaar** en wordt genegeerd, bv.
+    ``@--- volgende frase`` of ``@ --- zie blad 2``.
+    """
+    if name == "---":
         return True
-    if not name and rest == "---":
-        return True
+    if not name:
+        # ``@ ---`` → rest ``---``; ``@ --- comment`` → rest ``--- comment``.
+        return rest == "---" or rest.startswith("--- ")
     return False
 
 # Longest-first ELM match (VSA 1.0 set used on L).

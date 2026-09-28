@@ -138,6 +138,46 @@ S: re ||
     assert not any(d.code == "MVSA-DIRECTIVE" for d in diags)
 
 
+def test_validate_noop_separator_allows_trailing_comment():
+    """``@--- …`` / ``@ --- …``: tekst na de streepjes is commentaar."""
+    from vsa.mvsa_validate import is_noop_separator_directive
+
+    assert is_noop_separator_directive("---", "")
+    assert is_noop_separator_directive("---", "volgende frase")
+    assert is_noop_separator_directive("", "---")
+    assert is_noop_separator_directive("", "--- zie blad 2")
+    assert not is_noop_separator_directive("", "-- niet drie")
+    assert not is_noop_separator_directive("tekst", "---")
+
+    text = """\
+@do F4
+@mode major
+@sectie demo
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+@--- tweede systeem (commentaar)
+L: b_ ||
+S: re ||
+A: re ||
+T: re ||
+B: re ||
+@ --- ook met spatie vóór ---
+L: c_ ||
+S: mi ||
+A: mi ||
+T: mi ||
+B: mi ||
+"""
+    diags = validate_mvsa_text(text)
+    errors = [d for d in diags if d.severity == "error"]
+    assert errors == [], errors
+    assert not any(d.code == "MVSA-MARKER-DUP" for d in diags)
+    assert not any(d.code == "MVSA-DIRECTIVE" for d in diags)
+
+
 def test_validate_tekst_ok_and_bad():
     ok = """\
 @do F4

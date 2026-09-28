@@ -81,7 +81,8 @@ Tussen twee systemen van **dezelfde sectie** mogen bovendien:
 - directives (`@do`, `@mode`, `@oct`, `@title`, `@tekst`, `@---`, …).
 
 Een kale lege regel **scheidt geen** systemen (die mag midden in één systeem).
-Zet tussen vscode-systemen een `@`-regel, bv. `@---` of `@tekst "…"`.
+Zet tussen vscode-systemen een `@`-regel, bv. `@---` (optioneel commentaar
+erna).
 
 Canoniek staan de LSATB-regels **direct onder elkaar** zonder lege regels
 ertussen (zo schrijft tooling bij genereren / normalize).

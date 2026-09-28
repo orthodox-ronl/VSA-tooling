@@ -22,7 +22,7 @@ Het keyword zelf volgt: eerste teken een letter, daarna letters, `-` of `_`
 | **Gedefinieerd** (deze pagina) | Tooling kent de betekenis; foute argumenten → **error**                                        |
 | **Onbekend** (nog niet hier)   | Mag je gebruiken om te experimenteren; validate meldt een **warning**, geen error              |
 | **Ongeldige keyword-vorm**     | Bijv. `@1foo` of `@` alleen → **warning** (geen error); export gaat door                       |
-| **`@---`**                     | No-op regelscheider tussen LSATB-systemen (geen warning)                                       |
+| **`@---`**                     | No-op regelscheider tussen LSATB-systemen; optioneel commentaar erna (geen warning)            |
 
 Keyword-regels mogen:
 
@@ -413,7 +413,9 @@ of andere directive nodig hebt. Lege regels alleen doen dat **niet**. Voor een
 **nieuwe MuseScore-regel** op het blad: gebruik `@mscz-newline`, niet alleen
 `@---`.
 
-**Vorm.** `@---` of `@ ---` (geen argumenten).
+**Vorm.** `@---` of `@ ---`. Optioneel **commentaar** erna op dezelfde regel
+(wordt genegeerd, geen error/warning), bv. `@--- tweede systeem` of
+`@ --- zie Liturgikon p.12`.
 
 **Wel gebruiken** tussen twee LSATB-blokken van dezelfde sectie:
 
@@ -422,7 +424,7 @@ L: Heer_ … |
 S: a     … |
 …
 
-@---
+@--- volgende couplet
 
 L: Heer_ … ||
 S: a     … ||
