@@ -563,5 +563,6 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
 
 ### Output
 
-- `validate`: per geldig bestand `<pad>: OK`; anders diagnostiek en exitcode `1`.
+- `validate`: bij succes zonder warnings één regel `OK`; anders diagnostiek
+  en bij errors exitcode `1`.
 - `musicxml`: `Geschreven: <pad>` of fout op stderr.

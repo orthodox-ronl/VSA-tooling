@@ -1113,18 +1113,23 @@ def _cmd_mvsa_validate(args) -> int:
         print(f"Geen .mvsa gevonden onder {path}", file=sys.stderr)
         return 1
     errors = 0
+    had_messages = False
     for mvsa_path in files:
         diags = validate_mvsa_path(mvsa_path)
         fatal = [d for d in diags if d.severity == "error"]
         for d in diags:
-            print(format_diagnostic(d, mvsa_path), file=sys.stderr if d.severity == "error" else sys.stdout)
+            had_messages = True
+            print(
+                format_diagnostic(d, mvsa_path),
+                file=sys.stderr if d.severity == "error" else sys.stdout,
+            )
         if fatal:
             errors += 1
-            continue
-        print(f"{mvsa_path}: OK")
     if errors:
         print(f"{errors} mvsa-bestand(en) ongeldig", file=sys.stderr)
         return 1
+    if not had_messages:
+        print("OK")
     return 0
 
 

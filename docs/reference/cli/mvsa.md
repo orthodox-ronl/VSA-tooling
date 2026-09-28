@@ -81,9 +81,11 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 
 ### Output
 
-- **stdout**: per geldig bestand `<pad>: OK`; warnings naar stdout.
+- **stdout**: bij succes zonder warnings de tekst `OK` (één keer, ook bij
+  een map); warnings naar stdout.
 - **stderr**: errors (`ERROR: …`) en samenvatting bij falen.
 - Geen bestanden aangemaakt.
+- Geen per-bestand `…: OK`-regels (zelfde stijl als [`vsa validate`](validate.md)).
 
 ### Exit status
 

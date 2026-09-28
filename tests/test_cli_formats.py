@@ -40,3 +40,10 @@ def test_mscz_help_lists_matrix_actions(capsys):
 
 def test_mvsa_validate_alias_works():
     assert mvsa_main(["validate", "examples/mvsa/alleluia-toon-8.mvsa"]) == 0
+
+
+def test_mvsa_validate_success_prints_single_ok(capsys):
+    assert mvsa_main(["validate", "examples/mvsa/alleluia-toon-8.mvsa"]) == 0
+    out = capsys.readouterr().out.strip()
+    assert out == "OK"
+    assert ": OK" not in out
