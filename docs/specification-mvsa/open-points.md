@@ -42,12 +42,12 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 
 ### Tooling / conversies
 
-| Punt                 | Toelichting                                                                                                                                | Richting                                                                                                        |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| Kuiser-tool          | **Gedrag** staat in [syntax](syntax.md) / [semantiek](semantics.md); **implementatie** nog niet                                            | Tool boven `normalize` / `align_mvsa_columns`                                                                   |
-| MIDI-export          | `.mvsa` (en evt. andere bronnen) → `.mid` / `.midi` voor afspelen                                                                          | [formats/midi.md](../formats/midi.md); CLI-naam nog open                                                        |
-| Exports / gebruik    | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [status-en-roadmap](../status-en-roadmap.md) stap 1; [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md) |
-| TEv2 docs-opschonen  | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                    |
+| Punt                 | Toelichting                                                                                                                                | Richting                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Kuiser-tool          | **Gedrag** staat in [syntax](syntax.md) / [semantiek](semantics.md); **implementatie** nog niet                                            | Tool boven `normalize` / `align_mvsa_columns`                                                                        |
+| MIDI-export          | `.mvsa` (en evt. andere bronnen) → `.mid` / `.midi` voor afspelen                                                                          | [formats/midi.md](../formats/midi.md); CLI-naam nog open                                                             |
+| Exports / gebruik    | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages) |
+| TEv2 docs-opschonen  | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                         |
 
 ---
 
