@@ -415,22 +415,20 @@ B: g&-&- ||
     assert not errors, errors
 
 
-def test_validate_eof_closes_section_with_warning():
-    """EOF sluit een open sectie; ontbrekende || is warning, geen error."""
+def test_validate_eof_closes_section_on_final_bar():
+    """EOF: laatste maatstreep (| of ||) beëindigt de sectie; geen warning."""
     text = """\
 @sectie demo
 L: a_ |
 S: do |
 """
     diags = validate_mvsa_text(text)
-    errors = [d for d in diags if d.severity == "error"]
-    assert errors == [], errors
-    assert any(
-        d.code == "MVSA-SECTIE-IMPLICIT" and d.severity == "warning" for d in diags
-    )
+    assert not any(d.severity == "error" for d in diags), diags
+    assert not any(d.code == "MVSA-SECTIE-IMPLICIT" for d in diags)
 
 
-def test_validate_new_sectie_closes_previous_with_warning():
+def test_validate_new_sectie_closes_previous_on_final_bar():
+    """Nieuwe @sectie: vorige sectie eindigt op haar laatste maatstreep."""
     text = """\
 @sectie a
 L: a_ |
@@ -441,14 +439,8 @@ L: b_ ||
 S: re ||
 """
     diags = validate_mvsa_text(text)
-    errors = [d for d in diags if d.severity == "error"]
-    assert errors == [], errors
-    assert any(
-        d.code == "MVSA-SECTIE-IMPLICIT"
-        and "@sectie 'b'" in d.message
-        and d.severity == "warning"
-        for d in diags
-    )
+    assert not any(d.severity == "error" for d in diags), diags
+    assert not any(d.code == "MVSA-SECTIE-IMPLICIT" for d in diags)
 
 
 def test_validate_blok_no_implicit_sectie_warning():

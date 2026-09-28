@@ -10,35 +10,36 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 
 ## Werkt nu
 
-| Onderdeel | Status | Opmerking |
-| --- | --- | --- |
-| VSA parser | Werkend | Ondersteunt tekst, scopes, modifiers en hoogte-markeringen. |
-| Syntaxvalidatie | Werkend | Meldt meerdere fouten waar mogelijk. |
-| Semantische validatie | Werkend | Onder andere modifier-aantallen en hoogte-marker-controles; het bekende voorbeeld met een foute laatste marker wordt gedetecteerd. |
-| Meerdere hoogte-markeringen | Werkend | Parser, validator en SVG-rendering ondersteunen dit. |
-| SVG-rendering | Werkend | Inclusief multiline/wrapping, spacingbeleid en regressietests. |
-| MusicXML/MXL-export | Werkend | Beschikbaar via `vsa musicxml`; profielen voor playback/engraving. |
-| Markdown VSA-blokken | Werkend | `::: vsa-notatie` wordt gevonden, gevalideerd en verwerkt. |
-| Hugo build-markdown | Werkend | Genereert Markdown en SVG-assets voor Hugo. |
-| `:::include` | Werkend | Ondersteunt markdown, VSA, assets en exporttypes `svg`, `coria`, `mxl`. |
-| `:::coria` | Werkend | Blijft ondersteund als build-time directive/alias. |
-| Print/web directives | Werkend met beperking | `web-only`, `print-only`, `keep-together`; nesting is nog niet toegestaan. |
-| Parochie-lokaal model | Werkend in demo | `lokaal/`, manifeststructuur en voorbeeldincludes zijn aanwezig. |
-| Catalogus-resolutie | Werkend | `vsa resolve-catalogus` zet `zoek=` om naar `bron:` of `lokaal:`. |
-| Hugo-demo | Werkend als testbed | Combineert praktijkmateriaal, documentatie, layouts en publicatieketen. |
+| Onderdeel                   | Status                | Opmerking                                                                                                                                        |
+| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| VSA parser                  | Werkend               | Ondersteunt tekst, scopes, modifiers en hoogte-markeringen.                                                                                      |
+| Syntaxvalidatie             | Werkend               | Meldt meerdere fouten waar mogelijk.                                                                                                             |
+| Semantische validatie       | Werkend               | Onder andere modifier-aantallen en hoogte-marker-controles; het bekende voorbeeld met een foute laatste marker wordt gedetecteerd.               |
+| Meerdere hoogte-markeringen | Werkend               | Parser, validator en SVG-rendering ondersteunen dit.                                                                                             |
+| SVG-rendering               | Werkend               | Inclusief multiline/wrapping, spacingbeleid en regressietests.                                                                                   |
+| MusicXML/MXL-export         | Werkend               | Beschikbaar via `vsa musicxml`; profielen voor playback/engraving.                                                                               |
+| Markdown VSA-blokken        | Werkend               | `::: vsa-notatie` wordt gevonden, gevalideerd en verwerkt.                                                                                       |
+| Hugo build-markdown         | Werkend               | Genereert Markdown en SVG-assets voor Hugo.                                                                                                      |
+| `:::include`                | Werkend               | Ondersteunt markdown, VSA, assets en exporttypes `svg`, `coria`, `mxl`.                                                                          |
+| `:::coria`                  | Werkend               | Blijft ondersteund als build-time directive/alias.                                                                                               |
+| Print/web directives        | Werkend met beperking | `web-only`, `print-only`, `keep-together`; nesting is nog niet toegestaan.                                                                       |
+| Parochie-lokaal model       | Werkend in demo       | `lokaal/`, manifeststructuur en voorbeeldincludes zijn aanwezig.                                                                                 |
+| Catalogus-resolutie         | Werkend               | `vsa resolve-catalogus` zet `zoek=` om naar `bron:` of `lokaal:`.                                                                                |
+| Hugo-demo                   | Werkend als testbed   | Combineert praktijkmateriaal, documentatie, layouts en publicatieketen.                                                                          |
+| mvsa (draft)                | Werkend conversies    | `mvsa`/`vsa mvsa`: validate, normalize, musicxml, mscz, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md). |
 
 ## Beperkt of kwetsbaar
 
-| Onderdeel | Status | Waarom dit aandacht vraagt |
-| --- | --- | --- |
-| README/projectingang | Verbeterd, maar jong | De README is nu herschreven; hij moet actueel blijven bij workflow-keuzes. |
-| Roadmap | Nieuw gecentraliseerd | Dit document vervangt nog niet automatisch alle oude todo's. |
-| Directive-nesting | Open besluit | `web-only` binnen `keep-together` faalt nu bewust; praktijkmateriaal wil dit soms wel. |
-| Commentaar in VSA | Deels opgelost | HTML-commentaar en comment-only regels zijn aangepakt, maar een compleet commentaarmodel is nog nuttig. |
-| VSA-blok-afbakening | Authoring-usability | Vergeten `::: vsa-notatie` of afsluitende `:::` moet vroeg en duidelijk worden gemeld. |
-| `bron:` met Coria/MXL | Beperkt | SVG op `bron:` werkt; Coria/MXL buiten `content-root` is nog niet glad. |
-| AST/source maps | Later | Nodig voor betere foutposities, editor-integratie en eventueel roundtrip tooling. |
-| Editor-ondersteuning | Niet aanwezig | VS Code highlighting en foutmarkering zouden dagelijks gebruik veel prettiger maken. |
+| Onderdeel             | Status                | Waarom dit aandacht vraagt                                                                              |
+| --------------------- | --------------------- | ------------------------------------------------------------------------------------------------------- |
+| README/projectingang  | Verbeterd, maar jong  | De README is nu herschreven; hij moet actueel blijven bij workflow-keuzes.                              |
+| Roadmap               | Nieuw gecentraliseerd | Dit document vervangt nog niet automatisch alle oude todo's.                                            |
+| Directive-nesting     | Open besluit          | `web-only` binnen `keep-together` faalt nu bewust; praktijkmateriaal wil dit soms wel.                  |
+| Commentaar in VSA     | Deels opgelost        | HTML-commentaar en comment-only regels zijn aangepakt, maar een compleet commentaarmodel is nog nuttig. |
+| VSA-blok-afbakening   | Authoring-usability   | Vergeten `::: vsa-notatie` of afsluitende `:::` moet vroeg en duidelijk worden gemeld.                  |
+| `bron:` met Coria/MXL | Beperkt               | SVG op `bron:` werkt; Coria/MXL buiten `content-root` is nog niet glad.                                 |
+| AST/source maps       | Later                 | Nodig voor betere foutposities, editor-integratie en eventueel roundtrip tooling.                       |
+| Editor-ondersteuning  | Niet aanwezig         | VS Code highlighting en foutmarkering zouden dagelijks gebruik veel prettiger maken.                    |
 
 ## Open ontwerpbesluiten
 
@@ -170,13 +171,13 @@ Resultaat:
 
 ## Later
 
-| Onderwerp | Waarom later |
-| --- | --- |
-| AST-formalisering met spans/source maps | Belangrijk, maar pas echt nodig voor editor tooling en complexere refactors. |
-| Roundtrip parsing | Waardevol voor automatische transformaties, niet nodig voor huidige publicatieketen. |
-| AI-versnelde invoer met `|`-scheidingen | Interessant, maar afhankelijk van stabiele notatie- en validatieregels. |
-| SATB/beginakkoord-rendering | Muzikaal nuttig, maar vraagt eerst een duidelijk model en renderersemantiek. |
-| Volledige TEv2-conceptuele integratie | Eerst demo-ervaring opdoen en bepalen welke terminologie echt helpt. |
+| Onderwerp                               | Waarom later                                                                         |
+| --------------------------------------- | ------------------------------------------------------------------------------------ |
+| AST-formalisering met spans/source maps | Belangrijk, maar pas echt nodig voor editor tooling en complexere refactors.         |
+| Roundtrip parsing                       | Waardevol voor automatische transformaties, niet nodig voor huidige publicatieketen. |
+| AI-versnelde invoer met ` | `-scheidingen | Interessant, maar afhankelijk van stabiele notatie- en validatieregels. |
+| SATB/beginakkoord-rendering           | Muzikaal nuttig, maar vraagt eerst een duidelijk model en renderersemantiek. |
+| Volledige TEv2-conceptuele integratie | Eerst demo-ervaring opdoen en bepalen welke terminologie echt helpt.         |
 
 ## Relatie tot oude todo's
 

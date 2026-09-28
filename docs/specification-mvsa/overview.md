@@ -49,7 +49,8 @@ bij rendering/export, niet bij mvsa-brontekst.
 
 - Vervanging van eenstemmige VSA 1.0;
 - blokhergebruik en template-projectie als norm;
-- CLI-werkstromen en kuiser-implementatie (wel: gedragseisen voor canonieke vorm);
+- CLI-werkstromen en kuiser-**tool** (gedragseisen voor canonieke vorm staan in
+  syntax/semantiek; implementatie: [open-points](open-points.md));
 - volledige gelijkschakeling van chromatische `+` in eenstemmige VSA-EHM.
 
 ## Defaults
@@ -68,7 +69,7 @@ Zie [Keywords](keywords.md) en
 | Term                | Betekenis                                                                                                                                                                                                                                                                                                                        |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **mvsa-bestand**    | Tekstbron (conventioneel `.mvsa`) met secties, systemen en directives.                                                                                                                                                                                                                                                           |
-| **Sectie**          | Muzikale eenheid (`@sectie` of anoniem): een of meer LSATB-systemen. Eindigt canoniek met `\|\|` (of `:\|\|`); ook impliciet bij een nieuwe `@sectie`, bij EOF, of (later) bij `::: mvsa-notatie`. Validate mag `MVSA-SECTIE-IMPLICIT` geven. **Niet** van toepassing op speelblokken (`@blok`) — zie [Speelplan](speelplan.md). |
+| **Sectie**          | Muzikale eenheid (`@sectie` of anoniem): een of meer LSATB-systemen. Eindigt met `\|\|` / `:\|\|` (expliciet), of met de laatste maatstreep bij een nieuwe `@sectie`, bij EOF, of (later) bij `::: mvsa-notatie`. **Niet** van toepassing op speelblokken (`@blok`) — zie [Speelplan](speelplan.md).                             |
 | **Speelblok**       | Genoemd segment (`@blok` *id*) voor een speelplan. Geen `\|\|`-eis tussen blokken. Eén `@speelplan` per bestand.                                                                                                                                                                                                                 |
 | **LSATB-systeem**   | Aaneengesloten reeks regels met een [regelidentifier](#termen-in-deze-specificatie); `#`-commentaar ertussen mag; een **lege regel eindigt** het systeem. Eindigt altijd op `\|` of `\|\|` (of specialisatie).                                                                                                                   |
 | **regelidentifier** | Label aan het begin van een inhoudsregel: `stemidentifier` + optionele [EHM](@) + `:`. Voorbeelden: `L:`, `L1:`, `S:`, `S-:`, `T\6:`, `cantus:`. Zie [Syntax — regelidentifier](syntax.md#regelidentifier).                                                                                                                      |

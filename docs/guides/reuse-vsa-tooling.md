@@ -4,6 +4,34 @@ Deze pagina is de **integratiehandleiding**: hoe je `vsa-tool` in een andere rep
 installeert en in CI gebruikt. Volledig werkend voorbeeld:
 [VSA-demo](https://github.com/orthodox-ronl/VSA-demo).
 
+## Ownership: tooling vs consumer
+
+**Vuistregel:** als twee verschillende sites dezelfde conversie of validatie
+nodig hebben → **VSA-tooling**. Als alleen déze site beslist “dit telt als
+product” of “zo zetten we de Hugo-CI in” → **consumer-repo** (bibliotheek,
+VSA-demo, …).
+
+| VSA-tooling                                                               | Consumer (bibliotheek, demo, …)                                      |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Geldigheid van `.vsa` / `.mvsa` / `.mxl` / `.mscz`                        | Welke bestanden horen bij welke representatie / publicatiespoor      |
+| Omzetten naar een **canonieke** of **gekozen** exportvorm / layoutprofiel | Batch: wat wel/niet regenereren, sibling-namen, freshness-gates      |
+| Algemene CLI + optionele herbruikbare `workflow_call`-helpers             | Eigen site-CI (Hugo-build, Pages, productchecks)                     |
+
+**Bibliotheek-id.** Welke id bij een zangstuk hoort, bepaalt de
+**bibliotheek** (of een andere consumer). Product-scripts daar geven die id
+door met `--bibliotheek-id` / API-parameter. VSA-tooling zet de id in het
+colofon (layoutprofiel `partituur`). Pad-afleiding is alleen een fallback.
+
+**Layout / conventies.** MSCZ-export kent benoemde profielen (`partituur`,
+`plain`); zie [`.mscz` — layoutprofielen](../formats/mscz.md#layoutprofielen---layout).
+De consumer **kiest**; VSA-tooling **definieert en handhaaft**.
+
+**Niet in VSA-tooling:** productpipelines (`sync_*` / `check_*` met
+sitebeleid), “artefacten handmatig”, Hugo-site-CI voorbij generieke
+validate/render-helpers.
+
+Zie ook [Consumer-site — waar hoort wat](../manuals/consumer-site.md).
+
 ## Direct met `pip`
 
 ```cmd
@@ -109,16 +137,16 @@ jobs:
       contents: write
 ```
 
-| Input                    | Verplicht            | Toelichting                                      |
-| ------------------------ | -------------------- | ------------------------------------------------ |
-| `artifact_name`          | ja                   | Naam van `upload-artifact` in de build-job       |
-| `publish_dir`            | nee (default `site`) | Downloadpad; moet `index.html` bevatten          |
+| Input                    | Verplicht            | Toelichting                                                            |
+| ------------------------ | -------------------- | ---------------------------------------------------------------------- |
+| `artifact_name`          | ja                   | Naam van `upload-artifact` in de build-job                             |
+| `publish_dir`            | nee (default `site`) | Downloadpad; moet `index.html` bevatten                                |
 | `destination_dir`        | nee                  | subdirectory op gh-pages (bijv. `preview` of branch-slug); leeg = root |
-| `url_prefix`             | ja                   | Publiek pad voor linkcheck, bv. `/koor/preview/` |
-| `keep_files`             | nee (default `true`) | `true` als subdirectory-deploys en productie `gh-pages` delen |
-| `skip_publication_check` | nee                  | Alleen als de caller zelf al heeft gecontroleerd |
-| `pages_url`              | nee                  | URL in log na deploy                             |
-| `vsa_tooling_ref`        | nee (default `main`) | Ref voor check-script                            |
+| `url_prefix`             | ja                   | Publiek pad voor linkcheck, bv. `/koor/preview/`                       |
+| `keep_files`             | nee (default `true`) | `true` als subdirectory-deploys en productie `gh-pages` delen          |
+| `skip_publication_check` | nee                  | Alleen als de caller zelf al heeft gecontroleerd                       |
+| `pages_url`              | nee                  | URL in log na deploy                                                   |
+| `vsa_tooling_ref`        | nee (default `main`) | Ref voor check-script                                                  |
 
 Productie-deploy (root van `gh-pages`; sibling-mappen zoals `preview/` en
 branch-previews die niet in de nieuwe site-build zitten blijven behouden):
@@ -140,11 +168,14 @@ branch-previews die niet in de nieuwe site-build zitten blijven behouden):
 
 | Repo                                                                         | Wat je ziet                       |
 | ---------------------------------------------------------------------------- | --------------------------------- |
-| [VSA-demo](https://github.com/orthodox-ronl/VSA-demo)                   | Volledige Hugo-consumer + Pages   |
+| [VSA-demo](https://github.com/orthodox-ronl/VSA-demo)                        | Volledige Hugo-consumer + Pages   |
 | Deze repo `docs-pages.yml`                                                   | MkDocs tool-docs op Pages         |
-| [bron docs-pages](https://github.com/orthodox-ronl/bron)                | MkDocs + dezelfde deploy-reusable |
+| [bron docs-pages](https://github.com/orthodox-ronl/bron)                     | MkDocs + dezelfde deploy-reusable |
 
 ## Org-grenzen (D1)
 
 Installeer de tool hier; **dupliceer geen** org-specs. Terminologie en
 zangstuk-formaat: [bron — specs](https://orthodox-ronl.github.io/bron/specs/).
+
+Tooling vs productbeleid / site-CI: zie
+[Ownership: tooling vs consumer](#ownership-tooling-vs-consumer).

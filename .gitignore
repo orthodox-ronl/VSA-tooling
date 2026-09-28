@@ -264,4 +264,3 @@ __marimo__/
 .streamlit/secrets.toml
 .ensure-stamp
 examples/mvsa/make.bat
-examples/mvsa/make.cmd

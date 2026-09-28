@@ -265,13 +265,14 @@ def _build_parser():
             "Top-level alias: mvsa …  (ook: mxl … / mscz … voor andere bronnen).\n"
             "\n"
             "Hulp: vsa mvsa validate -h | vsa mvsa musicxml -h | "
-            "vsa mvsa mscz -h | vsa mvsa import -h | vsa mvsa normalize -h"
+            "vsa mvsa mscz -h | vsa mvsa pdf -h | vsa mvsa import -h | "
+            "vsa mvsa normalize -h"
         ),
     )
     mvsa_sub = mvsa.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,musicxml,mscz,import,normalize}",
+        metavar="{validate,musicxml,mscz,pdf,import,normalize}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -332,6 +333,8 @@ def _build_parser():
             "  vsa mvsa mscz examples\\mvsa\\alleluia-toon-8.canonieke.mvsa\n"
             "  vsa mvsa mscz lied.mvsa -o generated\\lied.mscz "
             "--section schets2-oct-doremi\n"
+            "  vsa mvsa mscz lied.mvsa -o out.mscz --layout partituur "
+            "--bibliotheek-id zangstuk/var/uv\n"
             "  vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\\lied.mxl"
         ),
     )
@@ -363,6 +366,92 @@ def _build_parser():
         metavar="PATH",
         default=None,
         help="Bewaar ook het tussenliggende .mxl op dit pad.",
+    )
+    m_mscz.add_argument(
+        "--layout",
+        metavar="PROFILE",
+        default=None,
+        help=(
+            "MSCZ-layoutprofiel: partituur (default; A4/leesbaarheid/colofon) "
+            "of plain (geen nabewerking). Zie docs/formats/mscz-leesbaarheid.md."
+        ),
+    )
+    m_mscz.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        dest="bibliotheek_id",
+        help=(
+            "Expliciete bibliotheek-id voor colofon (profiel partituur). "
+            "Zonder deze optie: optionele pad-afleiding. Consumer bepaalt de id."
+        ),
+    )
+    m_pdf = mvsa_sub.add_parser(
+        "pdf",
+        help="Exporteer .mvsa (of .mscz) naar print-PDF voor zangers.",
+        description=(
+            "Partituur-PDF via MuseScore. Bron .mvsa: keten mvsa -> mscz -> pdf. "
+            "Bron .mscz: alleen MuseScore-conversie. Vereist MuseScore 4 (of 3)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa pdf examples\\mvsa\\alleluia-toon-1.mvsa\n"
+            "  vsa mvsa pdf lied.mvsa -o generated\\lied.pdf --keep-mscz generated\\lied.mscz\n"
+            "  vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv\n"
+            "  vsa mvsa pdf lied.mscz -o lied.pdf"
+        ),
+    )
+    m_pdf.add_argument(
+        "path",
+        help=".mvsa- of .mscz-bestand.",
+    )
+    m_pdf.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help="Uitvoer-.pdf (default: <stem>.pdf naast het bronbestand).",
+    )
+    m_pdf.add_argument(
+        "--section",
+        metavar="SECTION",
+        default=None,
+        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+    )
+    m_pdf.add_argument(
+        "--musescore",
+        metavar="PATH",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto-detectie).",
+    )
+    m_pdf.add_argument(
+        "--keep-mscz",
+        metavar="PATH",
+        default=None,
+        help="Bij .mvsa: bewaar ook het tussenliggende .mscz op dit pad.",
+    )
+    m_pdf.add_argument(
+        "--keep-mxl",
+        metavar="PATH",
+        default=None,
+        help="Bij .mvsa: bewaar ook het tussenliggende partituur-.mxl.",
+    )
+    m_pdf.add_argument(
+        "--layout",
+        metavar="PROFILE",
+        default=None,
+        help=(
+            "Bij .mvsa: MSCZ-layoutprofiel partituur (default) of plain "
+            "(zie mvsa mscz --layout)."
+        ),
+    )
+    m_pdf.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        dest="bibliotheek_id",
+        help="Bij .mvsa + layout partituur: expliciete bibliotheek-id voor colofon.",
     )
     m_import = mvsa_sub.add_parser(
         "import",
@@ -1025,16 +1114,19 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_musicxml(args)
     if getattr(args, "mvsa_command", None) == "mscz":
         return _cmd_mvsa_mscz(args)
+    if getattr(args, "mvsa_command", None) == "pdf":
+        return _cmd_mvsa_pdf(args)
     if getattr(args, "mvsa_command", None) == "import":
         return _cmd_mvsa_import(args)
     if getattr(args, "mvsa_command", None) == "normalize":
         return _cmd_mvsa_normalize(args)
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
-        "Gebruik: vsa mvsa {validate,musicxml,mscz,import,normalize} …\n"
+        "Gebruik: vsa mvsa {validate,musicxml,mscz,pdf,import,normalize} …\n"
         "  vsa mvsa validate PATH\n"
         "  vsa mvsa musicxml PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
+        "  vsa mvsa pdf PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
         "  vsa mvsa import PATH --pitch {doremi,a-g,vsa} [-o OUTPUT]\n"
         "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa}] [-o OUTPUT]\n"
         "Hulp: vsa mvsa -h | vsa mvsa import -h",
@@ -1059,18 +1151,23 @@ def _cmd_mvsa_validate(args) -> int:
         print(f"Geen .mvsa gevonden onder {path}", file=sys.stderr)
         return 1
     errors = 0
+    had_messages = False
     for mvsa_path in files:
         diags = validate_mvsa_path(mvsa_path)
         fatal = [d for d in diags if d.severity == "error"]
         for d in diags:
-            print(format_diagnostic(d, mvsa_path), file=sys.stderr if d.severity == "error" else sys.stdout)
+            had_messages = True
+            print(
+                format_diagnostic(d, mvsa_path),
+                file=sys.stderr if d.severity == "error" else sys.stdout,
+            )
         if fatal:
             errors += 1
-            continue
-        print(f"{mvsa_path}: OK")
     if errors:
         print(f"{errors} mvsa-bestand(en) ongeldig", file=sys.stderr)
         return 1
+    if not had_messages:
+        print("OK")
     return 0
 
 
@@ -1119,6 +1216,8 @@ def _cmd_mvsa_mscz(args) -> int:
             section_id=args.section,
             musescore=musescore,
             keep_mxl=keep_mxl,
+            layout=getattr(args, "layout", None),
+            bibliotheek_id=getattr(args, "bibliotheek_id", None),
         )
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
@@ -1134,6 +1233,76 @@ def _cmd_mvsa_mscz(args) -> int:
     print(f"Geschreven: {out}")
     if keep_mxl is not None:
         print(f"MXL: {keep_mxl}")
+    return 0
+
+
+def _cmd_mvsa_pdf(args) -> int:
+    from .mvsa_mscz import (
+        MvsaMsczError,
+        export_mscz_to_pdf,
+        export_mvsa_to_pdf,
+    )
+    from .mvsa_musicxml import MvsaExportError
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = Path(args.output) if args.output else path.with_suffix(".pdf")
+    musescore = Path(args.musescore) if args.musescore else None
+    suffix = path.suffix.lower()
+    try:
+        if suffix == ".mscz":
+            if (
+                args.section
+                or args.keep_mscz
+                or args.keep_mxl
+                or args.layout
+                or args.bibliotheek_id
+            ):
+                print(
+                    "mvsa pdf: --section/--keep-mscz/--keep-mxl/--layout/"
+                    "--bibliotheek-id gelden alleen bij .mvsa",
+                    file=sys.stderr,
+                )
+                return 1
+            export_mscz_to_pdf(path, out, musescore=musescore)
+        elif suffix == ".mvsa":
+            keep_mscz = Path(args.keep_mscz) if args.keep_mscz else None
+            keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
+            export_mvsa_to_pdf(
+                path,
+                out,
+                section_id=args.section,
+                musescore=musescore,
+                keep_mscz=keep_mscz,
+                keep_mxl=keep_mxl,
+                layout=args.layout,
+                bibliotheek_id=args.bibliotheek_id,
+            )
+        else:
+            print(
+                f"mvsa pdf verwacht .mvsa of .mscz, kreeg: {path.name}",
+                file=sys.stderr,
+            )
+            return 1
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaExportError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    except MvsaMsczError as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
+    if args.keep_mscz:
+        print(f"MSCZ: {args.keep_mscz}")
+    if args.keep_mxl:
+        print(f"MXL: {args.keep_mxl}")
     return 0
 
 

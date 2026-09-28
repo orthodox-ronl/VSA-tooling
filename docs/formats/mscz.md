@@ -5,12 +5,14 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 
 ## Wat hoort hier
 
-| Onderwerp             | Waar                                                                              |
-| --------------------- | --------------------------------------------------------------------------------- |
-| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore) |
-| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md)                                         |
-| → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                            |
-| Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                         |
+| Onderwerp             | Waar                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore)      |
+| Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (via MuseScore; ook vanaf `.mscz`) |
+| Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak   |
+| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md)                                              |
+| → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                 |
+| Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                              |
 
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
 verwachten voor bruikbare SATB + lyrics.
@@ -23,6 +25,26 @@ verwachten voor bruikbare SATB + lyrics.
 Leesbaarheid (recite, lyrics, slurs, cues, stokken, maatnummers):
 [MSCZ-leesbaarheid](mscz-leesbaarheid.md).
 Semantiek deelt de kern met MXL; layout divergeert (Coria = vier parts).
+
+## Layoutprofielen (`--layout`)
+
+Na de MuseScore-conversie past VSA-tooling een **benoemd profiel** toe.
+De consumer **kiest**; de tool **handhaaft**. Zie
+[ownership](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer).
+
+| Profiel     | CLI                            | Wat je krijgt                                                                 |
+| ----------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `partituur` | `--layout partituur` (default) | Canonieke koorprint: [MSCZ-leesbaarheid](mscz-leesbaarheid.md) + checklist    |
+| `plain`     | `--layout plain`               | Geen Style-/colofon-/recite-nabewerking; alleen MuseScore-output van de MXL   |
+
+```cmd
+mvsa mscz lied.mvsa -o generated\lied.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
+mvsa mscz lied.mvsa -o generated\lied.plain.mscz --layout plain
+```
+
+**Bibliotheek-id:** consumer bepaalt de waarde; geef die met
+`--bibliotheek-id` (colofon bij `partituur`). Pad-afleiding is alleen een
+fallback.
 
 ## Typische commando’s
 
