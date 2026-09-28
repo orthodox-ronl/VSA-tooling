@@ -6,16 +6,20 @@
     **Niet:** een volledige Hugo-cursus — die hoort bij
     [VSA-demo](https://github.com/orthodox-ronl/VSA-demo).
 
-**Antwoord in het kort:** tooling = package/CLI; presentatievoorbeeld =
-VSA-demo; [zangstukken](@bron)/org-specs = [bron-repository](@bron).
+**Antwoord in het kort:** tooling = package/CLI (validate, conversies,
+layoutprofielen); presentatievoorbeeld = VSA-demo; bibliotheek/productbeleid
+= consumer-repo’s; [zangstukken](@bron)/org-specs = [bron-repository](@bron).
+
+Ownership (wat hoort waar, bibliotheek-id, layoutprofielen):
+[Integratie — reuse](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer).
 
 ## Waar hoort wat
 
 | Repo                                                           | Rol                                          |
 | -------------------------------------------------------------- | -------------------------------------------- |
 | **[VSA-tooling](@bron)** (deze docs)                           | Package, CLI, specs, [fixtures](@)           |
-| **[VSA-demo](https://github.com/orthodox-ronl/VSA-demo)** | Voorbeeld-Hugo-site + Pages                  |
-| **[bron](https://github.com/orthodox-ronl/bron)**         | [Zangstukken](@bron) en org-specs            |
+| **[VSA-demo](https://github.com/orthodox-ronl/VSA-demo)**      | Voorbeeld-Hugo-site + Pages                  |
+| **[bron](https://github.com/orthodox-ronl/bron)**              | [Zangstukken](@bron) en org-specs            |
 
 ## Minimale keten (tooling)
 
