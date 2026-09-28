@@ -45,8 +45,6 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 | Punt                 | Toelichting                                                                                                                                | Richting                                                                                                        |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
 | Kuiser-tool          | **Gedrag** staat in [syntax](syntax.md) / [semantiek](semantics.md); **implementatie** nog niet                                            | Tool boven `normalize` / `align_mvsa_columns`                                                                   |
-| Bibliotheek-id API   | Consumer bepaalt de id; tooling moet een **expliciete** optie bieden om id in colofon/meta te zetten (pad-sniffen is hoogstens hulpmiddel) | CLI/export-API; zie [reuse — ownership](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer)           |
-| MSCZ-layoutprofielen | Meerdere layouts/conventies → **benoemde, gedocumenteerde** keuzes; tools naleven die                                                      | CLI-keuze + docs ([mscz-leesbaarheid](../formats/mscz-leesbaarheid.md))                                         |
 | MIDI-export          | `.mvsa` (en evt. andere bronnen) → `.mid` / `.midi` voor afspelen                                                                          | [formats/midi.md](../formats/midi.md); CLI-naam nog open                                                        |
 | Exports / gebruik    | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [status-en-roadmap](../status-en-roadmap.md) stap 1; [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md) |
 | TEv2 docs-opschonen  | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                    |
@@ -62,6 +60,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 | `mvsa pdf`       | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                     |
 | Validate-output  | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
 | Sectie-einde     | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |
+| MSCZ-layout + id | `--layout {partituur,plain}`; `--bibliotheek-id` (expliciet; pad = fallback)                        |
 | Experiment-PDF   | Checklist P1–P5; copyright-footer P4 blijft “later”                                                 |
 
 ---

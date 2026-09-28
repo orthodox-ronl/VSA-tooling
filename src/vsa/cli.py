@@ -333,6 +333,8 @@ def _build_parser():
             "  vsa mvsa mscz examples\\mvsa\\alleluia-toon-8.canonieke.mvsa\n"
             "  vsa mvsa mscz lied.mvsa -o generated\\lied.mscz "
             "--section schets2-oct-doremi\n"
+            "  vsa mvsa mscz lied.mvsa -o out.mscz --layout partituur "
+            "--bibliotheek-id zangstuk/var/uv\n"
             "  vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\\lied.mxl"
         ),
     )
@@ -365,6 +367,25 @@ def _build_parser():
         default=None,
         help="Bewaar ook het tussenliggende .mxl op dit pad.",
     )
+    m_mscz.add_argument(
+        "--layout",
+        metavar="PROFILE",
+        default=None,
+        help=(
+            "MSCZ-layoutprofiel: partituur (default; A4/leesbaarheid/colofon) "
+            "of plain (geen nabewerking). Zie docs/formats/mscz-leesbaarheid.md."
+        ),
+    )
+    m_mscz.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        dest="bibliotheek_id",
+        help=(
+            "Expliciete bibliotheek-id voor colofon (profiel partituur). "
+            "Zonder deze optie: optionele pad-afleiding. Consumer bepaalt de id."
+        ),
+    )
     m_pdf = mvsa_sub.add_parser(
         "pdf",
         help="Exporteer .mvsa (of .mscz) naar print-PDF voor zangers.",
@@ -377,6 +398,7 @@ def _build_parser():
             "voorbeelden:\n"
             "  vsa mvsa pdf examples\\mvsa\\alleluia-toon-1.mvsa\n"
             "  vsa mvsa pdf lied.mvsa -o generated\\lied.pdf --keep-mscz generated\\lied.mscz\n"
+            "  vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv\n"
             "  vsa mvsa pdf lied.mscz -o lied.pdf"
         ),
     )
@@ -414,6 +436,22 @@ def _build_parser():
         metavar="PATH",
         default=None,
         help="Bij .mvsa: bewaar ook het tussenliggende partituur-.mxl.",
+    )
+    m_pdf.add_argument(
+        "--layout",
+        metavar="PROFILE",
+        default=None,
+        help=(
+            "Bij .mvsa: MSCZ-layoutprofiel partituur (default) of plain "
+            "(zie mvsa mscz --layout)."
+        ),
+    )
+    m_pdf.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        dest="bibliotheek_id",
+        help="Bij .mvsa + layout partituur: expliciete bibliotheek-id voor colofon.",
     )
     m_import = mvsa_sub.add_parser(
         "import",
@@ -1178,6 +1216,8 @@ def _cmd_mvsa_mscz(args) -> int:
             section_id=args.section,
             musescore=musescore,
             keep_mxl=keep_mxl,
+            layout=getattr(args, "layout", None),
+            bibliotheek_id=getattr(args, "bibliotheek_id", None),
         )
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
@@ -1214,9 +1254,16 @@ def _cmd_mvsa_pdf(args) -> int:
     suffix = path.suffix.lower()
     try:
         if suffix == ".mscz":
-            if args.section or args.keep_mscz or args.keep_mxl:
+            if (
+                args.section
+                or args.keep_mscz
+                or args.keep_mxl
+                or args.layout
+                or args.bibliotheek_id
+            ):
                 print(
-                    "mvsa pdf: --section/--keep-mscz/--keep-mxl gelden alleen bij .mvsa",
+                    "mvsa pdf: --section/--keep-mscz/--keep-mxl/--layout/"
+                    "--bibliotheek-id gelden alleen bij .mvsa",
                     file=sys.stderr,
                 )
                 return 1
@@ -1231,6 +1278,8 @@ def _cmd_mvsa_pdf(args) -> int:
                 musescore=musescore,
                 keep_mscz=keep_mscz,
                 keep_mxl=keep_mxl,
+                layout=args.layout,
+                bibliotheek_id=args.bibliotheek_id,
             )
         else:
             print(

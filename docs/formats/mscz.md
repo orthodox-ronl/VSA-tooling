@@ -26,6 +26,26 @@ Leesbaarheid (recite, lyrics, slurs, cues, stokken, maatnummers):
 [MSCZ-leesbaarheid](mscz-leesbaarheid.md).
 Semantiek deelt de kern met MXL; layout divergeert (Coria = vier parts).
 
+## Layoutprofielen (`--layout`)
+
+Na de MuseScore-conversie past VSA-tooling een **benoemd profiel** toe.
+De consumer **kiest**; de tool **handhaaft**. Zie
+[ownership](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer).
+
+| Profiel     | CLI                            | Wat je krijgt                                                                 |
+| ----------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `partituur` | `--layout partituur` (default) | Canonieke koorprint: [MSCZ-leesbaarheid](mscz-leesbaarheid.md) + checklist    |
+| `plain`     | `--layout plain`               | Geen Style-/colofon-/recite-nabewerking; alleen MuseScore-output van de MXL   |
+
+```cmd
+mvsa mscz lied.mvsa -o generated\lied.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
+mvsa mscz lied.mvsa -o generated\lied.plain.mscz --layout plain
+```
+
+**Bibliotheek-id:** consumer bepaalt de waarde; geef die met
+`--bibliotheek-id` (colofon bij `partituur`). Pad-afleiding is alleen een
+fallback.
+
 ## Typische commando’s
 
 ```cmd

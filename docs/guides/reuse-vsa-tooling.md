@@ -19,13 +19,12 @@ VSA-demo, …).
 
 **Bibliotheek-id.** Welke id bij een zangstuk hoort, bepaalt de
 **bibliotheek** (of een andere consumer). Product-scripts daar geven die id
-door aan de tooling (colofon / metadata). VSA-tooling regelt **dat** en
-**hoe** je een id op de partituur kunt zetten; niet *welke* id het is.
+door met `--bibliotheek-id` / API-parameter. VSA-tooling zet de id in het
+colofon (layoutprofiel `partituur`). Pad-afleiding is alleen een fallback.
 
-**Layout / conventies.** Als een export (bijv. `.mscz`) meerdere layouts of
-conventies toelaat, moet de CLI die als **benoemde, gedocumenteerde
-profielen** aanbieden; de tools houden zich daaraan. De consumer **kiest**
-het profiel; VSA-tooling **definieert en handhaaft** het.
+**Layout / conventies.** MSCZ-export kent benoemde profielen (`partituur`,
+`plain`); zie [`.mscz` — layoutprofielen](../formats/mscz.md#layoutprofielen---layout).
+De consumer **kiest**; VSA-tooling **definieert en handhaaft**.
 
 **Niet in VSA-tooling:** productpipelines (`sync_*` / `check_*` met
 sitebeleid), “artefacten handmatig”, Hugo-site-CI voorbij generieke

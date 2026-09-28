@@ -2,10 +2,11 @@
 
 Doel: regels zodat een genormaliseerde / gegenereerde `.mscz` **op het blad
 leesbaar** blijft — geen tekst in buurmaten, geen verwarrende bogen, geen
-rommelige maatnummers. Dit beschrijft het **standaard partituur-layoutprofiel**
-(export via `mscz_partituur`). Als er later meer layouts/conventies bij komen,
-horen die als **benoemde, gedocumenteerde CLI-profielen** — de consumer kiest,
-de tool handhaaft; zie
+rommelige maatnummers. Dit is het layoutprofiel **`partituur`**
+(`mvsa mscz --layout partituur`, default), toegepast via `mscz_partituur`.
+
+Andere profielen: zie [`.mscz` — layoutprofielen](mscz.md#layoutprofielen---layout).
+Ownership (wie kiest, wie handhaaft):
 [reuse — ownership](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer).
 
 Gerelateerd:

@@ -19,9 +19,10 @@ vsa mvsa [-h] {validate,musicxml,mscz,pdf,import,normalize} …
 mvsa validate [-h] path
 mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-          [--keep-mxl PATH] path
+          [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID] path
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-         [--keep-mscz PATH] [--keep-mxl PATH] path
+         [--keep-mscz PATH] [--keep-mxl PATH]
+         [--layout PROFILE] [--bibliotheek-id ID] path
 mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
 ```
@@ -169,7 +170,7 @@ en diagnostiek op stderr. Controleer eerst met `vsa mvsa validate`.
 
 ```text
 vsa mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-              [--keep-mxl PATH] path
+              [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID] path
 ```
 
 ### Beschrijving
@@ -178,10 +179,23 @@ Exporteert **één** `.mvsa`-bestand naar MuseScore (`.mscz`) via de keten:
 
 ```text
 .mvsa  →  .mxl (partituur: SA/TB, lege part-namen)  →  MuseScore CLI  →  .mscz
-       →  stem-indicaties uit (Style + lege namen)
+       →  layoutprofiel (default: partituur)
 ```
 
-Dit voldoet aan de [MSCZ-checklist](../../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
+Layoutprofielen (na MuseScore-conversie):
+
+| Profiel      | Gedrag                                                                                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `partituur`  | **Default.** A4, leesbaarheid, lege partijnamen, colofon — [MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md). |
+| `plain`      | Geen nabewerking door VSA-tooling (ruwe MuseScore-output van de partituur-MXL).                                     |
+
+`--bibliotheek-id` zet de id in het colofon (**alleen** bij `partituur`).
+Zonder die optie mag tooling de id uit het pad afleiden als
+`…/bibliotheek/<zangstuk>/<variant>/<uitvoeringsvorm>/…` — consumers horen
+de id **expliciet** te geven. Zie
+[ownership](../../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer).
+
+Dit voldoet bij `partituur` aan de [MSCZ-checklist](../../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
 (twee balken, geen S/Soprano-labels). Voor Coria-playback (vier parts)
 blijft [`vsa mvsa musicxml`](#vsa-mvsa-musicxml) het primaire pad.
 
@@ -194,13 +208,15 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam                 | Verplicht | Betekenis                                              | Default                             |
-| -------------------- | --------- | ------------------------------------------------------ | ----------------------------------- |
-| `path`               | Ja        | Bron-`.mvsa`-bestand.                                  | —                                   |
-| `-o`, `--output`     | Nee       | Uitvoer-`.mscz`.                                       | `<stem>.mscz` naast het bronbestand |
-| `--section SECTION`  | Nee       | Alleen deze `@sectie`-id.                              | Alle secties                        |
-| `--musescore PATH`   | Nee       | Pad naar MuseScore-executable.                         | Auto-detectie                       |
-| `--keep-mxl PATH`    | Nee       | Bewaar ook het tussenliggende `.mxl`.                  | temp (wordt verwijderd)             |
+| Naam                   | Verplicht | Betekenis                                              | Default                             |
+| ---------------------- | --------- | ------------------------------------------------------ | ----------------------------------- |
+| `path`                 | Ja        | Bron-`.mvsa`-bestand.                                  | —                                   |
+| `-o`, `--output`       | Nee       | Uitvoer-`.mscz`.                                       | `<stem>.mscz` naast het bronbestand |
+| `--section SECTION`    | Nee       | Alleen deze `@sectie`-id.                              | Alle secties                        |
+| `--musescore PATH`     | Nee       | Pad naar MuseScore-executable.                         | Auto-detectie                       |
+| `--keep-mxl PATH`      | Nee       | Bewaar ook het tussenliggende `.mxl`.                  | temp (wordt verwijderd)             |
+| `--layout PROFILE`     | Nee       | `partituur` of `plain`.                                | `partituur`                         |
+| `--bibliotheek-id ID`  | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback. | pad-sniff / geen                    |
 
 ### Output
 
@@ -220,6 +236,8 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 vsa mvsa mscz examples\mvsa\alleluia-toon-8.canonieke.mvsa
 vsa mvsa mscz lied.mvsa -o generated\lied.mscz --section schets2-oct-doremi
 vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\lied.mxl
+vsa mvsa mscz lied.mvsa -o out.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
+vsa mvsa mscz lied.mvsa -o raw.mscz --layout plain
 ```
 
 ---
@@ -230,7 +248,8 @@ vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\lied.mxl
 
 ```text
 vsa mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-             [--keep-mscz PATH] [--keep-mxl PATH] path
+             [--keep-mscz PATH] [--keep-mxl PATH]
+             [--layout PROFILE] [--bibliotheek-id ID] path
 ```
 
 ### Beschrijving
@@ -239,27 +258,33 @@ Maakt een **print-PDF** van de partituur (voor zangers), via MuseScore CLI.
 
 | Bron    | Pad                                                                      |
 | ------- | ------------------------------------------------------------------------ |
-| `.mvsa` | Keten: partituur-`.mxl` → `.mscz` (layout-conventies) → `.pdf`           |
+| `.mvsa` | Keten: partituur-`.mxl` → `.mscz` (`--layout`) → `.pdf`                  |
 | `.mscz` | Alleen MuseScore-conversie naar `.pdf` (geen her-export uit `.mvsa`)     |
+
+`--layout` / `--bibliotheek-id` gelden alleen bij bron `.mvsa` (zelfde
+betekenis als bij [`mscz`](#vsa-mvsa-mscz)).
 
 Dit is **niet** [`vsa pdf`](pdf.md) (Markdown + VSA-SVG naar A4 via browser).
 
 ### Argumenten en opties
 
-| Naam              | Verplicht | Betekenis                                      | Default                    |
-| ----------------- | --------- | ---------------------------------------------- | -------------------------- |
-| `path`            | Ja        | `.mvsa` of `.mscz`.                            | —                          |
-| `-o`, `--output`  | Nee       | Uitvoer-`.pdf`.                                | `<stem>.pdf` naast bron    |
-| `--section`       | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.          | alle secties               |
-| `--musescore`     | Nee       | MuseScore-executable.                          | auto-detectie              |
-| `--keep-mscz`     | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.    | temp (wordt verwijderd)    |
-| `--keep-mxl`      | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mxl`.     | niet                       |
+| Naam                   | Verplicht | Betekenis                                      | Default                    |
+| ---------------------- | --------- | ---------------------------------------------- | -------------------------- |
+| `path`                 | Ja        | `.mvsa` of `.mscz`.                            | —                          |
+| `-o`, `--output`       | Nee       | Uitvoer-`.pdf`.                                | `<stem>.pdf` naast bron    |
+| `--section`            | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.          | alle secties               |
+| `--musescore`          | Nee       | MuseScore-executable.                          | auto-detectie              |
+| `--keep-mscz`          | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.    | temp (wordt verwijderd)    |
+| `--keep-mxl`           | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mxl`.     | niet                       |
+| `--layout PROFILE`     | Nee       | Bij `.mvsa`: `partituur` of `plain`.           | `partituur`                |
+| `--bibliotheek-id ID`  | Nee       | Bij `.mvsa` + `partituur`: colofon-id.         | pad-sniff / geen           |
 
 ### Voorbeelden
 
 ```cmd
 vsa mvsa pdf examples\mvsa\alleluia-toon-1.mvsa
 vsa mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
+vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 vsa mvsa pdf lied.mscz -o lied.pdf
 ```
 
