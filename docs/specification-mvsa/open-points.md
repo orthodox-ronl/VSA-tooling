@@ -13,14 +13,13 @@ Werkplan-restpunten syntax (geschiedenis):
 
 ## Nu (eerstvolgende tooling)
 
-| Punt                         | Toelichting                                                                                         | Richting                                                |
-| ---------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `mvsa pdf`                   | Partituur-PDF voor zangers; keten via `.mscz` → MuseScore CLI (`convert_with_musescore`)            | CLI + man-pagina; `examples/mvsa/make.cmd` gebruikt het |
-| Validate-output              | Bij succes geen lijst met OK-bestanden; één `OK` volstaat (zoals `vsa validate`)                    | `mvsa validate`                                         |
-| Sectie-einde bij EOF / fence | Maatstreep = sectie-einde bij EOF, fence-`:::`, en bij nieuwe `@sectie`                             | Spec + parse/validate                                   |
+| Punt                         | Toelichting                                                                      | Richting              |
+| ---------------------------- | -------------------------------------------------------------------------------- | --------------------- |
+| Validate-output              | Bij succes geen lijst met OK-bestanden; één `OK` volstaat (zoals `vsa validate`) | `mvsa validate`       |
+| Sectie-einde bij EOF / fence | Maatstreep = sectie-einde bij EOF, fence-`:::`, en bij nieuwe `@sectie`          | Spec + parse/validate |
 
 Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
-`examples/mvsa/make.cmd`.
+`examples/mvsa/make.cmd` (PDF via `mvsa pdf`).
 
 ---
 
@@ -61,6 +60,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 | ---------------- | --------------------------------------------------------------------- |
 | Parser / CLI     | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5) |
 | Conversieslices  | normalize, mscz-export, import, bron-commands — zie conversions-plan  |
+| `mvsa pdf`       | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`       |
 | Experiment-PDF   | Checklist P1–P5; copyright-footer P4 blijft “later”                   |
 
 ---

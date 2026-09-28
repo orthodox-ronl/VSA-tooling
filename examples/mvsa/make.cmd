@@ -71,7 +71,7 @@ if errorlevel 1 exit /b 1
 
 echo.
 echo make pdf %SRC% ^(zangers / MuseScore-partituur^)
-python -c "from pathlib import Path; from vsa.musescore_cli import convert_with_musescore; convert_with_musescore(Path(r'%SRC%.mscz'), Path(r'%SRC%.pdf'))"
+vsa mvsa pdf "%SRC%.mscz" -o "%SRC%.pdf"
 if errorlevel 1 exit /b 1
 
 exit /b 0

@@ -5,12 +5,13 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 
 ## Wat hoort hier
 
-| Onderwerp             | Waar                                                                              |
-| --------------------- | --------------------------------------------------------------------------------- |
-| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore) |
-| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md)                                         |
-| → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                            |
-| Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                         |
+| Onderwerp             | Waar                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore)      |
+| Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (via MuseScore; ook vanaf `.mscz`) |
+| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md)                                              |
+| → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                 |
+| Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                              |
 
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
 verwachten voor bruikbare SATB + lyrics.

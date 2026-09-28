@@ -24,6 +24,8 @@ from .mvsa_validate import MvsaValidationError
 __all__ = [
     "MvsaMsczError",
     "export_mvsa_to_mscz",
+    "export_mvsa_to_pdf",
+    "export_mscz_to_pdf",
     "MuseScoreConvertError",
     "MuseScoreNotFoundError",
 ]
@@ -107,6 +109,75 @@ def export_mvsa_to_mscz(
     finally:
         if tmp_mxl is not None:
             tmp_mxl.unlink(missing_ok=True)
+
+    return out
+
+
+def export_mscz_to_pdf(
+    mscz: Path,
+    out: Path,
+    *,
+    musescore: Path | None = None,
+) -> Path:
+    """Convert an existing ``.mscz`` to MuseScore print-PDF (zangers)."""
+    mscz = Path(mscz)
+    out = Path(out)
+    if out.suffix.lower() != ".pdf":
+        out = out.with_suffix(".pdf")
+    if not mscz.is_file():
+        raise MvsaMsczError(f"Bestand niet gevonden: {mscz}")
+    if mscz.suffix.lower() != ".mscz":
+        raise MvsaMsczError(f"PDF-export verwacht .mscz, kreeg: {mscz.name}")
+    try:
+        convert_with_musescore(mscz, out, musescore=musescore)
+    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+        raise MvsaMsczError(str(exc)) from exc
+    return out
+
+
+def export_mvsa_to_pdf(
+    path: Path,
+    out: Path,
+    *,
+    section_id: str | None = None,
+    musescore: Path | None = None,
+    keep_mscz: Path | None = None,
+    keep_mxl: Path | None = None,
+) -> Path:
+    """Export ``.mvsa`` to print-PDF via partituur ``.mscz`` (zangers).
+
+    Returns ``out`` (``.pdf``). Intermediate ``.mscz`` is kept when
+    ``keep_mscz`` is set; otherwise a temp file is used.
+    """
+    path = Path(path)
+    out = Path(out)
+    if out.suffix.lower() != ".pdf":
+        out = out.with_suffix(".pdf")
+
+    tmp_mscz: Path | None = None
+    if keep_mscz is not None:
+        mscz_path = Path(keep_mscz)
+        if mscz_path.suffix.lower() != ".mscz":
+            mscz_path = mscz_path.with_suffix(".mscz")
+        mscz_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        fd, name = tempfile.mkstemp(suffix=".mscz", prefix="mvsa-")
+        os.close(fd)
+        tmp_mscz = Path(name)
+        mscz_path = tmp_mscz
+
+    try:
+        export_mvsa_to_mscz(
+            path,
+            mscz_path,
+            section_id=section_id,
+            musescore=musescore,
+            keep_mxl=keep_mxl,
+        )
+        export_mscz_to_pdf(mscz_path, out, musescore=musescore)
+    finally:
+        if tmp_mscz is not None:
+            tmp_mscz.unlink(missing_ok=True)
 
     return out
 

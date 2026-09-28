@@ -14,25 +14,28 @@ Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,musicxml,mscz,import,normalize} …
-vsa mvsa [-h] {validate,musicxml,mscz,import,normalize} …
+mvsa [-h] {validate,musicxml,mscz,pdf,import,normalize} …
+vsa mvsa [-h] {validate,musicxml,mscz,pdf,import,normalize} …
 mvsa validate [-h] path
 mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--keep-mxl PATH] path
+mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+         [--keep-mscz PATH] [--keep-mxl PATH] path
 mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
 ```
 
 ## Subcommando's
 
-| Subcommando                          | Doel                                              |
-| ------------------------------------ | ------------------------------------------------- |
-| [`validate`](#vsa-mvsa-validate)     | Structuur + sync-telling van `.mvsa` controleren. |
-| [`musicxml`](#vsa-mvsa-musicxml)     | Exporteer `.mvsa` naar SATB MusicXML.             |
-| [`mscz`](#vsa-mvsa-mscz)             | Exporteer `.mvsa` naar MuseScore (`.mscz`).       |
-| [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` naar `.mvsa`.          |
-| [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen). |
+| Subcommando                          | Doel                                                         |
+| ------------------------------------ | ------------------------------------------------------------ |
+| [`validate`](#vsa-mvsa-validate)     | Structuur + sync-telling van `.mvsa` controleren.            |
+| [`musicxml`](#vsa-mvsa-musicxml)     | Exporteer `.mvsa` naar SATB MusicXML.                        |
+| [`mscz`](#vsa-mvsa-mscz)             | Exporteer `.mvsa` naar MuseScore (`.mscz`).                  |
+| [`pdf`](#vsa-mvsa-pdf)               | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).       |
+| [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` naar `.mvsa`.                     |
+| [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen).            |
 
 Hulp op de commandoregel:
 
@@ -42,6 +45,7 @@ vsa mvsa -h
 mvsa validate -h
 mvsa musicxml -h
 mvsa mscz -h
+mvsa pdf -h
 mvsa import -h
 mvsa normalize -h
 ```
@@ -214,6 +218,47 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 vsa mvsa mscz examples\mvsa\alleluia-toon-8.canonieke.mvsa
 vsa mvsa mscz lied.mvsa -o generated\lied.mscz --section schets2-oct-doremi
 vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\lied.mxl
+```
+
+---
+
+## `vsa mvsa pdf`
+
+### Synopsis
+
+```text
+vsa mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+             [--keep-mscz PATH] [--keep-mxl PATH] path
+```
+
+### Beschrijving
+
+Maakt een **print-PDF** van de partituur (voor zangers), via MuseScore CLI.
+
+| Bron    | Pad                                                                      |
+| ------- | ------------------------------------------------------------------------ |
+| `.mvsa` | Keten: partituur-`.mxl` → `.mscz` (layout-conventies) → `.pdf`           |
+| `.mscz` | Alleen MuseScore-conversie naar `.pdf` (geen her-export uit `.mvsa`)     |
+
+Dit is **niet** [`vsa pdf`](pdf.md) (Markdown + VSA-SVG naar A4 via browser).
+
+### Argumenten en opties
+
+| Naam              | Verplicht | Betekenis                                      | Default                    |
+| ----------------- | --------- | ---------------------------------------------- | -------------------------- |
+| `path`            | Ja        | `.mvsa` of `.mscz`.                            | —                          |
+| `-o`, `--output`  | Nee       | Uitvoer-`.pdf`.                                | `<stem>.pdf` naast bron    |
+| `--section`       | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.          | alle secties               |
+| `--musescore`     | Nee       | MuseScore-executable.                          | auto-detectie              |
+| `--keep-mscz`     | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.    | temp (wordt verwijderd)    |
+| `--keep-mxl`      | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mxl`.     | niet                       |
+
+### Voorbeelden
+
+```cmd
+vsa mvsa pdf examples\mvsa\alleluia-toon-1.mvsa
+vsa mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
+vsa mvsa pdf lied.mscz -o lied.pdf
 ```
 
 ---

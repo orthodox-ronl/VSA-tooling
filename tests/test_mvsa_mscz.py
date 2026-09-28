@@ -424,3 +424,39 @@ def test_bibliotheek_id_from_path():
     p = Path("x/bibliotheek/7-kleine-intocht/zondag/hemelum/score.mscz")
     assert bibliotheek_id_from_path(p) == "7-kleine-intocht/zondag/hemelum"
     assert bibliotheek_id_from_path(Path("examples/mvsa/foo.mvsa")) is None
+
+
+def test_export_pdf_without_musescore_raises(tmp_path: Path):
+    from vsa.mvsa_mscz import export_mvsa_to_pdf
+
+    out = tmp_path / "out.pdf"
+    with patch("vsa.mvsa_mscz.require_musescore", side_effect=MuseScoreNotFoundError("x")):
+        with pytest.raises(MvsaMsczError, match="x"):
+            export_mvsa_to_pdf(ALLELUIA, out, section_id="schets3-oct-doremi")
+
+
+def test_export_mscz_to_pdf_rejects_wrong_suffix(tmp_path: Path):
+    from vsa.mvsa_mscz import export_mscz_to_pdf
+
+    bogus = tmp_path / "x.mxl"
+    bogus.write_bytes(b"not-mscz")
+    with pytest.raises(MvsaMsczError, match=r"\.mscz"):
+        export_mscz_to_pdf(bogus, tmp_path / "out.pdf")
+
+
+@pytest.mark.skipif(MUSESCORE is None, reason="MuseScore niet geïnstalleerd")
+def test_export_alleluia_section_to_pdf(tmp_path: Path):
+    from vsa.mvsa_mscz import export_mvsa_to_pdf
+
+    out = tmp_path / "alleluia.pdf"
+    keep = tmp_path / "alleluia.mscz"
+    export_mvsa_to_pdf(
+        ALLELUIA,
+        out,
+        section_id="schets3-oct-doremi",
+        keep_mscz=keep,
+    )
+    assert out.is_file()
+    assert out.stat().st_size > 500
+    assert keep.is_file()
+    assert out.read_bytes()[:4] == b"%PDF"

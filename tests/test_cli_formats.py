@@ -17,6 +17,7 @@ def test_mvsa_help_lists_subcommands(capsys):
     assert "validate" in out
     assert "normalize" in out
     assert "import" in out
+    assert "pdf" in out
 
 
 def test_mxl_help_lists_matrix_actions(capsys):
