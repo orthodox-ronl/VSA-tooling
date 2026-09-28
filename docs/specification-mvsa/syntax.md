@@ -235,8 +235,13 @@ Een sectie eindigt op een van deze manieren (de eerste is **canoniek**):
    de open sectie in dat blok.
 
 Canoniek schrijf je dus nog steeds `||` (of `:||`) op het laatste systeem van
-elke sectie. Impliciete afsluiting via `@sectie` / EOF / fence is geldig voor
-validatie en export, maar niet de vorm die tooling bij genereren schrijft.
+elke **sectie** (`@sectie` / anoniem). Impliciete afsluiting via `@sectie` /
+EOF / fence is geldig voor validatie en export, maar niet de vorm die tooling
+bij genereren schrijft. Validate mag `MVSA-SECTIE-IMPLICIT` geven.
+
+**Speelblokken (`@blok`):** horen niet onder deze `||`-canonieke regel. Een
+nieuw `@blok` of EOF na een speelblok zonder `||` is **geen** warning. Zie
+[Speelplan](speelplan.md).
 
 ### Meerdere systemen per sectie
 

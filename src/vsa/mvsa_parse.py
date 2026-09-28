@@ -28,6 +28,7 @@ from .mvsa_validate import (
     _validate_directive_value,
     is_lyrics_stem,
     is_noop_separator_directive,
+    normalize_directive_name,
     parse_regelidentifier,
     parse_tekst_argument,
 )
@@ -164,6 +165,8 @@ class ParsedDocument:
 def parse_mvsa(text: str) -> ParsedDocument:
     """Parse structure + sticky context + per-measure L/voice tokens."""
     diagnostics: list[MvsaDiagnostic] = []
+    if text.startswith("\ufeff"):
+        text = text[1:]
     cleaned = HTML_COMMENT_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
     lines = cleaned.splitlines()
 
@@ -190,7 +193,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
 
         if stripped.startswith("@"):
             name, _, rest = stripped[1:].partition(" ")
-            name = name.strip()
+            name = normalize_directive_name(name.strip())
             rest = rest.strip()
             if is_noop_separator_directive(name, rest):
                 pass  # optionele no-op; lege regel scheidt systemen al
@@ -218,6 +221,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
                         current is not None
                         and current.systems
                         and not current.systems[-1].ends_section
+                        and current.origin != "blok"
                     ):
                         diagnostics.append(
                             MvsaDiagnostic(
@@ -241,20 +245,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
                         )
                     )
                 else:
-                    if (
-                        current is not None
-                        and current.systems
-                        and not current.systems[-1].ends_section
-                    ):
-                        diagnostics.append(
-                            MvsaDiagnostic(
-                                "MVSA-SECTIE-IMPLICIT",
-                                f"sectie impliciet afgesloten door @blok {rest!r} "
-                                f"(canoniek: || of :|| op het laatste systeem)",
-                                line_no,
-                                severity="warning",
-                            )
-                        )
+                    # Speelblok ≠ sectie: geen ||-eis tussen @blok's (Coria-pauze).
                     pending_sectie = (rest, line_no, "blok")
                     current = None
             elif name == "speelplan":
@@ -431,15 +422,16 @@ def parse_mvsa(text: str) -> ParsedDocument:
             )
         )
     if current is not None and current.systems and not current.systems[-1].ends_section:
-        diagnostics.append(
-            MvsaDiagnostic(
-                "MVSA-SECTIE-IMPLICIT",
-                "sectie impliciet afgesloten door einde van het bestand "
-                "(canoniek: || of :|| op het laatste systeem)",
-                current.systems[-1].start_line,
-                severity="warning",
+        if current.origin != "blok":
+            diagnostics.append(
+                MvsaDiagnostic(
+                    "MVSA-SECTIE-IMPLICIT",
+                    "sectie impliciet afgesloten door einde van het bestand "
+                    "(canoniek: || of :|| op het laatste systeem)",
+                    current.systems[-1].start_line,
+                    severity="warning",
+                )
             )
-        )
 
     _validate_sync(sections, diagnostics)
     doc = ParsedDocument(

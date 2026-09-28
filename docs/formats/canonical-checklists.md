@@ -43,7 +43,7 @@ en Oefenhoek `VSA-demo/scripts/mscz-product-transforms.md` (Coria-kolom).
 | M3  | **Lyrics per part**            | Elke part heeft de gezongen tekst (lyric number 1) zodat muted/solo stemmen tekst tonen.                                                                  |
 | M4  | **Coria-vriendelijk**          | Geen features die Coria stelselmatig breekt of negeert (volg `playback`-tabel in rendering.md).                                                           |
 | M5  | **Melisma-extend**             | Alleen op eerste noot: `<extend/>` zonder `type`; midden/eind **geen** `<lyric>`.                                                                         |
-| M5a | **Melisma same-pitch**         | Zelfde hoogte binnen één lettergreep → samentrekken (S13/R7); geen heraangeslagen kwarten.                                                                |
+| M5a | **Melisma same-pitch**         | Zelfde hoogte binnen één lettergreep → **één** noot (gestipte ELM behouden; Coria stript ties). Geen heraangeslagen half+kwart.                           |
 | M6  | **Voice/stem**                 | Expliciete `<voice>` / `<stem>` zoals in `playback` (getest t.o.v. MuseScore-roundtrip + Coria).                                                          |
 | M7  | **Blad-aanwijzing**            | Scopeloze aanwijzingen → hele-nootrust zonder lyrics (pauze), geen “meegezongen” tekst.                                                                   |
 | M8  | **MIDI in part-list**          | `midi-device` / `midi-instrument` aanwezig (defaults uit metadata).                                                                                       |
@@ -113,20 +113,20 @@ andere pipeline, geen MuseScore-partituur.)*
 
 ## Verschillen bewust hangende houden
 
-| Onderwerp          | `.mxl` (Coria)                      | `.mscz` / MuseScore-PDF (partituur)                                                                                |
-| ------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Balken / parts     | vier parts S/A/T/B                  | twee balken SA + TB                                                                                                |
-| Stem-labels        | part-namen Soprano…Bass (Coria-UI)  | **geen** zichtbare stem-indicaties                                                                                 |
-| Lyrics             | op elke part                        | één laag tussen de balken                                                                                          |
-| Recite             | per lettergreep een noot            | 1–(n−2)–1 + spacers (zichtbare lyrics)                                                                             |
-| Melisma-extend     | `<extend/>`; slur bij toonwissels   | `<extend/>`; slur bij toonwissels; geen extender onder recite                                                      |
-| Melisma same-pitch | collapse/tie-keten (**M5a**/S13)    | collapse/tie-keten (**S13**/R7) — zelfde regel als MXL                                                             |
-| Stokrichting       | (per part, vaak auto)               | S/T omhoog, A/B omlaag (twee voices per balk)                                                                      |
-| Typografie / Style | weglaten                            | wel (MuseScore A4)                                                                                                 |
-| Blad-aanwijzing    | rust zonder lyric                   | mag op blad zichtbaar blijven                                                                                      |
-| Mid-flow `@tekst`  | `[PAUZE]`-maat + cue (M15)          | dubbele streep + SystemText; **geen** HBox/spacermaat (S14–S15, S17–S19)                                           |
-| Leidende `\|:`     | forward op eerste inhoudsmaat (M16) | idem; geen lege rustmaat (S16)                                                                                     |
-| Doel               | afspelen / Coria                    | lezen / bewerken / PDF                                                                                             |
+| Onderwerp          | `.mxl` (Coria)                                                        | `.mscz` / MuseScore-PDF (partituur)                                                                                |
+| ------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Balken / parts     | vier parts S/A/T/B                                                    | twee balken SA + TB                                                                                                |
+| Stem-labels        | part-namen Soprano…Bass (Coria-UI)                                    | **geen** zichtbare stem-indicaties                                                                                 |
+| Lyrics             | op elke part                                                          | één laag tussen de balken                                                                                          |
+| Recite             | per lettergreep een noot                                              | 1–(n−2)–1 + spacers (zichtbare lyrics)                                                                             |
+| Melisma-extend     | `<extend/>`; slur bij toonwissels                                     | `<extend/>`; slur bij toonwissels; geen extender onder recite                                                      |
+| Melisma same-pitch | collapse tot **één** noot incl. gestipte ELM (M5a; Coria stript ties) | collapse/tie-keten ongestipt (S13/R7 I1+I2) — MuseScore-veilig                                                     |
+| Stokrichting       | (per part, vaak auto)                                                 | S/T omhoog, A/B omlaag (twee voices per balk)                                                                      |
+| Typografie / Style | weglaten                                                              | wel (MuseScore A4)                                                                                                 |
+| Blad-aanwijzing    | rust zonder lyric                                                     | mag op blad zichtbaar blijven                                                                                      |
+| Mid-flow `@tekst`  | `[PAUZE]`-maat + cue (M15)                                            | dubbele streep + SystemText; **geen** HBox/spacermaat (S14–S15, S17–S19)                                           |
+| Leidende `\|:`     | forward op eerste inhoudsmaat (M16)                                   | idem; geen lege rustmaat (S16)                                                                                     |
+| Doel               | afspelen / Coria                                                      | lezen / bewerken / PDF                                                                                             |
 
 ## Bestandsnaamgeving (conventie)
 

@@ -1,8 +1,8 @@
 # Speelplan en speelblokken (draft)
 
-**Status:** draft v0 — fase 1 (syntax, validatie, MXL-expansie, MSCZ-speeltekst).
-Fase 2 (herhaal-/volta-notatie op het blad) staat in
-[Open punten](open-points.md).
+**Status:** draft v0 — fase 1 (syntax, validatie, MXL-expansie) + fase 2a
+(volta voor patroon `(a,b)×n+(a,c)` op partituur). Verdere volta-patronen
+staan in [Open punten](open-points.md).
 
 **Voor wie:** wie een vast SATB-antwoord (alleluia, litanie-antwoord) één keer
 wil opschrijven en de uitvoeringsvolgorde apart wil vastleggen.
@@ -17,8 +17,18 @@ In de `.mvsa` schrijf je elk **speelblok** één keer (`@blok`).
 | **MXL** (playback)   | **Klinkende vorm:** speelplan volledig uitgeschreven              |
 | **MSCZ** (partituur) | **Bladvorm:** elk blok één keer + zichtbare speeltekst (fase 1)   |
 
+**Besluit bladvorm (“als vanzelf”):** optie **A** — compact blad met
+conventionele herhaal-/volta-/D.S.-notatie. Niet standaard: speelplan ook op
+papier uitschrijven (dat is alleen het vangnet als geen navigatiepatroon past).
+
+**Bestandsgrens:** één `.mvsa` ↔ hoogstens **één** `@speelplan`. Geen nesten
+van speelplan in `@sectie`. Meerdere stukken met eigen plan → aparte bestanden.
+`@sectie` blijft voor bestanden **zonder** speelplan (schetsen, `--section`).
+
 Zonder `@speelplan` blijft het huidige gedrag: documentvolgorde = klinkende
-volgorde.
+volgorde. Open herhalingen (litanie: `|:` … `:|` zonder vaste N) horen
+**buiten** een speelplan; MusicXML-`<repeat>` blijft daar geldig voor blad én
+Coria.
 
 Dit is **niet** hetzelfde als VSA-templates `cycle`/`final` (tekstregels →
 formule-frasen). Speelplan is voor vaste SATB-blokken in één `.mvsa`.
@@ -31,7 +41,7 @@ formule-frasen). Speelplan is voor vaste SATB-blokken in één `.mvsa`.
 | **Speelplan**      | Niet-lege lijst speelblok-ids = canonieke klinkende volgorde              |
 | **Bladvorm**       | Wat op papier staat: elk speelblok één keer, bronvolgorde                 |
 | **Klinkende vorm** | Tijdlijn na expansie van het speelplan                                    |
-| **Speeltekst**     | Zichtbare markering op het blad (fase 1: `Speel: …` + bloknummers)        |
+| **Speeltekst**     | Alleen vangnet als geen navigatiepatroon past (zelden)                    |
 
 ## Syntax
 
@@ -55,18 +65,25 @@ L: … |
 S: … |
 …
 @blok 2
+L: … |
+…
+@blok 3
 L: … ||
 …
 ```
 
-- Opent een nieuwe sectie met dat id (zelfde structurele rol als `@sectie`).
-- Id: cijferreeks `[1-9][0-9]*` **of** dezelfde vorm als `@sectie`:
-  `[a-z][a-z0-9_-]*`.
+- Opent een **speelblok** (genoemd LSATB-segment voor `@speelplan`). In de
+  parser is dat een eigen segment (`origin=blok`), **geen** `@sectie`.
+- Id: cijferreeks `[1-9][0-9]*` **of** `[a-z][a-z0-9_-]*`.
 - Elk speelblok-id komt hoogstens één keer voor.
+- Tussen blokken is **`||` niet verplicht** (en vaak ongewenst: `||` triggert
+  in Coria een pauze). Validate geeft hier **geen** `MVSA-SECTIE-IMPLICIT`.
+  Optioneel `||` alleen op het **laatste** blok van het bestand.
 
-`@sectie` blijft beschikbaar buiten speelplannen. In een bestand **met**
-`@speelplan` moeten alle muzikale segmenten via `@blok` gelabeld zijn (geen
-anonieme sectie, geen `@sectie` als speelblok).
+**`@sectie` vs `@blok`:** gebruik `@sectie` in bestanden **zonder** `@speelplan`
+(export-id, schetsen). In een bestand **met** `@speelplan` moeten alle
+muzikale segmenten via `@blok` (geen anonieme sectie, geen `@sectie`).
+Nest geen speelplan in een sectie — één plan per bestand.
 
 ## Herhaalstrepen en speelplan
 
@@ -77,7 +94,8 @@ bladherhaling.
 Buiten een speelplan-bestand (geen `@speelplan`) blijven `|:` / `:|` / `:||`
 gewoon toegestaan.
 
-Toegestaan in speelblokken: `|` (frase) en `||` (sectie-einde).
+Toegestaan in speelblokken: `|` (frase); `||` mag maar is geen eis tussen
+blokken (zie hierboven).
 
 ## Semantiek
 
@@ -108,14 +126,22 @@ Toegestaan in speelblokken: `|` (frase) en `||` (sectie-einde).
 Bij aanwezig speelplan: exporteer de **klinkende vorm** (maten herhaald volgens
 het plan). Geen afhankelijkheid van MusicXML-`<repeat>` voor de speelduur.
 
-### MSCZ (`layout=partituur`, fase 1)
+### MSCZ (`layout=partituur`)
 
-- Bladvorm: elk `@blok` één keer, bronvolgorde.
-- Op de eerste maat: speeltekst `Speel: 1-2-1-2-1-3` (ids met `-` gekoppeld).
-- Bij de eerste maat van elk speelblok: zichtbaar bloknummer (bijv. `1`).
+Bladvorm: elk `@blok` één keer in bronvolgorde (tenzij vangnet **expand**).
+Geen blok-id-labels boven de maten — navigatietekens zijn genoeg.
 
-Fase 2 mag die speeltekst aanvullen of vervangen door herhaal-/volta-notatie,
-zolang de uitvoeringsvolgorde van het blad afleesbaar blijft.
+De exporter kiest automatisch (eerste match wint):
+
+| Prioriteit | Patroon                                      | Bladtekens                                              |
+| ---------- | -------------------------------------------- | ------------------------------------------------------- |
+| 1          | plan = blokvolgorde                          | niets                                                   |
+| 2          | `(a,b)×n + (a,c)` (3 blokken)                | `\|: a \|1..n. b :\| n+1. c` (volta)                    |
+| 3          | `prefix + X×n + suffix` (n≥2)                | `\|: … :\|` (+ `times` als n>2)                         |
+| 4          | `blad[0..ds] + blad[segno..fine]`            | Segno + Fine + D.S. al Fine (of D.C. al Fine)           |
+| 5          | rest                                         | **expand**: speelplan uitgeschreven op het blad         |
+
+Coria (`playback`) schrijft het speelplan altijd volledig uit (geen jumps).
 
 ## Voorbeeld
 
@@ -143,12 +169,15 @@ L:  Al-&-&-&.&.&-  … ||
 …
 ```
 
-- Blad (MSCZ): blokken 1, 2, 3 + `Speel: 1-2-1-2-1-3`.
+- Blad (MSCZ): `|:` 1 `|1,2.` 2 `:|` `3.` 3.
 - Coria (MXL): 1+2+1+2+1+3 achter elkaar.
 
-## Bewust later (fase 2)
+Trisagion-vorm (`nls-1, nls-2, ksl, doxologie, nls-2, ksl`): Segno bij
+`nls-2`, Fine aan het eind van `ksl`, **D.S. al Fine** na `doxologie`.
 
-- Automatische of halfautomatische volta-/herhaalnotatie op MSCZ/PDF.
+## Bewust later
+
+- Meer sprongvormen (D.S. al Coda, geneste herhalingen).
 - CLI-vlag voor compacte MXL (alleen als de consumer herhalingen begrijpt).
 - Speelplan over meerdere bestanden; geneste plannen; `until: final` zoals
   templates.

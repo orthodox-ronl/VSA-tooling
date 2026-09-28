@@ -23,13 +23,21 @@ zangers) — **overschrijf de originelen niet**. Lokaal bouwen:
 `make.cmd naam` of `make.cmd all` (PDF vereist MuseScore 4).
 Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 
-| Bestand                              | Wat je ziet                                                                                         |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| `alleluia-toon-8.mvsa`               | Reciteertoon (`(…)`) + cadens; do-re-mi / a–g / `@oct` / EHM; canonieke `@sectie` + `\|\|`.         |
-| `alleluia-toon-1.mvsa`               | `@blok` + `@speelplan 1,2,1,2,1,3`; relatieve SATB.                                                 |
-| `kleine-intocht-zondag-hemelum.mvsa` | Omzetting VSA-demo MusicXML; absolute `bb4`/`g3`, `@oct`, mix.                                      |
-| `trisagion-8a-slav-hemelum.mvsa`     | Canonieke secties + **experimenteel** blokhergebruik (`@voices`, `L'` — nog niet normatief).        |
+| Bestand                              | Wat je ziet                                                                              |
+| ------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `alleluia-toon-1.mvsa`               | `@speelplan 1,2,1,2,1,3` → volta op partituur                                            |
+| `alleluia-toon-2.mvsa` … `8.mvsa`    | Eén doorlopende cadens (geen speelplan)                                                  |
+| `1a-vredeslitanie.mvsa` | Open herhaling met `\|:` … `: | ` (geen speelplan); blad én Coria via MusicXML-`<repeat>` |
+| `3-eerste-kleine-litanie.mvsa`       | Korte litanie, antwoorden één keer uitgeschreven |
+| `kleine-intocht-zondag-hemelum.mvsa` | Omzetting VSA-demo MusicXML; absolute `bb4`/`g3` |
+| `trisagion-8a-slav-hemelum.mvsa`     | `@speelplan` → Segno / Fine / D.S. al Fine       |
+
+**Speelplan vs `|:…:|`:** vaste klinkende volgorde → één `@speelplan` per
+`.mvsa` met `@blok` (Coria schrijft uit; blad: volta / herhaling / D.S. of
+expand). Open litanie-herhaling (N onbekend) → `|:…:|` zonder speelplan.
+`@sectie` alleen in bestanden zonder speelplan (schetsen / `--section`).
 
 Canonieke vorm (draft): woordstreepjes tussen lettergrepen van hetzelfde woord;
-maatstrepen op alle LSATB-regels; sectie-einde `||` op alle LSATB-regels;
-**lege regel** tussen vscode-systemen (geen `@---` nodig).
+maatstrepen op alle LSATB-regels; bij **secties** eindstreep `||` op het
+laatste systeem; tussen **speelblokken** is `||` geen eis. **Lege regel**
+tussen vscode-systemen (geen `@---` nodig).

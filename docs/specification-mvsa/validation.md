@@ -40,14 +40,18 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
     hetzelfde systeem; wél tussen twee systemen (primaire scheiding). Optioneel
     mag `@---` (met commentaar) of een andere directive hetzelfde doen.
     `#`-commentaar mag wél tussen markers van hetzelfde systeem.
-4. Een sectie eindigt door: (a) `||` of `:||` op alle LSATB-regels van een
-   systeem (canoniek); of (b) een nieuwe `@sectie` die de vorige impliciet
-   afsluit; of (c) einde van het bestand (EOF); later ook het sluiten van een
-   `::: mvsa-notatie`-fence. Ontbrekende `||` vóór (b)/(c) mag een **warning**
-   zijn (niet-canoniek), geen error.
+4. Een **sectie** (`@sectie` of anoniem) eindigt door: (a) `||` of `:||` op alle
+   LSATB-regels van een systeem (canoniek); of (b) een nieuwe `@sectie` die de
+   vorige impliciet afsluit; of (c) einde van het bestand (EOF); later ook het
+   sluiten van een `::: mvsa-notatie`-fence. Ontbrekende `||` vóór (b)/(c) mag
+   een **warning** `MVSA-SECTIE-IMPLICIT` zijn (niet-canoniek), geen error.
+   **Uitzondering:** speelblokken (`@blok`) — geen warning bij overgang naar
+   een volgend `@blok` of bij EOF van een `@blok`; `||` tussen blokken is geen
+   eis (zie [Speelplan](speelplan.md)).
 5. `@sectie` *id* voldoet aan `[a-z][a-z0-9_-]*`.
-5a. `@blok` / `@speelplan`: zie [Speelplan](speelplan.md) (ids, geen herhaalstrepen
-    in speelplan-blokken, expansie vs bladvorm).
+5a. `@blok` / `@speelplan`: zie [Speelplan](speelplan.md). Eén `@speelplan` per
+    bestand; geen `@sectie`/anonieme muziek naast een speelplan; geen
+    herhaalstrepen in speelplan-blokken.
 
 ## Sync
 

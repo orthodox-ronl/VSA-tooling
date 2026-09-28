@@ -218,7 +218,7 @@ def normalize_mvsa_path(
             if path.suffix.lower() == ".mvsa"
             else DEFAULT_IMPORT_PITCH
         )
-    text = path.read_text(encoding="utf-8")
+    text = path.read_text(encoding="utf-8-sig")
     normalized = normalize_mvsa_text(
         text, pitch=pitch, octave_style=octave_style, align=align
     )

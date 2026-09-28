@@ -26,6 +26,15 @@ IDENTIFIER_EHM_RE = re.compile(
 
 # Keyword after ``@``: [A-Za-z][A-Za-z-_]*
 DIRECTIVE_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z-_]*$")
+
+
+def normalize_directive_name(name: str) -> str:
+    """Strip optional trailing ``:`` (``@bron: "…"`` ≡ ``@bron "…"``)."""
+    if name.endswith(":") and DIRECTIVE_NAME_RE.fullmatch(name[:-1]):
+        return name[:-1]
+    return name
+
+
 # Gedefinieerde keywords (zie docs/specification-mvsa/keywords.md).
 ALLOWED_DIRECTIVES = frozenset(
     {
@@ -198,6 +207,8 @@ class _Section:
     id: str | None
     start_line: int
     systems: list[_System] = field(default_factory=list)
+    # ``blok`` | ``sectie`` | None (anonieme sectie)
+    origin: str | None = None
 
 
 class MvsaValidationError(Exception):
@@ -211,6 +222,8 @@ class MvsaValidationError(Exception):
 
 def validate_mvsa_text(text: str, *, source: str = "<mvsa>") -> list[MvsaDiagnostic]:
     """Return diagnostics (errors and warnings). Empty list = OK."""
+    if text.startswith("\ufeff"):
+        text = text[1:]
     diagnostics: list[MvsaDiagnostic] = []
     sections = _parse_document(text, diagnostics)
     if any(d.severity == "error" for d in diagnostics):
@@ -240,7 +253,7 @@ def validate_mvsa_text(text: str, *, source: str = "<mvsa>") -> list[MvsaDiagnos
 
 
 def validate_mvsa_path(path: Path) -> list[MvsaDiagnostic]:
-    text = path.read_text(encoding="utf-8")
+    text = path.read_text(encoding="utf-8-sig")
     return validate_mvsa_text(text, source=str(path))
 
 
@@ -262,7 +275,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
 
     sections: list[_Section] = []
     current: _Section | None = None
-    pending_sectie: tuple[str, int] | None = None  # id, line
+    pending_sectie: tuple[str, int, str] | None = None  # id, line, origin
     pending_tekst_lines: list[int] = []
     pending_mscz_newline_lines: list[int] = []
     i = 0
@@ -279,7 +292,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
 
         if stripped.startswith("@"):
             name, _, rest = stripped[1:].partition(" ")
-            name = name.strip()
+            name = normalize_directive_name(name.strip())
             rest = rest.strip()
             if is_noop_separator_directive(name, rest):
                 pass  # optionele no-op; lege regel scheidt systemen al
@@ -308,6 +321,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                         current is not None
                         and current.systems
                         and not current.systems[-1].ends_section
+                        and current.origin != "blok"
                     ):
                         diagnostics.append(
                             MvsaDiagnostic(
@@ -318,7 +332,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                                 severity="warning",
                             )
                         )
-                    pending_sectie = (rest, line_no)
+                    pending_sectie = (rest, line_no, "sectie")
                     current = None
             elif name == "blok":
                 if not rest or not BLOK_ID_RE.match(rest):
@@ -331,21 +345,8 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                         )
                     )
                 else:
-                    if (
-                        current is not None
-                        and current.systems
-                        and not current.systems[-1].ends_section
-                    ):
-                        diagnostics.append(
-                            MvsaDiagnostic(
-                                "MVSA-SECTIE-IMPLICIT",
-                                f"sectie impliciet afgesloten door @blok {rest!r} "
-                                f"(canoniek: || of :|| op het laatste systeem)",
-                                line_no,
-                                severity="warning",
-                            )
-                        )
-                    pending_sectie = (rest, line_no)
+                    # Speelblok ≠ sectie: geen ||-eis tussen @blok's.
+                    pending_sectie = (rest, line_no, "blok")
                     current = None
             elif name in ALLOWED_DIRECTIVES:
                 _validate_directive_value(name, rest, line_no, diagnostics)
@@ -439,14 +440,16 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
         pending_mscz_newline_lines.clear()
 
         if current is None:
-            sid = pending_sectie[0] if pending_sectie else None
-            start = pending_sectie[1] if pending_sectie else system.start_line
-            current = _Section(id=sid, start_line=start)
+            if pending_sectie:
+                sid, start, origin = pending_sectie
+            else:
+                sid, start, origin = None, system.start_line, None
+            current = _Section(id=sid, start_line=start, origin=origin)
             sections.append(current)
             pending_sectie = None
         elif pending_sectie is not None:
-            # @sectie without closing previous — already flagged; start new
-            current = _Section(id=pending_sectie[0], start_line=pending_sectie[1])
+            sid, start, origin = pending_sectie
+            current = _Section(id=sid, start_line=start, origin=origin)
             sections.append(current)
             pending_sectie = None
 
@@ -473,23 +476,26 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
             )
         )
     if pending_sectie is not None:
+        sid, start, origin = pending_sectie
+        label = "@blok" if origin == "blok" else "@sectie"
         diagnostics.append(
             MvsaDiagnostic(
-                "MVSA-SECTIE-EMPTY",
-                f"@sectie {pending_sectie[0]!r} zonder LSATB-systeem",
-                pending_sectie[1],
+                "MVSA-BLOK-EMPTY" if origin == "blok" else "MVSA-SECTIE-EMPTY",
+                f"{label} {sid!r} zonder LSATB-systeem",
+                start,
             )
         )
     if current is not None and current.systems and not current.systems[-1].ends_section:
-        diagnostics.append(
-            MvsaDiagnostic(
-                "MVSA-SECTIE-IMPLICIT",
-                "sectie impliciet afgesloten door einde van het bestand "
-                "(canoniek: || of :|| op het laatste systeem)",
-                current.systems[-1].start_line,
-                severity="warning",
+        if current.origin != "blok":
+            diagnostics.append(
+                MvsaDiagnostic(
+                    "MVSA-SECTIE-IMPLICIT",
+                    "sectie impliciet afgesloten door einde van het bestand "
+                    "(canoniek: || of :|| op het laatste systeem)",
+                    current.systems[-1].start_line,
+                    severity="warning",
+                )
             )
-        )
     return sections
 
 

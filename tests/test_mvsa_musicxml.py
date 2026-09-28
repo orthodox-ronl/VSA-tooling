@@ -19,6 +19,7 @@ from vsa.pitch_resolver import PitchResolver
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "mvsa"
 INTOCHT = EXAMPLES / "kleine-intocht-zondag-hemelum.mvsa"
+INTOCHT_SCHETS = EXAMPLES / "test-kleine-intocht-zondag-hemelum.mvsa"
 ALLELUIA = EXAMPLES / "alleluia-toon-8.mvsa"
 
 
@@ -257,7 +258,7 @@ def test_export_rejects_invalid():
 
 
 def test_export_intocht_schets_a():
-    text = INTOCHT.read_text(encoding="utf-8")
+    text = INTOCHT_SCHETS.read_text(encoding="utf-8")
     xml = export_mvsa_to_musicxml(text, section_id="schets-a-bladcijfer")
     assert xml.count("<part id=") == 4
     assert '<part id="P1">' in xml
@@ -290,7 +291,7 @@ def test_export_intocht_schets_a():
 
 
 def test_export_partituur_layout_two_staves():
-    text = INTOCHT.read_text(encoding="utf-8")
+    text = INTOCHT_SCHETS.read_text(encoding="utf-8")
     xml = export_mvsa_to_musicxml(
         text, section_id="schets-a-bladcijfer", layout="partituur"
     )
@@ -331,7 +332,7 @@ def test_export_partituur_layout_two_staves():
 
 def test_export_playback_no_recite_collapse():
     """Coria/playback: elke recite-lettergreep een noot; geen breve-collapse."""
-    text = INTOCHT.read_text(encoding="utf-8")
+    text = INTOCHT_SCHETS.read_text(encoding="utf-8")
     xml = export_mvsa_to_musicxml(text, section_id="schets-a-bladcijfer")
     body = xml.split('<part id="P1">')[1].split("</part>")[0]
     assert "<type>breve</type>" not in body
@@ -402,6 +403,92 @@ B: g&g g ||
     assert p1.count("<type>quarter</type>") == 0
     assert "<text>lu</text>" in p1
     assert "<text>ia</text>" in p1
+
+
+def test_playback_preserves_dotted_melisma_slots_trisagion_god():
+    """``God_.&_.`` met g4&a4 → twee gepunte halven (niet half+kwart×2).
+
+    Partituur/MSCZ mag I1 half+kwart met ties houden; playback niet splitten
+    want Coria stript ties en zou dan heraanslaan.
+    """
+    from xml.etree import ElementTree as ET
+
+    text = (EXAMPLES / "trisagion-8a-slav-hemelum.mvsa").read_text(
+        encoding="utf-8-sig"
+    )
+    playback = export_mvsa_to_musicxml(text, layout="playback")
+    root = ET.fromstring(playback)
+    p1 = root.find("./part[@id='P1']")
+    assert p1 is not None
+    m1 = p1.find("./measure[@number='1']")
+    assert m1 is not None
+    god_notes: list[ET.Element] = []
+    collecting = False
+    for note in m1.findall("note"):
+        lyric = note.find("lyric")
+        if lyric is not None and (lyric.findtext("text") or "") == "God":
+            collecting = True
+            god_notes = [note]
+            continue
+        if collecting:
+            if lyric is not None and lyric.findtext("text"):
+                break
+            god_notes.append(note)
+    assert len(god_notes) == 2
+    for note in god_notes:
+        assert note.findtext("type") == "half"
+        assert note.find("dot") is not None
+        assert note.findtext("duration") == "12"
+
+    partituur = export_mvsa_to_musicxml(text, layout="partituur")
+    proot = ET.fromstring(partituur)
+    # Stem SA voice 1 in partituur: God still I1-split with ties
+    pp1 = proot.find("./part[@id='P1']")
+    assert pp1 is not None
+    m1p = pp1.find("./measure[@number='1']")
+    assert m1p is not None
+    body = ET.tostring(m1p, encoding="unicode")
+    assert "<text>God</text>" in body
+    assert 'type="start"' in body  # tie start (I1 pack)
+    assert body.count("<type>quarter</type>") >= 1
+    assert body.count("<type>half</type>") >= 2
+
+
+def test_playback_ksl_svyaty_melisma_not_fake_quarter():
+    """ksl ``Свя-тый_.&-&_.`` op T (d4&d4&d4): één noot van 7 tellen, niet type=quarter.
+
+    Coria toont ``<type>``; duration=28 met type=quarter zag eruit als twee kwarten.
+    """
+    from xml.etree import ElementTree as ET
+
+    text = (EXAMPLES / "trisagion-8a-slav-hemelum.mvsa").read_text(
+        encoding="utf-8-sig"
+    )
+    playback = export_mvsa_to_musicxml(text, layout="playback")
+    root = ET.fromstring(playback)
+    p3 = root.find("./part[@id='P3']")
+    assert p3 is not None
+    found = False
+    for measure in p3.findall("measure"):
+        notes = [n for n in measure.findall("note") if n.find("rest") is None]
+        texts = []
+        for note in notes:
+            lyr = note.find("lyric")
+            texts.append(lyr.findtext("text") if lyr is not None else None)
+        # De _.&-&_. -maat: alleen Свя + тый (daarna Bez in de volgende maat).
+        if texts[:2] != ["Свя", "тый"]:
+            continue
+        if len(texts) >= 3 and texts[2]:
+            continue  # Свя-тый_. Бо… of Креп…
+        svya, tyj = notes[0], notes[1]
+        assert svya.findtext("type") == "quarter"
+        assert svya.findtext("duration") == "4"
+        assert tyj.findtext("duration") == "28"
+        assert tyj.findtext("type") == "whole"
+        assert len(tyj.findall("dot")) == 2
+        found = True
+        break
+    assert found, "ksl Свя-тый_.&-&_. measure not found on T (P3)"
 
 
 def test_alleluia_toon1_playback_lu_bb_is_half():
@@ -494,7 +581,7 @@ def test_playback_partituur_layout_roundtrip_transform():
         ensure_playback_musicxml,
     )
 
-    text = INTOCHT.read_text(encoding="utf-8")
+    text = INTOCHT_SCHETS.read_text(encoding="utf-8")
     playback = export_mvsa_to_musicxml(text, section_id="schets-a-bladcijfer")
     partituur = ensure_partituur_musicxml(playback)
     assert partituur.count('<part id="') == 2
@@ -514,7 +601,7 @@ def test_export_alleluia_so_sharp():
 
 
 def test_export_unknown_section():
-    text = INTOCHT.read_text(encoding="utf-8")
+    text = INTOCHT_SCHETS.read_text(encoding="utf-8")
     with pytest.raises(MvsaExportError, match="sectie"):
         export_mvsa_to_musicxml(text, section_id="bestaat-niet")
 
@@ -833,6 +920,30 @@ B: do ||
     assert '<creator type="translator">NL-redactie</creator>' in xml
     assert "<source>Liturgikon, p.147-149</source>" in xml
     assert "CC BY-SA 4.0 — test" in xml
+    playback = export_mvsa_to_musicxml(text, title="bestandsnaam", layout="playback")
+    assert "<source>Liturgikon, p.147-149</source>" in playback
+
+
+def test_bron_optional_colon_accepted():
+    """``@bron: "…"`` is equivalent to ``@bron "…"`` (YAML-achtige schrijfwijze)."""
+    text = """\
+@bron: "koormap Hemelum"
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    doc = parse_mvsa(text)
+    assert doc.bron == "koormap Hemelum"
+    assert not [
+        d for d in doc.diagnostics if d.code == "MVSA-DIRECTIVE" and "bron" in d.message
+    ]
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    assert "<source>koormap Hemelum</source>" in xml
 
 
 def test_mscz_newline_emits_new_system():
@@ -939,13 +1050,106 @@ def test_speelplan_playback_expands_measures():
     assert xml.count(">c</text>") == 4
 
 
-def test_speelplan_partituur_keeps_bladvorm_with_speeltekst():
+def test_speelplan_partituur_volta_ab_ac():
+    """``1,2,1,2,1,3`` → |: 1 |1,2. 2 :| 3. 3 (geen blok-ids, geen Speel:)."""
     xml = export_mvsa_to_musicxml(_SPEELPLAN_DEMO, layout="partituur")
-    assert "Speel: 1-2-1-2-1-3" in xml
+    assert "Speel: 1-2-1-2-1-3" not in xml
+    # Geen losse blok-id staff text (alleen lyrics a/b/c).
+    assert ">1</text>" not in xml
+    assert ">2</text>" not in xml
+    assert ">3</text>" not in xml
     # Bladvorm: drie maten × 2 parts (geen expansie).
     assert xml.count("<measure ") == 6
+    assert 'direction="forward"' in xml
+    assert 'direction="backward"' in xml
+    assert 'number="1,2"' in xml
+    assert 'number="3"' in xml
+    assert 'type="start"' in xml
+    assert 'type="stop"' in xml
     assert ">a</text>" in xml
     assert ">b</text>" in xml
     assert ">c</text>" in xml
-    # Speelplan-ids als bladmarkering.
-    assert ">1</text>" in xml or ">1<" in xml or "1" in xml
+
+
+def test_speelplan_partituur_ds_al_fine_trisagion_shape():
+    """``A B C D B C`` → segno op B, Fine op C, D.S. al Fine na D."""
+    text = """\
+@do F4
+@mode major
+@speelplan nls-1, nls-2, ksl, doxologie, nls-2, ksl
+
+@blok nls-1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok nls-2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok ksl
+L: c_ |
+S: mi |
+A: mi |
+T: mi |
+B: mi |
+
+@blok doxologie
+L: d_ ||
+S: fa ||
+A: fa ||
+T: fa ||
+B: fa ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert "Speel:" not in xml
+    assert "<segno/>" in xml
+    assert ">Fine</words>" in xml
+    assert ">D.S. al Fine</words>" in xml
+    assert 'dalsegno="segno"' in xml
+    # Compact: 4 blokken × 1 maat × 2 parts, geen expansie.
+    assert xml.count("<measure ") == 8
+
+
+def test_speelplan_partituur_expand_fallback():
+    """Onherleidbaar plan → uitgeschreven bladvorm (klinkende volgorde)."""
+    text = """\
+@do F4
+@mode major
+@speelplan 1, 3, 2, 1
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok 3
+L: c_ ||
+S: mi ||
+A: mi ||
+T: mi ||
+B: mi ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert "<ending " not in xml
+    assert "<segno/>" not in xml
+    # 1,3,2,1 → vier maten × 2 parts
+    assert xml.count("<measure ") == 8
+    # Lyrics alleen op SA (P1): a,c,b,a
+    assert xml.count(">a</text>") == 2
+    assert xml.count(">b</text>") == 1
+    assert xml.count(">c</text>") == 1

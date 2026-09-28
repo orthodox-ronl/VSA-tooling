@@ -65,15 +65,19 @@ vsa mvsa validate examples\mvsa
 Een `@`-regel begint (na spaties) met `@` + keyword + argumenten. Zulke regels
 horen **vóór** of **tussen** LSATB-systemen — niet tussen `L:` en `S:`.
 
-| Keyword       | Doet kort gezegd                                                         | Default / tip        |
-| ------------- | ------------------------------------------------------------------------ | -------------------- |
-| `@do`         | Grondtoon van de do-context (`F4`, `G4`, …)                              | `F4`                 |
-| `@mode`       | `major` of `minor`                                                       | `major`              |
-| `@oct`        | Schrijfoctaaf per stem (`S=0 A=0 T=-1 B=-1`)                             | overal `0`           |
-| `@sectie`     | Label voor een stuk tekst (export met `--section`)                       | —                    |
-| `@start`      | Beginanker (EHM) per stem; liever vaak `S-:` / `T\6:` op de stemregel    | —                    |
-| `@tekst`      | Cue / systeembrontekst (priesterregel, …) boven het volgende systeem     | —                    |
-| `@titel` e.d. | Metadata voor MSCZ-kop (titel, componist, …)                             | zie keywords-lijst   |
+| Keyword          | Doet kort gezegd                                                         | Default / tip        |
+| ---------------- | ------------------------------------------------------------------------ | -------------------- |
+| `@do`            | Grondtoon van de do-context (`F4`, `G4`, …)                              | `F4`                 |
+| `@mode`          | `major` of `minor`                                                       | `major`              |
+| `@oct`           | Schrijfoctaaf per stem (`S=0 A=0 T=-1 B=-1`)                             | overal `0`           |
+| `@sectie`        | Label voor een stuk (export `--section`); **niet** bij `@speelplan`      | —                    |
+| `@blok`          | Speelblok-id voor `@speelplan` (één plan per bestand)                    | zie speelplan-spec   |
+| `@speelplan`     | Klinkende volgorde van blokken (Coria uitgeschreven; blad compact)       | hoogstens één/file   |
+| `@start`         | Beginanker (EHM) per stem; liever vaak `S-:` / `T\6:` op de stemregel    | —                    |
+| `@tekst`         | Cue / systeembrontekst (priesterregel, …) boven het volgende systeem     | —                    |
+| `@title`         | Titel van het zangstuk (MusicXML `<work-title>`, MuseScore-titel)        | bestandsnaam         |
+| `@bron`          | Bron van de partituur (boek/koormap); MusicXML `<source>`, Coria-info    | —                    |
+| `@composer` e.d. | Metadata (componist, copyright, ondertitel, …)                           | zie keywords-lijst   |
 
 Sticky: `@do` / `@mode` / `@oct` gelden vanaf het **eerstvolgende** LSATB-systeem
 tot je ze opnieuw zet. Systemen scheiden doe je met een **lege regel**; `@---`
@@ -81,6 +85,8 @@ is alleen nodig als je commentaar op die scheidingsregel wilt.
 
 ??? tip "Voorbeeld: typische SATB-kop"
     ```text
+    @title "Alleluia - Toon 1"
+    @bron "koormap Hemelum"
     @do F4
     @mode major
     @oct S=0 A=0 T=-1 B=-1
@@ -92,7 +98,9 @@ is alleen nodig als je commentaar op die scheidingsregel wilt.
     ```
 
 Complete lijst (wel/niet gebruiken, vorm, onbekende keywords):
-[Keywords (`@…`)](../specification-mvsa/keywords.md).
+[Keywords (`@…`)](../specification-mvsa/keywords.md). Speelplan en bladvorm:
+[Speelplan](../specification-mvsa/speelplan.md) — één `@speelplan` per
+`.mvsa`; `@sectie` alleen in bestanden zonder speelplan.
 
 ---
 

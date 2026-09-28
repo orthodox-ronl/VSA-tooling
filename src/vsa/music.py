@@ -40,8 +40,13 @@ class Duration:
             "whole": 16,
             "breve": 32,
         }[self.note_type]
-        if self.dots == 1:
-            base = base + base // 2
+        # Each dot adds half of the previous undotted increment.
+        extra = base
+        for _ in range(self.dots):
+            extra //= 2
+            if extra <= 0:
+                break
+            base += extra
         return base
 
 

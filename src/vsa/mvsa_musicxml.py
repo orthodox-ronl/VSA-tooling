@@ -144,8 +144,11 @@ def export_mvsa_to_musicxml(
     measure_left_styles: list[str | None] = []
     measure_staff_texts: list[list[str]] = []
     measure_new_system: list[bool] = []
+    # Speelblok-id → (eerste_maatindex, laatste_maatindex) in bladvorm.
+    blok_measure_range: dict[str, tuple[int, int]] = {}
     score_started = False
     for section in sections:
+        section_start = len(bar_styles)
         for system in section.systems:
             events_by_voice = _system_to_events(system, layout=layout)
             for voice, measures in events_by_voice.items():
@@ -158,15 +161,6 @@ def export_mvsa_to_musicxml(
                 measure_left_styles.append(left)
                 if mi == 0:
                     texts = list(getattr(system, "staff_texts", None) or [])
-                    # Partituur + speelplan: bloknummer op eerste maat van het blok.
-                    if (
-                        layout == "partituur"
-                        and doc.speelplan
-                        and section.origin == "blok"
-                        and section.id
-                        and system is section.systems[0]
-                    ):
-                        texts = [section.id, *texts]
                     measure_staff_texts.append(texts)
                     # Alleen ``@mscz-newline`` forceert een MuseScore-systeembreuk.
                     wants_break = bool(getattr(system, "mscz_newline", False))
@@ -176,13 +170,42 @@ def export_mvsa_to_musicxml(
                     measure_new_system.append(False)
             if system.measures:
                 score_started = True
+        if (
+            layout == "partituur"
+            and section.origin == "blok"
+            and section.id
+            and len(bar_styles) > section_start
+        ):
+            blok_measure_range[section.id] = (section_start, len(bar_styles) - 1)
 
-    # Fase 1: speeltekst bovenaan partituur (bladvorm).
-    if layout == "partituur" and doc.speelplan and measure_staff_texts:
-        from .mvsa_speelplan import format_speelplan_text
+    from .mvsa_speelplan import plan_partituur_navigation
 
-        speel = format_speelplan_text(doc.speelplan)
-        measure_staff_texts[0] = [speel, *measure_staff_texts[0]]
+    nav = plan_partituur_navigation(doc) if layout == "partituur" else None
+    ending_start: list[str | None] = [None] * len(bar_styles)
+    ending_stop: list[str | None] = [None] * len(bar_styles)
+    repeat_times: list[int | None] = [None] * len(bar_styles)
+    nav_marks: list[list[str]] = [[] for _ in bar_styles]
+    if nav is not None and nav.kind == "volta_ab_ac" and nav.volta is not None:
+        _apply_volta_ab_ac(
+            nav.volta,
+            blok_measure_range,
+            measure_left_styles,
+            bar_styles,
+            ending_start,
+            ending_stop,
+        )
+    elif nav is not None and nav.kind == "repeat" and nav.repeat is not None:
+        _apply_repeat_nav(
+            nav.repeat,
+            blok_measure_range,
+            measure_left_styles,
+            bar_styles,
+            repeat_times,
+        )
+    elif nav is not None and nav.kind == "ds_al_fine" and nav.ds is not None:
+        _apply_ds_al_fine(nav.ds, blok_measure_range, nav_marks)
+    # expand / identity: geen extra tekens; expand schrijft het plan uit via
+    # sections_for_layout.
     # Wrap lange ``@tekst`` (``...`` → nieuwe regel) vóór breedte-schatting.
     for i, texts in enumerate(measure_staff_texts):
         if texts:
@@ -238,6 +261,10 @@ def export_mvsa_to_musicxml(
             measure_new_system=measure_new_system,
             measure_cue_gap=measure_cue_gap,
             measure_widths=measure_widths,
+            measure_ending_start=ending_start,
+            measure_ending_stop=ending_stop,
+            measure_repeat_times=repeat_times,
+            measure_nav_marks=nav_marks,
             meta=meta,
         )
     xml = _emit_score_playback(
@@ -265,7 +292,7 @@ def export_mvsa_path(
     section_id: str | None = None,
     layout: MvsaLayout = "playback",
 ) -> None:
-    text = path.read_text(encoding="utf-8")
+    text = path.read_text(encoding="utf-8-sig")
     xml = export_mvsa_to_musicxml(
         text,
         title=path.stem,
@@ -533,9 +560,12 @@ def _position_to_notes(
                 slur_stop=(n > 1 and si == n - 1),
             )
         )
-    # Same-pitch melisma (S13/R7): playback én partituur — zingen als één toon.
-    # Recite-print-collapse blijft partituur-only (M10).
-    return _collapse_same_pitch_melisma(notes)
+    # Same-pitch melisma (S13/R7 / M5a). Partituur: I1 ongestipte pack + ties.
+    # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot (Coria
+    # stript ties → half+kwart zou heraangeslagen klinken).
+    return _collapse_same_pitch_melisma(
+        notes, allow_dotted=(layout == "playback")
+    )
 
 
 def _pitch_equal(a: Pitch, b: Pitch) -> bool:
@@ -554,47 +584,92 @@ _DIVS_TO_DURATION: dict[int, Duration] = {
     3: Duration(note_type="eighth", dots=1),
     4: Duration(note_type="quarter", dots=0),
     6: Duration(note_type="quarter", dots=1),
+    7: Duration(note_type="quarter", dots=2),  # double-dotted quarter
     8: Duration(note_type="half", dots=0),
     12: Duration(note_type="half", dots=1),
+    14: Duration(note_type="half", dots=2),  # double-dotted half
     16: Duration(note_type="whole", dots=0),
+    24: Duration(note_type="whole", dots=1),
+    28: Duration(note_type="whole", dots=2),  # _.&-&_. same-pitch (7 quarters)
     # Geen 32→breve: MuseScore zet durationType=breve en rekt de maat (corrupt).
 }
 
-# Melisma-collapse mag alleen deze (zonder punt): MuseScore dropte dots
-# bij senza-misura-import → stem-len mismatch → “corrupt score”.
+# Melisma-collapse partituur/MSCZ: alleen ongestipt (MuseScore dropte dots
+# bij senza-misura-import → stem-len mismatch → “corrupt score”).
 _COLLAPSE_SAFE_DIVS = frozenset({1, 2, 4, 8, 16})
 _PACK_ORDER = (16, 8, 4, 2, 1)
+# Playback/Coria: gestipte standaardduuren ok (geen MuseScore-import).
+_PACK_ORDER_DOTTED = (28, 24, 16, 14, 12, 8, 7, 6, 4, 3, 2, 1)
 
 
 def _duration_from_divs(divs: int) -> tuple[Duration, int | None]:
     """Map divisions → (Duration, optional duration_divisions override).
 
     Nooit MusicXML ``type=breve``: MuseScore gebruikt dat als maatbreedte
-    (vaak 8/4) en stemmen lopen uit sync.
+    (vaak 8/4) en stemmen lopen uit sync. Wel tot dubbelgepunt whole (28).
     """
     if divs in _DIVS_TO_DURATION:
         return _DIVS_TO_DURATION[divs], None
+    for note_type, base in (
+        ("whole", 16),
+        ("half", 8),
+        ("quarter", 4),
+        ("eighth", 2),
+        ("16th", 1),
+    ):
+        if divs == base:
+            return Duration(note_type=note_type, dots=0), None
+        if divs == base + base // 2:
+            return Duration(note_type=note_type, dots=1), None
+        if base >= 4 and divs == base + base // 2 + base // 4:
+            return Duration(note_type=note_type, dots=2), None
     return Duration(note_type="quarter", dots=0), divs
 
 
-def _pack_safe_divs(total: int) -> list[int]:
-    """Split ``total`` into ongestipte standaardduuren ≤ whole (I1+I2)."""
+def _pack_safe_divs(total: int, *, allow_dotted: bool = False) -> list[int]:
+    """Split ``total`` into standaardduuren ≤ dotted-whole.
+
+    Partituur (``allow_dotted=False``): alleen ongestipt ≤ whole (I1+I2).
+    Playback: gestipte waarden toegestaan.
+    """
     if total <= 0:
         return []
     parts: list[int] = []
     remaining = total
-    for size in _PACK_ORDER:
+    order = _PACK_ORDER_DOTTED if allow_dotted else _PACK_ORDER
+    for size in order:
         while remaining >= size:
             parts.append(size)
             remaining -= size
     return parts
 
 
-def _pack_same_pitch_run(run: list[NoteEvent]) -> list[NoteEvent]:
+def _pack_same_pitch_run(
+    run: list[NoteEvent], *, allow_dotted: bool = False
+) -> list[NoteEvent]:
     """One same-pitch melisma run → one note or a tie-chain (I2)."""
     first = run[0]
     total = sum(_note_divs(n) for n in run)
-    parts = _pack_safe_divs(total)
+
+    if allow_dotted:
+        # Coria stript ``<tie>``: always one sounding note for a same-pitch hold.
+        # Keep intentional dotted ELM slots (``_.``) when the run is already one note.
+        if len(run) == 1:
+            return list(run)
+        dur, div_override = _duration_from_divs(total)
+        return [
+            NoteEvent(
+                pitch=first.pitch,
+                duration=dur,
+                lyrics=list(first.lyrics),
+                recite=first.recite,
+                spacer=first.spacer,
+                duration_divisions=div_override,
+                stemless=first.stemless,
+            )
+        ]
+
+    parts = _pack_safe_divs(total, allow_dotted=False)
     if not parts:
         return [
             NoteEvent(
@@ -627,14 +702,16 @@ def _pack_same_pitch_run(run: list[NoteEvent]) -> list[NoteEvent]:
     return out
 
 
-def _collapse_same_pitch_melisma(notes: list[NoteEvent]) -> list[NoteEvent]:
+def _collapse_same_pitch_melisma(
+    notes: list[NoteEvent], *, allow_dotted: bool = False
+) -> list[NoteEvent]:
     """Same-pitch melisma → collapse and/or tie-keten (S13/R7).
 
-    Geldt voor playback (``.mxl``) én partituur (MSCZ).
+    *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één noot.
+    Partituur/MSCZ (default): **I1** ongestipt ≤ whole; **I2** tie-keten.
 
-    **I1:** alleen ongestipte ≤ whole; nooit ``type=breve`` / gestipte sommen.
-    **I2:** som > whole → tie-keten (wholes + rest) i.p.v. heraangeslagen hakken.
-    Slur alleen bij toonwissels binnen het melisma; pure hold → ties, geen slur.
+    Slur alleen bij toonwissels binnen het melisma; pure hold → ties (partituur)
+    of één noot (playback).
     """
     if len(notes) <= 1:
         return notes
@@ -648,7 +725,7 @@ def _collapse_same_pitch_melisma(notes: list[NoteEvent]) -> list[NoteEvent]:
 
     packed: list[NoteEvent] = []
     for run in runs:
-        packed.extend(_pack_same_pitch_run(run))
+        packed.extend(_pack_same_pitch_run(run, allow_dotted=allow_dotted))
 
     n = len(packed)
     if n == 1:
@@ -772,6 +849,103 @@ def _collapse_recite_for_partituur(
     return out
 
 
+def _apply_volta_ab_ac(
+    volta,
+    blok_measure_range: dict[str, tuple[int, int]],
+    measure_left_styles: list[str | None],
+    bar_styles: list[str],
+    ending_start: list[str | None],
+    ending_stop: list[str | None],
+) -> None:
+    """Zet forward/backward-repeat + endings voor ``VoltaAbAc`` op maat-arrays."""
+    ra = blok_measure_range.get(volta.a)
+    rb = blok_measure_range.get(volta.b)
+    rc = blok_measure_range.get(volta.c)
+    if ra is None or rb is None or rc is None:
+        return
+    a0, _a1 = ra
+    b0, b1 = rb
+    c0, c1 = rc
+    measure_left_styles[a0] = "repeat-start"
+    ending_start[b0] = volta.first_ending_numbers
+    ending_stop[b1] = volta.first_ending_numbers
+    bar_styles[b1] = "repeat-end"
+    ending_start[c0] = volta.second_ending_number
+    ending_stop[c1] = volta.second_ending_number
+
+
+def _apply_repeat_nav(
+    repeat,
+    blok_measure_range: dict[str, tuple[int, int]],
+    measure_left_styles: list[str | None],
+    bar_styles: list[str],
+    repeat_times: list[int | None],
+) -> None:
+    """``|: start … end :|`` met optioneel ``times`` > 2."""
+    rs = blok_measure_range.get(repeat.start_id)
+    re_ = blok_measure_range.get(repeat.end_id)
+    if rs is None or re_ is None:
+        return
+    measure_left_styles[rs[0]] = "repeat-start"
+    bar_styles[re_[1]] = "repeat-end"
+    if repeat.times > 2:
+        repeat_times[re_[1]] = repeat.times
+
+
+def _apply_ds_al_fine(
+    ds,
+    blok_measure_range: dict[str, tuple[int, int]],
+    nav_marks: list[list[str]],
+) -> None:
+    """Segno/Fine + D.S. of D.C. al Fine op maat-nav-marks."""
+    rs = blok_measure_range.get(ds.segno_id)
+    rf = blok_measure_range.get(ds.fine_id)
+    rd = blok_measure_range.get(ds.ds_after_id)
+    if rs is None or rf is None or rd is None:
+        return
+    if not ds.use_da_capo:
+        nav_marks[rs[0]].append("segno")
+    nav_marks[rf[1]].append("fine")
+    jump = "dc_al_fine" if ds.use_da_capo else "ds_al_fine"
+    nav_marks[rd[1]].append(jump)
+
+
+def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
+    """MusicXML-directions voor segno / Fine / D.S.|D.C. al Fine."""
+    for mark in marks:
+        if mark == "segno":
+            out.append(
+                '<direction placement="above">'
+                "<direction-type><segno/></direction-type>"
+                '<sound segno="segno"/>'
+                "</direction>"
+            )
+        elif mark == "fine":
+            out.append(
+                '<direction placement="above">'
+                '<direction-type><words font-weight="bold">Fine</words>'
+                "</direction-type>"
+                '<sound fine="yes"/>'
+                "</direction>"
+            )
+        elif mark == "ds_al_fine":
+            out.append(
+                '<direction placement="above">'
+                '<direction-type><words font-weight="bold">D.S. al Fine</words>'
+                "</direction-type>"
+                '<sound dalsegno="segno"/>'
+                "</direction>"
+            )
+        elif mark == "dc_al_fine":
+            out.append(
+                '<direction placement="above">'
+                '<direction-type><words font-weight="bold">D.C. al Fine</words>'
+                "</direction-type>"
+                '<sound dacapo="yes"/>'
+                "</direction>"
+            )
+
+
 def _mvsa_bar_to_style(token: str) -> str:
     """MVSA-maatstreep → interne bar-code voor MusicXML-export.
 
@@ -823,12 +997,15 @@ def _emit_measure_barlines(
     *,
     left_style: str | None = None,
     pauzes: list[bool] | None = None,
+    ending_start: str | None = None,
+    ending_stop: str | None = None,
+    repeat_times: int | None = None,
 ) -> None:
     """Linker forward-repeat (na ``|:``) + rechter streep (eventueel backward).
 
     Linker streep komt van ``start_bar`` (leidende ``|:`` zonder lege maat) of
     van de vorige maat die op ``|:`` eindigde. Pauzematen tussen ``|:`` en de
-    koormaat worden overgeslagen.
+    koormaat worden overgeslagen. Optioneel MusicXML-``<ending>`` (volta).
     """
     need_forward = left_style == "repeat-start"
     if not need_forward:
@@ -837,27 +1014,27 @@ def _emit_measure_barlines(
             j -= 1
         prev = bar_styles[j] if j >= 0 and j < len(bar_styles) else None
         need_forward = prev == "repeat-start"
+    left_bits: list[str] = []
     if need_forward:
-        out.append(
-            '<barline location="left">'
-            "<bar-style>heavy-light</bar-style>"
-            '<repeat direction="forward"/>'
-            "</barline>"
-        )
+        left_bits.append("<bar-style>heavy-light</bar-style>")
+        left_bits.append('<repeat direction="forward"/>')
+    if ending_start:
+        left_bits.append(f'<ending number="{ending_start}" type="start"/>')
+    if left_bits:
+        out.append(f'<barline location="left">{"".join(left_bits)}</barline>')
     raw = bar_styles[mi] if 0 <= mi < len(bar_styles) else "regular"
     style = _right_bar_style(mi, n_measures, bar_styles)
-    repeat_dir: str | None = None
+    right_bits: list[str] = [f"<bar-style>{style}</bar-style>"]
     if raw in ("repeat-end", "repeat-end-section"):
-        repeat_dir = "backward"
-    if repeat_dir:
-        out.append(
-            f'<barline location="right"><bar-style>{style}</bar-style>'
-            f'<repeat direction="{repeat_dir}"/></barline>'
-        )
-    else:
-        out.append(
-            f'<barline location="right"><bar-style>{style}</bar-style></barline>'
-        )
+        if repeat_times and repeat_times > 2:
+            right_bits.append(
+                f'<repeat direction="backward" times="{repeat_times}"/>'
+            )
+        else:
+            right_bits.append('<repeat direction="backward"/>')
+    if ending_stop:
+        right_bits.append(f'<ending number="{ending_stop}" type="stop"/>')
+    out.append(f'<barline location="right">{"".join(right_bits)}</barline>')
 
 
 def _resolve_slot(
@@ -1267,6 +1444,10 @@ def _emit_score_partituur(
     measure_new_system: list[bool] | None = None,
     measure_cue_gap: list[bool] | None = None,
     measure_widths: list[int | None] | None = None,
+    measure_ending_start: list[str | None] | None = None,
+    measure_ending_stop: list[str | None] | None = None,
+    measure_repeat_times: list[int | None] | None = None,
+    measure_nav_marks: list[list[str]] | None = None,
     meta: dict[str, str | None] | None = None,
 ) -> str:
     """Twee balken SA/TB: voice 1 (S/T) stok omhoog, voice 2 (A/B) stok omlaag."""
@@ -1279,6 +1460,10 @@ def _emit_score_partituur(
     new_systems = list(measure_new_system or [])
     cue_gaps = list(measure_cue_gap or [])
     widths = list(measure_widths or [])
+    end_starts = list(measure_ending_start or [])
+    end_stops = list(measure_ending_stop or [])
+    rep_times = list(measure_repeat_times or [])
+    navs = list(measure_nav_marks or [])
     while len(left_styles) < n_measures:
         left_styles.append(None)
     while len(staff_texts) < n_measures:
@@ -1289,6 +1474,14 @@ def _emit_score_partituur(
         cue_gaps.append(False)
     while len(widths) < n_measures:
         widths.append(None)
+    while len(end_starts) < n_measures:
+        end_starts.append(None)
+    while len(end_stops) < n_measures:
+        end_stops.append(None)
+    while len(rep_times) < n_measures:
+        rep_times.append(None)
+    while len(navs) < n_measures:
+        navs.append([])
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -1339,6 +1532,8 @@ def _emit_score_partituur(
             if top_staff:
                 if new_systems[mi]:
                     out.append('<print new-system="yes"/>')
+                if navs[mi]:
+                    _emit_nav_marks(out, navs[mi])
                 if staff_texts[mi]:
                     _emit_staff_text_directions(out, staff_texts[mi])
             if cue_gaps[mi]:
@@ -1362,6 +1557,9 @@ def _emit_score_partituur(
                 n_measures,
                 styles,
                 left_style=left_styles[mi],
+                ending_start=end_starts[mi],
+                ending_stop=end_stops[mi],
+                repeat_times=rep_times[mi],
             )
             out.append("</measure>")
         out.append("</part>")

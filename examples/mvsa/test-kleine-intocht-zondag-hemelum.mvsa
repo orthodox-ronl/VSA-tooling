@@ -8,9 +8,10 @@
 #
 # Niet door `vsa` geparsed. Draft-spec: docs/specification-mvsa/
 
-@title "(7) Kleine Intocht (testbestand)
+@title "(7) Kleine Intocht (testbestand)"
 @composer     "Traditioneel"
 @tekstdichter "bron: orthodoxekerkmuziek.nl"
+@bron "orthodoxekerkmuziek.nl"
 @copyright "CC BY-SA 4.0"
 
 @do F4

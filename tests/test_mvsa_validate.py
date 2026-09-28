@@ -451,6 +451,32 @@ S: re ||
     )
 
 
+def test_validate_blok_no_implicit_sectie_warning():
+    """Tussen @blok's is geen || vereist; geen SECTIE-IMPLICIT."""
+    text = """\
+@do F4
+@mode major
+@speelplan 1, 2
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+"""
+    diags = validate_mvsa_text(text)
+    assert not any(d.code == "MVSA-SECTIE-IMPLICIT" for d in diags)
+    assert not any(d.severity == "error" for d in diags)
+
+
 @pytest.mark.parametrize(
     "name",
     [
@@ -466,6 +492,15 @@ def test_examples_mvsa_ok(name: str):
     diags = validate_mvsa_text(path.read_text(encoding="utf-8"), source=str(path))
     errors = [d for d in diags if d.severity == "error"]
     assert errors == [], errors
+
+
+def test_leading_utf8_bom_is_ignored():
+    """Windows-editors zetten soms UTF-8 BOM; dat mag geen MVSA-LINE geven."""
+    text = "\ufeff# comment\n@do F4\n@mode major\n@sectie x\nL: a_ ||\nS: do ||\nA: do ||\nT: do ||\nB: do ||\n"
+    diags = validate_mvsa_text(text)
+    errors = [d for d in diags if d.severity == "error"]
+    assert errors == [], errors
+    assert not any(d.code == "MVSA-LINE" for d in diags)
 
 
 @pytest.mark.parametrize(

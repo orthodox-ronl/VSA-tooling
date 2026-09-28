@@ -144,6 +144,10 @@ def apply_partituur_mscz_conventions(
 
     *title* (``@title``) wordt als ``workTitle``-meta én als Title-tekst in de
     kop-VBox gezet — MusicXML-import laat dat veld soms leeg.
+
+    *bron* (``@bron``) → meta ``source``. Staat er geen *tekstdichter*, dan ook
+    zichtbaar op het blad als lyricist-tekst ``bron: …`` (MuseScore toont meta
+    ``source`` niet op het blad). *tekstdichter* wint voor die bladplek.
     """
     path = Path(path)
     if not path.is_file() or path.suffix.lower() != ".mscz":
@@ -170,16 +174,23 @@ def apply_partituur_mscz_conventions(
     mscx = _apply_recite_print_conventions(mscx)
     if title:
         mscx = _ensure_score_title(mscx, title)
+    # Bladzichtbaar: echte @tekstdichter wint; anders @bron als lyricist-tekst
+    # (MuseScore toont meta ``source`` niet op het blad, wél lyricist).
+    sheet_lyricist = (tekstdichter or "").strip()
+    if not sheet_lyricist and bron:
+        sheet_lyricist = _bron_as_sheet_lyricist(bron)
     for meta_name, value in (
         ("composer", composer),
         ("source", bron),
         ("subtitle", ondertitel),
-        ("lyricist", tekstdichter),
+        ("lyricist", sheet_lyricist or None),
         ("arranger", arrangeur),
         ("translator", vertaler),
     ):
         if value:
             mscx = _set_meta(mscx, meta_name, value)
+    if sheet_lyricist:
+        mscx = _ensure_header_text(mscx, style="lyricist", text=sheet_lyricist)
     short, full = _format_copyright_notices(copyright, bibliotheek_id)
     mscx = _set_meta(mscx, "copyright", short)
     mscx = _set_footer_style(mscx, short)
@@ -314,21 +325,41 @@ def _set_meta(mscx: str, name: str, value: str) -> str:
 _TITLE_TEXT_BLOCK_RE = re.compile(
     r"<Text>\s*<style>\s*title\s*</style>[\s\S]*?</Text>",
 )
+_LYRICIST_TEXT_BLOCK_RE = re.compile(
+    r"<Text>\s*<style>\s*lyricist\s*</style>[\s\S]*?</Text>",
+)
 # Eerste VBox direct onder Staff (kopkader vóór Measures).
 _HEADER_VBOX_RE = re.compile(
     r"(<Staff\b[^>]*>\s*)(<VBox\b[^>]*>)([\s\S]*?)(</VBox>)",
 )
 
 
-def _ensure_score_title(mscx: str, title: str) -> str:
-    """Zet ``workTitle``-meta én vul/plaats Title-tekst in de kop-VBox."""
-    title = title.strip()
-    if not title:
-        return mscx
-    mscx = _set_meta(mscx, "workTitle", title)
-    escaped = _xml_text(title)
+def _bron_as_sheet_lyricist(bron: str) -> str:
+    """Visible sheet label when only ``@bron`` is set (no ``@tekstdichter``)."""
+    value = bron.strip()
+    if not value:
+        return ""
+    if value.lower().startswith("bron:"):
+        return value
+    return f"bron: {value}"
 
-    def repl_title(m: re.Match[str]) -> str:
+
+def _ensure_header_text(mscx: str, *, style: str, text: str) -> str:
+    """Zet of vul een Text-blok met *style* in de kop-VBox."""
+    text = text.strip()
+    if not text:
+        return mscx
+    escaped = _xml_text(text)
+    style_l = style.lower()
+    block_re = (
+        _TITLE_TEXT_BLOCK_RE if style_l == "title" else _LYRICIST_TEXT_BLOCK_RE
+    )
+    if style_l not in ("title", "lyricist"):
+        block_re = re.compile(
+            rf"<Text>\s*<style>\s*{re.escape(style)}\s*</style>[\s\S]*?</Text>",
+        )
+
+    def repl_existing(m: re.Match[str]) -> str:
         block = m.group(0)
         if re.search(r"<text[\s/>]", block):
             return re.sub(
@@ -339,14 +370,13 @@ def _ensure_score_title(mscx: str, title: str) -> str:
             )
         return block.replace("</Text>", f"<text>{escaped}</text></Text>", 1)
 
-    new_mscx, n = _TITLE_TEXT_BLOCK_RE.subn(repl_title, mscx, count=1)
+    new_mscx, n = block_re.subn(repl_existing, mscx, count=1)
     if n:
         return new_mscx
 
-    # Geen Title-Text: voeg toe aan eerste VBox vóór Measures (kopkader).
-    title_block = (
+    text_block = (
         "<Text>\n"
-        "          <style>title</style>\n"
+        f"          <style>{style}</style>\n"
         f"          <text>{escaped}</text>\n"
         "          </Text>\n"
         "        "
@@ -354,17 +384,16 @@ def _ensure_score_title(mscx: str, title: str) -> str:
 
     def repl_vbox(m: re.Match[str]) -> str:
         staff_open, vbox_open, body, vbox_close = m.groups()
-        return f"{staff_open}{vbox_open}{title_block}{body}{vbox_close}"
+        return f"{staff_open}{vbox_open}{body}{text_block}{vbox_close}"
 
     new_mscx, n = _HEADER_VBOX_RE.subn(repl_vbox, mscx, count=1)
     if n:
         return new_mscx
 
-    # Geen VBox: maak een minimale titel-VBox vóór de eerste Measure.
     title_vbox = (
         "<VBox>\n"
         "        <height>10</height>\n"
-        f"        {title_block}"
+        f"        {text_block}"
         "</VBox>\n"
         "      "
     )
@@ -374,6 +403,15 @@ def _ensure_score_title(mscx: str, title: str) -> str:
         mscx,
         count=1,
     )
+
+
+def _ensure_score_title(mscx: str, title: str) -> str:
+    """Zet ``workTitle``-meta én vul/plaats Title-tekst in de kop-VBox."""
+    title = title.strip()
+    if not title:
+        return mscx
+    mscx = _set_meta(mscx, "workTitle", title)
+    return _ensure_header_text(mscx, style="title", text=title)
 
 
 def _format_copyright_notices(

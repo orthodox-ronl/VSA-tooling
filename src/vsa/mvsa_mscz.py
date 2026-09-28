@@ -86,7 +86,7 @@ def export_mvsa_to_mscz(
         try:
             from .bibliotheek_id import bibliotheek_id_from_path
 
-            doc = parse_mvsa(path.read_text(encoding="utf-8"))
+            doc = parse_mvsa(path.read_text(encoding="utf-8-sig"))
             # Geen mid-systeem-HBox vóór @tekst (accolade). Scheiding = ‖ +
             # SystemText; lege spacer-maten worden weggestript.
             apply_partituur_mscz_conventions(
@@ -112,14 +112,8 @@ def export_mvsa_to_mscz(
 
 
 def _collect_staff_texts_from_doc(doc) -> list[str]:
-    from .mvsa_speelplan import format_speelplan_text
-
     out: list[str] = []
-    if doc.speelplan:
-        out.append(format_speelplan_text(doc.speelplan))
     for section in doc.sections:
-        if doc.speelplan and section.origin == "blok" and section.id:
-            out.append(section.id)
         for system in section.systems:
             out.extend(system.staff_texts)
     return out
@@ -127,4 +121,4 @@ def _collect_staff_texts_from_doc(doc) -> list[str]:
 
 def _collect_staff_texts(path: Path) -> list[str]:
     """All ``@tekst`` strings in document order (for MSCZ SystemText promote)."""
-    return _collect_staff_texts_from_doc(parse_mvsa(path.read_text(encoding="utf-8")))
+    return _collect_staff_texts_from_doc(parse_mvsa(path.read_text(encoding="utf-8-sig")))

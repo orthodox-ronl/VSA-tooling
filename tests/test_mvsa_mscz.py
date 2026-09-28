@@ -330,6 +330,65 @@ def test_colophon_uses_copyright_and_bibliotheek_id(tmp_path: Path):
     assert "oddFooterC>" in out
 
 
+def test_bron_without_tekstdichter_appears_as_lyricist_on_sheet(tmp_path: Path):
+    """``@bron`` alleen → zichtbaar op blad als lyricist ``bron: …``."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1">'
+        "<Measure><voice>"
+        "<Chord><durationType>whole</durationType></Chord>"
+        "</voice><len>1/1</len></Measure>"
+        "</Staff>"
+        "</Score></museScore>"
+    )
+    path = tmp_path / "bron.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("bron.mscx", mscx)
+    apply_partituur_mscz_conventions(
+        path,
+        title="Demo",
+        bron="koormap Hemelum",
+    )
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("bron.mscx").decode("utf-8")
+    assert '<metaTag name="source">koormap Hemelum</metaTag>' in out
+    assert '<metaTag name="lyricist">bron: koormap Hemelum</metaTag>' in out
+    assert "<style>lyricist</style>" in out
+    assert "<text>bron: koormap Hemelum</text>" in out
+
+
+def test_tekstdichter_wins_over_bron_for_sheet_lyricist(tmp_path: Path):
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1">'
+        "<Measure><voice>"
+        "<Chord><durationType>whole</durationType></Chord>"
+        "</voice><len>1/1</len></Measure>"
+        "</Staff>"
+        "</Score></museScore>"
+    )
+    path = tmp_path / "both.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("both.mscx", mscx)
+    apply_partituur_mscz_conventions(
+        path,
+        title="Demo",
+        bron="koormap Hemelum",
+        tekstdichter="bron: koormap Hemelum",
+    )
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("both.mscx").decode("utf-8")
+    assert '<metaTag name="source">koormap Hemelum</metaTag>' in out
+    assert '<metaTag name="lyricist">bron: koormap Hemelum</metaTag>' in out
+    assert out.count("bron: koormap Hemelum") >= 2
+
+
 def test_ensure_score_title_fills_empty_title_text(tmp_path: Path):
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 

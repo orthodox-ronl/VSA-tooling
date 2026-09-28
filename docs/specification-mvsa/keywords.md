@@ -131,24 +131,24 @@ beide voorkomen.
 ## `@sectie`
 
 **Wat het is.** Opent een nieuwe **sectie** met een id. Een sectie is een
-muzikale eenheid van een of meer LSATB-systemen.
+muzikale eenheid van een of meer LSATB-systemen — in bestanden **zonder**
+`@speelplan`.
 
 **Vorm.** `@sectie` + spatie + id: `[a-z][a-z0-9_-]*` (kleine letters).
 
 **Sectie-einde.** Canoniek eindigt de vorige sectie met `||` (of `:||`) op alle
 lyrics-/stemregels. Een nieuwe `@sectie` **sluit de vorige sectie ook impliciet
-af** als die nog open stond (toegestaan, niet-canoniek — validate mag warnen).
-Zelfde impliciete afsluiting geldt bij **einde van het bestand**, en later bij
-het sluiten van een `::: mvsa-notatie`-blok. Zie
-[Syntax — sectie-einde](syntax.md#einde).
+af** als die nog open stond (toegestaan, niet-canoniek — validate mag warnen
+met `MVSA-SECTIE-IMPLICIT`). Zelfde warning bij **EOF** van een open sectie of
+anonieme sectie. Zie [Syntax — sectie-einde](syntax.md#einde).
 
 **Wel gebruiken** om delen te benoemen die je apart wilt exporteren
-(`vsa mvsa musicxml … --section id`) of om het bestand leesbaar te houden
-(couplet / refrein / schets).
+(`vsa mvsa musicxml … --section id`) of om schetsen in één experiment-bestand
+uit elkaar te houden (couplet / refrein / pitch-variant).
 
-**Niet gebruiken** als label boven één los antwoord in een litanie: daarvoor is
-`@tekst` bedoeld (zichtbare cue op het blad). `@sectie` is structuur in de
-bron, geen staff-tekst.
+**Niet gebruiken** samen met `@speelplan` (dan: `@blok`). Niet als litanie-cue
+(dat is `@tekst`). Niet om meerdere speelplannen in één file te nesten — één
+plan = één `.mvsa`.
 
 ```text
 @sectie openingsfrase
@@ -158,17 +158,17 @@ bron, geen staff-tekst.
 
 ## `@blok`
 
-**Wat het is.** Opent een **speelblok**: een genaamde sectie die in een
-`@speelplan` mag voorkomen. Structureel hetzelfde als `@sectie` (nieuwe
-muzikale eenheid), maar met ids die ook cijfers mogen zijn.
+**Wat het is.** Opent een **speelblok**: genoemd LSATB-segment voor een
+`@speelplan`. Geen “sectie” in de zin van `||`-afsluiting; tussen blokken is
+`||` niet verplicht.
 
 **Vorm.** `@blok` + spatie + id: `[1-9][0-9]*` **of** `[a-z][a-z0-9_-]*`.
 
-**Wel gebruiken** wanneer je een speelplan hebt (of wilt voorbereiden): elk
-blok één keer opschrijven, volgorde in `@speelplan`.
+**Wel gebruiken** wanneer je een speelplan hebt: elk blok één keer, volgorde in
+`@speelplan`. Eén speelplan per bestand.
 
-**Niet gebruiken** i.p.v. `@tekst` (zichtbare litanie-cue) of voor
-layout-systeembreuken (`@mscz-newline`).
+**Niet gebruiken** i.p.v. `@tekst` of `@mscz-newline`; niet i.p.v. `@sectie`
+buiten een speelplan-bestand (tenzij je redactioneel een id wilt zonder plan).
 
 Zie [Speelplan](speelplan.md).
 
@@ -181,15 +181,16 @@ Zie [Speelplan](speelplan.md).
 ## `@speelplan`
 
 **Wat het is.** Zet de **canonieke klinkende volgorde** van speelblokken.
-Bladmuziek (MSCZ) blijft compact; MXL-playback schrijft het plan uit.
+Bladmuziek (MSCZ) blijft compact (volta / herhaling / D.S. of expand);
+MXL-playback schrijft het plan uit.
 
 **Vorm.** `@speelplan` + komma-gescheiden ids (zelfde id-vorm als `@blok`).
-Hoogstens één per bestand.
+Hoogstens **één** per bestand — nest geen plan in `@sectie`.
 
 **Wel gebruiken** bij vaste herhaalpatronen (bijv. alleluia 1-2-1-2-1-3).
 
-**Niet gebruiken** samen met `|:` / `:|` in die speelblokken — die strepen
-zijn daar verboden; het plan is leidend.
+**Niet gebruiken** samen met `|:` / `:|` in die speelblokken; niet naast
+`@sectie` in hetzelfde bestand.
 
 Zie [Speelplan](speelplan.md).
 
@@ -365,8 +366,21 @@ dat is `@bron`.
 
 **`@bron`.** Referentie naar de **bron van de partituur** (boek, bladzijden,
 uitgave), zodat je later terug kunt vinden waar deze notatie vandaan komt.
-Verschijnt in MusicXML als `<source>` en in MuseScore als meta `source` (niet
-als zichtbare staff-tekst).
+Gaat mee in **beide** exportpaden:
+
+- MusicXML (playback/Coria én partituur): `<identification><source>…</source>`
+- MuseScore/MSCZ: meta-tag `source`
+
+**Op het MSCZ-blad:** MuseScore toont meta `source` niet automatisch in de kop.
+Zonder `@tekstdichter` zet de MSCZ-export daarom `@bron` ook als
+**lyricist-tekst** in de kop (`bron: …`), zodat de herkomst op papier zichtbaar
+is. Heb je wél een echte tekstdichter, dan wint `@tekstdichter` voor die plek;
+`@bron` blijft dan alleen in meta/`<source>`.
+
+Optionele schrijfwijze met dubbele punt na het keyword: `@bron: "…"` ≡
+`@bron "…"`. Let op: `bron:` *in* een quoted string (bv.
+`@tekstdichter "bron: koormap …"`) is gewoon tekst — dat is geen keyword en
+geeft geen warning.
 
 ```text
 @bron "Liturgikon, p.147-149"
@@ -374,10 +388,14 @@ als zichtbare staff-tekst).
 
 **`@ondertitel`.** Ondertitel onder de hoofdtitel (bv. liturgische aanduiding).
 Gaat mee in partituur/MSCZ (`movement-title` / MuseScore `subtitle`); Coria-
-playback strip’t die tag bewust.
+playback behoudt die tag (geen sanitize-strip).
 
 **`@tekstdichter` / `@arrangeur` / `@vertaler`.** Personenrollen naast de
 componist; zelfde stringvorm. Alleen zetten als je die rol echt kent.
+`@tekstdichter` verschijnt op het MSCZ-blad (lyricist-plek). Wil je daar de
+partituurbron tonen, gebruik bij voorkeur alleen `@bron` (zie hierboven); een
+expliciete `@tekstdichter "bron: …"` mag nog steeds en wint dan voor die
+bladplek.
 
 **`@copyright`.** Bronnotice voor footer (kort) en colofon (volledig) in
 `.mscz`, en `<rights>` in MusicXML. Zonder `@copyright` gebruikt MSCZ-export
