@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 12:23 CEST.
+  , gebouwd 2026-09-28 15:58 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5302,23 +5302,22 @@ eenduidig “stem <code>S</code> + EHM <code>-</code>” is (niet stem-id <code>
 <p>Na de dubbele punt volgt inhoud (hoogte- of lyrics-tekst), voorafgegaan door
 optionele spaties.</p>
 <h2 id="3-lsatb-systeem">3. LSATB-systeem<a class="headerlink" href="#3-lsatb-systeem" title="Permanent link">&para;</a></h2>
-<p>Een <strong>LSATB-systeem</strong> is een reeks inhoudsregels die elk met een regelidentifier
-beginnen. Tussen de identifier-regels van <strong>hetzelfde</strong> systeem mogen (niet
-canoniek, wel toegestaan):</p>
+<p>Een <strong>LSATB-systeem</strong> is een aaneengesloten reeks inhoudsregels die elk met een
+regelidentifier beginnen. Tussen de identifier-regels van <strong>hetzelfde</strong> systeem
+mag alleen <code>#</code>-commentaar (geen lege regels).</p>
+<p>Een <strong>lege regel</strong> (alleen spaties/tabs, of helemaal leeg) <strong>eindigt</strong> het
+lopende LSATB-systeem. Daarna mag een nieuw systeem beginnen, of iets anders
+(<code>@</code>-directive, <code>#</code>-commentaar, HTML-commentaar, …). De <strong>canonieke</strong>
+scheiding tussen vscode-systemen is die lege regel; <code>@---</code> is optioneel
+(vooral met commentaar erna).</p>
+<p>Tussen twee systemen van <strong>dezelfde sectie</strong> mogen verder:</p>
 <ul>
-<li>lege regels;</li>
-<li><code>#</code>-commentaar.</li>
-</ul>
-<p>Tussen twee systemen van <strong>dezelfde sectie</strong> mogen bovendien:</p>
-<ul>
-<li>HTML-commentaar;</li>
+<li>lege regels (één of meer);</li>
+<li><code>#</code>- of HTML-commentaar;</li>
 <li>directives (<code>@do</code>, <code>@mode</code>, <code>@oct</code>, <code>@title</code>, <code>@tekst</code>, <code>@---</code>, …).</li>
 </ul>
-<p>Een kale lege regel <strong>scheidt geen</strong> systemen (die mag midden in één systeem).
-Zet tussen vscode-systemen een <code>@</code>-regel, bv. <code>@---</code> (optioneel commentaar
-erna).</p>
-<p>Canoniek staan de LSATB-regels <strong>direct onder elkaar</strong> zonder lege regels
-ertussen (zo schrijft tooling bij genereren / normalize).</p>
+<p>Canoniek staan de LSATB-regels van één systeem <strong>direct onder elkaar</strong> (geen
+lege regels ertussen; zo schrijft tooling bij genereren / normalize).</p>
 <p>Een systeem:</p>
 <ol>
 <li>bevat minstens één lyrics-regel of stemregel (in de praktijk beide);</li>
@@ -5495,8 +5494,12 @@ S: …
    de open sectie in dat blok.</li>
 </ol>
 <p>Canoniek schrijf je dus nog steeds <code>||</code> (of <code>:||</code>) op het laatste systeem van
-elke sectie. Impliciete afsluiting via <code>@sectie</code> / EOF / fence is geldig voor
-validatie en export, maar niet de vorm die tooling bij genereren schrijft.</p>
+elke <strong>sectie</strong> (<code>@sectie</code> / anoniem). Impliciete afsluiting via <code>@sectie</code> /
+EOF / fence is geldig voor validatie en export, maar niet de vorm die tooling
+bij genereren schrijft. Validate mag <code>MVSA-SECTIE-IMPLICIT</code> geven.</p>
+<p><strong>Speelblokken (<code>@blok</code>):</strong> horen niet onder deze <code>||</code>-canonieke regel. Een
+nieuw <code>@blok</code> of EOF na een speelblok zonder <code>||</code> is <strong>geen</strong> warning. Zie
+<a href="../speelplan/">Speelplan</a>.</p>
 <h3 id="meerdere-systemen-per-sectie">Meerdere systemen per sectie<a class="headerlink" href="#meerdere-systemen-per-sectie" title="Permanent link">&para;</a></h3>
 <p>Een lange sectie mag over meerdere LSATB-systemen worden gesplitst (leesbaarheid
 in de editor). Elk tussensysteem eindigt op <code>|</code> (of herhalingsspecialisatie die

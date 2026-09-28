@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 12:23 CEST.
+  , gebouwd 2026-09-28 15:58 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4699,15 +4699,24 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
 <li>Binnen een sectie hebben alle LSATB-systemen dezelfde regelidentifiers
    (inclusief eventuele EHM) in dezelfde volgorde.</li>
 <li>Elk LSATB-systeem eindigt op elke LSATB-regel met <code>|</code> of <code>||</code> (of
-   toegestane specialisatie).</li>
-<li>Een sectie eindigt door: (a) <code>||</code> of <code>:||</code> op alle LSATB-regels van een
-   systeem (canoniek); of (b) een nieuwe <code>@sectie</code> die de vorige impliciet
-   afsluit; of (c) einde van het bestand (EOF); later ook het sluiten van een
-   <code>::: mvsa-notatie</code>-fence. Ontbrekende <code>||</code> vóór (b)/(c) mag een <strong>warning</strong>
-   zijn (niet-canoniek), geen error.</li>
+   toegestane specialisatie).
+3a. Een <strong>lege regel</strong> binnen of direct na LSATB-inhoud <strong>eindigt</strong> het lopende
+    LSATB-systeem. Lege regels horen dus <strong>niet</strong> tussen <code>L:</code> en <code>S:</code> van
+    hetzelfde systeem; wél tussen twee systemen (primaire scheiding). Optioneel
+    mag <code>@---</code> (met commentaar) of een andere directive hetzelfde doen.
+    <code>#</code>-commentaar mag wél tussen markers van hetzelfde systeem.</li>
+<li>Een <strong>sectie</strong> (<code>@sectie</code> of anoniem) eindigt door: (a) <code>||</code> of <code>:||</code> op alle
+   LSATB-regels van een systeem (canoniek); of (b) een nieuwe <code>@sectie</code> die de
+   vorige impliciet afsluit; of (c) einde van het bestand (EOF); later ook het
+   sluiten van een <code>::: mvsa-notatie</code>-fence. Ontbrekende <code>||</code> vóór (b)/(c) mag
+   een <strong>warning</strong> <code>MVSA-SECTIE-IMPLICIT</code> zijn (niet-canoniek), geen error.
+   <strong>Uitzondering:</strong> speelblokken (<code>@blok</code>) — geen warning bij overgang naar
+   een volgend <code>@blok</code> of bij EOF van een <code>@blok</code>; <code>||</code> tussen blokken is geen
+   eis (zie <a href="../speelplan/">Speelplan</a>).</li>
 <li><code>@sectie</code> <em>id</em> voldoet aan <code>[a-z][a-z0-9_-]*</code>.
-5a. <code>@blok</code> / <code>@speelplan</code>: zie <a href="../speelplan/">Speelplan</a> (ids, geen herhaalstrepen
-    in speelplan-blokken, expansie vs bladvorm).</li>
+5a. <code>@blok</code> / <code>@speelplan</code>: zie <a href="../speelplan/">Speelplan</a>. Eén <code>@speelplan</code> per
+    bestand; geen <code>@sectie</code>/anonieme muziek naast een speelplan; geen
+    herhaalstrepen in speelplan-blokken.</li>
 </ol>
 <h2 id="sync">Sync<a class="headerlink" href="#sync" title="Permanent link">&para;</a></h2>
 <ol>
@@ -4791,7 +4800,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-28
         
       </p>
       

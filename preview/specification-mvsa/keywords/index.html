@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 12:23 CEST.
+  , gebouwd 2026-09-28 15:58 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4877,7 +4877,7 @@ horen:</p>
 </tr>
 <tr>
 <td><strong><code>@---</code></strong></td>
-<td>No-op regelscheider tussen LSATB-systemen; optioneel commentaar erna (geen warning)</td>
+<td>Optionele no-op-scheider tussen LSATB-systemen (lege regel volstaat); commentaar erna OK</td>
 </tr>
 </tbody>
 </table>
@@ -4950,44 +4950,45 @@ beide voorkomen.</p>
 <hr />
 <h2 id="sectie"><code>@sectie</code><a class="headerlink" href="#sectie" title="Permanent link">&para;</a></h2>
 <p><strong>Wat het is.</strong> Opent een nieuwe <strong>sectie</strong> met een id. Een sectie is een
-muzikale eenheid van een of meer LSATB-systemen.</p>
+muzikale eenheid van een of meer LSATB-systemen — in bestanden <strong>zonder</strong>
+<code>@speelplan</code>.</p>
 <p><strong>Vorm.</strong> <code>@sectie</code> + spatie + id: <code>[a-z][a-z0-9_-]*</code> (kleine letters).</p>
 <p><strong>Sectie-einde.</strong> Canoniek eindigt de vorige sectie met <code>||</code> (of <code>:||</code>) op alle
 lyrics-/stemregels. Een nieuwe <code>@sectie</code> <strong>sluit de vorige sectie ook impliciet
-af</strong> als die nog open stond (toegestaan, niet-canoniek — validate mag warnen).
-Zelfde impliciete afsluiting geldt bij <strong>einde van het bestand</strong>, en later bij
-het sluiten van een <code>::: mvsa-notatie</code>-blok. Zie
-<a href="../syntax/#einde">Syntax — sectie-einde</a>.</p>
+af</strong> als die nog open stond (toegestaan, niet-canoniek — validate mag warnen
+met <code>MVSA-SECTIE-IMPLICIT</code>). Zelfde warning bij <strong>EOF</strong> van een open sectie of
+anonieme sectie. Zie <a href="../syntax/#einde">Syntax — sectie-einde</a>.</p>
 <p><strong>Wel gebruiken</strong> om delen te benoemen die je apart wilt exporteren
-(<code>vsa mvsa musicxml … --section id</code>) of om het bestand leesbaar te houden
-(couplet / refrein / schets).</p>
-<p><strong>Niet gebruiken</strong> als label boven één los antwoord in een litanie: daarvoor is
-<code>@tekst</code> bedoeld (zichtbare cue op het blad). <code>@sectie</code> is structuur in de
-bron, geen staff-tekst.</p>
+(<code>vsa mvsa musicxml … --section id</code>) of om schetsen in één experiment-bestand
+uit elkaar te houden (couplet / refrein / pitch-variant).</p>
+<p><strong>Niet gebruiken</strong> samen met <code>@speelplan</code> (dan: <code>@blok</code>). Niet als litanie-cue
+(dat is <code>@tekst</code>). Niet om meerdere speelplannen in één file te nesten — één
+plan = één <code>.mvsa</code>.</p>
 <div class="highlight"><pre><span></span><code>@sectie openingsfrase
 </code></pre></div>
 <hr />
 <h2 id="blok"><code>@blok</code><a class="headerlink" href="#blok" title="Permanent link">&para;</a></h2>
-<p><strong>Wat het is.</strong> Opent een <strong>speelblok</strong>: een genaamde sectie die in een
-<code>@speelplan</code> mag voorkomen. Structureel hetzelfde als <code>@sectie</code> (nieuwe
-muzikale eenheid), maar met ids die ook cijfers mogen zijn.</p>
+<p><strong>Wat het is.</strong> Opent een <strong>speelblok</strong>: genoemd LSATB-segment voor een
+<code>@speelplan</code>. Geen “sectie” in de zin van <code>||</code>-afsluiting; tussen blokken is
+<code>||</code> niet verplicht.</p>
 <p><strong>Vorm.</strong> <code>@blok</code> + spatie + id: <code>[1-9][0-9]*</code> <strong>of</strong> <code>[a-z][a-z0-9_-]*</code>.</p>
-<p><strong>Wel gebruiken</strong> wanneer je een speelplan hebt (of wilt voorbereiden): elk
-blok één keer opschrijven, volgorde in <code>@speelplan</code>.</p>
-<p><strong>Niet gebruiken</strong> i.p.v. <code>@tekst</code> (zichtbare litanie-cue) of voor
-layout-systeembreuken (<code>@mscz-newline</code>).</p>
+<p><strong>Wel gebruiken</strong> wanneer je een speelplan hebt: elk blok één keer, volgorde in
+<code>@speelplan</code>. Eén speelplan per bestand.</p>
+<p><strong>Niet gebruiken</strong> i.p.v. <code>@tekst</code> of <code>@mscz-newline</code>; niet i.p.v. <code>@sectie</code>
+buiten een speelplan-bestand (tenzij je redactioneel een id wilt zonder plan).</p>
 <p>Zie <a href="../speelplan/">Speelplan</a>.</p>
 <div class="highlight"><pre><span></span><code>@blok 1
 </code></pre></div>
 <hr />
 <h2 id="speelplan"><code>@speelplan</code><a class="headerlink" href="#speelplan" title="Permanent link">&para;</a></h2>
 <p><strong>Wat het is.</strong> Zet de <strong>canonieke klinkende volgorde</strong> van speelblokken.
-Bladmuziek (MSCZ) blijft compact; MXL-playback schrijft het plan uit.</p>
+Bladmuziek (MSCZ) blijft compact (volta / herhaling / D.S. of expand);
+MXL-playback schrijft het plan uit.</p>
 <p><strong>Vorm.</strong> <code>@speelplan</code> + komma-gescheiden ids (zelfde id-vorm als <code>@blok</code>).
-Hoogstens één per bestand.</p>
+Hoogstens <strong>één</strong> per bestand — nest geen plan in <code>@sectie</code>.</p>
 <p><strong>Wel gebruiken</strong> bij vaste herhaalpatronen (bijv. alleluia 1-2-1-2-1-3).</p>
-<p><strong>Niet gebruiken</strong> samen met <code>|:</code> / <code>:|</code> in die speelblokken — die strepen
-zijn daar verboden; het plan is leidend.</p>
+<p><strong>Niet gebruiken</strong> samen met <code>|:</code> / <code>:|</code> in die speelblokken; niet naast
+<code>@sectie</code> in hetzelfde bestand.</p>
 <p>Zie <a href="../speelplan/">Speelplan</a>.</p>
 <div class="highlight"><pre><span></span><code>@speelplan 1, 2, 1, 2, 1, 3
 </code></pre></div>
@@ -5084,8 +5085,8 @@ L: A_-men_ |
 <li>cues zonder regelsprong — alleen <code>@tekst</code> volstaat (export zet desnoods een
   dubbele maatstreep vóór de cue);</li>
 <li>sectiegrenzen in de bron — dat is <code>||</code> / <code>@sectie</code>;</li>
-<li>scheiding van vscode-blokken zonder MSCZ-layout — dan volstaat <code>@---</code> of
-  een andere directive.</li>
+<li>scheiding van vscode-blokken zonder MSCZ-layout — dan volstaat een <strong>lege
+  regel</strong> (optioneel <code>@---</code> met commentaar).</li>
 </ul>
 <p><strong>Gedrag.</strong> Geldt alleen voor het eerstvolgende LSATB-systeem (niet sticky).
 Op het eerste systeem van de partituur is een explicit new-system overbodig
@@ -5169,15 +5170,31 @@ dat is <code>@bron</code>.</p>
 </code></pre></div>
 <p><strong><code>@bron</code>.</strong> Referentie naar de <strong>bron van de partituur</strong> (boek, bladzijden,
 uitgave), zodat je later terug kunt vinden waar deze notatie vandaan komt.
-Verschijnt in MusicXML als <code>&lt;source&gt;</code> en in MuseScore als meta <code>source</code> (niet
-als zichtbare staff-tekst).</p>
+Gaat mee in <strong>beide</strong> exportpaden:</p>
+<ul>
+<li>MusicXML (playback/Coria én partituur): <code>&lt;identification&gt;&lt;source&gt;…&lt;/source&gt;</code></li>
+<li>MuseScore/MSCZ: meta-tag <code>source</code></li>
+</ul>
+<p><strong>Op het MSCZ-blad:</strong> MuseScore toont meta <code>source</code> niet automatisch in de kop.
+Zonder <code>@tekstdichter</code> zet de MSCZ-export daarom <code>@bron</code> ook als
+<strong>lyricist-tekst</strong> in de kop (<code>bron: …</code>), zodat de herkomst op papier zichtbaar
+is. Heb je wél een echte tekstdichter, dan wint <code>@tekstdichter</code> voor die plek;
+<code>@bron</code> blijft dan alleen in meta/<code>&lt;source&gt;</code>.</p>
+<p>Optionele schrijfwijze met dubbele punt na het keyword: <code>@bron: "…"</code> ≡
+<code>@bron "…"</code>. Let op: <code>bron:</code> <em>in</em> een quoted string (bv.
+<code>@tekstdichter "bron: koormap …"</code>) is gewoon tekst — dat is geen keyword en
+geeft geen warning.</p>
 <div class="highlight"><pre><span></span><code>@bron "Liturgikon, p.147-149"
 </code></pre></div>
 <p><strong><code>@ondertitel</code>.</strong> Ondertitel onder de hoofdtitel (bv. liturgische aanduiding).
 Gaat mee in partituur/MSCZ (<code>movement-title</code> / MuseScore <code>subtitle</code>); Coria-
-playback strip’t die tag bewust.</p>
+playback behoudt die tag (geen sanitize-strip).</p>
 <p><strong><code>@tekstdichter</code> / <code>@arrangeur</code> / <code>@vertaler</code>.</strong> Personenrollen naast de
-componist; zelfde stringvorm. Alleen zetten als je die rol echt kent.</p>
+componist; zelfde stringvorm. Alleen zetten als je die rol echt kent.
+<code>@tekstdichter</code> verschijnt op het MSCZ-blad (lyricist-plek). Wil je daar de
+partituurbron tonen, gebruik bij voorkeur alleen <code>@bron</code> (zie hierboven); een
+expliciete <code>@tekstdichter "bron: …"</code> mag nog steeds en wint dan voor die
+bladplek.</p>
 <p><strong><code>@copyright</code>.</strong> Bronnotice voor footer (kort) en colofon (volledig) in
 <code>.mscz</code>, en <code>&lt;rights&gt;</code> in MusicXML. Zonder <code>@copyright</code> gebruikt MSCZ-export
 een default (CC BY-SA 4.0 + eredienst-zin).</p>
@@ -5223,15 +5240,23 @@ voor tijdelijke tipjes in de bron — <code>@opmerkingen</code> is voor blijvend
 zodra tooling die gaat tonen.</p>
 <hr />
 <h2 id="-"><code>@---</code><a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
-<p><strong>Wat het is.</strong> Een <strong>no-op</strong> die wél een LSATB-systeem afbreekt. Handig als
-scheiding tussen vscode-systemen in dezelfde sectie wanneer je geen <code>@tekst</code>
-of andere directive nodig hebt. Lege regels alleen doen dat <strong>niet</strong>. Voor een
+<p><strong>Wat het is.</strong> Optionele <strong>no-op</strong> die een LSATB-systeem afbreekt — hetzelfde
+effect als een <strong>lege regel</strong>. Voor een gewone scheiding tussen vscode-systemen
+volstaat die lege regel; <code>@---</code> is vooral handig als je bij de scheiding
+<strong>commentaar op dezelfde regel</strong> wilt (<code>@--- tweede couplet</code>). Voor een
 <strong>nieuwe MuseScore-regel</strong> op het blad: gebruik <code>@mscz-newline</code>, niet alleen
-<code>@---</code>.</p>
+<code>@---</code> of een lege regel.</p>
 <p><strong>Vorm.</strong> <code>@---</code> of <code>@ ---</code>. Optioneel <strong>commentaar</strong> erna op dezelfde regel
 (wordt genegeerd, geen error/warning), bv. <code>@--- tweede systeem</code> of
 <code>@ --- zie Liturgikon p.12</code>.</p>
-<p><strong>Wel gebruiken</strong> tussen twee LSATB-blokken van dezelfde sectie:</p>
+<p><strong>Gewone scheiding</strong> (voorkeur: lege regel):</p>
+<div class="highlight"><pre><span></span><code>L: Heer_ … |
+S: a     … |
+
+L: Heer_ … ||
+S: a     … ||
+</code></pre></div>
+<p><strong>Wel <code>@---</code> gebruiken</strong> als je commentaar wilt meenemen bij de scheiding:</p>
 <div class="highlight"><pre><span></span><code>L: Heer_ … |
 S: a     … |
 …
@@ -5243,7 +5268,8 @@ S: a     … ||
 …
 </code></pre></div>
 <p><strong>Niet gebruiken</strong> als zichtbare inhoud op het blad — daarvoor is <code>@tekst</code>.
-Ook niet als vervanging van <code>@mscz-newline</code> (dat forceert de MSCZ-regelsprong).</p>
+Ook niet als vervanging van <code>@mscz-newline</code> (dat forceert de MSCZ-regelsprong).
+Zonder commentaar is <code>@---</code> overbodig naast een lege regel.</p>
 <hr />
 <h2 id="onbekende-keywords">Onbekende keywords<a class="headerlink" href="#onbekende-keywords" title="Permanent link">&para;</a></h2>
 <p>Alles wat de vorm van een keyword heeft maar <strong>niet</strong> in de lijst hierboven

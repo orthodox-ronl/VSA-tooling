@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 12:23 CEST.
+  , gebouwd 2026-09-28 15:58 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2952,10 +2952,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#mscz-layoutpartituur-fase-1" class="md-nav__link">
+  <a href="#mscz-layoutpartituur" class="md-nav__link">
     <span class="md-ellipsis">
       
-        MSCZ (layout=partituur, fase 1)
+        MSCZ (layout=partituur)
       
     </span>
   </a>
@@ -2979,10 +2979,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#bewust-later-fase-2" class="md-nav__link">
+  <a href="#bewust-later" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bewust later (fase 2)
+        Bewust later
       
     </span>
   </a>
@@ -4749,10 +4749,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#mscz-layoutpartituur-fase-1" class="md-nav__link">
+  <a href="#mscz-layoutpartituur" class="md-nav__link">
     <span class="md-ellipsis">
       
-        MSCZ (layout=partituur, fase 1)
+        MSCZ (layout=partituur)
       
     </span>
   </a>
@@ -4776,10 +4776,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#bewust-later-fase-2" class="md-nav__link">
+  <a href="#bewust-later" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bewust later (fase 2)
+        Bewust later
       
     </span>
   </a>
@@ -4812,9 +4812,9 @@
 
 
 <h1 id="speelplan-en-speelblokken-draft">Speelplan en speelblokken (draft)<a class="headerlink" href="#speelplan-en-speelblokken-draft" title="Permanent link">&para;</a></h1>
-<p><strong>Status:</strong> draft v0 — fase 1 (syntax, validatie, MXL-expansie, MSCZ-speeltekst).
-Fase 2 (herhaal-/volta-notatie op het blad) staat in
-<a href="../open-points/">Open punten</a>.</p>
+<p><strong>Status:</strong> draft v0 — fase 1 (syntax, validatie, MXL-expansie) + fase 2a
+(volta voor patroon <code>(a,b)×n+(a,c)</code> op partituur). Verdere volta-patronen
+staan in <a href="../open-points/">Open punten</a>.</p>
 <p><strong>Voor wie:</strong> wie een vast SATB-antwoord (alleluia, litanie-antwoord) één keer
 wil opschrijven en de uitvoeringsvolgorde apart wil vastleggen.</p>
 <h2 id="idee-in-het-kort">Idee in het kort<a class="headerlink" href="#idee-in-het-kort" title="Permanent link">&para;</a></h2>
@@ -4838,8 +4838,16 @@ wil opschrijven en de uitvoeringsvolgorde apart wil vastleggen.</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Besluit bladvorm (“als vanzelf”):</strong> optie <strong>A</strong> — compact blad met
+conventionele herhaal-/volta-/D.S.-notatie. Niet standaard: speelplan ook op
+papier uitschrijven (dat is alleen het vangnet als geen navigatiepatroon past).</p>
+<p><strong>Bestandsgrens:</strong> één <code>.mvsa</code> ↔ hoogstens <strong>één</strong> <code>@speelplan</code>. Geen nesten
+van speelplan in <code>@sectie</code>. Meerdere stukken met eigen plan → aparte bestanden.
+<code>@sectie</code> blijft voor bestanden <strong>zonder</strong> speelplan (schetsen, <code>--section</code>).</p>
 <p>Zonder <code>@speelplan</code> blijft het huidige gedrag: documentvolgorde = klinkende
-volgorde.</p>
+volgorde. Open herhalingen (litanie: <code>|:</code> … <code>:|</code> zonder vaste N) horen
+<strong>buiten</strong> een speelplan; MusicXML-<code>&lt;repeat&gt;</code> blijft daar geldig voor blad én
+Coria.</p>
 <p>Dit is <strong>niet</strong> hetzelfde als VSA-templates <code>cycle</code>/<code>final</code> (tekstregels →
 formule-frasen). Speelplan is voor vaste SATB-blokken in één <code>.mvsa</code>.</p>
 <h2 id="termen">Termen<a class="headerlink" href="#termen" title="Permanent link">&para;</a></h2>
@@ -4869,7 +4877,7 @@ formule-frasen). Speelplan is voor vaste SATB-blokken in één <code>.mvsa</code
 </tr>
 <tr>
 <td><strong>Speeltekst</strong></td>
-<td>Zichtbare markering op het blad (fase 1: <code>Speel: …</code> + bloknummers)</td>
+<td>Alleen vangnet als geen navigatiepatroon past (zelden)</td>
 </tr>
 </tbody>
 </table>
@@ -4890,25 +4898,33 @@ L: … |
 S: … |
 …
 @blok 2
+L: … |
+…
+@blok 3
 L: … ||
 …
 </code></pre></div>
 <ul>
-<li>Opent een nieuwe sectie met dat id (zelfde structurele rol als <code>@sectie</code>).</li>
-<li>Id: cijferreeks <code>[1-9][0-9]*</code> <strong>of</strong> dezelfde vorm als <code>@sectie</code>:
-  <code>[a-z][a-z0-9_-]*</code>.</li>
+<li>Opent een <strong>speelblok</strong> (genoemd LSATB-segment voor <code>@speelplan</code>). In de
+  parser is dat een eigen segment (<code>origin=blok</code>), <strong>geen</strong> <code>@sectie</code>.</li>
+<li>Id: cijferreeks <code>[1-9][0-9]*</code> <strong>of</strong> <code>[a-z][a-z0-9_-]*</code>.</li>
 <li>Elk speelblok-id komt hoogstens één keer voor.</li>
+<li>Tussen blokken is <strong><code>||</code> niet verplicht</strong> (en vaak ongewenst: <code>||</code> triggert
+  in Coria een pauze). Validate geeft hier <strong>geen</strong> <code>MVSA-SECTIE-IMPLICIT</code>.
+  Optioneel <code>||</code> alleen op het <strong>laatste</strong> blok van het bestand.</li>
 </ul>
-<p><code>@sectie</code> blijft beschikbaar buiten speelplannen. In een bestand <strong>met</strong>
-<code>@speelplan</code> moeten alle muzikale segmenten via <code>@blok</code> gelabeld zijn (geen
-anonieme sectie, geen <code>@sectie</code> als speelblok).</p>
+<p><strong><code>@sectie</code> vs <code>@blok</code>:</strong> gebruik <code>@sectie</code> in bestanden <strong>zonder</strong> <code>@speelplan</code>
+(export-id, schetsen). In een bestand <strong>met</strong> <code>@speelplan</code> moeten alle
+muzikale segmenten via <code>@blok</code> (geen anonieme sectie, geen <code>@sectie</code>).
+Nest geen speelplan in een sectie — één plan per bestand.</p>
 <h2 id="herhaalstrepen-en-speelplan">Herhaalstrepen en speelplan<a class="headerlink" href="#herhaalstrepen-en-speelplan" title="Permanent link">&para;</a></h2>
 <p>In een speelblok dat in <code>@speelplan</code> voorkomt zijn <strong><code>|:</code></strong> en <strong><code>:|</code></strong>
 (en <strong><code>:||</code></strong>) <strong>verboden</strong>. Canonieke volgorde komt uit het speelplan, niet uit
 bladherhaling.</p>
 <p>Buiten een speelplan-bestand (geen <code>@speelplan</code>) blijven <code>|:</code> / <code>:|</code> / <code>:||</code>
 gewoon toegestaan.</p>
-<p>Toegestaan in speelblokken: <code>|</code> (frase) en <code>||</code> (sectie-einde).</p>
+<p>Toegestaan in speelblokken: <code>|</code> (frase); <code>||</code> mag maar is geen eis tussen
+blokken (zie hierboven).</p>
 <h2 id="semantiek">Semantiek<a class="headerlink" href="#semantiek" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Expansie: concateneer de maten van de speelblokken in planvolgorde →
@@ -4974,14 +4990,47 @@ gewoon toegestaan.</p>
 <h3 id="mxl-layoutplayback">MXL (<code>layout=playback</code>)<a class="headerlink" href="#mxl-layoutplayback" title="Permanent link">&para;</a></h3>
 <p>Bij aanwezig speelplan: exporteer de <strong>klinkende vorm</strong> (maten herhaald volgens
 het plan). Geen afhankelijkheid van MusicXML-<code>&lt;repeat&gt;</code> voor de speelduur.</p>
-<h3 id="mscz-layoutpartituur-fase-1">MSCZ (<code>layout=partituur</code>, fase 1)<a class="headerlink" href="#mscz-layoutpartituur-fase-1" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Bladvorm: elk <code>@blok</code> één keer, bronvolgorde.</li>
-<li>Op de eerste maat: speeltekst <code>Speel: 1-2-1-2-1-3</code> (ids met <code>-</code> gekoppeld).</li>
-<li>Bij de eerste maat van elk speelblok: zichtbaar bloknummer (bijv. <code>1</code>).</li>
-</ul>
-<p>Fase 2 mag die speeltekst aanvullen of vervangen door herhaal-/volta-notatie,
-zolang de uitvoeringsvolgorde van het blad afleesbaar blijft.</p>
+<h3 id="mscz-layoutpartituur">MSCZ (<code>layout=partituur</code>)<a class="headerlink" href="#mscz-layoutpartituur" title="Permanent link">&para;</a></h3>
+<p>Bladvorm: elk <code>@blok</code> één keer in bronvolgorde (tenzij vangnet <strong>expand</strong>).
+Geen blok-id-labels boven de maten — navigatietekens zijn genoeg.</p>
+<p>De exporter kiest automatisch (eerste match wint):</p>
+<table>
+<thead>
+<tr>
+<th>Prioriteit</th>
+<th>Patroon</th>
+<th>Bladtekens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>plan = blokvolgorde</td>
+<td>niets</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>(a,b)×n + (a,c)</code> (3 blokken)</td>
+<td><code>\|: a \|1..n. b :\| n+1. c</code> (volta)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>prefix + X×n + suffix</code> (n≥2)</td>
+<td><code>\|: … :\|</code> (+ <code>times</code> als n&gt;2)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>blad[0..ds] + blad[segno..fine]</code></td>
+<td>Segno + Fine + D.S. al Fine (of D.C. al Fine)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>rest</td>
+<td><strong>expand</strong>: speelplan uitgeschreven op het blad</td>
+</tr>
+</tbody>
+</table>
+<p>Coria (<code>playback</code>) schrijft het speelplan altijd volledig uit (geen jumps).</p>
 <h2 id="voorbeeld">Voorbeeld<a class="headerlink" href="#voorbeeld" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>@title "Alleluia - Toon 1"
 @do F4
@@ -5006,12 +5055,14 @@ L:  Al-&amp;-&amp;-&amp;.&amp;.&amp;-  … ||
 …
 </code></pre></div>
 <ul>
-<li>Blad (MSCZ): blokken 1, 2, 3 + <code>Speel: 1-2-1-2-1-3</code>.</li>
+<li>Blad (MSCZ): <code>|:</code> 1 <code>|1,2.</code> 2 <code>:|</code> <code>3.</code> 3.</li>
 <li>Coria (MXL): 1+2+1+2+1+3 achter elkaar.</li>
 </ul>
-<h2 id="bewust-later-fase-2">Bewust later (fase 2)<a class="headerlink" href="#bewust-later-fase-2" title="Permanent link">&para;</a></h2>
+<p>Trisagion-vorm (<code>nls-1, nls-2, ksl, doxologie, nls-2, ksl</code>): Segno bij
+<code>nls-2</code>, Fine aan het eind van <code>ksl</code>, <strong>D.S. al Fine</strong> na <code>doxologie</code>.</p>
+<h2 id="bewust-later">Bewust later<a class="headerlink" href="#bewust-later" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Automatische of halfautomatische volta-/herhaalnotatie op MSCZ/PDF.</li>
+<li>Meer sprongvormen (D.S. al Coda, geneste herhalingen).</li>
 <li>CLI-vlag voor compacte MXL (alleen als de consumer herhalingen begrijpt).</li>
 <li>Speelplan over meerdere bestanden; geneste plannen; <code>until: final</code> zoals
   templates.</li>
@@ -5052,7 +5103,7 @@ L:  Al-&amp;-&amp;-&amp;.&amp;.&amp;-  … ||
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-28
         
       </p>
       

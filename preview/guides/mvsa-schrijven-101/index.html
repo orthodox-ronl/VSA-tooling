@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 12:23 CEST.
+  , gebouwd 2026-09-28 15:58 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5010,7 +5010,10 @@ T: fa-  so-  la- ||
 B: do-  re-  mi- ||
 </code></pre></div>
 <p>Elk <strong>LSATB-systeem</strong> is één blok: <code>L:</code> plus de stemregels die bij die frase
-horen, afgesloten met dezelfde maatstrepen (<code>|</code> of <code>||</code>) op alle regels.</p>
+horen, afgesloten met dezelfde maatstrepen (<code>|</code> of <code>||</code>) op alle regels.
+Zet <strong>geen lege regel</strong> tussen <code>L:</code> en de stemmen — een lege regel <strong>eindigt</strong>
+het systeem. Tussen twee systemen: een <strong>lege regel</strong> (voorkeur), of
+een <code>@-</code> directive, zoals <code>@---</code> met commentaar.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa
 </code></pre></div>
@@ -5044,8 +5047,18 @@ horen <strong>vóór</strong> of <strong>tussen</strong> LSATB-systemen — niet
 </tr>
 <tr>
 <td><code>@sectie</code></td>
-<td>Label voor een stuk tekst (export met <code>--section</code>)</td>
+<td>Label voor een stuk (export <code>--section</code>); <strong>niet</strong> bij <code>@speelplan</code></td>
 <td>—</td>
+</tr>
+<tr>
+<td><code>@blok</code></td>
+<td>Speelblok-id voor <code>@speelplan</code> (één plan per bestand)</td>
+<td>zie speelplan-spec</td>
+</tr>
+<tr>
+<td><code>@speelplan</code></td>
+<td>Klinkende volgorde van blokken (Coria uitgeschreven; blad compact)</td>
+<td>hoogstens één/file</td>
 </tr>
 <tr>
 <td><code>@start</code></td>
@@ -5058,16 +5071,29 @@ horen <strong>vóór</strong> of <strong>tussen</strong> LSATB-systemen — niet
 <td>—</td>
 </tr>
 <tr>
-<td><code>@titel</code> e.d.</td>
-<td>Metadata voor MSCZ-kop (titel, componist, …)</td>
+<td><code>@title</code></td>
+<td>Titel van het zangstuk (MusicXML <code>&lt;work-title&gt;</code>, MuseScore-titel)</td>
+<td>bestandsnaam</td>
+</tr>
+<tr>
+<td><code>@bron</code></td>
+<td>Bron van de partituur (boek/koormap); MusicXML <code>&lt;source&gt;</code>, Coria-info</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>@composer</code> e.d.</td>
+<td>Metadata (componist, copyright, ondertitel, …)</td>
 <td>zie keywords-lijst</td>
 </tr>
 </tbody>
 </table>
 <p>Sticky: <code>@do</code> / <code>@mode</code> / <code>@oct</code> gelden vanaf het <strong>eerstvolgende</strong> LSATB-systeem
-tot je ze opnieuw zet.</p>
+tot je ze opnieuw zet. Systemen scheiden doe je met een <strong>lege regel</strong>; <code>@---</code>
+is alleen nodig als je commentaar op die scheidingsregel wilt.</p>
 <p>??? tip "Voorbeeld: typische SATB-kop"
-    <div class="highlight"><pre><span></span><code>@do F4
+    <div class="highlight"><pre><span></span><code>@title "Alleluia - Toon 1"
+@bron "koormap Hemelum"
+@do F4
 @mode major
 @oct S=0 A=0 T=-1 B=-1
 
@@ -5077,7 +5103,9 @@ S: fa            so- ||
 …
 </code></pre></div></p>
 <p>Complete lijst (wel/niet gebruiken, vorm, onbekende keywords):
-<a href="../../specification-mvsa/keywords/">Keywords (<code>@…</code>)</a>.</p>
+<a href="../../specification-mvsa/keywords/">Keywords (<code>@…</code>)</a>. Speelplan en bladvorm:
+<a href="../../specification-mvsa/speelplan/">Speelplan</a> — één <code>@speelplan</code> per
+<code>.mvsa</code>; <code>@sectie</code> alleen in bestanden zonder speelplan.</p>
 <hr />
 <h2 id="3-l-regels-schrijven">3. L-regels schrijven<a class="headerlink" href="#3-l-regels-schrijven" title="Permanent link">&para;</a></h2>
 <p>De <code>L:</code>-regel is de <strong>telling</strong>: lettergrepen, ELM-duur, recite en melisma.
@@ -5425,6 +5453,11 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
 <td><code>@</code>-regels vóór of tussen systemen</td>
 </tr>
 <tr>
+<td>Lege regel tussen <code>L:</code> en <code>S:</code></td>
+<td>systeem eindigt te vroeg</td>
+<td>geen lege regels binnen één LSATB-blok</td>
+</tr>
+<tr>
 <td>Kale <code>c</code> verwachten als C4 bij <code>@do F4</code></td>
 <td>do-octaaf → C5</td>
 <td>schrijf <code>c4</code> of <code>c-</code> / <code>so-</code> voor C4</td>
@@ -5523,7 +5556,7 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-28
         
       </p>
       

@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 12:23 CEST.
+  , gebouwd 2026-09-28 15:58 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5371,8 +5371,9 @@ hetzelfde.</p>
 <li>één regel per <strong>stem</strong> (alleen toonhoogte),</li>
 <li>optioneel metadata (<code>@do</code>, <code>@oct</code>, <code>@start</code>, …).</li>
 </ul>
-<p>Stemvolgorde is vrij; de L-regel mag tussen de stemmen staan. Een lege regel
-(of een expliciete systeemscheiding, nader te kiezen) scheidt systemen.</p>
+<p>Stemvolgorde is vrij; de L-regel mag tussen de stemmen staan. Een <strong>lege regel</strong>
+scheidt systemen (geen lege regels binnen één LSATB-blok). Optioneel blijft
+<code>@---</code> als no-op-scheider met commentaar.</p>
 <p>Elke inhoudsregel begint met een <strong>regelidentifier</strong>: stemidentifier, optioneel
 een EHM, dan een dubbele punt:</p>
 <div class="highlight"><pre><span></span><code>L: …
@@ -6090,7 +6091,7 @@ Samenvatting hieronder; bij conflict wint de draft-spec.</p>
 </tr>
 <tr>
 <td>LSATB-systeem</td>
-<td>Aaneengesloten <code>[LSATB]\d*:</code>-regels; eindigt op <code>\|</code> of <code>\|\|</code>; vaste marker-volgorde binnen de sectie</td>
+<td>Aaneengesloten identifier-regels; <strong>lege regel eindigt</strong> het systeem; <code>#</code> ertussen mag; eindigt op <code>\|</code> of <code>\|\|</code>; vaste marker-volgorde binnen de sectie; <code>@---</code> optioneel (commentaar)</td>
 </tr>
 <tr>
 <td>Directives</td>
@@ -6301,7 +6302,7 @@ events heeft, en of <code>@include</code> een alias van <code>=</code> mag zijn.
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-28
         
       </p>
       

@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 12:23 CEST.
+  , gebouwd 2026-09-28 15:58 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4698,11 +4698,15 @@ bij rendering/export, niet bij mvsa-brontekst.</p>
 </tr>
 <tr>
 <td><strong>Sectie</strong></td>
-<td>Muzikale eenheid: een of meer LSATB-systemen. Eindigt canoniek met <code>\|\|</code> (of <code>: |     |</code>) op alle lyrics-/stemregels van het laatste systeem; ook impliciet bij een nieuwe <code>@sectie</code>, bij einde van het bestand, of (later) bij het sluiten van een <code>::: mvsa-notatie</code>-blok. Optioneel met <code>@sectie</code>-<em>id</em>.</td>
+<td>Muzikale eenheid (<code>@sectie</code> of anoniem): een of meer LSATB-systemen. Eindigt canoniek met <code>\|\|</code> (of <code>:\|\|</code>); ook impliciet bij een nieuwe <code>@sectie</code>, bij EOF, of (later) bij <code>::: mvsa-notatie</code>. Validate mag <code>MVSA-SECTIE-IMPLICIT</code> geven. <strong>Niet</strong> van toepassing op speelblokken (<code>@blok</code>) — zie <a href="../speelplan/">Speelplan</a>.</td>
+</tr>
+<tr>
+<td><strong>Speelblok</strong></td>
+<td>Genoemd segment (<code>@blok</code> <em>id</em>) voor een speelplan. Geen <code>\|\|</code>-eis tussen blokken. Eén <code>@speelplan</code> per bestand.</td>
 </tr>
 <tr>
 <td><strong>LSATB-systeem</strong></td>
-<td>Reeks regels met een <a href="#termen-in-deze-specificatie">regelidentifier</a>; lege regels/<code>#</code> ertussen mogen (niet canoniek). Eindigt altijd op <code>\|</code> of <code>\|\|</code> (of specialisatie).</td>
+<td>Aaneengesloten reeks regels met een <a href="#termen-in-deze-specificatie">regelidentifier</a>; <code>#</code>-commentaar ertussen mag; een <strong>lege regel eindigt</strong> het systeem. Eindigt altijd op <code>\|</code> of <code>\|\|</code> (of specialisatie).</td>
 </tr>
 <tr>
 <td><strong>regelidentifier</strong></td>
@@ -4780,7 +4784,7 @@ bij rendering/export, niet bij mvsa-brontekst.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-28
         
       </p>
       
