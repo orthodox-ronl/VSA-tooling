@@ -934,6 +934,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#layoutprofielen-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layoutprofielen (--layout)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#typische-commandos" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4522,6 +4533,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#layoutprofielen-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layoutprofielen (--layout)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#typische-commandos" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4585,6 +4607,14 @@ voor de <strong>partituur-workflow</strong>; Coria gebruikt <code>.mxl</code>.</
 <td><a href="../../reference/cli/mvsa/#vsa-mvsa-mscz"><code>mvsa mscz</code></a> (partituur-mxl → MuseScore)</td>
 </tr>
 <tr>
+<td>Print-PDF (zangers)</td>
+<td><a href="../../reference/cli/mvsa/#vsa-mvsa-pdf"><code>mvsa pdf</code></a> (via MuseScore; ook vanaf <code>.mscz</code>)</td>
+</tr>
+<tr>
+<td>Layoutprofiel</td>
+<td>Standaard: <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a>; benoemde keuzes = tooling-taak</td>
+</tr>
+<tr>
 <td>Import → <code>.mvsa</code></td>
 <td><a href="../../reference/cli/mscz/"><code>mscz import</code></a></td>
 </tr>
@@ -4608,6 +4638,37 @@ verwachten voor bruikbare SATB + lyrics.</p>
 Leesbaarheid (recite, lyrics, slurs, cues, stokken, maatnummers):
 <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a>.
 Semantiek deelt de kern met MXL; layout divergeert (Coria = vier parts).</p>
+<h2 id="layoutprofielen-layout">Layoutprofielen (<code>--layout</code>)<a class="headerlink" href="#layoutprofielen-layout" title="Permanent link">&para;</a></h2>
+<p>Na de MuseScore-conversie past VSA-tooling een <strong>benoemd profiel</strong> toe.
+De consumer <strong>kiest</strong>; de tool <strong>handhaaft</strong>. Zie
+<a href="../../guides/reuse-vsa-tooling/#ownership-tooling-vs-consumer">ownership</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Profiel</th>
+<th>CLI</th>
+<th>Wat je krijgt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>partituur</code></td>
+<td><code>--layout partituur</code> (default)</td>
+<td>Canonieke koorprint: <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a> + checklist</td>
+</tr>
+<tr>
+<td><code>plain</code></td>
+<td><code>--layout plain</code></td>
+<td>Geen Style-/colofon-/recite-nabewerking; alleen MuseScore-output van de MXL</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code>mvsa mscz lied.mvsa -o generated\lied.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
+mvsa mscz lied.mvsa -o generated\lied.plain.mscz --layout plain
+</code></pre></div>
+<p><strong>Bibliotheek-id:</strong> consumer bepaalt de waarde; geef die met
+<code>--bibliotheek-id</code> (colofon bij <code>partituur</code>). Pad-afleiding is alleen een
+fallback.</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mscz import generated\alleluia.mscz --pitch abc -o generated\from-mscz.mvsa
 mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
@@ -4657,7 +4718,7 @@ mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-28
         
       </p>
       

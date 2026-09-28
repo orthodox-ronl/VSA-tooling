@@ -4650,7 +4650,8 @@ bij rendering/export, niet bij mvsa-brontekst.</p>
 <ul>
 <li>Vervanging van eenstemmige VSA 1.0;</li>
 <li>blokhergebruik en template-projectie als norm;</li>
-<li>CLI-werkstromen en kuiser-implementatie (wel: gedragseisen voor canonieke vorm);</li>
+<li>CLI-werkstromen en kuiser-<strong>tool</strong> (gedragseisen voor canonieke vorm staan in
+  syntax/semantiek; implementatie: <a href="../open-points/">open-points</a>);</li>
 <li>volledige gelijkschakeling van chromatische <code>+</code> in eenstemmige VSA-EHM.</li>
 </ul>
 <h2 id="defaults">Defaults<a class="headerlink" href="#defaults" title="Permanent link">&para;</a></h2>
@@ -4693,7 +4694,7 @@ bij rendering/export, niet bij mvsa-brontekst.</p>
 </tr>
 <tr>
 <td><strong>Sectie</strong></td>
-<td>Muzikale eenheid (<code>@sectie</code> of anoniem): een of meer LSATB-systemen. Eindigt canoniek met <code>\|\|</code> (of <code>:\|\|</code>); ook impliciet bij een nieuwe <code>@sectie</code>, bij EOF, of (later) bij <code>::: mvsa-notatie</code>. Validate mag <code>MVSA-SECTIE-IMPLICIT</code> geven. <strong>Niet</strong> van toepassing op speelblokken (<code>@blok</code>) — zie <a href="../speelplan/">Speelplan</a>.</td>
+<td>Muzikale eenheid (<code>@sectie</code> of anoniem): een of meer LSATB-systemen. Eindigt met <code>\|\|</code> / <code>:\|\|</code> (expliciet), of met de laatste maatstreep bij een nieuwe <code>@sectie</code>, bij EOF, of (later) bij <code>::: mvsa-notatie</code>. <strong>Niet</strong> van toepassing op speelblokken (<code>@blok</code>) — zie <a href="../speelplan/">Speelplan</a>.</td>
 </tr>
 <tr>
 <td><strong>Speelblok</strong></td>

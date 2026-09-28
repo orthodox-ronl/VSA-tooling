@@ -4948,11 +4948,11 @@ beide voorkomen.</p>
 muzikale eenheid van een of meer LSATB-systemen — in bestanden <strong>zonder</strong>
 <code>@speelplan</code>.</p>
 <p><strong>Vorm.</strong> <code>@sectie</code> + spatie + id: <code>[a-z][a-z0-9_-]*</code> (kleine letters).</p>
-<p><strong>Sectie-einde.</strong> Canoniek eindigt de vorige sectie met <code>||</code> (of <code>:||</code>) op alle
-lyrics-/stemregels. Een nieuwe <code>@sectie</code> <strong>sluit de vorige sectie ook impliciet
-af</strong> als die nog open stond (toegestaan, niet-canoniek — validate mag warnen
-met <code>MVSA-SECTIE-IMPLICIT</code>). Zelfde warning bij <strong>EOF</strong> van een open sectie of
-anonieme sectie. Zie <a href="../syntax/#einde">Syntax — sectie-einde</a>.</p>
+<p><strong>Sectie-einde.</strong> Bij een nieuwe <code>@sectie</code>, bij <strong>EOF</strong>, of (later) bij
+fence-<code>:::</code> is de <strong>laatste maatstreep</strong> van het vorige laatste systeem
+(<code>|</code>, <code>||</code>, …) het sectie-einde. Expliciet midden in een bestand (zonder
+nieuwe <code>@sectie</code>) gebruik je <code>||</code> of <code>:||</code>. Tooling schrijft bij genereren
+bij voorkeur <code>||</code>. Zie <a href="../syntax/#einde">Syntax — sectie-einde</a>.</p>
 <p><strong>Wel gebruiken</strong> om delen te benoemen die je apart wilt exporteren
 (<code>vsa mvsa musicxml … --section id</code>) of om schetsen in één experiment-bestand
 uit elkaar te houden (couplet / refrein / pitch-variant).</p>

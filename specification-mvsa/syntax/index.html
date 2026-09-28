@@ -5475,32 +5475,36 @@ S: …
 </code></pre></div>
 <p><strong>Sectie-id:</strong> <code>[a-z][a-z0-9_-]*</code> (bijvoorbeeld <code>nl1</code>, <code>slav1</code>, <code>doxologie</code>).</p>
 <h3 id="einde">Einde<a class="headerlink" href="#einde" title="Permanent link">&para;</a></h3>
-<p>Een sectie eindigt op een van deze manieren (de eerste is <strong>canoniek</strong>):</p>
+<p>Een sectie eindigt op een van deze manieren:</p>
 <ol>
-<li><strong>Sectie-eindestreep:</strong> op <strong>alle</strong> LSATB-regels van een systeem staat
-   <code>||</code> of <code>:||</code>. Regels daarna horen niet meer bij die sectie.</li>
-<li><strong>Nieuwe <code>@sectie</code>:</strong> een volgende <code>@sectie</code> <em>id</em> opent een nieuwe sectie en
-   <strong>sluit daarmee impliciet</strong> de vorige af, ook als die nog geen <code>||</code> had.
-   (Toegestaan in niet-canonieke bronnen; tooling mag een warning geven.)</li>
-<li><strong>Einde van het bestand (EOF):</strong> een open sectie zonder <code>||</code> wordt bij EOF
-   als afgesloten beschouwd.</li>
+<li><strong>Sectie-eindestreep <code>||</code> / <code>:||</code>:</strong> op <strong>alle</strong> LSATB-regels van een
+   systeem. Regels daarna horen niet meer bij die sectie. Dit is de vorm die
+   tooling bij <strong>genereren</strong> schrijft, en die je nodig hebt om midden in een
+   bestand een sectie te beëindigen <strong>zonder</strong> meteen een nieuwe <code>@sectie</code> te
+   openen.</li>
+<li><strong>Nieuwe <code>@sectie</code>:</strong> een volgende <code>@sectie</code> <em>id</em> opent een nieuwe sectie.
+   De <strong>laatste maatstreep</strong> van het vorige laatste systeem (<code>|</code>, <code>||</code>, of
+   herhalingsvorm) is tegelijk het sectie-einde — ook als dat geen <code>||</code> was.</li>
+<li><strong>Einde van het bestand (EOF):</strong> idem: de laatste maatstreep van het
+   laatste systeem beëindigt de open sectie.</li>
 <li><strong>(Vooruitblik)</strong> Het sluiten van een fenced blok <code>::: mvsa-notatie</code> …
-   <code>:::</code> (zodra die vorm in markdown/export landt) werkt hetzelfde als EOF voor
-   de open sectie in dat blok.</li>
+   <code>:::</code> (zodra die vorm in markdown landt) werkt hetzelfde als EOF voor de
+   open sectie in dat blok.</li>
 </ol>
-<p>Canoniek schrijf je dus nog steeds <code>||</code> (of <code>:||</code>) op het laatste systeem van
-elke <strong>sectie</strong> (<code>@sectie</code> / anoniem). Impliciete afsluiting via <code>@sectie</code> /
-EOF / fence is geldig voor validatie en export, maar niet de vorm die tooling
-bij genereren schrijft. Validate mag <code>MVSA-SECTIE-IMPLICIT</code> geven.</p>
-<p><strong>Speelblokken (<code>@blok</code>):</strong> horen niet onder deze <code>||</code>-canonieke regel. Een
-nieuw <code>@blok</code> of EOF na een speelblok zonder <code>||</code> is <strong>geen</strong> warning. Zie
+<p>Kort: bij <strong>EOF</strong>, <strong>nieuwe <code>@sectie</code></strong>, of <strong>fence-<code>:::</code></strong> is elke geldige
+eindmaatstreep op het laatste systeem genoeg. <code>||</code> blijft nuttig als
+<strong>expliciete</strong> sectie-eindestreep midden in de bron en als canonieke
+exportvorm.</p>
+<p><strong>Speelblokken (<code>@blok</code>):</strong> horen niet onder een <code>||</code>-eis tussen blokken. Een
+nieuw <code>@blok</code> of EOF na een speelblok is gewoon toegestaan. Zie
 <a href="../speelplan/">Speelplan</a>.</p>
 <h3 id="meerdere-systemen-per-sectie">Meerdere systemen per sectie<a class="headerlink" href="#meerdere-systemen-per-sectie" title="Permanent link">&para;</a></h3>
 <p>Een lange sectie mag over meerdere LSATB-systemen worden gesplitst (leesbaarheid
 in de editor). Elk tussensysteem eindigt op <code>|</code> (of herhalingsspecialisatie die
-geen sectie-einde is). Canoniek eindigt alleen het <strong>laatste</strong> systeem van de
-sectie op <code>||</code> of <code>:||</code>; zonder die streep mag de sectie toch eindigen via
-<code>@sectie</code> / EOF zoals hierboven.</p>
+geen sectie-einde is). Het <strong>laatste</strong> systeem van de sectie eindigt op een
+geldige maatstreep; bij doorlopende tekst zonder nieuwe <code>@sectie</code> gebruik je
+<code>||</code> of <code>:||</code> om de sectie te beëindigen. Bij een volgende <code>@sectie</code>, bij EOF,
+of (later) bij fence-<code>:::</code> volstaat ook <code>|</code>.</p>
 <p>Alle systemen in één sectie hebben hetzelfde aantal LSATB-regels en dezelfde
 regelidentifiers in dezelfde volgorde (zelfde stemidentifier én dezelfde
 optionele EHM per regel).</p>

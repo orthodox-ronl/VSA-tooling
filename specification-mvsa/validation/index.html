@@ -4701,13 +4701,13 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
     mag <code>@---</code> (met commentaar) of een andere directive hetzelfde doen.
     <code>#</code>-commentaar mag wél tussen markers van hetzelfde systeem.</li>
 <li>Een <strong>sectie</strong> (<code>@sectie</code> of anoniem) eindigt door: (a) <code>||</code> of <code>:||</code> op alle
-   LSATB-regels van een systeem (canoniek); of (b) een nieuwe <code>@sectie</code> die de
-   vorige impliciet afsluit; of (c) einde van het bestand (EOF); later ook het
-   sluiten van een <code>::: mvsa-notatie</code>-fence. Ontbrekende <code>||</code> vóór (b)/(c) mag
-   een <strong>warning</strong> <code>MVSA-SECTIE-IMPLICIT</code> zijn (niet-canoniek), geen error.
-   <strong>Uitzondering:</strong> speelblokken (<code>@blok</code>) — geen warning bij overgang naar
-   een volgend <code>@blok</code> of bij EOF van een <code>@blok</code>; <code>||</code> tussen blokken is geen
-   eis (zie <a href="../speelplan/">Speelplan</a>).</li>
+   LSATB-regels van een systeem (expliciet midden in het bestand); of (b) een
+   nieuwe <code>@sectie</code> — de <strong>laatste maatstreep</strong> van het vorige laatste systeem
+   (<code>|</code> of <code>||</code>, …) is dan het sectie-einde; of (c) einde van het bestand (EOF);
+   later ook het sluiten van een <code>::: mvsa-notatie</code>-fence (zelfde als EOF).
+   Geen warning <code>MVSA-SECTIE-IMPLICIT</code> meer voor (b)/(c).
+   <strong>Uitzondering:</strong> speelblokken (<code>@blok</code>) — geen <code>||</code>-eis tussen blokken
+   (zie <a href="../speelplan/">Speelplan</a>).</li>
 <li><code>@sectie</code> <em>id</em> voldoet aan <code>[a-z][a-z0-9_-]*</code>.
 5a. <code>@blok</code> / <code>@speelplan</code>: zie <a href="../speelplan/">Speelplan</a>. Eén <code>@speelplan</code> per
     bestand; geen <code>@sectie</code>/anonieme muziek naast een speelplan; geen
