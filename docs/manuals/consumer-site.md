@@ -60,5 +60,6 @@ Documentatie: [VSA-demo README](https://github.com/orthodox-ronl/VSA-demo/blob/m
 ## Zie ook
 
 - Installatie en CI: [Integratie — reuse](../guides/reuse-vsa-tooling.md)
+- Tooling-versie vastzetten: [Releases: taggen en pinnen](releases.md)
 - CLI: [CLI-taken](../guides/cli-taken.md), [CLI-referentie](../reference/cli/index.md)
 - Navigatie-placeholders: [hugo-navigation-placeholders](../guides/hugo-navigation-placeholders.md)

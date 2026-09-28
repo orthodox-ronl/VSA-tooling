@@ -6,8 +6,8 @@ Taakgerichte documentatie voor werken met de [VSA-tooling](@bron). Dit is het
 [Referentie](../reference/README.md).
 
 !!! note "Voor wie"
-    Vooral notatie-auteurs en consumer-site builders. Koor / liturgie: niet
-    hier — zie [Home](../index.md).
+    Vooral notatie-auteurs, consumer-site builders en beheerders (releases /
+    pins). Koor / liturgie: niet hier — zie [Home](../index.md).
 
 ## Leespad
 
@@ -32,6 +32,7 @@ Taakgerichte documentatie voor werken met de [VSA-tooling](@bron). Dit is het
 | [Testen en regressie](../guides/testing-and-regression.md)          | [Fixture](@)-mappen en pytest.                       |
 | [Liturgikon-notatie](../guides/liturgikon-notatie.md)               | Historische neumenschrift-uitleg.                    |
 | [Consumer-site — waar hoort wat](consumer-site.md)                  | Ownership + keten; presentatie = VSA-demo.           |
+| [Releases: taggen en pinnen](releases.md)                           | Tag/Release in VSA-tooling; pin in bibliotheek e.d.  |
 | [TEv2 in tool-docs](../guides/tev2-docs.md)                         | Glossary-pipeline en TermRefs.                       |
 | [Navigatie-placeholders](../guides/hugo-navigation-placeholders.md) | `VSA-NAV`-markers (toolgedrag).                      |
 

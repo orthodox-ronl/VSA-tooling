@@ -38,8 +38,10 @@ Zie ook [Consumer-site — waar hoort wat](../manuals/consumer-site.md).
 python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
 ```
 
-Voor productie bij voorkeur een **tag** i.p.v. `@main`, bijvoorbeeld `@v0.1.0`
-(wanneer die bestaat).
+Voor productie bij voorkeur een **tag** i.p.v. `@main`, bijvoorbeeld
+`@0.2.0` (zodra die tag bestaat). Werkinstructies (taggen in VSA-tooling én
+pinnen in bibliotheek / andere consumers):
+[Releases: taggen en pinnen](../manuals/releases.md).
 
 Daarna:
 
@@ -179,3 +181,6 @@ zangstuk-formaat: [bron — specs](https://orthodox-ronl.github.io/bron/specs/).
 
 Tooling vs productbeleid / site-CI: zie
 [Ownership: tooling vs consumer](#ownership-tooling-vs-consumer).
+
+Taggen van VSA-tooling en pinnen in consumers:
+[Releases: taggen en pinnen](../manuals/releases.md).
