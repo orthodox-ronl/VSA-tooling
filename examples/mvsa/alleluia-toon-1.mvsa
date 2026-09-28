@@ -1,16 +1,50 @@
-# Alleluia toon 1 — mvsa-experiment
-#
-# Draft-spec: docs/specification-mvsa/  |  plan §7
-# Doel: vrije SATB, 1:1 lengte-posities L ↔ hoogte-stukken, geen recite-`~`.
+# Alleluia toon 1
+
+@title "Alleluia - Toon 1"
+@composer     "Traditioneel"
+@tekstdichter "bron: koormap Hemelum"
+@bron "koormap Hemelum"
+@copyright "CC BY-SA 4.0"
 
 @do F4
 @mode major
 
-@start S=- A=\3 T=\6 B=\8
+@speelplan 1, 2, 1, 2, 1, 3
 
-@sectie alleluia-toon-1
-L: Al le lu_ i_ a_ al le lu_ ia | Al-&-&-&.&.&- le-&- ia__ ||
-S: -  /  /  \  #\ /  /  /  \   | -&-&-&\2&/2&/  \&-  \    ||
-A: -  -  /3 \2 -  /  /2 -  -   | -&-&-&\2&/2&/  \&-  \2   ||
-T: -  /  /  \  \  /  /  /  \   | -&-&-&\2&/2&/  \&\  \    ||
-B: -  -  /  \3 /3 \ \4 /2 /2   | \3&-&-&/&\/&/3 \3&- /3   ||
+@oct S=0 A=0 T=-1 B=-1
+
+@blok 1
+L:   Al le.&. lu_ i_  a_   al  le lu-&-  ia_ |
+S-:  -    -&/  /   \   #\  /   /    /&-   \  |/2
+A\3: -    -&-  /3  \2  -   -   /2   -&-   -  |-
+T/2: -    -&/  /   \   \   /   /    /&-   \  |/4
+B-:  -    -&-  -   /   \3  /3  \   \4&/2  /2 |-
+
+@mscz-newline
+
+@blok 2
+L:  Al-&-&-&.&.&-  le-lu_&_ -ia_ |
+S/:   -&/&\&\&/&/    -  \&-   \  |-
+A\:   -&/&\&\&/&/    -  \&-   \2 |\3
+T/4:  -&-&-&\2&/2&-  -  -&\   \  |/2
+B\3:  -&-&-&/&\&/3   - \3&-   /3 |-
+
+@blok 3
+L:  Al-&-&-&.&.&-  le-lu_&_ -ia_ |
+S/:   -&/&\&\&/&/    -  \&/2  \  |/2
+A\:   -&/&\&\&/&/    -  \&/2  \  |-
+T/4:  -&-&-&\2&/2&-  -  -&-   -  |/4
+B\3:  -&-&-&/&\&/3   -  \3&-  /3 |-
+
+
+# PRO MEMORI
+#
+# Absolute pitch-equivalent (zelfde klinkende tonen als sectie begin):
+# @oct S=0 A=0 T=-1 B=-1
+#
+# @blok 1
+# L: Al le.&. lu_ i_  a_   al  le lu-&-  ia_ |
+# S: f    f&g  a   g   f#  g   a   bb&bb  a  |
+# A: c    c&c  f   d   d   d   f    f&f   f  |
+# T: a    a&bb c+  bb  a   bb  c+  d+&d+  c+ |
+# B: f    f&f  f   g   d   g   f  bb-&d   f  |

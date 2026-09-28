@@ -486,10 +486,10 @@ default
 
 | Script                         | Wat doet het?               |
 | ------------------------------ | --------------------------- |
-| `test`        | installeert lokale omgeving |
+| `test`                         | installeert lokale omgeving |
 | `scripts\test.cmd`             | draait tests                |
 | `scripts\ci.cmd`               | draait lokale CI            |
-| `serve`       | MkDocs docs lokaal serveren |
+| `serve`                        | MkDocs docs lokaal serveren |
 
 ## Diagnosevolgorde
 
@@ -536,3 +536,32 @@ vsa template validate docs\specification-vsa-templates\library\tropaar-toon-4\te
 
 Bij succes: één `OK`-regel per bestand. Bij fout: `pad: ERROR: CODE: …` en
 exitcode `1`.
+
+## `vsa mvsa …`
+
+### Doel
+
+Draft-tooling voor meerstemmige `.mvsa`-bestanden (L + SATB). Zie
+[specification-mvsa](../specification-mvsa/README.md) en de man-pagina
+[reference/cli/mvsa.md](../reference/cli/mvsa.md).
+
+### Gebruik
+
+```cmd
+vsa mvsa validate examples\mvsa
+vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
+vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+```
+
+### Opties (`musicxml`)
+
+| Optie                | Betekenis                                                          |
+| -------------------- | ------------------------------------------------------------------ |
+| `-o`, `--output`     | Uitvoerbestand (default: `<stem>.mxl` naast het bronbestand).      |
+| `--section SECTION`  | Alleen deze `@sectie`-id exporteren (default: alle secties).       |
+
+### Output
+
+- `validate`: per geldig bestand `<pad>: OK`; anders diagnostiek en exitcode `1`.
+- `musicxml`: `Geschreven: <pad>` of fout op stderr.

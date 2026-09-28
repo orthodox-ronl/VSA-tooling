@@ -17,6 +17,9 @@ dependencies = [
 
 [project.scripts]
 vsa = "vsa.cli:main"
+mvsa = "vsa.cli_mvsa:main"
+mxl = "vsa.cli_mxl:main"
+mscz = "vsa.cli_mscz:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

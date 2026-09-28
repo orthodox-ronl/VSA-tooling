@@ -11,9 +11,22 @@ node_modules/
 # MuseScore/lokale PDF-export — niet committen (scans horen in bron)
 *.pdf
 
+# MuseScore autosave — nergens committen
+*.autosave
+
 # MuseScore-rommel bij openen/opslaan naast .mscz (niet committen)
 **/.mscbackup/
 **/Thumbnails/
+
+# examples/mvsa: alleen bron-.mvsa (+ README/ISSUES); geen conversieproducten
+examples/mvsa/*.mvsa.*
+examples/mvsa/*.mxl
+examples/mvsa/*.mxl.*
+examples/mvsa/*.mscz
+examples/mvsa/*.mscz.*
+examples/mvsa/*.musicxml
+examples/mvsa/*.mid
+examples/mvsa/*.midi
 
 # Lokale docs-checks (scripts/check-docs.py) — niet committen
 docs/reports/
@@ -250,3 +263,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 .ensure-stamp
+examples/mvsa/make.bat
+examples/mvsa/make.cmd

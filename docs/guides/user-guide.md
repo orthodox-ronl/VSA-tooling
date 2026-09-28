@@ -23,6 +23,7 @@ VSA-notatie  →  validate  →  SVG / MusicXML / Hugo-Markdown
 | Ik wil …                                           | Ga naar                                                                      |
 | -------------------------------------------------- | ---------------------------------------------------------------------------- |
 | Lokaal installeren en eerste `OK`                  | [Starten](../getting-started/README.md)                                      |
+| `.mvsa` leren typen (L, stemmen, octaven)          | [mvsa schrijven 101](mvsa-schrijven-101.md)                                  |
 | Het juiste commando kiezen                         | [CLI-taken](cli-taken.md)                                                    |
 | Begrijpen waarom validate faalt                    | [Validatie](validation.md) · [`vsa validate`](../reference/cli/validate.md)  |
 | Eén bestand of site als SVG                        | [SVG exporteren](svg-export.md)                                              |

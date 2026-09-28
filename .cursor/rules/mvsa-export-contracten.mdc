@@ -1,0 +1,41 @@
+---
+description: MVSA/MXL/MSCZ-export volgt canonieke contracten (checklists)
+globs: src/vsa/mvsa_musicxml.py,src/vsa/musicxml_*.py,src/vsa/mscz_*.py,src/vsa/mvsa_mscz.py,src/vsa/cli_mxl.py,src/vsa/cli_mscz.py,tests/test_mvsa_musicxml.py,tests/test_musicxml_*.py,tests/test_mvsa_mscz.py,docs/formats/canonical-checklists.md,docs/formats/mxl.md,docs/formats/mscz*.md
+alwaysApply: false
+---
+
+# MVSA-export: contracten eerst
+
+Bij wijzigingen aan `.mvsa` → MusicXML / MuseScore-export: **eerst** de
+contracten lezen en respecteren, daarna code.
+
+## Bron van waarheid
+
+1. [`docs/formats/canonical-checklists.md`](docs/formats/canonical-checklists.md)
+   — M-reeks (Coria/`.mxl`) en S-reeks (partituur/`.mscz`)
+2. [`docs/formats/mscz-leesbaarheid.md`](docs/formats/mscz-leesbaarheid.md) —
+   printregels R/M
+3. Bij templates ook
+   [`docs/specification-vsa-templates/rendering-pitfalls.md`](docs/specification-vsa-templates/rendering-pitfalls.md)
+
+Nieuwe layout-/duur-/melisma-gedrag → **checklistregel bijwerken** in dezelfde
+PR als de code (niet alleen in chat of een losse test).
+
+## Harde exportregels (niet “partituur-only” gokken)
+
+| Onderwerp | `.mxl` (playback) | `.mscz` (partituur) |
+| --- | --- | --- |
+| **Recite** | Geen print-collapse (M10): één klinkende noot per lettergreep | Mag 1-(n−2)-1 + `\|\|O\|\|` (R5+) |
+| **Same-pitch melisma** | **Wél** samentrekken (M5a / S13 / R7): één lettergreep, zelfde toonhoogte → één noot of tie-keten; geen heraangeslagen kwarten | Idem |
+| **Melisma met toonwissels** | Lyric + `<extend/>` op eerste; slur mag (Coria-sanitize kan notations strippen) | Lyric + `<extend/>` + slur |
+
+Implementatie: `mvsa_musicxml._collapse_same_pitch_melisma` — aanroepen voor
+**beide** layouts, niet alleen `partituur`.
+
+## Checklist bij elke export-PR
+
+1. Welke M-/S-/R-regel raakt dit?
+2. Staat die regel al in `canonical-checklists.md`? Zo nee: toevoegen.
+3. Test die het contract vastzet (playback én/of partituur naar gelang de regel).
+4. Geen stille divergentie: “werkt op MSCZ, MXL later” alleen als de checklist
+   dat **expliciet** als verschil noemt (zoals recite M10 vs print).

@@ -19,6 +19,9 @@ CI gebruikt `examples\consumer-minimal\content-source`.
 | `clean` | tijdelijke bestanden weg |
 | `import` | zip uit Downloads uitpakken |
 | `run-example` | `vsa` op een voorbeeld-`.vsa` |
+| `mvsa` | top-level `mvsa` (≡ `vsa mvsa`; bron `.mvsa`) |
+| `mxl` | top-level `mxl` (import / mscz; bron `.mxl`) |
+| `mscz` | top-level `mscz` (import / mxl; bron `.mscz`) |
 | `check-docs` | docs-hygiene |
 
 Python-helpers blijven in `scripts/`. Oude namen (`docs-serve`, `ci`, `bootstrap`) zijn aliases.
