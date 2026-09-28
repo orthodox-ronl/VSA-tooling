@@ -17,7 +17,8 @@ from vsa.musescore_cli import (
 from vsa.mvsa_mscz import MvsaMsczError, export_mvsa_to_mscz
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "mvsa"
-ALLELUIA = EXAMPLES / "alleluia-toon-8.mvsa"
+# Schets-secties (schets3-oct-doremi, …) staan in het test-fixture.
+ALLELUIA = EXAMPLES / "test-alleluia-toon-8.mvsa"
 MUSESCORE = find_musescore()
 
 

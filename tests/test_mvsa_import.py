@@ -13,7 +13,8 @@ from vsa.mvsa_validate import validate_mvsa_text
 from vsa.musicxml_package import write_musicxml_output
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "mvsa"
-ALLELUIA = EXAMPLES / "alleluia-toon-8.mvsa"
+# Schets-secties (schets3-oct-doremi, …) staan in het test-fixture.
+ALLELUIA = EXAMPLES / "test-alleluia-toon-8.mvsa"
 
 
 def _part_pitches(xml: str, part_id: str) -> list[tuple[str, str, str]]:
