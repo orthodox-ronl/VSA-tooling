@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/mvsa-musicxml-export</code>
-  , gebouwd 2026-09-28 16:09 CEST.
+   — branch <code>chore/mvsa-backlog-en-make-cmd</code>
+  , gebouwd 2026-09-28 18:44 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4089,6 +4089,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#ownership-tooling-vs-consumer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ownership: tooling vs consumer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#direct-met-pip" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4543,6 +4554,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#ownership-tooling-vs-consumer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ownership: tooling vs consumer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#direct-met-pip" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4637,6 +4659,44 @@
 <p>Deze pagina is de <strong>integratiehandleiding</strong>: hoe je <code>vsa-tool</code> in een andere repo
 installeert en in CI gebruikt. Volledig werkend voorbeeld:
 <a href="https://github.com/orthodox-ronl/VSA-demo">VSA-demo</a>.</p>
+<h2 id="ownership-tooling-vs-consumer">Ownership: tooling vs consumer<a class="headerlink" href="#ownership-tooling-vs-consumer" title="Permanent link">&para;</a></h2>
+<p><strong>Vuistregel:</strong> als twee verschillende sites dezelfde conversie of validatie
+nodig hebben → <strong>VSA-tooling</strong>. Als alleen déze site beslist “dit telt als
+product” of “zo zetten we de Hugo-CI in” → <strong>consumer-repo</strong> (bibliotheek,
+VSA-demo, …).</p>
+<table>
+<thead>
+<tr>
+<th>VSA-tooling</th>
+<th>Consumer (bibliotheek, demo, …)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Geldigheid van <code>.vsa</code> / <code>.mvsa</code> / <code>.mxl</code> / <code>.mscz</code></td>
+<td>Welke bestanden horen bij welke representatie / publicatiespoor</td>
+</tr>
+<tr>
+<td>Omzetten naar een <strong>canonieke</strong> of <strong>gekozen</strong> exportvorm / layoutprofiel</td>
+<td>Batch: wat wel/niet regenereren, sibling-namen, freshness-gates</td>
+</tr>
+<tr>
+<td>Algemene CLI + optionele herbruikbare <code>workflow_call</code>-helpers</td>
+<td>Eigen site-CI (Hugo-build, Pages, productchecks)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bibliotheek-id.</strong> Welke id bij een zangstuk hoort, bepaalt de
+<strong>bibliotheek</strong> (of een andere consumer). Product-scripts daar geven die id
+door met <code>--bibliotheek-id</code> / API-parameter. VSA-tooling zet de id in het
+colofon (layoutprofiel <code>partituur</code>). Pad-afleiding is alleen een fallback.</p>
+<p><strong>Layout / conventies.</strong> MSCZ-export kent benoemde profielen (<code>partituur</code>,
+<code>plain</code>); zie <a href="../../formats/mscz/#layoutprofielen---layout"><code>.mscz</code> — layoutprofielen</a>.
+De consumer <strong>kiest</strong>; VSA-tooling <strong>definieert en handhaaft</strong>.</p>
+<p><strong>Niet in VSA-tooling:</strong> productpipelines (<code>sync_*</code> / <code>check_*</code> met
+sitebeleid), “artefacten handmatig”, Hugo-site-CI voorbij generieke
+validate/render-helpers.</p>
+<p>Zie ook <a href="../../manuals/consumer-site/">Consumer-site — waar hoort wat</a>.</p>
 <h2 id="direct-met-pip">Direct met <code>pip</code><a class="headerlink" href="#direct-met-pip" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
 </code></pre></div>
@@ -4808,6 +4868,8 @@ branch-previews die niet in de nieuwe site-build zitten blijven behouden):</p>
 <h2 id="org-grenzen-d1">Org-grenzen (D1)<a class="headerlink" href="#org-grenzen-d1" title="Permanent link">&para;</a></h2>
 <p>Installeer de tool hier; <strong>dupliceer geen</strong> org-specs. Terminologie en
 zangstuk-formaat: <a href="https://orthodox-ronl.github.io/bron/specs/">bron — specs</a>.</p>
+<p>Tooling vs productbeleid / site-CI: zie
+<a href="#ownership-tooling-vs-consumer">Ownership: tooling vs consumer</a>.</p>
 
 
 
@@ -4844,7 +4906,7 @@ zangstuk-formaat: <a href="https://orthodox-ronl.github.io/bron/specs/">bron —
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-18
+        Bijgewerkt: 2026-09-28
         
       </p>
       
