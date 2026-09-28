@@ -136,11 +136,11 @@ muzikale eenheid van een of meer LSATB-systemen — in bestanden **zonder**
 
 **Vorm.** `@sectie` + spatie + id: `[a-z][a-z0-9_-]*` (kleine letters).
 
-**Sectie-einde.** Canoniek eindigt de vorige sectie met `||` (of `:||`) op alle
-lyrics-/stemregels. Een nieuwe `@sectie` **sluit de vorige sectie ook impliciet
-af** als die nog open stond (toegestaan, niet-canoniek — validate mag warnen
-met `MVSA-SECTIE-IMPLICIT`). Zelfde warning bij **EOF** van een open sectie of
-anonieme sectie. Zie [Syntax — sectie-einde](syntax.md#einde).
+**Sectie-einde.** Bij een nieuwe `@sectie`, bij **EOF**, of (later) bij
+fence-`:::` is de **laatste maatstreep** van het vorige laatste systeem
+(`|`, `||`, …) het sectie-einde. Expliciet midden in een bestand (zonder
+nieuwe `@sectie`) gebruik je `||` of `:||`. Tooling schrijft bij genereren
+bij voorkeur `||`. Zie [Syntax — sectie-einde](syntax.md#einde).
 
 **Wel gebruiken** om delen te benoemen die je apart wilt exporteren
 (`vsa mvsa musicxml … --section id`) of om schetsen in één experiment-bestand

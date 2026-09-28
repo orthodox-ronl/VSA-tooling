@@ -13,9 +13,7 @@ Werkplan-restpunten syntax (geschiedenis):
 
 ## Nu (eerstvolgende tooling)
 
-| Punt                         | Toelichting                                                             | Richting              |
-| ---------------------------- | ----------------------------------------------------------------------- | --------------------- |
-| Sectie-einde bij EOF / fence | Maatstreep = sectie-einde bij EOF, fence-`:::`, en bij nieuwe `@sectie` | Spec + parse/validate |
+*(leeg — volgende werk uit [Backlog](#backlog-bewust-later))*
 
 Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 `examples/mvsa/make.cmd` (PDF via `mvsa pdf`).
@@ -55,13 +53,14 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 
 ## Klaar (niet opnieuw openen)
 
-| Punt             | Stand                                                                 |
-| ---------------- | --------------------------------------------------------------------- |
-| Parser / CLI     | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5) |
-| Conversieslices  | normalize, mscz-export, import, bron-commands — zie conversions-plan  |
-| `mvsa pdf`       | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`       |
-| Validate-output  | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`    |
-| Experiment-PDF   | Checklist P1–P5; copyright-footer P4 blijft “later”                   |
+| Punt             | Stand                                                                                               |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| Parser / CLI     | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                               |
+| Conversieslices  | normalize, mscz-export, import, bron-commands — zie conversions-plan                                |
+| `mvsa pdf`       | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                     |
+| Validate-output  | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
+| Sectie-einde     | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |
+| Experiment-PDF   | Checklist P1–P5; copyright-footer P4 blijft “later”                                                 |
 
 ---
 

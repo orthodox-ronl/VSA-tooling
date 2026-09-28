@@ -221,35 +221,39 @@ S: …
 
 ### Einde
 
-Een sectie eindigt op een van deze manieren (de eerste is **canoniek**):
+Een sectie eindigt op een van deze manieren:
 
-1. **Sectie-eindestreep:** op **alle** LSATB-regels van een systeem staat
-   `||` of `:||`. Regels daarna horen niet meer bij die sectie.
-2. **Nieuwe `@sectie`:** een volgende `@sectie` *id* opent een nieuwe sectie en
-   **sluit daarmee impliciet** de vorige af, ook als die nog geen `||` had.
-   (Toegestaan in niet-canonieke bronnen; tooling mag een warning geven.)
-3. **Einde van het bestand (EOF):** een open sectie zonder `||` wordt bij EOF
-   als afgesloten beschouwd.
+1. **Sectie-eindestreep `||` / `:||`:** op **alle** LSATB-regels van een
+   systeem. Regels daarna horen niet meer bij die sectie. Dit is de vorm die
+   tooling bij **genereren** schrijft, en die je nodig hebt om midden in een
+   bestand een sectie te beëindigen **zonder** meteen een nieuwe `@sectie` te
+   openen.
+2. **Nieuwe `@sectie`:** een volgende `@sectie` *id* opent een nieuwe sectie.
+   De **laatste maatstreep** van het vorige laatste systeem (`|`, `||`, of
+   herhalingsvorm) is tegelijk het sectie-einde — ook als dat geen `||` was.
+3. **Einde van het bestand (EOF):** idem: de laatste maatstreep van het
+   laatste systeem beëindigt de open sectie.
 4. **(Vooruitblik)** Het sluiten van een fenced blok `::: mvsa-notatie` …
-   `:::` (zodra die vorm in markdown/export landt) werkt hetzelfde als EOF voor
-   de open sectie in dat blok.
+   `:::` (zodra die vorm in markdown landt) werkt hetzelfde als EOF voor de
+   open sectie in dat blok.
 
-Canoniek schrijf je dus nog steeds `||` (of `:||`) op het laatste systeem van
-elke **sectie** (`@sectie` / anoniem). Impliciete afsluiting via `@sectie` /
-EOF / fence is geldig voor validatie en export, maar niet de vorm die tooling
-bij genereren schrijft. Validate mag `MVSA-SECTIE-IMPLICIT` geven.
+Kort: bij **EOF**, **nieuwe `@sectie`**, of **fence-`:::`** is elke geldige
+eindmaatstreep op het laatste systeem genoeg. `||` blijft nuttig als
+**expliciete** sectie-eindestreep midden in de bron en als canonieke
+exportvorm.
 
-**Speelblokken (`@blok`):** horen niet onder deze `||`-canonieke regel. Een
-nieuw `@blok` of EOF na een speelblok zonder `||` is **geen** warning. Zie
+**Speelblokken (`@blok`):** horen niet onder een `||`-eis tussen blokken. Een
+nieuw `@blok` of EOF na een speelblok is gewoon toegestaan. Zie
 [Speelplan](speelplan.md).
 
 ### Meerdere systemen per sectie
 
 Een lange sectie mag over meerdere LSATB-systemen worden gesplitst (leesbaarheid
 in de editor). Elk tussensysteem eindigt op `|` (of herhalingsspecialisatie die
-geen sectie-einde is). Canoniek eindigt alleen het **laatste** systeem van de
-sectie op `||` of `:||`; zonder die streep mag de sectie toch eindigen via
-`@sectie` / EOF zoals hierboven.
+geen sectie-einde is). Het **laatste** systeem van de sectie eindigt op een
+geldige maatstreep; bij doorlopende tekst zonder nieuwe `@sectie` gebruik je
+`||` of `:||` om de sectie te beëindigen. Bij een volgende `@sectie`, bij EOF,
+of (later) bij fence-`:::` volstaat ook `|`.
 
 Alle systemen in één sectie hebben hetzelfde aantal LSATB-regels en dezelfde
 regelidentifiers in dezelfde volgorde (zelfde stemidentifier én dezelfde

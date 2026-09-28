@@ -77,7 +77,8 @@ L: … ||
 - Id: cijferreeks `[1-9][0-9]*` **of** `[a-z][a-z0-9_-]*`.
 - Elk speelblok-id komt hoogstens één keer voor.
 - Tussen blokken is **`||` niet verplicht** (en vaak ongewenst: `||` triggert
-  in Coria een pauze). Validate geeft hier **geen** `MVSA-SECTIE-IMPLICIT`.
+  in Coria een pauze). Geen `||`-eis tussen blokken (in tegenstelling tot
+  expliciete sectie-eindestreep midden in een `@sectie`-bestand).
   Optioneel `||` alleen op het **laatste** blok van het bestand.
 
 **`@sectie` vs `@blok`:** gebruik `@sectie` in bestanden **zonder** `@speelplan`

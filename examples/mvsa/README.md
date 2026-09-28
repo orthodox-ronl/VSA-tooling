@@ -38,6 +38,7 @@ expand). Open litanie-herhaling (N onbekend) → `|:…:|` zonder speelplan.
 `@sectie` alleen in bestanden zonder speelplan (schetsen / `--section`).
 
 Canonieke vorm (draft): woordstreepjes tussen lettergrepen van hetzelfde woord;
-maatstrepen op alle LSATB-regels; bij **secties** eindstreep `||` op het
-laatste systeem; tussen **speelblokken** is `||` geen eis. **Lege regel**
-tussen vscode-systemen (geen `@---` nodig).
+maatstrepen op alle LSATB-regels; bij **secties** eindigt het laatste systeem
+op een maatstreep (`||` bij voorkeur in gegenereerde output; bij EOF / nieuwe
+`@sectie` volstaat ook `|`); tussen **speelblokken** is `||` geen eis.
+**Lege regel** tussen vscode-systemen (geen `@---` nodig).

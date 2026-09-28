@@ -317,21 +317,8 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                         )
                     )
                 else:
-                    if (
-                        current is not None
-                        and current.systems
-                        and not current.systems[-1].ends_section
-                        and current.origin != "blok"
-                    ):
-                        diagnostics.append(
-                            MvsaDiagnostic(
-                                "MVSA-SECTIE-IMPLICIT",
-                                f"sectie impliciet afgesloten door @sectie {rest!r} "
-                                f"(canoniek: || of :|| op het laatste systeem)",
-                                line_no,
-                                severity="warning",
-                            )
-                        )
+                    # Nieuwe @sectie: laatste maatstreep van vorige sectie
+                    # (ook |) is sectie-einde; geen MVSA-SECTIE-IMPLICIT.
                     pending_sectie = (rest, line_no, "sectie")
                     current = None
             elif name == "blok":
@@ -485,17 +472,8 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                 start,
             )
         )
-    if current is not None and current.systems and not current.systems[-1].ends_section:
-        if current.origin != "blok":
-            diagnostics.append(
-                MvsaDiagnostic(
-                    "MVSA-SECTIE-IMPLICIT",
-                    "sectie impliciet afgesloten door einde van het bestand "
-                    "(canoniek: || of :|| op het laatste systeem)",
-                    current.systems[-1].start_line,
-                    severity="warning",
-                )
-            )
+    # EOF (en later fence-:::): open sectie eindigt op de laatste maatstreep
+    # van het laatste systeem (| of ||); geen warning. Speelblokken: idem.
     return sections
 
 
