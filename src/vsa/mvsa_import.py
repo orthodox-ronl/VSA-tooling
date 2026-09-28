@@ -353,34 +353,52 @@ def _group_positions(
 ) -> list[_Position]:
     """Group notes into L-length positions (lyric starts / melisma).
 
-    When ``mirror_of`` is set (for A/T/B), use the same group sizes as S.
+    When ``mirror_of`` is set (for A/T/B), emit one position per S position with
+    the same slot count. If the voice has lyrics, consume by lyric/melisma
+    groups so a shorter collapsed melisma (M5a) does not steal the next
+    syllable; pad with the last pitch held (re-export collapses pads again).
+    Without lyrics, fall back to index-aligned chunks of S's sizes.
     """
     if mirror_of is not None:
         out: list[_Position] = []
         i = 0
+        hold_pitch: Pitch | None = None
+        hold_dur = Duration("quarter", 0)
+        by_lyrics = any(n.lyrics for n in notes)
         for pos in mirror_of:
             n = len(pos.notes)
-            chunk = notes[i : i + n]
-            if len(chunk) < n:
-                # Pad with last pitch held
-                while len(chunk) < n and chunk:
-                    chunk.append(
-                        _Note(
-                            pitch=chunk[-1].pitch,
-                            duration=chunk[-1].duration,
-                            lyrics=[],
-                        )
-                    )
+            if by_lyrics:
+                chunk: list[_Note] = []
+                if i < len(notes):
+                    chunk.append(notes[i])
+                    i += 1
+                    while i < len(notes) and not notes[i].lyrics:
+                        chunk.append(notes[i])
+                        i += 1
+            else:
+                chunk = list(notes[i : i + n])
+                i += n
+            if chunk and chunk[-1].pitch is not None:
+                hold_pitch = chunk[-1].pitch
+                hold_dur = chunk[-1].duration
+            if len(chunk) > n:
+                chunk = chunk[:n]
+                if chunk and chunk[-1].pitch is not None:
+                    hold_pitch = chunk[-1].pitch
+                    hold_dur = chunk[-1].duration
+            elif len(chunk) < n:
+                fill = hold_pitch if hold_pitch is not None else Pitch("C", 4, 0.0)
                 while len(chunk) < n:
                     chunk.append(
                         _Note(
-                            pitch=Pitch("C", 4, 0.0),
-                            duration=Duration("quarter", 0),
+                            pitch=fill,
+                            duration=hold_dur,
                             lyrics=[],
                         )
                     )
+                if hold_pitch is None:
+                    hold_pitch = fill
             out.append(_Position(notes=chunk, recite=pos.recite))
-            i += n
         return out
 
     positions: list[_Position] = []
