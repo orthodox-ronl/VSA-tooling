@@ -1,8 +1,10 @@
 # Speelplan en speelblokken (draft)
 
 **Status:** draft v0 — fase 1 (syntax, validatie, MXL-expansie) + fase 2a
-(volta voor patroon `(a,b)×n+(a,c)`) + fase 2b (D.S./D.C. al Fine op
-partituur). Rest-sprongen (D.S. al Coda, geneste jumps): [Open punten](open-points.md).
+(volta voor patroon `(a,b)×n+(a,c)`) + fase 2b (D.S./D.C. al Fine) +
+fase 2c (D.S./D.C. al Coda) op partituur. Geneste combinatie-jumps zonder
+één herkenbaar bladpatroon blijven expand ([Open punten](open-points.md) /
+«Bewust later»).
 
 **Voor wie:** wie een vast SATB-antwoord (alleluia, litanie-antwoord) één keer
 wil opschrijven en de uitvoeringsvolgorde apart wil vastleggen.
@@ -134,15 +136,31 @@ Geen blok-id-labels boven de maten — navigatietekens zijn genoeg.
 
 De exporter kiest automatisch (eerste match wint):
 
-| Prioriteit | Patroon                                      | Bladtekens                                              |
-| ---------- | -------------------------------------------- | ------------------------------------------------------- |
-| 1          | plan = blokvolgorde                          | niets                                                   |
-| 2          | `(a,b)×n + (a,c)` (3 blokken)                | `\|: a \|1..n. b :\| n+1. c` (volta)                    |
-| 3          | `prefix + X×n + suffix` (n≥2)                | `\|: … :\|` (+ `times` als n>2)                         |
-| 4          | `blad[0..ds] + blad[segno..fine]`            | Segno + Fine + D.S. al Fine (of D.C. al Fine)           |
-| 5          | rest                                         | **expand**: speelplan uitgeschreven op het blad         |
+| Prioriteit | Patroon                                               | Bladtekens                                                      |
+| ---------- | ----------------------------------------------------- | --------------------------------------------------------------- |
+| 1          | plan = blokvolgorde                                   | niets                                                           |
+| 2          | `(a,b)×n + (a,c)` (3 blokken)                         | `\|: a \|1..n. b :\| n+1. c` (volta)                            |
+| 3          | `prefix + X×n + suffix` (n≥2)                         | `\|: … :\|` (+ `times` als n>2)                                 |
+| 4          | `blad[0..ds] + blad[segno..fine]`                     | Segno + Fine + D.S. al Fine (of D.C. al Fine)                   |
+| 5          | `blad[0..ds] + blad[segno..tocoda] + blad[coda..]`    | Segno + To Coda + Coda + D.S. al Coda (of D.C. al Coda)         |
+| 6          | rest                                                  | **expand**: speelplan uitgeschreven op het blad                 |
 
 Coria (`playback`) schrijft het speelplan altijd volledig uit (geen jumps).
+
+**D.S./D.C. al Coda (prioriteit 5)** — planvorm en bladtekens:
+
+| Plan (blok-ids)                            | Bladvolgorde              | Bladtekens                                                                                     |
+| ------------------------------------------ | ------------------------- | ---------------------------------------------------------------------------------------------- |
+| `1, 2, 3, 2, 4`                            | 1 2 3 4                   | Segno bij start 2; To Coda einde 2; D.S. al Coda einde 3; Coda-teken bij 4                     |
+| `intro, mid, bridge, intro, mid, coda`     | intro mid bridge coda     | To Coda einde mid; D.C. al Coda einde bridge; Coda-teken bij coda (geen segno)                 |
+
+Drie bladblokken met plan `(a,b)+(a,c)` valt onder **volta** (prioriteit 2),
+niet onder D.C. al Coda — dezelfde klinkende volgorde, andere bladvorm.
+
+Eisen: To Coda staat strikt vóór het D.S./D.C.-blok; coda = rest van het blad
+na dat blok (minstens één speelblok). Disjunct van prioriteit 4 (Fine herhaalt
+alleen binnen `[0..ds]`). Geneste combinaties (volta+D.S., dubbele sprongen)
+zonder één zo’n bladpatroon → prioriteit 6 (expand).
 
 ## Voorbeeld
 
@@ -176,9 +194,13 @@ L:  Al-&-&-&.&.&-  … ||
 Trisagion-vorm (`nls-1, nls-2, ksl, doxologie, nls-2, ksl`): Segno bij
 `nls-2`, Fine aan het eind van `ksl`, **D.S. al Fine** na `doxologie`.
 
+Coda-vorm (`1, 2, 3, 2, 4`): Segno bij `2`, To Coda eind `2`, **D.S. al Coda**
+na `3`, Coda-teken bij `4`.
+
 ## Bewust later
 
-- Meer sprongvormen (D.S. al Coda, geneste herhalingen).
+- Geneste combinatie-jumps (bijv. volta + D.S.) zonder één herkenbaar
+  bladpatroon — blijven expand; aparte matcher alleen bij eenduidig corpus-nut.
 - CLI-vlag voor compacte MXL (alleen als de consumer herhalingen begrijpt).
 - Speelplan over meerdere bestanden; geneste plannen; `until: final` zoals
   templates.

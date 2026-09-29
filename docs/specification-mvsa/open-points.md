@@ -29,7 +29,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
 
 | Punt                                    | Toelichting                                                                    | Richting                                                                       |
 | --------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Speelplan: D.S. al Coda / geneste jumps | Volta `(a,b)×n+(a,c)` en D.S./D.C. al Fine zijn klaar; rest-sprongen nog niet  | [speelplan.md](speelplan.md) «Bewust later»                                    |
+| Speelplan: geneste combinatie-jumps     | D.S./D.C. al Coda is klaar; volta+D.S. e.d. zonder één bladpatroon → expand    | [speelplan.md](speelplan.md) «Bewust later»                                    |
 | Blokhergebruik                          | Secties of stemmen hergebruiken (`@voices`, deelbereiken)                      | Experiment: `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`                     |
 | Overlays t.o.v. S                       | A/T/B als afwijking van de sopraan                                             | Later                                                                          |
 | Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                       | Later                                                                          |
@@ -54,19 +54,19 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
 
 ## Klaar (niet opnieuw openen)
 
-| Punt                           | Stand                                                                                               |
-| ------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Parser / CLI                   | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                               |
-| Conversieslices                | normalize, mscz-export, import, bron-commands — zie conversions-plan                                |
-| `mvsa pdf`                     | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                     |
-| `vsa`/`mvsa audio`             | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                         |
-| Los MIDI-bestand               | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)    |
-| Speelplan volta + D.S. al Fine | Partituur-nav: `(a,b)×n+(a,c)` en D.S./D.C. al Fine; MXL expansie; tests aanwezig                   |
-| Laddergraad `+`/`-` = octaaf   | Mvsa-keuze vastgelegd (kruis via `#`/`b`); chromatische `+` in eenstemmige VSA-EHM → VSA-spec       |
-| Validate-output                | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
-| Sectie-einde                   | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |
-| MSCZ-layout + id               | `--layout {partituur,plain}`; `--bibliotheek-id` (expliciet; pad = fallback)                        |
-| Experiment-PDF                 | Checklist P1–P5; copyright-footer P4 blijft “later”                                                 |
+| Punt                                  | Stand                                                                                               |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Parser / CLI                          | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                               |
+| Conversieslices                       | normalize, mscz-export, import, bron-commands — zie conversions-plan                                |
+| `mvsa pdf`                            | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                     |
+| `vsa`/`mvsa audio`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                         |
+| Los MIDI-bestand                      | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)    |
+| Speelplan volta + D.S. al Fine / Coda | Partituur-nav: volta, D.S./D.C. al Fine, D.S./D.C. al Coda; MXL expansie; tests                     |
+| Laddergraad `+`/`-` = octaaf          | Mvsa-keuze vastgelegd (kruis via `#`/`b`); chromatische `+` in eenstemmige VSA-EHM → VSA-spec       |
+| Validate-output                       | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
+| Sectie-einde                          | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |
+| MSCZ-layout + id                      | `--layout {partituur,plain}`; `--bibliotheek-id` (expliciet; pad = fallback)                        |
+| Experiment-PDF                        | Checklist P1–P5; copyright-footer P4 blijft “later”                                                 |
 
 ---
 

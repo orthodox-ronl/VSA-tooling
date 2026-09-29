@@ -204,6 +204,8 @@ def export_mvsa_to_musicxml(
         )
     elif nav is not None and nav.kind == "ds_al_fine" and nav.ds is not None:
         _apply_ds_al_fine(nav.ds, blok_measure_range, nav_marks)
+    elif nav is not None and nav.kind == "ds_al_coda" and nav.coda is not None:
+        _apply_ds_al_coda(nav.coda, blok_measure_range, nav_marks)
     # expand / identity: geen extra tekens; expand schrijft het plan uit via
     # sections_for_layout.
     # Wrap lange ``@tekst`` (``...`` → nieuwe regel) vóór breedte-schatting.
@@ -910,8 +912,28 @@ def _apply_ds_al_fine(
     nav_marks[rd[1]].append(jump)
 
 
+def _apply_ds_al_coda(
+    coda,
+    blok_measure_range: dict[str, tuple[int, int]],
+    nav_marks: list[list[str]],
+) -> None:
+    """Segno / To Coda / Coda + D.S. of D.C. al Coda op maat-nav-marks."""
+    rs = blok_measure_range.get(coda.segno_id)
+    rt = blok_measure_range.get(coda.to_coda_id)
+    rd = blok_measure_range.get(coda.ds_after_id)
+    rc = blok_measure_range.get(coda.coda_id)
+    if rs is None or rt is None or rd is None or rc is None:
+        return
+    if not coda.use_da_capo:
+        nav_marks[rs[0]].append("segno")
+    nav_marks[rt[1]].append("to_coda")
+    jump = "dc_al_coda" if coda.use_da_capo else "ds_al_coda"
+    nav_marks[rd[1]].append(jump)
+    nav_marks[rc[0]].append("coda")
+
+
 def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
-    """MusicXML-directions voor segno / Fine / D.S.|D.C. al Fine."""
+    """MusicXML-directions voor segno / Fine / Coda / D.S.|D.C. jumps."""
     for mark in marks:
         if mark == "segno":
             out.append(
@@ -940,6 +962,37 @@ def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
             out.append(
                 '<direction placement="above">'
                 '<direction-type><words font-weight="bold">D.C. al Fine</words>'
+                "</direction-type>"
+                '<sound dacapo="yes"/>'
+                "</direction>"
+            )
+        elif mark == "to_coda":
+            out.append(
+                '<direction placement="above">'
+                '<direction-type><words font-weight="bold">To Coda</words>'
+                "</direction-type>"
+                '<sound tocoda="coda"/>'
+                "</direction>"
+            )
+        elif mark == "coda":
+            out.append(
+                '<direction placement="above">'
+                "<direction-type><coda/></direction-type>"
+                '<sound coda="coda"/>'
+                "</direction>"
+            )
+        elif mark == "ds_al_coda":
+            out.append(
+                '<direction placement="above">'
+                '<direction-type><words font-weight="bold">D.S. al Coda</words>'
+                "</direction-type>"
+                '<sound dalsegno="segno"/>'
+                "</direction>"
+            )
+        elif mark == "dc_al_coda":
+            out.append(
+                '<direction placement="above">'
+                '<direction-type><words font-weight="bold">D.C. al Coda</words>'
                 "</direction-type>"
                 '<sound dacapo="yes"/>'
                 "</direction>"

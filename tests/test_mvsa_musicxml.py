@@ -1050,6 +1050,50 @@ def test_speelplan_playback_expands_measures():
     assert xml.count(">c</text>") == 4
 
 
+def test_speelplan_playback_coda_shape_expands_no_jumps():
+    """Playback blijft expand: geen Segno/Coda-markers bij coda-vormig plan."""
+    text = """\
+@do F4
+@mode major
+@speelplan 1, 2, 3, 2, 4
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok 3
+L: c_ |
+S: mi |
+A: mi |
+T: mi |
+B: mi |
+
+@blok 4
+L: d_ ||
+S: fa ||
+A: fa ||
+T: fa ||
+B: fa ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    assert "<segno/>" not in xml
+    assert "<coda/>" not in xml
+    assert "To Coda" not in xml
+    assert "D.S. al Coda" not in xml
+    # Uitgeschreven: ≥5 plan-slots (parts × maten; eventueel [PAUZE] na ||).
+    assert xml.count("<measure ") >= 10
+
+
 def test_speelplan_partituur_volta_ab_ac():
     """``1,2,1,2,1,3`` → |: 1 |1,2. 2 :| 3. 3 (geen blok-ids, geen Speel:)."""
     xml = export_mvsa_to_musicxml(_SPEELPLAN_DEMO, layout="partituur")
@@ -1116,6 +1160,101 @@ B: fa ||
     assert xml.count("<measure ") == 8
 
 
+def test_speelplan_partituur_ds_al_coda():
+    """``1,2,3,2,4`` → Segno@2, To Coda@2, D.S. al Coda@3, Coda@4."""
+    text = """\
+@do F4
+@mode major
+@speelplan 1, 2, 3, 2, 4
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok 3
+L: c_ |
+S: mi |
+A: mi |
+T: mi |
+B: mi |
+
+@blok 4
+L: d_ ||
+S: fa ||
+A: fa ||
+T: fa ||
+B: fa ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert "Speel:" not in xml
+    assert "<segno/>" in xml
+    assert ">To Coda</words>" in xml
+    assert 'tocoda="coda"' in xml
+    assert "<coda/>" in xml
+    assert 'coda="coda"' in xml
+    assert ">D.S. al Coda</words>" in xml
+    assert 'dalsegno="segno"' in xml
+    assert ">Fine</words>" not in xml
+    # Compact: 4 blokken × 1 maat × 2 parts, geen expansie.
+    assert xml.count("<measure ") == 8
+
+
+def test_speelplan_partituur_dc_al_coda():
+    """Vier bladblokken: D.C. al Coda (niet volta ``(a,b)×1+(a,c)``)."""
+    text = """\
+@do F4
+@mode major
+@speelplan intro, mid, bridge, intro, mid, coda
+
+@blok intro
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok mid
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok bridge
+L: c_ |
+S: mi |
+A: mi |
+T: mi |
+B: mi |
+
+@blok coda
+L: d_ ||
+S: fa ||
+A: fa ||
+T: fa ||
+B: fa ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert "<segno/>" not in xml
+    assert ">To Coda</words>" in xml
+    assert ">D.C. al Coda</words>" in xml
+    assert 'dacapo="yes"' in xml
+    assert "<coda/>" in xml
+    assert "<ending " not in xml
+    # Compact: 4 blokken × 1 maat × 2 parts.
+    assert xml.count("<measure ") == 8
+
+
 def test_speelplan_partituur_expand_fallback():
     """Onherleidbaar plan → uitgeschreven bladvorm (klinkende volgorde)."""
     text = """\
@@ -1147,6 +1286,7 @@ B: mi ||
     xml = export_mvsa_to_musicxml(text, layout="partituur")
     assert "<ending " not in xml
     assert "<segno/>" not in xml
+    assert "<coda/>" not in xml
     # 1,3,2,1 → vier maten × 2 parts
     assert xml.count("<measure ") == 8
     # Lyrics alleen op SA (P1): a,c,b,a

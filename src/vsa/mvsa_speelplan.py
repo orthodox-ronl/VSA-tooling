@@ -20,6 +20,7 @@ NavKind = Literal[
     "volta_ab_ac",
     "repeat",
     "ds_al_fine",
+    "ds_al_coda",
     "expand",
 ]
 
@@ -87,6 +88,23 @@ class DsAlFineNav:
 
 
 @dataclass(frozen=True)
+class DsAlCodaNav:
+    """Eerste doorgang tot ``ds_after``, terug naar segno tot To Coda, dan coda.
+
+    Planvorm: ``blad[0..ds] + blad[segno..tocoda] + blad[coda..]`` met
+    ``coda = blad[ds+1..]`` (minstens één coda-blok).
+
+    ``use_da_capo``: segno = eerste blok → D.C. al Coda (geen segno-teken).
+    """
+
+    segno_id: str
+    to_coda_id: str
+    ds_after_id: str
+    coda_id: str
+    use_da_capo: bool = False
+
+
+@dataclass(frozen=True)
 class PartituurNav:
     """Hoe het speelplan op de partituur wordt weergegeven."""
 
@@ -94,6 +112,7 @@ class PartituurNav:
     volta: VoltaAbAc | None = None
     repeat: RepeatNav | None = None
     ds: DsAlFineNav | None = None
+    coda: DsAlCodaNav | None = None
 
     @property
     def is_compact(self) -> bool:
@@ -191,6 +210,54 @@ def match_ds_al_fine(
     return best
 
 
+def match_ds_al_coda(
+    plan: list[str] | None,
+    blok_ids: list[str],
+) -> DsAlCodaNav | None:
+    """Herken ``blad[0..ds] + blad[segno..tocoda] + blad[coda..]``.
+
+    ``coda`` is altijd het restant van het blad na ``ds`` (minstens één blok).
+    Disjunct van D.S. al Fine: die herhaalt alleen binnen ``[0..ds]``.
+    """
+    if not plan or len(blok_ids) < 3:
+        return None
+    best: DsAlCodaNav | None = None
+    # Prefer longer second pass (segno..tocoda), then later DS, then longer coda.
+    best_score = (-1, -1, -1)
+    for ds_after in range(len(blok_ids) - 1):
+        first = blok_ids[: ds_after + 1]
+        coda = blok_ids[ds_after + 1 :]
+        if not coda:
+            continue
+        if plan[: len(first)] != first:
+            continue
+        remainder = plan[len(first) :]
+        if len(remainder) <= len(coda):
+            continue
+        if remainder[-len(coda) :] != coda:
+            continue
+        mid = remainder[: -len(coda)]
+        if not mid:
+            continue
+        for segno in range(ds_after + 1):
+            # To Coda strikt vóór D.S.-blok (klassiek blad; geen mark-botsing).
+            for to_coda in range(segno, ds_after):
+                second = blok_ids[segno : to_coda + 1]
+                if second != mid:
+                    continue
+                score = (len(second), ds_after, len(coda))
+                if score > best_score:
+                    best_score = score
+                    best = DsAlCodaNav(
+                        segno_id=blok_ids[segno],
+                        to_coda_id=blok_ids[to_coda],
+                        ds_after_id=blok_ids[ds_after],
+                        coda_id=coda[0],
+                        use_da_capo=(segno == 0),
+                    )
+    return best
+
+
 def plan_partituur_navigation(doc: ParsedDocument) -> PartituurNav | None:
     """Kies compacte bladvorm-navigatie, of ``expand`` als vangnet.
 
@@ -211,6 +278,9 @@ def plan_partituur_navigation(doc: ParsedDocument) -> PartituurNav | None:
     ds = match_ds_al_fine(plan, ids)
     if ds is not None:
         return PartituurNav("ds_al_fine", ds=ds)
+    coda = match_ds_al_coda(plan, ids)
+    if coda is not None:
+        return PartituurNav("ds_al_coda", coda=coda)
     return PartituurNav("expand")
 
 
