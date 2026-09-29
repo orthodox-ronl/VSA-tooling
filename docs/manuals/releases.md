@@ -33,9 +33,9 @@ Gebruik **semver zonder `v`-prefix**: `0.1.0`, `0.2.0`, `1.0.0`.
 - Pip-URL: `…VSA-tooling.git@0.2.0`.
 - Workflow-pin: `uses: orthodox-ronl/VSA-tooling/.github/workflows/….yml@0.2.0`.
 
-Bestaande tag: `0.1.0` (juni 2026, pre-release). Nieuwe features ná die tag
-(zoals `mvsa pdf`, `--layout`, `--bibliotheek-id`) zitten **niet** in `0.1.0`;
-gebruik daarvoor `main` tot er een nieuwere tag is, of maak die tag (stappen
+Huidige productietag: **`0.2.0`** (MVSA kuiser/export/audio). Tag `0.1.0`
+(juni 2026) is verouderd voor bibliotheek-productie. Nieuwe features ná
+`0.2.0`: float op `main` tot de volgende tag, of maak die tag (stappen
 hieronder).
 
 ---

@@ -188,6 +188,25 @@ def test_kuiser_idempotent_on_canonical_example():
     assert not [d for d in diags if d.severity == "error"]
 
 
+def test_kuiser_preserves_leading_repeat_bar():
+    text = """\
+@do F4
+@mode major
+@sectie a
+L: |: Heer_ | U__ :|
+S: |: a     | -   :|a
+A: |: f     | -   :|f
+T: |: c     | -   :|c
+B: |: f     | -   :|f
+"""
+    result = kuiser_mvsa_text(text)
+    for stem in ("L", "S", "A", "T", "B"):
+        line = next(ln for ln in result.text.splitlines() if ln.startswith(f"{stem}:"))
+        assert line.lstrip().startswith(f"{stem}: |:") or "|: " in line
+    diags = validate_mvsa_text(result.text)
+    assert not [d for d in diags if d.severity == "error"]
+
+
 def test_kuiser_check_and_cli(tmp_path: Path, capsys):
     src = tmp_path / "sketch.mvsa"
     src.write_text(

@@ -222,10 +222,16 @@ def _align_system_contents(contents: dict[str, str], order: list[str]) -> dict[s
 
     l_marker = next(m for m in order if is_lyrics_stem(m))
     ref_bars = splits[l_marker].bar_tokens
+    ref_leading = splits[l_marker].leading_bar
     for m in order:
         if splits[m].bar_tokens != ref_bars:
             raise ValueError(
                 f"maatstrepen verschillen: {l_marker}={ref_bars} vs {m}={splits[m].bar_tokens}"
+            )
+        if splits[m].leading_bar != ref_leading:
+            raise ValueError(
+                f"leidende maatstreep verschilt: {l_marker}={ref_leading!r} "
+                f"vs {m}={splits[m].leading_bar!r}"
             )
 
     # Preserve stem eindankers; L should have none.
@@ -255,6 +261,10 @@ def _align_system_contents(contents: dict[str, str], order: list[str]) -> dict[s
     result: dict[str, str] = {}
     for m in order:
         parts: list[str] = []
+        if ref_leading:
+            parts.append(ref_leading)
+            if n_seg:
+                parts.append(" ")
         for i, seg in enumerate(out_segs[m]):
             parts.append(seg.rstrip().ljust(widths[i]))
             if i < len(ref_bars):

@@ -2,6 +2,7 @@
 
 @title "(1a) Vredeslitanie"
 @composer     "Traditioneel"
+@tekstdichter "bron: koormap Hemelum"
 @bron "koormap Hemelum"
 @copyright "CC BY-SA 4.0"
 
@@ -23,11 +24,11 @@ A: f    -   -     -   |
 T: c    -   -     -   |
 B: f    -   -     -   |
 @mscz-newline
-L: Heer ont-ferm_ U__ | Heer ont-ferm_ U__ :|
-S: a    -   \     /   | a    -   /     \   :|a
-A: f    -   \     /   | f    -   \     /   :|f
-T: c    -   -     -   | c    -   -     -   :|c
-B: f    -   c     f   | f    -   c     f   :|f
+L: |: Heer ont-ferm_ U__ | Heer ont-ferm_ U__ :|
+S: |: a    -   \     /   | a    -   /     \   :|a
+A: |: f    -   \     /   | f    -   \     /   :|f
+T: |: c    -   -     -   | c    -   -     -   :|c
+B: |: f    -   c     f   | f    -   c     f   :|f
 
 @mscz-newline
 @tekst "P: Onze Alheilige ... ons leven aan"
