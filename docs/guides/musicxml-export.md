@@ -161,14 +161,17 @@ De meeste instellingen staan in YAML-frontmatter bovenaan je `.vsa`-bestand
 
 ### Afspelen (profiel `playback`)
 
-Alleen nodig als je het geluid wilt aanpassen:
+Canonieke klank is **piano** op elke partij (`keyboard.piano.grand`).
+Voor SATB-`.mxl` uit `.mvsa` staat dat vast in de export (checklist M8).
+Bij eenstemmig `.vsa` is piano de default. Coria heeft daarnaast een eigen
+geluidskeuze in de speler (los van dit veld in het bestand).
 
-| Instelling     | Standaard              | Tip                                                     |
-| -------------- | ---------------------- | ------------------------------------------------------- |
-| `part-name`    | `Vocal`                | Naam van de partij                                      |
-| `midi-sound`   | `keyboard.piano.grand` | Werkt goed in Coria; voor koorklank: `voice.choir.aahs` |
-| `midi-channel` | `1`                    | MIDI-kanaal                                             |
-| `midi-program` | `1`                    | Instrumentnummer                                        |
+| Instelling     | Standaard              | Tip                                       |
+| -------------- | ---------------------- | ----------------------------------------- |
+| `part-name`    | `Vocal`                | Naam van de partij                        |
+| `midi-sound`   | `keyboard.piano.grand` | Canonieke piano; niet wijzigen voor Coria |
+| `midi-channel` | `1`                    | MIDI-kanaal                               |
+| `midi-program` | `1`                    | Acoustic Grand Piano (GM)                 |
 
 ### Typografie (profiel `engraving`)
 
@@ -192,7 +195,7 @@ muziek:
   mode: major
   tempo: 132
   musicxml-profile: playback
-  midi-sound: voice.choir.aahs
+  midi-sound: keyboard.piano.grand
 identificatie:
   title: Tropaar van de zondag, toon 3
   composer: Traditioneel

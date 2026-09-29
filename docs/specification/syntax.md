@@ -111,7 +111,7 @@ zonder de bestaande syntaxis te breken.
 | `muziek`        | `reciting-mode`    | ongescopte tekst in MusicXML: `quarters` (default) of `whole`                                                              |
 | `muziek`        | `musicxml-profile` | exportprofiel: `playback` (default) of `engraving` (zie [MusicXML-exportprofielen](rendering.md#musicxml-exportprofielen)) |
 | `muziek`        | `part-name`        | partijnaam in MusicXML; default `Vocal`                                                                                    |
-| `muziek`        | `midi-sound`       | General MIDI-instrument (playback); default `keyboard.piano.grand`                                                         |
+| `muziek`        | `midi-sound`       | General MIDI-instrument (playback); canonieke default `keyboard.piano.grand` (piano)                                       |
 | `muziek`        | `midi-channel`     | MIDI-kanaal 1–16; default `1`                                                                                              |
 | `muziek`        | `midi-program`     | MIDI-programmanummer; default `1`                                                                                          |
 | `muziek`        | `midi-volume`      | MIDI-volume 0–100 (playback); default `78.7402`                                                                            |
@@ -241,8 +241,8 @@ Een [ELM](@) beschrijft de duur van één [muzikale positie](@) ten opzichte van
 | `..`     | `{tekst..}` | 1/4 × standaardduur | twee gestapelde punten                                      |
 | `-`      | `{tekst-}`  | standaardduur       | implementatie-afhankelijke standaardduur-glyph              |
 | `~`      | `{tekst~}`  | standaardduur       | geen zichtbare [glyph](@)                                   |
-| `-.`     | `{tekst-.}` | 1½ × standaardduur  | halve lijn (linkerhelft) onder het [zangelement](@)          |
-| `~.`     | `{tekst~.}` | 1½ × standaardduur  | zelfde glyph als `-.`                                      |
+| `-.`     | `{tekst-.}` | 1½ × standaardduur  | halve lijn (linkerhelft) onder het [zangelement](@)         |
+| `~.`     | `{tekst~.}` | 1½ × standaardduur  | zelfde glyph als `-.`                                       |
 
 ### Samengestelde modifiers
 

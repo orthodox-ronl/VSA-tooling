@@ -39,8 +39,9 @@ afspeelknop.
 Default-formaat: **``.mp3``**. Optioneel ``--format ogg`` of ``wav``, of
 ``[audio] format`` in ``vsa.toml``.
 
-Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). Bitrate en
-aparte instrumentkeuze zijn in v1 MuseScore-defaults (later uitbreidbaar).
+Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). Canonieke
+playback-MXL gebruikt **piano** op elke partij (checklist M8). Bitrate en
+extra instrumentkeuze buiten die piano zijn in v1 MuseScore-defaults.
 
 ## Bestandsnaamgeving
 

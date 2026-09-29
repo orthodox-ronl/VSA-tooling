@@ -125,6 +125,9 @@ Exporteert **één** `.mvsa`-bestand naar SATB MusicXML (`.mxl` of
 `.musicxml`/`.xml`). Zonder `--section` gaan alle `@sectie`-blokken achter
 elkaar in één partituur; met `--section` alleen die sectie-id.
 
+Playback (Coria): vier parts S/A/T/B met **piano** op elke partij
+([checklist M8](../../formats/canonical-checklists.md#checklist-mxl-coria-playback)).
+
 Dit is een **aparte** exporter dan [`vsa musicxml`](musicxml.md) (eenstemmig
 VSA).
 

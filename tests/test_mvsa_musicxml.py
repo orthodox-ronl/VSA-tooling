@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -288,6 +289,28 @@ def test_export_intocht_schets_a():
     assert body.count("<type>half</type>") >= 1
     assert "<part-name>Soprano</part-name>" in xml
     assert "<type>breve</type>" not in body
+
+
+def test_playback_piano_midi_on_all_parts():
+    """Canonieke Coria-MXL: piano op elke stempartij (checklist M8)."""
+    text = INTOCHT_SCHETS.read_text(encoding="utf-8")
+    xml = export_mvsa_to_musicxml(text, section_id="schets-a-bladcijfer")
+    root = ET.fromstring(xml.split('dtd">', 1)[-1])
+    score_parts = root.findall(".//score-part")
+    assert len(score_parts) == 4
+    for i, sp in enumerate(score_parts, start=1):
+        sound = sp.find("score-instrument/instrument-sound")
+        assert sound is not None and sound.text == "keyboard.piano.grand"
+        midi = sp.find("midi-instrument")
+        assert midi is not None
+        assert midi.findtext("midi-program") == "1"
+        assert midi.findtext("midi-channel") == str(i)
+    # Partituur-layout heeft geen MIDI (leesblad, geen Coria-playback).
+    partituur = export_mvsa_to_musicxml(
+        text, section_id="schets-a-bladcijfer", layout="partituur"
+    )
+    assert "midi-instrument" not in partituur
+    assert "instrument-sound" not in partituur
 
 
 def test_export_partituur_layout_two_staves():
@@ -591,6 +614,16 @@ def test_playback_partituur_layout_roundtrip_transform():
     assert "<part-name>Soprano</part-name>" in back
     assert ("single", "Komt,") in _part_lyrics(back, "P1")
     assert ("single", "Komt,") in _part_lyrics(back, "P4")
+    root = ET.fromstring(back.split('dtd">', 1)[-1])
+    sounds = [
+        el.text
+        for el in root.findall(".//score-instrument/instrument-sound")
+    ]
+    assert sounds == ["keyboard.piano.grand"] * 4
+    channels = [
+        el.text for el in root.findall(".//midi-instrument/midi-channel")
+    ]
+    assert channels == ["1", "2", "3", "4"]
 
 
 def test_export_alleluia_so_sharp():

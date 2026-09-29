@@ -1,6 +1,7 @@
 """Convert MusicXML between Coria-playback (4 parts) and partituur (2 staves).
 
 Used so ``mxl mscz`` / ``mscz mxl`` landen op de canonieke checklists.
+Playback (vier parts) krijgt altijd piano-MIDI op elke stempartij (M8).
 """
 
 from __future__ import annotations
@@ -10,6 +11,19 @@ import re
 from xml.etree import ElementTree as ET
 
 _NS_STRIP = re.compile(r"^\{[^}]+\}")
+
+_PLAYBACK_MIDI_SOUND = "keyboard.piano.grand"
+_PLAYBACK_MIDI_PROGRAM = "1"
+_PLAYBACK_MIDI_VOLUME = "78.7402"
+_PLAYBACK_MIDI_PAN = "0"
+_MIDI_CHILD_TAGS = frozenset({"score-instrument", "midi-device", "midi-instrument"})
+_PLAYBACK_PART_NAMES = {
+    "P1": ("Soprano", "S"),
+    "P2": ("Alto", "A"),
+    "P3": ("Tenor", "T"),
+    "P4": ("Bass", "B"),
+}
+_PLAYBACK_CHANNELS = {"P1": 1, "P2": 2, "P3": 3, "P4": 4}
 
 
 def local(tag: str) -> str:
@@ -92,14 +106,14 @@ def ensure_playback_musicxml(xml: str) -> str:
     by_id = {pid: el for pid, el in _iter_parts(root)}
 
     if len(score_parts) >= 4 and {"P1", "P2", "P3", "P4"}.issubset(by_id):
-        _set_playback_part_names(root)
+        _normalize_playback_part_list(root)
         return _serialize(root)
 
     if len(score_parts) == 2 and {"P1", "P2"}.issubset(by_id):
         return _explode_partituur_to_playback(root, by_id)
 
     # Fallback: rename whatever we have; keep structure.
-    _set_playback_part_names(root)
+    _normalize_playback_part_list(root)
     return _serialize(root)
 
 
@@ -112,16 +126,16 @@ def _explode_partituur_to_playback(
     work = ET.SubElement(new_root, "work")
     ET.SubElement(work, "work-title").text = title
     part_list = ET.SubElement(new_root, "part-list")
-    names = (
+    for pid, name, abbr in (
         ("P1", "Soprano", "S"),
         ("P2", "Alto", "A"),
         ("P3", "Tenor", "T"),
         ("P4", "Bass", "B"),
-    )
-    for pid, name, abbr in names:
+    ):
         sp = ET.SubElement(part_list, "score-part", id=pid)
         ET.SubElement(sp, "part-name").text = name
         ET.SubElement(sp, "part-abbreviation").text = abbr
+        _set_piano_midi(sp, pid)
 
     voice_streams: dict[str, list[list[ET.Element]]] = {
         "S": [],
@@ -353,12 +367,12 @@ def _clear_part_names(root: ET.Element) -> None:
 
 
 def _set_playback_part_names(root: ET.Element) -> None:
-    names = {
-        "P1": ("Soprano", "S"),
-        "P2": ("Alto", "A"),
-        "P3": ("Tenor", "T"),
-        "P4": ("Bass", "B"),
-    }
+    """Backward-compatible alias: names + canonieke piano-MIDI."""
+    _normalize_playback_part_list(root)
+
+
+def _normalize_playback_part_list(root: ET.Element) -> None:
+    """Zet Soprano…Bass-namen én piano-MIDI op P1–P4 (checklist M8)."""
     pl = next((c for c in root if local(c.tag) == "part-list"), None)
     if pl is None:
         return
@@ -366,9 +380,9 @@ def _set_playback_part_names(root: ET.Element) -> None:
         if local(sp.tag) != "score-part":
             continue
         pid = sp.get("id") or ""
-        if pid not in names:
+        if pid not in _PLAYBACK_PART_NAMES:
             continue
-        name, abbr = names[pid]
+        name, abbr = _PLAYBACK_PART_NAMES[pid]
         pn = next((c for c in sp if local(c.tag) == "part-name"), None)
         pa = next((c for c in sp if local(c.tag) == "part-abbreviation"), None)
         if pn is None:
@@ -377,6 +391,29 @@ def _set_playback_part_names(root: ET.Element) -> None:
             pa = ET.SubElement(sp, "part-abbreviation")
         pn.text = name
         pa.text = abbr
+        _set_piano_midi(sp, pid)
+
+
+def _set_piano_midi(score_part: ET.Element, part_id: str) -> None:
+    """Replace instrumentatie op één score-part door canonieke piano."""
+    for child in list(score_part):
+        if local(child.tag) in _MIDI_CHILD_TAGS:
+            score_part.remove(child)
+    instrument_id = f"{part_id}-I1"
+    channel = _PLAYBACK_CHANNELS.get(part_id, 1)
+    score_instrument = ET.SubElement(
+        score_part, "score-instrument", id=instrument_id
+    )
+    ET.SubElement(score_instrument, "instrument-name")
+    ET.SubElement(score_instrument, "instrument-sound").text = _PLAYBACK_MIDI_SOUND
+    ET.SubElement(score_part, "midi-device", id=instrument_id, port="1")
+    midi_instrument = ET.SubElement(
+        score_part, "midi-instrument", id=instrument_id
+    )
+    ET.SubElement(midi_instrument, "midi-channel").text = str(channel)
+    ET.SubElement(midi_instrument, "midi-program").text = _PLAYBACK_MIDI_PROGRAM
+    ET.SubElement(midi_instrument, "volume").text = _PLAYBACK_MIDI_VOLUME
+    ET.SubElement(midi_instrument, "pan").text = _PLAYBACK_MIDI_PAN
 
 
 def _work_title(root: ET.Element) -> str:

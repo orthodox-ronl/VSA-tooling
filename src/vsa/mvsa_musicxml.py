@@ -2,7 +2,8 @@
 
 Layouts (canonieke checklists):
 
-- ``playback`` — vier parts Soprano/Alto/Tenor/Bass (Coria / ``.mxl``).
+- ``playback`` — vier parts Soprano/Alto/Tenor/Bass (Coria / ``.mxl``);
+  elke part met canonieke piano-MIDI (checklist M8).
 - ``partituur`` — twee parts SA + TB, **twee voices** per balk (S/T stok
   omhoog, A/B stok omlaag), **lege** part-namen (tussenbestand / bron voor
   MuseScore-``.mscz``).
@@ -46,6 +47,12 @@ PARTS = (
     {"id": "P3", "name": "Tenor", "abbr": "T", "clef": ("F", "4"), "voice": "T"},
     {"id": "P4", "name": "Bass", "abbr": "B", "clef": ("F", "4"), "voice": "B"},
 )
+
+# Canonieke playback-MIDI (checklist M8): piano op elke stempartij.
+_PLAYBACK_MIDI_SOUND = "keyboard.piano.grand"
+_PLAYBACK_MIDI_PROGRAM = "1"
+_PLAYBACK_MIDI_VOLUME = "78.7402"
+_PLAYBACK_MIDI_PAN = "0"
 
 # Partituur: twee balken; part-name leeg (geen stem-indicaties op het blad).
 PARTITUUR_PARTS = (
@@ -1385,6 +1392,23 @@ def _emit_work_and_movement(
     if ondertitel:
         out.append(f"<movement-title>{escape(ondertitel)}</movement-title>")
 
+
+def _emit_playback_piano_midi(out: list[str], part_id: str, channel: int) -> None:
+    """Canonieke piano-MIDI voor één Coria/playback-part (checklist M8)."""
+    instrument_id = f"{part_id}-I1"
+    out.append(f'<score-instrument id="{instrument_id}">')
+    out.append("<instrument-name></instrument-name>")
+    out.append(f"<instrument-sound>{_PLAYBACK_MIDI_SOUND}</instrument-sound>")
+    out.append("</score-instrument>")
+    out.append(f'<midi-device id="{instrument_id}" port="1"/>')
+    out.append(f'<midi-instrument id="{instrument_id}">')
+    out.append(f"<midi-channel>{channel}</midi-channel>")
+    out.append(f"<midi-program>{_PLAYBACK_MIDI_PROGRAM}</midi-program>")
+    out.append(f"<volume>{_PLAYBACK_MIDI_VOLUME}</volume>")
+    out.append(f"<pan>{_PLAYBACK_MIDI_PAN}</pan>")
+    out.append("</midi-instrument>")
+
+
 def _emit_score_playback(
     voice_measures: dict[str, list[list[NoteEvent]]],
     *,
@@ -1427,10 +1451,11 @@ def _emit_score_playback(
     _emit_work_and_movement(out, title, meta)
     _emit_identification(out, meta)
     out.append("<part-list>")
-    for part in PARTS:
+    for channel, part in enumerate(PARTS, start=1):
         out.append(f'<score-part id="{part["id"]}">')
         out.append(f"<part-name>{part['name']}</part-name>")
         out.append(f"<part-abbreviation>{part['abbr']}</part-abbreviation>")
+        _emit_playback_piano_midi(out, part["id"], channel)
         out.append("</score-part>")
     out.append("</part-list>")
 

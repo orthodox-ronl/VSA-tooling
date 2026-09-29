@@ -53,20 +53,20 @@ identificatie:
 
 ## Velden in `muziek`
 
-| Veld                 | Betekenis                                      |
-| -------------------- | ---------------------------------------------- |
-| `do`                 | Grondtoon, bijvoorbeeld `F4`                   |
-| `mode`               | Modus: `major` of `minor`                      |
-| `tempo`              | Tempo in BPM                                   |
-| `meter`              | Maatsoort, bijvoorbeeld `4/4`                  |
-| `reciting-mode`      | Ongescopte tekst in MusicXML                   |
-| `musicxml-profile`   | Exportprofiel: `playback` of `engraving`       |
-| `part-name`          | Partijnaam in MusicXML                         |
-| `midi-sound`         | General MIDI-instrument                        |
-| `midi-channel`       | MIDI-kanaal 1–16                               |
-| `midi-program`       | MIDI-programmanummer                           |
-| `midi-volume`        | MIDI-volume 0–100                              |
-| `midi-pan`           | MIDI-panning −100…100                          |
+| Veld                 | Betekenis                                             |
+| -------------------- | ----------------------------------------------------- |
+| `do`                 | Grondtoon, bijvoorbeeld `F4`                          |
+| `mode`               | Modus: `major` of `minor`                             |
+| `tempo`              | Tempo in BPM                                          |
+| `meter`              | Maatsoort, bijvoorbeeld `4/4`                         |
+| `reciting-mode`      | Ongescopte tekst in MusicXML                          |
+| `musicxml-profile`   | Exportprofiel: `playback` of `engraving`              |
+| `part-name`          | Partijnaam in MusicXML                                |
+| `midi-sound`         | General MIDI-instrument (canonieke default: piano)    |
+| `midi-channel`       | MIDI-kanaal 1–16                                      |
+| `midi-program`       | MIDI-programmanummer (canonieke default: `1` = piano) |
+| `midi-volume`        | MIDI-volume 0–100                                     |
+| `midi-pan`           | MIDI-panning −100…100                                 |
 
 ## Velden in `identificatie`
 
