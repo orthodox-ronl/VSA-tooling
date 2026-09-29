@@ -111,7 +111,7 @@ nav:
   - Handleidingen:
     - Overzicht: manuals/index.md
     - Consumer-site — waar hoort wat: manuals/consumer-site.md
-    - Releases: taggen en pinnen: manuals/releases.md
+    - "Releases: taggen en pinnen": manuals/releases.md
     - mvsa schrijven 101: guides/mvsa-schrijven-101.md
     - Gebruikershandleiding: guides/user-guide.md
     - CLI-taken: guides/cli-taken.md
