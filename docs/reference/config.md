@@ -12,6 +12,9 @@ max-line-width = 800
 assets-url-prefix = "/vsa"
 output-mode = "img"
 
+[audio]
+format = "mp3"
+
 [validation.severity]
 VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH = "warning"
 ```
@@ -23,6 +26,7 @@ VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH = "warning"
 | `max-line-width`     | `800`   | Maximale SVG-regelbreedte    |
 | `assets-url-prefix`  | `/vsa`  | URL-prefix voor SVG-assets   |
 | `output-mode`        | `img`   | Markdown-uitvoer als `<img>` |
+| `audio.format`       | `mp3`   | Default voor `vsa audio`     |
 
 ## Voorrang
 
@@ -50,14 +54,16 @@ VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH = "warning"
 
 ## Commando-ondersteuning
 
-| Commando             | Gebruikt severity-config? |
-| -------------------- | ------------------------- |
-| `vsa validate`       | Ja                        |
-| `vsa process`        | Ja                        |
-| `vsa build-markdown` | Ja                        |
-| `vsa svg`            | Nee                       |
-| `vsa blocks`         | Nee                       |
-| `vsa parse`          | Nee                       |
+| Commando             | Gebruikt severity-config? | Gebruikt `[audio]`? |
+| -------------------- | ------------------------- | ------------------- |
+| `vsa validate`       | Ja                        | Nee                 |
+| `vsa process`        | Ja                        | Nee                 |
+| `vsa build-markdown` | Ja                        | Nee                 |
+| `vsa audio`          | Nee                       | Ja (`format`)       |
+| `mvsa audio`         | Nee                       | Ja (`format`)       |
+| `vsa svg`            | Nee                       | Nee                 |
+| `vsa blocks`         | Nee                       | Nee                 |
+| `vsa parse`          | Nee                       | Nee                 |
 
 ## Hard blijvende fouten
 

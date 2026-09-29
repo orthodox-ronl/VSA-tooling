@@ -61,10 +61,18 @@ class ValidationConfig:
 
 
 @dataclass
+class AudioConfig:
+    """Defaults for ``vsa audio`` / ``mvsa audio`` (preview-luisteren)."""
+
+    format: str = "mp3"
+
+
+@dataclass
 class VSAConfig:
     rendering: RenderingConfig = field(default_factory=RenderingConfig)
     hugo: HugoConfig = field(default_factory=HugoConfig)
     validation: ValidationConfig = field(default_factory=ValidationConfig)
+    audio: AudioConfig = field(default_factory=AudioConfig)
 
 
 def load_config(path: str | Path | None = None) -> VSAConfig:
@@ -83,6 +91,7 @@ def load_config(path: str | Path | None = None) -> VSAConfig:
     rendering = data.get("rendering", {})
     hugo = data.get("hugo", {})
     validation = data.get("validation", {})
+    audio = data.get("audio", {})
 
     if "max-line-width" in rendering:
         config.rendering.max_line_width = _positive_float(
@@ -106,7 +115,22 @@ def load_config(path: str | Path | None = None) -> VSAConfig:
             for code, value in severity.items()
         }
 
+    if isinstance(audio, dict) and "format" in audio:
+        config.audio.format = _normalize_audio_format(audio["format"])
+
     return config
+
+
+def _normalize_audio_format(value):
+    from .audio_export import AUDIO_FORMATS, AudioExportError, normalize_audio_format
+
+    try:
+        return normalize_audio_format(value)
+    except AudioExportError as exc:
+        raise ValueError(
+            f"Onbekend audio.format: {value!r}. "
+            f"Gebruik: {', '.join(AUDIO_FORMATS)}."
+        ) from exc
 
 
 def _load_svg_rendering_config(config: SVGRenderingConfig, data: dict):

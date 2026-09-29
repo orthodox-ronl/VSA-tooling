@@ -10,23 +10,24 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 
 ## Werkt nu
 
-| Onderdeel                   | Status                | Opmerking                                                                                                                                        |
-| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| VSA parser                  | Werkend               | Ondersteunt tekst, scopes, modifiers en hoogte-markeringen.                                                                                      |
-| Syntaxvalidatie             | Werkend               | Meldt meerdere fouten waar mogelijk.                                                                                                             |
-| Semantische validatie       | Werkend               | Onder andere modifier-aantallen en hoogte-marker-controles; het bekende voorbeeld met een foute laatste marker wordt gedetecteerd.               |
-| Meerdere hoogte-markeringen | Werkend               | Parser, validator en SVG-rendering ondersteunen dit.                                                                                             |
-| SVG-rendering               | Werkend               | Inclusief multiline/wrapping, spacingbeleid en regressietests.                                                                                   |
-| MusicXML/MXL-export         | Werkend               | Beschikbaar via `vsa musicxml`; profielen voor playback/engraving.                                                                               |
-| Markdown VSA-blokken        | Werkend               | `::: vsa-notatie` wordt gevonden, gevalideerd en verwerkt.                                                                                       |
-| Hugo build-markdown         | Werkend               | Genereert Markdown en SVG-assets voor Hugo.                                                                                                      |
-| `:::include`                | Werkend               | Ondersteunt markdown, VSA, assets en exporttypes `svg`, `coria`, `mxl`.                                                                          |
-| `:::coria`                  | Werkend               | Blijft ondersteund als build-time directive/alias.                                                                                               |
-| Print/web directives        | Werkend met beperking | `web-only`, `print-only`, `keep-together`; nesting is nog niet toegestaan.                                                                       |
-| Parochie-lokaal model       | Werkend in demo       | `lokaal/`, manifeststructuur en voorbeeldincludes zijn aanwezig.                                                                                 |
-| Catalogus-resolutie         | Werkend               | `vsa resolve-catalogus` zet `zoek=` om naar `bron:` of `lokaal:`.                                                                                |
-| Hugo-demo                   | Werkend als testbed   | Combineert praktijkmateriaal, documentatie, layouts en publicatieketen.                                                                          |
-| mvsa (draft)                | Werkend conversies    | `mvsa`/`vsa mvsa`: validate, normalize, musicxml, mscz, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md). |
+| Onderdeel                   | Status                | Opmerking                                                                                                                                                    |
+| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| VSA parser                  | Werkend               | Ondersteunt tekst, scopes, modifiers en hoogte-markeringen.                                                                                                  |
+| Syntaxvalidatie             | Werkend               | Meldt meerdere fouten waar mogelijk.                                                                                                                         |
+| Semantische validatie       | Werkend               | Onder andere modifier-aantallen en hoogte-marker-controles; het bekende voorbeeld met een foute laatste marker wordt gedetecteerd.                           |
+| Meerdere hoogte-markeringen | Werkend               | Parser, validator en SVG-rendering ondersteunen dit.                                                                                                         |
+| SVG-rendering               | Werkend               | Inclusief multiline/wrapping, spacingbeleid en regressietests.                                                                                               |
+| MusicXML/MXL-export         | Werkend               | Beschikbaar via `vsa musicxml`; profielen voor playback/engraving.                                                                                           |
+| Audio-export (preview)      | Werkend               | `vsa audio` / `mvsa audio` → ``.mp3`` via MuseScore; site-knop is consumer.                                                                                  |
+| Markdown VSA-blokken        | Werkend               | `::: vsa-notatie` wordt gevonden, gevalideerd en verwerkt.                                                                                                   |
+| Hugo build-markdown         | Werkend               | Genereert Markdown en SVG-assets voor Hugo.                                                                                                                  |
+| `:::include`                | Werkend               | Ondersteunt markdown, VSA, assets en exporttypes `svg`, `coria`, `mxl`.                                                                                      |
+| `:::coria`                  | Werkend               | Blijft ondersteund als build-time directive/alias.                                                                                                           |
+| Print/web directives        | Werkend met beperking | `web-only`, `print-only`, `keep-together`; nesting is nog niet toegestaan.                                                                                   |
+| Parochie-lokaal model       | Werkend in demo       | `lokaal/`, manifeststructuur en voorbeeldincludes zijn aanwezig.                                                                                             |
+| Catalogus-resolutie         | Werkend               | `vsa resolve-catalogus` zet `zoek=` om naar `bron:` of `lokaal:`.                                                                                            |
+| Hugo-demo                   | Werkend als testbed   | Combineert praktijkmateriaal, documentatie, layouts en publicatieketen.                                                                                      |
+| mvsa (draft)                | Werkend conversies    | `mvsa`/`vsa mvsa`: validate, normalize, musicxml, mscz, pdf, audio, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md). |
 
 ## Beperkt of kwetsbaar
 

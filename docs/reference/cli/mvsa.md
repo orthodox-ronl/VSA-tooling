@@ -14,8 +14,8 @@ Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,musicxml,mscz,pdf,import,normalize} …
-vsa mvsa [-h] {validate,musicxml,mscz,pdf,import,normalize} …
+mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize} …
+vsa mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize} …
 mvsa validate [-h] path
 mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
@@ -23,6 +23,8 @@ mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--layout PROFILE] [--bibliotheek-id ID] path
+mvsa audio [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
+           [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
 mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
 ```
@@ -35,6 +37,7 @@ mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
 | [`musicxml`](#vsa-mvsa-musicxml)     | Exporteer `.mvsa` naar SATB MusicXML.                        |
 | [`mscz`](#vsa-mvsa-mscz)             | Exporteer `.mvsa` naar MuseScore (`.mscz`).                  |
 | [`pdf`](#vsa-mvsa-pdf)               | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).       |
+| [`audio`](#vsa-mvsa-audio)           | Exporteer naar audio (``.mp3``) voor preview-luisteren.      |
 | [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` naar `.mvsa`.                     |
 | [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen).            |
 
@@ -47,6 +50,7 @@ mvsa validate -h
 mvsa musicxml -h
 mvsa mscz -h
 mvsa pdf -h
+mvsa audio -h
 mvsa import -h
 mvsa normalize -h
 ```
@@ -286,6 +290,44 @@ vsa mvsa pdf examples\mvsa\alleluia-toon-1.mvsa
 vsa mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
 vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 vsa mvsa pdf lied.mscz -o lied.pdf
+```
+
+---
+
+## `vsa mvsa audio`
+
+### Synopsis
+
+```text
+vsa mvsa audio [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
+               [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
+```
+
+### Beschrijving
+
+Maakt een **preview-audiobestand** (default ``.mp3``) via MuseScore: eerst
+playback-``.mxl`` (vier parts), daarna audio. Bron mag ``.mvsa``, ``.mxl``,
+``.vsa`` of ``.mscz`` (fallback) zijn. Alleen het artefact; de consumer-site
+zet de afspeelknop. Zie [`vsa audio`](audio.md) en [formats/audio.md](../../formats/audio.md).
+
+### Argumenten en opties
+
+| Naam                     | Verplicht | Betekenis                                         | Default                         |
+| ------------------------ | --------- | ------------------------------------------------- | ------------------------------- |
+| `path`                   | Ja        | ``.mvsa`` / ``.mxl`` / ``.vsa`` / ``.mscz``.      | —                               |
+| `-o`, `--output`         | Nee       | Uitvoer-audio.                                    | ``<stem>.mp3`` naast bron       |
+| `--format`               | Nee       | ``mp3`` / ``ogg`` / ``wav`` zonder extensie.      | ``mp3`` of ``[audio].format``   |
+| `--section`              | Nee       | Alleen bij ``.mvsa``: één ``@sectie``-id.         | alle secties                    |
+| `--musescore`            | Nee       | MuseScore-executable.                             | auto-detectie                   |
+| `--keep-mxl`             | Nee       | Bewaar tussenliggende playback-``.mxl``.          | temp (wordt verwijderd)         |
+| `--config`               | Nee       | Pad naar ``vsa.toml``.                            | auto-detectie                   |
+
+### Voorbeelden
+
+```cmd
+vsa mvsa audio examples\mvsa\test-alleluia-toon-8.mvsa --section schets3-oct-doremi
+vsa mvsa audio lied.mvsa -o generated\lied.mp3
+vsa mvsa audio lied.mxl -o lied.ogg --format ogg
 ```
 
 ---

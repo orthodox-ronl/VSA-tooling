@@ -95,6 +95,7 @@ nav:
       - .mvsa: formats/mvsa.md
       - .mxl / .musicxml: formats/mxl.md
       - .mscz: formats/mscz.md
+      - .mp3 / audio: formats/audio.md
       - .midi / .mid: formats/midi.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
@@ -104,6 +105,7 @@ nav:
       - mxl: reference/cli/mxl.md
       - mscz: reference/cli/mscz.md
       - vsa musicxml: reference/cli/musicxml.md
+      - vsa audio: reference/cli/audio.md
     - Scripts (cmd): formats/scripts.md
     - Conversieplan: plans/mvsa-conversions.md
   - Handleidingen:
@@ -184,6 +186,7 @@ nav:
       - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
       - reference/cli/musicxml.md
+      - reference/cli/audio.md
       - reference/cli/mvsa.md
       - reference/cli/mxl.md
       - reference/cli/mscz.md

@@ -51,7 +51,8 @@ bij rendering/export, niet bij mvsa-brontekst.
 - blokhergebruik en template-projectie als norm;
 - CLI-werkstromen en kuiser-**tool** (gedragseisen voor canonieke vorm staan in
   syntax/semantiek; implementatie: [open-points](open-points.md));
-- volledige gelijkschakeling van chromatische `+` in eenstemmige VSA-EHM.
+- volledige gelijkschakeling van chromatische `+` in eenstemmige VSA-EHM
+  (mvsa: `+`/`-` = octaaf; VSA-EHM blijft VSA-spec).
 
 ## Defaults
 

@@ -8,16 +8,17 @@ specificaties; dit is de navigatiehub.
 
 Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
-| Bron ↓ \ Doel → | `.vsa`          | `.mvsa`          | `.mxl`          | `.mscz`             | `.midi`              |
-| --------------- | --------------- | ---------------- | --------------- | ------------------- | -------------------- |
-| **`.vsa`**      | (waar relevant) | —                | `vsa musicxml`  | via mxl / templates | open                 |
-| **`.mvsa`**     | —               | `mvsa normalize` | `mvsa musicxml` | `mvsa mscz`         | open                 |
-| **`.mxl`**      | —               | `mxl import`     | (checklist)     | `mxl mscz`          | open                 |
-| **`.mscz`**     | —               | `mscz import`    | `mscz mxl`      | (checklist)         | open                 |
-| **`.midi`**     | —               | —                | —               | —                   | (afspelen; CLI open) |
+| Bron ↓ \ Doel → | `.vsa`          | `.mvsa`          | `.mxl`          | `.mscz`             | `.mp3` / audio         | `.midi`              |
+| --------------- | --------------- | ---------------- | --------------- | ------------------- | ---------------------- | -------------------- |
+| **`.vsa`**      | (waar relevant) | —                | `vsa musicxml`  | via mxl / templates | `vsa audio`            | — (niet gepland)     |
+| **`.mvsa`**     | —               | `mvsa normalize` | `mvsa musicxml` | `mvsa mscz`         | `mvsa audio`           | — (niet gepland)     |
+| **`.mxl`**      | —               | `mxl import`     | (checklist)     | `mxl mscz`          | `vsa audio`            | — (niet gepland)     |
+| **`.mscz`**     | —               | `mscz import`    | `mscz mxl`      | (checklist)         | `vsa audio` (fallback) | — (niet gepland)     |
+| **`.midi`**     | —               | —                | —               | —                   | —                      | — (niet gepland)     |
 
-- **`.midi` / `.mid`:** rol = een **variant** van een **zangstuk** afspelen.
-  CLI-command nog niet vastgelegd — zie [`.midi`](midi.md).
+- **Audio (``.mp3`` / ``.ogg`` / ``.wav``):** preview-luisteren; CLI
+  [`vsa audio`](../reference/cli/audio.md) — zie [`.mp3` / audio](audio.md).
+- **``.midi`` / ``.mid``:** **niet gepland** (preview = audio) — zie [`.midi`](midi.md).
 - Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 - Normaalvorm-checklists MXL / MSCZ / PDF: [canonieke checklists](canonical-checklists.md)
   (MXL = vier parts; MSCZ = twee balken SA/TB zonder stem-labels).
@@ -25,30 +26,32 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
 ## Bestandsformaten
 
-| Extensie                       | Rol                                 | Spec / profiel                                                                          | CLI (bron = command)               |
-| ------------------------------ | ----------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------- |
-| [`.vsa`](vsa.md)               | Eenstemmige VSA-bron                | [Specificatie VSA](../specification/README.md)                                          | [`vsa`](../reference/cli/index.md) |
-| [`.mvsa`](mvsa.md)             | Meerstemmige tekstbron (draft)      | [specification-mvsa](../specification-mvsa/README.md)                                   | [`mvsa`](../reference/cli/mvsa.md) |
-| [`.mxl` / `.musicxml`](mxl.md) | MusicXML (Coria / bewerking)        | [checklists](canonical-checklists.md) · [MusicXML-export](../guides/musicxml-export.md) | [`mxl`](../reference/cli/mxl.md)   |
-| [`.mscz`](mscz.md)             | MuseScore-partituur                 | [checklists](canonical-checklists.md) · templates                                       | [`mscz`](../reference/cli/mscz.md) |
-| [`.midi` / `.mid`](midi.md)    | Afspelen (variant van een zangstuk) | dunne checklist; CLI open                                                               | — (open)                           |
+| Extensie                       | Rol                                 | Spec / profiel                                                                          | CLI (bron = command)                     |
+| ------------------------------ | ----------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
+| [`.vsa`](vsa.md)               | Eenstemmige VSA-bron                | [Specificatie VSA](../specification/README.md)                                          | [`vsa`](../reference/cli/index.md)       |
+| [`.mvsa`](mvsa.md)             | Meerstemmige tekstbron (draft)      | [specification-mvsa](../specification-mvsa/README.md)                                   | [`mvsa`](../reference/cli/mvsa.md)       |
+| [`.mxl` / `.musicxml`](mxl.md) | MusicXML (Coria / bewerking)        | [checklists](canonical-checklists.md) · [MusicXML-export](../guides/musicxml-export.md) | [`mxl`](../reference/cli/mxl.md)         |
+| [`.mscz`](mscz.md)             | MuseScore-partituur                 | [checklists](canonical-checklists.md) · templates                                       | [`mscz`](../reference/cli/mscz.md)       |
+| [`.mp3` / audio](audio.md)     | Preview-luisteren (afgeleide)       | dunne checklist; MuseScore                                                              | [`vsa audio`](../reference/cli/audio.md) |
+| [`.midi` / `.mid`](midi.md)    | Los MIDI (niet gepland)             | superseded door audio                                                                   | —                                        |
 
 ## Commando’s
 
 | Command             | Bron                          | Man-pagina                                 |
 | ------------------- | ----------------------------- | ------------------------------------------ |
 | `vsa`               | `.vsa` (+ Markdown-workflows) | [CLI-overzicht](../reference/cli/index.md) |
+| `vsa audio`         | `.mxl` / `.vsa` / …           | [`audio`](../reference/cli/audio.md)       |
 | `mvsa` ≡ `vsa mvsa` | `.mvsa`                       | [`mvsa`](../reference/cli/mvsa.md)         |
 | `mxl`               | `.mxl` / `.musicxml`          | [`mxl`](../reference/cli/mxl.md)           |
 | `mscz`              | `.mscz`                       | [`mscz`](../reference/cli/mscz.md)         |
-| *(open)*            | `.midi`                       | [`.midi`](midi.md)                         |
 
 Na `pip install -e .` staan `vsa`, `mvsa`, `mxl` en `mscz` op PATH.
 
 ## Bestandsnaamgeving (kort)
 
 In `generated/` bij voorkeur `stem.brontype.doeltype` (laatste = echte
-extensie), bv. `alleluia.mvsa.mxl`. CLI-`-o` mag simpel blijven. Details:
+extensie), bv. `alleluia.mvsa.mxl` of `lied.mvsa.mp3`. CLI-`-o` mag simpel
+blijven. Details:
 [canonieke checklists — naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ## Windows `.cmd`-scripts

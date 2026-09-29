@@ -9,3 +9,7 @@ max-line-width = 800
 # Gebruik Hugo shortcodes:
 # {{< vsa src="..." >}}
 output-mode = "shortcode"
+
+# Preview-audio (vsa audio / mvsa audio):
+# [audio]
+# format = "mp3"

@@ -1,8 +1,8 @@
 # Speelplan en speelblokken (draft)
 
 **Status:** draft v0 — fase 1 (syntax, validatie, MXL-expansie) + fase 2a
-(volta voor patroon `(a,b)×n+(a,c)` op partituur). Verdere volta-patronen
-staan in [Open punten](open-points.md).
+(volta voor patroon `(a,b)×n+(a,c)`) + fase 2b (D.S./D.C. al Fine op
+partituur). Rest-sprongen (D.S. al Coda, geneste jumps): [Open punten](open-points.md).
 
 **Voor wie:** wie een vast SATB-antwoord (alleluia, litanie-antwoord) één keer
 wil opschrijven en de uitvoeringsvolgorde apart wil vastleggen.

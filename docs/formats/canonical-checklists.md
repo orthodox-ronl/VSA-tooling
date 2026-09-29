@@ -135,7 +135,7 @@ Traceerbaarheid van conversies — **niet verplicht** op elke `-o`.
 | Regel                                                  | Voorbeeld                                                    |
 | ------------------------------------------------------ | ------------------------------------------------------------ |
 | Bij voorkeur in `generated/`: `stem.brontype.doeltype` | `alleluia.mvsa.mxl`, `alleluia.mscz.mvsa`, `tropaar.vsa.mxl` |
-| **Laatste** segment = echte extensie voor tools        | `.mxl`, `.mvsa`, `.mscz`, `.mid` / `.midi`                   |
+| **Laatste** segment = echte extensie voor tools        | `.mxl`, `.mvsa`, `.mscz`, `.mp3` / `.ogg` / `.wav`           |
 | CLI-default mag enkelvoudig blijven                    | `-o out.mxl` of `<stem>.mxl`                                 |
 | Geen fout als de naam “simpel” is                      | normalize/export falen niet op ontbrekende dubbele extensie  |
 

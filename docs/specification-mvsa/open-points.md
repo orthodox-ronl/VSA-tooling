@@ -9,14 +9,17 @@ Conversiematrix en afgeronde slices:
 Werkplan-restpunten syntax (geschiedenis):
 [`docs/plans/mvsa-v0-syntax.md` §10](../plans/mvsa-v0-syntax.md).
 
+Repo-breed kompas (niet alleen mvsa):
+[`docs/status-en-roadmap.md`](../status-en-roadmap.md).
+
 ---
 
 ## Nu (eerstvolgende tooling)
 
 *(leeg — volgende werk uit [Backlog](#backlog-bewust-later))*
 
-Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
-`examples/mvsa/make.cmd` (PDF via `mvsa pdf`).
+Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
+`examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa audio`).
 
 ---
 
@@ -26,12 +29,11 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 
 | Punt                                    | Toelichting                                                                    | Richting                                                                       |
 | --------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Speelplan fase 2c                       | D.S. al Coda / geneste jumps; verfijnen expand-heuristiek                      | Na volta + D.S. al Fine ([speelplan.md](speelplan.md))                         |
+| Speelplan: D.S. al Coda / geneste jumps | Volta `(a,b)×n+(a,c)` en D.S./D.C. al Fine zijn klaar; rest-sprongen nog niet  | [speelplan.md](speelplan.md) «Bewust later»                                    |
 | Blokhergebruik                          | Secties of stemmen hergebruiken (`@voices`, deelbereiken)                      | Experiment: `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`                     |
 | Overlays t.o.v. S                       | A/T/B als afwijking van de sopraan                                             | Later                                                                          |
 | Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                       | Later                                                                          |
 | Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                                   | Alleen als corpuswerk het vraagt                                               |
-| Chromatische `+` in eenstemmige VSA-EHM | Los van mvsa-laddergraden (waar `+` = octaaf)                                  | Via VSA 1.0-spec                                                               |
 
 ### Markdown-pipeline en fences
 
@@ -44,8 +46,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 
 | Punt                 | Toelichting                                                                                                                                | Richting                                                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| Kuiser-tool          | **Gedrag** staat in [syntax](syntax.md) / [semantiek](semantics.md); **implementatie** nog niet                                            | Tool boven `normalize` / `align_mvsa_columns`                                                                        |
-| MIDI-export          | `.mvsa` (en evt. andere bronnen) → `.mid` / `.midi` voor afspelen                                                                          | [formats/midi.md](../formats/midi.md); CLI-naam nog open                                                             |
+| Kuiser-tool          | **Gedrag** staat in [syntax](syntax.md) / [semantiek](semantics.md); **implementatie** nog niet als één CLI (`normalize` + align bestaan)  | Tool boven `normalize` / `align_mvsa_columns`                                                                        |
 | Exports / gebruik    | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages) |
 | TEv2 docs-opschonen  | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                         |
 
@@ -53,15 +54,19 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
 
 ## Klaar (niet opnieuw openen)
 
-| Punt             | Stand                                                                                               |
-| ---------------- | --------------------------------------------------------------------------------------------------- |
-| Parser / CLI     | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                               |
-| Conversieslices  | normalize, mscz-export, import, bron-commands — zie conversions-plan                                |
-| `mvsa pdf`       | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                     |
-| Validate-output  | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
-| Sectie-einde     | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |
-| MSCZ-layout + id | `--layout {partituur,plain}`; `--bibliotheek-id` (expliciet; pad = fallback)                        |
-| Experiment-PDF   | Checklist P1–P5; copyright-footer P4 blijft “later”                                                 |
+| Punt                           | Stand                                                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Parser / CLI                   | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                               |
+| Conversieslices                | normalize, mscz-export, import, bron-commands — zie conversions-plan                                |
+| `mvsa pdf`                     | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                     |
+| `vsa`/`mvsa audio`             | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                         |
+| Los MIDI-bestand               | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)    |
+| Speelplan volta + D.S. al Fine | Partituur-nav: `(a,b)×n+(a,c)` en D.S./D.C. al Fine; MXL expansie; tests aanwezig                   |
+| Laddergraad `+`/`-` = octaaf   | Mvsa-keuze vastgelegd (kruis via `#`/`b`); chromatische `+` in eenstemmige VSA-EHM → VSA-spec       |
+| Validate-output                | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
+| Sectie-einde                   | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |
+| MSCZ-layout + id               | `--layout {partituur,plain}`; `--bibliotheek-id` (expliciet; pad = fallback)                        |
+| Experiment-PDF                 | Checklist P1–P5; copyright-footer P4 blijft “later”                                                 |
 
 ---
 
@@ -72,4 +77,5 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
   [reuse-vsa-tooling](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer).
 - **bibliotheek** (en andere consumers): geen fork van tooling-scripts; dunne
   wrappers die de gepubliceerde CLI aanroepen. Productpipelines en Hugo-site-CI
-  horen in die repo’s, niet hier.
+  horen in die repo’s, niet hier. Afspeelknop / `:::include mp3-player` = consumer
+  (artefact: `vsa audio`).

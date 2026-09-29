@@ -90,12 +90,12 @@ Geen `default.uitvoeringsvorm` — feest-stukken uit bron (`liturgikon`); lokaal
 
 #### Exporttypes
 
-| Exporttype   | Status              | Opmerking                           |
-| ------------ | ------------------- | ----------------------------------- |
-| `svg`        | **Geïmplementeerd** | Notatie inline                      |
-| `coria`      | **Geïmplementeerd** | Oefenlink                           |
-| `mxl`        | **Geïmplementeerd** | Download MusicXML (vanuit VSA-pad)  |
-| `mp3-player` | **Gepland**         | Audio-inline — contract nog in bron |
+| Exporttype   | Status                              | Opmerking                                      |
+| ------------ | ----------------------------------- | ---------------------------------------------- |
+| `svg`        | **Geïmplementeerd**                 | Notatie inline                                 |
+| `coria`      | **Geïmplementeerd**                 | Oefenlink                                      |
+| `mxl`        | **Geïmplementeerd**                 | Download MusicXML (vanuit VSA-pad)             |
+| `mp3-player` | **Gepland** (artefact: `vsa audio`) | Site-knop/include nog open; CLI maakt ``.mp3`` |
 
 Meerdere regels met **dezelfde** `zoek=` → één catalogus-zoekactie, meerdere includes.
 
@@ -132,7 +132,7 @@ vsa resolve-catalogus pad\naar\samenstelling.md ^
 | `--bron-root`    | [Bron-repository](@bron) (`zangstukken/`)                                                                                                                                  |
 | `--output`       | Optioneel ander uitvoerbestand; default: overschrijven invoer of `.resolved.md`                                                                                            |
 | `--dry-run`      | Alleen rapport, geen schrijven                                                                                                                                             |
-| `--interactive`  | Review bij ambiguïteit (**gepland**; nu: `AmbiguousError` + [`catalogus zoek --lijst`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek)) |
+| `--interactive`  | Review bij ambiguïteit (**gepland**; nu: `AmbiguousError` + [`catalogus zoek --lijst`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek))      |
 
 ### Wat het commando doet
 
@@ -147,9 +147,9 @@ vsa resolve-catalogus pad\naar\samenstelling.md ^
 
 | Tool                                                                                                                                        | Rol                                                                                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`catalogus zoek`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek) `"Kondakion" --default-gelegenheid …` | Lage API — één zoekactie                                                                                                                       |
-| [`catalogus index validate`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-index-validate)                   | Index controleren vóór bulk-resolve                                                                                                            |
-| [`vsa resolve-catalogus`](../reference/cli/resolve-catalogus.md)                                                                            | Markdown-processor voor Rene — roept [`catalogus zoek`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek) aan |
+| [`catalogus zoek`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek) `"Kondakion" --default-gelegenheid …`      | Lage API — één zoekactie                                                                                                                       |
+| [`catalogus index validate`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-index-validate)                        | Index controleren vóór bulk-resolve                                                                                                            |
+| [`vsa resolve-catalogus`](../reference/cli/resolve-catalogus.md)                                                                            | Markdown-processor voor Rene — roept [`catalogus zoek`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek) aan      |
 
 Zie [bron — catalogus CLI](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/).
 
