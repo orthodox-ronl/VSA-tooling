@@ -122,8 +122,8 @@ Stemregels moeten daar **slot voor slot** op aansluiten.
 1. Tel op de L-regel de **slots** (lettergrepen + melisma-`&`-stukken).
 2. Zet op elke stemregel **evenveel** hoogte-stukken (gescheiden door spaties).
 3. Zet op elke regel dezelfde maatstrepen op dezelfde plekken.
-4. Spaties mogen kolommen uitlijnen; `vsa mvsa normalize` (default: behoud
-   spelling) helpt bij uitlijning.
+4. Spaties mogen kolommen uitlijnen; `vsa mvsa kuiser` (of `normalize`) helpt
+   bij uitlijning en eenduidige maatstrepen.
 
 ??? example "Recite + melisma (schets)"
     ```text
@@ -140,7 +140,14 @@ Handige check:
 vsa mvsa validate pad\naar\lied.mvsa
 ```
 
-Uitlijnen zonder spelling te wijzigen:
+Uitlijnen en kuiser-toleranties (in-place; behoud spelling):
+
+```cmd
+vsa mvsa kuiser pad\naar\lied.mvsa
+```
+
+Alleen kolomuitlijning / pitch-herschrijf (schrijft default
+`<stem>.normalized.mvsa`):
 
 ```cmd
 vsa mvsa normalize pad\naar\lied.mvsa -o pad\naar\lied.mvsa
@@ -293,7 +300,7 @@ S: fa so- mi&do&re&mi fa mi ||mi
 3. Zet bovenaan `@do` / `@mode` / `@oct` goed (import vult dit grotendeels in).
 4. Controleer L-tekst (import kan lelijk syllabificeren) en sync.
 5. `vsa mvsa validate lied.mvsa`
-6. Optioneel opnieuw uitlijnen: `vsa mvsa normalize lied.mvsa -o lied.mvsa`
+6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa`
 
 Referentie-voorbeeld (bladcijfers):
 [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa).
@@ -337,13 +344,13 @@ Voorbeeld met meerdere equivalente schetsen:
 
 ## 9. Controleren en exporteren
 
-| Stap        | Commando (voorbeeld)                                      |
-| ----------- | --------------------------------------------------------- |
-| Valideren   | `vsa mvsa validate lied.mvsa`                             |
-| MusicXML    | `vsa mvsa musicxml lied.mvsa -o generated\lied.mxl`       |
-| MuseScore   | `vsa mvsa mscz lied.mvsa -o generated\lied.mscz`          |
-| Eén sectie  | voeg `--section sectie-id` toe                            |
-| Uitlijnen   | `vsa mvsa normalize lied.mvsa -o lied.mvsa`               |
+| Stap               | Commando (voorbeeld)                                      |
+| ------------------ | --------------------------------------------------------- |
+| Valideren          | `vsa mvsa validate lied.mvsa`                             |
+| MusicXML           | `vsa mvsa musicxml lied.mvsa -o generated\lied.mxl`       |
+| MuseScore          | `vsa mvsa mscz lied.mvsa -o generated\lied.mscz`          |
+| Eén sectie         | voeg `--section sectie-id` toe                            |
+| Uitlijnen / kuisen | `vsa mvsa kuiser lied.mvsa`                               |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling

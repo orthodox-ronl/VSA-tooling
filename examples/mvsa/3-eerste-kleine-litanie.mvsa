@@ -10,22 +10,22 @@
 @oct S=0 A=0 T=-1 B=-1
 
 @tekst "P: Nogmaals ... in vrede bidden"
-L:  Heer ont-ferm_ U__  |  Heer ont-ferm_ U__  |
-S:  a    -   -     -    |  a    -   \     /    |a
-A:  f    -   -     -    |  f    -   \     /    |f
-T:  c    -   -     -    |  c    -   -     -    |c
-B:  f    -   -     -    |  f    -   \3    /3   |f
+L: Heer ont-ferm_ U__ | Heer ont-ferm_ U__ |
+S: a    -   -     -   | a    -   \     /   |a
+A: f    -   -     -   | f    -   \     /   |f
+T: c    -   -     -   | c    -   -     -   |c
+B: f    -   -     -   | f    -   \3    /3  |f
 
 @tekst "P: Onze Alheilige ... ons leven aan"
-L:  Aan_ U_, O_ Heer__ |
-S:  a    bb  -     a   |
-A:  f    -   e     f   |
-T:  c    d   c     -   |
-B:  f    bb- c     f   |
+L: Aan_ U_, O_ Heer__ |
+S: a    bb  -  a      |
+A: f    -   e  f      |
+T: c    d   c  -      |
+B: f    bb- c  f      |
 
 @tekst "P: Want van U ... der eeuwen"
 L: A__-men__ ||
-S:  a    -   ||
-A:  f    -   ||
-T:  c    -   ||
-B:  f    -   ||
+S: a   -     ||
+A: f   -     ||
+T: c   -     ||
+B: f   -     ||

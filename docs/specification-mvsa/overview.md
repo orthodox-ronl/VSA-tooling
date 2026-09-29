@@ -49,10 +49,12 @@ bij rendering/export, niet bij mvsa-brontekst.
 
 - Vervanging van eenstemmige VSA 1.0;
 - blokhergebruik en template-projectie als norm;
-- CLI-werkstromen en kuiser-**tool** (gedragseisen voor canonieke vorm staan in
-  syntax/semantiek; implementatie: [open-points](open-points.md));
 - volledige gelijkschakeling van chromatische `+` in eenstemmige VSA-EHM
   (mvsa: `+`/`-` = octaaf; VSA-EHM blijft VSA-spec).
+
+De kuiser-**tool** (`mvsa kuiser`) past de canonieke-vormregels uit
+[syntax](syntax.md) / [semantiek](semantics.md) toe; restpunten staan in
+[open-points](open-points.md).
 
 ## Defaults
 

@@ -311,6 +311,9 @@ def _build_parser():
             "      Importeer .mxl/.mscz naar .mvsa.\n"
             "  normalize PATH [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}]\n"
             "      Canoniseer .mvsa (default: behoud noteernamen; optioneel herschrijf).\n"
+            "  kuiser PATH [PATH…] [-o OUTPUT] [--check] [--pitch …]\n"
+            "      Authoring-kuiser: strepen syncen, woordstreep-spatie, align "
+            "(+ optioneel pitch).\n"
             "\n"
             "voorbeelden:\n"
             "  vsa mvsa validate examples\\mvsa\n"
@@ -320,18 +323,20 @@ def _build_parser():
             "  vsa mvsa import out.mxl -o out.mvsa --pitch doremi\n"
             "  vsa mvsa normalize lied.mvsa -o out.mvsa\n"
             "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch a-g\n"
+            "  vsa mvsa kuiser lied.mvsa\n"
+            "  vsa mvsa kuiser examples\\mvsa --check\n"
             "\n"
             "Top-level alias: mvsa …  (ook: mxl … / mscz … voor andere bronnen).\n"
             "\n"
             "Hulp: vsa mvsa validate -h | vsa mvsa musicxml -h | "
             "vsa mvsa mscz -h | vsa mvsa pdf -h | vsa mvsa audio -h | "
-            "vsa mvsa import -h | vsa mvsa normalize -h"
+            "vsa mvsa import -h | vsa mvsa normalize -h | vsa mvsa kuiser -h"
         ),
     )
     mvsa_sub = mvsa.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,musicxml,mscz,pdf,audio,import,normalize}",
+        metavar="{validate,musicxml,mscz,pdf,audio,import,normalize,kuiser}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -676,6 +681,68 @@ def _build_parser():
         help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
     )
     m_normalize.add_argument(
+        "--no-align",
+        action="store_true",
+        help="Sla canonieke kolomuitlijning over.",
+    )
+    m_kuiser = mvsa_sub.add_parser(
+        "kuiser",
+        help="Kuiser: canonieke authoring-vorm (strepen, woordstreep, align).",
+        description=(
+            "Pas kuiser-toleranties toe op .mvsa (draft-spec): "
+            "canonieke L-standaardduur '~' (ELM '-' → '~'), "
+            "waarschuwing bij ambiguë '-' (regel+kolom), "
+            "maatstrepen syncen waar eenduidig, daarna kolomuitlijning. "
+            "Geen stille 'hei- li'→'hei-li'-collapse. "
+            "Default: schrijf in-place. --check = dry-run (exit 1 bij wijziging). "
+            "Optioneel --pitch zoals bij normalize. "
+            "Zie docs/specification-mvsa/syntax.md."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa kuiser examples\\mvsa\\alleluia-toon-8.mvsa\n"
+            "  vsa mvsa kuiser examples\\mvsa --check\n"
+            "  vsa mvsa kuiser lied.mvsa -o generated\\lied.kuiser.mvsa\n"
+            "  vsa mvsa kuiser lied.mvsa --pitch a-g"
+        ),
+    )
+    m_kuiser.add_argument(
+        "paths",
+        nargs="+",
+        help=".mvsa-bestand(en) of map(pen) met .mvsa-bestanden.",
+    )
+    m_kuiser.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help=(
+            "Uitvoerbestand (alleen bij één bronbestand). "
+            "Default: schrijf in-place."
+        ),
+    )
+    m_kuiser.add_argument(
+        "--check",
+        action="store_true",
+        help="Dry-run: geen schrijfactie; exit 1 als er iets zou wijzigen.",
+    )
+    m_kuiser.add_argument(
+        "--pitch",
+        choices=["preserve", "doremi", "a-g", "abc", "vsa"],
+        default="preserve",
+        help=(
+            "Doel-spelling op stemregels (default: preserve). "
+            "Zelfde keuzes als normalize."
+        ),
+    )
+    m_kuiser.add_argument(
+        "--octave-style",
+        choices=["@oct", "marker"],
+        default="@oct",
+        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+    )
+    m_kuiser.add_argument(
         "--no-align",
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
@@ -1322,9 +1389,12 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_import(args)
     if getattr(args, "mvsa_command", None) == "normalize":
         return _cmd_mvsa_normalize(args)
+    if getattr(args, "mvsa_command", None) == "kuiser":
+        return _cmd_mvsa_kuiser(args)
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
-        "Gebruik: vsa mvsa {validate,musicxml,mscz,pdf,audio,import,normalize} …\n"
+        "Gebruik: vsa mvsa "
+        "{validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …\n"
         "  vsa mvsa validate PATH\n"
         "  vsa mvsa musicxml PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
@@ -1332,7 +1402,8 @@ def _cmd_mvsa(args) -> int:
         "  vsa mvsa audio PATH [-o OUTPUT] [--format {mp3,ogg,wav}]\n"
         "  vsa mvsa import PATH --pitch {doremi,a-g,vsa} [-o OUTPUT]\n"
         "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa}] [-o OUTPUT]\n"
-        "Hulp: vsa mvsa -h | vsa mvsa import -h",
+        "  vsa mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
+        "Hulp: vsa mvsa -h | vsa mvsa kuiser -h",
         file=sys.stderr,
     )
     return 1
@@ -1610,6 +1681,73 @@ def _cmd_mvsa_normalize(args) -> int:
         print(f"{loc}ERROR: {exc}", file=sys.stderr)
         return 1
     print(f"Geschreven: {out}")
+    return 0
+
+
+def _cmd_mvsa_kuiser(args) -> int:
+    from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_path
+    from .mvsa_normalize import MvsaNormalizeError
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    files: list[Path] = []
+    for raw in args.paths:
+        p = Path(raw)
+        if p.is_dir():
+            files.extend(sorted(p.rglob("*.mvsa")))
+        elif p.is_file():
+            files.append(p)
+        else:
+            print(f"Pad niet gevonden: {p}", file=sys.stderr)
+            return 1
+    if not files:
+        print("Geen .mvsa-bestanden gevonden.", file=sys.stderr)
+        return 1
+    if args.output is not None and len(files) != 1:
+        print(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            file=sys.stderr,
+        )
+        return 1
+
+    would_change = 0
+    errors = 0
+    for path in files:
+        out = Path(args.output) if args.output is not None else None
+        try:
+            changed, warnings = kuiser_mvsa_path(
+                path,
+                out,
+                pitch=args.pitch,
+                octave_style=args.octave_style,
+                align=not args.no_align,
+                check=args.check,
+            )
+        except MvsaValidationError as exc:
+            for d in exc.diagnostics:
+                print(format_diagnostic(d, path), file=sys.stderr)
+            errors += 1
+            continue
+        except (MvsaKuiserError, MvsaNormalizeError) as exc:
+            loc = f"{path}:{exc.line}: " if getattr(exc, "line", 0) else f"{path}: "
+            print(f"{loc}ERROR: {exc}", file=sys.stderr)
+            errors += 1
+            continue
+        for w in warnings:
+            print(w.format(path), file=sys.stderr)
+        if changed:
+            would_change += 1
+            if args.check:
+                print(f"would change: {path}")
+            else:
+                target = out if out is not None else path
+                print(f"kuiser: {target}")
+        else:
+            print(f"ok: {path}")
+
+    if errors:
+        return 1
+    if args.check and would_change:
+        return 1
     return 0
 
 

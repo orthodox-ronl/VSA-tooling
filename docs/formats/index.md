@@ -8,13 +8,13 @@ specificaties; dit is de navigatiehub.
 
 Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
-| Bron ↓ \ Doel → | `.vsa`          | `.mvsa`          | `.mxl`          | `.mscz`             | `.mp3` / audio         | `.midi`              |
-| --------------- | --------------- | ---------------- | --------------- | ------------------- | ---------------------- | -------------------- |
-| **`.vsa`**      | (waar relevant) | —                | `vsa musicxml`  | via mxl / templates | `vsa audio`            | — (niet gepland)     |
-| **`.mvsa`**     | —               | `mvsa normalize` | `mvsa musicxml` | `mvsa mscz`         | `mvsa audio`           | — (niet gepland)     |
-| **`.mxl`**      | —               | `mxl import`     | (checklist)     | `mxl mscz`          | `vsa audio`            | — (niet gepland)     |
-| **`.mscz`**     | —               | `mscz import`    | `mscz mxl`      | (checklist)         | `vsa audio` (fallback) | — (niet gepland)     |
-| **`.midi`**     | —               | —                | —               | —                   | —                      | — (niet gepland)     |
+| Bron ↓ \ Doel → | `.vsa`          | `.mvsa`                     | `.mxl`          | `.mscz`             | `.mp3` / audio         | `.midi`              |
+| --------------- | --------------- | --------------------------- | --------------- | ------------------- | ---------------------- | -------------------- |
+| **`.vsa`**      | (waar relevant) | —                           | `vsa musicxml`  | via mxl / templates | `vsa audio`            | — (niet gepland)     |
+| **`.mvsa`**     | —               | `mvsa kuiser` / `normalize` | `mvsa musicxml` | `mvsa mscz`         | `mvsa audio`           | — (niet gepland)     |
+| **`.mxl`**      | —               | `mxl import`                | (checklist)     | `mxl mscz`          | `vsa audio`            | — (niet gepland)     |
+| **`.mscz`**     | —               | `mscz import`               | `mscz mxl`      | (checklist)         | `vsa audio` (fallback) | — (niet gepland)     |
+| **`.midi`**     | —               | —                           | —               | —                   | —                      | — (niet gepland)     |
 
 - **Audio (``.mp3`` / ``.ogg`` / ``.wav``):** preview-luisteren; CLI
   [`vsa audio`](../reference/cli/audio.md) — zie [`.mp3` / audio](audio.md).

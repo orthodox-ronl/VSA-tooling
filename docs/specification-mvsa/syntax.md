@@ -133,7 +133,10 @@ breder is dan de lettergreep tot aan de volgende anker-kolom, komt er ruimte
 *vóór* het streepje (`le -lu`), zodat stemtokens met spaties gescheiden blijven
 en de ankers (eerste letters / eerste noottekens) toch onder elkaar staan.
 Vermijd `le-  lu` (streepje direct gevolgd door spaties): die vorm leest de
-kuiser als ELM `-` op “le”, niet als woordstreepje.
+parser als ELM `-` op “le”, niet als woordstreepje. Canoniek schrijf je
+standaard-lengte op L als `~`, en een woordstreepje **direct vóór** de
+volgende lettergreep — met eventuele spaties *ervóór* als de stemregels
+meer breedte nodig hebben (`hei_&_&_  -li`, niet `hei_&_&_-li`).
 
 ```text
 L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&-&-&_         i_  a__  ||
@@ -150,9 +153,10 @@ eráchter.
 
 **Validatie** eist deze kolommen **niet**: alleen de positietelling telt
 ([Semantiek](semantics.md#sync-contract-lengte-posities)). Losse invoer mag
-rompiger zijn; de kuiser mag normaliseren. Gegenereerde output en de
-voorbeelden in `examples/mvsa` volgen wél deze layout. Hulpje:
-`python scripts/align_mvsa_columns.py examples/mvsa`.
+rompiger zijn; de kuiser mag normaliseren (`vsa mvsa kuiser`). Gegenereerde
+output en de voorbeelden in `examples/mvsa` volgen wél deze layout. Hulpje:
+`python scripts/align_mvsa_columns.py examples/mvsa` (alleen kolommen; de
+volledige kuiser-pipeline is `mvsa kuiser`).
 
 ## 4. Maatstrepen en sectie-einde
 
@@ -281,13 +285,18 @@ ongeacht spaties en streepjes erin. Zie [Reciteertoon](#reciteertoon).
 
 ### Canonieke woordstreepjes
 
-Tussen opeenvolgende lettergrepen van **hetzelfde woord** staat altijd `-`.
-Tussen het einde van een woord en het begin van het volgende woord staat **geen**
-`-` (wel spatie en/of leesteken). Tussen die lettergrepen mogen wel ELM’s,
-recite-haakjes, maatstrepen en leestekens staan.
+Tussen opeenvolgende lettergrepen van **hetzelfde woord** staat altijd `-`
+**direct vóór** de volgende lettergreep (`hei-li` of, bij extra kolombreedte,
+`hei  -li`). Tussen het einde van een woord en het begin van het volgende
+woord staat **geen** `-` (wel spatie en/of leesteken). Tussen die lettergrepen
+mogen wel ELM’s, recite-haakjes, maatstrepen en leestekens staan.
 
-De kuiser mag eenvoudige fouten herstellen (bijvoorbeeld `hei- li- ge` →
-`hei-li-ge`).
+De kuiser **collapse’t niet** `hei- li` → `hei-li`: dat zou ELM-duur
+veranderen in een woordstreepje en bij lange melisma’s de align breken
+(`hei_&_&_&_&_&_ -li` mag niet `hei_&_&_&_&_&_-li` worden). Bij
+`hei- li` (streepje + spaties + letter) waarschuwt de kuiser met regel en
+kolom: controleer of je een woordstreepje (`-li` / `  -li`) of duur (`~`)
+bedoelde.
 
 ### Melisma (vorm A)
 
@@ -404,9 +413,13 @@ Zie ook [Semantiek — pitfalls rond `~`](semantics.md#pitfalls-rond).
 De ELM-set volgt VSA 1.0 (`_`, `__`, `_.`, `-`, `~`, `.`, `..`, `-.`, `~.`,
 samengesteld met `&`). Op de lyrics-regel betekent kale `-` **tussen letters**
 een lettergreepstreepje; `-` **als ELM** staat in duurpositie (direct na de
-lettergreep of na `&`). Direct na een recite-`)` is kale `-` **geen** ELM maar
-een woordstreepje naar de volgende lettergreep; kies voor duur `_`, `~`, `.`,
-`-.`, …
+lettergreep of na `&`). **Canoniek** schrijf je standaard-lengte op L als
+`~` (niet als kale `-`), zodat `-` op L bij lettergrepen hoort. In **invoer**
+blijft kale `-` als standaard-lengte geldig (o.a. in melisma-slots en in
+samengestelde ELM’s zoals `-.`); de kuiser herschrijft eenduidige ELM-`-`
+naar `~` en waarschuwt bij ambiguë gevallen. Direct na een recite-`)` is kale
+`-` **geen** ELM maar een woordstreepje naar de volgende lettergreep; kies
+voor duur `_`, `~`, `.`, `-.`, …
 
 Leestekens mogen **achter** de lettergreep of **achter** de ELM staan en horen
 bij de tekst van die lettergreep (`Komt_,`, `ia,`, `tus_,`). Binnen `(…)` horen

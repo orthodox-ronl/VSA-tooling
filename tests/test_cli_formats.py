@@ -16,6 +16,7 @@ def test_mvsa_help_lists_subcommands(capsys):
     out = capsys.readouterr().out
     assert "validate" in out
     assert "normalize" in out
+    assert "kuiser" in out
     assert "import" in out
     assert "pdf" in out
 

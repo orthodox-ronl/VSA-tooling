@@ -95,15 +95,22 @@ def _format_lpos(p: LPosition) -> str:
             if i:
                 parts.append("-" if (i - 1 < len(p.links) and p.links[i - 1]) else " ")
             parts.append(syl)
-        return "(" + "".join(parts) + ")" + "".join(p.elms)
+        return "(" + "".join(parts) + ")" + _format_elms(p.elms)
     prefix = "-" if p.continues_word else ""
     if not p.syllables:
-        return prefix + "".join(p.elms)
+        return prefix + _format_elms(p.elms)
     body = p.syllables[0]
     for i, syl in enumerate(p.syllables[1:]):
         link = p.links[i] if i < len(p.links) else True
         body += ("-" if link else " ") + syl
-    return prefix + body + "".join(p.elms)
+    return prefix + body + _format_elms(p.elms)
+
+
+def _format_elms(elms: list[str]) -> str:
+    """Join melisma ELM slots with ``&`` (``_&-&_``), not concatenated."""
+    if not elms:
+        return ""
+    return "&".join(elms)
 
 
 def _voice_tokens(measure: str) -> list[str]:

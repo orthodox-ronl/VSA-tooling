@@ -158,18 +158,22 @@ Het teken `~` is op de L-regel **alleen** ELM (duur). Recite markeer je met
 - In melisma’s heeft ELM-`~` de voorkeur boven ELM-`-` vóór een
   lettergreepstreepje: schrijf `li~&~-ge`, niet `li-&--ge` (dubbele `-` is
   ambigu voor lezer en kuiser).
+- **Canoniek** op L: standaard-lengte als `~`; kale ELM-`-` is invoer-tolerantie
+  (kuiser → `~`). Woordstreepje met extra breedte: spaties **vóór** `-letter`
+  (`…_&_  -li`).
 
 De kuiser mag recite-haakjes niet stilzwijgend weghalen of ELM-`~` niet in
 woordstreepjes veranderen.
 
 ## Canonieke layout vs. tolerantie
 
-| Onderwerp              | Canoniek                                                                                         | Kuiser                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Woordstreepjes         | `-` tussen lettergrepen van één woord; geen `-` tussen woorden                                   | Mag spaties rond streepjes normaliseren                         |
-| Maat-/sectiestrepen    | Op alle LSATB-regels op dezelfde posities                                                        | Mag strepen van één regel naar de andere kopiëren als eenduidig |
-| **Kolomuitlijning**    | Zie [Syntax — canonieke kolomuitlijning](syntax.md#canonieke-kolomuitlijning-lsatb)              | Mag losser zijn; gegenereerde output en voorbeelden zijn strikt |
-| Directives             | Sticky tot overrule                                                                              | —                                                               |
+| Onderwerp              | Canoniek                                                                                         | Kuiser                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Standaard-lengte op L  | `~` (niet kale ELM-`-`); `-` hoort bij lettergrepen                                              | Herschrijft eenduidige ELM-`-` → `~`; waarschuwt bij ambiguë `-` (regel + kolom)                |
+| Woordstreepjes         | `-` direct vóór de volgende lettergreep; bij breedte spaties *ervóór* (`hei  -li`)               | Geen stille `hei- li`→`hei-li`-collapse; Pyphen-warnings bij ontbrekende / verdachte streepjes  |
+| Maat-/sectiestrepen    | Op alle LSATB-regels op dezelfde posities                                                        | Mag strepen van één regel naar de andere kopiëren als eenduidig                                 |
+| **Kolomuitlijning**    | Zie [Syntax — canonieke kolomuitlijning](syntax.md#canonieke-kolomuitlijning-lsatb)              | Mag losser zijn; gegenereerde output en voorbeelden zijn strikt                                 |
+| Directives             | Sticky tot overrule                                                                              | —                                                                                               |
 
 **Semantiek** (sync-telling) hangt niet van kolommen af: ongelijke spaties mogen
 in losse invoer. De **standaardlayout** die tooling schrijft (en die in

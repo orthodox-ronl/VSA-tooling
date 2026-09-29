@@ -14,8 +14,8 @@ Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize} …
-vsa mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize} …
+mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
+vsa mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
 mvsa validate [-h] path
 mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
@@ -27,6 +27,7 @@ mvsa audio [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
            [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
 mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
+mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
 ```
 
 ## Subcommando's
@@ -40,6 +41,7 @@ mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
 | [`audio`](#vsa-mvsa-audio)           | Exporteer naar audio (``.mp3``) voor preview-luisteren.      |
 | [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` naar `.mvsa`.                     |
 | [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen).            |
+| [`kuiser`](#vsa-mvsa-kuiser)         | Authoring-kuiser: strepen syncen, woordstreep, align.        |
 
 Hulp op de commandoregel:
 
@@ -53,6 +55,7 @@ mvsa pdf -h
 mvsa audio -h
 mvsa import -h
 mvsa normalize -h
+mvsa kuiser -h
 ```
 
 ---
@@ -443,6 +446,71 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 vsa mvsa normalize examples\mvsa\alleluia-toon-8.canonieke.mvsa -o generated\alleluia.normalized.mvsa
 vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
 vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
+```
+
+---
+
+## `vsa mvsa kuiser`
+
+### Synopsis
+
+```text
+vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}]
+                [--octave-style {@oct,marker}] [--no-align] path [path …]
+```
+
+### Beschrijving
+
+Authoring-pad naar de **canonieke schrijfvorm** uit de draft-spec
+([syntax](../../specification-mvsa/syntax.md),
+[semantiek — layout](../../specification-mvsa/semantics.md#canonieke-layout-vs-tolerantie)):
+
+1. woordstreep-spatie op L (`hei- li` → `hei-li`; `le-  lu` blijft);
+2. maatstrepen syncen waar eenduidig (maximale unieke bar-reeks;
+   herpartitioneren via positietelling);
+3. daarna hetzelfde als `normalize` (default `--pitch preserve` + kolomalign).
+
+Default schrijft **in-place**. Gebruik `--check` als dry-run (exit 1 als er
+iets zou wijzigen). Na afloop moet validate geen errors meer geven; bij
+conflicterende strepen faalt de kuiser met een duidelijke fout.
+
+Gedrag t.o.v. `-` op L (draft-spec):
+
+- **Canoniek:** standaard-lengte als `~`; woordstreepje direct vóór de
+  lettergreep (`-li`), met spaties *ervóór* bij extra breedte (`…_&_  -li`).
+- **Invoer:** kale ELM-`-` mag (o.a. melisma); kuiser herschrijft eenduidige
+  gevallen naar `~`.
+- **Ambigu** (`hei- li`, `li-&--ge`): waarschuwing op stderr met
+  `bestand:regel:kolom` — geen stille collapse naar `hei-li`.
+
+`normalize` blijft het conversiepad (pitch-herschrijf naar een apart
+uitvoerbestand). `kuiser` is het dagelijkse authoring-commando.
+
+### Argumenten en opties
+
+| Optie                   | Verplicht | Beschrijving                                                         | Default              |
+| ----------------------- | --------- | -------------------------------------------------------------------- | -------------------- |
+| `path`                  | Ja        | `.mvsa`-bestand(en) of map(pen).                                     | —                    |
+| `-o`, `--output`        | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                     | in-place             |
+| `--check`               | Nee       | Geen schrijfactie; exit 1 bij wijziging.                             | uit                  |
+| `--pitch`               | Nee       | Zelfde als `normalize` (default preserve).                           | `preserve`           |
+| `--octave-style`        | Nee       | Schrijfoctaaf-stijl.                                                 | `@oct`               |
+| `--no-align`            | Nee       | Sla kolomuitlijning over.                                            | uit                  |
+
+### Exit status
+
+| Exitcode | Betekenis                                                      |
+| -------- | -------------------------------------------------------------- |
+| `0`      | Klaar (of `--check` zonder wijziging).                         |
+| `1`      | Pad ontbreekt, kuiser-/validatiefout, of `--check` met diff.   |
+
+### Voorbeelden
+
+```cmd
+vsa mvsa kuiser examples\mvsa\alleluia-toon-8.mvsa
+vsa mvsa kuiser examples\mvsa --check
+vsa mvsa kuiser lied.mvsa -o generated\lied.kuiser.mvsa
+vsa mvsa kuiser lied.mvsa --pitch a-g
 ```
 
 ## Zie ook

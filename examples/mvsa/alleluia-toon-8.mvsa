@@ -2,14 +2,13 @@
 
 @title "Alleluia - Toon 8"
 @composer     "Traditioneel"
-@tekstdichter "bron: koormap Hemelum"
 @bron "koormap Hemelum"
 @copyright "CC BY-SA 4.0"
 
 @do F4
 @mode major
 
-L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&-&-&_         i_  a__  ||
+L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&~&~&_         i_  a__  ||
 S: fa                             so-  mi&do&re&mi       fa  mi   ||
 A: re                             re   do&la-&si-&do     re  si-  ||
 T: la-                            so-  so-&mi-&so-&so-   la- so-# ||

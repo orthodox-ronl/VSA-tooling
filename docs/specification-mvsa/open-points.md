@@ -18,7 +18,7 @@ Repo-breed kompas (niet alleen mvsa):
 
 *(leeg — volgende werk uit [Backlog](#backlog-bewust-later))*
 
-Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
+Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
 `examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa audio`).
 
 ---
@@ -45,7 +45,6 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
 
 | Punt                 | Toelichting                                                                                                                                | Richting                                                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| Kuiser-tool          | **Gedrag** staat in [syntax](syntax.md) / [semantiek](semantics.md); **implementatie** nog niet als één CLI (`normalize` + align bestaan)  | Tool boven `normalize` / `align_mvsa_columns`                                                                        |
 | Exports / gebruik    | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages) |
 | TEv2 docs-opschonen  | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                         |
 
@@ -53,20 +52,21 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
 
 ## Klaar (niet opnieuw openen)
 
-| Punt                                  | Stand                                                                                               |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Parser / CLI                          | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                               |
-| Conversieslices                       | normalize, mscz-export, import, bron-commands — zie conversions-plan                                |
-| `mvsa pdf`                            | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                     |
-| `vsa`/`mvsa audio`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                         |
-| Los MIDI-bestand                      | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)    |
-| Speelplan volta + D.S. al Fine / Coda | Partituur-nav: volta, D.S./D.C. al Fine, D.S./D.C. al Coda; MXL expansie; tests                     |
-| `::: mvsa-notatie` / `::: mvsa`       | Markdown-fences + aliases `::: vsa` / `::: mvsa`; validate; build → Coria/MXL; `:::include *.mvsa`  |
-| Laddergraad `+`/`-` = octaaf          | Mvsa-keuze vastgelegd (kruis via `#`/`b`); chromatische `+` in eenstemmige VSA-EHM → VSA-spec       |
-| Validate-output                       | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
-| Sectie-einde                          | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |
-| MSCZ-layout + id                      | `--layout {partituur,plain}`; `--bibliotheek-id` (expliciet; pad = fallback)                        |
-| Experiment-PDF                        | Checklist P1–P5; copyright-footer P4 blijft “later”                                                 |
+| Punt                                  | Stand                                                                                                                                                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Parser / CLI                          | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                                                                                                                                                                                  |
+| Conversieslices                       | normalize, mscz-export, import, bron-commands — zie conversions-plan                                                                                                                                                                                   |
+| Kuiser-tool                           | `mvsa kuiser`: L-ELM `-`→`~`; ambiguë-`-`-warnings; semantische woordstreepjes (Pyphen, exact); maatstrepen syncen; align; `--check`. Bewust later: conflicterende gedeeltelijke strepen raden; marker-octaaf → `@oct`                                 |
+| `mvsa pdf`                            | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                                                                                                                                                                        |
+| `vsa`/`mvsa audio`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                                                                                                                                                                            |
+| Los MIDI-bestand                      | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)                                                                                                                                                       |
+| Speelplan volta + D.S. al Fine / Coda | Partituur-nav: volta, D.S./D.C. al Fine, D.S./D.C. al Coda; MXL expansie; tests                                                                                                                                                                        |
+| `::: mvsa-notatie` / `::: mvsa`       | Markdown-fences + aliases `::: vsa` / `::: mvsa`; validate; build → Coria/MXL; `:::include *.mvsa`                                                                                                                                                     |
+| Laddergraad `+`/`-` = octaaf          | Mvsa-keuze vastgelegd (kruis via `#`/`b`); chromatische `+` in eenstemmige VSA-EHM → VSA-spec                                                                                                                                                          |
+| Validate-output                       | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                                                                                                                                                                     |
+| Sectie-einde                          | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT`                                                                                                                                                    |
+| MSCZ-layout + id                      | `--layout {partituur,plain}`; `--bibliotheek-id` (expliciet; pad = fallback)                                                                                                                                                                           |
+| Experiment-PDF                        | Checklist P1–P5; copyright-footer P4 blijft “later”                                                                                                                                                                                                    |
 
 ---
 

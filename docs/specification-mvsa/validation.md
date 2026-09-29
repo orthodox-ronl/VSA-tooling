@@ -84,10 +84,14 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
 
 ## Canonieke vorm (warning)
 
-11. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden
-    (nog niet volledig geautomatiseerd).
+11. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden:
+    `mvsa kuiser` waarschuwt via Pyphen (alleen Latijnse lettergrepen) wanneer
+    de splitsing **exact** overeenkomt (ontbrekend), zonder een volgend
+    hoofdletter-woord vast te plakken. Streepje tussen twee hoofdletter-woorden
+    zonder Pyphen-breuk: aparte warning. Liturgische / niet-Latijnse splits
+    blijven stil.
 12. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
-    had kunnen syncen — of, na kuiser, alsnog inconsistent: error.
+    had kunnen syncen — of, na `mvsa kuiser`, alsnog inconsistent: error.
 
 ## Buiten v0-validatie / export-beperkingen
 
