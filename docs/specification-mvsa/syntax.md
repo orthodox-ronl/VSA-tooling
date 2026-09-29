@@ -233,9 +233,8 @@ Een sectie eindigt op een van deze manieren:
    herhalingsvorm) is tegelijk het sectie-einde — ook als dat geen `||` was.
 3. **Einde van het bestand (EOF):** idem: de laatste maatstreep van het
    laatste systeem beëindigt de open sectie.
-4. **(Vooruitblik)** Het sluiten van een fenced blok `::: mvsa-notatie` …
-   `:::` (zodra die vorm in markdown landt) werkt hetzelfde als EOF voor de
-   open sectie in dat blok.
+4. **Fenced markdown:** het sluiten van `::: mvsa-notatie` / `::: mvsa` …
+   `:::` werkt hetzelfde als EOF voor de open sectie in dat blok.
 
 Kort: bij **EOF**, **nieuwe `@sectie`**, of **fence-`:::`** is elke geldige
 eindmaatstreep op het laatste systeem genoeg. `||` blijft nuttig als
@@ -253,7 +252,7 @@ in de editor). Elk tussensysteem eindigt op `|` (of herhalingsspecialisatie die
 geen sectie-einde is). Het **laatste** systeem van de sectie eindigt op een
 geldige maatstreep; bij doorlopende tekst zonder nieuwe `@sectie` gebruik je
 `||` of `:||` om de sectie te beëindigen. Bij een volgende `@sectie`, bij EOF,
-of (later) bij fence-`:::` volstaat ook `|`.
+of bij fence-`:::` volstaat ook `|`.
 
 Alle systemen in één sectie hebben hetzelfde aantal LSATB-regels en dezelfde
 regelidentifiers in dezelfde volgorde (zelfde stemidentifier én dezelfde

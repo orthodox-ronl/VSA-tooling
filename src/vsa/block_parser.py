@@ -1,11 +1,20 @@
 from dataclasses import dataclass, field
 import re
+from typing import Literal
 
 from .parser import Parser
 
 
-START_MARKER = "::: vsa-notatie"
 END_MARKER = ":::"
+
+# Canonieke openingsregels (na strip); aliassen normaliseren naar kind.
+VSA_FENCE_INFOS = frozenset({"vsa-notatie", "vsa"})
+MVSA_FENCE_INFOS = frozenset({"mvsa-notatie", "mvsa"})
+
+# Backwards-compat voor imports die de canonieke VSA-fence verwachten.
+START_MARKER = "::: vsa-notatie"
+
+NotationKind = Literal["vsa", "mvsa"]
 
 
 DEFAULT_METADATA = {
@@ -33,6 +42,8 @@ class MarkdownBlock:
     end_line: int
     metadata: dict[str, str] = field(default_factory=dict)
     body: str = ""
+    kind: NotationKind = "vsa"
+    info_string: str = "vsa-notatie"
 
     def effective_metadata(self):
         result = dict(DEFAULT_METADATA)
@@ -41,6 +52,18 @@ class MarkdownBlock:
 
     def parse_body(self, body: str | None = None):
         return Parser(body if body is not None else self.body).parse()
+
+
+def notation_fence_kind(stripped: str) -> NotationKind | None:
+    """Return ``vsa`` / ``mvsa`` for a fence-open line, else ``None``."""
+    info = _fence_info_string(stripped)
+    if info is None:
+        return None
+    if info in VSA_FENCE_INFOS:
+        return "vsa"
+    if info in MVSA_FENCE_INFOS:
+        return "mvsa"
+    return None
 
 
 def parse_markdown_blocks(markdown: str):
@@ -67,15 +90,17 @@ def parse_markdown_blocks(markdown: str):
             index += 1
             continue
 
-        if in_code_fence or stripped != START_MARKER:
+        kind = None if in_code_fence else notation_fence_kind(stripped)
+        if kind is None:
             index += 1
             continue
 
+        info_string = _fence_info_string(stripped) or kind
         start_line = index + 1
         index += 1
 
-        metadata = {}
-        body_lines = []
+        metadata: dict[str, str] = {}
+        body_lines: list[str] = []
 
         while index < len(lines):
             stripped_inner = lines[index].strip()
@@ -83,14 +108,23 @@ def parse_markdown_blocks(markdown: str):
             if stripped_inner == END_MARKER:
                 break
 
-            parsed = _parse_metadata_line(stripped_inner)
+            if kind == "vsa":
+                parsed = _parse_metadata_line(stripped_inner)
+                if parsed is not None:
+                    key, value = parsed
+                    metadata[key] = value
+                    index += 1
+                    continue
+            elif kind == "mvsa":
+                # Alleen assignment-metadata; ``# …`` is mvsa-commentaar.
+                parsed = _parse_assignment_metadata_line(stripped_inner)
+                if parsed is not None:
+                    key, value = parsed
+                    metadata[key] = value
+                    index += 1
+                    continue
 
-            if parsed is None:
-                body_lines.append(lines[index])
-            else:
-                key, value = parsed
-                metadata[key] = value
-
+            body_lines.append(lines[index])
             index += 1
 
         end_line = index + 1 if index < len(lines) else len(lines)
@@ -101,12 +135,27 @@ def parse_markdown_blocks(markdown: str):
                 end_line=end_line,
                 metadata=metadata,
                 body="\n".join(body_lines).strip(),
+                kind=kind,
+                info_string=info_string,
             )
         )
 
         index += 1
 
     return blocks
+
+
+def _fence_info_string(stripped: str) -> str | None:
+    """``::: vsa-notatie`` → ``vsa-notatie``; anders ``None``."""
+    if not stripped.startswith(":::"):
+        return None
+    rest = stripped[3:].strip()
+    if not rest:
+        return None
+    info = rest.split(None, 1)[0]
+    if info in VSA_FENCE_INFOS or info in MVSA_FENCE_INFOS:
+        return info
+    return None
 
 
 def _parse_metadata_line(line: str):
@@ -120,6 +169,13 @@ def _parse_metadata_line(line: str):
 
     if hash_match:
         return hash_match.group(1), hash_match.group(2)
+
+    return _parse_assignment_metadata_line(line)
+
+
+def _parse_assignment_metadata_line(line: str):
+    if line == "":
+        return None
 
     assignment_match = re.match(
         r'^([A-Za-z0-9_-]+)\s*=\s*"([^"]*)"\s*$',

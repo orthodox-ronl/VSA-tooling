@@ -58,6 +58,26 @@ def process_markdown_file(
     processed = []
 
     for index, block in enumerate(blocks, start=1):
+        if block.kind == "mvsa":
+            from .mvsa_musicxml import export_mvsa_to_musicxml
+            from .musicxml_package import write_musicxml_output
+
+            output_file = output_dir / f"{relative_stem}-block-{index}.mxl"
+            xml = export_mvsa_to_musicxml(
+                block.body,
+                title=output_file.stem,
+                layout="playback",
+            )
+            write_musicxml_output(output_file, xml)
+            processed.append(
+                ProcessedBlock(
+                    source_file=str(input_path),
+                    block_index=index,
+                    output_file=str(output_file),
+                )
+            )
+            continue
+
         expanded_body, _ = prepare_markdown_block_body(
             block.body,
             markdown_path=input_path,

@@ -91,6 +91,31 @@ Gegenereerde Markdown met `--output-mode shortcode`:
 {{< vsa src="/vsa/smoke-block-1.svg" >}}
 ```
 
+### Mvsa-blokken
+
+Canonieke fence: `::: mvsa-notatie` … `:::`. Alias: `::: mvsa` (zelfde
+gedrag). Alias voor eenstemmig: `::: vsa` ≡ `::: vsa-notatie`.
+
+Bron:
+
+```markdown
+::: mvsa
+@do F4
+@mode major
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+:::
+```
+
+Na `build-markdown`: playback-``.mxl`` in `assets_dir` plus Hugo-shortcodes
+`coria` en `mxl-download` (mvsa heeft geen SVG-renderer). Optionele
+blok-metadata alleen als `key="waarde"` (niet `# key:` — dat is mvsa-commentaar).
+
+`:::include lied.mvsa:::` wrapt het bestand als `::: mvsa-notatie`.
+
 ## Exit status
 
 | Exitcode | Betekenis                                               |

@@ -472,7 +472,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                 start,
             )
         )
-    # EOF (en later fence-:::): open sectie eindigt op de laatste maatstreep
+    # EOF / fence-::: : open sectie eindigt op de laatste maatstreep
     # van het laatste systeem (| of ||); geen warning. Speelblokken: idem.
     return sections
 

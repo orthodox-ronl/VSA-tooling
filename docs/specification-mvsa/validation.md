@@ -44,8 +44,8 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    LSATB-regels van een systeem (expliciet midden in het bestand); of (b) een
    nieuwe `@sectie` — de **laatste maatstreep** van het vorige laatste systeem
    (`|` of `||`, …) is dan het sectie-einde; of (c) einde van het bestand (EOF);
-   later ook het sluiten van een `::: mvsa-notatie`-fence (zelfde als EOF).
-   Geen warning `MVSA-SECTIE-IMPLICIT` meer voor (b)/(c).
+   of (d) sluiten van een `::: mvsa-notatie` / `::: mvsa`-fence (zelfde als EOF).
+   Geen warning `MVSA-SECTIE-IMPLICIT` meer voor (b)/(c)/(d).
    **Uitzondering:** speelblokken (`@blok`) — geen `||`-eis tussen blokken
    (zie [Speelplan](speelplan.md)).
 5. `@sectie` *id* voldoet aan `[a-z][a-z0-9_-]*`.

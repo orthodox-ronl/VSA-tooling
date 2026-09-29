@@ -37,10 +37,9 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
 
 ### Markdown-pipeline en fences
 
-| Punt                              | Toelichting                                                                                                                                                          | Richting                                      |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `::: mvsa-notatie` / `::: mvsa`   | Markdown-blok met mvsa; aliases `::: vsa` / `::: mvsa`; sluitende `:::` = sectie-einde zoals EOF; tekst tussen laatste maatstreep en `:::` = warning/fout            | Spec + parse + `build-markdown` / includes    |
-| `::: vsa-notatie` in `.vsa`       | Optioneel fence in `.vsa`: zonder fence = kale VSA (nu); mét fence = buiten fence in principe commentaar (later metadata)                                            | Eenstemmige VSA-tooling                       |
+| Punt                        | Toelichting                                                                                                                                               | Richting                |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `::: vsa-notatie` in `.vsa` | Optioneel fence in `.vsa`: zonder fence = kale VSA (nu); mét fence = buiten fence in principe commentaar (later metadata)                                 | Eenstemmige VSA-tooling |
 
 ### Tooling / conversies
 
@@ -62,6 +61,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf / audio):
 | `vsa`/`mvsa audio`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                         |
 | Los MIDI-bestand                      | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)    |
 | Speelplan volta + D.S. al Fine / Coda | Partituur-nav: volta, D.S./D.C. al Fine, D.S./D.C. al Coda; MXL expansie; tests                     |
+| `::: mvsa-notatie` / `::: mvsa`       | Markdown-fences + aliases `::: vsa` / `::: mvsa`; validate; build → Coria/MXL; `:::include *.mvsa`  |
 | Laddergraad `+`/`-` = octaaf          | Mvsa-keuze vastgelegd (kruis via `#`/`b`); chromatische `+` in eenstemmige VSA-EHM → VSA-spec       |
 | Validate-output                       | Succes → één `OK` (geen per-bestand `…: OK`); zoals `vsa validate`                                  |
 | Sectie-einde                          | Bij EOF / nieuwe `@sectie` / (later) fence: laatste maatstreep = einde; geen `MVSA-SECTIE-IMPLICIT` |

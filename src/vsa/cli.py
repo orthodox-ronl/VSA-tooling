@@ -821,15 +821,33 @@ def _cmd_blocks(args):
             item = {
                 "start_line": block.start_line,
                 "end_line": block.end_line,
-                "metadata": block.effective_metadata(),
+                "kind": block.kind,
+                "info_string": block.info_string,
+                "metadata": (
+                    block.effective_metadata()
+                    if block.kind == "vsa"
+                    else dict(block.metadata)
+                ),
                 "body": block.body,
-                "ast": block.parse_body().to_dict(),
             }
+            if block.kind == "vsa":
+                item["ast"] = block.parse_body().to_dict()
             data.append(item)
 
         print(json.dumps(data, ensure_ascii=False, indent=2))
     else:
-        print(f"{len(blocks)} VSA-blok(ken) gevonden")
+        vsa_n = sum(1 for b in blocks if b.kind == "vsa")
+        mvsa_n = sum(1 for b in blocks if b.kind == "mvsa")
+        parts = []
+        if vsa_n:
+            parts.append(f"{vsa_n} VSA-blok(ken)")
+        if mvsa_n:
+            parts.append(f"{mvsa_n} mvsa-blok(ken)")
+        print(
+            (", ".join(parts) + " gevonden")
+            if parts
+            else "0 notatieblok(ken) gevonden"
+        )
 
     return 0
 
@@ -873,7 +891,7 @@ def _cmd_process(args, config):
         config=config,
     )
 
-    print(f"{len(result.blocks)} SVG-bestand(en) gegenereerd")
+    print(f"{len(result.blocks)} assetbestand(en) gegenereerd")
 
     for block in result.blocks:
         print(f"- {block.output_file}")
@@ -909,7 +927,7 @@ def _cmd_build_markdown(args, config):
     )
 
     print(f"{len(result.markdown_files)} Markdownbestand(en) geschreven")
-    print(f"{len(result.svg_files)} SVG-bestand(en) geschreven")
+    print(f"{len(result.svg_files)} assetbestand(en) geschreven")
     return 0
 
 
@@ -1228,6 +1246,29 @@ def _export_md_to_musicxml(
     written = 0
 
     for i, block in enumerate(blocks):
+        suffix = f"-{i + 1}" if len(blocks) > 1 else ""
+        out_file = output_dir / f"{stem}{suffix}{output_suffix}"
+
+        if block.kind == "mvsa":
+            from .mvsa_musicxml import MvsaExportError, export_mvsa_to_musicxml
+            from .mvsa_validate import MvsaValidationError
+
+            try:
+                xml_str = export_mvsa_to_musicxml(
+                    block.body,
+                    title=out_file.stem,
+                    layout="playback",
+                )
+            except (MvsaValidationError, MvsaExportError) as exc:
+                print(
+                    f"{input_path} (blok {i + 1}): fout bij mvsa-MusicXML-export: {exc}",
+                    file=sys.stderr,
+                )
+                return 1, written
+            write_musicxml_output(out_file, xml_str)
+            written += 1
+            continue
+
         metadata = block.effective_metadata()
         metadata.update(cli_overrides)
         try:
@@ -1253,8 +1294,6 @@ def _export_md_to_musicxml(
             )
             return 1, written
 
-        suffix = f"-{i + 1}" if len(blocks) > 1 else ""
-        out_file = output_dir / f"{stem}{suffix}{output_suffix}"
         write_musicxml_output(out_file, xml_str)
         written += 1
 

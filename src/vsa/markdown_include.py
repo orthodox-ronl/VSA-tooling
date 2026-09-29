@@ -75,8 +75,9 @@ def resolve_includes(
 
     Exporttype ``svg`` refers to a ``.vsa`` source path. Exporttypes ``coria``
     and ``mxl`` accept ``.vsa`` (derived MXL) or native ``.mxl`` / ``.musicxml``.
-    Extension-based includes (``.md``, ``.vsa`` without exporttype, ``.svg``, …)
-    behave as before. Plain ``:::include bestand.mxl:::`` is not supported.
+    Extension-based includes (``.md``, ``.vsa`` / ``.mvsa`` without exporttype,
+    ``.svg``, …) behave as before. Plain ``:::include bestand.mxl:::`` is not
+    supported.
 
     Logische referenties ``id:…``, ``lokaal:…`` en ``bron:…`` worden via
     **catalogus** opgelost naar een ``.vsa``-pad (fase 3).
@@ -147,7 +148,13 @@ def resolve_includes(
             )
 
         suffix = included_path.suffix.lower()
-        supported = {".md", ".markdown", ".vsa", ".svg"} | _RASTER_SUFFIXES | _DOCUMENT_SUFFIXES
+        supported = {
+            ".md",
+            ".markdown",
+            ".vsa",
+            ".mvsa",
+            ".svg",
+        } | _RASTER_SUFFIXES | _DOCUMENT_SUFFIXES
 
         if suffix not in supported:
             raise IncludeError(
@@ -180,6 +187,13 @@ def resolve_includes(
                 included_path,
                 alt=alt,
                 scale=scale,
+            )
+
+        elif suffix == ".mvsa":
+            _append_mvsa_notation_block(
+                result_lines,
+                included_path,
+                alt=alt,
             )
 
         elif suffix in {".svg"} | _RASTER_SUFFIXES:
@@ -403,6 +417,22 @@ def _append_vsa_notation_block(
         result_lines.append(f"# scale: {scale}")
     if vsa_body:
         result_lines.extend(vsa_body.splitlines())
+    result_lines.append(":::")
+
+
+def _append_mvsa_notation_block(
+    result_lines: list[str],
+    included_path: Path,
+    *,
+    alt: str | None,
+) -> None:
+    """Wrap a ``.mvsa`` file as ``::: mvsa-notatie`` (geen YAML-frontmatter)."""
+    body = included_path.read_text(encoding="utf-8-sig")
+    result_lines.append("::: mvsa-notatie")
+    if alt:
+        result_lines.append(f'alt="{alt}"')
+    if body:
+        result_lines.extend(body.splitlines())
     result_lines.append(":::")
 
 

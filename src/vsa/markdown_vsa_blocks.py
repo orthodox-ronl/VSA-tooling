@@ -13,8 +13,8 @@ class VSAMarkdownBlock:
 
 
 VSA_FENCE_RE = re.compile(
-    r"(?P<fence>^```+\s*(?P<codeinfo>vsa(?:-notatie)?)\s*$"
-    r"|^:::\s*(?P<coloninfo>vsa(?:-notatie)?)\s*$)"
+    r"(?P<fence>^```+\s*(?P<codeinfo>(?:m?vsa)(?:-notatie)?)\s*$"
+    r"|^:::\s*(?P<coloninfo>(?:m?vsa)(?:-notatie)?)\s*$)"
     r"(?P<body>.*?)"
     r"(?P<close>^```+\s*$|^:::\s*$)",
     re.MULTILINE | re.DOTALL,

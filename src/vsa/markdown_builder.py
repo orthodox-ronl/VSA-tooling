@@ -5,9 +5,13 @@ import shutil
 
 from .content_assets import CORIA_HTML_SOURCE_SUFFIX, NATIVE_MUSICXML_SUFFIXES
 
-from .block_parser import START_MARKER, END_MARKER, parse_markdown_blocks
+from .block_parser import END_MARKER, notation_fence_kind, parse_markdown_blocks
 from .config import VSAConfig
-from .markdown_coria import resolve_coria_directives
+from .markdown_coria import (
+    emit_coria_shortcode,
+    emit_mxl_download_shortcode,
+    resolve_coria_directives,
+)
 from .markdown_directives import process_directives
 from .markdown_include import IncludeError, resolve_includes
 from .resolve_catalogus import (
@@ -308,7 +312,8 @@ def _rewrite_markdown_file(
             index += 1
             continue
 
-        if in_code_fence or stripped != START_MARKER:
+        kind = None if in_code_fence else notation_fence_kind(stripped)
+        if kind is None:
             result_lines.append(lines[index])
             index += 1
             continue
@@ -324,47 +329,113 @@ def _rewrite_markdown_file(
 
         end_index = index
         block = blocks[block_index - 1]
-        expanded_body, _ = prepare_markdown_block_body(
-            block.body,
-            markdown_path=source_path,
-            markdown_text=source,
-        )
 
-        svg_name = _svg_name(source_relative, block_index)
-
-        svg_path = assets_dir / svg_name
-        svg_path.parent.mkdir(parents=True, exist_ok=True)
-
-        renderer = SVGRenderer()
-        renderer.max_line_width = max_line_width
-
-        svg = renderer.render_document(block.parse_body(expanded_body))
-        svg_path.write_text(svg, encoding="utf-8")
-
-        svg_paths.append(svg_path)
-
-        img_src = f"{assets_url_prefix.rstrip('/')}/{svg_name.replace(chr(92), '/')}"
-
-        alt = block.metadata.get("alt", "VSA notatie")
-        scale = block.metadata.get("scale")
-        natural_width = _svg_natural_width(svg)
-        style_attr = _scale_style(scale, natural_width)
-
-        if output_mode == "shortcode":
-            px = _scale_px(scale, natural_width)
-            scale_param = f' scale="{px}"' if px else ""
-            replacement = f'{{{{< vsa src="{img_src}" alt="{alt}"{scale_param} >}}}}'
-        else:
-            replacement = (
-                f'<img class="vsa-notation" '
-                f'src="{img_src}" alt="{alt}"{style_attr}>'
+        if block.kind == "mvsa":
+            replacements, asset_paths = _rewrite_mvsa_block(
+                block,
+                source_relative=source_relative,
+                block_index=block_index,
+                assets_dir=assets_dir,
+                assets_url_prefix=assets_url_prefix,
             )
-
-        result_lines.append(replacement)
+            result_lines.extend(replacements)
+            svg_paths.extend(asset_paths)
+        else:
+            replacement, svg_path = _rewrite_vsa_block(
+                block,
+                source=source,
+                source_path=source_path,
+                source_relative=source_relative,
+                block_index=block_index,
+                assets_dir=assets_dir,
+                assets_url_prefix=assets_url_prefix,
+                max_line_width=max_line_width,
+                output_mode=output_mode,
+            )
+            result_lines.append(replacement)
+            svg_paths.append(svg_path)
 
         index = end_index + 1
 
     return "\n".join(result_lines) + "\n", svg_paths
+
+
+def _rewrite_vsa_block(
+    block,
+    *,
+    source,
+    source_path,
+    source_relative,
+    block_index,
+    assets_dir,
+    assets_url_prefix,
+    max_line_width,
+    output_mode,
+) -> tuple[str, Path]:
+    expanded_body, _ = prepare_markdown_block_body(
+        block.body,
+        markdown_path=source_path,
+        markdown_text=source,
+    )
+
+    svg_name = _svg_name(source_relative, block_index)
+    svg_path = assets_dir / svg_name
+    svg_path.parent.mkdir(parents=True, exist_ok=True)
+
+    renderer = SVGRenderer()
+    renderer.max_line_width = max_line_width
+    svg = renderer.render_document(block.parse_body(expanded_body))
+    svg_path.write_text(svg, encoding="utf-8")
+
+    img_src = f"{assets_url_prefix.rstrip('/')}/{svg_name.replace(chr(92), '/')}"
+    alt = block.metadata.get("alt", "VSA notatie")
+    scale = block.metadata.get("scale")
+    natural_width = _svg_natural_width(svg)
+    style_attr = _scale_style(scale, natural_width)
+
+    if output_mode == "shortcode":
+        px = _scale_px(scale, natural_width)
+        scale_param = f' scale="{px}"' if px else ""
+        replacement = f'{{{{< vsa src="{img_src}" alt="{alt}"{scale_param} >}}}}'
+    else:
+        replacement = (
+            f'<img class="vsa-notation" '
+            f'src="{img_src}" alt="{alt}"{style_attr}>'
+        )
+    return replacement, svg_path
+
+
+def _rewrite_mvsa_block(
+    block,
+    *,
+    source_relative,
+    block_index,
+    assets_dir,
+    assets_url_prefix,
+) -> tuple[list[str], list[Path]]:
+    """Playback-MXL + Coria-/download-shortcodes (mvsa heeft geen SVG-renderer)."""
+    from .mvsa_musicxml import export_mvsa_to_musicxml
+    from .musicxml_package import write_musicxml_output
+
+    mxl_name = _mxl_name(source_relative, block_index)
+    mxl_path = assets_dir / mxl_name
+    mxl_path.parent.mkdir(parents=True, exist_ok=True)
+
+    title = block.metadata.get("alt") or Path(mxl_name).stem
+    xml = export_mvsa_to_musicxml(
+        block.body,
+        title=title,
+        layout="playback",
+    )
+    write_musicxml_output(mxl_path, xml)
+
+    public = f"{assets_url_prefix.rstrip('/')}/{mxl_name.replace(chr(92), '/')}"
+    label = block.metadata.get("label") or "Oefenen in Coria"
+    download_label = block.metadata.get("mxl-label") or "Download MusicXML"
+    return [
+        emit_coria_shortcode(public, label),
+        emit_mxl_download_shortcode(public, download_label),
+    ], [mxl_path]
 
 
 def _svg_name(source_relative, block_index):
@@ -373,6 +444,13 @@ def _svg_name(source_relative, block_index):
     stem = _safe_name(stem)
 
     return f"{stem}-block-{block_index}.svg"
+
+
+def _mxl_name(source_relative, block_index):
+    without_suffix = source_relative.with_suffix("")
+    stem = "-".join(without_suffix.parts)
+    stem = _safe_name(stem)
+    return f"{stem}-block-{block_index}.mxl"
 
 
 def _safe_name(value):

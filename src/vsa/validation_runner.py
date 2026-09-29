@@ -157,11 +157,14 @@ def _validate_markdown(path: Path, text: str, result: ValidationResult,
             code="VSA-BLOCK-PARSE-ERROR",
             message_nl=str(exc),
             category="syntax",
-            hint_nl="Controleer de VSA-blokmarkeringen in het Markdownbestand.",
+            hint_nl="Controleer de VSA-/mvsa-blokmarkeringen in het Markdownbestand.",
         )
         return
 
     for block in blocks:
+        if block.kind == "mvsa":
+            _validate_mvsa_block(path, block, result)
+            continue
         try:
             expanded, warnings = prepare_markdown_block_body(
                 block.body,
@@ -195,6 +198,31 @@ def _validate_markdown(path: Path, text: str, result: ValidationResult,
             config=config,
             source_line_offset=block.start_line,
         )
+
+
+def _validate_mvsa_block(path: Path, block, result: ValidationResult) -> None:
+    from .mvsa_validate import validate_mvsa_text
+
+    for diag in validate_mvsa_text(block.body, source=str(path)):
+        line = block.start_line + max(diag.line, 1) - 1
+        if diag.severity == "error":
+            result.add_error(
+                source=str(path),
+                code=diag.code,
+                message_nl=diag.message,
+                line=line,
+                category="mvsa",
+                hint_nl="Controleer de mvsa-syntax in dit Markdown-blok.",
+            )
+        else:
+            result.add_warning(
+                source=str(path),
+                code=diag.code,
+                message_nl=diag.message,
+                line=line,
+                category="mvsa",
+                hint_nl="Controleer de mvsa-syntax in dit Markdown-blok.",
+            )
 
 
 def _add_include_vsa_warning(
