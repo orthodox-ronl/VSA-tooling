@@ -20,6 +20,7 @@ Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
 **Normaalvorm (checklist):**
 [canonieke checklists — MXL](canonical-checklists.md#checklist-mxl-coria-playback)
 (Coria / `playback`) — **vier aparte parts** S/A/T/B met lyrics per part;
+**piano-MIDI** op elke part (`keyboard.piano.grand`, M8);
 **geen** print-recite-collapse (M10). Same-pitch **melisma** samentrekken
 (M5a): één lettergreep op dezelfde toon → **één** noot (gestipte ELM’s zoals
 `_.` blijven intact; Coria stript ties). Semantiek deelt de kern met MSCZ;

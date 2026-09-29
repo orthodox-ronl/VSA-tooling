@@ -432,9 +432,10 @@ MIDI-parameters ([blokmetadata](@) / `muziek`-sectie):
 | `midi-volume`  | `78.7402`              | `<volume>`           |
 | `midi-pan`     | `0`                    | `<pan>`              |
 
-> **Opmerking:** `keyboard.piano.grand` is de default omdat MuseScore-roundtrip
-> en Coria daarmee zijn getest. Voor koorklank kan `voice.choir.aahs` worden
-> ingesteld.
+> **Opmerking:** Canonieke playback-klank is piano (`keyboard.piano.grand`) —
+> op elke stempartij bij SATB-`.mxl` (checklist M8) en als default bij
+> eenstemmig `.vsa`. MuseScore-roundtrip is daarmee getest. Een andere
+> `midi-sound` (bijv. koorklank) is geen canonieke vorm.
 
 ##### Profiel `engraving`
 

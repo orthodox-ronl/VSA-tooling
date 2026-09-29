@@ -172,6 +172,18 @@ def _build_parser():
         ),
     )
 
+    text_cmd = subparsers.add_parser(
+        "text",
+        help=(
+            "Platte gezongen tekst uit .vsa of .mvsa "
+            "(zonder EHM/ELM; voor zoekindex)."
+        ),
+    )
+    text_cmd.add_argument(
+        "path",
+        help="VSA- of MVSA-bestand (.vsa / .mvsa).",
+    )
+
     musicxml = subparsers.add_parser("musicxml")
     musicxml.add_argument(
         "input",
@@ -815,6 +827,9 @@ def _run(args):
     if args.command == "syllabify":
         return _cmd_syllabify(args)
 
+    if args.command == "text":
+        return _cmd_text(args)
+
     if args.command == "musicxml":
         return _cmd_musicxml(args, config)
 
@@ -1012,6 +1027,25 @@ def _cmd_pdf(args, config):
         chrome_command=chrome_command,
     )
     print(f"PDF geschreven naar: {result}")
+    return 0
+
+
+def _cmd_text(args) -> int:
+    from .text_export import plain_text_from_path
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    try:
+        text = plain_text_from_path(path)
+    except ValueError as exc:
+        print(f"text: {exc}", file=sys.stderr)
+        return 1
+    except Exception as exc:  # noqa: BLE001 — CLI toont parsefouten leesbaar
+        print(f"text: fout bij lezen van {path}: {exc}", file=sys.stderr)
+        return 1
+    print(text)
     return 0
 
 
