@@ -424,6 +424,12 @@ def test_bibliotheek_id_from_path():
     p = Path("x/bibliotheek/7-kleine-intocht/zondag/hemelum/score.mscz")
     assert bibliotheek_id_from_path(p) == "7-kleine-intocht/zondag/hemelum"
     assert bibliotheek_id_from_path(Path("examples/mvsa/foo.mvsa")) is None
+    # Repo root named bibliotheek must not steal content-source/bibliotheek
+    nested = Path(
+        "bibliotheek/content-source/bibliotheek/"
+        "9-alleluia/9a-toon-1/groningen/score.mvsa"
+    )
+    assert bibliotheek_id_from_path(nested) == "9-alleluia/9a-toon-1/groningen"
 
 
 def test_resolve_bibliotheek_id_prefers_explicit():

@@ -127,7 +127,6 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
     import tempfile
 
     from .musicxml_package import write_musicxml_output
-    from .musicxml_satb_layout import ensure_playback_musicxml
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
     from .mvsa_import import read_musicxml_file
 
@@ -150,10 +149,9 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
         try:
             convert_with_musescore(path, tmp_mxl, musescore=musescore)
             xml = read_musicxml_file(tmp_mxl)
-            playback = ensure_playback_musicxml(xml)
-            from .musicxml_coria_timing import finalize_coria_musicxml
+            from .musicxml_playback_normalize import normalize_playback_musicxml
 
-            playback = finalize_coria_musicxml(playback, apply_timing=True)
+            playback = normalize_playback_musicxml(xml, apply_timing=True)
             write_musicxml_output(out, playback)
         except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
             print(f"{path}: ERROR: {exc}", file=sys.stderr)

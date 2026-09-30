@@ -24,19 +24,35 @@ def bibliotheek_id_from_path(path: Path | str | None) -> str | None:
 
     Convenience only — not authoritative. Prefer an explicit id from the
     consumer when writing colophon/metadata.
+
+    Prefers ``…/content-source/bibliotheek/<zangstuk>/<variant>/<uv>/…``
+    so a repo root named ``bibliotheek`` does not steal the first match.
+    Falls back to the first ``bibliotheek`` segment with three valid ids.
     """
     if path is None:
         return None
     parts = Path(path).resolve().parts
-    for i, part in enumerate(parts):
-        if part != "bibliotheek":
-            continue
+
+    def _try_at(i: int) -> str | None:
         if i + 3 >= len(parts):
             return None
         segs = parts[i + 1 : i + 4]
         if all(_ID_PART.fullmatch(s) for s in segs):
             return "/".join(segs)
         return None
+
+    for i, part in enumerate(parts):
+        if part != "bibliotheek":
+            continue
+        if i > 0 and parts[i - 1] == "content-source":
+            hit = _try_at(i)
+            if hit is not None:
+                return hit
+            return None
+    for i, part in enumerate(parts):
+        if part != "bibliotheek":
+            continue
+        return _try_at(i)
     return None
 
 

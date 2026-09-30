@@ -34,7 +34,7 @@ afspeelknop.
 | ``.mxl`` / ``.musicxml``     | `vsa audio` / `mvsa audio`                    |
 | ``.vsa``                     | `vsa audio` (via playback MusicXML)           |
 | ``.mvsa``                    | `mvsa audio` (via playback MusicXML)          |
-| ``.mscz``                    | `vsa audio` / `mvsa audio` (fallback via mxl) |
+| ``.mscz``                    | `vsa audio` / `mvsa audio` (via genormaliseerde playback-MXL + piano) |
 
 Default-formaat: **``.mp3``**. Optioneel ``--format ogg`` of ``wav``, of
 ``[audio] format`` in ``vsa.toml``.

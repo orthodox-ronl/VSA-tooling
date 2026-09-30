@@ -125,6 +125,7 @@ def export_mvsa_to_musicxml(
     section_id: str | None = None,
     layout: MvsaLayout = "playback",
     source_path: Path | None = None,
+    bibliotheek_id: str | None = None,
 ) -> str:
     """Validate + export. Raises MvsaValidationError or MvsaExportError."""
     if layout not in ("playback", "partituur"):
@@ -245,7 +246,7 @@ def export_mvsa_to_musicxml(
             measure_left_styles,
         )
 
-    from .bibliotheek_id import bibliotheek_id_from_path
+    from .bibliotheek_id import resolve_bibliotheek_id
 
     ctx = sections[0].systems[0].context if sections and sections[0].systems else StickyContext()
     effective_title = doc.title if doc.title else title
@@ -257,7 +258,7 @@ def export_mvsa_to_musicxml(
         "tekstdichter": getattr(doc, "tekstdichter", None),
         "arrangeur": getattr(doc, "arrangeur", None),
         "vertaler": getattr(doc, "vertaler", None),
-        "bibliotheek_id": bibliotheek_id_from_path(source_path),
+        "bibliotheek_id": resolve_bibliotheek_id(bibliotheek_id, source_path),
     }
     if layout == "partituur":
         return _emit_score_partituur(
@@ -300,6 +301,7 @@ def export_mvsa_path(
     *,
     section_id: str | None = None,
     layout: MvsaLayout = "playback",
+    bibliotheek_id: str | None = None,
 ) -> None:
     text = path.read_text(encoding="utf-8-sig")
     xml = export_mvsa_to_musicxml(
@@ -308,6 +310,7 @@ def export_mvsa_path(
         section_id=section_id,
         layout=layout,
         source_path=path,
+        bibliotheek_id=bibliotheek_id,
     )
     write_musicxml_output(out, xml)
 

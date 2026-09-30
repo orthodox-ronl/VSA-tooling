@@ -395,6 +395,16 @@ def _build_parser():
         default=None,
         help="Alleen deze @sectie-id exporteren (default: alle secties).",
     )
+    m_musicxml.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        dest="bibliotheek_id",
+        help=(
+            "Bibliotheek-id in MusicXML identification/rights "
+            "(default: pad-sniff onder content-source/bibliotheek)."
+        ),
+    )
     m_mscz = mvsa_sub.add_parser(
         "mscz",
         help="Exporteer .mvsa naar MuseScore (.mscz) via MusicXML.",
@@ -1492,7 +1502,12 @@ def _cmd_mvsa_musicxml(args) -> int:
     if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
         out = out.with_suffix(musicxml_output_suffix(path=out))
     try:
-        export_mvsa_path(path, out, section_id=args.section)
+        export_mvsa_path(
+            path,
+            out,
+            section_id=args.section,
+            bibliotheek_id=getattr(args, "bibliotheek_id", None),
+        )
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
             print(format_diagnostic(d, path), file=sys.stderr)

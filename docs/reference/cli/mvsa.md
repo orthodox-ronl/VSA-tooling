@@ -116,7 +116,7 @@ vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
 ### Synopsis
 
 ```text
-vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
+vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID] path
 ```
 
 ### Beschrijving
@@ -135,10 +135,11 @@ VSA).
 
 | Naam                 | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                          |
 | -------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
-| `path`               | Ja        | Bron-`.mvsa`-bestand.                                                     | —                                            | Moet een bestaand bestand zijn.      |
-| `-o`, `--output`     | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<stem>.mxl` naast het bronbestand           | Andere extensie → wordt `.mxl`.      |
-| `--section SECTION`  | Nee       | Alleen deze `@sectie`-id exporteren (bijv. `schets-a-bladcijfer`).        | Alle secties                                 | Id moet in het bestand voorkomen.    |
-| `-h`, `--help`       | Nee       | Toon hulp voor dit subcommando (inclusief `-o` en `--section`).           | —                                            | —                                    |
+| `path`                 | Ja        | Bron-`.mvsa`-bestand.                                                     | —                                            | Moet een bestaand bestand zijn.      |
+| `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<stem>.mxl` naast het bronbestand           | Andere extensie → wordt `.mxl`.      |
+| `--section SECTION`    | Nee       | Alleen deze `@sectie`-id exporteren (bijv. `schets-a-bladcijfer`).        | Alle secties                                 | Id moet in het bestand voorkomen.    |
+| `--bibliotheek-id ID`  | Nee       | Zet bibliotheek-id in identification/rights; anders pad-sniff.            | pad-sniff onder `content-source/bibliotheek` | Optioneel.                           |
+| `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                           | —                                            | —                                    |
 
 ### Output
 
