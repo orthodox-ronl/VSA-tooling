@@ -9,8 +9,8 @@ Conversiematrix en afgeronde slices:
 Werkplan-restpunten syntax (geschiedenis):
 [`docs/plans/mvsa-v0-syntax.md` §10](../plans/mvsa-v0-syntax.md).
 
-Repo-breed kompas (niet alleen mvsa):
-[`docs/status-en-roadmap.md`](../status-en-roadmap.md).
+Repo-breed kompas (niet alleen mvsa): repo-bestand
+`docs/status-en-roadmap.md` (niet op Pages; staat in `exclude_docs`).
 
 ---
 
