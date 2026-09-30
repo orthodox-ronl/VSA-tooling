@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>chore/mvsa-backlog-en-make-cmd</code>
-  , gebouwd 2026-09-28 18:44 CEST.
+   — branch <code>fix/docs-open-points-roadmap-link</code>
+  , gebouwd 2026-09-30 22:13 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -890,6 +890,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/midi/" class="md-nav__link">
         
   
@@ -1169,6 +1197,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1337,6 +1393,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3748,6 +3832,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -4709,8 +4821,8 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
    LSATB-regels van een systeem (expliciet midden in het bestand); of (b) een
    nieuwe <code>@sectie</code> — de <strong>laatste maatstreep</strong> van het vorige laatste systeem
    (<code>|</code> of <code>||</code>, …) is dan het sectie-einde; of (c) einde van het bestand (EOF);
-   later ook het sluiten van een <code>::: mvsa-notatie</code>-fence (zelfde als EOF).
-   Geen warning <code>MVSA-SECTIE-IMPLICIT</code> meer voor (b)/(c).
+   of (d) sluiten van een <code>::: mvsa-notatie</code> / <code>::: mvsa</code>-fence (zelfde als EOF).
+   Geen warning <code>MVSA-SECTIE-IMPLICIT</code> meer voor (b)/(c)/(d).
    <strong>Uitzondering:</strong> speelblokken (<code>@blok</code>) — geen <code>||</code>-eis tussen blokken
    (zie <a href="../speelplan/">Speelplan</a>).</li>
 <li><code>@sectie</code> <em>id</em> voldoet aan <code>[a-z][a-z0-9_-]*</code>.
@@ -4749,10 +4861,14 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
 </ol>
 <h2 id="canonieke-vorm-warning">Canonieke vorm (warning)<a class="headerlink" href="#canonieke-vorm-warning" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden
-    (nog niet volledig geautomatiseerd).</li>
+<li>Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden:
+    <code>mvsa kuiser</code> waarschuwt via Pyphen (alleen Latijnse lettergrepen) wanneer
+    de splitsing <strong>exact</strong> overeenkomt (ontbrekend), zonder een volgend
+    hoofdletter-woord vast te plakken. Streepje tussen twee hoofdletter-woorden
+    zonder Pyphen-breuk: aparte warning. Liturgische / niet-Latijnse splits
+    blijven stil.</li>
 <li>Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
-    had kunnen syncen — of, na kuiser, alsnog inconsistent: error.</li>
+    had kunnen syncen — of, na <code>mvsa kuiser</code>, alsnog inconsistent: error.</li>
 </ol>
 <h2 id="buiten-v0-validatie-export-beperkingen">Buiten v0-validatie / export-beperkingen<a class="headerlink" href="#buiten-v0-validatie-export-beperkingen" title="Permanent link">&para;</a></h2>
 <ul>
@@ -4800,7 +4916,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-09-29
         
       </p>
       

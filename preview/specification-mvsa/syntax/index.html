@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>chore/mvsa-backlog-en-make-cmd</code>
-  , gebouwd 2026-09-28 18:44 CEST.
+   — branch <code>fix/docs-open-points-roadmap-link</code>
+  , gebouwd 2026-09-30 22:13 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -890,6 +890,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/midi/" class="md-nav__link">
         
   
@@ -1169,6 +1197,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1337,6 +1393,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -4010,6 +4094,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -5365,7 +5477,10 @@ breder is dan de lettergreep tot aan de volgende anker-kolom, komt er ruimte
 <em>vóór</em> het streepje (<code>le -lu</code>), zodat stemtokens met spaties gescheiden blijven
 en de ankers (eerste letters / eerste noottekens) toch onder elkaar staan.
 Vermijd <code>le-  lu</code> (streepje direct gevolgd door spaties): die vorm leest de
-kuiser als ELM <code>-</code> op “le”, niet als woordstreepje.</p>
+parser als ELM <code>-</code> op “le”, niet als woordstreepje. Canoniek schrijf je
+standaard-lengte op L als <code>~</code>, en een woordstreepje <strong>direct vóór</strong> de
+volgende lettergreep — met eventuele spaties <em>ervóór</em> als de stemregels
+meer breedte nodig hebben (<code>hei_&amp;_&amp;_  -li</code>, niet <code>hei_&amp;_&amp;_-li</code>).</p>
 <div class="highlight"><pre><span></span><code>L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&amp;-&amp;-&amp;_         i_  a__  ||
 S: fa                             so   mi&amp;do&amp;re&amp;mi       fa  mi   ||
 A: re                             re   do&amp;fa-&amp;si-&amp;do     re  si-  ||
@@ -5378,9 +5493,10 @@ tekens breed is, staat er ruimte vóór het woordstreepje (<code>le  -lu</code>)
 eráchter.</p>
 <p><strong>Validatie</strong> eist deze kolommen <strong>niet</strong>: alleen de positietelling telt
 (<a href="../semantics/#sync-contract-lengte-posities">Semantiek</a>). Losse invoer mag
-rompiger zijn; de kuiser mag normaliseren. Gegenereerde output en de
-voorbeelden in <code>examples/mvsa</code> volgen wél deze layout. Hulpje:
-<code>python scripts/align_mvsa_columns.py examples/mvsa</code>.</p>
+rompiger zijn; de kuiser mag normaliseren (<code>vsa mvsa kuiser</code>). Gegenereerde
+output en de voorbeelden in <code>examples/mvsa</code> volgen wél deze layout. Hulpje:
+<code>python scripts/align_mvsa_columns.py examples/mvsa</code> (alleen kolommen; de
+volledige kuiser-pipeline is <code>mvsa kuiser</code>).</p>
 <h2 id="4-maatstrepen-en-sectie-einde">4. Maatstrepen en sectie-einde<a class="headerlink" href="#4-maatstrepen-en-sectie-einde" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -5492,9 +5608,8 @@ S: …
    herhalingsvorm) is tegelijk het sectie-einde — ook als dat geen <code>||</code> was.</li>
 <li><strong>Einde van het bestand (EOF):</strong> idem: de laatste maatstreep van het
    laatste systeem beëindigt de open sectie.</li>
-<li><strong>(Vooruitblik)</strong> Het sluiten van een fenced blok <code>::: mvsa-notatie</code> …
-   <code>:::</code> (zodra die vorm in markdown landt) werkt hetzelfde als EOF voor de
-   open sectie in dat blok.</li>
+<li><strong>Fenced markdown:</strong> het sluiten van <code>::: mvsa-notatie</code> / <code>::: mvsa</code> …
+   <code>:::</code> werkt hetzelfde als EOF voor de open sectie in dat blok.</li>
 </ol>
 <p>Kort: bij <strong>EOF</strong>, <strong>nieuwe <code>@sectie</code></strong>, of <strong>fence-<code>:::</code></strong> is elke geldige
 eindmaatstreep op het laatste systeem genoeg. <code>||</code> blijft nuttig als
@@ -5509,7 +5624,7 @@ in de editor). Elk tussensysteem eindigt op <code>|</code> (of herhalingsspecial
 geen sectie-einde is). Het <strong>laatste</strong> systeem van de sectie eindigt op een
 geldige maatstreep; bij doorlopende tekst zonder nieuwe <code>@sectie</code> gebruik je
 <code>||</code> of <code>:||</code> om de sectie te beëindigen. Bij een volgende <code>@sectie</code>, bij EOF,
-of (later) bij fence-<code>:::</code> volstaat ook <code>|</code>.</p>
+of bij fence-<code>:::</code> volstaat ook <code>|</code>.</p>
 <p>Alle systemen in één sectie hebben hetzelfde aantal LSATB-regels en dezelfde
 regelidentifiers in dezelfde volgorde (zelfde stemidentifier én dezelfde
 optionele EHM per regel).</p>
@@ -5529,12 +5644,17 @@ Leestekens (<code>,</code> <code>.</code> <code>;</code> …) zijn <strong>geen<
 <p><strong>Uitzondering — recite:</strong> alles tussen <code>(</code> en <code>)</code> is <strong>één</strong> L-stuk / lengte-positie,
 ongeacht spaties en streepjes erin. Zie <a href="#reciteertoon">Reciteertoon</a>.</p>
 <h3 id="canonieke-woordstreepjes">Canonieke woordstreepjes<a class="headerlink" href="#canonieke-woordstreepjes" title="Permanent link">&para;</a></h3>
-<p>Tussen opeenvolgende lettergrepen van <strong>hetzelfde woord</strong> staat altijd <code>-</code>.
-Tussen het einde van een woord en het begin van het volgende woord staat <strong>geen</strong>
-<code>-</code> (wel spatie en/of leesteken). Tussen die lettergrepen mogen wel ELM’s,
-recite-haakjes, maatstrepen en leestekens staan.</p>
-<p>De kuiser mag eenvoudige fouten herstellen (bijvoorbeeld <code>hei- li- ge</code> →
-<code>hei-li-ge</code>).</p>
+<p>Tussen opeenvolgende lettergrepen van <strong>hetzelfde woord</strong> staat altijd <code>-</code>
+<strong>direct vóór</strong> de volgende lettergreep (<code>hei-li</code> of, bij extra kolombreedte,
+<code>hei  -li</code>). Tussen het einde van een woord en het begin van het volgende
+woord staat <strong>geen</strong> <code>-</code> (wel spatie en/of leesteken). Tussen die lettergrepen
+mogen wel ELM’s, recite-haakjes, maatstrepen en leestekens staan.</p>
+<p>De kuiser <strong>collapse’t niet</strong> <code>hei- li</code> → <code>hei-li</code>: dat zou ELM-duur
+veranderen in een woordstreepje en bij lange melisma’s de align breken
+(<code>hei_&amp;_&amp;_&amp;_&amp;_&amp;_ -li</code> mag niet <code>hei_&amp;_&amp;_&amp;_&amp;_&amp;_-li</code> worden). Bij
+<code>hei- li</code> (streepje + spaties + letter) waarschuwt de kuiser met regel en
+kolom: controleer of je een woordstreepje (<code>-li</code> / <code>-li</code>) of duur (<code>~</code>)
+bedoelde.</p>
 <h3 id="melisma-vorm-a">Melisma (vorm A)<a class="headerlink" href="#melisma-vorm-a" title="Permanent link">&para;</a></h3>
 <p>Meerdere slots op één lettergreep: één L-stuk met <code>&amp;</code> tussen ELM-slots, bijvoorbeeld
 <code>Ster~&amp;~&amp;~</code> of <code>God_.&amp;_.</code>. In de canonieke <strong>MSCZ</strong>/MusicXML-export staat de
@@ -5698,9 +5818,13 @@ L: Ster~&amp;~&amp;~-ke_.
 <p>De ELM-set volgt VSA 1.0 (<code>_</code>, <code>__</code>, <code>_.</code>, <code>-</code>, <code>~</code>, <code>.</code>, <code>..</code>, <code>-.</code>, <code>~.</code>,
 samengesteld met <code>&amp;</code>). Op de lyrics-regel betekent kale <code>-</code> <strong>tussen letters</strong>
 een lettergreepstreepje; <code>-</code> <strong>als ELM</strong> staat in duurpositie (direct na de
-lettergreep of na <code>&amp;</code>). Direct na een recite-<code>)</code> is kale <code>-</code> <strong>geen</strong> ELM maar
-een woordstreepje naar de volgende lettergreep; kies voor duur <code>_</code>, <code>~</code>, <code>.</code>,
-<code>-.</code>, …</p>
+lettergreep of na <code>&amp;</code>). <strong>Canoniek</strong> schrijf je standaard-lengte op L als
+<code>~</code> (niet als kale <code>-</code>), zodat <code>-</code> op L bij lettergrepen hoort. In <strong>invoer</strong>
+blijft kale <code>-</code> als standaard-lengte geldig (o.a. in melisma-slots en in
+samengestelde ELM’s zoals <code>-.</code>); de kuiser herschrijft eenduidige ELM-<code>-</code>
+naar <code>~</code> en waarschuwt bij ambiguë gevallen. Direct na een recite-<code>)</code> is kale
+<code>-</code> <strong>geen</strong> ELM maar een woordstreepje naar de volgende lettergreep; kies
+voor duur <code>_</code>, <code>~</code>, <code>.</code>, <code>-.</code>, …</p>
 <p>Leestekens mogen <strong>achter</strong> de lettergreep of <strong>achter</strong> de ELM staan en horen
 bij de tekst van die lettergreep (<code>Komt_,</code>, <code>ia,</code>, <code>tus_,</code>). Binnen <code>(…)</code> horen
 komma’s bij de lettergreep vóór de <code>)</code>.</p>
@@ -5916,7 +6040,7 @@ dezelfde kolom; zie
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-09-29
         
       </p>
       

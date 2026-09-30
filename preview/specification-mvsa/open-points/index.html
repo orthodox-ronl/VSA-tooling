@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>chore/mvsa-backlog-en-make-cmd</code>
-  , gebouwd 2026-09-28 18:44 CEST.
+   — branch <code>fix/docs-open-points-roadmap-link</code>
+  , gebouwd 2026-09-30 22:13 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -890,6 +890,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/midi/" class="md-nav__link">
         
   
@@ -1169,6 +1197,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1337,6 +1393,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3754,6 +3838,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -4675,11 +4787,13 @@ conversies). Voorheen verspreid over deze pagina,
 <a href="../../plans/mvsa-conversions/"><code>docs/plans/mvsa-conversions.md</code></a>.
 Werkplan-restpunten syntax (geschiedenis):
 <a href="../../plans/mvsa-v0-syntax/"><code>docs/plans/mvsa-v0-syntax.md</code> §10</a>.</p>
+<p>Repo-breed kompas (niet alleen mvsa): repo-bestand
+<code>docs/status-en-roadmap.md</code> (niet op Pages; staat in <code>exclude_docs</code>).</p>
 <hr />
 <h2 id="nu-eerstvolgende-tooling">Nu (eerstvolgende tooling)<a class="headerlink" href="#nu-eerstvolgende-tooling" title="Permanent link">&para;</a></h2>
 <p><em>(leeg — volgende werk uit <a href="#backlog-bewust-later">Backlog</a>)</em></p>
-<p>Lokaal bouwen van voorbeelden (validate / normalize / mxl / mscz / pdf):
-<code>examples/mvsa/make.cmd</code> (PDF via <code>mvsa pdf</code>).</p>
+<p>Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
+<code>examples/mvsa/make.cmd</code> (PDF via <code>mvsa pdf</code>; audio via <code>mvsa audio</code>).</p>
 <hr />
 <h2 id="backlog-bewust-later">Backlog (bewust later)<a class="headerlink" href="#backlog-bewust-later" title="Permanent link">&para;</a></h2>
 <h3 id="syntax-en-semantiek">Syntax en semantiek<a class="headerlink" href="#syntax-en-semantiek" title="Permanent link">&para;</a></h3>
@@ -4693,9 +4807,9 @@ Werkplan-restpunten syntax (geschiedenis):
 </thead>
 <tbody>
 <tr>
-<td>Speelplan fase 2c</td>
-<td>D.S. al Coda / geneste jumps; verfijnen expand-heuristiek</td>
-<td>Na volta + D.S. al Fine (<a href="../speelplan/">speelplan.md</a>)</td>
+<td>Speelplan: geneste combinatie-jumps</td>
+<td>D.S./D.C. al Coda is klaar; volta+D.S. e.d. zonder één bladpatroon → expand</td>
+<td><a href="../speelplan/">speelplan.md</a> «Bewust later»</td>
 </tr>
 <tr>
 <td>Blokhergebruik</td>
@@ -4717,11 +4831,6 @@ Werkplan-restpunten syntax (geschiedenis):
 <td>Veel teksten op één stemgrid</td>
 <td>Alleen als corpuswerk het vraagt</td>
 </tr>
-<tr>
-<td>Chromatische <code>+</code> in eenstemmige VSA-EHM</td>
-<td>Los van mvsa-laddergraden (waar <code>+</code> = octaaf)</td>
-<td>Via VSA 1.0-spec</td>
-</tr>
 </tbody>
 </table>
 <h3 id="markdown-pipeline-en-fences">Markdown-pipeline en fences<a class="headerlink" href="#markdown-pipeline-en-fences" title="Permanent link">&para;</a></h3>
@@ -4734,11 +4843,6 @@ Werkplan-restpunten syntax (geschiedenis):
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>::: mvsa-notatie</code> / <code>::: mvsa</code></td>
-<td>Markdown-blok met mvsa; aliases <code>::: vsa</code> / <code>::: mvsa</code>; sluitende <code>:::</code> = sectie-einde zoals EOF; tekst tussen laatste maatstreep en <code>:::</code> = warning/fout</td>
-<td>Spec + parse + <code>build-markdown</code> / includes</td>
-</tr>
 <tr>
 <td><code>::: vsa-notatie</code> in <code>.vsa</code></td>
 <td>Optioneel fence in <code>.vsa</code>: zonder fence = kale VSA (nu); mét fence = buiten fence in principe commentaar (later metadata)</td>
@@ -4756,16 +4860,6 @@ Werkplan-restpunten syntax (geschiedenis):
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>Kuiser-tool</td>
-<td><strong>Gedrag</strong> staat in <a href="../syntax/">syntax</a> / <a href="../semantics/">semantiek</a>; <strong>implementatie</strong> nog niet</td>
-<td>Tool boven <code>normalize</code> / <code>align_mvsa_columns</code></td>
-</tr>
-<tr>
-<td>MIDI-export</td>
-<td><code>.mvsa</code> (en evt. andere bronnen) → <code>.mid</code> / <code>.midi</code> voor afspelen</td>
-<td><a href="../../formats/midi/">formats/midi.md</a>; CLI-naam nog open</td>
-</tr>
 <tr>
 <td>Exports / gebruik</td>
 <td>Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten</td>
@@ -4797,8 +4891,32 @@ Werkplan-restpunten syntax (geschiedenis):
 <td>normalize, mscz-export, import, bron-commands — zie conversions-plan</td>
 </tr>
 <tr>
+<td>Kuiser-tool</td>
+<td><code>mvsa kuiser</code>: L-ELM <code>-</code>→<code>~</code>; ambiguë-<code>-</code>-warnings; semantische woordstreepjes (Pyphen, exact); maatstrepen syncen; align; <code>--check</code>. Bewust later: conflicterende gedeeltelijke strepen raden; marker-octaaf → <code>@oct</code></td>
+</tr>
+<tr>
 <td><code>mvsa pdf</code></td>
 <td><code>.mvsa</code>/<code>.mscz</code> → MuseScore-PDF; <code>make.cmd</code> gebruikt <code>mvsa pdf</code></td>
+</tr>
+<tr>
+<td><code>vsa</code>/<code>mvsa audio</code></td>
+<td>Preview-<code>.mp3</code> via MuseScore; zie <a href="../../formats/audio/">formats/audio.md</a></td>
+</tr>
+<tr>
+<td>Los MIDI-bestand</td>
+<td><strong>Niet gepland</strong> — preview-luisteren dekt de use case; zie <a href="../../formats/midi/">formats/midi.md</a></td>
+</tr>
+<tr>
+<td>Speelplan volta + D.S. al Fine / Coda</td>
+<td>Partituur-nav: volta, D.S./D.C. al Fine, D.S./D.C. al Coda; MXL expansie; tests</td>
+</tr>
+<tr>
+<td><code>::: mvsa-notatie</code> / <code>::: mvsa</code></td>
+<td>Markdown-fences + aliases <code>::: vsa</code> / <code>::: mvsa</code>; validate; build → Coria/MXL; <code>:::include *.mvsa</code></td>
+</tr>
+<tr>
+<td>Laddergraad <code>+</code>/<code>-</code> = octaaf</td>
+<td>Mvsa-keuze vastgelegd (kruis via <code>#</code>/<code>b</code>); chromatische <code>+</code> in eenstemmige VSA-EHM → VSA-spec</td>
 </tr>
 <tr>
 <td>Validate-output</td>
@@ -4826,7 +4944,8 @@ Werkplan-restpunten syntax (geschiedenis):
   <a href="../../guides/reuse-vsa-tooling/#ownership-tooling-vs-consumer">reuse-vsa-tooling</a>.</li>
 <li><strong>bibliotheek</strong> (en andere consumers): geen fork van tooling-scripts; dunne
   wrappers die de gepubliceerde CLI aanroepen. Productpipelines en Hugo-site-CI
-  horen in die repo’s, niet hier.</li>
+  horen in die repo’s, niet hier. Afspeelknop / <code>:::include mp3-player</code> = consumer
+  (artefact: <code>vsa audio</code>).</li>
 </ul>
 
 
@@ -4864,7 +4983,7 @@ Werkplan-restpunten syntax (geschiedenis):
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-09-30
         
       </p>
       
