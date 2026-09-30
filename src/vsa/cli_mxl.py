@@ -1,6 +1,7 @@
 """Top-level ``mxl`` CLI (bron: ``.mxl`` / ``.musicxml``).
 
-Acties: import -> mvsa; mscz (via MuseScore). Zie docs/plans/mvsa-conversions.md.
+Acties: import -> mvsa; mscz (via MuseScore); validate / normalize (playback).
+Zie docs/plans/mvsa-conversions.md en docs/formats/canonical-checklists.md.
 """
 
 from __future__ import annotations
@@ -29,6 +30,10 @@ def main(argv: list[str] | None = None) -> int:
         return vsa_main(forwarded)
     if ns.mxl_command == "mscz":
         return _cmd_mxl_to_mscz(ns)
+    if ns.mxl_command == "validate":
+        return _cmd_mxl_validate(ns)
+    if ns.mxl_command == "normalize":
+        return _cmd_mxl_normalize(ns)
     parser.print_help()
     return 1
 
@@ -37,7 +42,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mxl",
         description=(
-            "Conversies met .mxl / .musicxml als bron. "
+            "Conversies en playback-gates met .mxl / .musicxml als bron. "
             "Zie docs/plans/mvsa-conversions.md."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -47,10 +52,16 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Importeer naar .mvsa.\n"
             "  mscz PATH [-o OUT] [--musescore PATH]\n"
             "      Converteer naar .mscz via MuseScore.\n"
+            "  validate PATH [--profile {satb,mono}]\n"
+            "      Checklist Coria/playback (M2/M8/importer/meta).\n"
+            "  normalize PATH [-o OUT] [--apply-timing]\n"
+            "      Normaliseer naar playback-profiel.\n"
             "\n"
             "voorbeelden:\n"
             "  mxl import lied.mxl --pitch doremi -o lied.mvsa\n"
             "  mxl mscz lied.mxl -o lied.mscz\n"
+            "  mxl validate lied.mvsa.mxl --profile satb\n"
+            "  mxl normalize raw.mxl -o out.mxl --apply-timing\n"
             "\n"
             "Alias: vsa mvsa import … (zelfde import-pad)."
         ),
@@ -58,7 +69,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mxl_command",
         required=True,
-        metavar="{import,mscz}",
+        metavar="{import,mscz,validate,normalize}",
     )
     imp = sub.add_parser(
         "import",
@@ -112,7 +123,85 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+
+    validate = sub.add_parser(
+        "validate",
+        help="Controleer Coria/playback-checklist (niet-muterend).",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    validate.add_argument("path", help=".mxl / .musicxml / .xml bestand.")
+    validate.add_argument(
+        "--profile",
+        choices=["satb", "mono"],
+        default="satb",
+        help="satb = vier parts (default); mono = eenstemmig .vsa.mxl.",
+    )
+
+    normalize = sub.add_parser(
+        "normalize",
+        help="Normaliseer naar Coria/playback-profiel.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    normalize.add_argument("path", help=".mxl / .musicxml / .xml bronbestand.")
+    normalize.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Uitvoer (default: overschrijf bron).",
+    )
+    normalize.add_argument(
+        "--apply-timing",
+        action="store_true",
+        help=(
+            "Pauze/caesura + recite-explosie (MSCZ-roundtrip). "
+            "Default uit (MVSA-achtige bron)."
+        ),
+    )
     return parser
+
+
+def _cmd_mxl_validate(ns: argparse.Namespace) -> int:
+    from .musicxml_playback_checklist import validate_playback_mxl_path
+
+    path = Path(ns.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    findings = validate_playback_mxl_path(path, profile=ns.profile)
+    if not findings:
+        print(f"OK ({ns.profile}): {path}")
+        return 0
+    for f in findings:
+        print(f"{path}: {f.code}: {f.message}", file=sys.stderr)
+    print(f"{len(findings)} checklist-fout(en)", file=sys.stderr)
+    return 1
+
+
+def _cmd_mxl_normalize(ns: argparse.Namespace) -> int:
+    from .musicxml_playback_normalize import normalize_playback_mxl_path
+
+    path = Path(ns.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    if path.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
+        print(
+            f"Verwacht .mxl/.musicxml/.xml; kreeg {path.suffix!r}",
+            file=sys.stderr,
+        )
+        return 1
+    out = Path(ns.output) if ns.output else path
+    try:
+        dest = normalize_playback_mxl_path(
+            path,
+            out,
+            apply_timing=bool(ns.apply_timing),
+        )
+    except Exception as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {dest}")
+    return 0
 
 
 def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:

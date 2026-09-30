@@ -170,10 +170,25 @@ def _write_playback_mxl(
             raise AudioExportError(
                 "Audio-export: --section geldt alleen bij .mvsa"
             )
+        import tempfile
+
+        from .musicxml_package import write_musicxml_output
+        from .musicxml_playback_normalize import normalize_playback_musicxml
+        from .mvsa_import import read_musicxml_file
+
+        fd, raw_name = tempfile.mkstemp(suffix=".mxl", prefix="vsa-audio-mscz-")
+        os.close(fd)
+        raw_mxl = Path(raw_name)
         try:
-            convert_with_musescore(path, mxl_path, musescore=musescore)
-        except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            raise AudioExportError(str(exc)) from exc
+            try:
+                convert_with_musescore(path, raw_mxl, musescore=musescore)
+            except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+                raise AudioExportError(str(exc)) from exc
+            xml = read_musicxml_file(raw_mxl)
+            playback = normalize_playback_musicxml(xml, apply_timing=True)
+            write_musicxml_output(mxl_path, playback)
+        finally:
+            raw_mxl.unlink(missing_ok=True)
         return
     raise AudioExportError(f"Onverwacht bronformaat: {path.name}")
 

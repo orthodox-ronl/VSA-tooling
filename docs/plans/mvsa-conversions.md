@@ -114,7 +114,7 @@ Elke conversie-entry leest één brontype:
 | ------------------- | -------------------- | --------------------------------------------------------- |
 | `vsa`               | `.vsa`               | validate, musicxml, svg, …; later `normalize` waar zinvol |
 | `mvsa` / `vsa mvsa` | `.mvsa`              | validate, musicxml, mscz, pdf, audio, import, normalize   |
-| `mxl`               | `.mxl` / `.musicxml` | import → mvsa; mscz (MuseScore)                           |
+| `mxl`               | `.mxl` / `.musicxml` | import → mvsa; mscz; **validate** / **normalize** (playback-checklist) |
 | `mscz`              | `.mscz`              | import → mvsa; mxl (MuseScore)                            |
 | `vsa audio`         | `.mxl` / `.vsa` / …  | preview ``.mp3`` via MuseScore                            |
 

@@ -56,8 +56,10 @@ en Oefenhoek `VSA-demo/scripts/mscz-product-transforms.md` (Coria-kolom).
 | M15 | **``@tekst``-pauze**           | Mid-flow `@tekst` (niet maat 1): zelfde `[PAUZE]`-maat als na `\|\|` (cue op de pauzemaat). Geen dubbele pauze als de vorige maat al sectie-einde is.                                                                                                                          |
 | M16 | **Leidende `\|:`**             | Forward-repeat links op de **eerste inhoudsmaat**; geen lege rustmaat vóór die inhoud (zelfde semantiek als MSCZ S16).                                                                                                                                                         |
 
-**Normalize-target MXL → MXL:** herschrijf naar deze checklist +
-`playback`-encoding (nog te implementeren als CLI-diagonaal).
+**Normalize-target MXL → MXL:** `mxl normalize` (zie
+[`mxl` CLI](../reference/cli/mxl.md)) herschrijft naar deze checklist +
+`playback`-encoding. Lees-gate zonder schrijven: `mxl validate`
+(`--profile satb` of `mono`).
 
 ## Checklist MSCZ (partituur / MuseScore)
 
