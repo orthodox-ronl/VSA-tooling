@@ -993,6 +993,34 @@
   
   
     <li class="md-nav__item">
+      <a href="audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="midi/" class="md-nav__link">
         
   
@@ -1275,6 +1303,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1443,6 +1499,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3727,6 +3811,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -4626,6 +4738,7 @@ specificaties; dit is de navigatiehub.</p>
 <th><code>.mvsa</code></th>
 <th><code>.mxl</code></th>
 <th><code>.mscz</code></th>
+<th><code>.mp3</code> / audio</th>
 <th><code>.midi</code></th>
 </tr>
 </thead>
@@ -4636,15 +4749,17 @@ specificaties; dit is de navigatiehub.</p>
 <td>—</td>
 <td><code>vsa musicxml</code></td>
 <td>via mxl / templates</td>
-<td>open</td>
+<td><code>vsa audio</code></td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.mvsa</code></strong></td>
 <td>—</td>
-<td><code>mvsa normalize</code></td>
+<td><code>mvsa kuiser</code> / <code>normalize</code></td>
 <td><code>mvsa musicxml</code></td>
 <td><code>mvsa mscz</code></td>
-<td>open</td>
+<td><code>mvsa audio</code></td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.mxl</code></strong></td>
@@ -4652,7 +4767,8 @@ specificaties; dit is de navigatiehub.</p>
 <td><code>mxl import</code></td>
 <td>(checklist)</td>
 <td><code>mxl mscz</code></td>
-<td>open</td>
+<td><code>vsa audio</code></td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.mscz</code></strong></td>
@@ -4660,7 +4776,8 @@ specificaties; dit is de navigatiehub.</p>
 <td><code>mscz import</code></td>
 <td><code>mscz mxl</code></td>
 <td>(checklist)</td>
-<td>open</td>
+<td><code>vsa audio</code> (fallback)</td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.midi</code></strong></td>
@@ -4668,13 +4785,15 @@ specificaties; dit is de navigatiehub.</p>
 <td>—</td>
 <td>—</td>
 <td>—</td>
-<td>(afspelen; CLI open)</td>
+<td>—</td>
+<td>— (niet gepland)</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li><strong><code>.midi</code> / <code>.mid</code>:</strong> rol = een <strong>variant</strong> van een <strong>zangstuk</strong> afspelen.
-  CLI-command nog niet vastgelegd — zie <a href="midi/"><code>.midi</code></a>.</li>
+<li><strong>Audio (<code>.mp3</code> / <code>.ogg</code> / <code>.wav</code>):</strong> preview-luisteren; CLI
+  <a href="../reference/cli/audio/"><code>vsa audio</code></a> — zie <a href="audio/"><code>.mp3</code> / audio</a>.</li>
+<li><strong><code>.midi</code> / <code>.mid</code>:</strong> <strong>niet gepland</strong> (preview = audio) — zie <a href="midi/"><code>.midi</code></a>.</li>
 <li>Volledige matrix / keuzes: <a href="../plans/mvsa-conversions/">mvsa-conversies</a>.</li>
 <li>Normaalvorm-checklists MXL / MSCZ / PDF: <a href="canonical-checklists/">canonieke checklists</a>
   (MXL = vier parts; MSCZ = twee balken SA/TB zonder stem-labels).
@@ -4716,10 +4835,16 @@ specificaties; dit is de navigatiehub.</p>
 <td><a href="../reference/cli/mscz/"><code>mscz</code></a></td>
 </tr>
 <tr>
+<td><a href="audio/"><code>.mp3</code> / audio</a></td>
+<td>Preview-luisteren (afgeleide)</td>
+<td>dunne checklist; MuseScore</td>
+<td><a href="../reference/cli/audio/"><code>vsa audio</code></a></td>
+</tr>
+<tr>
 <td><a href="midi/"><code>.midi</code> / <code>.mid</code></a></td>
-<td>Afspelen (variant van een zangstuk)</td>
-<td>dunne checklist; CLI open</td>
-<td>— (open)</td>
+<td>Los MIDI (niet gepland)</td>
+<td>superseded door audio</td>
+<td>—</td>
 </tr>
 </tbody>
 </table>
@@ -4739,6 +4864,11 @@ specificaties; dit is de navigatiehub.</p>
 <td><a href="../reference/cli/">CLI-overzicht</a></td>
 </tr>
 <tr>
+<td><code>vsa audio</code></td>
+<td><code>.mxl</code> / <code>.vsa</code> / …</td>
+<td><a href="../reference/cli/audio/"><code>audio</code></a></td>
+</tr>
+<tr>
 <td><code>mvsa</code> ≡ <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
 <td><a href="../reference/cli/mvsa/"><code>mvsa</code></a></td>
@@ -4753,17 +4883,13 @@ specificaties; dit is de navigatiehub.</p>
 <td><code>.mscz</code></td>
 <td><a href="../reference/cli/mscz/"><code>mscz</code></a></td>
 </tr>
-<tr>
-<td><em>(open)</em></td>
-<td><code>.midi</code></td>
-<td><a href="midi/"><code>.midi</code></a></td>
-</tr>
 </tbody>
 </table>
 <p>Na <code>pip install -e .</code> staan <code>vsa</code>, <code>mvsa</code>, <code>mxl</code> en <code>mscz</code> op PATH.</p>
 <h2 id="bestandsnaamgeving-kort">Bestandsnaamgeving (kort)<a class="headerlink" href="#bestandsnaamgeving-kort" title="Permanent link">&para;</a></h2>
 <p>In <code>generated/</code> bij voorkeur <code>stem.brontype.doeltype</code> (laatste = echte
-extensie), bv. <code>alleluia.mvsa.mxl</code>. CLI-<code>-o</code> mag simpel blijven. Details:
+extensie), bv. <code>alleluia.mvsa.mxl</code> of <code>lied.mvsa.mp3</code>. CLI-<code>-o</code> mag simpel
+blijven. Details:
 <a href="canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</p>
 <h2 id="windows-cmd-scripts">Windows <code>.cmd</code>-scripts<a class="headerlink" href="#windows-cmd-scripts" title="Permanent link">&para;</a></h2>
 <p>In de repo-root (via <code>scripts\</code>):</p>
@@ -4831,7 +4957,7 @@ scripts\mscz.cmd -h
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-29
         
       </p>
       

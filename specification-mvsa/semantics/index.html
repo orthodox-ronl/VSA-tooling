@@ -885,6 +885,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/midi/" class="md-nav__link">
         
   
@@ -1164,6 +1192,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1332,6 +1388,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3805,6 +3889,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -4974,6 +5086,9 @@ identifier-vorm is de voorkeur als de EHM bij die stemregel hoort.</p>
 <li>In melisma’s heeft ELM-<code>~</code> de voorkeur boven ELM-<code>-</code> vóór een
   lettergreepstreepje: schrijf <code>li~&amp;~-ge</code>, niet <code>li-&amp;--ge</code> (dubbele <code>-</code> is
   ambigu voor lezer en kuiser).</li>
+<li><strong>Canoniek</strong> op L: standaard-lengte als <code>~</code>; kale ELM-<code>-</code> is invoer-tolerantie
+  (kuiser → <code>~</code>). Woordstreepje met extra breedte: spaties <strong>vóór</strong> <code>-letter</code>
+  (<code>…_&amp;_  -li</code>).</li>
 </ul>
 <p>De kuiser mag recite-haakjes niet stilzwijgend weghalen of ELM-<code>~</code> niet in
 woordstreepjes veranderen.</p>
@@ -4988,9 +5103,14 @@ woordstreepjes veranderen.</p>
 </thead>
 <tbody>
 <tr>
+<td>Standaard-lengte op L</td>
+<td><code>~</code> (niet kale ELM-<code>-</code>); <code>-</code> hoort bij lettergrepen</td>
+<td>Herschrijft eenduidige ELM-<code>-</code> → <code>~</code>; waarschuwt bij ambiguë <code>-</code> (regel + kolom)</td>
+</tr>
+<tr>
 <td>Woordstreepjes</td>
-<td><code>-</code> tussen lettergrepen van één woord; geen <code>-</code> tussen woorden</td>
-<td>Mag spaties rond streepjes normaliseren</td>
+<td><code>-</code> direct vóór de volgende lettergreep; bij breedte spaties <em>ervóór</em> (<code>hei  -li</code>)</td>
+<td>Geen stille <code>hei- li</code>→<code>hei-li</code>-collapse; Pyphen-warnings bij ontbrekende / verdachte streepjes</td>
 </tr>
 <tr>
 <td>Maat-/sectiestrepen</td>
@@ -5053,7 +5173,7 @@ op mvsa-laddergraden is <code>+</code> octaaf.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-29
         
       </p>
       

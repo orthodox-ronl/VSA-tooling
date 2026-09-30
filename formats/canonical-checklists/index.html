@@ -891,6 +891,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../midi/" class="md-nav__link">
         
   
@@ -1286,6 +1314,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1454,6 +1510,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3738,6 +3822,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -4753,8 +4865,8 @@ en Oefenhoek <code>VSA-demo/scripts/mscz-product-transforms.md</code> (Coria-kol
 </tr>
 <tr>
 <td>M8</td>
-<td><strong>MIDI in part-list</strong></td>
-<td><code>midi-device</code> / <code>midi-instrument</code> aanwezig (defaults uit metadata).</td>
+<td><strong>MIDI: piano op elke part</strong></td>
+<td>Elke stempartij (P1–P4) heeft <code>midi-device</code> / <code>midi-instrument</code> met canonieke piano: <code>instrument-sound</code> = <code>keyboard.piano.grand</code>, <code>midi-program</code> = <code>1</code>, kanalen 1–4. Geen koorklank (<code>voice.choir.aahs</code>) als canonieke vorm. Eenstemmig <code>.vsa</code>-playback: zelfde piano-default.</td>
 </tr>
 <tr>
 <td>M9</td>
@@ -4798,8 +4910,10 @@ en Oefenhoek <code>VSA-demo/scripts/mscz-product-transforms.md</code> (Coria-kol
 </tr>
 </tbody>
 </table>
-<p><strong>Normalize-target MXL → MXL:</strong> herschrijf naar deze checklist +
-<code>playback</code>-encoding (nog te implementeren als CLI-diagonaal).</p>
+<p><strong>Normalize-target MXL → MXL:</strong> <code>mxl normalize</code> (zie
+<a href="../../reference/cli/mxl/"><code>mxl</code> CLI</a>) herschrijft naar deze checklist +
+<code>playback</code>-encoding. Lees-gate zonder schrijven: <code>mxl validate</code>
+(<code>--profile satb</code> of <code>mono</code>).</p>
 <h2 id="checklist-mscz-partituur-musescore">Checklist MSCZ (partituur / MuseScore)<a class="headerlink" href="#checklist-mscz-partituur-musescore" title="Permanent link">&para;</a></h2>
 <p>Primair: leesbare SATB-partituur in MuseScore 4 (en afgeleide print-PDF).
 Bron van waarheid voor layout-pitfalls:
@@ -4979,6 +5093,11 @@ andere pipeline, geen MuseScore-partituur.)</em></p>
 <td><strong>geen</strong> zichtbare stem-indicaties</td>
 </tr>
 <tr>
+<td>Instrument / MIDI</td>
+<td>piano op elke part (<code>keyboard.piano.grand</code>, M8)</td>
+<td>geen Coria-MIDI-eis (leesblad); MuseScore kiest bij openen meestal piano</td>
+</tr>
+<tr>
 <td>Lyrics</td>
 <td>op elke part</td>
 <td>één laag tussen de balken</td>
@@ -5046,7 +5165,7 @@ andere pipeline, geen MuseScore-partituur.)</em></p>
 </tr>
 <tr>
 <td><strong>Laatste</strong> segment = echte extensie voor tools</td>
-<td><code>.mxl</code>, <code>.mvsa</code>, <code>.mscz</code>, <code>.mid</code> / <code>.midi</code></td>
+<td><code>.mxl</code>, <code>.mvsa</code>, <code>.mscz</code>, <code>.mp3</code> / <code>.ogg</code> / <code>.wav</code></td>
 </tr>
 <tr>
 <td>CLI-default mag enkelvoudig blijven</td>
@@ -5097,7 +5216,7 @@ andere pipeline, geen MuseScore-partituur.)</em></p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-09-30
         
       </p>
       

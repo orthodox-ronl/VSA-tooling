@@ -885,6 +885,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/midi/" class="md-nav__link">
         
   
@@ -1151,6 +1179,34 @@
     
   
     vsa musicxml
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
   
 
     
@@ -1556,6 +1612,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3840,6 +3924,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -5117,6 +5229,7 @@ canonieke vorm brengen (zelfde formaat).</p>
 <th><code>.mvsa</code></th>
 <th><code>.mxl</code> / <code>.musicxml</code></th>
 <th><code>.mscz</code></th>
+<th><code>.mp3</code> / audio</th>
 <th><code>.midi</code> / <code>.mid</code></th>
 </tr>
 </thead>
@@ -5127,7 +5240,8 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td>— (niet v0)</td>
 <td><code>vsa musicxml</code></td>
 <td>via MXL / templates</td>
-<td><strong>open</strong> (CLI n.t.b.)</td>
+<td><code>vsa audio</code></td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.mvsa</code></strong></td>
@@ -5135,7 +5249,8 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td><strong><code>normalize</code></strong></td>
 <td><code>mvsa musicxml</code></td>
 <td><strong><code>mscz</code></strong> via mxl→MuseScore</td>
-<td><strong>open</strong> (CLI n.t.b.)</td>
+<td><code>mvsa audio</code></td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.mxl</code> / <code>.musicxml</code></strong></td>
@@ -5143,7 +5258,8 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td><strong><code>import</code></strong></td>
 <td><strong>normalize</strong> → <a href="../../formats/canonical-checklists/#checklist-mxl-coria-playback">checklist MXL</a></td>
 <td>MuseScore / <code>mxl mscz</code></td>
-<td><strong>open</strong></td>
+<td><code>vsa audio</code></td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.mscz</code></strong></td>
@@ -5151,7 +5267,8 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td><strong><code>import</code></strong> (via mxl)</td>
 <td><code>mscz mxl</code></td>
 <td><strong>normalize</strong> → <a href="../../formats/canonical-checklists/#checklist-mscz-partituur-musescore">checklist MSCZ</a></td>
-<td><strong>open</strong></td>
+<td><code>vsa audio</code> (fallback)</td>
+<td>— (niet gepland)</td>
 </tr>
 <tr>
 <td><strong><code>.midi</code> / <code>.mid</code></strong></td>
@@ -5159,12 +5276,14 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td>—</td>
 <td>—</td>
 <td>—</td>
-<td>afspelen; CLI open</td>
+<td>—</td>
+<td>— (niet gepland)</td>
 </tr>
 </tbody>
 </table>
-<p><strong><code>.midi</code>:</strong> rol = een <strong>variant</strong> van een <strong>zangstuk</strong> afspelen. Geen
-CLI-naam vastgelegd — zie <a href="../../formats/midi/">formats/midi.md</a>.</p>
+<p><strong>Audio (<code>.mp3</code>):</strong> preview-luisteren via MuseScore — zie
+<a href="../../formats/audio/">formats/audio.md</a>. <strong><code>.midi</code>:</strong> <strong>niet gepland</strong>
+(preview = audio) — zie <a href="../../formats/midi/">formats/midi.md</a>.</p>
 <p>Hub: <a href="../../formats/">Formaten &amp; CLI</a>.</p>
 <p>Legenda status in dit traject:</p>
 <table>
@@ -5203,7 +5322,8 @@ CLI-naam vastgelegd — zie <a href="../../formats/midi/">formats/midi.md</a>.</
 <li><strong><code>.mxl</code> → <code>.mxl</code> / <code>.mscz</code> → <code>.mscz</code>:</strong> normaliseer naar de
   <a href="../../formats/canonical-checklists/">canonieke checklists</a> (Coria vs
   partituur), niet herdefiniëren van MusicXML/MuseScore.</li>
-<li><strong><code>.midi</code>:</strong> afspelen van een variant van een zangstuk; CLI open.</li>
+<li><strong>Audio (<code>.mp3</code>):</strong> preview-luisteren; zie <a href="../../formats/audio/">formats/audio.md</a>.</li>
+<li><strong><code>.midi</code>:</strong> niet gepland (preview = audio).</li>
 </ul>
 <hr />
 <h2 id="2-canonieke-vormen-index">2. Canonieke vormen (index)<a class="headerlink" href="#2-canonieke-vormen-index" title="Permanent link">&para;</a></h2>
@@ -5238,8 +5358,13 @@ CLI-naam vastgelegd — zie <a href="../../formats/midi/">formats/midi.md</a>.</
 <td><a href="../../formats/canonical-checklists/">canonieke checklists</a>, <a href="../../specification-vsa-templates/rendering-pitfalls/">vsa-templates / pitfalls</a></td>
 </tr>
 <tr>
+<td><code>.mp3</code> / audio</td>
+<td>Preview-luisteren; MuseScore-defaults</td>
+<td><a href="../../formats/audio/">formats/audio.md</a></td>
+</tr>
+<tr>
 <td><code>.midi</code> / <code>.mid</code></td>
-<td>Afspelen van een variant van een zangstuk; CLI open</td>
+<td>Niet gepland (preview = audio)</td>
 <td><a href="../../formats/midi/">formats/midi.md</a></td>
 </tr>
 </tbody>
@@ -5304,7 +5429,7 @@ hergebruik van <code>digit*</code>.</p>
 <ul>
 <li>Default CLI-output: eenvoudig (<code>-o out.mxl</code>, bron-stem → <code>.mxl</code>).</li>
 <li>Optioneel in <code>generated/</code>: bron-extensie meenemen voor herkomst, bv.
-  <code>naam.mvsa.mxl</code>, <code>naam.mscz.mvsa</code>, <code>naam.vsa.midi</code>.</li>
+  <code>naam.mvsa.mxl</code>, <code>naam.mscz.mvsa</code>, <code>naam.vsa.mp3</code>.</li>
 <li>Tools kijken naar de <strong>laatste</strong> extensie.</li>
 <li>Normatieve korte tekst + checklist-context:
   <a href="../../formats/canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</li>
@@ -5329,12 +5454,12 @@ hergebruik van <code>digit*</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, musicxml, mscz, import, normalize</td>
+<td>validate, musicxml, mscz, pdf, audio, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
 <td><code>.mxl</code> / <code>.musicxml</code></td>
-<td>import → mvsa; mscz (MuseScore)</td>
+<td>import → mvsa; mscz; <strong>validate</strong> / <strong>normalize</strong> (playback-checklist)</td>
 </tr>
 <tr>
 <td><code>mscz</code></td>
@@ -5342,9 +5467,9 @@ hergebruik van <code>digit*</code>.</p>
 <td>import → mvsa; mxl (MuseScore)</td>
 </tr>
 <tr>
-<td><em>(open)</em></td>
-<td><code>.midi</code> / <code>.mid</code></td>
-<td>afspelen; commandnaam n.t.b.</td>
+<td><code>vsa audio</code></td>
+<td><code>.mxl</code> / <code>.vsa</code> / …</td>
+<td>preview <code>.mp3</code> via MuseScore</td>
 </tr>
 </tbody>
 </table>
@@ -5511,7 +5636,7 @@ werken.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-09-30
         
       </p>
       

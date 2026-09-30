@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://orthodox-ronl.github.io/VSA-tooling/guides/mvsa-schrijven-101/">
       
       
-        <link rel="prev" href="../../manuals/consumer-site/">
+        <link rel="prev" href="../../manuals/releases/">
       
       
         <link rel="next" href="../user-guide/">
@@ -885,6 +885,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/midi/" class="md-nav__link">
         
   
@@ -1164,6 +1192,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1335,6 +1391,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3882,6 +3966,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -5140,8 +5252,8 @@ Stemregels moeten daar <strong>slot voor slot</strong> op aansluiten.</p>
 <li>Tel op de L-regel de <strong>slots</strong> (lettergrepen + melisma-<code>&amp;</code>-stukken).</li>
 <li>Zet op elke stemregel <strong>evenveel</strong> hoogte-stukken (gescheiden door spaties).</li>
 <li>Zet op elke regel dezelfde maatstrepen op dezelfde plekken.</li>
-<li>Spaties mogen kolommen uitlijnen; <code>vsa mvsa normalize</code> (default: behoud
-   spelling) helpt bij uitlijning.</li>
+<li>Spaties mogen kolommen uitlijnen; <code>vsa mvsa kuiser</code> (of <code>normalize</code>) helpt
+   bij uitlijning en eenduidige maatstrepen.</li>
 </ol>
 <p>??? example "Recite + melisma (schets)"
     <div class="highlight"><pre><span></span><code>L: (Al-le-lu-ia, Al)-le-lu_&amp;-&amp;-&amp;_ i_ a__ ||
@@ -5153,7 +5265,11 @@ recite-groep; daarna `c`, dan een melisma `a&amp;f&amp;g&amp;a`, enz.
 <p>Handige check:</p>
 <div class="highlight"><pre><span></span><code>vsa mvsa validate pad\naar\lied.mvsa
 </code></pre></div>
-<p>Uitlijnen zonder spelling te wijzigen:</p>
+<p>Uitlijnen en kuiser-toleranties (in-place; behoud spelling):</p>
+<div class="highlight"><pre><span></span><code>vsa mvsa kuiser pad\naar\lied.mvsa
+</code></pre></div>
+<p>Alleen kolomuitlijning / pitch-herschrijf (schrijft default
+<code>&lt;stem&gt;.normalized.mvsa</code>):</p>
 <div class="highlight"><pre><span></span><code>vsa mvsa normalize pad\naar\lied.mvsa -o pad\naar\lied.mvsa
 </code></pre></div>
 <hr />
@@ -5362,7 +5478,7 @@ vsa mvsa import bron.mxl -o lied.mvsa --pitch doremi
 <li>Zet bovenaan <code>@do</code> / <code>@mode</code> / <code>@oct</code> goed (import vult dit grotendeels in).</li>
 <li>Controleer L-tekst (import kan lelijk syllabificeren) en sync.</li>
 <li><code>vsa mvsa validate lied.mvsa</code></li>
-<li>Optioneel opnieuw uitlijnen: <code>vsa mvsa normalize lied.mvsa -o lied.mvsa</code></li>
+<li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code></li>
 </ol>
 <p>Referentie-voorbeeld (bladcijfers):
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa"><code>kleine-intocht-zondag-hemelum.mvsa</code></a>.</p>
@@ -5420,8 +5536,8 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 <td>voeg <code>--section sectie-id</code> toe</td>
 </tr>
 <tr>
-<td>Uitlijnen</td>
-<td><code>vsa mvsa normalize lied.mvsa -o lied.mvsa</code></td>
+<td>Uitlijnen / kuisen</td>
+<td><code>vsa mvsa kuiser lied.mvsa</code></td>
 </tr>
 </tbody>
 </table>
@@ -5551,7 +5667,7 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-09-29
         
       </p>
       

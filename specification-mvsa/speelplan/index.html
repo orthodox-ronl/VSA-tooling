@@ -885,6 +885,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .mp3 / audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/midi/" class="md-nav__link">
         
   
@@ -1164,6 +1192,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1332,6 +1388,34 @@
     
   
     Consumer-site — waar hoort wat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manuals/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases: taggen en pinnen
   
 
     
@@ -3821,6 +3905,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/audio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa audio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/mvsa/" class="md-nav__link">
         
   
@@ -4808,8 +4920,10 @@
 
 <h1 id="speelplan-en-speelblokken-draft">Speelplan en speelblokken (draft)<a class="headerlink" href="#speelplan-en-speelblokken-draft" title="Permanent link">&para;</a></h1>
 <p><strong>Status:</strong> draft v0 — fase 1 (syntax, validatie, MXL-expansie) + fase 2a
-(volta voor patroon <code>(a,b)×n+(a,c)</code> op partituur). Verdere volta-patronen
-staan in <a href="../open-points/">Open punten</a>.</p>
+(volta voor patroon <code>(a,b)×n+(a,c)</code>) + fase 2b (D.S./D.C. al Fine) +
+fase 2c (D.S./D.C. al Coda) op partituur. Geneste combinatie-jumps zonder
+één herkenbaar bladpatroon blijven expand (<a href="../open-points/">Open punten</a> /
+«Bewust later»).</p>
 <p><strong>Voor wie:</strong> wie een vast SATB-antwoord (alleluia, litanie-antwoord) één keer
 wil opschrijven en de uitvoeringsvolgorde apart wil vastleggen.</p>
 <h2 id="idee-in-het-kort">Idee in het kort<a class="headerlink" href="#idee-in-het-kort" title="Permanent link">&para;</a></h2>
@@ -5021,12 +5135,45 @@ Geen blok-id-labels boven de maten — navigatietekens zijn genoeg.</p>
 </tr>
 <tr>
 <td>5</td>
+<td><code>blad[0..ds] + blad[segno..tocoda] + blad[coda..]</code></td>
+<td>Segno + To Coda + Coda + D.S. al Coda (of D.C. al Coda)</td>
+</tr>
+<tr>
+<td>6</td>
 <td>rest</td>
 <td><strong>expand</strong>: speelplan uitgeschreven op het blad</td>
 </tr>
 </tbody>
 </table>
 <p>Coria (<code>playback</code>) schrijft het speelplan altijd volledig uit (geen jumps).</p>
+<p><strong>D.S./D.C. al Coda (prioriteit 5)</strong> — planvorm en bladtekens:</p>
+<table>
+<thead>
+<tr>
+<th>Plan (blok-ids)</th>
+<th>Bladvolgorde</th>
+<th>Bladtekens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1, 2, 3, 2, 4</code></td>
+<td>1 2 3 4</td>
+<td>Segno bij start 2; To Coda einde 2; D.S. al Coda einde 3; Coda-teken bij 4</td>
+</tr>
+<tr>
+<td><code>intro, mid, bridge, intro, mid, coda</code></td>
+<td>intro mid bridge coda</td>
+<td>To Coda einde mid; D.C. al Coda einde bridge; Coda-teken bij coda (geen segno)</td>
+</tr>
+</tbody>
+</table>
+<p>Drie bladblokken met plan <code>(a,b)+(a,c)</code> valt onder <strong>volta</strong> (prioriteit 2),
+niet onder D.C. al Coda — dezelfde klinkende volgorde, andere bladvorm.</p>
+<p>Eisen: To Coda staat strikt vóór het D.S./D.C.-blok; coda = rest van het blad
+na dat blok (minstens één speelblok). Disjunct van prioriteit 4 (Fine herhaalt
+alleen binnen <code>[0..ds]</code>). Geneste combinaties (volta+D.S., dubbele sprongen)
+zonder één zo’n bladpatroon → prioriteit 6 (expand).</p>
 <h2 id="voorbeeld">Voorbeeld<a class="headerlink" href="#voorbeeld" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>@title "Alleluia - Toon 1"
 @do F4
@@ -5056,9 +5203,12 @@ L:  Al-&amp;-&amp;-&amp;.&amp;.&amp;-  … ||
 </ul>
 <p>Trisagion-vorm (<code>nls-1, nls-2, ksl, doxologie, nls-2, ksl</code>): Segno bij
 <code>nls-2</code>, Fine aan het eind van <code>ksl</code>, <strong>D.S. al Fine</strong> na <code>doxologie</code>.</p>
+<p>Coda-vorm (<code>1, 2, 3, 2, 4</code>): Segno bij <code>2</code>, To Coda eind <code>2</code>, <strong>D.S. al Coda</strong>
+na <code>3</code>, Coda-teken bij <code>4</code>.</p>
 <h2 id="bewust-later">Bewust later<a class="headerlink" href="#bewust-later" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Meer sprongvormen (D.S. al Coda, geneste herhalingen).</li>
+<li>Geneste combinatie-jumps (bijv. volta + D.S.) zonder één herkenbaar
+  bladpatroon — blijven expand; aparte matcher alleen bij eenduidig corpus-nut.</li>
 <li>CLI-vlag voor compacte MXL (alleen als de consumer herhalingen begrijpt).</li>
 <li>Speelplan over meerdere bestanden; geneste plannen; <code>until: final</code> zoals
   templates.</li>
@@ -5099,7 +5249,7 @@ L:  Al-&amp;-&amp;-&amp;.&amp;.&amp;-  … ||
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-09-29
         
       </p>
       
