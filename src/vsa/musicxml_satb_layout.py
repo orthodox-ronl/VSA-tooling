@@ -98,8 +98,10 @@ def ensure_partituur_musicxml(xml: str) -> str:
 def ensure_playback_musicxml(xml: str) -> str:
     """Return four-part Soprano/Alto/Tenor/Bass MusicXML for Coria.
 
-    Two-staff partituur (chords or voice1+2) is exploded. Already-four-part
-    SATB is returned with canonical part names.
+    Two-staff partituur (chords or voice1+2) is exploded. MuseScore often
+    exports SA/TB as **one** ``score-part`` with ``<staff>1``/``2`` (voices
+    1/2 and 5/6); that is exploded the same way. Already-four-part SATB is
+    returned with canonical part names.
     """
     root = ET.fromstring(xml)
     score_parts = _score_parts(root)
@@ -112,16 +114,90 @@ def ensure_playback_musicxml(xml: str) -> str:
     if len(score_parts) == 2 and {"P1", "P2"}.issubset(by_id):
         return _explode_partituur_to_playback(root, by_id)
 
+    if len(score_parts) == 1:
+        only = next(iter(by_id.values()))
+        if _part_uses_two_staves(only):
+            synthetic = _virtual_sa_tb_parts_from_one_part(only)
+            return _explode_partituur_to_playback(root, synthetic)
+
     # Fallback: rename whatever we have; keep structure.
     _normalize_playback_part_list(root)
     return _serialize(root)
+
+
+def _part_uses_two_staves(part: ET.Element) -> bool:
+    staves: set[str] = set()
+    for note in part.iter():
+        if local(note.tag) != "note":
+            continue
+        staff = _staff_of(note)
+        if staff is not None:
+            staves.add(staff)
+    return "1" in staves and "2" in staves
+
+
+def _staff_of(note: ET.Element) -> str | None:
+    for child in note:
+        if local(child.tag) == "staff" and (child.text or "").strip():
+            return (child.text or "").strip()
+    return None
+
+
+def _direction_staff(direction: ET.Element) -> str | None:
+    for child in direction:
+        if local(child.tag) == "staff" and (child.text or "").strip():
+            return (child.text or "").strip()
+    return None
+
+
+def _virtual_sa_tb_parts_from_one_part(part: ET.Element) -> dict[str, ET.Element]:
+    """Split MuseScore 1-part / 2-staff into virtual P1 (SA) + P2 (TB)."""
+    p1 = ET.Element("part", id="P1")
+    p2 = ET.Element("part", id="P2")
+    for meas in (el for el in part if local(el.tag) == "measure"):
+        m1, m2 = _split_measure_by_staff(meas)
+        p1.append(m1)
+        p2.append(m2)
+    return {"P1": p1, "P2": p2}
+
+
+def _split_measure_by_staff(meas: ET.Element) -> tuple[ET.Element, ET.Element]:
+    """Partition one measure's events into staff-1 and staff-2 streams."""
+    m1 = ET.Element("measure", attrib=dict(meas.attrib))
+    m2 = ET.Element("measure", attrib=dict(meas.attrib))
+    current_staff = "1"
+    for child in meas:
+        tag = local(child.tag)
+        if tag == "note":
+            current_staff = _staff_of(child) or current_staff
+            target = m1 if current_staff == "1" else m2
+            target.append(copy.deepcopy(child))
+        elif tag == "backup":
+            target = m1 if current_staff == "1" else m2
+            target.append(copy.deepcopy(child))
+        elif tag == "direction":
+            staff = _direction_staff(child)
+            if staff == "2":
+                m2.append(copy.deepcopy(child))
+            else:
+                m1.append(copy.deepcopy(child))
+        elif tag in {"attributes", "barline"}:
+            m1.append(copy.deepcopy(child))
+            m2.append(copy.deepcopy(child))
+        elif tag in {"print", "sound"}:
+            m1.append(copy.deepcopy(child))
+        else:
+            m1.append(copy.deepcopy(child))
+    return m1, m2
 
 
 def _explode_partituur_to_playback(
     root: ET.Element, by_id: dict[str, ET.Element]
 ) -> str:
     title = _work_title(root)
-    n_meas = max(len(list(by_id[p].findall("measure"))) for p in ("P1", "P2"))
+    p1_meas = [el for el in by_id["P1"] if local(el.tag) == "measure"]
+    p2_meas = [el for el in by_id["P2"] if local(el.tag) == "measure"]
+    n_meas = max(len(p1_meas), len(p2_meas), 1)
     new_root = ET.Element("score-partwise", version=root.get("version") or "3.1")
     work = ET.SubElement(new_root, "work")
     ET.SubElement(work, "work-title").text = title
@@ -144,8 +220,6 @@ def _explode_partituur_to_playback(
         "B": [],
     }
     clefs = {"S": ("G", "2"), "A": ("G", "2"), "T": ("F", "4"), "B": ("F", "4")}
-    p1_meas = list(by_id["P1"].findall("measure"))
-    p2_meas = list(by_id["P2"].findall("measure"))
     for mi in range(n_meas):
         sa = _split_staff_measure(p1_meas[mi] if mi < len(p1_meas) else None)
         tb = _split_staff_measure(p2_meas[mi] if mi < len(p2_meas) else None)
@@ -201,14 +275,24 @@ def _explode_partituur_to_playback(
 def _split_staff_measure(
     meas: ET.Element | None,
 ) -> tuple[list[ET.Element], list[ET.Element]]:
-    """Split one staff measure into (upper, lower) — voice 1/2 or legacy chords."""
+    """Split one staff measure into (upper, lower) — voices or legacy chords.
+
+    MuseScore SATB-on-two-staves uses voices 1/2 on staff 1 and 5/6 on staff 2;
+    the lowest voice number is treated as upper, the rest as lower.
+    """
     if meas is None:
         return [], []
     notes = [n for n in meas if local(n.tag) == "note"]
-    if any(_voice_num(n) is not None for n in notes):
-        upper = [n for n in notes if (_voice_num(n) or 1) == 1]
-        lower = [n for n in notes if (_voice_num(n) or 1) != 1]
+    voice_nums = sorted(
+        {v for n in notes if (v := _voice_num(n)) is not None}
+    )
+    if len(voice_nums) >= 2:
+        upper_v = voice_nums[0]
+        upper = [n for n in notes if (_voice_num(n) or upper_v) == upper_v]
+        lower = [n for n in notes if (_voice_num(n) or upper_v) != upper_v]
         return upper, lower
+    if len(voice_nums) == 1:
+        return notes, [copy.deepcopy(n) for n in notes]
     upper: list[ET.Element] = []
     lower: list[ET.Element] = []
     i = 0

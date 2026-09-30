@@ -231,9 +231,18 @@ def strip_doctype(xml: str) -> str:
     return _DOCTYPE_RE.sub("", xml, count=1).lstrip()
 
 
+_LICENSE_IN_TEXT = re.compile(
+    r"(?i)\b(CC\s*BY|creativecommons|colofon|all\s+rights\s+reserved)\b"
+)
+
+
 def sanitize_coria_importer(root: ET.Element) -> None:
     """Strip visuele MusicXML die Coria's vertaler laat crashen (VSA-demo-port)."""
     root.set("version", "3.1")
+    # Engraving-only layout block (checklist M9).
+    for el in list(root):
+        if local(el.tag) == "defaults":
+            root.remove(el)
     # Geen strip van movement-title: MVSA zet ``@ondertitel`` daar (cues zitten
     # in ``<direction>``, niet in movement-title zoals Capella soms deed).
     ident = _child(root, "identification")
@@ -243,6 +252,7 @@ def sanitize_coria_importer(root: ET.Element) -> None:
             for el in list(enc):
                 if local(el.tag) == "supports":
                     enc.remove(el)
+        _ensure_source_when_rights_is_license(root, ident)
     for el in list(root.iter()):
         for attr in list(el.attrib):
             if attr.startswith(_LAYOUT_ATTR_PREFIXES) or attr in _LAYOUT_ATTRS:
@@ -262,6 +272,35 @@ def sanitize_coria_importer(root: ET.Element) -> None:
         for el in list(plist):
             if local(el.tag) == "part-group":
                 plist.remove(el)
+
+
+def _ensure_source_when_rights_is_license(
+    root: ET.Element, ident: ET.Element
+) -> None:
+    """Checklist META: rights met licentie eist een niet-lege ``source``."""
+    source_el = _child(ident, "source")
+    rights_el = _child(ident, "rights")
+    source = _text(source_el)
+    rights = _text(rights_el)
+    if source:
+        return
+    if not rights or not _LICENSE_IN_TEXT.search(rights):
+        return
+    title = ""
+    for el in root.iter():
+        if local(el.tag) == "work-title" and (el.text or "").strip():
+            title = (el.text or "").strip()
+            break
+    text = title or "partituur"
+    if source_el is None:
+        source_el = ET.Element("source")
+        # Prefer source after rights when both exist.
+        if rights_el is not None:
+            idx = list(ident).index(rights_el) + 1
+            ident.insert(idx, source_el)
+        else:
+            ident.append(source_el)
+    source_el.text = text
 
 
 def _key_alters(fifths: int) -> dict[str, int]:

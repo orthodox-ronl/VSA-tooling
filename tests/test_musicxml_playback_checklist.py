@@ -136,6 +136,76 @@ def test_normalize_clears_importer_violations():
     # After normalize: no beam/stem/part-group; version 3.1
     assert coria_importer_violations(root) == []
     assert "DOCTYPE" not in cleaned.upper()
+    assert _child_local(root, "defaults") is None
+
+
+def _child_local(root: ET.Element, name: str) -> ET.Element | None:
+    from vsa.musicxml_satb_layout import local
+
+    for c in root:
+        if local(c.tag) == name:
+            return c
+    return None
+
+
+def test_one_part_two_staff_musescore_explodes_to_satb():
+    """MuseScore SA/TB often: 1 score-part, staff 1/2, voices 1/2 + 5/6."""
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <defaults><scaling><millimeters>7</millimeters><tenths>40</tenths></scaling></defaults>
+  <identification>
+    <rights>CC BY-SA 4.0</rights>
+  </identification>
+  <work><work-title>Proef</work-title></work>
+  <part-list>
+    <score-part id="P1"><part-name></part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <staves>2</staves>
+        <clef number="1"><sign>G</sign><line>2</line></clef>
+        <clef number="2"><sign>F</sign><line>4</line></clef>
+      </attributes>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>1</voice><type>whole</type>
+        <staff>1</staff>
+        <lyric number="1"><syllabic>single</syllabic><text>Heer</text></lyric>
+      </note>
+      <backup><duration>4</duration></backup>
+      <note>
+        <pitch><step>E</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>2</voice><type>whole</type>
+        <staff>1</staff>
+      </note>
+      <backup><duration>4</duration></backup>
+      <note>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>5</voice><type>whole</type>
+        <staff>2</staff>
+      </note>
+      <backup><duration>4</duration></backup>
+      <note>
+        <pitch><step>C</step><octave>3</octave></pitch>
+        <duration>4</duration><voice>6</voice><type>whole</type>
+        <staff>2</staff>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    cleaned = normalize_playback_musicxml(xml, apply_timing=False)
+    findings = validate_playback_musicxml(cleaned, profile="satb")
+    assert findings == [], findings
+    root = ET.fromstring(cleaned.split("?>", 1)[-1].lstrip())
+    from vsa.musicxml_satb_layout import local
+
+    parts = [el for el in root if local(el.tag) == "part"]
+    assert [p.get("id") for p in parts] == ["P1", "P2", "P3", "P4"]
+    assert _child_local(root, "defaults") is None
 
 
 def test_meta_source_looks_like_license():
