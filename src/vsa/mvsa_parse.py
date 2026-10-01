@@ -91,8 +91,21 @@ class LPosition:
     elms: list[str]  # one ELM per slot; default "~" if implicit
     # For each syllable after the first: True = hyphen (same word), False = space (new word)
     links: list[bool] = field(default_factory=list)
-    # True if this position continues a word started in the previous L-stuk (leading '-')
+    # Parallel to links: True = hard orthographic hyphen (bron ``=``), False = soft ``-``
+    hard_links: list[bool] = field(default_factory=list)
+    # True if this position continues a word started in the previous L-stuk (leading '-' / '=')
     continues_word: bool = False
+    # True if that continuation was a hard ``=`` (not soft ``-``)
+    continues_word_hard: bool = False
+
+
+def _is_woordstreepje(c: str) -> bool:
+    """Zacht ``-`` of hard ``=`` vóór de volgende lettergreep."""
+    return c in "-="
+
+
+def _woordstreepje_is_hard(c: str) -> bool:
+    return c == "="
 
 
 @dataclass
@@ -747,7 +760,7 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                 close = n
             interior = s[i + 1 : close]
             i = close + 1 if close < n and s[close] == ")" else n
-            syllables, links = _parse_recite_interior(interior)
+            syllables, links, hard_links = _parse_recite_interior(interior)
             # After ')': duration ELMs only — bare '-' is woordstreepje, not ELM.
             elm_list, i = _read_elms(s, i, allow_bare_dash=False)
             positions.append(
@@ -756,19 +769,24 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                     syllables=syllables,
                     elms=elm_list,
                     links=links,
+                    hard_links=hard_links,
                     continues_word=False,
                 )
             )
             continue
 
-        # Stray '-' (not a woordstreepje before a letter): skip
-        if s[i] == "-" and not (i + 1 < n and _is_syllable_char(s[i + 1])):
+        # Stray woordstreepje (not before a letter): skip
+        if _is_woordstreepje(s[i]) and not (
+            i + 1 < n and _is_syllable_char(s[i + 1])
+        ):
             i += 1
             continue
 
         continues_word = False
-        if s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
+        continues_word_hard = False
+        if _is_woordstreepje(s[i]) and i + 1 < n and _is_syllable_char(s[i + 1]):
             continues_word = True
+            continues_word_hard = _woordstreepje_is_hard(s[i])
             i += 1
 
         # Leading ELM vóór de lettergreep (bijv. ``~Al``, ``_Geest``).
@@ -777,8 +795,10 @@ def parse_l_positions(measure: str) -> list[LPosition]:
 
         syllables: list[str] = []
         links: list[bool] = []
+        hard_links: list[bool] = []
         elms: list[str] = []
         pending_link: bool | None = None
+        pending_hard: bool = False
         used_leading = False
 
         while True:
@@ -799,8 +819,12 @@ def parse_l_positions(measure: str) -> list[LPosition]:
 
             if syllables:
                 links.append(True if pending_link is None else pending_link)
+                hard_links.append(
+                    pending_hard if pending_link is not False else False
+                )
             syllables.append(syll)
             pending_link = None
+            pending_hard = False
 
             if piece_elms:
                 elms.extend(piece_elms)
@@ -814,7 +838,13 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                 syllables[-1] += s[i]
                 i += 1
 
-            if i < n and s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
+            if (
+                i < n
+                and _is_woordstreepje(s[i])
+                and i + 1 < n
+                and _is_syllable_char(s[i + 1])
+            ):
+                pending_hard = _woordstreepje_is_hard(s[i])
                 i += 1
                 pending_link = True
                 positions.append(
@@ -823,13 +853,17 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                         syllables=syllables,
                         elms=elms if elms else ["~"],
                         links=links,
+                        hard_links=hard_links,
                         continues_word=continues_word,
+                        continues_word_hard=continues_word_hard,
                     )
                 )
                 syllables = []
                 links = []
+                hard_links = []
                 elms = []
                 continues_word = True
+                continues_word_hard = pending_hard
                 continue
 
             break
@@ -843,7 +877,9 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                     syllables=syllables,
                     elms=elms,
                     links=links,
+                    hard_links=hard_links,
                     continues_word=continues_word,
+                    continues_word_hard=continues_word_hard,
                 )
             )
         elif i == progress_at:
@@ -853,24 +889,30 @@ def parse_l_positions(measure: str) -> list[LPosition]:
     return positions
 
 
-def _parse_recite_interior(interior: str) -> tuple[list[str], list[bool]]:
-    """Syllables + links inside ``( … )`` (space = word, ``-`` = hyphen)."""
+def _parse_recite_interior(
+    interior: str,
+) -> tuple[list[str], list[bool], list[bool]]:
+    """Syllables + links inside ``( … )`` (space = word, ``-``/``=`` = hyphen)."""
     s = interior.strip()
     if not s:
-        return [], []
+        return [], [], []
     syllables: list[str] = []
     links: list[bool] = []
+    hard_links: list[bool] = []
     i = 0
     n = len(s)
     pending_link: bool | None = None
+    pending_hard = False
     while i < n:
         if s[i].isspace():
             if syllables:
                 pending_link = False
+                pending_hard = False
             i += 1
             continue
-        if s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
+        if _is_woordstreepje(s[i]) and i + 1 < n and _is_syllable_char(s[i + 1]):
             pending_link = True
+            pending_hard = _woordstreepje_is_hard(s[i])
             i += 1
             continue
         if s[i] in ",;:!?" and not syllables:
@@ -887,13 +929,22 @@ def _parse_recite_interior(interior: str) -> tuple[list[str], list[bool]]:
             syll += s[i]
             i += 1
         if syllables:
-            links.append(True if pending_link is None else pending_link)
+            link = True if pending_link is None else pending_link
+            links.append(link)
+            hard_links.append(pending_hard if link else False)
         syllables.append(syll)
         pending_link = None
-        if i < n and s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
+        pending_hard = False
+        if (
+            i < n
+            and _is_woordstreepje(s[i])
+            and i + 1 < n
+            and _is_syllable_char(s[i + 1])
+        ):
             pending_link = True
+            pending_hard = _woordstreepje_is_hard(s[i])
             i += 1
-    return syllables, links
+    return syllables, links, hard_links
 
 
 def _read_elms(

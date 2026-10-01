@@ -32,6 +32,11 @@ de grens tussen tekst en `{…}`, en tussen opeenvolgende scopes. Zo wordt
   zing-deling) blijft bij hypheneren ongemoeid; bij `--unsyllabify`
   verdwijnen die streepjes wél. Over scope-grenzen heen worden breekpunten
   opnieuw uit Pyphen afgeleid.
+- **Hard streepje:** schrijf een orthografisch koppelteken als `=` in de
+  bron (`mede=eeuwige`). Syllabify hypheneert de delen apart
+  (`me-de=eeu-wi-ge`); `--unsyllabify` houdt `=`; `vsa text` / MusicXML /
+  SVG tonen een gewoon streepje. Zachte `-` verdwijnen in zoektekst, `=`
+  niet (wordt `-`).
 - Dit is **geen** automatische stap bij `vsa musicxml`: bron en product
   blijven voorspelbaar. Na schrijven vernieuw je `.vsa.mxl` via
   `scripts\vsa-products.cmd` of `scripts\check.cmd`.

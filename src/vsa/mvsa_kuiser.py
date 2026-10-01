@@ -29,7 +29,7 @@ from .mvsa_normalize import (
     MvsaNormalizeError,
     normalize_mvsa_text,
 )
-from .mvsa_parse import _ELMS, _is_syllable_char, parse_l_positions
+from .mvsa_parse import _ELMS, _is_syllable_char, _is_woordstreepje, parse_l_positions
 from .mvsa_validate import (
     MvsaValidationError,
     _BarSplit,
@@ -417,12 +417,12 @@ def _bare_elm_dash_indices(s: str) -> list[int]:
             found.extend(dash_at)
             continue
 
-        # Stray '-' not before a letter: skip (same as parse_l_positions).
-        if s[i] == "-" and not (i + 1 < n and _is_syllable_char(s[i + 1])):
+        # Stray woordstreepje not before a letter: skip (same as parse_l_positions).
+        if _is_woordstreepje(s[i]) and not (i + 1 < n and _is_syllable_char(s[i + 1])):
             i += 1
             continue
 
-        if s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
+        if _is_woordstreepje(s[i]) and i + 1 < n and _is_syllable_char(s[i + 1]):
             i += 1  # woordstreepje
 
         leading, i = _read_elms_dash_indices(s, i)
@@ -442,7 +442,12 @@ def _bare_elm_dash_indices(s: str) -> list[int]:
             found.extend(dash_at)
             while i < n and s[i] in ",;:!?":
                 i += 1
-            if i < n and s[i] == "-" and i + 1 < n and _is_syllable_char(s[i + 1]):
+            if (
+                i < n
+                and _is_woordstreepje(s[i])
+                and i + 1 < n
+                and _is_syllable_char(s[i + 1])
+            ):
                 i += 1
                 continue
             break

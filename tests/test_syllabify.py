@@ -24,6 +24,14 @@ def test_hyphenate_dutch_examples() -> None:
     assert hyphenate_dutch_word("al-len") == "al-len"
 
 
+def test_hard_hyphen_equals_preserved_through_syllabify() -> None:
+    assert hyphenate_dutch_word("mede=eeuwige") == "me-de=eeu-wi-ge"
+    assert unsyllabify_plain_text("me-de=eeu-wi-ge") == "mede=eeuwige"
+    from vsa.syllabify import dehyphenate_dutch_word
+
+    assert dehyphenate_dutch_word("me-de=eeu-wi-ge") == "mede-eeuwige"
+
+
 def test_plain_text_preserves_barlines_and_punct() -> None:
     assert syllabify_plain_text("lijden / gebeden") == "lij-den / ge-be-den"
     assert syllabify_plain_text("komst,") == "komst,"

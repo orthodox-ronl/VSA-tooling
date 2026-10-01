@@ -55,12 +55,24 @@ def _dutch_dic():
     return pyphen.Pyphen(lang="nl_NL")
 
 
+# Hard orthografisch streepje in bronnotatie (``mede=eeuwige`` → lezersvorm ``mede-eeuwige``).
+HARD_HYPHEN = "="
+
+
 def hyphenate_dutch_word(word: str) -> str:
     """Voeg orthografische lettergreepstreepjes toe (Pyphen ``nl_NL``).
 
-    Bestaande ``-`` in het woord blijven leidend (geen her-hyphenatie).
+    Bestaande zachte ``-`` blijven leidend (geen her-hyphenatie). Hard ``=``
+    splitst het woord in delen die elk apart gehypheneerd worden.
     """
-    if not word or "-" in word:
+    if not word:
+        return word
+    if HARD_HYPHEN in word:
+        return HARD_HYPHEN.join(
+            hyphenate_dutch_word(part) if part else part
+            for part in word.split(HARD_HYPHEN)
+        )
+    if "-" in word:
         return word
     if not any(ch.isalpha() for ch in word):
         return word
@@ -69,18 +81,32 @@ def hyphenate_dutch_word(word: str) -> str:
 
 def dutch_hyphen_positions(word: str) -> list[int]:
     """Pyphen-breekposities (index vóór het teken waar ``-`` komt)."""
-    if not word or "-" in word:
+    if not word or "-" in word or HARD_HYPHEN in word:
         return []
     if not any(ch.isalpha() for ch in word):
         return []
     return list(_dutch_dic().positions(word))
 
 
-def dehyphenate_dutch_word(word: str) -> str:
-    """Verwijder lettergreepstreepjes uit een woordkern."""
+def strip_soft_hyphens(word: str) -> str:
+    """Verwijder alleen zachte lettergreepstreepjes; hard ``=`` blijft staan."""
     if not word or "-" not in word:
         return word
     return word.replace("-", "")
+
+
+def dehyphenate_dutch_word(word: str) -> str:
+    """Lezers-/zoekvorm: zachte ``-`` weg, hard ``=`` wordt ``-``."""
+    if not word:
+        return word
+    return strip_soft_hyphens(word).replace(HARD_HYPHEN, "-")
+
+
+def display_lyric_text(text: str) -> str:
+    """Bronlyric → weergave: hard ``=`` wordt een zichtbaar streepje."""
+    if not text or HARD_HYPHEN not in text:
+        return text
+    return text.replace(HARD_HYPHEN, "-")
 
 
 def syllabify_plain_text(text: str) -> str:
@@ -89,8 +115,8 @@ def syllabify_plain_text(text: str) -> str:
 
 
 def unsyllabify_plain_text(text: str) -> str:
-    """Verwijder lettergreepstreepjes in platte tekst; barlines blijven staan."""
-    return _map_plain_tokens(text, dehyphenate_dutch_word)
+    """Verwijder lettergreepstreepjes in platte tekst; barlines en hard ``=`` blijven."""
+    return _map_plain_tokens(text, strip_soft_hyphens)
 
 
 def syllabify_vsa_body(body: str) -> SyllabifyResult:
@@ -447,7 +473,7 @@ def _unsyllabify_word_run(atoms: list[_Atom]) -> str:
         if part.kind == "scope":
             out.append(part.source)
         else:
-            out.append(f"{part.prefix}{dehyphenate_dutch_word(part.core)}{part.suffix}")
+            out.append(f"{part.prefix}{strip_soft_hyphens(part.core)}{part.suffix}")
     return "".join(out)
 
 

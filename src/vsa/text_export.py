@@ -6,27 +6,39 @@ from pathlib import Path
 
 from .mvsa_parse import LPosition, parse_mvsa
 from .mvsa_validate import is_lyrics_stem
-from .syllabify import dehyphenate_dutch_word
+from .syllabify import HARD_HYPHEN, dehyphenate_dutch_word, strip_soft_hyphens
 from .vsa_stanzas import VsaNote, extract_stanza_notes
 
 
-def join_lyric_syllables(syllables: list[str], links: list[bool]) -> str:
-    """Zelfde regel als MVSA-MusicXML: '-' binnen woord, spatie tussen woorden."""
+def join_lyric_syllables(
+    syllables: list[str],
+    links: list[bool],
+    hard_links: list[bool] | None = None,
+) -> str:
+    """Zelfde regel als MVSA-MusicXML: streepje binnen woord, spatie tussen woorden.
+
+    Zachte links worden ``-``; harde links (bron ``=``) blijven ``=`` tot
+    ``dehyphenate_dutch_word`` ze omzet naar een zichtbaar streepje.
+    """
     if not syllables:
         return ""
     out = syllables[0]
     for i, syl in enumerate(syllables[1:]):
-        sep = "-" if (i < len(links) and links[i]) else " "
+        if i < len(links) and links[i]:
+            hard = bool(hard_links and i < len(hard_links) and hard_links[i])
+            sep = HARD_HYPHEN if hard else "-"
+        else:
+            sep = " "
         out += sep + syl
     return out
 
 
-def _dehyphenate_words(text: str) -> str:
-    """Verwijder lettergreepstreepjes per woord; spaties blijven woordgrenzen."""
+def _piece_for_plain(text: str) -> str:
+    """Binnen een woord: zachte ``-`` weg, hard ``=`` nog laten staan."""
     if not text:
         return ""
     return " ".join(
-        dehyphenate_dutch_word(part) for part in text.split(" ") if part != ""
+        strip_soft_hyphens(part) for part in text.split(" ") if part != ""
     )
 
 
@@ -70,24 +82,28 @@ def plain_text_from_vsa(source: str) -> str:
 
 
 def _append_lpos(parts: list[str], lpos: LPosition, *, open_word: bool) -> bool:
-    """Voeg één L-positie toe. Retourneert of het volgende stuk aan het woord plakt."""
-    joined = join_lyric_syllables(lpos.syllables, lpos.links)
+    """Voeg één L-positie toe. Retourneert of het volgende stuk aan het woord plakt.
+
+    Woordvoortzetting komt van ``continues_word`` op *deze* positie (leidend
+    ``-``/``=``), niet van interne lettergreep-links binnen de positie.
+    Onderdelen houden ``=`` tot de eindregel; pas daar wordt het zichtbare ``-``.
+    """
+    joined = join_lyric_syllables(lpos.syllables, lpos.links, lpos.hard_links)
     if not joined:
         return open_word
-    plain = _dehyphenate_words(joined)
-    if not plain:
+    piece = _piece_for_plain(joined)
+    if not piece:
         return open_word
     if open_word or lpos.continues_word:
+        glue = HARD_HYPHEN if lpos.continues_word_hard else ""
         if parts:
-            parts[-1] = parts[-1] + plain
+            parts[-1] = parts[-1] + glue + piece
         else:
-            parts.append(plain)
+            parts.append(piece)
     else:
-        parts.append(plain)
-    # Hyphen-link naar volgende positie? Laatste link True → woord open.
-    if lpos.links and lpos.links[-1] and len(lpos.syllables) > 1:
-        return True
-    # Enkele lettergreep met trailing hyphen-semantiek via continues op next.
+        parts.append(piece)
+    # Interne links horen bij deze positie; de *volgende* positie zet
+    # ``continues_word`` als het woord verdergaat.
     return False
 
 
@@ -109,7 +125,9 @@ def plain_text_from_mvsa(source: str) -> str:
                             parts, lpos, open_word=open_word
                         )
             if parts:
-                chunks.append(" ".join(parts))
+                chunks.append(
+                    " ".join(dehyphenate_dutch_word(p) for p in parts)
+                )
     return "\n".join(chunks).strip()
 
 

@@ -291,6 +291,12 @@ Tussen opeenvolgende lettergrepen van **hetzelfde woord** staat altijd `-`
 woord staat **geen** `-` (wel spatie en/of leesteken). Tussen die lettergrepen
 mogen wel ELM’s, recite-haakjes, maatstrepen en leestekens staan.
 
+**Hard streepje:** een orthografisch koppelteken dat in de lezersvorm moet
+blijven (bijv. `mede-eeuwige`) schrijf je in de bron als `=` (`mede=eeuwige`
+of `mede=eeu-wi-ge`). Export (SVG, MusicXML, `vsa text`) toont een gewoon
+streepje; zachte lettergreepstreepjes verdwijnen in platte zoektekst, het
+harde streepje niet.
+
 De kuiser **collapse’t niet** `hei- li` → `hei-li`: dat zou ELM-duur
 veranderen in een woordstreepje en bij lange melisma’s de align breken
 (`hei_&_&_&_&_&_ -li` mag niet `hei_&_&_&_&_&_-li` worden). Bij
@@ -374,6 +380,7 @@ L: (Al-le-lu-ia, Al-le-lu-ia, Al)_-le-lu_&-&-&_ i_ a__ ||
 | `(hei)`                   | Recite op “hei”, standaardduur                                            |
 | `hei~`                    | Lettergreep “hei” + ELM-duur `~` (**geen** recite)                        |
 | `(hei-li-ge)`             | Recite; `-` binnen haakjes = lettergreepstreepje                          |
+| `mede=eeuwige`            | Hard streepje (`=`); weergave/zoektekst als `mede-eeuwige`                |
 | `Chris_-tus_`             | Twee lengte-posities; `-` tussen posities = zelfde woord                  |
 | `(… voor) Chris_`         | Recite eindigt bij `)`; nieuwe positie (nieuw woord)                      |
 | `(… Al)-le_…`             | Recite eindigt bij `)`; `-` = zelfde woord doorlopend                     |

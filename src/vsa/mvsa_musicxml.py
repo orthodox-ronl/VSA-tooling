@@ -31,6 +31,7 @@ from .mvsa_parse import (
 )
 from .mvsa_validate import is_lyrics_stem
 from .mvsa_validate import MvsaValidationError
+from .syllabify import display_lyric_text
 from .pitch_resolver import (
     PitchResolver,
     degree_to_pitch,
@@ -1733,7 +1734,7 @@ def _emit_single_note(
             lyric_xml += (
                 f'<lyric number="{ly.number}">'
                 f"<syllabic>{escape(ly.syllabic)}</syllabic>"
-                f"<text>{escape(ly.text)}</text>{extend_xml}</lyric>"
+                f"<text>{escape(display_lyric_text(ly.text))}</text>{extend_xml}</lyric>"
             )
     out.append("<note>")
     if chord:

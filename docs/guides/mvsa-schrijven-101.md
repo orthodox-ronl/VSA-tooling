@@ -111,8 +111,9 @@ Stemregels moeten daar **slot voor slot** op aansluiten.
 
 | Op de L-regel              | Betekenis                                              |
 | -------------------------- | ------------------------------------------------------ |
-| `Hei` / `li-ge`            | lettergreep; `-` = woordstreepje tussen lettergrepen   |
-| `_` `=` `__` `~` …         | ELM (duur) direct na lettergreep of na `)`             |
+| `Hei` / `li-ge`            | lettergreep; `-` = zacht woordstreepje (lettergreep)   |
+| `mede=eeuwige`             | hard streepje: bron `=`, weergave/zoektekst als `-`    |
+| `_` `__` `~` `.` …         | ELM (duur) direct na lettergreep of na `)`             |
 | `( … )`                    | recite-groep (meerdere lettergrepen, één toonhoogte)   |
 | `&`                        | melisma: extra toon op dezelfde lettergreep            |
 | `\|` / `\|\|` / `\|:` …    | maatstreep (zelfde vorm op alle stemregels)            |

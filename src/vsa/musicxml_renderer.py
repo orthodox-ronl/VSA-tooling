@@ -73,6 +73,7 @@ from .ast import ControlTokenNode, Document, Node, PitchMarkerNode, ScopeNode, T
 from .duration_model import UnknownELM, elm_to_duration
 from .music import Duration, Pitch
 from .pitch_resolver import PitchResolver, key_fifths
+from .syllabify import display_lyric_text
 
 # Number of MusicXML divisions per quarter note.
 _DIVISIONS = 4
@@ -681,7 +682,7 @@ class MusicXMLRenderer:
                 lyric_attrs["xml:lang"] = language
             lyric = ET.SubElement(note_el, "lyric", **lyric_attrs)
             ET.SubElement(lyric, "syllabic").text = "single"
-            ET.SubElement(lyric, "text").text = text
+            ET.SubElement(lyric, "text").text = display_lyric_text(text)
             if self._is_playback:
                 ET.SubElement(lyric, "extend")
             else:
@@ -701,7 +702,7 @@ class MusicXMLRenderer:
                 lyric_attrs["xml:lang"] = language
             lyric = ET.SubElement(note_el, "lyric", **lyric_attrs)
             ET.SubElement(lyric, "syllabic").text = ev.get("syllabic", "single")
-            ET.SubElement(lyric, "text").text = text
+            ET.SubElement(lyric, "text").text = display_lyric_text(text)
             if ev.get("extend"):
                 ET.SubElement(lyric, "extend")
 

@@ -11,6 +11,7 @@ from .mvsa_parse import (
     LPosition,
     _ELMS,
     _is_syllable_char,
+    _is_woordstreepje,
     _read_elms,
     parse_l_positions,
 )
@@ -56,7 +57,7 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
             spans.append((start + offset, i + offset))
             pi += 1
             continue
-        if stripped[i] == "-" and i + 1 < n and _is_syllable_char(stripped[i + 1]):
+        if _is_woordstreepje(stripped[i]) and i + 1 < n and _is_syllable_char(stripped[i + 1]):
             i += 1
         while True:
             while i < n and (
@@ -70,7 +71,7 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
                 i += 1
             if (
                 i < n
-                and stripped[i] == "-"
+                and _is_woordstreepje(stripped[i])
                 and i + 1 < n
                 and _is_syllable_char(stripped[i + 1])
             ):
@@ -93,16 +94,27 @@ def _format_lpos(p: LPosition) -> str:
         parts: list[str] = []
         for i, syl in enumerate(p.syllables):
             if i:
-                parts.append("-" if (i - 1 < len(p.links) and p.links[i - 1]) else " ")
+                if i - 1 < len(p.links) and p.links[i - 1]:
+                    hard = i - 1 < len(p.hard_links) and p.hard_links[i - 1]
+                    parts.append("=" if hard else "-")
+                else:
+                    parts.append(" ")
             parts.append(syl)
         return "(" + "".join(parts) + ")" + _format_elms(p.elms)
-    prefix = "-" if p.continues_word else ""
+    if p.continues_word:
+        prefix = "=" if p.continues_word_hard else "-"
+    else:
+        prefix = ""
     if not p.syllables:
         return prefix + _format_elms(p.elms)
     body = p.syllables[0]
     for i, syl in enumerate(p.syllables[1:]):
         link = p.links[i] if i < len(p.links) else True
-        body += ("-" if link else " ") + syl
+        if link:
+            hard = i < len(p.hard_links) and p.hard_links[i]
+            body += ("=" if hard else "-") + syl
+        else:
+            body += " " + syl
     return prefix + body + _format_elms(p.elms)
 
 

@@ -10,6 +10,7 @@ from .svg_line_layout import (
     WhitespaceNode,
     build_lines,
 )
+from .syllabify import display_lyric_text
 
 
 class SVGRenderer:
@@ -155,17 +156,18 @@ class SVGRenderer:
         if text == "":
             return x
 
+        shown = display_lyric_text(text)
         parts.append(f'<g class="vsa-unit vsa-unit-text" data-vsa-unit="{item_index}">')
         parts.append(
             f'<text class="vsa-text vsa-free-text" x="{x:.2f}" y="{baseline_y:.2f}" '
             f'xml:space="preserve" '
             f'font-family="{escape(self.font_family)}" font-size="{self.font_size:.2f}">'
-            f'{escape(text)}</text>'
+            f'{escape(shown)}</text>'
         )
         parts.append("</g>")
 
         return x + estimate_text_width(
-            text,
+            shown,
             self.font_size,
             preserve_whitespace=True,
             font_family=self.font_family,
@@ -189,11 +191,12 @@ class SVGRenderer:
 
         parts.append(f'<g class="vsa-unit vsa-unit-scope" data-vsa-unit="{item_index}">')
 
+        shown = display_lyric_text(layout.text)
         parts.append(
             f'<text class="vsa-text vsa-sung-text" x="{x_syllable:.2f}" y="{baseline_y:.2f}" '
             f'xml:space="preserve" '
             f'font-family="{escape(self.font_family)}" font-size="{self.font_size:.2f}">'
-            f'{escape(layout.text)}</text>'
+            f'{escape(shown)}</text>'
         )
 
         if layout.filler_width > 2.0:

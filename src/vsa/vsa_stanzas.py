@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from .ast import Document, PitchMarkerNode, ScopeNode, TextNode
+from .bracket_directive import VALID_EHM_VALUES
 from .dutch_syllables import recite_syllables
 from .duration_model import elm_to_duration
 from .music import Duration, Pitch
@@ -14,6 +15,11 @@ from .pitch_resolver import PitchResolver
 from .yaml_frontmatter import parse_vsa_frontmatter_with_body_offset
 
 _STANZA_MARKERS = frozenset({"*", "**"})
+# Losse EHM/barline-tokens in platte tekst zijn geen gezongen woorden.
+_BARE_EHM_TOKENS = frozenset(
+    v for v in VALID_EHM_VALUES if v and all(ch in "/\\-~#♯+b♭" for ch in v)
+)
+_BARE_EHM_SORTED = sorted(_BARE_EHM_TOKENS, key=len, reverse=True)
 
 
 @dataclass(frozen=True)
@@ -181,13 +187,19 @@ def _consume_text(
             flush_word()
             close_stanza()
             continue
-        if _PUNCT_ONLY_RE.match(token):
-            append_punct(token)
+        if token in _BARE_EHM_TOKENS:
+            # Losse hoogtemarkering / barline (``//``, ``\``, …) — geen lyric.
+            continue
+        stripped = _strip_leading_ehm(token)
+        if not stripped:
+            continue
+        if _PUNCT_ONLY_RE.match(stripped):
+            append_punct(stripped)
             continue
         pitch = resolver.current_pitch
         dur = elm_to_duration("~", model=duration_model)
         line, column = loc(token_start)
-        for lyric, _syllabic in recite_syllables(token):
+        for lyric, _syllabic in recite_syllables(stripped):
             word.append(
                 VsaNote(
                     lyric=lyric,
@@ -198,6 +210,14 @@ def _consume_text(
                     column=column,
                 )
             )
+
+
+def _strip_leading_ehm(token: str) -> str:
+    """Haal een leidende kale EHM weg (``\\te`` → ``te``; ``//om`` → ``om``)."""
+    for ehm in _BARE_EHM_SORTED:
+        if token.startswith(ehm):
+            return token[len(ehm) :]
+    return token
 
 
 def _with_word_syllabics(notes: list[VsaNote]) -> list[VsaNote]:
