@@ -352,7 +352,7 @@ geldt voor de keywords hieronder.
 | `@tekstdichter` | `@tekstdichter "…"`                  | `<creator type="lyricist">`   | `lyricist`     |
 | `@arrangeur`    | `@arrangeur "bew. Hemelum"`          | `<creator type="arranger">`   | `arranger`     |
 | `@vertaler`     | `@vertaler "NL: …"`                  | `<creator type="translator">` | `translator`   |
-| `@bron`         | `@bron "Liturgikon, p.147-149"`      | `<source>`                    | `source`       |
+| `@bron`         | `@bron "Liturgikon, p.147-149"`      | `<source>` (+ MSCZ-colofon)   | `source`       |
 | `@copyright`    | `@copyright "CC BY-SA 4.0 — …"`      | `<rights>` (+ footer/colofon) | `copyright`    |
 
 **`@composer`.** Naam of aanduiding van de **componist** (of traditionele
@@ -371,16 +371,16 @@ Gaat mee in **beide** exportpaden:
 - MusicXML (playback/Coria én partituur): `<identification><source>…</source>`
 - MuseScore/MSCZ: meta-tag `source`
 
-**Op het MSCZ-blad:** MuseScore toont meta `source` niet automatisch in de kop.
-Zonder `@tekstdichter` zet de MSCZ-export daarom `@bron` ook als
-**lyricist-tekst** in de kop (`bron: …`), zodat de herkomst op papier zichtbaar
-is. Heb je wél een echte tekstdichter, dan wint `@tekstdichter` voor die plek;
-`@bron` blijft dan alleen in meta/`<source>`.
+**Op het MSCZ-blad:** MuseScore toont meta `source` niet in de kop. De
+partituur-export zet `@bron` daarom als regel **`Bron: …` in het colofon**
+(onderaan), naast copyright en eventuele bibliotheek-id. Gebruik `@bron` voor
+de herkomst; gebruik `@tekstdichter` alleen voor een echte tekstdichter (die
+verschijnt dan wél als lyricist linksboven).
 
 Optionele schrijfwijze met dubbele punt na het keyword: `@bron: "…"` ≡
 `@bron "…"`. Let op: `bron:` *in* een quoted string (bv.
 `@tekstdichter "bron: koormap …"`) is gewoon tekst — dat is geen keyword en
-geeft geen warning.
+geeft geen warning; zet herkomst bij voorkeur via `@bron`.
 
 ```text
 @bron "Liturgikon, p.147-149"
@@ -392,10 +392,8 @@ playback behoudt die tag (geen sanitize-strip).
 
 **`@tekstdichter` / `@arrangeur` / `@vertaler`.** Personenrollen naast de
 componist; zelfde stringvorm. Alleen zetten als je die rol echt kent.
-`@tekstdichter` verschijnt op het MSCZ-blad (lyricist-plek). Wil je daar de
-partituurbron tonen, gebruik bij voorkeur alleen `@bron` (zie hierboven); een
-expliciete `@tekstdichter "bron: …"` mag nog steeds en wint dan voor die
-bladplek.
+`@tekstdichter` verschijnt op het MSCZ-blad (lyricist-plek). De partituurbron
+hoort in `@bron` (colofon), niet als nep-tekstdichter.
 
 **`@copyright`.** Bronnotice voor footer (kort) en colofon (volledig) in
 `.mscz`, en `<rights>` in MusicXML. Zonder `@copyright` gebruikt MSCZ-export

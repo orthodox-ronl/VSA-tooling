@@ -327,11 +327,12 @@ def test_colophon_uses_copyright_and_bibliotheek_id(tmp_path: Path):
     assert '<metaTag name="composer">Archimandriet Feofan</metaTag>' in out
     assert '<metaTag name="source">Liturgikon, p.147-149</metaTag>' in out
     assert '<metaTag name="subtitle">Litanie</metaTag>' in out
+    assert "Bron: Liturgikon, p.147-149" in out
     assert "oddFooterC>" in out
 
 
-def test_bron_without_tekstdichter_appears_as_lyricist_on_sheet(tmp_path: Path):
-    """``@bron`` alleen → zichtbaar op blad als lyricist ``bron: …``."""
+def test_bron_appears_in_colophon_not_as_lyricist(tmp_path: Path):
+    """``@bron`` → meta source + colofonregel; niet als lyricist in de kop."""
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 
     mscx = (
@@ -355,12 +356,14 @@ def test_bron_without_tekstdichter_appears_as_lyricist_on_sheet(tmp_path: Path):
     with zipfile.ZipFile(path) as zf:
         out = zf.read("bron.mscx").decode("utf-8")
     assert '<metaTag name="source">koormap Hemelum</metaTag>' in out
-    assert '<metaTag name="lyricist">bron: koormap Hemelum</metaTag>' in out
-    assert "<style>lyricist</style>" in out
-    assert "<text>bron: koormap Hemelum</text>" in out
+    assert "Bron: koormap Hemelum" in out
+    assert "Colofon" in out
+    assert '<metaTag name="lyricist">' not in out
+    assert "<style>lyricist</style>" not in out
 
 
-def test_tekstdichter_wins_over_bron_for_sheet_lyricist(tmp_path: Path):
+def test_tekstdichter_still_appears_as_lyricist(tmp_path: Path):
+    """Echte ``@tekstdichter`` blijft lyricist; ``@bron`` alleen colofon/meta."""
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 
     mscx = (
@@ -380,14 +383,15 @@ def test_tekstdichter_wins_over_bron_for_sheet_lyricist(tmp_path: Path):
         path,
         title="Demo",
         bron="koormap Hemelum",
-        tekstdichter="bron: koormap Hemelum",
+        tekstdichter="liturgikon",
     )
     with zipfile.ZipFile(path) as zf:
         out = zf.read("both.mscx").decode("utf-8")
     assert '<metaTag name="source">koormap Hemelum</metaTag>' in out
-    assert '<metaTag name="lyricist">bron: koormap Hemelum</metaTag>' in out
-    assert out.count("bron: koormap Hemelum") >= 2
-
+    assert "Bron: koormap Hemelum" in out
+    assert '<metaTag name="lyricist">liturgikon</metaTag>' in out
+    assert "<style>lyricist</style>" in out
+    assert "<text>liturgikon</text>" in out
 
 def test_ensure_score_title_fills_empty_title_text(tmp_path: Path):
     from vsa.mscz_partituur import apply_partituur_mscz_conventions

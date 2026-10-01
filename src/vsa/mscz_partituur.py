@@ -104,6 +104,7 @@ _COLOPHON_VBOX_RE = re.compile(
 )
 _COLOPHON_TITLE = "Colofon"
 _BIB_ID_LABEL = "Bibliotheek-id:"
+_BRON_LABEL = "Bron:"
 _SEE_COLOPHON = "zie colofon"
 _LITURGY_COPY = (
     "Voor gebruik in de orthodoxe eredienst is kopiëren toegestaan."
@@ -145,9 +146,9 @@ def apply_partituur_mscz_conventions(
     *title* (``@title``) wordt als ``workTitle``-meta én als Title-tekst in de
     kop-VBox gezet — MusicXML-import laat dat veld soms leeg.
 
-    *bron* (``@bron``) → meta ``source``. Staat er geen *tekstdichter*, dan ook
-    zichtbaar op het blad als lyricist-tekst ``bron: …`` (MuseScore toont meta
-    ``source`` niet op het blad). *tekstdichter* wint voor die bladplek.
+    *bron* (``@bron``) → meta ``source`` én regel in het colofon. MuseScore
+    toont meta ``source`` niet in de kop; daarom geen lyricist-workaround meer.
+    *tekstdichter* blijft optioneel als echte lyricist-tekst in de kop.
     """
     path = Path(path)
     if not path.is_file() or path.suffix.lower() != ".mscz":
@@ -174,16 +175,12 @@ def apply_partituur_mscz_conventions(
     mscx = _apply_recite_print_conventions(mscx)
     if title:
         mscx = _ensure_score_title(mscx, title)
-    # Bladzichtbaar: echte @tekstdichter wint; anders @bron als lyricist-tekst
-    # (MuseScore toont meta ``source`` niet op het blad, wél lyricist).
-    sheet_lyricist = (tekstdichter or "").strip()
-    if not sheet_lyricist and bron:
-        sheet_lyricist = _bron_as_sheet_lyricist(bron)
+    sheet_lyricist = (tekstdichter or "").strip() or None
     for meta_name, value in (
         ("composer", composer),
         ("source", bron),
         ("subtitle", ondertitel),
-        ("lyricist", sheet_lyricist or None),
+        ("lyricist", sheet_lyricist),
         ("arranger", arrangeur),
         ("translator", vertaler),
     ):
@@ -191,7 +188,7 @@ def apply_partituur_mscz_conventions(
             mscx = _set_meta(mscx, meta_name, value)
     if sheet_lyricist:
         mscx = _ensure_header_text(mscx, style="lyricist", text=sheet_lyricist)
-    short, full = _format_copyright_notices(copyright, bibliotheek_id)
+    short, full = _format_copyright_notices(copyright, bibliotheek_id, bron=bron)
     mscx = _set_meta(mscx, "copyright", short)
     mscx = _set_footer_style(mscx, short)
     mscx = _insert_colophon_after_staff1(mscx, full)
@@ -334,16 +331,6 @@ _HEADER_VBOX_RE = re.compile(
 )
 
 
-def _bron_as_sheet_lyricist(bron: str) -> str:
-    """Visible sheet label when only ``@bron`` is set (no ``@tekstdichter``)."""
-    value = bron.strip()
-    if not value:
-        return ""
-    if value.lower().startswith("bron:"):
-        return value
-    return f"bron: {value}"
-
-
 def _ensure_header_text(mscx: str, *, style: str, text: str) -> str:
     """Zet of vul een Text-blok met *style* in de kop-VBox."""
     text = text.strip()
@@ -415,7 +402,10 @@ def _ensure_score_title(mscx: str, title: str) -> str:
 
 
 def _format_copyright_notices(
-    copyright: str | None, bibliotheek_id: str | None
+    copyright: str | None,
+    bibliotheek_id: str | None,
+    *,
+    bron: str | None = None,
 ) -> tuple[str, str]:
     """(korte footer, volledige colofontekst)."""
     raw = (copyright or "").strip()
@@ -428,6 +418,17 @@ def _format_copyright_notices(
         full = raw
         if _LITURGY_COPY.lower() not in full.lower():
             full = f"{full}\n{_LITURGY_COPY}"
+    source = (bron or "").strip()
+    if source:
+        full = re.sub(
+            rf"(?im)^\s*{re.escape(_BRON_LABEL)}\s*.*$",
+            "",
+            full,
+        ).strip()
+        # Strip optional leading ``bron:`` from the value itself.
+        if source.lower().startswith("bron:"):
+            source = source[5:].strip()
+        full = f"{full}\n{_BRON_LABEL} {source}"
     ident = (bibliotheek_id or "").strip()
     if ident:
         full = re.sub(
