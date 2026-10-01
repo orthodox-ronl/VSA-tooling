@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>fix/mscz-mxl-one-part-two-staff</code>
-  , gebouwd 2026-09-30 23:33 CEST.
+   — branch <code>development</code>
+  , gebouwd 2026-10-01 21:05 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5263,7 +5263,7 @@ geldt voor de keywords hieronder.</p>
 <tr>
 <td><code>@bron</code></td>
 <td><code>@bron "Liturgikon, p.147-149"</code></td>
-<td><code>&lt;source&gt;</code></td>
+<td><code>&lt;source&gt;</code> (+ MSCZ-colofon)</td>
 <td><code>source</code></td>
 </tr>
 <tr>
@@ -5287,15 +5287,15 @@ Gaat mee in <strong>beide</strong> exportpaden:</p>
 <li>MusicXML (playback/Coria én partituur): <code>&lt;identification&gt;&lt;source&gt;…&lt;/source&gt;</code></li>
 <li>MuseScore/MSCZ: meta-tag <code>source</code></li>
 </ul>
-<p><strong>Op het MSCZ-blad:</strong> MuseScore toont meta <code>source</code> niet automatisch in de kop.
-Zonder <code>@tekstdichter</code> zet de MSCZ-export daarom <code>@bron</code> ook als
-<strong>lyricist-tekst</strong> in de kop (<code>bron: …</code>), zodat de herkomst op papier zichtbaar
-is. Heb je wél een echte tekstdichter, dan wint <code>@tekstdichter</code> voor die plek;
-<code>@bron</code> blijft dan alleen in meta/<code>&lt;source&gt;</code>.</p>
+<p><strong>Op het MSCZ-blad:</strong> MuseScore toont meta <code>source</code> niet in de kop. De
+partituur-export zet <code>@bron</code> daarom als regel <strong><code>Bron: …</code> in het colofon</strong>
+(onderaan), naast copyright en eventuele bibliotheek-id. Gebruik <code>@bron</code> voor
+de herkomst; gebruik <code>@tekstdichter</code> alleen voor een echte tekstdichter (die
+verschijnt dan wél als lyricist linksboven).</p>
 <p>Optionele schrijfwijze met dubbele punt na het keyword: <code>@bron: "…"</code> ≡
 <code>@bron "…"</code>. Let op: <code>bron:</code> <em>in</em> een quoted string (bv.
 <code>@tekstdichter "bron: koormap …"</code>) is gewoon tekst — dat is geen keyword en
-geeft geen warning.</p>
+geeft geen warning; zet herkomst bij voorkeur via <code>@bron</code>.</p>
 <div class="highlight"><pre><span></span><code>@bron "Liturgikon, p.147-149"
 </code></pre></div>
 <p><strong><code>@ondertitel</code>.</strong> Ondertitel onder de hoofdtitel (bv. liturgische aanduiding).
@@ -5303,10 +5303,8 @@ Gaat mee in partituur/MSCZ (<code>movement-title</code> / MuseScore <code>subtit
 playback behoudt die tag (geen sanitize-strip).</p>
 <p><strong><code>@tekstdichter</code> / <code>@arrangeur</code> / <code>@vertaler</code>.</strong> Personenrollen naast de
 componist; zelfde stringvorm. Alleen zetten als je die rol echt kent.
-<code>@tekstdichter</code> verschijnt op het MSCZ-blad (lyricist-plek). Wil je daar de
-partituurbron tonen, gebruik bij voorkeur alleen <code>@bron</code> (zie hierboven); een
-expliciete <code>@tekstdichter "bron: …"</code> mag nog steeds en wint dan voor die
-bladplek.</p>
+<code>@tekstdichter</code> verschijnt op het MSCZ-blad (lyricist-plek). De partituurbron
+hoort in <code>@bron</code> (colofon), niet als nep-tekstdichter.</p>
 <p><strong><code>@copyright</code>.</strong> Bronnotice voor footer (kort) en colofon (volledig) in
 <code>.mscz</code>, en <code>&lt;rights&gt;</code> in MusicXML. Zonder <code>@copyright</code> gebruikt MSCZ-export
 een default (CC BY-SA 4.0 + eredienst-zin).</p>
@@ -5426,7 +5424,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-10-01
         
       </p>
       
