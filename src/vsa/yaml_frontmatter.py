@@ -4,22 +4,21 @@ Parses optional YAML frontmatter from .vsa files.
 A .vsa file may begin with a YAML block delimited by ``---``:
 
     ---
-    muziek:
-      do: F4
-      mode: major
-      tempo: 132
-    identificatie:
-      title: Troparion van de zondag, toon 1
+    do: F4
+    mode: major
+    tempo: 132
+    partituur:
+      title: Tropaar van de zondag, toon 1
       composer: Traditioneel
-      language: nl
+    taal: nl
+    bron:
+      uitgangspunt: Liturgikon, p.58
     ---
     [:] ...
 
-The ``muziek`` section maps directly to block metadata keys (do, mode, tempo,
-duration-model, meter, validate-ending). The ``identificatie`` section maps to
-MusicXML identification fields. The ``typografie`` section maps to font
-defaults for export renderers (see spec §4.1.2 and §8.2.10). Other sections
-are preserved for future use.
+Playback keys may also appear under ``muziek:`` (legacy) or ``afspelen:``
+(future). ``bron.uitgangspunt`` maps to MusicXML ``<source>`` / MuseScore
+meta ``source``. Legacy ``identificatie:`` remains readable for older files.
 
 Files without a ``---`` delimiter are returned unchanged.
 """
@@ -71,29 +70,63 @@ def parse_vsa_frontmatter_with_body_offset(text: str) -> tuple[dict, str, int]:
     return data, body, body_offset
 
 
+def _promote_playback(frontmatter: dict, result: dict[str, str]) -> None:
+    """Zet do/mode/tempo in het platte block-metadata dict."""
+    for section in ("muziek", "afspelen"):
+        block = frontmatter.get(section, {})
+        if isinstance(block, dict):
+            for k, v in block.items():
+                if v is None or v == "":
+                    continue
+                result[str(k)] = str(v)
+    for k in ("do", "mode", "tempo"):
+        if k in frontmatter and frontmatter[k] is not None and frontmatter[k] != "":
+            result[k] = str(frontmatter[k])
+
+
 def frontmatter_to_block_metadata(frontmatter: dict) -> dict[str, str]:
     """Flatten YAML frontmatter into the flat ``key=value`` dict format used
     by :class:`~vsa.block_parser.MarkdownBlock`.
 
-    The ``muziek`` section's keys are promoted to the top level (they match
-    existing block metadata keys like ``do``, ``mode``, ``tempo``).
+    Playback keys (``do`` / ``mode`` / ``tempo``) are promoted from top-level,
+    ``muziek:``, or ``afspelen:``.
 
-    All other sections are stored as ``section.key`` to avoid collisions.
+    Nested sections are stored as ``section.key`` (e.g. ``bron.uitgangspunt``,
+    ``partituur.title``, legacy ``identificatie.title``).
     """
     result: dict[str, str] = {}
+    _promote_playback(frontmatter, result)
 
-    muziek = frontmatter.get("muziek", {})
-    if isinstance(muziek, dict):
-        for k, v in muziek.items():
-            result[str(k)] = str(v)
-
+    skip_sections = {"muziek", "afspelen", "do", "mode", "tempo"}
     for section, values in frontmatter.items():
-        if section == "muziek":
+        if section in skip_sections:
             continue
         if isinstance(values, dict):
             for k, v in values.items():
+                if v is None or v == "":
+                    continue
                 result[f"{section}.{k}"] = str(v)
+        elif values is None or values == "":
+            continue
         else:
             result[str(section)] = str(values)
 
     return result
+
+
+def bron_uitgangspunt_from_frontmatter(frontmatter: dict) -> str | None:
+    """Return ``bron.uitgangspunt`` if set (non-empty string).
+
+    Falls back to legacy ``identificatie.bron``.
+    """
+    bron = frontmatter.get("bron")
+    if isinstance(bron, dict):
+        val = bron.get("uitgangspunt")
+        if val is not None and str(val).strip():
+            return str(val).strip()
+    ident = frontmatter.get("identificatie")
+    if isinstance(ident, dict):
+        val = ident.get("bron")
+        if val is not None and str(val).strip():
+            return str(val).strip()
+    return None

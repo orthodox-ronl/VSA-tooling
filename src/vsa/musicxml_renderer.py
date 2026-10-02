@@ -274,29 +274,55 @@ class MusicXMLRenderer:
             ET.SubElement(defaults, tag, **attrs)
 
     def _add_work(self, score: ET.Element) -> None:
-        title = self._meta.get("identificatie.title", "")
+        title = (
+            self._meta.get("partituur.title")
+            or self._meta.get("identificatie.title")
+            or self._meta.get("titel")
+            or self._meta.get("title")
+            or ""
+        )
         if title:
             work = ET.SubElement(score, "work")
             ET.SubElement(work, "work-title").text = title
 
-        subtitle = self._meta.get("identificatie.subtitle", "")
+        subtitle = (
+            self._meta.get("partituur.subtitle")
+            or self._meta.get("identificatie.subtitle")
+            or ""
+        )
         if subtitle:
             ET.SubElement(score, "movement-title").text = subtitle
 
     def _add_identification(self, score: ET.Element) -> None:
         ident = ET.SubElement(score, "identification")
 
+        composer_set = False
         for key, mxml_type in [
+            ("partituur.composer", "composer"),
             ("identificatie.composer", "composer"),
             ("identificatie.lyricist", "lyricist"),
         ]:
             value = self._meta.get(key, "")
-            if value:
-                ET.SubElement(ident, "creator", type=mxml_type).text = value
+            if not value:
+                continue
+            if mxml_type == "composer":
+                if composer_set:
+                    continue
+                composer_set = True
+            ET.SubElement(ident, "creator", type=mxml_type).text = value
 
         rights = self._meta.get("identificatie.rights", "")
         if rights:
             ET.SubElement(ident, "rights").text = rights
+
+        source = (
+            self._meta.get("bron.uitgangspunt")
+            or self._meta.get("identificatie.bron")
+            or self._meta.get("bron")
+            or ""
+        ).strip()
+        if source:
+            ET.SubElement(ident, "source").text = source
 
         encoding = ET.SubElement(ident, "encoding")
         ET.SubElement(encoding, "software").text = "vsa-tool"
@@ -318,7 +344,12 @@ class MusicXMLRenderer:
                 ET.SubElement(encoding, "supports", **attrs)
 
         # Liturgical tone stored as miscellaneous
-        tone = self._meta.get("identificatie.tone", self._meta.get("tone", ""))
+        tone = (
+            self._meta.get("toon")
+            or self._meta.get("identificatie.tone")
+            or self._meta.get("tone")
+            or ""
+        )
         if tone:
             misc = ET.SubElement(ident, "miscellaneous")
             ET.SubElement(misc, "miscellaneous-field", name="tone").text = str(tone)
@@ -364,7 +395,10 @@ class MusicXMLRenderer:
         meter_str = self._meta.get("meter", "")
         reciting_mode = self._meta.get("reciting-mode", RECITING_MODE_QUARTERS)
         language = self._meta.get(
-            "identificatie.language", self._meta.get("language", "")
+            "taal",
+            self._meta.get(
+                "identificatie.language", self._meta.get("language", "")
+            ),
         )
 
         try:

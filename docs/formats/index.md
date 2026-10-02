@@ -19,6 +19,9 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 - **Audio (``.mp3`` / ``.ogg`` / ``.wav``):** preview-luisteren; CLI
   [`vsa audio`](../reference/cli/audio.md) — zie [`.mp3` / audio](audio.md).
 - **``.midi`` / ``.mid``:** **niet gepland** (preview = audio) — zie [`.midi`](midi.md).
+- **Platte gezongen tekst (zoekindex):** [`vsa text`](../reference/cli/text.md)
+  op `.vsa` / `.mvsa` / MusicXML / `.mscz` (geen aparte matrixkolom; schrijft
+  geen `.mvsa`-sibling). Alias op MuseScore-bron: [`mscz text`](../reference/cli/mscz.md).
 - Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 - Normaalvorm-checklists MXL / MSCZ / PDF: [canonieke checklists](canonical-checklists.md)
   (MXL = vier parts; MSCZ = twee balken SA/TB zonder stem-labels).
@@ -37,21 +40,23 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
 ## Commando’s
 
-| Command             | Bron                          | Man-pagina                                 |
-| ------------------- | ----------------------------- | ------------------------------------------ |
-| `vsa`               | `.vsa` (+ Markdown-workflows) | [CLI-overzicht](../reference/cli/index.md) |
-| `vsa audio`         | `.mxl` / `.vsa` / …           | [`audio`](../reference/cli/audio.md)       |
-| `mvsa` ≡ `vsa mvsa` | `.mvsa`                       | [`mvsa`](../reference/cli/mvsa.md)         |
-| `mxl`               | `.mxl` / `.musicxml`          | [`mxl`](../reference/cli/mxl.md)           |
-| `mscz`              | `.mscz`                       | [`mscz`](../reference/cli/mscz.md)         |
+| Command             | Bron                                   | Man-pagina                                 |
+| ------------------- | -------------------------------------- | ------------------------------------------ |
+| `vsa`               | `.vsa` (+ Markdown-workflows)          | [CLI-overzicht](../reference/cli/index.md) |
+| `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz`  | [`text`](../reference/cli/text.md)         |
+| `vsa audio`         | `.mxl` / `.vsa` / …                    | [`audio`](../reference/cli/audio.md)       |
+| `mvsa` ≡ `vsa mvsa` | `.mvsa`                                | [`mvsa`](../reference/cli/mvsa.md)         |
+| `mxl`               | `.mxl` / `.musicxml`                   | [`mxl`](../reference/cli/mxl.md)           |
+| `mscz`              | `.mscz` (import / mxl / text)          | [`mscz`](../reference/cli/mscz.md)         |
 
 Na `pip install -e .` staan `vsa`, `mvsa`, `mxl` en `mscz` op PATH.
 
 ## Bestandsnaamgeving (kort)
 
 In `generated/` bij voorkeur `stem.brontype.doeltype` (laatste = echte
-extensie), bv. `alleluia.mvsa.mxl` of `lied.mvsa.mp3`. CLI-`-o` mag simpel
-blijven. Details:
+extensie), bv. `alleluia.mvsa.mxl`, `lied.mvsa.mp3`, of voor zoektekst
+`lied.mscz.lyrics.txt` (via [`vsa text`](../reference/cli/text.md)).
+CLI-`-o` mag simpel blijven. Details:
 [canonieke checklists — naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ## Windows `.cmd`-scripts

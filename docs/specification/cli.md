@@ -537,6 +537,27 @@ vsa template validate docs\specification-vsa-templates\library\tropaar-toon-4\te
 Bij succes: één `OK`-regel per bestand. Bij fout: `pad: ERROR: CODE: …` en
 exitcode `1`.
 
+## `vsa text <pad>`
+
+### Doel
+
+Haal platte gezongen tekst uit `.vsa`, `.mvsa`, MusicXML (`.mxl` /
+`.musicxml` / `.xml`) of `.mscz` — zonder notatie, voor zoekindex of
+lyrics-producten. Schrijft geen `.mvsa`-sibling.
+
+Volledige regel (MusicXML-lyrics, stemkeuze, `-o`): man-pagina
+[reference/cli/text.md](../reference/cli/text.md).
+
+### Gebruik
+
+```cmd
+vsa text examples\minimal\001_plain_text.vsa
+vsa text lied.mscz.mxl -o generated\lied.mscz.lyrics.txt
+vsa text lied.mscz -o generated\lied.mscz.lyrics.txt
+```
+
+Alias voor alleen `.mscz`: `mscz text` (zelfde extractie via temp-`.mxl`).
+
 ## `vsa mvsa …`
 
 ### Doel

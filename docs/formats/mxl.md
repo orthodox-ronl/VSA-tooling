@@ -12,6 +12,7 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 | Export vanuit `.mvsa`    | [`mvsa musicxml`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)                                   |
 | Import → `.mvsa`         | [`mxl import`](../reference/cli/mxl.md)                                                         |
 | → `.mscz`                | [`mxl mscz`](../reference/cli/mxl.md)                                                           |
+| Platte gezongen tekst    | [`vsa text`](../reference/cli/text.md) (ook op `{stam}.mscz.mxl`)                               |
 | Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                           |
 
 Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
@@ -33,6 +34,7 @@ Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
 ```cmd
 mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
+vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
 ```
 
 Via repo-script: `scripts\mxl.cmd …`
@@ -41,3 +43,4 @@ Via repo-script: `scripts\mxl.cmd …`
 
 - [Formaten & CLI — overzicht](index.md)
 - [`.mvsa`](mvsa.md) · [`.mscz`](mscz.md) · [`.vsa`](vsa.md)
+- Platte tekst: [`vsa text`](../reference/cli/text.md)

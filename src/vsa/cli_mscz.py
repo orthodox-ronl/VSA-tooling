@@ -1,6 +1,7 @@
 """Top-level ``mscz`` CLI (bron: ``.mscz``).
 
-Acties: import -> mvsa; mxl (via MuseScore). Zie docs/plans/mvsa-conversions.md.
+Acties: import -> mvsa; mxl (via MuseScore); text (lyrics via temp-mxl).
+Zie docs/plans/mvsa-conversions.md.
 """
 
 from __future__ import annotations
@@ -31,6 +32,8 @@ def main(argv: list[str] | None = None) -> int:
         return vsa_main(forwarded)
     if ns.mscz_command == "mxl":
         return _cmd_mscz_to_mxl(ns)
+    if ns.mscz_command == "text":
+        return _cmd_mscz_text(ns)
     parser.print_help()
     return 1
 
@@ -49,18 +52,22 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Importeer naar .mvsa (via MuseScore -> mxl).\n"
             "  mxl PATH [-o OUT] [--musescore PATH]\n"
             "      Exporteer naar .mxl via MuseScore.\n"
+            "  text PATH [-o OUT] [--musescore PATH]\n"
+            "      Platte gezongen tekst (via temp-.mxl; geen .mvsa).\n"
             "\n"
             "voorbeelden:\n"
             "  mscz import lied.mscz --pitch doremi -o lied.mvsa\n"
             "  mscz mxl lied.mscz -o lied.mxl\n"
+            "  mscz text lied.mscz -o lied.lyrics.txt\n"
             "\n"
-            "Alias: vsa mvsa import … (zelfde import-pad)."
+            "Alias import: vsa mvsa import …\n"
+            "Alias text: vsa text … (ook .mxl / .vsa / .mvsa)."
         ),
     )
     sub = parser.add_subparsers(
         dest="mscz_command",
         required=True,
-        metavar="{import,mxl}",
+        metavar="{import,mxl,text}",
     )
     imp = sub.add_parser(
         "import",
@@ -119,6 +126,29 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+
+    text = sub.add_parser(
+        "text",
+        help="Platte gezongen tekst uit .mscz (via MuseScore; geen .mvsa).",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Zelfde extractie als ``vsa text`` op MusicXML: eerste part met\n"
+            "lyric number 1, lettergrepen samengevoegd tot woorden.\n"
+            "Schrijft geen import-sibling (.mvsa)."
+        ),
+    )
+    text.add_argument("path", help=".mscz bronbestand.")
+    text.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Schrijf platte tekst naar dit bestand i.p.v. stdout.",
+    )
+    text.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto).",
+    )
     return parser
 
 
@@ -163,6 +193,22 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
         tmp_mxl.unlink(missing_ok=True)
     print(f"Geschreven: {out}")
     return 0
+
+
+def _cmd_mscz_text(ns: argparse.Namespace) -> int:
+    """Forward naar ``vsa text`` (zelfde API; geen .mvsa)."""
+    from .cli import main as vsa_main
+
+    path = Path(ns.path)
+    if path.suffix.lower() != ".mscz":
+        print(f"Verwacht .mscz als bron; kreeg {path.suffix!r}", file=sys.stderr)
+        return 1
+    forwarded = ["text", ns.path]
+    if ns.output:
+        forwarded.extend(["-o", ns.output])
+    if ns.musescore:
+        forwarded.extend(["--musescore", ns.musescore])
+    return vsa_main(forwarded)
 
 
 if __name__ == "__main__":

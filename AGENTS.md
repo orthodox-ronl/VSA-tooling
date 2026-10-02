@@ -13,7 +13,8 @@ Organisatie-context (andere repo's, terminologie): zie
 VSA-tooling is de **Python-toolchain** voor Vereenvoudigde Slavische Accentnotatie:
 
 - parser en semantische validator;
-- CLI (`vsa`): validate, parse, blocks, build-markdown, pdf, svg, musicxml, …;
+- CLI (`vsa`): validate, parse, blocks, build-markdown, pdf, svg, musicxml,
+  text, …;
 - MkDocs-documentatie op GitHub Pages; presentatievoorbeeld in
   [VSA-demo](https://github.com/orthodox-ronl/VSA-demo);
 - regressietests en GitHub Actions CI (inclusief herbruikbare render-workflow).
@@ -76,6 +77,13 @@ Before implementing:
 ### 4. Goal-Driven Execution
 
 Define verifiable success criteria (tests, validate, build) and loop until they pass.
+
+### 5. Documentatie synchroon met code
+
+Bij gedragswijzigingen: in **dezelfde** ronde man-pagina’s, handleidingen
+(`docs/guides/`), format-hubs (`docs/formats/`), contract/plan-pagina’s en
+cross-links bijwerken. Zie `.cursor/rules/docs-sync-with-code.mdc`.
+Geen «docs later».
 
 ---
 
@@ -251,15 +259,19 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 
 ## Cursor-regels
 
-| Regel                                 | Doel                                |
-| ------------------------------------- | ----------------------------------- |
-| `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                    |
-| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker          |
-| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron    |
-| `documentatie-duidelijkheid.mdc`      | Leesbare docs                       |
-| `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13) |
+| Regel                                 | Doel                                                         |
+| ------------------------------------- | ------------------------------------------------------------ |
+| `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                             |
+| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                   |
+| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                             |
+| `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                |
+| `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken       |
+| `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                          |
 
 Na bulk-tabellen: `python scripts/align_markdown_tables.py <pad>`.
+
+**Documentatie bij code:** man-pagina’s én handleidingen én format-hubs
+in dezelfde ronde bijwerken (zie `docs-sync-with-code.mdc`).
 
 ---
 
