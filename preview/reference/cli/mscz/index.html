@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-02 15:08 CEST.
+  , gebouwd 2026-10-02 23:27 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3777,6 +3777,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../text/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa text — platte gezongen tekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../musicxml/" class="md-nav__link">
         
   
@@ -4860,12 +4888,15 @@ Zie het conversieplan:
 <a href="../../../plans/mvsa-conversions/">mvsa-conversions</a>.</p>
 <p>Alias voor import: <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> (zelfde
 MSCZ→mxl→mvsa-keten).</p>
+<p>Alias voor platte tekst: <a href="../text/"><code>vsa text</code></a> (zelfde extractie; ook
+<code>.mxl</code> / <code>.vsa</code> / <code>.mvsa</code>).</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mscz [-h] {import,mxl} …
+<div class="highlight"><pre><span></span><code>mscz [-h] {import,mxl,text} …
 mscz import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
             [--octave-style {@oct,marker}] [--section SECTION]
             [--musescore PATH] [--no-align] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
+mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 </code></pre></div>
 <h2 id="subcommandos">Subcommando's<a class="headerlink" href="#subcommandos" title="Permanent link">&para;</a></h2>
 <table>
@@ -4884,17 +4915,23 @@ mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
 <td><code>mxl</code></td>
 <td>Naar Coria-<code>.mxl</code>: MuseScore-export, daarna explode naar vier parts.</td>
 </tr>
+<tr>
+<td><code>text</code></td>
+<td>Platte gezongen tekst via temp-<code>.mxl</code> (geen <code>.mvsa</code>; zie <a href="../text/"><code>vsa text</code></a>).</td>
+</tr>
 </tbody>
 </table>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
+mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
 </code></pre></div>
 <p>Via repo-script:</p>
 <div class="highlight"><pre><span></span><code>scripts\mscz.cmd -h
 </code></pre></div>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
+<li><a href="../text/"><code>text</code></a> — platte tekst uit <code>.vsa</code> / <code>.mvsa</code> / MusicXML / <code>.mscz</code></li>
 <li><a href="../mvsa/"><code>mvsa</code></a> — bron <code>.mvsa</code></li>
 <li><a href="../mxl/"><code>mxl</code></a> — bron <code>.mxl</code></li>
 <li>MSCZ-export vanuit mvsa: <a href="../mvsa/#vsa-mvsa-mscz"><code>vsa mvsa mscz</code></a></li>
@@ -4935,7 +4972,7 @@ mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-27
+        Bijgewerkt: 2026-10-02
         
       </p>
       
