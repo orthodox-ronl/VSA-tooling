@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-02 12:16 CEST.
+  , gebouwd 2026-10-02 12:25 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4959,7 +4959,7 @@ Ownership (wie kiest, wie handhaaft):
 </tr>
 <tr>
 <td>R7</td>
-<td>Melisma same-pitch (I1+I2): <strong>I1</strong> — alleen ongestipte standaardduuren ≤ whole; nooit <code>type=breve</code> / gestipte sommen. <strong>I2</strong> — lange holds als <strong>tie-keten</strong> (wholes + rest) i.p.v. heraangeslagen hakken; totale duur = som slots; pure hold zonder slur.</td>
+<td>Melisma same-pitch: <strong>I1</strong> (MusicXML-partituur) — alleen ongestipte standaardduuren ≤ whole of tie-keten; nooit <code>type=breve</code> / gestipte sommen in MusicXML (MuseScore-importcorruptie). <strong>I2</strong> — lange holds als tie-keten i.p.v. heraangeslagen hakken. <strong>MSCZ-postprocess</strong> — die tie-ketens samentrekken tot <strong>één compacte noot, inclusief gestipt</strong> (leesbaar 3/4 i.p.v. 2/4+1/4); pure hold zonder slur.</td>
 </tr>
 </tbody>
 </table>
@@ -5092,7 +5092,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>M8</td>
-<td>Melisma-print: same-pitch samentrekken of tie-keten (S13 / R7 I1+I2); slur alleen bij toonwissels.</td>
+<td>Melisma-print: same-pitch → compacte noot (MSCZ-postprocess) of tie-keten in MusicXML (S13 / R7); slur alleen bij toonwissels.</td>
 </tr>
 <tr>
 <td>M9</td>
@@ -5248,8 +5248,12 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 <td><code>vsa.mscz_partituur</code> (S17, C3–C4)</td>
 </tr>
 <tr>
-<td>Melisma collapse/tie-keten (I1+I2)</td>
+<td>Melisma collapse/tie-keten (I1+I2 in MusicXML)</td>
 <td><code>mvsa_musicxml._collapse_same_pitch_melisma</code> / <code>_pack_safe_divs</code></td>
+</tr>
+<tr>
+<td>Melisma same-pitch → gestipte compacte noot (MSCZ)</td>
+<td><code>mscz_partituur._collapse_same_pitch_tie_runs</code></td>
 </tr>
 <tr>
 <td>Maat-<code>len</code> gelijk over staves; geen <code>durationType=breve</code></td>
@@ -5305,7 +5309,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-10-02
         
       </p>
       

@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-02 12:16 CEST.
+  , gebouwd 2026-10-02 12:25 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5054,7 +5054,7 @@ Leesregels in deze repo: <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a>.<
 <tr>
 <td>S13</td>
 <td><strong>Melisma</strong></td>
-<td><strong>MXL en MSCZ</strong> (zie ook M5a). Lyric op eerste noot + <code>&lt;extend/&gt;</code>; bij <strong>toonwissels</strong> ook melisma-slur. <strong>Zelfde-hoogte</strong> binnen één melisma: samentrekken tot ongestipte standaardduuren ≤ whole, of een <strong>tie-keten</strong> van zulke noten die de som dekt (I2). <strong>I1:</strong> nooit MusicXML <code>type=breve</code> of gestipte collapse-sommen (MuseScore-corruptie); maat-<code>len</code>/stem-sommen gelijk. Pure same-pitch-hold: ties, <strong>geen</strong> slur. Geen Capella-fraseslurs. Zie <a href="../mscz-leesbaarheid/">leesbaarheid R7</a>.</td>
+<td><strong>MXL en MSCZ</strong> (zie ook M5a). Lyric op eerste noot + <code>&lt;extend/&gt;</code>; bij <strong>toonwissels</strong> ook melisma-slur. <strong>Zelfde-hoogte:</strong> MusicXML-tussenbestand (partituur) blijft <strong>I1</strong> — ongestipte standaardduuren ≤ whole of <strong>tie-keten</strong> (veilige MuseScore-import; geen gestipte MusicXML-collapse / geen <code>type=breve</code>). <strong>MSCZ-postprocess</strong> trekt die tie-ketens daarna samen tot <strong>één compacte noot, inclusief gestipt</strong> (bijv. half+kwart → gestipte half) — leesbaar blad. Pure same-pitch-hold: ties in het tussenbestand, <strong>geen</strong> slur; op het eindblad bij voorkeur één noot. Geen Capella-fraseslurs. Zie <a href="../mscz-leesbaarheid/">leesbaarheid R7</a>.</td>
 </tr>
 <tr>
 <td>S14</td>
@@ -5176,7 +5176,7 @@ andere pipeline, geen MuseScore-partituur.)</em></p>
 <tr>
 <td>Melisma same-pitch</td>
 <td>collapse tot <strong>één</strong> noot incl. gestipte ELM (M5a; Coria stript ties)</td>
-<td>collapse/tie-keten ongestipt (S13/R7 I1+I2) — MuseScore-veilig</td>
+<td>MusicXML: I1 tie-keten ongestipt; <strong>MSCZ-postprocess</strong>: compacte noot incl. stip (S13/R7)</td>
 </tr>
 <tr>
 <td>Stokrichting</td>
@@ -5277,7 +5277,7 @@ andere pipeline, geen MuseScore-partituur.)</em></p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-30
+        Bijgewerkt: 2026-10-02
         
       </p>
       
