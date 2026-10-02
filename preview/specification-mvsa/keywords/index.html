@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-02 11:24 CEST.
+  , gebouwd 2026-10-02 12:16 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3040,6 +3040,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#taal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @taal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#-" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4726,6 +4737,62 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plans/kerkslavisch-transliteratie/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    kerkslavische hulptekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plans/hulptekst-reviewcorpus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    hulptekst-reviewcorpus (expert)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4905,6 +4972,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#taal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @taal
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5329,11 +5407,6 @@ namen vastliggen voor later gebruik.</p>
 <td><code>@toon "8"</code></td>
 </tr>
 <tr>
-<td><code>@taal</code></td>
-<td>Taal van de gezongen tekst</td>
-<td><code>@taal "nl"</code></td>
-</tr>
-<tr>
 <td><code>@genre</code></td>
 <td>Soort zangstuk (litanie, tropaar, …) voor catalogus/filters</td>
 <td><code>@genre "litanie"</code></td>
@@ -5348,6 +5421,52 @@ namen vastliggen voor later gebruik.</p>
 <p><strong>Niet gebruiken</strong> als vervanging van <code>@tekst</code> (zichtbare cue) of <code>#</code>-commentaar
 voor tijdelijke tipjes in de bron — <code>@opmerkingen</code> is voor blijvende metadata
 zodra tooling die gaat tonen.</p>
+<hr />
+<h2 id="taal"><code>@taal</code><a class="headerlink" href="#taal" title="Permanent link">&para;</a></h2>
+<p><strong>Wat het is.</strong> Sticky <strong>passage-taal</strong> voor hulptekst-export: vanaf het
+eerstvolgende LSATB-systeem tot je <code>@taal</code> opnieuw zet. De converter gebruikt
+dit bij <code>--hulptekst</code> om te bepalen welke richting geldt.</p>
+<p><strong>Vorm.</strong> <code>@taal nl</code> · <code>@taal ksl</code> · <code>@taal auto</code><br />
+Optioneel als document-metadata: <code>@taal "nl"</code> (quoted string; als de string
+<code>nl</code> of <code>ksl</code> is, geldt die ook als sticky passage-taal).</p>
+<table>
+<thead>
+<tr>
+<th>Waarde</th>
+<th>Effect bij <code>--hulptekst</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ksl</code></td>
+<td>Hulptekst = Latijn (uit kerkslavische bronletters)</td>
+</tr>
+<tr>
+<td><code>nl</code></td>
+<td>Hulptekst = Cyrillisch (uit Nederlandse bronletters)</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>Per lettergreep detecteren (default als je <code>@taal</code> weglaat)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Wel gebruiken</strong> in gemengde stukken (bijv. Nederlands couplet + kerkslavisch
+refrein in één uitvoeringsvorm), zodat alleen de bedoelde passages worden
+omgezet.</p>
+<p><strong>Niet gebruiken</strong> als vervanging van aparte uitvoeringsvormen (<code>-nl</code> / <code>-ksl</code>)
+wanneer de <strong>melodie of lettergreepdeling</strong> verschilt — dat blijven aparte
+bestanden.</p>
+<div class="highlight"><pre><span></span><code>@taal nl
+L: Heer_ ont-ferm_ U_ |
+S: a    -   -     -   |
+
+@taal ksl
+L: Госпо-ди_ по-ми-луй_ |
+S: a     -   -  -   -   |
+</code></pre></div>
+<p>Zie <a href="../../plans/kerkslavisch-transliteratie/">kerkslavisch-transliteratie</a> en
+het <a href="../../plans/hulptekst-reviewcorpus/">reviewcorpus</a>.</p>
 <hr />
 <h2 id="-"><code>@---</code><a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
 <p><strong>Wat het is.</strong> Optionele <strong>no-op</strong> die een LSATB-systeem afbreekt — hetzelfde
@@ -5424,7 +5543,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-01
+        Bijgewerkt: 2026-10-02
         
       </p>
       
