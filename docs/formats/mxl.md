@@ -12,6 +12,7 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 | Export vanuit `.mvsa`    | [`mvsa musicxml`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)                                   |
 | Import → `.mvsa`         | [`mxl import`](../reference/cli/mxl.md)                                                         |
 | → `.mscz`                | [`mxl mscz`](../reference/cli/mxl.md)                                                           |
+| Platte gezongen tekst    | [`vsa text`](../reference/cli/text.md) (ook op `{stam}.mscz.mxl`)                               |
 | Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                           |
 
 Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren

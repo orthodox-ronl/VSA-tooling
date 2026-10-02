@@ -1,13 +1,20 @@
-"""Platte gezongen tekst uit .vsa / .mvsa (zoekindex, geen notatie)."""
+"""Platte gezongen tekst uit .vsa / .mvsa / MusicXML / .mscz (zoekindex, geen notatie)."""
 
 from __future__ import annotations
 
+import os
+import tempfile
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
+from .musicxml_satb_layout import local
 from .mvsa_parse import LPosition, parse_mvsa
 from .mvsa_validate import is_lyrics_stem
 from .syllabify import HARD_HYPHEN, dehyphenate_dutch_word, strip_soft_hyphens
 from .vsa_stanzas import VsaNote, extract_stanza_notes
+
+# MusicXML-bronnen voor lyrics-export (geen .mvsa-schrijven).
+_MUSICXML_SUFFIXES = {".mxl", ".musicxml", ".xml"}
 
 
 def join_lyric_syllables(
@@ -42,8 +49,11 @@ def _piece_for_plain(text: str) -> str:
     )
 
 
-def _stanza_to_plain(notes: list[VsaNote]) -> str:
-    """Voeg lettergrepen van één VSA-frase samen tot leesbare woorden."""
+def _events_to_plain(events: list[tuple[str, str]]) -> str:
+    """Voeg (lyric, syllabic)-events samen tot leesbare woorden.
+
+    ``syllabic`` volgt MusicXML: ``single`` / ``begin`` / ``middle`` / ``end``.
+    """
     words: list[str] = []
     buf: list[str] = []
 
@@ -53,25 +63,32 @@ def _stanza_to_plain(notes: list[VsaNote]) -> str:
         words.append(dehyphenate_dutch_word("".join(buf)))
         buf.clear()
 
-    for note in notes:
-        if not note.lyric:
+    for lyric, syllabic in events:
+        if not lyric:
             continue
-        syl = note.syllabic or "single"
+        syl = syllabic or "single"
         if syl == "single":
             flush()
-            words.append(dehyphenate_dutch_word(note.lyric))
+            words.append(dehyphenate_dutch_word(lyric))
         elif syl == "begin":
             flush()
-            buf.append(note.lyric)
+            buf.append(lyric)
         elif syl in ("middle", "end"):
-            buf.append(note.lyric)
+            buf.append(lyric)
             if syl == "end":
                 flush()
         else:
             flush()
-            words.append(dehyphenate_dutch_word(note.lyric))
+            words.append(dehyphenate_dutch_word(lyric))
     flush()
     return " ".join(words)
+
+
+def _stanza_to_plain(notes: list[VsaNote]) -> str:
+    """Voeg lettergrepen van één VSA-frase samen tot leesbare woorden."""
+    return _events_to_plain(
+        [(note.lyric, note.syllabic or "single") for note in notes if note.lyric]
+    )
 
 
 def plain_text_from_vsa(source: str) -> str:
@@ -131,13 +148,147 @@ def plain_text_from_mvsa(source: str) -> str:
     return "\n".join(chunks).strip()
 
 
-def plain_text_from_path(path: Path | str) -> str:
-    """Lees .vsa of .mvsa en geef platte tekst terug."""
+def _child_text(el: ET.Element, name: str) -> str:
+    for child in el:
+        if local(child.tag) == name:
+            return (child.text or "").strip()
+    return ""
+
+
+def _lyric_plain_text(lyric: ET.Element) -> str:
+    """Alle ``text``-kinderen van één lyric (elision = aaneen, geen spatie)."""
+    parts: list[str] = []
+    for child in lyric:
+        tag = local(child.tag)
+        if tag == "text":
+            parts.append((child.text or "").strip())
+        elif tag == "elision":
+            # Elision koppelt lettergrepen zonder spatie; geen extra teken.
+            continue
+    return "".join(parts)
+
+
+def _parse_voice(note: ET.Element) -> int | None:
+    raw = _child_text(note, "voice")
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError:
+        return None
+
+
+def _is_chord_note(note: ET.Element) -> bool:
+    return any(local(c.tag) == "chord" for c in note)
+
+
+def _lyric_events_from_part(part: ET.Element) -> list[tuple[str, str]]:
+    """Lyrics ``number=1`` uit één part, in maat-/notenvolgorde.
+
+    Bij meerdere voices met lyrics: alleen de laagste voice (bij voorkeur 1),
+    zodat SA/TB-partituur de lead-tekst niet verdubbelt.
+    """
+    collected: list[tuple[int | None, str, str]] = []
+    voices_with_lyrics: set[int | None] = set()
+
+    for meas in part:
+        if local(meas.tag) != "measure":
+            continue
+        for note in meas:
+            if local(note.tag) != "note":
+                continue
+            if _is_chord_note(note):
+                continue
+            voice = _parse_voice(note)
+            for ly in note:
+                if local(ly.tag) != "lyric":
+                    continue
+                number = (ly.get("number") or "1").strip() or "1"
+                if number != "1":
+                    continue
+                text = _lyric_plain_text(ly)
+                if not text:
+                    continue
+                syllabic = _child_text(ly, "syllabic") or "single"
+                collected.append((voice, text, syllabic))
+                voices_with_lyrics.add(voice)
+
+    if not collected:
+        return []
+
+    if 1 in voices_with_lyrics:
+        preferred: int | None = 1
+    else:
+        numbered = [v for v in voices_with_lyrics if v is not None]
+        preferred = min(numbered) if numbered else None
+
+    return [
+        (text, syllabic)
+        for voice, text, syllabic in collected
+        if voice == preferred
+    ]
+
+
+def plain_text_from_musicxml(xml: str) -> str:
+    """Gezongen tekst uit MusicXML (uncompressed string).
+
+    Regel (SATB / partituur): neem de **eerste part** (documentvolgorde) die
+    lyrics met ``number=\"1\"`` (of zonder number) heeft; binnen die part alleen
+    die lyric-laag, geen chord-noten, en bij meerdere voices alleen de laagste
+    voice met lyrics (bij voorkeur voice 1). Lettergrepen worden samengevoegd
+    zoals bij VSA (``single``/``begin``/``middle``/``end`` + dehyphenate).
+
+    Lege of lyric-loze scores geven een lege string (zelfde als ``vsa text``
+    zonder gezongen tekst).
+    """
+    root = ET.fromstring(xml)
+    for part in root:
+        if local(part.tag) != "part":
+            continue
+        events = _lyric_events_from_part(part)
+        if events:
+            return _events_to_plain(events).strip()
+    return ""
+
+
+def plain_text_from_mscz(
+    path: Path | str,
+    *,
+    musescore: Path | None = None,
+) -> str:
+    """Gezongen tekst uit ``.mscz`` via tijdelijke MuseScore-``.mxl`` (geen ``.mvsa``)."""
+    from .musescore_cli import convert_with_musescore
+    from .mvsa_import import read_musicxml_file
+
+    path = Path(path)
+    fd, tmp_name = tempfile.mkstemp(suffix=".mxl", prefix="vsa-text-")
+    os.close(fd)
+    tmp_mxl = Path(tmp_name)
+    try:
+        convert_with_musescore(path, tmp_mxl, musescore=musescore)
+        return plain_text_from_musicxml(read_musicxml_file(tmp_mxl))
+    finally:
+        tmp_mxl.unlink(missing_ok=True)
+
+
+def plain_text_from_path(
+    path: Path | str,
+    *,
+    musescore: Path | None = None,
+) -> str:
+    """Lees .vsa / .mvsa / .mxl / .musicxml / .xml / .mscz en geef platte tekst terug."""
     p = Path(path)
-    text = p.read_text(encoding="utf-8")
     suffix = p.suffix.lower()
     if suffix == ".vsa":
-        return plain_text_from_vsa(text)
+        return plain_text_from_vsa(p.read_text(encoding="utf-8"))
     if suffix == ".mvsa":
-        return plain_text_from_mvsa(text)
-    raise ValueError(f"verwacht .vsa of .mvsa, kreeg {p.suffix!r}")
+        return plain_text_from_mvsa(p.read_text(encoding="utf-8"))
+    if suffix in _MUSICXML_SUFFIXES:
+        from .mvsa_import import read_musicxml_file
+
+        return plain_text_from_musicxml(read_musicxml_file(p))
+    if suffix == ".mscz":
+        return plain_text_from_mscz(p, musescore=musescore)
+    raise ValueError(
+        f"verwacht .vsa, .mvsa, .mxl, .musicxml, .xml of .mscz; kreeg {p.suffix!r}"
+    )

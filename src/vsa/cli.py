@@ -175,13 +175,42 @@ def _build_parser():
     text_cmd = subparsers.add_parser(
         "text",
         help=(
-            "Platte gezongen tekst uit .vsa of .mvsa "
-            "(zonder EHM/ELM; voor zoekindex)."
+            "Platte gezongen tekst uit .vsa / .mvsa / MusicXML / .mscz "
+            "(zonder notatie; voor zoekindex)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Bronnen:\n"
+            "  .vsa / .mvsa — directe extractie\n"
+            "  .mxl / .musicxml / .xml — lyrics uit MusicXML\n"
+            "  .mscz — via tijdelijke MuseScore-.mxl (geen .mvsa)\n"
+            "\n"
+            "MusicXML-regel: eerste part met lyric number 1; geen dubbele\n"
+            "SATB-lyrics. Alias voor .mscz: mscz text PATH.\n"
+            "\n"
+            "voorbeelden:\n"
+            "  vsa text lied.vsa\n"
+            "  vsa text lied.mscz.mxl -o lied.lyrics.txt\n"
+            "  vsa text lied.mscz --musescore \"C:\\\\Program Files\\\\MuseScore 4\\\\bin\\\\MuseScore4.exe\""
         ),
     )
     text_cmd.add_argument(
         "path",
-        help="VSA- of MVSA-bestand (.vsa / .mvsa).",
+        help=(
+            "Bronbestand: .vsa, .mvsa, .mxl, .musicxml, .xml of .mscz "
+            "(ook .mscz.mxl)."
+        ),
+    )
+    text_cmd.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Schrijf platte tekst naar dit bestand i.p.v. stdout.",
+    )
+    text_cmd.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore (alleen bij .mscz; default: auto).",
     )
 
     musicxml = subparsers.add_parser("musicxml")
@@ -1067,21 +1096,33 @@ def _cmd_pdf(args, config):
 
 
 def _cmd_text(args) -> int:
+    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .text_export import plain_text_from_path
 
     path = Path(args.path)
     if not path.is_file():
         print(f"Bestand niet gevonden: {path}", file=sys.stderr)
         return 1
+    musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
     try:
-        text = plain_text_from_path(path)
+        text = plain_text_from_path(path, musescore=musescore)
     except ValueError as exc:
+        print(f"text: {exc}", file=sys.stderr)
+        return 1
+    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
         print(f"text: {exc}", file=sys.stderr)
         return 1
     except Exception as exc:  # noqa: BLE001 — CLI toont parsefouten leesbaar
         print(f"text: fout bij lezen van {path}: {exc}", file=sys.stderr)
         return 1
-    print(text)
+    out = Path(args.output) if getattr(args, "output", None) else None
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        payload = text if text.endswith("\n") or text == "" else text + "\n"
+        out.write_text(payload, encoding="utf-8", newline="\n")
+        print(f"Geschreven: {out}")
+    else:
+        print(text)
     return 0
 
 

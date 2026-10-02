@@ -185,6 +185,7 @@ nav:
       - reference/cli/pdf.md
       - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
+      - reference/cli/text.md
       - reference/cli/musicxml.md
       - reference/cli/audio.md
       - reference/cli/mvsa.md

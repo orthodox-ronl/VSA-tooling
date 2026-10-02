@@ -12,6 +12,7 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 | Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak   |
 | Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md)                                              |
 | → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                 |
+| Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)       |
 | Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                              |
 
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en

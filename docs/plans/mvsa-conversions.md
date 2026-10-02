@@ -110,13 +110,14 @@ hergebruik van `digit*`.
 
 Elke conversie-entry leest één brontype:
 
-| Command             | Bron                 | Acties (richting)                                                      |
-| ------------------- | -------------------- | ---------------------------------------------------------------------- |
-| `vsa`               | `.vsa`               | validate, musicxml, svg, …; later `normalize` waar zinvol              |
-| `mvsa` / `vsa mvsa` | `.mvsa`              | validate, musicxml, mscz, pdf, audio, import, normalize                |
-| `mxl`               | `.mxl` / `.musicxml` | import → mvsa; mscz; **validate** / **normalize** (playback-checklist) |
-| `mscz`              | `.mscz`              | import → mvsa; mxl (MuseScore)                                         |
-| `vsa audio`         | `.mxl` / `.vsa` / …  | preview ``.mp3`` via MuseScore                                         |
+| Command             | Bron                                  | Acties (richting)                                                      |
+| ------------------- | ------------------------------------- | ---------------------------------------------------------------------- |
+| `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol              |
+| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, musicxml, mscz, pdf, audio, import, normalize                |
+| `mxl`               | `.mxl` / `.musicxml`                  | import → mvsa; mscz; **validate** / **normalize** (playback-checklist) |
+| `mscz`              | `.mscz`                               | import → mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)         |
+| `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte gezongen tekst (zoekindex; geen `.mvsa`-sibling)                |
+| `vsa audio`         | `.mxl` / `.vsa` / …                   | preview ``.mp3`` via MuseScore                                         |
 
 **Transitie:** `vsa mvsa …` blijft de volledige alias van top-level `mvsa`.
 Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
@@ -193,11 +194,12 @@ doremi` en `a-g` (`tests/test_mvsa_import.py`).
 
 Top-level console-scripts + `scripts\*.cmd`:
 
-| Command             | Bron               | Acties                                      |
-| ------------------- | ------------------ | ------------------------------------------- |
-| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, musicxml, mscz, import, normalize |
-| `mxl`               | `.mxl`/`.musicxml` | import → mvsa; mscz                         |
-| `mscz`              | `.mscz`            | import → mvsa; mxl                          |
+| Command             | Bron               | Acties                                            |
+| ------------------- | ------------------ | ------------------------------------------------- |
+| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, musicxml, mscz, import, normalize       |
+| `mxl`               | `.mxl`/`.musicxml` | import → mvsa; mscz                               |
+| `mscz`              | `.mscz`            | import → mvsa; mxl; **text** (lyrics, geen mvsa)  |
+| `vsa text`          | meerdere           | platte tekst incl. MusicXML / `.mscz`             |
 
 **Criterium (gehaald):** `mvsa -h`, `mxl -h`, `mscz -h` tonen matrix-acties;
 man-pagina’s `docs/reference/cli/{mvsa,mxl,mscz}.md`; oude `vsa mvsa …` blijft

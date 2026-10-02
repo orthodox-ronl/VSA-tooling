@@ -66,11 +66,12 @@ echo %ERRORLEVEL%
 | [`pdf`](pdf.md)                                  | Render één Markdownbestand (VSA, includes, pagebreaks) naar A4-PDF.                        |
 | [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).               |
 | [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).       |
+| [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).               |
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                  |
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                    |
 | [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/export/import/pdf/audio (`mvsa` ≡ `vsa mvsa`).    |
 | [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: import → mvsa; mscz via MuseScore.                                |
-| [`mscz`](mscz.md)                                | Bron `.mscz`: import → mvsa; mxl via MuseScore.                                            |
+| [`mscz`](mscz.md)                                | Bron `.mscz`: import → mvsa; mxl via MuseScore; text (lyrics).                             |
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze
