@@ -17,9 +17,11 @@ Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
 vsa mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
 mvsa validate [-h] path
-mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
+mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
+              [--hulptekst-as-parts] [--bibliotheek-id ID] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-          [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID] path
+          [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
+          [--hulptekst] path
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--layout PROFILE] [--bibliotheek-id ID] path
@@ -116,7 +118,8 @@ vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
 ### Synopsis
 
 ```text
-vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID] path
+vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
+                  [--hulptekst-as-parts] [--bibliotheek-id ID] path
 ```
 
 ### Beschrijving
@@ -125,20 +128,35 @@ Exporteert **één** `.mvsa`-bestand naar SATB MusicXML (`.mxl` of
 `.musicxml`/`.xml`). Zonder `--section` gaan alle `@sectie`-blokken achter
 elkaar in één partituur; met `--section` alleen die sectie-id.
 
-Playback (Coria): vier parts S/A/T/B met **piano** op elke partij
+Playback (Coria): standaard vier parts S/A/T/B met **piano** op elke partij
 ([checklist M8](../../formats/canonical-checklists.md#checklist-mxl-coria-playback)).
+Stemidentifiers in het `.mvsa`-bestand (`Sop:`, `cantus:`, …) worden op dit
+pad als part-namen gebruikt (SATB-letters → Soprano/Alto/Tenor/Bass).
+
+**Hulptekst** (kerkslavisch ↔ Latijn / Nederlands ↔ Cyrillisch, parochieschema):
+
+| Vlag                   | Wie               | Effect                                                                                                                                                                                                                   |
+| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--hulptekst`          | Blad én Coria-MXL | Lyric number 2 onder dezelfde noten (transliteratie). Handmatige `L1` wint als lyric 2 al bestaat.                                                                                                                       |
+| `--hulptekst-as-parts` | Alleen Coria-MXL  | Extra parts: zelfde pitches, lyrics van laag 2; part-namen `{stem} ({label})`. Labels uit `@taal` (zie [keywords — @taal](../../specification-mvsa/keywords.md#taal)). Volume 0 op hulp-parts. Impliceert `--hulptekst`. |
+
+Richting en Coria-labels sturen met sticky `@taal` (`nl` / `ksl` / `auto`, of
+`Lap=aap Lus=noot` op lyrics-ids). Zie
+[kerkslavisch-transliteratie](../../plans/kerkslavisch-transliteratie.md).
 
 Dit is een **aparte** exporter dan [`vsa musicxml`](musicxml.md) (eenstemmig
 VSA).
 
 ### Argumenten en opties
 
-| Naam                 | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                          |
-| -------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
+| Naam                   | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                          |
+| ---------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
 | `path`                 | Ja        | Bron-`.mvsa`-bestand.                                                     | —                                            | Moet een bestaand bestand zijn.      |
 | `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<stem>.mxl` naast het bronbestand           | Andere extensie → wordt `.mxl`.      |
 | `--section SECTION`    | Nee       | Alleen deze `@sectie`-id exporteren (bijv. `schets-a-bladcijfer`).        | Alle secties                                 | Id moet in het bestand voorkomen.    |
 | `--bibliotheek-id ID`  | Nee       | Zet bibliotheek-id in identification/rights; anders pad-sniff.            | pad-sniff onder `content-source/bibliotheek` | Optioneel.                           |
+| `--hulptekst`          | Nee       | Tweede lyric-laag (number=2) via transliterator.                          | uit                                          | Zie beschrijving hierboven.          |
+| `--hulptekst-as-parts` | Nee       | Coria: extra parts met hulptekst (volume 0).                              | uit                                          | Impliceert `--hulptekst`.            |
 | `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                           | —                                            | —                                    |
 
 ### Output
@@ -166,6 +184,18 @@ Met expliciet uitvoerpad en één sectie:
 
 ```cmd
 vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+```
+
+Coria met keuze tussen lyrics-lagen (trisagion, kerkslavische sectie):
+
+```cmd
+vsa mvsa musicxml examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
+```
+
+Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mscz --hulptekst`):
+
+```cmd
+vsa mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --hulptekst -o generated\hulptekst-ksl.mscz
 ```
 
 ### Voorbeelden — falen
@@ -228,6 +258,7 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 | `--keep-mxl PATH`      | Nee       | Bewaar ook het tussenliggende `.mxl`.                  | temp (wordt verwijderd)             |
 | `--layout PROFILE`     | Nee       | `partituur` of `plain`.                                | `partituur`                         |
 | `--bibliotheek-id ID`  | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback. | pad-sniff / geen                    |
+| `--hulptekst`          | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»). | uit                                 |
 
 ### Output
 

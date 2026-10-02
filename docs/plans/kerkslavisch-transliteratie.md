@@ -163,7 +163,7 @@ inspectie.
 | Pad             | Formaat                | Mechanisme                                                                                                                                   | Gebruik                                          |
 | --------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | Blad / print    | `.mscz` (via MusicXML) | Zelfde noten; lyric number 1 = brontekst, number 2 = hulptekst (Latijn bij ksl-bron, Cyrillisch bij nl-bron)                                 | Zingen van papier / partituur in MuseScore       |
-| Coria / oefenen | `.mxl`                 | Extra part(s) met dezelfde pitches/ritme, andere lyrics; namen bv. `Kerkslavisch`/`Latijn` of `Nederlands`/`Cyrillisch`; geen echte stemmen  | Solo/mute in de speler; niet beide hard tegelijk |
+| Coria / oefenen | `.mxl`                 | Extra part(s) per stem × lyrics-laag; namen `{stemidentifier} ({@taal-label})`, bv. `Soprano (ksl)` of `Sop (aap)`; geen echte stemmen       | Solo/mute in de speler; niet beide hard tegelijk |
 
 **Samenvatting voor niet-programmeurs:** op het **blad** staan twee tekstregels
 onder dezelfde noten (bron + hulp). In **Coria** mag de oefenaar kiezen welke
@@ -266,7 +266,46 @@ Markering lost dat verschil niet op.
 
 ---
 
-## 10. Bewust later / buiten scope
+## 10. Gebruik in bibliotheek (consumer)
+
+**Doelgroep:** redacteur of build-beheerder die `.mvsa` uit de bibliotheek naar
+Coria-MXL of print-MSCZ genereert.
+
+1. **Tooling-versie.** Hulptekst zit op `main` (na merge uit `development`).
+   Pin in bibliotheek-CI of lokaal minstens op die commit, of op een release-tag
+   zodra die staat — zie
+   [Releases: taggen en pinnen](../manuals/releases.md).
+
+2. **Coria-publicatie** (playback-MXL in `static/` of catalogus-leaf):
+
+```cmd
+cd /d C:\Git\orthodox-ronl\bibliotheek
+python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
+vsa mvsa validate content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa
+vsa mvsa musicxml content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa --hulptekst-as-parts -o generated\coria\<representatie-id>.mxl --bibliotheek-id <zangstuk>/<variant>/<uitvoeringsvorm>
+```
+
+   Vervang paden door jullie echte mapconventie. In het `.mvsa`: `@taal` zetten
+   waar nl en ksl door elkaar lopen; optioneel `@taal Lap=aap Lus=noot` voor
+   vrije Coria-labels.
+
+3. **Print voor zangers** (tweede tekstregel op het blad):
+
+```cmd
+vsa mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
+```
+
+4. **Wat de bibliotheek zelf beslist:** welke representatie een Coria-MXL krijgt,
+   of hulptekst verplicht is, en freshness/sync — dat blijft consumer-beleid
+   ([reuse-vsa-tooling](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer)).
+
+Transliterator-kwaliteit (parochieschema) is een **apart** traject via
+[hulptekst-reviewcorpus](hulptekst-reviewcorpus.md); export werkt al met het
+huidige schema.
+
+---
+
+## 11. Bewust later / buiten scope
 
 - Wetenschappelijke transcriptieschema’s als productoptie naast `parochie`.
 - Automatische detectie van taal zonder markering.

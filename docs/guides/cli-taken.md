@@ -6,23 +6,25 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 
 ## Commando kiezen
 
-| Taak                                      | Commando                                                                                                   |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Versie tonen                              | [`vsa --version`](../reference/cli/index.md)                                                               |
-| [VSA-notatie](@bron) controleren          | [`vsa validate <bestand-of-map>`](../reference/cli/validate.md)                                            |
-| [AST](@) bekijken                         | [`vsa parse <bestand.vsa> --ast`](../reference/cli/parse.md)                                               |
-| [VSA-blokken](@) in Markdown vinden       | [`vsa blocks <bestand.md>`](../reference/cli/blocks.md)                                                    |
-| Eén SVG maken                             | [`vsa svg <input.vsa> <output.svg>`](../reference/cli/svg.md)                                              |
-| Markdownbestanden verwerken naar SVG      | [`vsa process <input> <output>`](../reference/cli/process.md)                                              |
-| [Hugo-output](@) genereren                | [`vsa build-markdown …`](../reference/cli/build-markdown.md)                                               |
-| Markdown + VSA naar A4-PDF                | [`vsa pdf <bestand.md>`](../reference/cli/pdf.md)                                                          |
-| `zoek=`-includes oplossen naar catalogus  | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                              |
-| Lettergreepstreepjes (bestand of map)     | [`vsa syllabify <pad>`](../reference/cli/syllabify.md)                                                     |
-| MusicXML exporteren                       | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md)                                    |
-| mvsa valideren (draft)                    | [`vsa mvsa validate <pad>`](../reference/cli/mvsa.md#vsa-mvsa-validate)                                    |
-| mvsa → SATB MusicXML (draft)              | [`vsa mvsa musicxml <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)               |
-| mvsa → MuseScore / print-PDF (draft)      | [`vsa mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) / [`pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) |
-| `.mvsa` leren schrijven                   | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                |
+| Taak                                      | Commando                                                                                                                                     |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Versie tonen                              | [`vsa --version`](../reference/cli/index.md)                                                                                                 |
+| [VSA-notatie](@bron) controleren          | [`vsa validate <bestand-of-map>`](../reference/cli/validate.md)                                                                              |
+| [AST](@) bekijken                         | [`vsa parse <bestand.vsa> --ast`](../reference/cli/parse.md)                                                                                 |
+| [VSA-blokken](@) in Markdown vinden       | [`vsa blocks <bestand.md>`](../reference/cli/blocks.md)                                                                                      |
+| Eén SVG maken                             | [`vsa svg <input.vsa> <output.svg>`](../reference/cli/svg.md)                                                                                |
+| Markdownbestanden verwerken naar SVG      | [`vsa process <input> <output>`](../reference/cli/process.md)                                                                                |
+| [Hugo-output](@) genereren                | [`vsa build-markdown …`](../reference/cli/build-markdown.md)                                                                                 |
+| Markdown + VSA naar A4-PDF                | [`vsa pdf <bestand.md>`](../reference/cli/pdf.md)                                                                                            |
+| `zoek=`-includes oplossen naar catalogus  | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                                                                |
+| Lettergreepstreepjes (bestand of map)     | [`vsa syllabify <pad>`](../reference/cli/syllabify.md)                                                                                       |
+| MusicXML exporteren                       | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md)                                                                      |
+| mvsa valideren (draft)                    | [`vsa mvsa validate <pad>`](../reference/cli/mvsa.md#vsa-mvsa-validate)                                                                      |
+| mvsa → SATB MusicXML (draft)              | [`vsa mvsa musicxml <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)                                                 |
+| mvsa → Coria met hulptekst-keuze          | [`vsa mvsa musicxml … --hulptekst-as-parts`](../reference/cli/mvsa.md#vsa-mvsa-musicxml) + [`@taal`](../specification-mvsa/keywords.md#taal) |
+| mvsa → blad met tweede tekstregel         | [`vsa mvsa mscz … --hulptekst`](../reference/cli/mvsa.md#vsa-mvsa-mscz)                                                                      |
+| mvsa → MuseScore / print-PDF (draft)      | [`vsa mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) / [`pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf)                                   |
+| `.mvsa` leren schrijven                   | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                  |
 
 ## Exitcodes
 
