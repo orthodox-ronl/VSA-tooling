@@ -33,6 +33,7 @@ Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 | `trisagion-8a-slav-hemelum.mvsa`     | `@speelplan` → Segno / Fine / D.S. al Fine                           |
 | `hulptekst-ksl-mini.mvsa`            | Kerkslavisch; export met `--hulptekst` → Latijn als lyric number 2   |
 | `hulptekst-nl-mini.mvsa`             | Nederlands; export met `--hulptekst` → Cyrillisch als lyric number 2 |
+| `hulptekst-parallel-l1-mini.mvsa`    | `L` + `L1` → lyric number 1 + 2 (handmatige parallelle laag)         |
 
 **Speelplan vs `|:…:|`:** vaste klinkende volgorde → één `@speelplan` per
 `.mvsa` met `@blok` (Coria schrijft uit; blad: volta / herhaling / D.S. of

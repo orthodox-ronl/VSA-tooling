@@ -100,5 +100,8 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
   gefaseerd);
 - Muzikale “juistheid” t.o.v. een blad (alleen telling en vorm bij validate);
 - blokhergebruik-referenties (`@voices`, `L'`, deelbereiken);
-- parallelle lyric-nummers (`L1` als tweede `<lyric number>`);
 - MSCZ-export.
+
+**Parallelle lyrics in export:** `L` → `<lyric number="1">`, `L1` →
+`number="2"` (enz.) — zie
+[kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md) fase 2.

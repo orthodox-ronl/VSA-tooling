@@ -124,12 +124,17 @@ class MvsaExportError(Exception):
 def _apply_hulptekst_lyric_layer(
     voice_measures: dict[str, list[list[NoteEvent]]],
 ) -> None:
-    """Voeg lyric number 2 toe (gegenereerde hulptekst) naast number 1."""
+    """Voeg lyric number 2 toe (gegenereerde hulptekst) naast number 1.
+
+    Slaat noten over die al een lyric number 2 hebben (bijv. handmatige ``L1``).
+    """
     from .transliterate import render_syllable
 
     for measures in voice_measures.values():
         for measure in measures:
             for ev in measure:
+                if any(ly.number == 2 for ly in ev.lyrics):
+                    continue
                 extras: list[LyricSyllable] = []
                 for ly in list(ev.lyrics):
                     if ly.number != 1:
@@ -426,18 +431,86 @@ def export_mvsa_path(
     write_musicxml_output(out, xml)
 
 
+def _lyric_number_for_marker(marker: str) -> int:
+    """Map lyrics-stem naar MusicXML ``lyric number``.
+
+    ``L`` / ``lyrics`` → 1; ``L1`` → 2; ``L2`` → 3; enz.
+    """
+    low = marker.lower()
+    if low in {"l", "lyrics"}:
+        return 1
+    m = re.fullmatch(r"l(\d+)", low)
+    if m:
+        return int(m.group(1)) + 1
+    return 1
+
+
+def _add_lyric_layer_to_notes(
+    notes: list[NoteEvent],
+    lpos: LPosition,
+    *,
+    opens_hyphen: bool,
+    number: int,
+) -> None:
+    """Voeg één parallelle lyrics-laag toe aan bestaande noten (zelfde positie)."""
+    if not notes:
+        return
+    if lpos.recite:
+        syllables = list(lpos.syllables) if lpos.syllables else []
+        n = len(syllables)
+        for i, note in enumerate(notes):
+            if i >= n:
+                break
+            syl_text = syllables[i]
+            if not syl_text:
+                continue
+            opens = i + 1 < n and i < len(lpos.links) and lpos.links[i]
+            continues = (i == 0 and lpos.continues_word) or (
+                i > 0 and i - 1 < len(lpos.links) and lpos.links[i - 1]
+            )
+            if continues and opens:
+                syl = "middle"
+            elif continues:
+                syl = "end"
+            elif opens:
+                syl = "begin"
+            else:
+                syl = "single"
+            note.lyrics.append(
+                LyricSyllable(text=syl_text, syllabic=syl, number=number)
+            )
+        return
+
+    if not lpos.syllables:
+        return
+    n = len(notes)
+    primary_syl = _syllabic_for_position(lpos, opens_hyphen=opens_hyphen)
+    if len(lpos.syllables) == 1:
+        syl = primary_syl
+        if n > 1 and syl == "single":
+            syl = "begin"
+        text = lpos.syllables[0]
+        extend = n > 1
+    else:
+        text = _join_lyric_text(lpos.syllables, lpos.links)
+        syl = primary_syl if primary_syl != "single" else "begin"
+        extend = n > 1
+    notes[0].lyrics.append(
+        LyricSyllable(text=text, syllabic=syl, number=number, extend=extend)
+    )
+
+
 def _system_to_events(
     system,
     *,
     layout: MvsaLayout = "playback",
 ) -> dict[str, list[list[NoteEvent]]]:
     ctx: StickyContext = system.context
-    lyric_marker = next(
-        (m for m in system.markers if is_lyrics_stem(m)),
-        None,
-    )
-    if lyric_marker is None:
+    lyric_markers = [m for m in system.markers if is_lyrics_stem(m)]
+    if not lyric_markers:
         raise MvsaExportError("geen lyrics-regel in systeem", line=system.start_line)
+    primary_lyric = lyric_markers[0]
+    parallel_lyrics = lyric_markers[1:]
 
     voice_markers = [m for m in system.markers if not is_lyrics_stem(m)]
     non_satb = [m for m in voice_markers if not re.fullmatch(r"[SATB]\d*", m)]
@@ -463,14 +536,27 @@ def _system_to_events(
     for p in PARTS:
         result.setdefault(p["voice"], [])
 
+    primary_number = _lyric_number_for_marker(primary_lyric)
+
     for bundle in system.measures:
-        l_positions = bundle.lyrics.get(lyric_marker, [])
+        l_positions = bundle.lyrics.get(primary_lyric, [])
         measure_events: dict[str, list[NoteEvent]] = {m[0]: [] for m in voice_markers}
 
         for vi, lpos in enumerate(l_positions):
             next_continues = (
                 vi + 1 < len(l_positions) and l_positions[vi + 1].continues_word
             )
+            extra_layers: list[tuple[int, LPosition]] = []
+            for pm in parallel_lyrics:
+                pl_list = bundle.lyrics.get(pm, [])
+                if vi >= len(pl_list):
+                    raise MvsaExportError(
+                        f"{pm}: minder L-posities dan {primary_lyric}",
+                        line=system.line_nos.get(pm, system.start_line),
+                    )
+                extra_layers.append(
+                    (_lyric_number_for_marker(pm), pl_list[vi])
+                )
             for vm in voice_markers:
                 letter = vm[0]
                 vpositions = bundle.voices.get(vm, [])
@@ -490,6 +576,8 @@ def _system_to_events(
                     layout=layout,
                     line=system.line_nos.get(vm, system.start_line),
                     marker=vm,
+                    lyric_number=primary_number,
+                    extra_lyric_layers=extra_layers,
                 )
                 measure_events[letter].extend(notes)
 
@@ -583,9 +671,12 @@ def _position_to_notes(
     layout: MvsaLayout = "playback",
     line: int = 0,
     marker: str = "",
+    lyric_number: int = 1,
+    extra_lyric_layers: list[tuple[int, LPosition]] | None = None,
 ) -> list[NoteEvent]:
     elms = list(lpos.elms) if lpos.elms else ["~"]
     slots = list(vpos.slots) if vpos.slots else ["-"]
+    extra_lyric_layers = list(extra_lyric_layers or [])
 
     if lpos.recite:
         pitch = _resolve_slot(
@@ -620,7 +711,11 @@ def _position_to_notes(
                 syl = "single"
             lyrics: list[LyricSyllable] = []
             if syl_text:
-                lyrics.append(LyricSyllable(text=syl_text, syllabic=syl, number=1))
+                lyrics.append(
+                    LyricSyllable(
+                        text=syl_text, syllabic=syl, number=lyric_number
+                    )
+                )
             out_notes.append(
                 NoteEvent(
                     pitch=pitch,
@@ -628,6 +723,10 @@ def _position_to_notes(
                     lyrics=lyrics,
                     recite=True,
                 )
+            )
+        for num, plpos in extra_lyric_layers:
+            _add_lyric_layer_to_notes(
+                out_notes, plpos, opens_hyphen=opens_hyphen, number=num
             )
         if layout == "partituur" and n >= RECITE_PRINT_COLLAPSE_MIN:
             return _collapse_recite_for_partituur(out_notes, edge_dur=base_dur)
@@ -665,6 +764,7 @@ def _position_to_notes(
                     LyricSyllable(
                         text=lpos.syllables[0],
                         syllabic=syl,
+                        number=lyric_number,
                         extend=n > 1,
                     )
                 )
@@ -672,7 +772,12 @@ def _position_to_notes(
                 text = _join_lyric_text(lpos.syllables, lpos.links)
                 syl = primary_syl if primary_syl != "single" else "begin"
                 lyrics.append(
-                    LyricSyllable(text=text, syllabic=syl, extend=n > 1)
+                    LyricSyllable(
+                        text=text,
+                        syllabic=syl,
+                        number=lyric_number,
+                        extend=n > 1,
+                    )
                 )
         notes.append(
             NoteEvent(
@@ -682,6 +787,10 @@ def _position_to_notes(
                 slur_start=(n > 1 and si == 0),
                 slur_stop=(n > 1 and si == n - 1),
             )
+        )
+    for num, plpos in extra_lyric_layers:
+        _add_lyric_layer_to_notes(
+            notes, plpos, opens_hyphen=opens_hyphen, number=num
         )
     # Same-pitch melisma (S13/R7 / M5a). Partituur: I1 ongestipte pack + ties.
     # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot (Coria

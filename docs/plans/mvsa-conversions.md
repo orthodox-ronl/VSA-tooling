@@ -209,8 +209,9 @@ werken.
 
 - Blokhergebruik `@voices`, overlays A/T/B t.o.v. S
 - Native MSCZ-schrijver voor willekeurige mvsa (tenzij stap 3 faalt zonder)
-- Parallelle lyrics (`L1` als lyric number 2) — zie ook
-  [kerkslavisch-transliteratie](kerkslavisch-transliteratie.md) (hulptekst blad/Coria)
+- Parallelle lyrics (`L1` als lyric number 2) — **fase 2 gedaan** in
+  [kerkslavisch-transliteratie](kerkslavisch-transliteratie.md); resterend:
+  `L'`-syntax / blokhergebruik
 - Volledige MuseScore- of MusicXML-formaatdefinitie
 - Verplichte dubbele extensies in alle outputs
 
