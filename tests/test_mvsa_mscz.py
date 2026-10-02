@@ -327,11 +327,12 @@ def test_colophon_uses_copyright_and_bibliotheek_id(tmp_path: Path):
     assert '<metaTag name="composer">Archimandriet Feofan</metaTag>' in out
     assert '<metaTag name="source">Liturgikon, p.147-149</metaTag>' in out
     assert '<metaTag name="subtitle">Litanie</metaTag>' in out
+    assert "Bron: Liturgikon, p.147-149" in out
     assert "oddFooterC>" in out
 
 
-def test_bron_without_tekstdichter_appears_as_lyricist_on_sheet(tmp_path: Path):
-    """``@bron`` alleen → zichtbaar op blad als lyricist ``bron: …``."""
+def test_bron_appears_in_colophon_not_as_lyricist(tmp_path: Path):
+    """``@bron`` → meta source + colofonregel; niet als lyricist in de kop."""
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 
     mscx = (
@@ -355,12 +356,14 @@ def test_bron_without_tekstdichter_appears_as_lyricist_on_sheet(tmp_path: Path):
     with zipfile.ZipFile(path) as zf:
         out = zf.read("bron.mscx").decode("utf-8")
     assert '<metaTag name="source">koormap Hemelum</metaTag>' in out
-    assert '<metaTag name="lyricist">bron: koormap Hemelum</metaTag>' in out
-    assert "<style>lyricist</style>" in out
-    assert "<text>bron: koormap Hemelum</text>" in out
+    assert "Bron: koormap Hemelum" in out
+    assert "Colofon" in out
+    assert '<metaTag name="lyricist">' not in out
+    assert "<style>lyricist</style>" not in out
 
 
-def test_tekstdichter_wins_over_bron_for_sheet_lyricist(tmp_path: Path):
+def test_tekstdichter_still_appears_as_lyricist(tmp_path: Path):
+    """Echte ``@tekstdichter`` blijft lyricist; ``@bron`` alleen colofon/meta."""
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 
     mscx = (
@@ -380,14 +383,15 @@ def test_tekstdichter_wins_over_bron_for_sheet_lyricist(tmp_path: Path):
         path,
         title="Demo",
         bron="koormap Hemelum",
-        tekstdichter="bron: koormap Hemelum",
+        tekstdichter="liturgikon",
     )
     with zipfile.ZipFile(path) as zf:
         out = zf.read("both.mscx").decode("utf-8")
     assert '<metaTag name="source">koormap Hemelum</metaTag>' in out
-    assert '<metaTag name="lyricist">bron: koormap Hemelum</metaTag>' in out
-    assert out.count("bron: koormap Hemelum") >= 2
-
+    assert "Bron: koormap Hemelum" in out
+    assert '<metaTag name="lyricist">liturgikon</metaTag>' in out
+    assert "<style>lyricist</style>" in out
+    assert "<text>liturgikon</text>" in out
 
 def test_ensure_score_title_fills_empty_title_text(tmp_path: Path):
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
@@ -511,3 +515,112 @@ def test_export_alleluia_section_to_pdf(tmp_path: Path):
     assert out.stat().st_size > 500
     assert keep.is_file()
     assert out.read_bytes()[:4] == b"%PDF"
+
+
+def _minimal_mscz(tmp_path: Path, mscx: str) -> Path:
+    path = tmp_path / "t.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("t.mscx", mscx)
+    return path
+
+
+def test_collapse_same_pitch_half_quarter_to_dotted_half(tmp_path: Path):
+    """I1 half+kwart (Tie) → gestipte half in MSCZ-postprocess (leesbaar 3/4)."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    chord_half = (
+        "<Chord>"
+        "<durationType>half</durationType>"
+        "<Lyrics><text>God</text></Lyrics>"
+        "<Note>"
+        '<Spanner type="Tie"><Tie/>'
+        "<next><location><fractions>1/2</fractions></location></next>"
+        "</Spanner>"
+        "<pitch>67</pitch><tpc>15</tpc>"
+        "</Note>"
+        "</Chord>"
+    )
+    chord_quarter = (
+        "<Chord>"
+        "<durationType>quarter</durationType>"
+        "<Note>"
+        '<Spanner type="Tie"><Tie/>'
+        "<prev><location><fractions>-1/2</fractions></location></prev>"
+        "</Spanner>"
+        "<pitch>67</pitch><tpc>15</tpc>"
+        "</Note>"
+        "</Chord>"
+    )
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1">'
+        '<Measure len="3/4">'
+        f"<voice>{chord_half}{chord_quarter}</voice>"
+        "</Measure>"
+        "</Staff>"
+        "</Score></museScore>"
+    )
+    path = _minimal_mscz(tmp_path, mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert out.count("<Chord>") == 1
+    assert "<dots>1</dots>" in out
+    assert "<durationType>half</durationType>" in out
+    assert 'type="Tie"' not in out
+    assert "<text>God</text>" in out
+
+
+def test_collapse_preserves_pitch_change_melisma(tmp_path: Path):
+    """Toonwissel-melisma (slur, verschillende pitch) blijft twee noten."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    a = (
+        "<Chord><durationType>half</durationType>"
+        "<Lyrics><text>God</text></Lyrics>"
+        '<Spanner type="Slur"><Slur/><next>'
+        "<location><fractions>1/2</fractions></location></next></Spanner>"
+        "<Note><pitch>67</pitch><tpc>15</tpc></Note></Chord>"
+    )
+    b = (
+        "<Chord><durationType>half</durationType>"
+        '<Spanner type="Slur"><prev>'
+        "<location><fractions>-1/2</fractions></location></prev></Spanner>"
+        "<Note><pitch>69</pitch><tpc>17</tpc></Note></Chord>"
+    )
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1"><Measure len="1/1">'
+        f"<voice>{a}{b}</voice>"
+        "</Measure></Staff></Score></museScore>"
+    )
+    path = _minimal_mscz(tmp_path, mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert out.count("<Chord>") == 2
+    assert 'type="Slur"' in out
+
+
+def test_collapse_does_not_merge_untied_same_pitch(tmp_path: Path):
+    """Zelfde toon zonder Tie (aparte lettergrepen) niet samentrekken."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    q = (
+        "<Chord><durationType>quarter</durationType>"
+        "<Note><pitch>62</pitch><tpc>10</tpc></Note></Chord>"
+    )
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1"><Measure len="3/4">'
+        f"<voice>{q}{q}{q}</voice>"
+        "</Measure></Staff></Score></museScore>"
+    )
+    path = _minimal_mscz(tmp_path, mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert out.count("<Chord>") == 3

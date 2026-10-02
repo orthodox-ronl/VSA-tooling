@@ -110,13 +110,13 @@ hergebruik van `digit*`.
 
 Elke conversie-entry leest één brontype:
 
-| Command             | Bron                 | Acties (richting)                                         |
-| ------------------- | -------------------- | --------------------------------------------------------- |
-| `vsa`               | `.vsa`               | validate, musicxml, svg, …; later `normalize` waar zinvol |
-| `mvsa` / `vsa mvsa` | `.mvsa`              | validate, musicxml, mscz, pdf, audio, import, normalize   |
+| Command             | Bron                 | Acties (richting)                                                      |
+| ------------------- | -------------------- | ---------------------------------------------------------------------- |
+| `vsa`               | `.vsa`               | validate, musicxml, svg, …; later `normalize` waar zinvol              |
+| `mvsa` / `vsa mvsa` | `.mvsa`              | validate, musicxml, mscz, pdf, audio, import, normalize                |
 | `mxl`               | `.mxl` / `.musicxml` | import → mvsa; mscz; **validate** / **normalize** (playback-checklist) |
-| `mscz`              | `.mscz`              | import → mvsa; mxl (MuseScore)                            |
-| `vsa audio`         | `.mxl` / `.vsa` / …  | preview ``.mp3`` via MuseScore                            |
+| `mscz`              | `.mscz`              | import → mvsa; mxl (MuseScore)                                         |
+| `vsa audio`         | `.mxl` / `.vsa` / …  | preview ``.mp3`` via MuseScore                                         |
 
 **Transitie:** `vsa mvsa …` blijft de volledige alias van top-level `mvsa`.
 Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
@@ -209,7 +209,9 @@ werken.
 
 - Blokhergebruik `@voices`, overlays A/T/B t.o.v. S
 - Native MSCZ-schrijver voor willekeurige mvsa (tenzij stap 3 faalt zonder)
-- Parallelle lyrics (`L1` als lyric number 2)
+- Parallelle lyrics (`L1` als lyric number 2) — **fase 2 gedaan** in
+  [kerkslavisch-transliteratie](kerkslavisch-transliteratie.md); resterend:
+  `L'`-syntax / blokhergebruik
 - Volledige MuseScore- of MusicXML-formaatdefinitie
 - Verplichte dubbele extensies in alle outputs
 

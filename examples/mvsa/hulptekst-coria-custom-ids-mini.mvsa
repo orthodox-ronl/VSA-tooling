@@ -1,0 +1,12 @@
+# Coria: willekeurige stem-/lyrics-ids + @taal/@oct-labels
+
+@do F4
+@mode major
+@title "Coria custom ids"
+@oct sop=0, zeep=-1
+@taal Lap=aap, Lus=noot
+
+Lap: Heer_ |
+Lus: Хер_  |
+Sop: a4    |
+Zeep: f3   |

@@ -42,10 +42,12 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 - Blokhergebruik (`@voices`, secties kopiëren);
 - Overlays van A/T/B t.o.v. S;
 - Pagina-layout (MuseScore-“systemen” op een blad);
-- Parallelle `L1` als tweede lyric-nummer
-  (MSCZ/import/normalize: [mvsa-conversions](../plans/mvsa-conversions.md));
+- Checklist-items voor lyric 2 / Coria-hulptekst-parts in
+  [canonical-checklists](../formats/canonical-checklists.md) (export werkt al;
+  normatieve M-items volgen later);
 - Los MIDI-bestand (preview = [audio](../formats/audio.md)).
 
 Wel beschikbaar: `vsa mvsa validate`, `musicxml`, `mscz`, `pdf`, `audio`,
-`import`, `normalize`, `kuiser`.
+`import`, `normalize`, `kuiser`; hulptekst via `--hulptekst` /
+`--hulptekst-as-parts` (zie [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md)).
 Navigatiehub: [Formaten & CLI](../formats/index.md).

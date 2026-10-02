@@ -755,10 +755,19 @@ def test_alleluia_toon_8_schets3_oct_ag_so_is_c5():
     assert s[9] == ("C", "", "5")  # c na recite
 
 
-def test_export_rejects_non_satb_stem_id():
+def test_export_allows_non_satb_stem_id_playback():
+    xml = export_mvsa_to_musicxml(
+        "@do F4\n@mode major\n@sectie x\nL: a_ ||\ncantus: c4 ||\n",
+        layout="playback",
+    )
+    assert "<part-name>cantus</part-name>" in xml
+
+
+def test_export_rejects_non_satb_stem_id_partituur():
     with pytest.raises(MvsaExportError, match="cantus"):
         export_mvsa_to_musicxml(
-            "@sectie x\nL: a_ ||\ncantus: do ||\n"
+            "@do F4\n@mode major\n@sectie x\nL: a_ ||\ncantus: c4 ||\n",
+            layout="partituur",
         )
 
 

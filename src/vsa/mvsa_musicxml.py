@@ -31,6 +31,8 @@ from .mvsa_parse import (
 )
 from .mvsa_validate import is_lyrics_stem
 from .mvsa_validate import MvsaValidationError
+from .mvsa_validate import resolve_stem_map_key
+from .mvsa_validate import split_directive_assignments
 from .syllabify import display_lyric_text
 from .pitch_resolver import (
     PitchResolver,
@@ -112,11 +114,306 @@ CUE_GAP_NOTE_TYPE = "16th"
 PAUSE_LYRIC = "[PAUZE]"
 PAUSE_DURATION_DIVS = 16  # whole @ divisions=4
 
+# Extra Coria-parts voor hulptekst (volume 0; geen dubbel geluid by default).
+_HULPTEKST_VOLUME = "0"
+
+_CLEF_BY_SATB = {
+    "S": ("G", "2"),
+    "A": ("G", "2"),
+    "T": ("F", "4"),
+    "B": ("F", "4"),
+}
+
+
+def _pairing_taal(taal: str | None) -> str | None:
+    """Complementaire laag-label: ksl↔nl (Coria-partnamen)."""
+    if taal is None:
+        return None
+    low = taal.lower()
+    if low == "ksl":
+        return "nl"
+    if low == "nl":
+        return "ksl"
+    return None
+
+
+def _part_display_name(base: str, label: str | None) -> str:
+    if label:
+        return f"{base} ({label})"
+    return base
+
+
+def _part_display_abbr(base: str, label: str | None, *, hulp: bool = False) -> str:
+    if label:
+        return f"{base}-{label}"
+    return f"{base}h" if hulp else base
+
+
+def _clef_for_voice(voice_id: str) -> tuple[str, str]:
+    if re.fullmatch(r"[SATB]\d*", voice_id):
+        return _CLEF_BY_SATB[voice_id[0].upper()]
+    return ("G", "2")
+
+
+def _satb_display_name(voice_id: str) -> str:
+    """Vriendelijke SATB-naam; anders de stemidentifier zelf."""
+    if re.fullmatch(r"[SATB]\d*", voice_id):
+        return next(p["name"] for p in PARTS if p["voice"] == voice_id[0])
+    return voice_id
+
+
+def _satb_abbr(voice_id: str) -> str:
+    if re.fullmatch(r"[SATB]\d*", voice_id):
+        return voice_id[0]
+    return voice_id[:4]
+
+
+def _infer_label_from_lyric_text(text: str) -> str | None:
+    from .transliterate import detect_direction
+
+    direction = detect_direction(text)
+    if direction == "ksl_to_latin":
+        return "ksl"
+    if direction == "nl_to_cyrillic":
+        return "nl"
+    return None
+
+
+def _infer_bron_taal_from_events(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+) -> str | None:
+    """Eerste lyric number=1 met herkenbaar schrift → ``ksl`` of ``nl``."""
+    for measures in voice_measures.values():
+        for measure in measures:
+            for ev in measure:
+                for ly in ev.lyrics:
+                    if ly.number != 1 or not ly.text or ly.text == PAUSE_LYRIC:
+                        continue
+                    found = _infer_label_from_lyric_text(ly.text)
+                    if found:
+                        return found
+    return None
+
+
+def _lyric_numbers_present(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+) -> list[int]:
+    nums: set[int] = set()
+    for measures in voice_measures.values():
+        for measure in measures:
+            for ev in measure:
+                for ly in ev.lyrics:
+                    nums.add(ly.number)
+    return sorted(nums) if nums else [1]
+
+
+def _resolve_layer_labels(
+    systems: list,
+    voice_measures: dict[str, list[list[NoteEvent]]],
+    lyric_numbers: list[int],
+) -> list[str | None]:
+    """Eén Coria-label per lyric-number, uit ``@taal`` of schrift-gok."""
+    markers: list[str] = []
+    ctx = None
+    for system in systems:
+        markers = [m for m in system.markers if is_lyrics_stem(m)]
+        ctx = getattr(system, "context", None)
+        if markers:
+            break
+    labels: list[str | None] = []
+    for i, num in enumerate(lyric_numbers):
+        label: str | None = None
+        if ctx is not None and i < len(markers):
+            label = ctx.taal_for(markers[i])
+        if label is None and i == 0:
+            label = (ctx.taal_for("L") if ctx is not None else None) or (
+                _infer_bron_taal_from_events(voice_measures)
+            )
+        if label is None and i == 1:
+            base = labels[0] if labels else None
+            label = (ctx.taal_for("L1") if ctx is not None else None) or _pairing_taal(
+                base
+            )
+        labels.append(label)
+    return labels
+
+
+def _ordered_voice_ids(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+    systems: list,
+) -> list[str]:
+    """Stemvolgorde uit het eerste systeem; val terug op keys zonder ``h``-suffix."""
+    for system in systems:
+        voices = [m for m in system.markers if not is_lyrics_stem(m)]
+        if voices:
+            # Playback gebruikt volle ids; partituur-legacy kan letters zijn.
+            if any(v in voice_measures for v in voices):
+                return list(voices)
+            letters = []
+            for v in voices:
+                letter = v[0]
+                if letter not in letters and letter in voice_measures:
+                    letters.append(letter)
+            if letters:
+                return letters
+    return [v for v in voice_measures if not re.search(r"h\d*$", v) and "h" not in v[1:]]
+
+
+def _build_playback_part_list(
+    voice_ids: list[str],
+    layer_labels: list[str | None],
+    *,
+    with_extra_layers: bool,
+) -> tuple[list[dict], list[dict] | None]:
+    """Coria part-list: ``Sop (aap)``, ``Zeep (noot)``, …"""
+    primary_label = layer_labels[0] if layer_labels else None
+    primary = [
+        {
+            "id": f"P{i + 1}",
+            "name": _part_display_name(_satb_display_name(v), primary_label),
+            "abbr": _part_display_abbr(_satb_abbr(v), primary_label),
+            "clef": _clef_for_voice(v),
+            "voice": v,
+        }
+        for i, v in enumerate(voice_ids)
+    ]
+    if not with_extra_layers or len(layer_labels) < 2:
+        return primary, None
+    extra: list[dict] = []
+    pid = len(primary) + 1
+    for li, label in enumerate(layer_labels[1:], start=2):
+        for v in voice_ids:
+            extra.append(
+                {
+                    "id": f"P{pid}",
+                    "name": _part_display_name(
+                        _satb_display_name(v), label
+                    )
+                    if label
+                    else f"{_satb_display_name(v)} (hulptekst)",
+                    "abbr": _part_display_abbr(
+                        _satb_abbr(v), label, hulp=True
+                    ),
+                    "clef": _clef_for_voice(v),
+                    "voice": f"{v}h{li}",
+                }
+            )
+            pid += 1
+    return primary, extra
+
+
+def _clone_notes_for_lyric_number(
+    measures: list[list[NoteEvent]], number: int
+) -> list[list[NoteEvent]]:
+    cloned: list[list[NoteEvent]] = []
+    for measure in measures:
+        cm: list[NoteEvent] = []
+        for ev in measure:
+            layer = [ly for ly in ev.lyrics if ly.number == number]
+            cm.append(
+                NoteEvent(
+                    pitch=ev.pitch,
+                    duration=ev.duration,
+                    lyrics=[
+                        LyricSyllable(
+                            text=ly.text,
+                            syllabic=ly.syllabic,
+                            number=1,
+                            extend=ly.extend,
+                        )
+                        for ly in layer
+                    ],
+                    recite=ev.recite,
+                    spacer=ev.spacer,
+                    duration_divisions=ev.duration_divisions,
+                    stemless=ev.stemless,
+                    breve_head=ev.breve_head,
+                    slur_start=ev.slur_start,
+                    slur_stop=ev.slur_stop,
+                    tie_start=ev.tie_start,
+                    tie_stop=ev.tie_stop,
+                )
+            )
+        cloned.append(cm)
+    return cloned
+
+
+def _attach_hulptekst_parts(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+    voice_ids: list[str],
+    lyric_numbers: list[int],
+) -> dict[str, list[list[NoteEvent]]]:
+    """Kloon stemmen per lyric-number > 1 naar ``{voice}h{n}``."""
+    out = {k: v for k, v in voice_measures.items()}
+    # Primaire laag: strip andere lyric-numbers op de bronstemmen (Coria toont één tekst).
+    primary_num = lyric_numbers[0] if lyric_numbers else 1
+    for voice in voice_ids:
+        if voice in out:
+            out[voice] = _clone_notes_for_lyric_number(out[voice], primary_num)
+    for num in lyric_numbers[1:]:
+        for voice in voice_ids:
+            src = voice_measures.get(voice, [])
+            out[f"{voice}h{num}"] = _clone_notes_for_lyric_number(src, num)
+    return out
+
 
 class MvsaExportError(Exception):
     def __init__(self, message: str, *, line: int = 0) -> None:
         self.line = line
         super().__init__(message)
+
+
+def _direction_from_sticky_taal(taal: str | None):
+    """Sticky ``@taal`` → transliterator-richting; ``None`` = auto per lettergreep."""
+    if taal is None:
+        return None
+    low = taal.lower()
+    if low == "ksl":
+        return "ksl_to_latin"
+    if low == "nl":
+        return "nl_to_cyrillic"
+    return None
+
+
+def _apply_hulptekst_to_notes(
+    notes: list[NoteEvent],
+    *,
+    direction: str | None,
+) -> None:
+    """Voeg lyric number 2 toe; skip als number 2 al bestaat (handmatige L1)."""
+    from .transliterate import render_syllable
+
+    for ev in notes:
+        if any(ly.number == 2 for ly in ev.lyrics):
+            continue
+        extras: list[LyricSyllable] = []
+        for ly in list(ev.lyrics):
+            if ly.number != 1:
+                continue
+            if not ly.text or ly.text == PAUSE_LYRIC:
+                continue
+            rendered = render_syllable(ly.text, direction=direction)
+            if rendered == ly.text:
+                continue
+            extras.append(
+                LyricSyllable(
+                    text=rendered,
+                    syllabic=ly.syllabic,
+                    number=2,
+                    extend=ly.extend,
+                )
+            )
+        ev.lyrics.extend(extras)
+
+
+def _apply_hulptekst_lyric_layer(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+) -> None:
+    """Fallback zonder sticky ``@taal`` (auto per lettergreep)."""
+    for measures in voice_measures.values():
+        for measure in measures:
+            _apply_hulptekst_to_notes(measure, direction=None)
+
 
 
 def export_mvsa_to_musicxml(
@@ -127,10 +424,24 @@ def export_mvsa_to_musicxml(
     layout: MvsaLayout = "playback",
     source_path: Path | None = None,
     bibliotheek_id: str | None = None,
+    hulptekst: bool = False,
+    hulptekst_as_parts: bool = False,
 ) -> str:
-    """Validate + export. Raises MvsaValidationError or MvsaExportError."""
+    """Validate + export. Raises MvsaValidationError or MvsaExportError.
+
+    *hulptekst*: tweede lyric-laag (``number=\"2\"``) via
+    :mod:`vsa.transliterate` (ksl→Latijn / nl→Cyrillisch per lettergreep).
+    *hulptekst_as_parts*: alleen zinvol bij ``layout=\"playback\"`` — extra
+    SATB-parts met alleen hulptekst (volume 0; speler kan solo zetten).
+    """
     if layout not in ("playback", "partituur"):
         raise MvsaExportError(f"onbekende layout {layout!r}")
+    if hulptekst_as_parts and not hulptekst:
+        hulptekst = True
+    if hulptekst_as_parts and layout != "playback":
+        raise MvsaExportError(
+            "hulptekst_as_parts is alleen voor layout=playback (Coria)"
+        )
     doc = parse_mvsa(text)
     errors = [d for d in doc.diagnostics if d.severity == "error"]
     if errors:
@@ -156,11 +467,16 @@ def export_mvsa_to_musicxml(
     # Speelblok-id → (eerste_maatindex, laatste_maatindex) in bladvorm.
     blok_measure_range: dict[str, tuple[int, int]] = {}
     score_started = False
+    systems_flat: list = []
     for section in sections:
         section_start = len(bar_styles)
         for system in section.systems:
-            events_by_voice = _system_to_events(system, layout=layout)
+            systems_flat.append(system)
+            events_by_voice = _system_to_events(
+                system, layout=layout, hulptekst=hulptekst
+            )
             for voice, measures in events_by_voice.items():
+                voice_measures.setdefault(voice, [])
                 voice_measures[voice].extend(measures)
             for mi, bundle in enumerate(system.measures):
                 bar_styles.append(_mvsa_bar_to_style(bundle.final_bar))
@@ -278,6 +594,41 @@ def export_mvsa_to_musicxml(
             measure_nav_marks=nav_marks,
             meta=meta,
         )
+
+    extra_parts: list[dict[str, str]] | None = None
+    playback_parts: list[dict] | None = None
+    if layout == "playback":
+        voice_ids = _ordered_voice_ids(voice_measures, systems_flat)
+        # Geen lege SATB-placeholders meenemen als het stuk andere ids heeft.
+        if voice_ids and not all(
+            re.fullmatch(r"[SATB]\d*", v) for v in voice_ids
+        ):
+            voice_measures = {
+                k: v for k, v in voice_measures.items() if k in voice_ids
+            }
+        lyric_nums = _lyric_numbers_present(voice_measures)
+        layer_labels = _resolve_layer_labels(
+            systems_flat, voice_measures, lyric_nums
+        )
+        if hulptekst_as_parts:
+            if len(lyric_nums) < 2:
+                # Genereer-laag ontbreekt → toch labels voor bron only.
+                pass
+            playback_parts, extra_parts = _build_playback_part_list(
+                voice_ids,
+                layer_labels,
+                with_extra_layers=len(lyric_nums) > 1,
+            )
+            if len(lyric_nums) > 1:
+                voice_measures = _attach_hulptekst_parts(
+                    voice_measures, voice_ids, lyric_nums
+                )
+        else:
+            # Gewone Coria: stemnamen = identifiers (SATB → Soprano…).
+            playback_parts, _ = _build_playback_part_list(
+                voice_ids, [None], with_extra_layers=False
+            )
+
     xml = _emit_score_playback(
         voice_measures,
         title=effective_title,
@@ -289,6 +640,8 @@ def export_mvsa_to_musicxml(
         measure_cue_gap=measure_cue_gap,
         measure_pauze=measure_pauze,
         meta=meta,
+        parts=playback_parts,
+        extra_parts=extra_parts,
     )
     from .musicxml_coria_timing import finalize_coria_musicxml
 
@@ -303,6 +656,8 @@ def export_mvsa_path(
     section_id: str | None = None,
     layout: MvsaLayout = "playback",
     bibliotheek_id: str | None = None,
+    hulptekst: bool = False,
+    hulptekst_as_parts: bool = False,
 ) -> None:
     text = path.read_text(encoding="utf-8-sig")
     xml = export_mvsa_to_musicxml(
@@ -312,57 +667,155 @@ def export_mvsa_path(
         layout=layout,
         source_path=path,
         bibliotheek_id=bibliotheek_id,
+        hulptekst=hulptekst,
+        hulptekst_as_parts=hulptekst_as_parts,
     )
     write_musicxml_output(out, xml)
+
+
+def _lyric_number_for_marker(marker: str, *, index: int = 0) -> int:
+    """Map lyrics-stem naar MusicXML ``lyric number``.
+
+    ``L`` / ``lyrics`` → 1; ``L1`` → 2; ``L2`` → 3; enz.
+    Andere lyrics-ids (``Lap``, ``Lus``, …): volgorde in het systeem (1-based).
+    """
+    low = marker.lower()
+    if low in {"l", "lyrics"}:
+        return 1
+    m = re.fullmatch(r"l(\d+)", low)
+    if m:
+        return int(m.group(1)) + 1
+    return index + 1
+
+
+def _add_lyric_layer_to_notes(
+    notes: list[NoteEvent],
+    lpos: LPosition,
+    *,
+    opens_hyphen: bool,
+    number: int,
+) -> None:
+    """Voeg één parallelle lyrics-laag toe aan bestaande noten (zelfde positie)."""
+    if not notes:
+        return
+    if lpos.recite:
+        syllables = list(lpos.syllables) if lpos.syllables else []
+        n = len(syllables)
+        for i, note in enumerate(notes):
+            if i >= n:
+                break
+            syl_text = syllables[i]
+            if not syl_text:
+                continue
+            opens = i + 1 < n and i < len(lpos.links) and lpos.links[i]
+            continues = (i == 0 and lpos.continues_word) or (
+                i > 0 and i - 1 < len(lpos.links) and lpos.links[i - 1]
+            )
+            if continues and opens:
+                syl = "middle"
+            elif continues:
+                syl = "end"
+            elif opens:
+                syl = "begin"
+            else:
+                syl = "single"
+            note.lyrics.append(
+                LyricSyllable(text=syl_text, syllabic=syl, number=number)
+            )
+        return
+
+    if not lpos.syllables:
+        return
+    n = len(notes)
+    primary_syl = _syllabic_for_position(lpos, opens_hyphen=opens_hyphen)
+    if len(lpos.syllables) == 1:
+        syl = primary_syl
+        if n > 1 and syl == "single":
+            syl = "begin"
+        text = lpos.syllables[0]
+        extend = n > 1
+    else:
+        text = _join_lyric_text(lpos.syllables, lpos.links)
+        syl = primary_syl if primary_syl != "single" else "begin"
+        extend = n > 1
+    notes[0].lyrics.append(
+        LyricSyllable(text=text, syllabic=syl, number=number, extend=extend)
+    )
 
 
 def _system_to_events(
     system,
     *,
     layout: MvsaLayout = "playback",
+    hulptekst: bool = False,
 ) -> dict[str, list[list[NoteEvent]]]:
     ctx: StickyContext = system.context
-    lyric_marker = next(
-        (m for m in system.markers if is_lyrics_stem(m)),
-        None,
-    )
-    if lyric_marker is None:
+    lyric_markers = [m for m in system.markers if is_lyrics_stem(m)]
+    if not lyric_markers:
         raise MvsaExportError("geen lyrics-regel in systeem", line=system.start_line)
+    primary_lyric = lyric_markers[0]
+    parallel_lyrics = lyric_markers[1:]
+    hulp_direction = (
+        _direction_from_sticky_taal(ctx.taal_for(primary_lyric))
+        if hulptekst
+        else None
+    )
 
     voice_markers = [m for m in system.markers if not is_lyrics_stem(m)]
-    non_satb = [m for m in voice_markers if not re.fullmatch(r"[SATB]\d*", m)]
-    if non_satb:
-        raise MvsaExportError(
-            "MusicXML-export ondersteunt alleen stem-ids S/A/T/B "
-            f"(eventueel met cijfer), niet {non_satb}",
-            line=system.start_line,
-        )
+    if layout == "partituur":
+        non_satb = [m for m in voice_markers if not re.fullmatch(r"[SATB]\d*", m)]
+        if non_satb:
+            raise MvsaExportError(
+                "partituur-export ondersteunt alleen stem-ids S/A/T/B "
+                f"(eventueel met cijfer), niet {non_satb}",
+                line=system.start_line,
+            )
+
+    # Playback: volle stemidentifier als key. Partituur: SATB-letter (SA/TB-balken).
+    def _vkey(vm: str) -> str:
+        return vm if layout == "playback" else vm[0]
 
     resolvers: dict[str, PitchResolver] = {}
     line_ehms = getattr(system, "line_ehms", {}) or {}
     for m in voice_markers:
-        letter = m[0]
-        resolvers[letter] = _voice_resolver(ctx, letter)
+        key = _vkey(m)
+        resolvers[key] = _voice_resolver(ctx, m)
         if ctx.start:
-            _apply_start(resolvers[letter], ctx.start, letter)
+            _apply_start(resolvers[key], ctx.start, m)
         line_ehm = line_ehms.get(m)
         if line_ehm is not None:
-            _apply_line_ehm(resolvers[letter], line_ehm)
+            _apply_line_ehm(resolvers[key], line_ehm)
 
-    result: dict[str, list[list[NoteEvent]]] = {m[0]: [] for m in voice_markers}
-    for p in PARTS:
-        result.setdefault(p["voice"], [])
+    result: dict[str, list[list[NoteEvent]]] = {_vkey(m): [] for m in voice_markers}
+    if layout == "partituur":
+        for p in PARTS:
+            result.setdefault(p["voice"], [])
+
+    primary_number = _lyric_number_for_marker(primary_lyric, index=0)
 
     for bundle in system.measures:
-        l_positions = bundle.lyrics.get(lyric_marker, [])
-        measure_events: dict[str, list[NoteEvent]] = {m[0]: [] for m in voice_markers}
+        l_positions = bundle.lyrics.get(primary_lyric, [])
+        measure_events: dict[str, list[NoteEvent]] = {
+            _vkey(m): [] for m in voice_markers
+        }
 
         for vi, lpos in enumerate(l_positions):
             next_continues = (
                 vi + 1 < len(l_positions) and l_positions[vi + 1].continues_word
             )
+            extra_layers: list[tuple[int, LPosition]] = []
+            for pi, pm in enumerate(parallel_lyrics, start=1):
+                pl_list = bundle.lyrics.get(pm, [])
+                if vi >= len(pl_list):
+                    raise MvsaExportError(
+                        f"{pm}: minder L-posities dan {primary_lyric}",
+                        line=system.line_nos.get(pm, system.start_line),
+                    )
+                extra_layers.append(
+                    (_lyric_number_for_marker(pm, index=pi), pl_list[vi])
+                )
             for vm in voice_markers:
-                letter = vm[0]
+                key = _vkey(vm)
                 vpositions = bundle.voices.get(vm, [])
                 if vi >= len(vpositions):
                     raise MvsaExportError(
@@ -373,37 +826,42 @@ def _system_to_events(
                 notes = _position_to_notes(
                     lpos,
                     vpos,
-                    resolvers[letter],
+                    resolvers[key],
                     ctx,
-                    letter,
+                    vm,
                     opens_hyphen=next_continues,
                     layout=layout,
                     line=system.line_nos.get(vm, system.start_line),
                     marker=vm,
+                    lyric_number=primary_number,
+                    extra_lyric_layers=extra_layers,
                 )
-                measure_events[letter].extend(notes)
+                if hulptekst:
+                    _apply_hulptekst_to_notes(notes, direction=hulp_direction)
+                measure_events[key].extend(notes)
 
-        for letter, evs in measure_events.items():
-            result[letter].append(evs)
+        for key, evs in measure_events.items():
+            result[key].append(evs)
 
-    for p in PARTS:
-        if p["voice"] not in result:
-            result[p["voice"]] = [[] for _ in system.measures]
+    if layout == "partituur":
+        for p in PARTS:
+            if p["voice"] not in result:
+                result[p["voice"]] = [[] for _ in system.measures]
     return result
 
 
-def writing_do_pitch(ctx: StickyContext, letter: str) -> Pitch:
+def writing_do_pitch(ctx: StickyContext, marker: str) -> Pitch:
     """``@do`` shifted by ``@oct`` for this voice (schrijf-do)."""
     do_p = parse_pitch_string(ctx.do)
-    shift = ctx.oct_for(letter)
+    shift = ctx.oct_for(marker)
     if shift == 0:
         return do_p
     return Pitch(step=do_p.step, octave=do_p.octave + shift, alter=do_p.alter)
 
 
-def _voice_resolver(ctx: StickyContext, letter: str) -> PitchResolver:
+def _voice_resolver(ctx: StickyContext, marker: str) -> PitchResolver:
     """PitchResolver whose do is the stem's schrijf-do (``@do`` + ``@oct``)."""
-    do_p = writing_do_pitch(ctx, letter)
+    do_p = writing_do_pitch(ctx, marker)
     return PitchResolver.from_metadata({"do": str(do_p), "mode": ctx.mode})
 
 
@@ -424,17 +882,19 @@ def _apply_line_ehm(resolver: PitchResolver, ehm: str) -> None:
     resolver.apply_start_marker(_expand_start_ehm(ehm))
 
 
-def _apply_start(resolver: PitchResolver, start_rest: str, letter: str) -> None:
-    """Parse ``@start S=- A=\\3 T=\\6 B=\\8`` for this voice."""
-    for part in start_rest.split():
+def _apply_start(resolver: PitchResolver, start_rest: str, marker: str) -> None:
+    """Parse ``@start S=- A=\\3`` / ``@start Sop=-`` for this voice."""
+    mapping: dict[str, str] = {}
+    for part in split_directive_assignments(start_rest):
         if "=" not in part:
             continue
         key, _, val = part.partition("=")
-        key = key.strip()
-        if key == letter or key.upper().startswith(letter.upper()):
-            resolver.apply_start_marker(_expand_start_ehm(val.strip()))
-            return
-    resolver.apply_start_marker([])
+        mapping[key.strip()] = val.strip()
+    found = resolve_stem_map_key(mapping, marker)
+    if found is not None:
+        resolver.apply_start_marker(_expand_start_ehm(mapping[found]))
+    else:
+        resolver.apply_start_marker([])
 
 
 def _join_lyric_text(syllables: list[str], links: list[bool]) -> str:
@@ -473,9 +933,12 @@ def _position_to_notes(
     layout: MvsaLayout = "playback",
     line: int = 0,
     marker: str = "",
+    lyric_number: int = 1,
+    extra_lyric_layers: list[tuple[int, LPosition]] | None = None,
 ) -> list[NoteEvent]:
     elms = list(lpos.elms) if lpos.elms else ["~"]
     slots = list(vpos.slots) if vpos.slots else ["-"]
+    extra_lyric_layers = list(extra_lyric_layers or [])
 
     if lpos.recite:
         pitch = _resolve_slot(
@@ -510,7 +973,11 @@ def _position_to_notes(
                 syl = "single"
             lyrics: list[LyricSyllable] = []
             if syl_text:
-                lyrics.append(LyricSyllable(text=syl_text, syllabic=syl, number=1))
+                lyrics.append(
+                    LyricSyllable(
+                        text=syl_text, syllabic=syl, number=lyric_number
+                    )
+                )
             out_notes.append(
                 NoteEvent(
                     pitch=pitch,
@@ -518,6 +985,10 @@ def _position_to_notes(
                     lyrics=lyrics,
                     recite=True,
                 )
+            )
+        for num, plpos in extra_lyric_layers:
+            _add_lyric_layer_to_notes(
+                out_notes, plpos, opens_hyphen=opens_hyphen, number=num
             )
         if layout == "partituur" and n >= RECITE_PRINT_COLLAPSE_MIN:
             return _collapse_recite_for_partituur(out_notes, edge_dur=base_dur)
@@ -555,6 +1026,7 @@ def _position_to_notes(
                     LyricSyllable(
                         text=lpos.syllables[0],
                         syllabic=syl,
+                        number=lyric_number,
                         extend=n > 1,
                     )
                 )
@@ -562,7 +1034,12 @@ def _position_to_notes(
                 text = _join_lyric_text(lpos.syllables, lpos.links)
                 syl = primary_syl if primary_syl != "single" else "begin"
                 lyrics.append(
-                    LyricSyllable(text=text, syllabic=syl, extend=n > 1)
+                    LyricSyllable(
+                        text=text,
+                        syllabic=syl,
+                        number=lyric_number,
+                        extend=n > 1,
+                    )
                 )
         notes.append(
             NoteEvent(
@@ -572,6 +1049,10 @@ def _position_to_notes(
                 slur_start=(n > 1 and si == 0),
                 slur_stop=(n > 1 and si == n - 1),
             )
+        )
+    for num, plpos in extra_lyric_layers:
+        _add_lyric_layer_to_notes(
+            notes, plpos, opens_hyphen=opens_hyphen, number=num
         )
     # Same-pitch melisma (S13/R7 / M5a). Partituur: I1 ongestipte pack + ties.
     # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot (Coria
@@ -1397,7 +1878,13 @@ def _emit_work_and_movement(
         out.append(f"<movement-title>{escape(ondertitel)}</movement-title>")
 
 
-def _emit_playback_piano_midi(out: list[str], part_id: str, channel: int) -> None:
+def _emit_playback_piano_midi(
+    out: list[str],
+    part_id: str,
+    channel: int,
+    *,
+    volume: str = _PLAYBACK_MIDI_VOLUME,
+) -> None:
     """Canonieke piano-MIDI voor één Coria/playback-part (checklist M8)."""
     instrument_id = f"{part_id}-I1"
     out.append(f'<score-instrument id="{instrument_id}">')
@@ -1408,7 +1895,7 @@ def _emit_playback_piano_midi(out: list[str], part_id: str, channel: int) -> Non
     out.append(f'<midi-instrument id="{instrument_id}">')
     out.append(f"<midi-channel>{channel}</midi-channel>")
     out.append(f"<midi-program>{_PLAYBACK_MIDI_PROGRAM}</midi-program>")
-    out.append(f"<volume>{_PLAYBACK_MIDI_VOLUME}</volume>")
+    out.append(f"<volume>{volume}</volume>")
     out.append(f"<pan>{_PLAYBACK_MIDI_PAN}</pan>")
     out.append("</midi-instrument>")
 
@@ -1425,6 +1912,8 @@ def _emit_score_playback(
     measure_cue_gap: list[bool] | None = None,
     measure_pauze: list[bool] | None = None,
     meta: dict[str, str | None] | None = None,
+    parts: list[dict] | None = None,
+    extra_parts: list[dict] | None = None,
 ) -> str:
     do_p = parse_pitch_string(context.do)
     fifths = key_fifths(do_p, context.mode)
@@ -1446,6 +1935,10 @@ def _emit_score_playback(
     while len(pauzes) < n_measures:
         pauzes.append(False)
 
+    emit_parts: list[dict] = list(parts) if parts is not None else list(PARTS)
+    if extra_parts:
+        emit_parts = emit_parts + list(extra_parts)
+
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN"',
@@ -1455,15 +1948,20 @@ def _emit_score_playback(
     _emit_work_and_movement(out, title, meta)
     _emit_identification(out, meta)
     out.append("<part-list>")
-    for channel, part in enumerate(PARTS, start=1):
+    for channel, part in enumerate(emit_parts, start=1):
         out.append(f'<score-part id="{part["id"]}">')
         out.append(f"<part-name>{part['name']}</part-name>")
         out.append(f"<part-abbreviation>{part['abbr']}</part-abbreviation>")
-        _emit_playback_piano_midi(out, part["id"], channel)
+        vol = (
+            _HULPTEKST_VOLUME
+            if re.search(r"h\d+$", str(part.get("voice", "")))
+            else _PLAYBACK_MIDI_VOLUME
+        )
+        _emit_playback_piano_midi(out, part["id"], channel, volume=vol)
         out.append("</score-part>")
     out.append("</part-list>")
 
-    for part in PARTS:
+    for part in emit_parts:
         voice = part["voice"]
         measures = list(voice_measures.get(voice, []))
         while len(measures) < n_measures:

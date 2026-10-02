@@ -52,12 +52,14 @@ def export_mvsa_to_mscz(
     keep_mxl: Path | None = None,
     layout: str | None = None,
     bibliotheek_id: str | None = None,
+    hulptekst: bool = False,
 ) -> Path:
     """Export ``path`` (.mvsa) to checklist-conformant ``out`` (.mscz).
 
     Intermediate MusicXML uses **partituur** layout (twee balken SA/TB).
     Post-process follows *layout* (default ``partituur``). *bibliotheek_id*
     is preferred over path sniffing for the colofon (``partituur`` only).
+    *hulptekst*: tweede lyric-laag in het tussen-MXL (blad «tweede couplet»).
 
     Returns ``out``.
     """
@@ -96,7 +98,11 @@ def export_mvsa_to_mscz(
     try:
         try:
             export_mvsa_path(
-                path, mxl_path, section_id=section_id, layout="partituur"
+                path,
+                mxl_path,
+                section_id=section_id,
+                layout="partituur",
+                hulptekst=hulptekst,
             )
         except (MvsaValidationError, MvsaExportError):
             raise
