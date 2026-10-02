@@ -36,11 +36,10 @@ Die hulptekst komt in de exportketens **zonder** een tweede echte melodiestem:
 - **Blad / print** (`.mscz`, via MusicXML): tweede tekstlaag onder dezelfde
   noten — MusicXML `<lyric number="1">` = brontekst, `number="2"` = hulptekst
   («tweede couplet»).
-- **Coria / oefenen** (`.mxl`): optioneel een tweede MusicXML-**part** met
-  **identieke** pitches en ritme, andere lyrics, duidelijke part-namen (bijv.
-  `Kerkslavisch` / `Latijn` of `Nederlands` / `Cyrillisch`). De speler kiest;
-  beide hard tegelijk (dubbel geluid) is niet de bedoeling. Dit zijn geen
-  echte stemmen.
+- **Coria / oefenen** (`.mxl`): optioneel extra MusicXML-**parts** — één per
+  stem × lyrics-laag, met part-namen `{stem} ({@taal-label})` (bv.
+  `Sop (aap)` / `Zeep (noot)`). De speler kiest; beide hard tegelijk (dubbel
+  geluid) is niet de bedoeling. Dit zijn geen echte stemmen.
 
 In de **catalogus** (bibliotheek) blijven taalvarianten via suffix op
 [uitvoeringsvorm-id](@bron) (`-nl` / `-ksl`) plus leaf-map — vastgelegd of

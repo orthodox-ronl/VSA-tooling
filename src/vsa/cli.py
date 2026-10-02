@@ -419,6 +419,7 @@ def _build_parser():
         dest="hulptekst_as_parts",
         help=(
             "Coria: extra SATB-parts met hulptekst (volume 0). "
+            "Part-namen: Soprano (ksl)/(nl) via @taal. "
             "Impliceert --hulptekst. Alleen playback-layout."
         ),
     )

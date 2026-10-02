@@ -16,6 +16,12 @@ SECTIE_ID_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
 BLOK_ID_RE = re.compile(r"^(?:[1-9][0-9]*|[a-z][a-z0-9_-]*)$")
 DO_RE = re.compile(r"^[A-Ga-g](#|b)?[0-9]$")
 OCT_ASSIGN_RE = re.compile(r"^([A-Za-z0-9_-]+)=(-?\d+)$")
+# Per lyrics-laag: ``Lap=nl``, ``Lus=noot``, ``L'=ksl`` (``L'`` ≡ ``L1``).
+TAAL_ASSIGN_RE = re.compile(
+    r"^([A-Za-z][A-Za-z0-9_']*)=([A-Za-z][A-Za-z0-9_-]*)$"
+)
+# Vrije Coria-labels én richting-tokens ``nl``/``ksl``.
+TAAL_LABEL_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 STEM_ID_BODY_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 # Same shape as stem height EHMs (``/``, ``\6``, ``-``, ``#\``, …).
@@ -59,7 +65,7 @@ ALLOWED_DIRECTIVES = frozenset(
         "genre",
         "opmerkingen",
         "mscz-newline",
-        "taal",  # sticky passage-taal (nl|ksl|auto)
+        "taal",  # sticky: nl|ksl|auto óf L=/L1=-toekenningen
     }
 )
 # Document-metadata met quoted string (laatste waarde wint).
@@ -87,6 +93,60 @@ STICKY_DIRECTIVES = frozenset({"do", "mode", "oct", "start", "taal"})
 ALLOWED_MODES = frozenset({"major", "minor"})
 ALLOWED_TALEN = frozenset({"nl", "ksl"})
 ALLOWED_TAAL_ARGS = frozenset({"nl", "ksl", "auto"})
+
+
+def normalize_lyric_taal_key(marker: str) -> str:
+    """Normaliseer lyrics-marker voor ``@taal``-toekenningen (``L'`` → ``L1``)."""
+    raw = (marker or "").strip()
+    if raw == "L'":
+        return "L1"
+    if raw.lower() == "lyrics":
+        return "L"
+    return raw
+
+
+def stem_id_base(marker: str) -> str:
+    """Strip trailing digits: ``Lus2``→``Lus``, ``S1``→``S``, ``Zeep``→``Zeep``."""
+    return re.sub(r"\d+$", "", marker or "")
+
+
+def resolve_stem_map_key(mapping: dict, marker: str) -> str | None:
+    """Zoek *marker* in *mapping*: exact, case-insensitive, dan digitsuffix-basis.
+
+    Voor ``S1``/``B2`` blijft SATB-letter-fallback: ``S``/``B``. Voor langere
+    namen (``Sop``, ``Lus2``) géén eerste-letter-fallback.
+    """
+    if not marker:
+        return None
+    if marker in mapping:
+        return marker
+    lower = marker.lower()
+    for key in mapping:
+        if key.lower() == lower:
+            return key
+    base = stem_id_base(marker)
+    if base and base != marker:
+        found = resolve_stem_map_key(mapping, base)
+        if found is not None:
+            return found
+    if re.fullmatch(r"[SATB]\d*", marker, flags=re.IGNORECASE):
+        letter = marker[0].upper()
+        if letter in mapping:
+            return letter
+        for key in mapping:
+            if key.lower() == letter.lower():
+                return key
+    return None
+
+
+def looks_like_taal_assignments(rest: str) -> bool:
+    """True als *rest* spaties/komma's en ``=`` bevat (vorm ``Lap=aap Lus=noot``)."""
+    return "=" in (rest or "")
+
+
+def split_directive_assignments(rest: str) -> list[str]:
+    """Splits ``S=0 A=0`` of ``sop=0, zeep=1`` in toekenningsdelen."""
+    return [p for p in re.split(r"[\s,]+", (rest or "").strip()) if p]
 
 
 def is_noop_separator_directive(name: str, rest: str) -> bool:
@@ -542,7 +602,7 @@ def _validate_directive_value(
                 MvsaDiagnostic("MVSA-OCT", "leeg @oct", line_no)
             )
             return
-        for part in rest.split():
+        for part in split_directive_assignments(rest):
             if not OCT_ASSIGN_RE.match(part):
                 diagnostics.append(
                     MvsaDiagnostic(
@@ -551,6 +611,16 @@ def _validate_directive_value(
                         line_no,
                     )
                 )
+            else:
+                stem = part.split("=", 1)[0]
+                if is_lyrics_stem(stem):
+                    diagnostics.append(
+                        MvsaDiagnostic(
+                            "MVSA-OCT",
+                            f"@oct verwacht een stem-id, niet lyrics-id {stem!r}",
+                            line_no,
+                        )
+                    )
     elif name == "start":
         if not rest:
             diagnostics.append(
@@ -559,12 +629,42 @@ def _validate_directive_value(
     elif name == "taal":
         if rest in ALLOWED_TAAL_ARGS:
             return
+        if looks_like_taal_assignments(rest):
+            parts = split_directive_assignments(rest)
+            if not parts:
+                diagnostics.append(
+                    MvsaDiagnostic("MVSA-TAAL", "leeg @taal", line_no)
+                )
+                return
+            for part in parts:
+                m = TAAL_ASSIGN_RE.match(part)
+                if not m:
+                    diagnostics.append(
+                        MvsaDiagnostic(
+                            "MVSA-TAAL",
+                            f"ongeldige @taal-toekenning {part!r} "
+                            f"(bv. Lap=aap Lus=noot of L=ksl L1=nl)",
+                            line_no,
+                        )
+                    )
+                    continue
+                key = normalize_lyric_taal_key(m.group(1))
+                if not is_lyrics_stem(key):
+                    diagnostics.append(
+                        MvsaDiagnostic(
+                            "MVSA-TAAL",
+                            f"@taal-toekenning verwacht lyrics-id "
+                            f"(begint met L/l), niet {key!r}",
+                            line_no,
+                        )
+                    )
+            return
         if parse_tekst_argument(rest) is None:
             diagnostics.append(
                 MvsaDiagnostic(
                     "MVSA-TAAL",
                     f"ongeldige @taal {rest!r} "
-                    f'(nl|ksl|auto, of quoted string bv. @taal "nl")',
+                    f'(nl|ksl|auto, Lap=aap Lus=noot, of quoted string bv. @taal "nl")',
                     line_no,
                 )
             )

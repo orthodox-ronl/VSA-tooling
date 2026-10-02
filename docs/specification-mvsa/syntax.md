@@ -57,8 +57,9 @@ de identifier zet alleen de default/start. Zie
 [Semantiek — absolute en relatieve hoogte](semantics.md#absolute-en-relatieve-hoogte).
 
 Gangbare stem-id’s in SATB-export: `S`, `A`, `T`, `B` (eventueel `S1`, …).
-Andere stem-id’s (`cantus:`) zijn syntactisch toegestaan; MusicXML/MSCZ-export
-verwacht voorlopig de SATB-letters.
+Andere stem-id’s (`cantus:`, `Sop:`) zijn syntactisch toegestaan. **Playback /
+Coria** exporteert die ids als part-namen; **partituur / MSCZ** verwacht voorlopig
+nog de SATB-letters.
 
 Het laatste teken van de stemidentifier mag geen `_` of `-` zijn, zodat `S-:`
 eenduidig “stem `S` + EHM `-`” is (niet stem-id `S-`). Ongeldig: `S_:`.

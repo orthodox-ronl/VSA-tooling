@@ -76,8 +76,10 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    `@speelplan`, `@---`), actieve metadata (`@title`, `@ondertitel`,
    `@composer`, `@tekstdichter`, `@arrangeur`, `@vertaler`, `@bron`,
    `@copyright`), en gereserveerde metadata (`@toon`, `@genre`,
-   `@opmerkingen`). Sticky `@taal nl|ksl|auto` stuurt hulptekst-richting
-   (zie [keywords — @taal](keywords.md#taal)).
+   `@opmerkingen`). Sticky `@taal` (`nl`/`ksl`/`auto`, of
+   `Lap=aap Lus=noot` op lyrics-ids) stuurt hulptekst-richting en Coria-partnamen
+   (zie [keywords — @taal](keywords.md#taal)). `@oct` / `@start` gebruiken
+   dezelfde stemidentifiers als de stemregels.
 10. Sticky / `@tekst` / metadata met ongeldige waarde: **error**
     (`MVSA-META` voor string-metadata). `@mscz-newline` met argumenten:
     **error**. `@tekst` of `@mscz-newline` zonder volgend LSATB-systeem:

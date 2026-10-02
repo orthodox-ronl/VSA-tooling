@@ -23,6 +23,7 @@ from .mvsa_validate import (
     SECTIE_ID_RE,
     STICKY_DIRECTIVES,
     STRING_META_DIRECTIVES,
+    TAAL_ASSIGN_RE,
     MvsaDiagnostic,
     _BarSplit,
     _ELMS,
@@ -30,9 +31,14 @@ from .mvsa_validate import (
     _validate_directive_value,
     is_lyrics_stem,
     is_noop_separator_directive,
+    looks_like_taal_assignments,
     normalize_directive_name,
+    normalize_lyric_taal_key,
     parse_regelidentifier,
     parse_tekst_argument,
+    resolve_stem_map_key,
+    split_directive_assignments,
+    stem_id_base,
 )
 
 DEGREE_NAMES = {
@@ -75,15 +81,24 @@ class StickyContext:
     mode: str = "major"
     oct: dict[str, int] = field(default_factory=dict)  # stem_id -> shift
     start: str | None = None  # raw @start rest
-    # Passage-taal voor hulptekst: ``nl`` | ``ksl`` | None (auto per lettergreep).
+    # Passage-richting voor hulptekst: ``nl`` | ``ksl`` | None (auto).
     taal: str | None = None
+    # Per lyrics-id → label (Coria) en/of richting ``nl``/``ksl``.
+    taal_lyrics: dict[str, str] = field(default_factory=dict)
 
     def oct_for(self, marker: str) -> int:
-        if marker in self.oct:
-            return self.oct[marker]
-        # SATB-compat: ``S1`` deelt default met ``S`` als alleen letter gezet is.
-        letter = marker[0] if marker else ""
-        return self.oct.get(letter, 0)
+        key = resolve_stem_map_key(self.oct, marker)
+        return self.oct[key] if key is not None else 0
+
+    def taal_for(self, marker: str) -> str | None:
+        """Label/richting voor lyrics-marker; ``L``/``lyrics`` valt terug op sticky ``taal``."""
+        key = normalize_lyric_taal_key(marker)
+        found = resolve_stem_map_key(self.taal_lyrics, key)
+        if found is not None:
+            return self.taal_lyrics[found]
+        if key.lower() in {"l", "lyrics"} or stem_id_base(key).lower() == "l":
+            return self.taal
+        return None
 
 
 @dataclass
@@ -265,9 +280,11 @@ def parse_mvsa(text: str) -> ParsedDocument:
             elif name in ALLOWED_DIRECTIVES:
                 _validate_directive_value(name, rest, line_no, diagnostics)
                 if name == "taal":
-                    # Sticky: ``@taal nl|ksl|auto``. Quoted: document-meta
-                    # (en sticky als de string ``nl``/``ksl`` is).
-                    if rest in ALLOWED_TAAL_ARGS:
+                    # Sticky: ``@taal nl|ksl|auto`` of ``@taal L=nl L1=ksl``.
+                    # Quoted: document-meta (en sticky als de string ``nl``/``ksl`` is).
+                    if rest in ALLOWED_TAAL_ARGS or looks_like_taal_assignments(
+                        rest
+                    ):
                         _apply_directive(ctx, name, rest)
                     else:
                         value = parse_tekst_argument(rest)
@@ -275,6 +292,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
                             doc_meta["taal"] = value
                             if value in ALLOWED_TALEN:
                                 ctx.taal = value
+                                ctx.taal_lyrics["L"] = value
                 elif name in STICKY_DIRECTIVES:
                     _apply_directive(ctx, name, rest)
                 elif name == "tekst":
@@ -459,7 +477,7 @@ def _apply_directive(ctx: StickyContext, name: str, rest: str) -> None:
     elif name == "mode" and rest in ALLOWED_MODES:
         ctx.mode = rest
     elif name == "oct" and rest:
-        for part in rest.split():
+        for part in split_directive_assignments(rest):
             m = OCT_ASSIGN_RE.match(part)
             if m:
                 ctx.oct[m.group(1)] = int(m.group(2))
@@ -468,8 +486,31 @@ def _apply_directive(ctx: StickyContext, name: str, rest: str) -> None:
     elif name == "taal":
         if rest == "auto":
             ctx.taal = None
+            ctx.taal_lyrics.pop("L", None)
         elif rest in ALLOWED_TALEN:
             ctx.taal = rest
+            ctx.taal_lyrics["L"] = rest
+        elif looks_like_taal_assignments(rest):
+            for part in split_directive_assignments(rest):
+                m = TAAL_ASSIGN_RE.match(part)
+                if not m:
+                    continue
+                key = normalize_lyric_taal_key(m.group(1))
+                value = m.group(2)
+                if not is_lyrics_stem(key):
+                    continue
+                ctx.taal_lyrics[key] = value
+                # Eerste lyrics-laag / ``L``: ook sticky richting als nl|ksl.
+                if key.lower() in {"l", "lyrics"} and value.lower() in ALLOWED_TALEN:
+                    ctx.taal = value.lower()
+                elif (
+                    not any(k.lower() in {"l", "lyrics"} for k in ctx.taal_lyrics)
+                    and value.lower() in ALLOWED_TALEN
+                    and ctx.taal is None
+                ):
+                    # Alleen lyrics-ids zoals Lap: eerste nl|ksl-waarde → sticky.
+                    ctx.taal = value.lower()
+
 
 
 def _ends_section(

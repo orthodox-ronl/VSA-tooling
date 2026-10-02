@@ -90,21 +90,25 @@ zonder octaafsuffix, en een toonnaam a–g **zonder** wetenschappelijk cijfer,
 klinkt t.o.v. `@do`. Typisch: bas en tenor één octaaf lager schrijven (`B=-1`,
 `T=-1`), zodat je `re` / `d` typt in plaats van `re-` / `d-`.
 
-**Vorm.** `@oct` + spatiescheidende toekenningen `Stem=n`, bv.
-`@oct S=0 A=0 T=-1 B=-1`.
+**Vorm.** `@oct` + toekenningen `Stem=n` (spaties of komma’s). De stem-namen
+zijn dezelfde **stemidentifiers** als op de stemregels (niet alleen S/A/T/B),
+bv. `@oct S=0 A=0 T=-1 B=-1` of `@oct sop=0, zeep=-1`. Matching is
+hoofdletterongevoelig; `S1` deelt de waarde van `S`, `Zeep2` deelt `Zeep`.
 
-**Wel gebruiken** bij SATB met laddergraden of kale a–g, zodat elke stem in een
-comfortabel schrijfoctaaf blijft. Kale a–g delen het **do-octaaf**
-(`[schrijf-do, +12)`): bij `@do F4` is `c` = C5.
+**Wel gebruiken** bij SATB of andere stem-ids met laddergraden of kale a–g,
+zodat elke stem in een comfortabel schrijfoctaaf blijft. Kale a–g delen het
+**do-octaaf** (`[schrijf-do, +12)`): bij `@do F4` is `c` = C5.
 
 **Niet gebruiken** om één losse noot te verschuiven: gebruik dan een
 octaafsuffix op die noot (`so-`, `fa+`, `c+`), of een wetenschappelijke toonnaam
-(`g3`, `c5`). Wetenschappelijke cijfers (`g3`) negeren `@oct`.
+(`g3`, `c5`). Wetenschappelijke cijfers (`g3`) negeren `@oct`. Geen lyrics-ids
+(`L…`) in `@oct`.
 
 **Default:** `0` voor elke stem die je niet noemt.
 
 ```text
 @oct S=0 A=0 T=-1 B=-1
+@oct sop=0, zeep=-1
 ```
 
 Zie [Semantiek — schrijfoctaaf](semantics.md#schrijfoctaaf).
@@ -422,36 +426,49 @@ zodra tooling die gaat tonen.
 
 ## `@taal`
 
-**Wat het is.** Sticky **passage-taal** voor hulptekst-export: vanaf het
-eerstvolgende LSATB-systeem tot je `@taal` opnieuw zet. De converter gebruikt
-dit bij `--hulptekst` om te bepalen welke richting geldt.
+**Wat het is.** Sticky **passage-taal / laag-label** voor hulptekst-export en
+Coria-partnamen: vanaf het eerstvolgende LSATB-systeem tot je `@taal` opnieuw
+zet. De keys zijn dezelfde **lyrics-identifiers** als op de lyrics-regels
+(alles wat met `L`/`l` begint).
 
-**Vorm.** `@taal nl` · `@taal ksl` · `@taal auto`  
-Optioneel als document-metadata: `@taal "nl"` (quoted string; als de string
-`nl` of `ksl` is, geldt die ook als sticky passage-taal).
+**Vorm.**
 
-| Waarde  | Effect bij `--hulptekst`                                      |
-| ------- | ------------------------------------------------------------- |
-| `ksl`   | Hulptekst = Latijn (uit kerkslavische bronletters)            |
-| `nl`    | Hulptekst = Cyrillisch (uit Nederlandse bronletters)          |
-| `auto`  | Per lettergreep detecteren (default als je `@taal` weglaat)   |
+| Vorm                                    | Betekenis                                                                                |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `@taal nl` · `@taal ksl` · `@taal auto` | Hele passage: richting voor primaire lyrics (`L`)                                        |
+| `@taal Lap=aap Lus=noot`                | Per lyrics-id een **vrij label** (Coria); spaties of komma’s                             |
+| `@taal L=ksl, L'=nl`                    | Zelfde; `L'` is alias voor `L1`                                                          |
+| `@taal "nl"`                            | Document-metadata (quoted); als de string `nl` of `ksl` is, ook sticky voor `L`          |
 
-**Wel gebruiken** in gemengde stukken (bijv. Nederlands couplet + kerkslavisch
-refrein in één uitvoeringsvorm), zodat alleen de bedoelde passages worden
-omgezet.
+| Waarde (richting) | Effect bij `--hulptekst`                                      |
+| ----------------- | ------------------------------------------------------------- |
+| `ksl`             | Hulptekst = Latijn (uit kerkslavische bronletters)            |
+| `nl`              | Hulptekst = Cyrillisch (uit Nederlandse bronletters)          |
+| `auto`            | Per lettergreep detecteren (default als je `@taal` weglaat)   |
+| ander label       | Alleen Coria-naam (bv. `aap`); richting blijft auto/detect    |
+
+**Coria-partnamen** (`--hulptekst-as-parts`): één MusicXML-part per
+**stem × lyrics-laag**, genaamd `{stemidentifier} ({label})` — bijvoorbeeld
+`Sop (aap)`, `Zeep (noot)`. Stemidentifiers die precies `S`/`A`/`T`/`B` zijn
+(eventueel met cijfer) krijgen de bekende namen Soprano/Alto/Tenor/Bass. Ontbreekt
+een label voor de tweede laag bij `nl`/`ksl`, dan het complement (`ksl`↔`nl`).
+
+**Wel gebruiken** voor gemengde passages, parallelle lyrics, of duidelijke
+Coria-keuzes. Matching is hoofdletterongevoelig; `Lus2` deelt het label van
+`Lus`.
 
 **Niet gebruiken** als vervanging van aparte uitvoeringsvormen (`-nl` / `-ksl`)
-wanneer de **melodie of lettergreepdeling** verschilt — dat blijven aparte
-bestanden.
+wanneer de **melodie of lettergreepdeling** verschilt. Part-namen in MusicXML
+zijn globaal: bij wisselende `@taal` midden in één bestand volgen de
+Coria-labels de **eerste** sticky toekenning in de export.
 
 ```text
-@taal nl
-L: Heer_ ont-ferm_ U_ |
-S: a    -   -     -   |
-
-@taal ksl
-L: Госпо-ди_ по-ми-луй_ |
-S: a     -   -  -   -   |
+@taal Lap=aap, Lus=noot
+@oct sop=0, zeep=-1
+Lap: Heer_ |
+Lus: Хер_  |
+Sop: a4    |
+Zeep: f3   |
 ```
 
 Zie [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md) en
