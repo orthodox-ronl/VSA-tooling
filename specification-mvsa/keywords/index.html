@@ -3035,6 +3035,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#taal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @taal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#-" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4721,6 +4732,62 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plans/kerkslavisch-transliteratie/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    kerkslavische hulptekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plans/hulptekst-reviewcorpus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    hulptekst-reviewcorpus (expert)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4904,6 +4971,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#taal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @taal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#-" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5031,16 +5109,20 @@ catalogus.</p>
 zonder octaafsuffix, en een toonnaam a–g <strong>zonder</strong> wetenschappelijk cijfer,
 klinkt t.o.v. <code>@do</code>. Typisch: bas en tenor één octaaf lager schrijven (<code>B=-1</code>,
 <code>T=-1</code>), zodat je <code>re</code> / <code>d</code> typt in plaats van <code>re-</code> / <code>d-</code>.</p>
-<p><strong>Vorm.</strong> <code>@oct</code> + spatiescheidende toekenningen <code>Stem=n</code>, bv.
-<code>@oct S=0 A=0 T=-1 B=-1</code>.</p>
-<p><strong>Wel gebruiken</strong> bij SATB met laddergraden of kale a–g, zodat elke stem in een
-comfortabel schrijfoctaaf blijft. Kale a–g delen het <strong>do-octaaf</strong>
-(<code>[schrijf-do, +12)</code>): bij <code>@do F4</code> is <code>c</code> = C5.</p>
+<p><strong>Vorm.</strong> <code>@oct</code> + toekenningen <code>Stem=n</code> (spaties of komma’s). De stem-namen
+zijn dezelfde <strong>stemidentifiers</strong> als op de stemregels (niet alleen S/A/T/B),
+bv. <code>@oct S=0 A=0 T=-1 B=-1</code> of <code>@oct sop=0, zeep=-1</code>. Matching is
+hoofdletterongevoelig; <code>S1</code> deelt de waarde van <code>S</code>, <code>Zeep2</code> deelt <code>Zeep</code>.</p>
+<p><strong>Wel gebruiken</strong> bij SATB of andere stem-ids met laddergraden of kale a–g,
+zodat elke stem in een comfortabel schrijfoctaaf blijft. Kale a–g delen het
+<strong>do-octaaf</strong> (<code>[schrijf-do, +12)</code>): bij <code>@do F4</code> is <code>c</code> = C5.</p>
 <p><strong>Niet gebruiken</strong> om één losse noot te verschuiven: gebruik dan een
 octaafsuffix op die noot (<code>so-</code>, <code>fa+</code>, <code>c+</code>), of een wetenschappelijke toonnaam
-(<code>g3</code>, <code>c5</code>). Wetenschappelijke cijfers (<code>g3</code>) negeren <code>@oct</code>.</p>
+(<code>g3</code>, <code>c5</code>). Wetenschappelijke cijfers (<code>g3</code>) negeren <code>@oct</code>. Geen lyrics-ids
+(<code>L…</code>) in <code>@oct</code>.</p>
 <p><strong>Default:</strong> <code>0</code> voor elke stem die je niet noemt.</p>
 <div class="highlight"><pre><span></span><code>@oct S=0 A=0 T=-1 B=-1
+@oct sop=0, zeep=-1
 </code></pre></div>
 <p>Zie <a href="../semantics/#schrijfoctaaf">Semantiek — schrijfoctaaf</a>.</p>
 <hr />
@@ -5258,7 +5340,7 @@ geldt voor de keywords hieronder.</p>
 <tr>
 <td><code>@bron</code></td>
 <td><code>@bron "Liturgikon, p.147-149"</code></td>
-<td><code>&lt;source&gt;</code></td>
+<td><code>&lt;source&gt;</code> (+ MSCZ-colofon)</td>
 <td><code>source</code></td>
 </tr>
 <tr>
@@ -5282,15 +5364,15 @@ Gaat mee in <strong>beide</strong> exportpaden:</p>
 <li>MusicXML (playback/Coria én partituur): <code>&lt;identification&gt;&lt;source&gt;…&lt;/source&gt;</code></li>
 <li>MuseScore/MSCZ: meta-tag <code>source</code></li>
 </ul>
-<p><strong>Op het MSCZ-blad:</strong> MuseScore toont meta <code>source</code> niet automatisch in de kop.
-Zonder <code>@tekstdichter</code> zet de MSCZ-export daarom <code>@bron</code> ook als
-<strong>lyricist-tekst</strong> in de kop (<code>bron: …</code>), zodat de herkomst op papier zichtbaar
-is. Heb je wél een echte tekstdichter, dan wint <code>@tekstdichter</code> voor die plek;
-<code>@bron</code> blijft dan alleen in meta/<code>&lt;source&gt;</code>.</p>
+<p><strong>Op het MSCZ-blad:</strong> MuseScore toont meta <code>source</code> niet in de kop. De
+partituur-export zet <code>@bron</code> daarom als regel <strong><code>Bron: …</code> in het colofon</strong>
+(onderaan), naast copyright en eventuele bibliotheek-id. Gebruik <code>@bron</code> voor
+de herkomst; gebruik <code>@tekstdichter</code> alleen voor een echte tekstdichter (die
+verschijnt dan wél als lyricist linksboven).</p>
 <p>Optionele schrijfwijze met dubbele punt na het keyword: <code>@bron: "…"</code> ≡
 <code>@bron "…"</code>. Let op: <code>bron:</code> <em>in</em> een quoted string (bv.
 <code>@tekstdichter "bron: koormap …"</code>) is gewoon tekst — dat is geen keyword en
-geeft geen warning.</p>
+geeft geen warning; zet herkomst bij voorkeur via <code>@bron</code>.</p>
 <div class="highlight"><pre><span></span><code>@bron "Liturgikon, p.147-149"
 </code></pre></div>
 <p><strong><code>@ondertitel</code>.</strong> Ondertitel onder de hoofdtitel (bv. liturgische aanduiding).
@@ -5298,10 +5380,8 @@ Gaat mee in partituur/MSCZ (<code>movement-title</code> / MuseScore <code>subtit
 playback behoudt die tag (geen sanitize-strip).</p>
 <p><strong><code>@tekstdichter</code> / <code>@arrangeur</code> / <code>@vertaler</code>.</strong> Personenrollen naast de
 componist; zelfde stringvorm. Alleen zetten als je die rol echt kent.
-<code>@tekstdichter</code> verschijnt op het MSCZ-blad (lyricist-plek). Wil je daar de
-partituurbron tonen, gebruik bij voorkeur alleen <code>@bron</code> (zie hierboven); een
-expliciete <code>@tekstdichter "bron: …"</code> mag nog steeds en wint dan voor die
-bladplek.</p>
+<code>@tekstdichter</code> verschijnt op het MSCZ-blad (lyricist-plek). De partituurbron
+hoort in <code>@bron</code> (colofon), niet als nep-tekstdichter.</p>
 <p><strong><code>@copyright</code>.</strong> Bronnotice voor footer (kort) en colofon (volledig) in
 <code>.mscz</code>, en <code>&lt;rights&gt;</code> in MusicXML. Zonder <code>@copyright</code> gebruikt MSCZ-export
 een default (CC BY-SA 4.0 + eredienst-zin).</p>
@@ -5326,11 +5406,6 @@ namen vastliggen voor later gebruik.</p>
 <td><code>@toon "8"</code></td>
 </tr>
 <tr>
-<td><code>@taal</code></td>
-<td>Taal van de gezongen tekst</td>
-<td><code>@taal "nl"</code></td>
-</tr>
-<tr>
 <td><code>@genre</code></td>
 <td>Soort zangstuk (litanie, tropaar, …) voor catalogus/filters</td>
 <td><code>@genre "litanie"</code></td>
@@ -5345,6 +5420,86 @@ namen vastliggen voor later gebruik.</p>
 <p><strong>Niet gebruiken</strong> als vervanging van <code>@tekst</code> (zichtbare cue) of <code>#</code>-commentaar
 voor tijdelijke tipjes in de bron — <code>@opmerkingen</code> is voor blijvende metadata
 zodra tooling die gaat tonen.</p>
+<hr />
+<h2 id="taal"><code>@taal</code><a class="headerlink" href="#taal" title="Permanent link">&para;</a></h2>
+<p><strong>Wat het is.</strong> Sticky <strong>passage-taal / laag-label</strong> voor hulptekst-export en
+Coria-partnamen: vanaf het eerstvolgende LSATB-systeem tot je <code>@taal</code> opnieuw
+zet. De keys zijn dezelfde <strong>lyrics-identifiers</strong> als op de lyrics-regels
+(alles wat met <code>L</code>/<code>l</code> begint).</p>
+<p><strong>Vorm.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Vorm</th>
+<th>Betekenis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@taal nl</code> · <code>@taal ksl</code> · <code>@taal auto</code></td>
+<td>Hele passage: richting voor primaire lyrics (<code>L</code>)</td>
+</tr>
+<tr>
+<td><code>@taal Lap=aap Lus=noot</code></td>
+<td>Per lyrics-id een <strong>vrij label</strong> (Coria); spaties of komma’s</td>
+</tr>
+<tr>
+<td><code>@taal L=ksl, L'=nl</code></td>
+<td>Zelfde; <code>L'</code> is alias voor <code>L1</code></td>
+</tr>
+<tr>
+<td><code>@taal "nl"</code></td>
+<td>Document-metadata (quoted); als de string <code>nl</code> of <code>ksl</code> is, ook sticky voor <code>L</code></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Waarde (richting)</th>
+<th>Effect bij <code>--hulptekst</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ksl</code></td>
+<td>Hulptekst = Latijn (uit kerkslavische bronletters)</td>
+</tr>
+<tr>
+<td><code>nl</code></td>
+<td>Hulptekst = Cyrillisch (uit Nederlandse bronletters)</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>Per lettergreep detecteren (default als je <code>@taal</code> weglaat)</td>
+</tr>
+<tr>
+<td>ander label</td>
+<td>Alleen Coria-naam (bv. <code>aap</code>); richting blijft auto/detect</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Coria-partnamen</strong> (<code>--hulptekst-as-parts</code>): één MusicXML-part per
+<strong>stem × lyrics-laag</strong>, genaamd <code>{stemidentifier} ({label})</code> — bijvoorbeeld
+<code>Sop (aap)</code>, <code>Zeep (noot)</code>. Stemidentifiers die precies <code>S</code>/<code>A</code>/<code>T</code>/<code>B</code> zijn
+(eventueel met cijfer) krijgen de bekende namen Soprano/Alto/Tenor/Bass. Ontbreekt
+een label voor de tweede laag bij <code>nl</code>/<code>ksl</code>, dan het complement (<code>ksl</code>↔<code>nl</code>).</p>
+<p><strong>Wel gebruiken</strong> voor gemengde passages, parallelle lyrics, of duidelijke
+Coria-keuzes. Matching is hoofdletterongevoelig; <code>Lus2</code> deelt het label van
+<code>Lus</code>.</p>
+<p><strong>Niet gebruiken</strong> als vervanging van aparte uitvoeringsvormen (<code>-nl</code> / <code>-ksl</code>)
+wanneer de <strong>melodie of lettergreepdeling</strong> verschilt. Part-namen in MusicXML
+zijn globaal: bij wisselende <code>@taal</code> midden in één bestand volgen de
+Coria-labels de <strong>eerste</strong> sticky toekenning in de export.</p>
+<div class="highlight"><pre><span></span><code>@taal Lap=aap, Lus=noot
+@oct sop=0, zeep=-1
+Lap: Heer_ |
+Lus: Хер_  |
+Sop: a4    |
+Zeep: f3   |
+</code></pre></div>
+<p>Zie <a href="../../plans/kerkslavisch-transliteratie/">kerkslavisch-transliteratie</a> en
+het <a href="../../plans/hulptekst-reviewcorpus/">reviewcorpus</a>.</p>
 <hr />
 <h2 id="-"><code>@---</code><a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
 <p><strong>Wat het is.</strong> Optionele <strong>no-op</strong> die een LSATB-systeem afbreekt — hetzelfde
@@ -5421,7 +5576,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-10-02
         
       </p>
       

@@ -4627,6 +4627,62 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plans/kerkslavisch-transliteratie/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    kerkslavische hulptekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plans/hulptekst-reviewcorpus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    hulptekst-reviewcorpus (expert)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4847,8 +4903,11 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
    <code>@start</code>), layout (<code>@tekst</code>, <code>@mscz-newline</code>, <code>@sectie</code>, <code>@blok</code>,
    <code>@speelplan</code>, <code>@---</code>), actieve metadata (<code>@title</code>, <code>@ondertitel</code>,
    <code>@composer</code>, <code>@tekstdichter</code>, <code>@arrangeur</code>, <code>@vertaler</code>, <code>@bron</code>,
-   <code>@copyright</code>), en gereserveerde metadata (<code>@toon</code>, <code>@taal</code>, <code>@genre</code>,
-   <code>@opmerkingen</code>).</li>
+   <code>@copyright</code>), en gereserveerde metadata (<code>@toon</code>, <code>@genre</code>,
+   <code>@opmerkingen</code>). Sticky <code>@taal</code> (<code>nl</code>/<code>ksl</code>/<code>auto</code>, of
+   <code>Lap=aap Lus=noot</code> op lyrics-ids) stuurt hulptekst-richting en Coria-partnamen
+   (zie <a href="../keywords/#taal">keywords — @taal</a>). <code>@oct</code> / <code>@start</code> gebruiken
+   dezelfde stemidentifiers als de stemregels.</li>
 <li>Sticky / <code>@tekst</code> / metadata met ongeldige waarde: <strong>error</strong>
     (<code>MVSA-META</code> voor string-metadata). <code>@mscz-newline</code> met argumenten:
     <strong>error</strong>. <code>@tekst</code> of <code>@mscz-newline</code> zonder volgend LSATB-systeem:
@@ -4872,9 +4931,11 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
   gefaseerd);</li>
 <li>Muzikale “juistheid” t.o.v. een blad (alleen telling en vorm bij validate);</li>
 <li>blokhergebruik-referenties (<code>@voices</code>, <code>L'</code>, deelbereiken);</li>
-<li>parallelle lyric-nummers (<code>L1</code> als tweede <code>&lt;lyric number&gt;</code>);</li>
 <li>MSCZ-export.</li>
 </ul>
+<p><strong>Parallelle lyrics in export:</strong> <code>L</code> → <code>&lt;lyric number="1"&gt;</code>, <code>L1</code> →
+<code>number="2"</code> (enz.) — zie
+<a href="../../plans/kerkslavisch-transliteratie/">kerkslavisch-transliteratie</a> fase 2.</p>
 
 
 
@@ -4911,7 +4972,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-29
+        Bijgewerkt: 2026-10-02
         
       </p>
       

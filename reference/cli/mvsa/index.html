@@ -5865,6 +5865,62 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../plans/kerkslavisch-transliteratie/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    kerkslavische hulptekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../plans/hulptekst-reviewcorpus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    hulptekst-reviewcorpus (expert)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -6567,9 +6623,11 @@ lyrics-regels en stemregels. Normatieve draft-spec:
 <div class="highlight"><pre><span></span><code>mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
 vsa mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
 mvsa validate [-h] path
-mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] path
+mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
+              [--hulptekst-as-parts] [--bibliotheek-id ID] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-          [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID] path
+          [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
+          [--hulptekst] path
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--layout PROFILE] [--bibliotheek-id ID] path
@@ -6724,14 +6782,42 @@ vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
 <hr />
 <h2 id="vsa-mvsa-musicxml"><code>vsa mvsa musicxml</code><a class="headerlink" href="#vsa-mvsa-musicxml" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_2">Synopsis<a class="headerlink" href="#synopsis_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID] path
+<div class="highlight"><pre><span></span><code>vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
+                  [--hulptekst-as-parts] [--bibliotheek-id ID] path
 </code></pre></div>
 <h3 id="beschrijving_1">Beschrijving<a class="headerlink" href="#beschrijving_1" title="Permanent link">&para;</a></h3>
 <p>Exporteert <strong>één</strong> <code>.mvsa</code>-bestand naar SATB MusicXML (<code>.mxl</code> of
 <code>.musicxml</code>/<code>.xml</code>). Zonder <code>--section</code> gaan alle <code>@sectie</code>-blokken achter
 elkaar in één partituur; met <code>--section</code> alleen die sectie-id.</p>
-<p>Playback (Coria): vier parts S/A/T/B met <strong>piano</strong> op elke partij
-(<a href="../../../formats/canonical-checklists/#checklist-mxl-coria-playback">checklist M8</a>).</p>
+<p>Playback (Coria): standaard vier parts S/A/T/B met <strong>piano</strong> op elke partij
+(<a href="../../../formats/canonical-checklists/#checklist-mxl-coria-playback">checklist M8</a>).
+Stemidentifiers in het <code>.mvsa</code>-bestand (<code>Sop:</code>, <code>cantus:</code>, …) worden op dit
+pad als part-namen gebruikt (SATB-letters → Soprano/Alto/Tenor/Bass).</p>
+<p><strong>Hulptekst</strong> (kerkslavisch ↔ Latijn / Nederlands ↔ Cyrillisch, parochieschema):</p>
+<table>
+<thead>
+<tr>
+<th>Vlag</th>
+<th>Wie</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--hulptekst</code></td>
+<td>Blad én Coria-MXL</td>
+<td>Lyric number 2 onder dezelfde noten (transliteratie). Handmatige <code>L1</code> wint als lyric 2 al bestaat.</td>
+</tr>
+<tr>
+<td><code>--hulptekst-as-parts</code></td>
+<td>Alleen Coria-MXL</td>
+<td>Extra parts: zelfde pitches, lyrics van laag 2; part-namen <code>{stem} ({label})</code>. Labels uit <code>@taal</code> (zie <a href="../../../specification-mvsa/keywords/#taal">keywords — @taal</a>). Volume 0 op hulp-parts. Impliceert <code>--hulptekst</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Richting en Coria-labels sturen met sticky <code>@taal</code> (<code>nl</code> / <code>ksl</code> / <code>auto</code>, of
+<code>Lap=aap Lus=noot</code> op lyrics-ids). Zie
+<a href="../../../plans/kerkslavisch-transliteratie/">kerkslavisch-transliteratie</a>.</p>
 <p>Dit is een <strong>aparte</strong> exporter dan <a href="../musicxml/"><code>vsa musicxml</code></a> (eenstemmig
 VSA).</p>
 <h3 id="argumenten-en-opties_1">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties_1" title="Permanent link">&para;</a></h3>
@@ -6775,6 +6861,20 @@ VSA).</p>
 <td>Optioneel.</td>
 </tr>
 <tr>
+<td><code>--hulptekst</code></td>
+<td>Nee</td>
+<td>Tweede lyric-laag (number=2) via transliterator.</td>
+<td>uit</td>
+<td>Zie beschrijving hierboven.</td>
+</tr>
+<tr>
+<td><code>--hulptekst-as-parts</code></td>
+<td>Nee</td>
+<td>Coria: extra parts met hulptekst (volume 0).</td>
+<td>uit</td>
+<td>Impliceert <code>--hulptekst</code>.</td>
+</tr>
+<tr>
 <td><code>-h</code>, <code>--help</code></td>
 <td>Nee</td>
 <td>Toon hulp voor dit subcommando.</td>
@@ -6814,6 +6914,12 @@ VSA).</p>
 </code></pre></div>
 <p>Met expliciet uitvoerpad en één sectie:</p>
 <div class="highlight"><pre><span></span><code>vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+</code></pre></div>
+<p>Coria met keuze tussen lyrics-lagen (trisagion, kerkslavische sectie):</p>
+<div class="highlight"><pre><span></span><code>vsa mvsa musicxml examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
+</code></pre></div>
+<p>Blad/MSCZ: lyric 2 op partituur-MXL (keten via <code>mscz --hulptekst</code>):</p>
+<div class="highlight"><pre><span></span><code>vsa mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --hulptekst -o generated\hulptekst-ksl.mscz
 </code></pre></div>
 <h3 id="voorbeelden-falen">Voorbeelden — falen<a class="headerlink" href="#voorbeelden-falen" title="Permanent link">&para;</a></h3>
 <p>Onbekende sectie-id of sync-fout in het <code>.mvsa</code>-bestand levert exitcode <code>1</code>
@@ -6913,6 +7019,12 @@ standaard Windows-pad
 <td>Nee</td>
 <td>Colofon-id (profiel <code>partituur</code>); anders pad-fallback.</td>
 <td>pad-sniff / geen</td>
+</tr>
+<tr>
+<td><code>--hulptekst</code></td>
+<td>Nee</td>
+<td>Tweede lyric-laag in tussen-MXL (blad «tweede regel»).</td>
+<td>uit</td>
 </tr>
 </tbody>
 </table>
@@ -7471,7 +7583,7 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-30
+        Bijgewerkt: 2026-10-02
         
       </p>
       
