@@ -3761,6 +3761,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/text/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa text — platte gezongen tekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -4766,6 +4794,10 @@
 <td><a href="../../reference/cli/mxl/"><code>mxl mscz</code></a></td>
 </tr>
 <tr>
+<td>Platte gezongen tekst</td>
+<td><a href="../../reference/cli/text/"><code>vsa text</code></a> (ook op <code>{stam}.mscz.mxl</code>)</td>
+</tr>
+<tr>
 <td>Normatieve renderdetails</td>
 <td><a href="../../specification/rendering/#musicxml-export">Rendering — MusicXML</a></td>
 </tr>
@@ -4786,12 +4818,14 @@ Oefenhoek-Coria-transforms: <code>VSA-demo/scripts/mscz-product-transforms.md</c
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
+vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
 </code></pre></div>
 <p>Via repo-script: <code>scripts\mxl.cmd …</code></p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../">Formaten &amp; CLI — overzicht</a></li>
 <li><a href="../mvsa/"><code>.mvsa</code></a> · <a href="../mscz/"><code>.mscz</code></a> · <a href="../vsa/"><code>.vsa</code></a></li>
+<li>Platte tekst: <a href="../../reference/cli/text/"><code>vsa text</code></a></li>
 </ul>
 
 

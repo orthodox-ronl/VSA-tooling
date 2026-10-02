@@ -3685,6 +3685,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/text/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa text — platte gezongen tekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -5362,12 +5390,25 @@ vsa template validate docs\specification-vsa-templates\library\tropaar-toon-4\te
 <h3 id="output_5">Output<a class="headerlink" href="#output_5" title="Permanent link">&para;</a></h3>
 <p>Bij succes: één <code>OK</code>-regel per bestand. Bij fout: <code>pad: ERROR: CODE: …</code> en
 exitcode <code>1</code>.</p>
-<h2 id="vsa-mvsa"><code>vsa mvsa …</code><a class="headerlink" href="#vsa-mvsa" title="Permanent link">&para;</a></h2>
+<h2 id="vsa-text-pad"><code>vsa text &lt;pad&gt;</code><a class="headerlink" href="#vsa-text-pad" title="Permanent link">&para;</a></h2>
 <h3 id="doel_10">Doel<a class="headerlink" href="#doel_10" title="Permanent link">&para;</a></h3>
+<p>Haal platte gezongen tekst uit <code>.vsa</code>, <code>.mvsa</code>, MusicXML (<code>.mxl</code> /
+<code>.musicxml</code> / <code>.xml</code>) of <code>.mscz</code> — zonder notatie, voor zoekindex of
+lyrics-producten. Schrijft geen <code>.mvsa</code>-sibling.</p>
+<p>Volledige regel (MusicXML-lyrics, stemkeuze, <code>-o</code>): man-pagina
+<a href="../../reference/cli/text/">reference/cli/text.md</a>.</p>
+<h3 id="gebruik_9">Gebruik<a class="headerlink" href="#gebruik_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>vsa text examples\minimal\001_plain_text.vsa
+vsa text lied.mscz.mxl -o generated\lied.mscz.lyrics.txt
+vsa text lied.mscz -o generated\lied.mscz.lyrics.txt
+</code></pre></div>
+<p>Alias voor alleen <code>.mscz</code>: <code>mscz text</code> (zelfde extractie via temp-<code>.mxl</code>).</p>
+<h2 id="vsa-mvsa"><code>vsa mvsa …</code><a class="headerlink" href="#vsa-mvsa" title="Permanent link">&para;</a></h2>
+<h3 id="doel_11">Doel<a class="headerlink" href="#doel_11" title="Permanent link">&para;</a></h3>
 <p>Draft-tooling voor meerstemmige <code>.mvsa</code>-bestanden (L + SATB). Zie
 <a href="../../specification-mvsa/">specification-mvsa</a> en de man-pagina
 <a href="../../reference/cli/mvsa/">reference/cli/mvsa.md</a>.</p>
-<h3 id="gebruik_9">Gebruik<a class="headerlink" href="#gebruik_9" title="Permanent link">&para;</a></h3>
+<h3 id="gebruik_10">Gebruik<a class="headerlink" href="#gebruik_10" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
 vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
@@ -5434,7 +5475,7 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-28
+        Bijgewerkt: 2026-10-02
         
       </p>
       

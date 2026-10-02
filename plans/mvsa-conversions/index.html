@@ -3896,6 +3896,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/text/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa text — platte gezongen tekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -5520,7 +5548,12 @@ hergebruik van <code>digit*</code>.</p>
 <tr>
 <td><code>mscz</code></td>
 <td><code>.mscz</code></td>
-<td>import → mvsa; mxl (MuseScore)</td>
+<td>import → mvsa; mxl (MuseScore); <strong>text</strong> (lyrics via temp-mxl)</td>
+</tr>
+<tr>
+<td><code>vsa text</code></td>
+<td><code>.vsa</code> / <code>.mvsa</code> / MusicXML / <code>.mscz</code></td>
+<td>platte gezongen tekst (zoekindex; geen <code>.mvsa</code>-sibling)</td>
 </tr>
 <tr>
 <td><code>vsa audio</code></td>
@@ -5629,7 +5662,12 @@ doremi</code> en <code>a-g</code> (<code>tests/test_mvsa_import.py</code>).</p>
 <tr>
 <td><code>mscz</code></td>
 <td><code>.mscz</code></td>
-<td>import → mvsa; mxl</td>
+<td>import → mvsa; mxl; <strong>text</strong> (lyrics, geen mvsa)</td>
+</tr>
+<tr>
+<td><code>vsa text</code></td>
+<td>meerdere</td>
+<td>platte tekst incl. MusicXML / <code>.mscz</code></td>
 </tr>
 </tbody>
 </table>
