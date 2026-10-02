@@ -43,10 +43,11 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 
 ### Tooling / conversies
 
-| Punt                 | Toelichting                                                                                                                                | Richting                                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| Exports / gebruik    | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages) |
-| TEv2 docs-opschonen  | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                         |
+| Punt                              | Toelichting                                                                                                                                | Richting                                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Exports / gebruik                 | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages) |
+| Hulptekst / parallelle lyrics     | Bidirectionele hulptekst (ksl→Latijn, nl→Cyrillisch); blad lyric 2 vs Coria-dubbelpart; gemengd nl+ksl                                     | [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md); conversions «parallelle lyrics»              |
+| TEv2 docs-opschonen               | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                         |
 
 ---
 
