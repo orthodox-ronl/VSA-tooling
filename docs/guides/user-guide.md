@@ -28,6 +28,7 @@ VSA-notatie  →  validate  →  SVG / MusicXML / Hugo-Markdown
 | Begrijpen waarom validate faalt                    | [Validatie](validation.md) · [`vsa validate`](../reference/cli/validate.md)  |
 | Eén bestand of site als SVG                        | [SVG exporteren](svg-export.md)                                              |
 | MusicXML / Coria                                   | [MusicXML-export](musicxml-export.md)                                        |
+| Platte gezongen tekst (zoek / lyrics)              | [`vsa text`](../reference/cli/text.md) · [CLI-taken](cli-taken.md)           |
 | Hugo-consumer / waar hoort wat                     | [Consumer-site](../manuals/consumer-site.md)                                 |
 | Tool in een andere repo of CI                      | [Integratie](../integratie/index.md)                                         |
 | Formele taalregels                                 | [Specificaties](../specification/README.md)                                  |

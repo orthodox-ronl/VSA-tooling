@@ -34,6 +34,7 @@ Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
 ```cmd
 mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
+vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
 ```
 
 Via repo-script: `scripts\mxl.cmd …`
@@ -42,3 +43,4 @@ Via repo-script: `scripts\mxl.cmd …`
 
 - [Formaten & CLI — overzicht](index.md)
 - [`.mvsa`](mvsa.md) · [`.mscz`](mscz.md) · [`.vsa`](vsa.md)
+- Platte tekst: [`vsa text`](../reference/cli/text.md)

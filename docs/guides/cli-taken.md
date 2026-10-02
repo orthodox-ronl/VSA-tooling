@@ -18,6 +18,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | Markdown + VSA naar A4-PDF                | [`vsa pdf <bestand.md>`](../reference/cli/pdf.md)                                                                                            |
 | `zoek=`-includes oplossen naar catalogus  | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                                                                |
 | Lettergreepstreepjes (bestand of map)     | [`vsa syllabify <pad>`](../reference/cli/syllabify.md)                                                                                       |
+| Platte gezongen tekst (zoekindex)         | [`vsa text <pad>`](../reference/cli/text.md) (`.vsa` / `.mvsa` / MusicXML / `.mscz`)                                                         |
 | MusicXML exporteren                       | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md)                                                                      |
 | mvsa valideren (draft)                    | [`vsa mvsa validate <pad>`](../reference/cli/mvsa.md#vsa-mvsa-validate)                                                                      |
 | mvsa → SATB MusicXML (draft)              | [`vsa mvsa musicxml <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)                                                 |
@@ -51,6 +52,10 @@ vsa blocks examples\minimal\031_markdown_block_metadata.md --json
 
 ```cmd
 vsa musicxml mijn-lied.vsa mijn-lied.mxl
+```
+
+```cmd
+vsa text mijn-lied.mscz.mxl -o generated\mijn-lied.mscz.lyrics.txt
 ```
 
 ## Bronnen

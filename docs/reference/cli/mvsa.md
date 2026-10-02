@@ -554,3 +554,4 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
 - Conversieplan: [mvsa-conversions](../../plans/mvsa-conversions.md)
 - Voorbeelden: [examples/mvsa](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)
 - Eenstemmig: [`vsa validate`](validate.md), [`vsa musicxml`](musicxml.md)
+- Platte gezongen tekst: [`vsa text`](text.md) (ook op `.mvsa` / MusicXML / `.mscz`)

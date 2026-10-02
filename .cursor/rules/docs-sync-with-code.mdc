@@ -1,0 +1,38 @@
+---
+description: Bij codewijzigingen altijd alle gerelateerde documentatie mee bijwerken
+alwaysApply: true
+---
+
+# Documentatie synchroon met code
+
+Bij **elke** gedragswijziging in code (CLI, API, formaten, export, validatie):
+werk in **dezelfde** wijzigingsronde ook de documentatie bij. Geen aparte
+«docs later»-stap; geen alleen man-pagina terwijl handleidingen achterblijven.
+
+## Wat je doorspit (minimaal)
+
+Zoek en werk bij wat de lezer gebruikt om het nieuwe gedrag te vinden:
+
+1. **Man-pagina’s** — `docs/reference/cli/` (nieuw of bestaand subcommando).
+2. **CLI-overzicht** — `docs/reference/cli/index.md` + `mkdocs.yml` nav.
+3. **Taakgerichte handleidingen** — o.a. `docs/guides/cli-taken.md`,
+   `docs/guides/user-guide.md`, relevante `docs/guides/*-export.md`.
+4. **Formaten-hub** — `docs/formats/index.md` en de pagina van het
+   brontype (`.vsa` / `.mvsa` / `.mxl` / `.mscz` / …).
+5. **Contract / plan** — waar de repo een CLI-contract of conversieplan
+   bijhoudt (`docs/specification/cli.md`, `docs/plans/…`), die synchroon
+   houden als het gedrag daar genoemd hoort te worden.
+6. **Cross-links** — «Zie ook» op verwante man-pagina’s (bijv. `mxl` ↔
+   `text`).
+
+Geldt voor **alle** orthodox-ronl-repo’s: man-pages én handleidingen én
+overzichten. Terminologie: `orthodox-ronl-terminologie.mdc`. Leesbaarheid:
+`documentatie-duidelijkheid.mdc`.
+
+## Succescheck vóór afronden
+
+- Kan een beheerder via CLI-taken / format-hub bij het nieuwe commando
+  of gedrag uitkomen zonder de man-pagina al te kennen?
+- Komen voorbeelden en bestandsnamen overeen met de echte CLI?
+- Geen verouderde claim («alleen .vsa/.mvsa») die het nieuwe gedrag
+  uitsluit?

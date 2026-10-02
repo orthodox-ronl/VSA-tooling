@@ -48,4 +48,5 @@ scripts\mxl.cmd -h
 - [`mvsa`](mvsa.md) — bron `.mvsa`
 - [`mscz`](mscz.md) — bron `.mscz` (`mscz mxl` gebruikt dezelfde normalize-keten)
 - [`vsa musicxml`](musicxml.md) — eenstemmig `.vsa` → MusicXML
+- [`vsa text`](text.md) — platte gezongen tekst uit `.mxl` / `.musicxml` (zoekindex)
 - [`vsa audio`](audio.md) — `.mscz` → mp3 via genormaliseerde playback-MXL

@@ -50,7 +50,9 @@ MuseScore naar een temp-`.mxl` en leest daaruit. Er ontstaat geen
 | `--musescore PATH`  | MuseScore-executable (alleen bij `.mscz`; default auto). |
 
 Geen stamp-header (`# vsa-source-sha256:`) in deze tooling — dat hoort bij
-consumer lyrics-products.
+consumer lyrics-products. Bestandsnaamgeving (conventie):
+`{stam}.vsa.lyrics.txt` / `{stam}.mvsa.lyrics.txt` / `{stam}.mscz.lyrics.txt`
+— zie [canonieke checklists — naamgeving](../../formats/canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ## Voorbeelden
 

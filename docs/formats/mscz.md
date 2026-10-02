@@ -52,6 +52,7 @@ fallback.
 ```cmd
 mscz import generated\alleluia.mscz --pitch abc -o generated\from-mscz.mvsa
 mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
+mscz text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 ```
 
@@ -63,4 +64,5 @@ Vereist MuseScore 4 (of 3) lokaal, tenzij je alleen `.mxl` gebruikt.
 
 - [Formaten & CLI — overzicht](index.md)
 - [`.mxl`](mxl.md) · [`.mvsa`](mvsa.md)
+- Platte tekst: [`vsa text`](../reference/cli/text.md) / [`mscz text`](../reference/cli/mscz.md)
 - [mvsa-conversies](../plans/mvsa-conversions.md)
