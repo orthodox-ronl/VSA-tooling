@@ -405,6 +405,23 @@ def _build_parser():
             "(default: pad-sniff onder content-source/bibliotheek)."
         ),
     )
+    m_musicxml.add_argument(
+        "--hulptekst",
+        action="store_true",
+        help=(
+            "Tweede lyric-laag (number=2): ksl→Latijn / nl→Cyrillisch "
+            "per lettergreep."
+        ),
+    )
+    m_musicxml.add_argument(
+        "--hulptekst-as-parts",
+        action="store_true",
+        dest="hulptekst_as_parts",
+        help=(
+            "Coria: extra SATB-parts met hulptekst (volume 0). "
+            "Impliceert --hulptekst. Alleen playback-layout."
+        ),
+    )
     m_mscz = mvsa_sub.add_parser(
         "mscz",
         help="Exporteer .mvsa naar MuseScore (.mscz) via MusicXML.",
@@ -470,6 +487,14 @@ def _build_parser():
         help=(
             "Expliciete bibliotheek-id voor colofon (profiel partituur). "
             "Zonder deze optie: optionele pad-afleiding. Consumer bepaalt de id."
+        ),
+    )
+    m_mscz.add_argument(
+        "--hulptekst",
+        action="store_true",
+        help=(
+            "Tweede lyric-laag (number=2) in partituur-MXL: ksl→Latijn / "
+            "nl→Cyrillisch."
         ),
     )
     m_pdf = mvsa_sub.add_parser(
@@ -1507,6 +1532,8 @@ def _cmd_mvsa_musicxml(args) -> int:
             out,
             section_id=args.section,
             bibliotheek_id=getattr(args, "bibliotheek_id", None),
+            hulptekst=bool(getattr(args, "hulptekst", False)),
+            hulptekst_as_parts=bool(getattr(args, "hulptekst_as_parts", False)),
         )
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
@@ -1541,6 +1568,7 @@ def _cmd_mvsa_mscz(args) -> int:
             keep_mxl=keep_mxl,
             layout=getattr(args, "layout", None),
             bibliotheek_id=getattr(args, "bibliotheek_id", None),
+            hulptekst=bool(getattr(args, "hulptekst", False)),
         )
     except MvsaValidationError as exc:
         for d in exc.diagnostics:

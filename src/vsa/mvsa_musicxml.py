@@ -111,11 +111,95 @@ CUE_GAP_NOTE_TYPE = "16th"
 PAUSE_LYRIC = "[PAUZE]"
 PAUSE_DURATION_DIVS = 16  # whole @ divisions=4
 
+# Extra Coria-parts voor hulptekst (volume 0; geen dubbel geluid by default).
+_HULPTEKST_VOLUME = "0"
+
 
 class MvsaExportError(Exception):
     def __init__(self, message: str, *, line: int = 0) -> None:
         self.line = line
         super().__init__(message)
+
+
+def _apply_hulptekst_lyric_layer(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+) -> None:
+    """Voeg lyric number 2 toe (gegenereerde hulptekst) naast number 1."""
+    from .transliterate import render_syllable
+
+    for measures in voice_measures.values():
+        for measure in measures:
+            for ev in measure:
+                extras: list[LyricSyllable] = []
+                for ly in list(ev.lyrics):
+                    if ly.number != 1:
+                        continue
+                    if not ly.text or ly.text == PAUSE_LYRIC:
+                        continue
+                    rendered = render_syllable(ly.text)
+                    if rendered == ly.text:
+                        continue
+                    extras.append(
+                        LyricSyllable(
+                            text=rendered,
+                            syllabic=ly.syllabic,
+                            number=2,
+                            extend=ly.extend,
+                        )
+                    )
+                ev.lyrics.extend(extras)
+
+
+def _attach_hulptekst_parts(
+    voice_measures: dict[str, list[list[NoteEvent]]],
+) -> tuple[dict[str, list[list[NoteEvent]]], list[dict[str, str]]]:
+    """Kloon SATB naar hulptekst-parts (alleen lyric number 1 = hulptekst)."""
+    out = {k: v for k, v in voice_measures.items()}
+    extra: list[dict[str, str]] = []
+    for i, part in enumerate(PARTS):
+        voice = part["voice"]
+        h_voice = f"{voice}h"
+        cloned: list[list[NoteEvent]] = []
+        for measure in voice_measures.get(voice, []):
+            cm: list[NoteEvent] = []
+            for ev in measure:
+                hulp = [ly for ly in ev.lyrics if ly.number == 2]
+                nev = NoteEvent(
+                    pitch=ev.pitch,
+                    duration=ev.duration,
+                    lyrics=[
+                        LyricSyllable(
+                            text=ly.text,
+                            syllabic=ly.syllabic,
+                            number=1,
+                            extend=ly.extend,
+                        )
+                        for ly in hulp
+                    ],
+                    recite=ev.recite,
+                    spacer=ev.spacer,
+                    duration_divisions=ev.duration_divisions,
+                    stemless=ev.stemless,
+                    breve_head=ev.breve_head,
+                    slur_start=ev.slur_start,
+                    slur_stop=ev.slur_stop,
+                    tie_start=ev.tie_start,
+                    tie_stop=ev.tie_stop,
+                )
+                cm.append(nev)
+            cloned.append(cm)
+        out[h_voice] = cloned
+        extra.append(
+            {
+                "id": f"P{5 + i}",
+                "name": f"{part['name']} (hulptekst)",
+                "abbr": f"{part['abbr']}h",
+                "clef": part["clef"],
+                "voice": h_voice,
+            }
+        )
+    return out, extra
+
 
 
 def export_mvsa_to_musicxml(
@@ -126,10 +210,24 @@ def export_mvsa_to_musicxml(
     layout: MvsaLayout = "playback",
     source_path: Path | None = None,
     bibliotheek_id: str | None = None,
+    hulptekst: bool = False,
+    hulptekst_as_parts: bool = False,
 ) -> str:
-    """Validate + export. Raises MvsaValidationError or MvsaExportError."""
+    """Validate + export. Raises MvsaValidationError or MvsaExportError.
+
+    *hulptekst*: tweede lyric-laag (``number=\"2\"``) via
+    :mod:`vsa.transliterate` (ksl→Latijn / nl→Cyrillisch per lettergreep).
+    *hulptekst_as_parts*: alleen zinvol bij ``layout=\"playback\"`` — extra
+    SATB-parts met alleen hulptekst (volume 0; speler kan solo zetten).
+    """
     if layout not in ("playback", "partituur"):
         raise MvsaExportError(f"onbekende layout {layout!r}")
+    if hulptekst_as_parts and not hulptekst:
+        hulptekst = True
+    if hulptekst_as_parts and layout != "playback":
+        raise MvsaExportError(
+            "hulptekst_as_parts is alleen voor layout=playback (Coria)"
+        )
     doc = parse_mvsa(text)
     errors = [d for d in doc.diagnostics if d.severity == "error"]
     if errors:
@@ -260,6 +358,9 @@ def export_mvsa_to_musicxml(
         "vertaler": getattr(doc, "vertaler", None),
         "bibliotheek_id": resolve_bibliotheek_id(bibliotheek_id, source_path),
     }
+    if hulptekst:
+        _apply_hulptekst_lyric_layer(voice_measures)
+
     if layout == "partituur":
         return _emit_score_partituur(
             voice_measures,
@@ -277,6 +378,11 @@ def export_mvsa_to_musicxml(
             measure_nav_marks=nav_marks,
             meta=meta,
         )
+
+    extra_parts: list[dict[str, str]] | None = None
+    if hulptekst_as_parts:
+        voice_measures, extra_parts = _attach_hulptekst_parts(voice_measures)
+
     xml = _emit_score_playback(
         voice_measures,
         title=effective_title,
@@ -288,6 +394,7 @@ def export_mvsa_to_musicxml(
         measure_cue_gap=measure_cue_gap,
         measure_pauze=measure_pauze,
         meta=meta,
+        extra_parts=extra_parts,
     )
     from .musicxml_coria_timing import finalize_coria_musicxml
 
@@ -302,6 +409,8 @@ def export_mvsa_path(
     section_id: str | None = None,
     layout: MvsaLayout = "playback",
     bibliotheek_id: str | None = None,
+    hulptekst: bool = False,
+    hulptekst_as_parts: bool = False,
 ) -> None:
     text = path.read_text(encoding="utf-8-sig")
     xml = export_mvsa_to_musicxml(
@@ -311,6 +420,8 @@ def export_mvsa_path(
         layout=layout,
         source_path=path,
         bibliotheek_id=bibliotheek_id,
+        hulptekst=hulptekst,
+        hulptekst_as_parts=hulptekst_as_parts,
     )
     write_musicxml_output(out, xml)
 
@@ -1396,7 +1507,13 @@ def _emit_work_and_movement(
         out.append(f"<movement-title>{escape(ondertitel)}</movement-title>")
 
 
-def _emit_playback_piano_midi(out: list[str], part_id: str, channel: int) -> None:
+def _emit_playback_piano_midi(
+    out: list[str],
+    part_id: str,
+    channel: int,
+    *,
+    volume: str = _PLAYBACK_MIDI_VOLUME,
+) -> None:
     """Canonieke piano-MIDI voor één Coria/playback-part (checklist M8)."""
     instrument_id = f"{part_id}-I1"
     out.append(f'<score-instrument id="{instrument_id}">')
@@ -1407,7 +1524,7 @@ def _emit_playback_piano_midi(out: list[str], part_id: str, channel: int) -> Non
     out.append(f'<midi-instrument id="{instrument_id}">')
     out.append(f"<midi-channel>{channel}</midi-channel>")
     out.append(f"<midi-program>{_PLAYBACK_MIDI_PROGRAM}</midi-program>")
-    out.append(f"<volume>{_PLAYBACK_MIDI_VOLUME}</volume>")
+    out.append(f"<volume>{volume}</volume>")
     out.append(f"<pan>{_PLAYBACK_MIDI_PAN}</pan>")
     out.append("</midi-instrument>")
 
@@ -1424,6 +1541,7 @@ def _emit_score_playback(
     measure_cue_gap: list[bool] | None = None,
     measure_pauze: list[bool] | None = None,
     meta: dict[str, str | None] | None = None,
+    extra_parts: list[dict] | None = None,
 ) -> str:
     do_p = parse_pitch_string(context.do)
     fifths = key_fifths(do_p, context.mode)
@@ -1445,6 +1563,10 @@ def _emit_score_playback(
     while len(pauzes) < n_measures:
         pauzes.append(False)
 
+    parts: list[dict] = list(PARTS)
+    if extra_parts:
+        parts = parts + list(extra_parts)
+
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN"',
@@ -1454,15 +1576,20 @@ def _emit_score_playback(
     _emit_work_and_movement(out, title, meta)
     _emit_identification(out, meta)
     out.append("<part-list>")
-    for channel, part in enumerate(PARTS, start=1):
+    for channel, part in enumerate(parts, start=1):
         out.append(f'<score-part id="{part["id"]}">')
         out.append(f"<part-name>{part['name']}</part-name>")
         out.append(f"<part-abbreviation>{part['abbr']}</part-abbreviation>")
-        _emit_playback_piano_midi(out, part["id"], channel)
+        vol = (
+            _HULPTEKST_VOLUME
+            if str(part.get("voice", "")).endswith("h")
+            else _PLAYBACK_MIDI_VOLUME
+        )
+        _emit_playback_piano_midi(out, part["id"], channel, volume=vol)
         out.append("</score-part>")
     out.append("</part-list>")
 
-    for part in PARTS:
+    for part in parts:
         voice = part["voice"]
         measures = list(voice_measures.get(voice, []))
         while len(measures) < n_measures:

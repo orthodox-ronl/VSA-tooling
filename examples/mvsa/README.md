@@ -28,9 +28,11 @@ Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 | `alleluia-toon-1.mvsa`               | `@speelplan 1,2,1,2,1,3` → volta op partituur                                            |
 | `alleluia-toon-2.mvsa` … `8.mvsa`    | Eén doorlopende cadens (geen speelplan)                                                  |
 | `1a-vredeslitanie.mvsa` | Open herhaling met `\|:` … `: | ` (geen speelplan); blad én Coria via MusicXML-`<repeat>` |
-| `3-eerste-kleine-litanie.mvsa`       | Korte litanie, antwoorden één keer uitgeschreven |
-| `kleine-intocht-zondag-hemelum.mvsa` | Omzetting VSA-demo MusicXML; absolute `bb4`/`g3` |
-| `trisagion-8a-slav-hemelum.mvsa`     | `@speelplan` → Segno / Fine / D.S. al Fine       |
+| `3-eerste-kleine-litanie.mvsa`       | Korte litanie, antwoorden één keer uitgeschreven                     |
+| `kleine-intocht-zondag-hemelum.mvsa` | Omzetting VSA-demo MusicXML; absolute `bb4`/`g3`                     |
+| `trisagion-8a-slav-hemelum.mvsa`     | `@speelplan` → Segno / Fine / D.S. al Fine                           |
+| `hulptekst-ksl-mini.mvsa`            | Kerkslavisch; export met `--hulptekst` → Latijn als lyric number 2   |
+| `hulptekst-nl-mini.mvsa`             | Nederlands; export met `--hulptekst` → Cyrillisch als lyric number 2 |
 
 **Speelplan vs `|:…:|`:** vaste klinkende volgorde → één `@speelplan` per
 `.mvsa` met `@blok` (Coria schrijft uit; blad: volta / herhaling / D.S. of
