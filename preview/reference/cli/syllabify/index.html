@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-02 15:04 CEST.
+  , gebouwd 2026-10-02 15:08 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4868,6 +4868,11 @@ de grens tussen tekst en <code>{…}</code>, en tussen opeenvolgende scopes. Zo 
   zing-deling) blijft bij hypheneren ongemoeid; bij <code>--unsyllabify</code>
   verdwijnen die streepjes wél. Over scope-grenzen heen worden breekpunten
   opnieuw uit Pyphen afgeleid.</li>
+<li><strong>Hard streepje:</strong> schrijf een orthografisch koppelteken als <code>=</code> in de
+  bron (<code>mede=eeuwige</code>). Syllabify hypheneert de delen apart
+  (<code>me-de=eeu-wi-ge</code>); <code>--unsyllabify</code> houdt <code>=</code>; <code>vsa text</code> / MusicXML /
+  SVG tonen een gewoon streepje. Zachte <code>-</code> verdwijnen in zoektekst, <code>=</code>
+  niet (wordt <code>-</code>).</li>
 <li>Dit is <strong>geen</strong> automatische stap bij <code>vsa musicxml</code>: bron en product
   blijven voorspelbaar. Na schrijven vernieuw je <code>.vsa.mxl</code> via
   <code>scripts\vsa-products.cmd</code> of <code>scripts\check.cmd</code>.</li>
@@ -5086,7 +5091,7 @@ scripts\vsa-products.cmd
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-20
+        Bijgewerkt: 2026-10-01
         
       </p>
       

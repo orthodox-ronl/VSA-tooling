@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-02 15:04 CEST.
+  , gebouwd 2026-10-02 15:08 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4830,10 +4830,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#10-bewust-later-buiten-scope" class="md-nav__link">
+  <a href="#10-gebruik-in-bibliotheek-consumer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. Bewust later / buiten scope
+        10. Gebruik in bibliotheek (consumer)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-bewust-later-buiten-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Bewust later / buiten scope
       
     </span>
   </a>
@@ -5177,10 +5188,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#10-bewust-later-buiten-scope" class="md-nav__link">
+  <a href="#10-gebruik-in-bibliotheek-consumer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. Bewust later / buiten scope
+        10. Gebruik in bibliotheek (consumer)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-bewust-later-buiten-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Bewust later / buiten scope
       
     </span>
   </a>
@@ -5444,7 +5466,7 @@ inspectie.</p>
 <tr>
 <td>Coria / oefenen</td>
 <td><code>.mxl</code></td>
-<td>Extra part(s) met dezelfde pitches/ritme, andere lyrics; namen bv. <code>Kerkslavisch</code>/<code>Latijn</code> of <code>Nederlands</code>/<code>Cyrillisch</code>; geen echte stemmen</td>
+<td>Extra part(s) per stem × lyrics-laag; namen <code>{stemidentifier} ({@taal-label})</code>, bv. <code>Soprano (ksl)</code> of <code>Sop (aap)</code>; geen echte stemmen</td>
 <td>Solo/mute in de speler; niet beide hard tegelijk</td>
 </tr>
 </tbody>
@@ -5600,7 +5622,43 @@ Markering lost dat verschil niet op.</p>
 <li>Validate en export groen met markering.</li>
 </ul>
 <hr />
-<h2 id="10-bewust-later-buiten-scope">10. Bewust later / buiten scope<a class="headerlink" href="#10-bewust-later-buiten-scope" title="Permanent link">&para;</a></h2>
+<h2 id="10-gebruik-in-bibliotheek-consumer">10. Gebruik in bibliotheek (consumer)<a class="headerlink" href="#10-gebruik-in-bibliotheek-consumer" title="Permanent link">&para;</a></h2>
+<p><strong>Doelgroep:</strong> redacteur of build-beheerder die <code>.mvsa</code> uit de bibliotheek naar
+Coria-MXL of print-MSCZ genereert.</p>
+<ol>
+<li>
+<p><strong>Tooling-versie.</strong> Hulptekst zit op <code>main</code> (na merge uit <code>development</code>).
+   Pin in bibliotheek-CI of lokaal minstens op die commit, of op een release-tag
+   zodra die staat — zie
+   <a href="../../manuals/releases/">Releases: taggen en pinnen</a>.</p>
+</li>
+<li>
+<p><strong>Coria-publicatie</strong> (playback-MXL in <code>static/</code> of catalogus-leaf):</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\bibliotheek
+python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
+vsa mvsa validate content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa
+vsa mvsa musicxml content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa --hulptekst-as-parts -o generated\coria\&lt;representatie-id&gt;.mxl --bibliotheek-id &lt;zangstuk&gt;/&lt;variant&gt;/&lt;uitvoeringsvorm&gt;
+</code></pre></div>
+<p>Vervang paden door jullie echte mapconventie. In het <code>.mvsa</code>: <code>@taal</code> zetten
+   waar nl en ksl door elkaar lopen; optioneel <code>@taal Lap=aap Lus=noot</code> voor
+   vrije Coria-labels.</p>
+<ol>
+<li><strong>Print voor zangers</strong> (tweede tekstregel op het blad):</li>
+</ol>
+<div class="highlight"><pre><span></span><code>vsa mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
+</code></pre></div>
+<ol>
+<li><strong>Wat de bibliotheek zelf beslist:</strong> welke representatie een Coria-MXL krijgt,
+   of hulptekst verplicht is, en freshness/sync — dat blijft consumer-beleid
+   (<a href="../../guides/reuse-vsa-tooling/#ownership-tooling-vs-consumer">reuse-vsa-tooling</a>).</li>
+</ol>
+<p>Transliterator-kwaliteit (parochieschema) is een <strong>apart</strong> traject via
+<a href="../hulptekst-reviewcorpus/">hulptekst-reviewcorpus</a>; export werkt al met het
+huidige schema.</p>
+<hr />
+<h2 id="11-bewust-later-buiten-scope">11. Bewust later / buiten scope<a class="headerlink" href="#11-bewust-later-buiten-scope" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Wetenschappelijke transcriptieschema’s als productoptie naast <code>parochie</code>.</li>
 <li>Automatische detectie van taal zonder markering.</li>

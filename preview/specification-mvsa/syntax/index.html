@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-02 15:04 CEST.
+  , gebouwd 2026-10-02 15:08 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5706,6 +5706,11 @@ ongeacht spaties en streepjes erin. Zie <a href="#reciteertoon">Reciteertoon</a>
 <code>hei  -li</code>). Tussen het einde van een woord en het begin van het volgende
 woord staat <strong>geen</strong> <code>-</code> (wel spatie en/of leesteken). Tussen die lettergrepen
 mogen wel ELM’s, recite-haakjes, maatstrepen en leestekens staan.</p>
+<p><strong>Hard streepje:</strong> een orthografisch koppelteken dat in de lezersvorm moet
+blijven (bijv. <code>mede-eeuwige</code>) schrijf je in de bron als <code>=</code> (<code>mede=eeuwige</code>
+of <code>mede=eeu-wi-ge</code>). Export (SVG, MusicXML, <code>vsa text</code>) toont een gewoon
+streepje; zachte lettergreepstreepjes verdwijnen in platte zoektekst, het
+harde streepje niet.</p>
 <p>De kuiser <strong>collapse’t niet</strong> <code>hei- li</code> → <code>hei-li</code>: dat zou ELM-duur
 veranderen in een woordstreepje en bij lange melisma’s de align breken
 (<code>hei_&amp;_&amp;_&amp;_&amp;_&amp;_ -li</code> mag niet <code>hei_&amp;_&amp;_&amp;_&amp;_&amp;_-li</code> worden). Bij
@@ -5828,6 +5833,10 @@ L: (Al-le-lu-ia, Al-le-lu-ia, Al)_-le-lu_&amp;-&amp;-&amp;_ i_ a__ ||
 <tr>
 <td><code>(hei-li-ge)</code></td>
 <td>Recite; <code>-</code> binnen haakjes = lettergreepstreepje</td>
+</tr>
+<tr>
+<td><code>mede=eeuwige</code></td>
+<td>Hard streepje (<code>=</code>); weergave/zoektekst als <code>mede-eeuwige</code></td>
 </tr>
 <tr>
 <td><code>Chris_-tus_</code></td>
