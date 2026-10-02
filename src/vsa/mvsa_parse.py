@@ -13,6 +13,8 @@ from typing import Any
 from .mvsa_validate import (
     ALLOWED_DIRECTIVES,
     ALLOWED_MODES,
+    ALLOWED_TALEN,
+    ALLOWED_TAAL_ARGS,
     BLOK_ID_RE,
     DIRECTIVE_NAME_RE,
     DO_RE,
@@ -73,6 +75,8 @@ class StickyContext:
     mode: str = "major"
     oct: dict[str, int] = field(default_factory=dict)  # stem_id -> shift
     start: str | None = None  # raw @start rest
+    # Passage-taal voor hulptekst: ``nl`` | ``ksl`` | None (auto per lettergreep).
+    taal: str | None = None
 
     def oct_for(self, marker: str) -> int:
         if marker in self.oct:
@@ -260,7 +264,18 @@ def parse_mvsa(text: str) -> ParsedDocument:
                     speelplan_line = line_no
             elif name in ALLOWED_DIRECTIVES:
                 _validate_directive_value(name, rest, line_no, diagnostics)
-                if name in STICKY_DIRECTIVES:
+                if name == "taal":
+                    # Sticky: ``@taal nl|ksl|auto``. Quoted: document-meta
+                    # (en sticky als de string ``nl``/``ksl`` is).
+                    if rest in ALLOWED_TAAL_ARGS:
+                        _apply_directive(ctx, name, rest)
+                    else:
+                        value = parse_tekst_argument(rest)
+                        if value is not None:
+                            doc_meta["taal"] = value
+                            if value in ALLOWED_TALEN:
+                                ctx.taal = value
+                elif name in STICKY_DIRECTIVES:
                     _apply_directive(ctx, name, rest)
                 elif name == "tekst":
                     value = parse_tekst_argument(rest)
@@ -450,6 +465,11 @@ def _apply_directive(ctx: StickyContext, name: str, rest: str) -> None:
                 ctx.oct[m.group(1)] = int(m.group(2))
     elif name == "start":
         ctx.start = rest or None
+    elif name == "taal":
+        if rest == "auto":
+            ctx.taal = None
+        elif rest in ALLOWED_TALEN:
+            ctx.taal = rest
 
 
 def _ends_section(

@@ -69,6 +69,14 @@ def test_auto_detect_direction() -> None:
     assert render_syllable("...") == "..."
 
 
+def test_uppercase_cyrillic_digraph_titlecase() -> None:
+    """Één hoofdletter mag digraph niet volledig uppercasen (Х→Ch, niet CH)."""
+    assert render_ksl_to_latin("Христе") == "Christe"
+    assert render_ksl_to_latin("Царю") == "Tsarjoe"
+    assert render_ksl_to_latin("Утешителю").startswith("Oe")
+
+
 def test_unknown_scheme_raises() -> None:
     with pytest.raises(ValueError, match="schema"):
         render_syllable("а", scheme="iso")  # type: ignore[arg-type]
+

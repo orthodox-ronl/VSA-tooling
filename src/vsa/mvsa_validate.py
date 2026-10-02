@@ -56,10 +56,10 @@ ALLOWED_DIRECTIVES = frozenset(
         "vertaler",
         # Gereserveerd: geaccepteerd, nog niet in export/praktijk.
         "toon",
-        "taal",
         "genre",
         "opmerkingen",
         "mscz-newline",
+        "taal",  # sticky passage-taal (nl|ksl|auto)
     }
 )
 # Document-metadata met quoted string (laatste waarde wint).
@@ -74,18 +74,19 @@ STRING_META_DIRECTIVES = frozenset(
         "arrangeur",
         "vertaler",
         "toon",
-        "taal",
         "genre",
         "opmerkingen",
     }
 )
 # Nog geen MuseScore/MusicXML-invulling; wel parse + validate.
 RESERVED_META_DIRECTIVES = frozenset(
-    {"toon", "taal", "genre", "opmerkingen"}
+    {"toon", "genre", "opmerkingen"}
 )
 # Sticky context (geldig vanaf eerstvolgend LSATB-systeem tot herzetting).
-STICKY_DIRECTIVES = frozenset({"do", "mode", "oct", "start"})
+STICKY_DIRECTIVES = frozenset({"do", "mode", "oct", "start", "taal"})
 ALLOWED_MODES = frozenset({"major", "minor"})
+ALLOWED_TALEN = frozenset({"nl", "ksl"})
+ALLOWED_TAAL_ARGS = frozenset({"nl", "ksl", "auto"})
 
 
 def is_noop_separator_directive(name: str, rest: str) -> bool:
@@ -554,6 +555,18 @@ def _validate_directive_value(
         if not rest:
             diagnostics.append(
                 MvsaDiagnostic("MVSA-START", "leeg @start", line_no)
+            )
+    elif name == "taal":
+        if rest in ALLOWED_TAAL_ARGS:
+            return
+        if parse_tekst_argument(rest) is None:
+            diagnostics.append(
+                MvsaDiagnostic(
+                    "MVSA-TAAL",
+                    f"ongeldige @taal {rest!r} "
+                    f'(nl|ksl|auto, of quoted string bv. @taal "nl")',
+                    line_no,
+                )
             )
     elif name == "tekst":
         if parse_tekst_argument(rest) is None:

@@ -121,38 +121,53 @@ class MvsaExportError(Exception):
         super().__init__(message)
 
 
+def _direction_from_sticky_taal(taal: str | None):
+    """Sticky ``@taal`` → transliterator-richting; ``None`` = auto per lettergreep."""
+    if taal == "ksl":
+        return "ksl_to_latin"
+    if taal == "nl":
+        return "nl_to_cyrillic"
+    return None
+
+
+def _apply_hulptekst_to_notes(
+    notes: list[NoteEvent],
+    *,
+    direction: str | None,
+) -> None:
+    """Voeg lyric number 2 toe; skip als number 2 al bestaat (handmatige L1)."""
+    from .transliterate import render_syllable
+
+    for ev in notes:
+        if any(ly.number == 2 for ly in ev.lyrics):
+            continue
+        extras: list[LyricSyllable] = []
+        for ly in list(ev.lyrics):
+            if ly.number != 1:
+                continue
+            if not ly.text or ly.text == PAUSE_LYRIC:
+                continue
+            rendered = render_syllable(ly.text, direction=direction)
+            if rendered == ly.text:
+                continue
+            extras.append(
+                LyricSyllable(
+                    text=rendered,
+                    syllabic=ly.syllabic,
+                    number=2,
+                    extend=ly.extend,
+                )
+            )
+        ev.lyrics.extend(extras)
+
+
 def _apply_hulptekst_lyric_layer(
     voice_measures: dict[str, list[list[NoteEvent]]],
 ) -> None:
-    """Voeg lyric number 2 toe (gegenereerde hulptekst) naast number 1.
-
-    Slaat noten over die al een lyric number 2 hebben (bijv. handmatige ``L1``).
-    """
-    from .transliterate import render_syllable
-
+    """Fallback zonder sticky ``@taal`` (auto per lettergreep)."""
     for measures in voice_measures.values():
         for measure in measures:
-            for ev in measure:
-                if any(ly.number == 2 for ly in ev.lyrics):
-                    continue
-                extras: list[LyricSyllable] = []
-                for ly in list(ev.lyrics):
-                    if ly.number != 1:
-                        continue
-                    if not ly.text or ly.text == PAUSE_LYRIC:
-                        continue
-                    rendered = render_syllable(ly.text)
-                    if rendered == ly.text:
-                        continue
-                    extras.append(
-                        LyricSyllable(
-                            text=rendered,
-                            syllabic=ly.syllabic,
-                            number=2,
-                            extend=ly.extend,
-                        )
-                    )
-                ev.lyrics.extend(extras)
+            _apply_hulptekst_to_notes(measure, direction=None)
 
 
 def _attach_hulptekst_parts(
@@ -261,7 +276,9 @@ def export_mvsa_to_musicxml(
     for section in sections:
         section_start = len(bar_styles)
         for system in section.systems:
-            events_by_voice = _system_to_events(system, layout=layout)
+            events_by_voice = _system_to_events(
+                system, layout=layout, hulptekst=hulptekst
+            )
             for voice, measures in events_by_voice.items():
                 voice_measures[voice].extend(measures)
             for mi, bundle in enumerate(system.measures):
@@ -363,9 +380,6 @@ def export_mvsa_to_musicxml(
         "vertaler": getattr(doc, "vertaler", None),
         "bibliotheek_id": resolve_bibliotheek_id(bibliotheek_id, source_path),
     }
-    if hulptekst:
-        _apply_hulptekst_lyric_layer(voice_measures)
-
     if layout == "partituur":
         return _emit_score_partituur(
             voice_measures,
@@ -504,6 +518,7 @@ def _system_to_events(
     system,
     *,
     layout: MvsaLayout = "playback",
+    hulptekst: bool = False,
 ) -> dict[str, list[list[NoteEvent]]]:
     ctx: StickyContext = system.context
     lyric_markers = [m for m in system.markers if is_lyrics_stem(m)]
@@ -511,6 +526,9 @@ def _system_to_events(
         raise MvsaExportError("geen lyrics-regel in systeem", line=system.start_line)
     primary_lyric = lyric_markers[0]
     parallel_lyrics = lyric_markers[1:]
+    hulp_direction = (
+        _direction_from_sticky_taal(getattr(ctx, "taal", None)) if hulptekst else None
+    )
 
     voice_markers = [m for m in system.markers if not is_lyrics_stem(m)]
     non_satb = [m for m in voice_markers if not re.fullmatch(r"[SATB]\d*", m)]
@@ -579,6 +597,8 @@ def _system_to_events(
                     lyric_number=primary_number,
                     extra_lyric_layers=extra_layers,
                 )
+                if hulptekst:
+                    _apply_hulptekst_to_notes(notes, direction=hulp_direction)
                 measure_events[letter].extend(notes)
 
         for letter, evs in measure_events.items():

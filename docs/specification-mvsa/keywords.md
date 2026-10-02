@@ -411,13 +411,51 @@ namen vastliggen voor later gebruik.
 | Keyword        | Bedoeling                                                           | Voorbeeld                        |
 | -------------- | ------------------------------------------------------------------- | -------------------------------- |
 | `@toon`        | Kerktoon / oktoechos-nummer van het zangstuk                        | `@toon "8"`                      |
-| `@taal`        | Taal van de gezongen tekst                                          | `@taal "nl"`                     |
 | `@genre`       | Soort zangstuk (litanie, tropaar, …) voor catalogus/filters         | `@genre "litanie"`               |
 | `@opmerkingen` | Redactionele notities voor de bewerker (niet bedoeld als bladtekst) | `@opmerkingen "nog controleren"` |
 
 **Niet gebruiken** als vervanging van `@tekst` (zichtbare cue) of `#`-commentaar
 voor tijdelijke tipjes in de bron — `@opmerkingen` is voor blijvende metadata
 zodra tooling die gaat tonen.
+
+---
+
+## `@taal`
+
+**Wat het is.** Sticky **passage-taal** voor hulptekst-export: vanaf het
+eerstvolgende LSATB-systeem tot je `@taal` opnieuw zet. De converter gebruikt
+dit bij `--hulptekst` om te bepalen welke richting geldt.
+
+**Vorm.** `@taal nl` · `@taal ksl` · `@taal auto`  
+Optioneel als document-metadata: `@taal "nl"` (quoted string; als de string
+`nl` of `ksl` is, geldt die ook als sticky passage-taal).
+
+| Waarde  | Effect bij `--hulptekst`                                      |
+| ------- | ------------------------------------------------------------- |
+| `ksl`   | Hulptekst = Latijn (uit kerkslavische bronletters)            |
+| `nl`    | Hulptekst = Cyrillisch (uit Nederlandse bronletters)          |
+| `auto`  | Per lettergreep detecteren (default als je `@taal` weglaat)   |
+
+**Wel gebruiken** in gemengde stukken (bijv. Nederlands couplet + kerkslavisch
+refrein in één uitvoeringsvorm), zodat alleen de bedoelde passages worden
+omgezet.
+
+**Niet gebruiken** als vervanging van aparte uitvoeringsvormen (`-nl` / `-ksl`)
+wanneer de **melodie of lettergreepdeling** verschilt — dat blijven aparte
+bestanden.
+
+```text
+@taal nl
+L: Heer_ ont-ferm_ U_ |
+S: a    -   -     -   |
+
+@taal ksl
+L: Госпо-ди_ по-ми-луй_ |
+S: a     -   -  -   -   |
+```
+
+Zie [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md) en
+het [reviewcorpus](../plans/hulptekst-reviewcorpus.md).
 
 ---
 

@@ -211,6 +211,8 @@ nav:
     - mvsa v0 — meerstemmige invoer: plans/mvsa-v0-syntax.md
     - mvsa-conversies (mxl/mscz/normalize): plans/mvsa-conversions.md
     - plans/vsa-polyphony-proposal.md
+    - kerkslavische hulptekst: plans/kerkslavisch-transliteratie.md
+    - hulptekst-reviewcorpus (expert): plans/hulptekst-reviewcorpus.md
 
 extra_css:
   - stylesheets/extra.css

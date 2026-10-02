@@ -157,7 +157,9 @@ def detect_direction(text: str) -> Direction | None:
 def _case_like(src: str, mapped: str) -> str:
     if not mapped:
         return mapped
-    if src.isupper():
+    # Één hoofdletter (Cyrillisch of Latijn) mag digraphen niet volledig
+    # uppercasen (Х→CH, Ц→TS); alleen bij hele woorden in HOOFDLETTERS.
+    if len(src) > 1 and src.isupper():
         return mapped.upper()
     if src[0].isupper():
         return mapped[0].upper() + mapped[1:]
