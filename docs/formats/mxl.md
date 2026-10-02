@@ -24,8 +24,8 @@ Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
 **geen** print-recite-collapse (M10). Same-pitch **melisma** samentrekken
 (M5a): één lettergreep op dezelfde toon → **één** noot (gestipte ELM’s zoals
 `_.` blijven intact; Coria stript ties). Semantiek deelt de kern met MSCZ;
-layout divergeert (partituur = twee balken, I1 tie-keten zonder gestipte
-collapse-sommen).
+layout divergeert (partituur-MusicXML = I1 tie-keten zonder gestipte
+collapse-sommen; **MSCZ-postprocess** maakt daarna compacte gestipte noten).
 Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
 
 ## Typische commando’s

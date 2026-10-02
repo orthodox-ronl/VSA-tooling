@@ -54,7 +54,7 @@ Bron: [rendering-pitfalls](../specification-vsa-templates/rendering-pitfalls.md)
 | R4  | **Geen** melisma-extender (`ticks`) of frase-slur onder recite-body.                                                                                                                                                                                                                           |
 | R5  | Maatlengte = som van de noten (+ spacers); elke slot ≈ randduur zodat speelduur = `n ×` rand (= Coria). Spacers klinken niet (`play=0`); de ticks blijven voor de layout.                                                                                                                      |
 | R6  | Kortere recite (`n < 6`): één zichtbare noot per lettergreep (geen collapse).                                                                                                                                                                                                                  |
-| R7  | Melisma same-pitch (I1+I2): **I1** — alleen ongestipte standaardduuren ≤ whole; nooit `type=breve` / gestipte sommen. **I2** — lange holds als **tie-keten** (wholes + rest) i.p.v. heraangeslagen hakken; totale duur = som slots; pure hold zonder slur.                                     |
+| R7  | Melisma same-pitch: **I1** (MusicXML-partituur) — alleen ongestipte standaardduuren ≤ whole of tie-keten; nooit `type=breve` / gestipte sommen in MusicXML (MuseScore-importcorruptie). **I2** — lange holds als tie-keten i.p.v. heraangeslagen hakken. **MSCZ-postprocess** — die tie-ketens samentrekken tot **één compacte noot, inclusief gestipt** (leesbaar 3/4 i.p.v. 2/4+1/4); pure hold zonder slur. |
 
 ### Canonieke printvorm 1–(n−2)–1 (MSCZ)
 
@@ -109,7 +109,7 @@ lettergreep een klinkende noot. Same-pitch **melisma** wél samentrekken
 | M5  | Geen lege derde balk.                                                                                                        |
 | M6  | Sectie-einde (`\|\|` in `.mvsa`): dubbele maatstreep (`light-light`); slot = `light-heavy`.                                  |
 | M7  | Stokken: S en T **omhoog** (voice 1); A en B **omlaag** (voice 2).                                                           |
-| M8  | Melisma-print: same-pitch samentrekken of tie-keten (S13 / R7 I1+I2); slur alleen bij toonwissels.                           |
+| M8  | Melisma-print: same-pitch → compacte noot (MSCZ-postprocess) of tie-keten in MusicXML (S13 / R7); slur alleen bij toonwissels. |
 | M9  | Leidende `\|:` → linker forward-repeat op eerste **inhoudsmaat**; geen lege rustmaat ervoor.                                 |
 | M10 | `:\|` → backward-repeat met herhaalpunten; niet alleen `light-light` zonder dots.                                            |
 
@@ -161,7 +161,8 @@ Contract: checklist MSCZ **S14–S19**. MuseScore-gedrag dat we vermijden:
 | Mid-flow `@tekst` → `\|\|` + SystemText (geen HBox)                       | `vsa.mvsa_musicxml` + `vsa.mscz_partituur` (S14–S15, S19)                    |
 | Leidende `\|:` → `start_bar` (geen lege maat)                             | `vsa.mvsa_validate` / `mvsa_parse` / `mvsa_musicxml` (S16, M16)              |
 | Korte rust-spacers strippen; trailing HBox weg                            | `vsa.mscz_partituur` (S17, C3–C4)                                            |
-| Melisma collapse/tie-keten (I1+I2)                                        | `mvsa_musicxml._collapse_same_pitch_melisma` / `_pack_safe_divs`             |
+| Melisma collapse/tie-keten (I1+I2 in MusicXML)                            | `mvsa_musicxml._collapse_same_pitch_melisma` / `_pack_safe_divs`             |
+| Melisma same-pitch → gestipte compacte noot (MSCZ)                        | `mscz_partituur._collapse_same_pitch_tie_runs`                               |
 | Maat-`len` gelijk over staves; geen `durationType=breve`                  | `mscz_partituur._apply_recite_print_conventions` / `_recompute_measure_lens` |
 | Stokken S/T↑ A/B↓ (voice 1/2 + backup)                                    | `vsa.mvsa_musicxml` `_emit_staff_voices`                                     |
 | A4 + typografie + partijnamen uit + systeemafstanden                      | `vsa.mscz_partituur.apply_partituur_mscz_conventions`                        |

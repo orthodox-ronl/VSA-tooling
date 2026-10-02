@@ -171,6 +171,9 @@ def apply_partituur_mscz_conventions(
     # Korte rust-only maten (oude spacers / lege |:-maat) → weg, niet HBox.
     mscx = _strip_short_rest_measures(mscx)
     mscx = _strip_trailing_hboxes(mscx)
+    # Same-pitch tie-ketens → compacte noten incl. stip (leesbaar 3/4 i.p.v. 2/4+1/4).
+    # Bewust ná MuseScore-import: gestipte MusicXML-collapse corruptte soms de score.
+    mscx = _collapse_same_pitch_tie_runs(mscx)
     # Recite-print (S8/R3): ||O||-kop + onhoorbare spacers; maatlengte herstellen.
     mscx = _apply_recite_print_conventions(mscx)
     if title:
@@ -593,6 +596,281 @@ _CHORD_DUR_FRAC: dict[str, Fraction] = {
     "64th": Fraction(1, 64),
     "128th": Fraction(1, 128),
 }
+
+# Compacte single-note vormen voor MSCZ-postprocess (gestipt mag wél — geen MusicXML-import).
+_DURATION_TYPE_ORDER = (
+    "whole",
+    "half",
+    "quarter",
+    "eighth",
+    "16th",
+    "32nd",
+    "64th",
+    "128th",
+)
+
+_TIE_SPANNER_RE = re.compile(
+    r'<Spanner type="Tie">.*?</Spanner>',
+    re.DOTALL,
+)
+_SLUR_SPANNER_RE = re.compile(
+    r'<Spanner type="Slur">.*?</Spanner>',
+    re.DOTALL,
+)
+_VOICE_BLOCK_RE = re.compile(r"(<voice>)(.*?)(</voice>)", re.DOTALL)
+_CHORD_SPLIT_RE = re.compile(r"(<Chord\b[^>]*>.*?</Chord>)", re.DOTALL)
+
+
+def _chord_pitch_key(chord_xml: str) -> tuple[tuple[str, str], ...] | None:
+    """Stable pitch identity for Notes in a Chord (pitch+tpc), or None if empty."""
+    notes = re.findall(r"<Note\b[^>]*>.*?</Note>", chord_xml, flags=re.S)
+    if not notes:
+        return None
+    keys: list[tuple[str, str]] = []
+    for note in notes:
+        pitch = re.search(r"<pitch>([^<]+)</pitch>", note)
+        tpc = re.search(r"<tpc>([^<]+)</tpc>", note)
+        if pitch is None:
+            return None
+        keys.append((pitch.group(1), tpc.group(1) if tpc else ""))
+    return tuple(keys)
+
+
+def _chord_has_tie_next(chord_xml: str) -> bool:
+    return bool(
+        re.search(
+            r'<Spanner type="Tie">(?:(?!</Spanner>).)*?<next>',
+            chord_xml,
+            flags=re.S,
+        )
+    )
+
+
+def _chord_has_tie_prev(chord_xml: str) -> bool:
+    return bool(
+        re.search(
+            r'<Spanner type="Tie">(?:(?!</Spanner>).)*?<prev>',
+            chord_xml,
+            flags=re.S,
+        )
+    )
+
+
+def _collapse_forbidden(chord_xml: str) -> bool:
+    """Recite spacers / ||O|| — niet samentrekken."""
+    if "<visible>0</visible>" in chord_xml:
+        return True
+    if "<noStem>1</noStem>" in chord_xml:
+        return True
+    if "<headType>breve</headType>" in chord_xml:
+        return True
+    if "<durationType>breve</durationType>" in chord_xml:
+        return True
+    return False
+
+
+def _fraction_to_type_dots(frac: Fraction) -> tuple[str, int] | None:
+    """Map duur → één MuseScore durationType + dots (0–2), zonder breve/longa."""
+    if frac <= 0:
+        return None
+    for name in _DURATION_TYPE_ORDER:
+        base = _CHORD_DUR_FRAC[name]
+        if frac == base:
+            return name, 0
+        if frac == base * Fraction(3, 2):
+            return name, 1
+        if frac == base * Fraction(7, 4):
+            return name, 2
+    return None
+
+
+def _set_chord_duration(chord_xml: str, *, duration_type: str, dots: int) -> str:
+    """Zet durationType + dots; verwijder oude dots-tags."""
+    out = re.sub(r"<dots>\d+</dots>", "", chord_xml)
+    out = re.sub(r"<dots\s*/>", "", out)
+    out = re.sub(
+        r"<durationType>[^<]+</durationType>",
+        f"<durationType>{duration_type}</durationType>",
+        out,
+        count=1,
+    )
+    if dots > 0:
+        out = re.sub(
+            r"(<Chord\b[^>]*>)",
+            rf"\1<dots>{dots}</dots>",
+            out,
+            count=1,
+        )
+    return out
+
+
+def _strip_tie_spanners(chord_xml: str) -> str:
+    return _TIE_SPANNER_RE.sub("", chord_xml)
+
+
+def _move_slur_spanners(src_chord: str, dst_chord: str) -> tuple[str, str]:
+    """Verplaats Slur-Spanners van src naar dst (bij collapse van eindnoot)."""
+    slurs = _SLUR_SPANNER_RE.findall(src_chord)
+    if not slurs:
+        return src_chord, dst_chord
+    cleaned_src = _SLUR_SPANNER_RE.sub("", src_chord)
+    # Plak voor </Chord> van dst.
+    insert = "".join(slurs)
+    cleaned_dst = re.sub(r"</Chord>\s*$", insert + "</Chord>", dst_chord, count=1)
+    return cleaned_src, cleaned_dst
+
+
+def _set_slur_fractions(chord_xml: str, *, next_frac: Fraction | None, prev_frac: Fraction | None) -> str:
+    """Werk location/fractions bij op Slur-Spanners in deze Chord."""
+
+    def fix_spanner(m: re.Match[str]) -> str:
+        block = m.group(0)
+        if next_frac is not None and "<next>" in block:
+            block = re.sub(
+                r"(<next>\s*<location>\s*<fractions>)[^<]+(</fractions>)",
+                rf"\g<1>{next_frac.numerator}/{next_frac.denominator}\2",
+                block,
+                count=1,
+            )
+        if prev_frac is not None and "<prev>" in block:
+            block = re.sub(
+                r"(<prev>\s*<location>\s*<fractions>)[^<]+(</fractions>)",
+                rf"\g<1>{prev_frac.numerator}/{prev_frac.denominator}\2",
+                block,
+                count=1,
+            )
+        return block
+
+    return _SLUR_SPANNER_RE.sub(fix_spanner, chord_xml)
+
+
+def _slur_has_next(chord_xml: str) -> bool:
+    return bool(
+        re.search(
+            r'<Spanner type="Slur">(?:(?!</Spanner>).)*?<next>',
+            chord_xml,
+            flags=re.S,
+        )
+    )
+
+
+def _slur_has_prev(chord_xml: str) -> bool:
+    return bool(
+        re.search(
+            r'<Spanner type="Slur">(?:(?!</Spanner>).)*?<prev>',
+            chord_xml,
+            flags=re.S,
+        )
+    )
+
+
+def _recompute_slur_fractions(chords: list[str]) -> list[str]:
+    """Herbereken Slur next/prev fractions uit werkelijke chord-duuren."""
+    starts: list[int] = []
+    pairs: list[tuple[int, int]] = []
+    for i, ch in enumerate(chords):
+        if _slur_has_next(ch):
+            starts.append(i)
+        if _slur_has_prev(ch):
+            if starts:
+                pairs.append((starts.pop(), i))
+    out = list(chords)
+    for start, end in pairs:
+        if start == end:
+            # Degenerate: slur op één noot → weg.
+            out[start] = _SLUR_SPANNER_RE.sub("", out[start])
+            continue
+        dist = sum(_chord_nominal_duration(out[i]) for i in range(start, end))
+        if dist <= 0:
+            continue
+        out[start] = _set_slur_fractions(out[start], next_frac=dist, prev_frac=None)
+        out[end] = _set_slur_fractions(out[end], next_frac=None, prev_frac=-dist)
+    return out
+
+
+def _collapse_tie_runs_in_voice(voice_body: str) -> str:
+    """Samentrekken van same-pitch Tie-ketens tot compacte (evt. gestipte) noten."""
+    parts = _CHORD_SPLIT_RE.split(voice_body)
+    chord_indices = [i for i, p in enumerate(parts) if p.startswith("<Chord")]
+    if len(chord_indices) < 2:
+        return voice_body
+
+    chords: list[str | None] = [parts[i] for i in chord_indices]
+    i = 0
+    while i < len(chords) - 1:
+        cur = chords[i]
+        if cur is None or _collapse_forbidden(cur):
+            i += 1
+            continue
+        key = _chord_pitch_key(cur)
+        if key is None or not _chord_has_tie_next(cur):
+            i += 1
+            continue
+        j = i + 1
+        while j < len(chords):
+            nxt = chords[j]
+            if nxt is None or _collapse_forbidden(nxt):
+                break
+            if _chord_pitch_key(nxt) != key:
+                break
+            if not _chord_has_tie_prev(nxt):
+                break
+            j += 1
+            if not _chord_has_tie_next(nxt):
+                break
+        run_end = j  # exclusive
+        if run_end - i < 2:
+            i += 1
+            continue
+        total = Fraction(0)
+        for k in range(i, run_end):
+            ch = chords[k]
+            if ch is not None:
+                total += _chord_nominal_duration(ch)
+        packed = _fraction_to_type_dots(total)
+        if packed is None:
+            i = run_end
+            continue
+        dur_type, dots = packed
+        survivor = _set_chord_duration(cur, duration_type=dur_type, dots=dots)
+        survivor = _strip_tie_spanners(survivor)
+        for k in range(i + 1, run_end):
+            doomed = chords[k]
+            if doomed is None:
+                continue
+            _src, survivor = _move_slur_spanners(doomed, survivor)
+            chords[k] = None
+        chords[i] = survivor
+        i = run_end
+
+    surviving = [c for c in chords if c is not None]
+    surviving = _recompute_slur_fractions(surviving)
+    kept_flags = [c is not None for c in chords]
+    kept_iter = iter(surviving)
+    out_parts: list[str] = []
+    chord_slot = 0
+    for part in parts:
+        if part.startswith("<Chord"):
+            if kept_flags[chord_slot]:
+                out_parts.append(next(kept_iter))
+            chord_slot += 1
+        else:
+            out_parts.append(part)
+    return "".join(out_parts)
+
+
+def _collapse_same_pitch_tie_runs(mscx: str) -> str:
+    """MSCZ-postprocess (S13): same-pitch Tie-keten → één compacte noot (stip ok).
+
+    MusicXML-partituur blijft I1 (ongestipt + ties) voor veilige MuseScore-import;
+    hier — ná import — maken we het leesbeeld compact (bijv. half+kwart → gestipte half).
+    """
+
+    def fix_voice(m: re.Match[str]) -> str:
+        open_v, body, close_v = m.group(1), m.group(2), m.group(3)
+        return open_v + _collapse_tie_runs_in_voice(body) + close_v
+
+    return _VOICE_BLOCK_RE.sub(fix_voice, mscx)
 
 
 def _apply_recite_print_conventions(mscx: str) -> str:

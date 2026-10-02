@@ -26,11 +26,11 @@ PR als de code (niet alleen in chat of een losse test).
 | Onderwerp | `.mxl` (playback) | `.mscz` (partituur) |
 | --- | --- | --- |
 | **Recite** | Geen print-collapse (M10): één klinkende noot per lettergreep | Mag 1-(n−2)-1 + `\|\|O\|\|` (R5+) |
-| **Same-pitch melisma** | **Wél** samentrekken (M5a / S13 / R7): één lettergreep, zelfde toonhoogte → één noot of tie-keten; geen heraangeslagen kwarten | Idem |
+| **Same-pitch melisma** | **Wél** samentrekken (M5a): één noot incl. gestipte ELM; geen heraangeslagen kwarten | MusicXML-tussenbestand: I1 tie-keten (veilige import). **MSCZ-postprocess** (`_collapse_same_pitch_tie_runs`): compacte noot incl. stip |
 | **Melisma met toonwissels** | Lyric + `<extend/>` op eerste; slur mag (Coria-sanitize kan notations strippen) | Lyric + `<extend/>` + slur |
 
-Implementatie: `mvsa_musicxml._collapse_same_pitch_melisma` — aanroepen voor
-**beide** layouts, niet alleen `partituur`.
+Implementatie playback/partituur-MusicXML: `mvsa_musicxml._collapse_same_pitch_melisma`
+(aanroepen voor **beide** layouts). Leesbaar gestipt blad: `mscz_partituur._collapse_same_pitch_tie_runs`.
 
 ## Checklist bij elke export-PR
 

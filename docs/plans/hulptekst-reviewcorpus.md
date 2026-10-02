@@ -42,56 +42,64 @@ review-snapshot.
 Kies bewust lastige letters: `ж`/`ш`/`щ`/`ч`/`ц`/`х`, `ы`/`и`/`й`, `я`/`ю`/`у`,
 zachte tekens, en bekende liturgische woorden.
 
-| Bron (ksl)     | Huidige tooling     | Jouw voorstel | Toelichting |
-| -------------- | ------------------- | ------------- | ----------- |
-| Господи        | Gospodi             |               |             |
-| помилуй        | pomiloej            |               |             |
-| Святый         | Svjatyj             |               |             |
-| Боже           | Bozje               |               |             |
-| Крепкий        | Krepkij             |               |             |
-| Безсмертный    | Bezsmertnyj         |               |             |
-| Аллилуиа       | Alliloeia           |               |             |
-| Аминь          | Amin                |               |             |
-| Слава          | Slava               |               |             |
-| Отцу           | Ottsoe              |               |             |
-| Сыну           | Synoe               |               |             |
-| Христе         | Christe             |               |             |
-| Христос        | Christos            |               |             |
-| Богородице     | Bogoroditse         |               |             |
-| Дево           | Devo                |               |             |
-| радуйся        | radoejsja           |               |             |
-| благодатная    | blagodatnaja        |               |             |
-| Марие          | Marie               |               |             |
-| Царю           | Tsarjoe             |               |             |
-| Небесный       | Nebesnyj            |               |             |
-| Утешителю      | Oetesjiteljoe       |               |             |
-| Иже            | Izje                |               |             |
-| сый            | syj                 |               |             |
-| исполняяй      | ispolnjajaj         |               |             |
-| Пресвятая      | Presvjataja         |               |             |
-| Троице         | Troitse             |               |             |
-| Иисусе         | Iisoese             |               |             |
-| Божий          | Bozjij              |               |             |
-| церковь        | tserkov             |               |             |
-| человеки       | tsjeloveki          |               |             |
-| жизнь          | zjizn               |               |             |
-| земля          | zemlja              |               |             |
-| дух            | doech               |               |             |
-| Трисвятое      | Trisvjatoe          |               |             |
-| херувимы       | cheroevimy          |               |             |
-| Серафимы       | Serafimy            |               |             |
+| Bron (ksl)  | Huidige tool  | Jouw voorstel | Toelichting |
+| ----------- | ------------- | ------------- | ----------- |
+| Господи     | Gospodi       |               |             |
+| помилуй     | pomiloej      |               |             |
+| Святый      | Svjatyj       |               |             |
+| Боже        | Bozje         |               |             |
+| Крепкий     | Krepkij       |               |             |
+| Безсмертный | Bezsmertnyj   |               |             |
+| Аллилуиа    | Alliloeia     |               |             |
+| Аминь       | Amin          |               |             |
+| Слава       | Slava         |               |             |
+| Отцу        | Ottsoe        |               |             |
+| Сыну        | Synoe         |               |             |
+| Христе      | Christe       |               |             |
+| Христос     | Christos      |               |             |
+| Богородице  | Bogoroditse   |               |             |
+| Дево        | Devo          |               |             |
+| радуйся     | radoejsja     |               |             |
+| благодатная | blagodatnaja  |               |             |
+| Марие       | Marie         |               |             |
+| Царю        | Tsarjoe       |               |             |
+| Небесный    | Nebesnyj      |               |             |
+| Утешителю   | Oetesjiteljoe |               |             |
+| Иже         | Izje          |               |             |
+| сый         | syj           |               |             |
+| исполняяй   | ispolnjajaj   |               |             |
+| Пресвятая   | Presvjataja   |               |             |
+| Троице      | Troitse       |               |             |
+| Иисусе      | Iisoese       |               |             |
+| Божий       | Bozjij        |               |             |
+| церковь     | tserkov       |               |             |
+| человеки    | tsjeloveki    |               |             |
+| жизнь       | zjizn         |               |             |
+| земля       | zemlja        |               |             |
+| дух         | doech         |               |             |
+| Трисвятое   | Trisvjatoe    |               |             |
+| херувимы    | cheroevimy    |               |             |
+| Серафимы    | Serafimy      |               |             |
 
 ---
 
 ## 3. Kerkslavisch → Latijn (korte zinnen)
 
-| Bron (ksl)                                                                    | Huidige tooling                                                                                      | Jouw voorstel | Toelichting |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------- | ----------- |
-| Господи помилуй                                                               | Gospodi pomiloej                                                                                     |               |             |
-| Святый Боже, Святый Крепкий, Святый Безсмертный, помилуй нас                  | Svjatyj Bozje, Svjatyj Krepkij, Svjatyj Bezsmertnyj, pomiloej nas                                    |               |             |
-| Слава Отцу и Сыну и Святому Духу                                              | Slava Ottsoe i Synoe i Svjatomoe Doechoe                                                             |               |             |
-| Ныне и присно и во веки веков. Аминь                                          | Nyne i prisno i vo veki vekov. Amin                                                                  |               |             |
-| Христос воскресе из мертвых                                                   | Christos voskrese iz mertvych                                                                        |               |             |
+- Господи помилуй ->
+  Gospodi pomiloej
+  *(jouw opmerkingen)*
+- Святый Боже, Святый Крепкий, Святый Безсмертный, помилуй нас -> 
+  Svjatyj Bozje, Svjatyj Krepkij, Svjatyj Bezsmertnyj, pomiloej nas
+  *(jouw opmerkingen)*
+- Слава Отцу и Сыну и Святому Духу ->
+  Slava Ottsoe i Synoe i Svjatomoe Doechoe
+  *(jouw opmerkingen)*
+- Ныне и присно и во веки веков. Аминь -> 
+  Nyne i prisno i vo veki vekov. Amin
+  *(jouw opmerkingen)*
+- Христос воскресе из мертвых -> 
+  Christos voskrese iz mertvych
+  *(jouw opmerkingen)*
 
 ---
 
@@ -100,50 +108,58 @@ zachte tekens, en bekende liturgische woorden.
 Hier zitten bekende knelpunten: Nederlandse **g** (nu → `х`), digraphen
 (`oe`/`ij`/`ui`/`ch`/`sch`), en leenwoorden met harde **g** (`God`, `Glorie`).
 
-| Bron (nl)        | Huidige tooling     | Jouw voorstel | Toelichting |
-| ---------------- | ------------------- | ------------- | ----------- |
-| Heer             | Хер                 |               |             |
-| ontferm          | онтферм             |               |             |
-| U                | У                   |               |             |
-| Amen             | Амен                |               |             |
-| Glorie           | Хлори               |               |             |
-| God              | Ход                 |               |             |
-| Vader            | Вадер               |               |             |
-| Zoon             | Зон                 |               |             |
-| Heilige          | Хейлихе             |               |             |
-| Geest            | Хест                |               |             |
-| wereld           | верелд              |               |             |
-| zondaars         | зондарс             |               |             |
-| barmhartigheid   | бармхартиххейд      |               |             |
-| koninkrijk       | конинкрейк          |               |             |
-| hemelen          | хемелен             |               |             |
-| brood            | брод                |               |             |
-| vergeef          | верхеф              |               |             |
-| schulden         | схулден             |               |             |
-| eeuwen           | еувен               |               |             |
-| Christus         | Христус             |               |             |
-| opgestaan        | опхестан            |               |             |
-| waarlijk         | варлейк             |               |             |
-| schoen           | схун                |               |             |
-| ijver            | ейвер               |               |             |
-| huis             | хёйс                |               |             |
-| vrouw            | враув               |               |             |
-| goed             | худ                 |               |             |
-| dag              | дах                 |               |             |
-| nacht            | нахт                |               |             |
-| alleluia         | аллелёйа            |               |             |
+| Bron (nl)      | Huidige tool   | Jouw voorstel | Toelichting |
+| -------------- | -------------- | ------------- | ----------- |
+| Heer           | Хер            |               |             |
+| ontferm        | онтферм        |               |             |
+| U              | У              |               |             |
+| Amen           | Амен           |               |             |
+| Glorie         | Хлори          |               |             |
+| God            | Ход            |               |             |
+| Vader          | Вадер          |               |             |
+| Zoon           | Зон            |               |             |
+| Heilige        | Хейлихе        |               |             |
+| Geest          | Хест           |               |             |
+| wereld         | верелд         |               |             |
+| zondaars       | зондарс        |               |             |
+| barmhartigheid | бармхартиххейд |               |             |
+| koninkrijk     | конинкрейк     |               |             |
+| hemelen        | хемелен        |               |             |
+| brood          | брод           |               |             |
+| vergeef        | верхеф         |               |             |
+| schulden       | схулден        |               |             |
+| eeuwen         | еувен          |               |             |
+| Christus       | Христус        |               |             |
+| opgestaan      | опхестан       |               |             |
+| waarlijk       | варлейк        |               |             |
+| schoen         | схун           |               |             |
+| ijver          | ейвер          |               |             |
+| huis           | хёйс           |               |             |
+| vrouw          | враув          |               |             |
+| goed           | худ            |               |             |
+| dag            | дах            |               |             |
+| nacht          | нахт           |               |             |
+| alleluia       | аллелёйа       |               |             |
 
 ---
 
 ## 5. Nederlands → Cyrillisch (korte zinnen)
 
-| Bron (nl)                                              | Huidige tooling                                              | Jouw voorstel | Toelichting |
-| ------------------------------------------------------ | ------------------------------------------------------------ | ------------- | ----------- |
-| Heer ontferm U                                         | Хер онтферм У                                                |               |             |
-| Glorie zij God                                         | Хлори зей Ход                                                |               |             |
-| Eer aan de Vader en de Zoon en de Heilige Geest        | Ер ан де Вадер ен де Зон ен де Хейлихе Хест                  |               |             |
-| nu en altijd en in de eeuwen der eeuwen. Amen          | ну ен алтейд ен ин де еувен дер еувен. Амен                  |               |             |
-| Christus is opgestaan uit de doden                     | Христус ис опхестан ёйт де доден                             |               |             |
+- Heer ontferm U ->                                          
+  Хер онтферм У
+  *(jouw opmerkingen)*
+- Glorie zij God -> 
+  Хлори зей Ход
+  *(jouw opmerkingen)*
+- Eer aan de Vader en de Zoon en de Heilige Geest -> 
+  Ер ан де Вадер ен де Зон ен де Хейлихе Хест
+  *(jouw opmerkingen)*
+- nu en altijd en in de eeuwen der eeuwen. Amen ->     
+  ну ен алтейд ен ин де еувен дер еувен. Амен
+  *(jouw opmerkingen)*
+- Christus is opgestaan uit de doden ->       
+  Христус ис опхестан ёйт де доден
+  *(jouw opmerkingen)*
 
 ---
 

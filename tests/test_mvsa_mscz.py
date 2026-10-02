@@ -515,3 +515,112 @@ def test_export_alleluia_section_to_pdf(tmp_path: Path):
     assert out.stat().st_size > 500
     assert keep.is_file()
     assert out.read_bytes()[:4] == b"%PDF"
+
+
+def _minimal_mscz(tmp_path: Path, mscx: str) -> Path:
+    path = tmp_path / "t.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("t.mscx", mscx)
+    return path
+
+
+def test_collapse_same_pitch_half_quarter_to_dotted_half(tmp_path: Path):
+    """I1 half+kwart (Tie) → gestipte half in MSCZ-postprocess (leesbaar 3/4)."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    chord_half = (
+        "<Chord>"
+        "<durationType>half</durationType>"
+        "<Lyrics><text>God</text></Lyrics>"
+        "<Note>"
+        '<Spanner type="Tie"><Tie/>'
+        "<next><location><fractions>1/2</fractions></location></next>"
+        "</Spanner>"
+        "<pitch>67</pitch><tpc>15</tpc>"
+        "</Note>"
+        "</Chord>"
+    )
+    chord_quarter = (
+        "<Chord>"
+        "<durationType>quarter</durationType>"
+        "<Note>"
+        '<Spanner type="Tie"><Tie/>'
+        "<prev><location><fractions>-1/2</fractions></location></prev>"
+        "</Spanner>"
+        "<pitch>67</pitch><tpc>15</tpc>"
+        "</Note>"
+        "</Chord>"
+    )
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1">'
+        '<Measure len="3/4">'
+        f"<voice>{chord_half}{chord_quarter}</voice>"
+        "</Measure>"
+        "</Staff>"
+        "</Score></museScore>"
+    )
+    path = _minimal_mscz(tmp_path, mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert out.count("<Chord>") == 1
+    assert "<dots>1</dots>" in out
+    assert "<durationType>half</durationType>" in out
+    assert 'type="Tie"' not in out
+    assert "<text>God</text>" in out
+
+
+def test_collapse_preserves_pitch_change_melisma(tmp_path: Path):
+    """Toonwissel-melisma (slur, verschillende pitch) blijft twee noten."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    a = (
+        "<Chord><durationType>half</durationType>"
+        "<Lyrics><text>God</text></Lyrics>"
+        '<Spanner type="Slur"><Slur/><next>'
+        "<location><fractions>1/2</fractions></location></next></Spanner>"
+        "<Note><pitch>67</pitch><tpc>15</tpc></Note></Chord>"
+    )
+    b = (
+        "<Chord><durationType>half</durationType>"
+        '<Spanner type="Slur"><prev>'
+        "<location><fractions>-1/2</fractions></location></prev></Spanner>"
+        "<Note><pitch>69</pitch><tpc>17</tpc></Note></Chord>"
+    )
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1"><Measure len="1/1">'
+        f"<voice>{a}{b}</voice>"
+        "</Measure></Staff></Score></museScore>"
+    )
+    path = _minimal_mscz(tmp_path, mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert out.count("<Chord>") == 2
+    assert 'type="Slur"' in out
+
+
+def test_collapse_does_not_merge_untied_same_pitch(tmp_path: Path):
+    """Zelfde toon zonder Tie (aparte lettergrepen) niet samentrekken."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    q = (
+        "<Chord><durationType>quarter</durationType>"
+        "<Note><pitch>62</pitch><tpc>10</tpc></Note></Chord>"
+    )
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        '<Staff id="1"><Measure len="3/4">'
+        f"<voice>{q}{q}{q}</voice>"
+        "</Measure></Staff></Score></museScore>"
+    )
+    path = _minimal_mscz(tmp_path, mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert out.count("<Chord>") == 3
