@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from .ast import PitchMarkerNode, PitchTransitionNode, ScopeNode
 from .diagnostics import DiagnosticCollection
 from .height_markers import (
     height_marker_refs,
@@ -110,48 +111,109 @@ class SemanticValidator:
                 )
 
     def _validate_height_marker_sequence(self, diagnostics: DiagnosticCollection) -> None:
-        """Controleert of elke lokale hoogte-markering overeenkomt met de berekende graad.
+        """Controleert hoogte-markeringen en stille toonhoogte-overgangen.
 
         De eerste markering geeft de begin-laddergraad. Elke volgende markering
-        (rol 'local_height') wordt vergeleken met de cumulatieve diatonische
-        cursor op basis van alle EHMs van de tussenliggende zangelementen.
-        Accidens-prefixen (`#`/`+`/`b`) bewegen die cursor niet.
+        wordt vergeleken met de cumulatieve diatonische cursor op basis van
+        alle EHMs van de tussenliggende zangelementen. Accidens-prefixen
+        (`#`/`+`/`b`) bewegen die cursor niet.
 
-        Na elke markering — ook bij een mismatch — wordt de *gedeclareerde*
-        graad als uitgangspunt voor het volgende segment genomen. Zo worden
-        vervolgfouten die alleen voortkomen uit een eerdere foute markering
-        niet apart gerapporteerd.
+        Een toonhoogte-overgang ``[<oud>:<nieuw>]`` controleert dat ``oud``
+        overeenkomt met die cursor en zet de cursor daarna op ``nieuw``.
+
+        Na elke markering of overgang — ook bij een mismatch — wordt de
+        *gedeclareerde* / *nieuwe* graad als uitgangspunt voor het volgende
+        segment genomen. Zo worden vervolgfouten die alleen voortkomen uit
+        een eerdere foute markering niet apart gerapporteerd.
         """
-        markers = self._height_markers()
-        if len(markers) < 2:
-            return
-
-        code = "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH"
         nodes = self.document.nodes
-        current_degree: int = _degree_of_ehm_list(markers[0].ehm)
-        prev_index: int = markers[0].index
+        marker_code = "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH"
+        transition_code = "VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH"
 
-        for ref in markers[1:]:
-            computed_degree = current_degree
-            for node in nodes[prev_index + 1 : ref.index]:
-                if type(node).__name__ == "ScopeNode":
-                    ehm = getattr(node, "height_modifier", [])
-                    computed_degree += _degree_of_ehm_list(ehm)
+        current_degree: int | None = None
+        prev_index = -1
 
-            declared: int = _degree_of_ehm_list(ref.ehm)
-            if declared != computed_degree:
-                correct = _marker_for_degree(computed_degree)
-                line, col = self._line_column(ref.node.start)
-                diagnostics.add(
-                    code=code,
-                    message_nl=height_marker_mismatch_detail(declared, computed_degree),
-                    line=line,
-                    column=col,
-                    severity=self._severity(code),
-                    category="semantic",
-                    hint_nl=f"Wijzig de markering naar `{correct}`.",
-                    doc_url=DOC_BASE,
+        for index, node in enumerate(nodes):
+            if isinstance(node, PitchMarkerNode):
+                if current_degree is None:
+                    current_degree = _degree_of_ehm_list(node.ehm)
+                    prev_index = index
+                    continue
+
+                computed_degree = self._degree_after_scopes(
+                    current_degree, nodes, prev_index + 1, index
                 )
+                declared = _degree_of_ehm_list(node.ehm)
+                if declared != computed_degree:
+                    correct = _marker_for_degree(computed_degree)
+                    line, col = self._line_column(node.start)
+                    diagnostics.add(
+                        code=marker_code,
+                        message_nl=height_marker_mismatch_detail(
+                            declared, computed_degree
+                        ),
+                        line=line,
+                        column=col,
+                        severity=self._severity(marker_code),
+                        category="semantic",
+                        hint_nl=f"Wijzig de markering naar `{correct}`.",
+                        doc_url=DOC_BASE,
+                    )
 
-            current_degree = declared
-            prev_index = ref.index
+                current_degree = declared
+                prev_index = index
+                continue
+
+            if isinstance(node, PitchTransitionNode):
+                if current_degree is None:
+                    current_degree = 0
+
+                computed_degree = self._degree_after_scopes(
+                    current_degree, nodes, prev_index + 1, index
+                )
+                from_degree = _degree_of_ehm_list(node.from_ehm)
+                to_degree = _degree_of_ehm_list(node.to_ehm)
+                if from_degree != computed_degree:
+                    expected_marker = _marker_for_degree(computed_degree)
+                    expected_old = expected_marker[1:-2]
+                    new_body = self._ehm_body(node.to_ehm)
+                    line, col = self._line_column(node.start)
+                    diagnostics.add(
+                        code=transition_code,
+                        message_nl=height_marker_mismatch_detail(
+                            from_degree, computed_degree
+                        ),
+                        line=line,
+                        column=col,
+                        severity=self._severity(transition_code),
+                        category="semantic",
+                        hint_nl=(
+                            f"De linkerhoogte moet bij cursor "
+                            f"`{expected_marker}` passen; gebruik "
+                            f"`[{expected_old}:{new_body}]` of pas de "
+                            f"voorgaande notatie aan."
+                        ),
+                        doc_url=DOC_BASE,
+                    )
+
+                current_degree = to_degree
+                prev_index = index
+
+    @staticmethod
+    def _degree_after_scopes(
+        start_degree: int,
+        nodes: list,
+        begin: int,
+        end: int,
+    ) -> int:
+        degree = start_degree
+        for node in nodes[begin:end]:
+            if isinstance(node, ScopeNode):
+                degree += _degree_of_ehm_list(node.height_modifier)
+        return degree
+
+    @staticmethod
+    def _ehm_body(ehm_list: list[str]) -> str:
+        if not ehm_list:
+            return ""
+        return ehm_list[0]

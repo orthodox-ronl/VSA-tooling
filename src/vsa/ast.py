@@ -53,6 +53,31 @@ HeightMarkerNode = PitchMarkerNode
 
 
 @dataclass
+class PitchTransitionNode:
+    """Stille toonhoogte-overgang ``[<oude-EHM>:<nieuwe-EHM>]`` (niet renderen)."""
+
+    from_height_modifier: Optional[List[str]] = None
+    to_height_modifier: Optional[List[str]] = None
+    start: Optional[int] = None
+    end: Optional[int] = None
+
+    @property
+    def from_ehm(self) -> List[str]:
+        return self.from_height_modifier or []
+
+    @property
+    def to_ehm(self) -> List[str]:
+        return self.to_height_modifier or []
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "PitchTransitionNode",
+            "from_height_modifier": self.from_height_modifier or [],
+            "to_height_modifier": self.to_height_modifier or [],
+        }
+
+
+@dataclass
 class ControlTokenNode:
     token: str
     meaning: str
@@ -67,9 +92,13 @@ class ControlTokenNode:
         }
 
 
-
-
-Node = Union[TextNode, ScopeNode, PitchMarkerNode, ControlTokenNode]
+Node = Union[
+    TextNode,
+    ScopeNode,
+    PitchMarkerNode,
+    PitchTransitionNode,
+    ControlTokenNode,
+]
 
 
 @dataclass

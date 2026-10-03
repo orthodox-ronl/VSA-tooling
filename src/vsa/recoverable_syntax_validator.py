@@ -1,3 +1,4 @@
+from .bracket_directive import split_pitch_transition_body
 from .vsa_comments import strip_vsa_html_comments
 from .diagnostics import DiagnosticCollection
 
@@ -119,7 +120,21 @@ class RecoverableSyntaxValidator:
 
             content = self.text[start + 1:end]
 
-            if not content.endswith(":"):
+            if content.endswith(":"):
+                pass
+            elif split_pitch_transition_body(content) is not None:
+                pass
+            elif ":" in content:
+                self.diagnostics.add(
+                    code="VSA-SYNTAX-INVALID-PITCH-TRANSITION",
+                    message_nl=(
+                        "Ongeldige toonhoogte-overgang; "
+                        "gebruik `[<oude-EHM>:<nieuwe-EHM>]` met geldige EHM-waarden."
+                    ),
+                    line=line,
+                    column=column,
+                )
+            else:
                 self.diagnostics.add(
                     code="VSA-SYNTAX-PITCH-MARKER-MISSING-COLON",
                     message_nl="Toonhoogte-markering mist ':'.",

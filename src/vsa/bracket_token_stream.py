@@ -2,10 +2,15 @@ from __future__ import annotations
 
 from typing import Literal, NamedTuple
 
-from vsa.bracket_directive import BracketDirective, find_bracket_directives, is_pitch_marker_directive
+from vsa.bracket_directive import (
+    BracketDirective,
+    find_bracket_directives,
+    is_pitch_marker_directive,
+    is_pitch_transition_directive,
+)
 
 
-BracketTokenKind = Literal["text", "directive", "pitch_marker"]
+BracketTokenKind = Literal["text", "directive", "pitch_marker", "pitch_transition"]
 
 
 class BracketToken(NamedTuple):
@@ -50,6 +55,14 @@ def token_for_directive(directive: BracketDirective) -> BracketToken:
     if is_pitch_marker_directive(directive):
         return BracketToken(
             kind="pitch_marker",
+            start=directive.start,
+            end=directive.end,
+            value=directive.body,
+        )
+
+    if is_pitch_transition_directive(directive):
+        return BracketToken(
+            kind="pitch_transition",
             start=directive.start,
             end=directive.end,
             value=directive.body,

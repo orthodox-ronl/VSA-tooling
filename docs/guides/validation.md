@@ -52,6 +52,7 @@ vsa validate examples\consumer-minimal\content-source
 | geen losse sluitaccolade                                                 | `tekst}`           |
 | [pitch-marker](@) is goed afgesloten                                     | `[//:`             |
 | [pitch-marker](@) heeft dubbele punt                                     | `[//]`             |
+| [toonhoogte-overgang](@) verbindt opeenvolgende hoogtes zonder mismatch  | zie liturgie-keten |
 | [hoogte-modifier](@)- en [lengte-modifier](@)-posities passen bij elkaar | `{/&\tekst_}`      |
 
 ## Succesoutput
@@ -110,13 +111,30 @@ examples\demo.md:blok-1:1:1: VSA-SYNTAX-EMPTY-SCOPE: Scope zonder zangelement.
 
 ## Diagnose bij problemen
 
-| Symptoom / melding                             | Oorzaak                              | Fix                                                                   |
-| ---------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------- |
-| `VSA-SYNTAX-EMPTY-SCOPE`                       | `{}` of lege [scope](@)              | [Zangelement](@) tussen `{` en `}` zetten                             |
-| `VSA-SYNTAX-UNCLOSED-SCOPE` (of vergelijkbaar) | Ontbrekende `}`                      | [Scope](@) afsluiten; regel/kolom in de melding volgen                |
-| Semantische modifier-mismatch                  | Aantal hoogte- ≠ lengte-posities     | [Modifiers](@) tellen; zie [semantics](../specification/semantics.md) |
-| `OK` lokaal, CI faalt                          | Andere map / andere `vsa.toml`       | Zelfde pad als CI; severity-overrides controleren                     |
-| SVG werkt, validate faalt                      | `svg` doet geen volle semantiek      | Verwacht gedrag — zie hierboven; herstel of accepteer bewust          |
+| Symptoom / melding                               | Oorzaak                                            | Fix                                                                                      |
+| ------------------------------------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `VSA-SYNTAX-EMPTY-SCOPE`                         | `{}` of lege [scope](@)                            | [Zangelement](@) tussen `{` en `}` zetten                                                |
+| `VSA-SYNTAX-UNCLOSED-SCOPE` (of vergelijkbaar)   | Ontbrekende `}`                                    | [Scope](@) afsluiten; regel/kolom in de melding volgen                                   |
+| Semantische modifier-mismatch                    | Aantal hoogte- ≠ lengte-posities                   | [Modifiers](@) tellen; zie [semantics](../specification/semantics.md)                    |
+| `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`            | Lokale markering wijkt af van berekende cursor     | Markering of scopes aanpassen; of bewuste sprong via [toonhoogte-overgang](@)            |
+| `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH`         | Linker-EHM van `[oud:nieuw]` klopt niet met cursor | Linkerhoogte laten matchen met de huidige markering/cursor                               |
+| `OK` lokaal, CI faalt                            | Andere map / andere `vsa.toml`                     | Zelfde pad als CI; severity-overrides controleren                                        |
+| SVG werkt, validate faalt                        | `svg` doet geen volle semantiek                    | Verwacht gedrag — zie hierboven; herstel of accepteer bewust                             |
+
+### Liturgie-keten: bewuste hoogtesprong
+
+Eindigt een antifoon op `[//:]` en begint een tropaar “in het echt” op
+`[/:]`, dan faalt validate zonder overgang. Zet tussen beide stukken een
+stille [toonhoogte-overgang](@) — die verschijnt niet op het blad:
+
+```text
+[//:] … einde antifoon … [//:]
+[//:/]
+[/:] Gij … begin tropaar … [/:]
+```
+
+Gebruik geen kunstmatige dalende EHM op het eerste woord van de tropaar
+(bijvoorbeeld `{\Gij}`): dat verandert de melodie.
 
 Concrete fail + Fix: man-page [`vsa validate`](../reference/cli/validate.md).
 

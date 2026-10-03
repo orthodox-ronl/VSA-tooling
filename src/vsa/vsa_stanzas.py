@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
-from .ast import Document, PitchMarkerNode, ScopeNode, TextNode
+from .ast import Document, PitchMarkerNode, PitchTransitionNode, ScopeNode, TextNode
 from .bracket_directive import VALID_EHM_VALUES
 from .dutch_syllables import recite_syllables
 from .duration_model import elm_to_duration
@@ -104,6 +104,9 @@ def extract_stanza_notes(
 
     for node in document.nodes:
         if isinstance(node, PitchMarkerNode):
+            continue
+        if isinstance(node, PitchTransitionNode):
+            resolver.apply_start_marker(node.to_ehm)
             continue
         if isinstance(node, TextNode):
             _consume_text(

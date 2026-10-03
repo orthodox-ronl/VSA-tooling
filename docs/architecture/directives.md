@@ -4,12 +4,13 @@ Bracket-directives zijn tokens tussen `[` en `]`. Zij moeten vroeg in de parsing
 
 ## Categorieën
 
-| Categorie       | Voorbeelden              | Betekenis                                      |
-| --------------- | ------------------------ | ---------------------------------------------- |
-| Hoogtemarkers   | `[:]`, `[/:]`, `[//:]`   | Positionele toon- of hoogte-informatie.        |
-| Control tokens  | `[*]`, `[/]`             | Structurele of renderergerichte controle.      |
-| Optionele vorm  | `[*?]`, `[/?]`           | Voorwaardelijke of tolerante control tokens.   |
-| Toekomstig      | `[token:param]`          | Uitbreidbare generieke directivevorm.          |
+| Categorie             | Voorbeelden                       | Betekenis                                                       |
+| --------------------- | --------------------------------- | --------------------------------------------------------------- |
+| Hoogtemarkers         | `[:]`, `[/:]`, `[//:]`            | Positionele toon- of hoogte-informatie (zichtbaar op het blad). |
+| Toonhoogte-overgang   | `[//:/]`, `[/://]`, `[:/]`        | Stille cursor-sprong; niet renderen.                            |
+| Control tokens        | `[*]`, `[/]`                      | Structurele of renderergerichte controle.                       |
+| Optionele vorm        | `[*?]`, `[/?]`                    | Voorwaardelijke of tolerante control tokens.                    |
+| Toekomstig            | `[token:param]`                   | Uitbreidbare generieke directivevorm.                           |
 
 ## Dispatchmodel
 
@@ -18,6 +19,7 @@ bracket-token
   ↓
 classificeer token
   ├── hoogte-marker
+  ├── toonhoogte-overgang
   ├── control-token
   ├── onbekende directive
   └── syntaxfout

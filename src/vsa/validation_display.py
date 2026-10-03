@@ -6,6 +6,7 @@ from .validation_runner import ValidationMessage
 
 _SHORT_MESSAGES_NL: dict[str, str] = {
     "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH": "Hoogte-markering klopt niet.",
+    "VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH": "Toonhoogte-overgang klopt niet.",
     "VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH": (
         "Hoogte- en lengtemodifiers komen niet overeen."
     ),
@@ -15,6 +16,7 @@ _SHORT_MESSAGES_NL: dict[str, str] = {
     "VSA-SYNTAX-WHITESPACE-IN-SCOPE": "Whitespace binnen zangelement.",
     "VSA-SYNTAX-UNCLOSED-PITCH-MARKER": "Toonhoogte-markering zonder ']'.",
     "VSA-SYNTAX-PITCH-MARKER-MISSING-COLON": "Toonhoogte-markering mist ':'.",
+    "VSA-SYNTAX-INVALID-PITCH-TRANSITION": "Ongeldige toonhoogte-overgang.",
     "VSA-SYNTAX-INVALID-SCOPE": "Zangelement heeft geen herkenbare opbouw.",
     "VSA-SYNTAX-EMPTY-SUNG-TEXT": "Zangelement zonder gezongen tekst.",
     "VSA-SYNTAX-MODIFIER-IN-SUNG-TEXT": "Modifierteken in gezongen tekst.",
@@ -76,7 +78,10 @@ def validation_short_message(message: ValidationMessage) -> str:
 
 def validation_detail_headline(message: ValidationMessage) -> str:
     severity = getattr(message, "severity", "error").upper()
-    if message.code == "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH":
+    if message.code in {
+        "VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH",
+        "VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH",
+    }:
         detail = message.message_nl
     else:
         detail = validation_short_message(message)

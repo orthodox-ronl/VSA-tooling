@@ -16,6 +16,7 @@ formPhrases:
   - hoogtemarkers
 glossaryNotes:
   - "Voorbeeld: `[:]` of `[/:]` vóór of na zangtekst; zonder afsluitende `:` is het geen pitch-marker."
+  - "Onderscheid met [toonhoogte-overgang](@): `[//:/]` is geen pitch-marker (niet-lege inhoud na de middelste `:`)."
 ---
 
 # Pitch-marker
@@ -25,7 +26,8 @@ toonhoogte of toonpositie aan. Vorm: `[<EHM>:]` — bijvoorbeeld `[:]` of `[/:]`
 
 De [parser](@) bewaart pitch-markers als positionele tokens in de volgorde van
 de bron; een [bracket-directive](@) zonder afsluitende dubbele punt valt niet
-onder dit begrip.
+onder dit begrip. Een [toonhoogte-overgang](@) `[<EHM>:<EHM>]` is een ander
+token: die eindigt niet op `:]` en wordt niet als pitch-marker gerenderd.
 
 Goede/valide voorbeelden van Pitch-marker zijn:
 - `[:]` of `[/:]` (afgesloten met `:`)
@@ -33,6 +35,7 @@ Goede/valide voorbeelden van Pitch-marker zijn:
 
 Geen goede/niet valide voorbeelden van Pitch-marker zijn:
 - `[/]` zonder `:` ([control-token](@) of andere)
+- `[//:/]` ([toonhoogte-overgang](@), geen markering)
 - Ongeldige [EHM](@)-vorm binnen de brackets
 
 ## Motivatie
@@ -43,5 +46,6 @@ machineleesbaar. Pitch-markers maken hoogte-afspraken in de notatie toetsbaar
 
 ## Gerelateerd / verder lezen
 
-- [hoogte-modifier](@), [bracket-directive](@), [vsa-scope](@), [EHM](@)
+- [hoogte-modifier](@), [bracket-directive](@), [vsa-scope](@), [EHM](@),
+  [toonhoogte-overgang](@)
 - Specificatie: [syntax](../specification/syntax.md) (bracket-/hoogte-secties)

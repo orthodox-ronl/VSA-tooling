@@ -291,6 +291,34 @@ als een enkel [zangstuk](@bron) met tussenliggende [toonhoogte-markeringen](@).
 
 De tekst `:]` is de syntactische afsluiter van een [toonhoogte-markering](@). Hij wordt visueel gerenderd als een horizontale lijn rond het verticale midden van de tekstregel, met daarboven de rendering van de [EHM](@).
 
+### Toonhoogte-overgang
+
+Een [toonhoogte-overgang](@) markeert een **bewuste sprong** in relatieve
+toonhoogte tussen opeenvolgende stukken in één VSA-bron, zonder iets op het
+blad te tonen en zonder de gezongen tekst te verdraaien.
+
+Vorm:
+
+```text
+[<oude-EHM>:<nieuwe-EHM>]
+```
+
+De rechterzijde mag niet leeg zijn. Eindigt de inhoud tussen `[` en `]` op
+`:`, dan is het een gewone [toonhoogte-markering](@) (`[/:]`, `[//:]`, …),
+geen overgang.
+
+| Token    | Betekenis                               |
+| -------- | --------------------------------------- |
+| `[//:/]` | overgang van `//` (+2) naar `/` (+1)    |
+| `[/://]` | overgang van `/` naar `//`              |
+| `[:/]`   | overgang van do (lege EHM) naar `/`     |
+| `[/:]`   | blijft gewone [toonhoogte-markering](@) |
+| `[//:]`  | blijft gewone [toonhoogte-markering](@) |
+
+Praktijkvoorbeeld: een antifoon eindigt op `[//:]`, daarna volgt `[//:/]`
+en een tropaar begint met `[/:]`. Zangers zien op het blad alleen de gewone
+markeringen; de overgang is uitsluitend voor validatie en export-cursor.
+
 ### Absolute toonhoogte binnen Hugo blokmetadata
 
 Een absolute toonhoogte bestaat uit:
@@ -346,13 +374,20 @@ Let op: in EBNF wordt `\` als escape-teken gebruikt. Om het teken `\` zelf te no
 
 zangstuk ::=
     { whitespace }
-    { toonhoogte-markering | non-scopechar | scope }
+    { toonhoogte-markering | toonhoogte-overgang | non-scopechar | scope }
     { whitespace } ;
 
 toonhoogte-markering ::=
     "["
     [ EHM ]
     ":]" ;
+
+toonhoogte-overgang ::=
+    "["
+    [ EHM ]
+    ":"
+    EHM
+    "]" ;
 
 non-scopechar ::=
     ? elk Unicode-karakter behalve "{" en "}" ? ;
