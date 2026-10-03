@@ -4832,9 +4832,9 @@
 
 <h1 id="canonieke-checklists-mxl-mscz-pdf">Canonieke checklists (.mxl / .mscz / PDF)<a class="headerlink" href="#canonieke-checklists-mxl-mscz-pdf" title="Permanent link">&para;</a></h1>
 <p>Doel: vastleggen wat <strong>wij</strong> als normale vorm zien in gegenereerde of
-genormaliseerde <code>.mxl</code> / <code>.mscz</code> (en afgeleide MuseScore-PDF). Dat zijn de
-targets voor export én voor eventuele diagonaal-normalisatie (zelfde formaat
-→ ons profiel).</p>
+genormaliseerde <code>.mxl</code> / <code>.mscz</code> (en afgeleide PDF’s). Dat zijn de targets
+voor export én voor eventuele diagonaal-normalisatie (zelfde formaat → ons
+profiel). PDF’s zijn canoniek <strong>A4 staand</strong> (zie checklist PDF P6).</p>
 <p>Geen herdefinitie van MusicXML of MuseScore — alleen onze conventies.
 Normatieve eenstemmige MusicXML-details:
 <a href="../../specification/rendering/#musicxml-export">rendering — MusicXML-export</a>.
@@ -5116,8 +5116,11 @@ checklist (beperkt wat wij vastleggen; geen volledige MuseScore-spec).</p>
 <h2 id="checklist-pdf-afgeleide-van-mscz">Checklist PDF (afgeleide van MSCZ)<a class="headerlink" href="#checklist-pdf-afgeleide-van-mscz" title="Permanent link">&para;</a></h2>
 <p>MuseScore-/basispartituur-PDF is <strong>geen</strong> apart bronformaat: dezelfde
 visuele afspraken als MSCZ (twee balken, geen stem-indicaties, lyrics tussen
-de balken, A4). Geen lettergreep-explosie, geen vier Coria-parts in de PDF.
+de balken). Geen lettergreep-explosie, geen vier Coria-parts in de PDF.
 Transforms: Oefenhoek <code>mscz-product-transforms.md</code> (PDF-kolom).</p>
+<p><strong>Canonieke pagina:</strong> elke door ons geproduceerde PDF is <strong>A4 staand</strong>
+(210×297 mm). US Letter is <strong>niet</strong> canoniek — noch voor partituur-PDF
+(<code>mvsa pdf</code> / MuseScore), noch voor Markdown-PDF (<a href="../../reference/cli/pdf/"><code>vsa pdf</code></a>).</p>
 <table>
 <thead>
 <tr>
@@ -5130,7 +5133,7 @@ Transforms: Oefenhoek <code>mscz-product-transforms.md</code> (PDF-kolom).</p>
 <tr>
 <td>P1</td>
 <td><strong>Erft MSCZ S2–S5, S7–S10, S14–S19</strong></td>
-<td>SA/TB, geen partijnamen, lyrics tussen balken, A4/Style, recite-spacers, maatstrepen; geen mid-systeem-HBox/spookmaten; cues als SystemText.</td>
+<td>SA/TB, geen partijnamen, lyrics tussen balken, Style/recite-spacers, maatstrepen; geen mid-systeem-HBox/spookmaten; cues als SystemText. (A4 via S7 én expliciet P6.)</td>
 </tr>
 <tr>
 <td>P2</td>
@@ -5152,10 +5155,15 @@ Transforms: Oefenhoek <code>mscz-product-transforms.md</code> (PDF-kolom).</p>
 <td><strong>Provenance (Oefenhoek)</strong></td>
 <td>Optioneel: partituur-hash / generator-meta zoals in product-transforms — nog niet verplicht in VSA-tooling-export.</td>
 </tr>
+<tr>
+<td>P6</td>
+<td><strong>A4 staand</strong></td>
+<td>Paginaformaat <strong>A4</strong> (210×297 mm), niet US Letter. Partituur: MuseScore-Style (<code>pageWidth</code>/<code>pageHeight</code>, zie MSCZ S7). Markdown-PDF (<code>vsa pdf</code>): print-CSS <code>@page</code> 210×297 mm.</td>
+</tr>
 </tbody>
 </table>
-<p><em>(Los daarvan: <a href="../../reference/cli/pdf/"><code>vsa pdf</code></a> render Markdown+VSA naar A4 —
-andere pipeline, geen MuseScore-partituur.)</em></p>
+<p><a href="../../reference/cli/pdf/"><code>vsa pdf</code></a> is een andere pipeline (Markdown + VSA-SVG,
+geen MuseScore-partituur) maar valt onder <strong>dezelfde</strong> A4-eis (P6).</p>
 <h2 id="verschillen-bewust-hangende-houden">Verschillen bewust hangende houden<a class="headerlink" href="#verschillen-bewust-hangende-houden" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -5304,7 +5312,7 @@ andere pipeline, geen MuseScore-partituur.)</em></p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-03
         
       </p>
       
