@@ -1,4 +1,12 @@
-from .ast import Document, TextNode, ScopeNode, PitchMarkerNode, HeightMarkerNode
+from .ast import (
+    Document,
+    TextNode,
+    ScopeNode,
+    PitchMarkerNode,
+    HeightMarkerNode,
+    PitchTransitionNode,
+)
+from .bracket_directive import split_pitch_transition_body
 from .errors import VSASyntaxError
 from .vsa_comments import semantic_offset_to_source, strip_vsa_html_comments_with_offset_map
 
@@ -71,7 +79,7 @@ class Parser:
             if self._starts_with("{"):
                 nodes.append(self._parse_scope())
             elif self._starts_with("["):
-                nodes.append(self._parse_pitch_marker())
+                nodes.append(self._parse_bracket_directive())
             elif self._starts_with("}"):
                 raise VSASyntaxError("Losse sluitaccolade", self.pos)
             else:
@@ -95,23 +103,57 @@ class Parser:
             end=self._source_offset(self.pos),
         )
 
-    def _parse_pitch_marker(self) -> PitchMarkerNode:
+    def _parse_bracket_directive(self) -> PitchMarkerNode | PitchTransitionNode:
         start = self.pos
-        end_token = self.text.find(BRACKET_DIRECTIVE_END, self.pos + 1)
+        close = self.text.find("]", self.pos + 1)
 
-        if end_token == -1:
-            raise VSASyntaxError("Toonhoogte-markering mist bracket-directive eindtoken ':]'", start)
+        if close == -1:
+            raise VSASyntaxError(
+                "Toonhoogte-markering mist afsluitende ']'",
+                start,
+            )
 
-        raw_modifier = self.text[self.pos + 1:end_token]
-        height_modifier = self._parse_pitch_marker_modifier(raw_modifier, start)
+        inner = self.text[self.pos + 1 : close]
 
-        self.pos = end_token + len(BRACKET_DIRECTIVE_END)
+        if inner.endswith(":"):
+            raw_modifier = inner[:-1]
+            height_modifier = self._parse_pitch_marker_modifier(raw_modifier, start)
+            self.pos = close + 1
+            return HeightMarkerNode(
+                height_modifier=height_modifier,
+                start=self._source_offset(start),
+                end=self._source_offset(self.pos),
+            )
 
-        return HeightMarkerNode(
-            height_modifier=height_modifier,
-            start=self._source_offset(start),
-            end=self._source_offset(self.pos),
+        split = split_pitch_transition_body(inner)
+        if split is not None:
+            old_raw, new_raw = split
+            from_mod = self._parse_pitch_marker_modifier(old_raw, start)
+            to_mod = self._parse_pitch_marker_modifier(new_raw, start)
+            self.pos = close + 1
+            return PitchTransitionNode(
+                from_height_modifier=from_mod,
+                to_height_modifier=to_mod,
+                start=self._source_offset(start),
+                end=self._source_offset(self.pos),
+            )
+
+        # Behoud herkenbare fout voor `[/]` e.d. (geen `:`-afsluiter van een markering).
+        if BRACKET_DIRECTIVE_END not in self.text[self.pos : close + 1]:
+            raise VSASyntaxError(
+                "Toonhoogte-markering mist bracket-directive eindtoken ':]' "
+                "of toonhoogte-overgang '[<EHM>:<EHM>]'",
+                start,
+            )
+
+        raise VSASyntaxError(
+            f"Ongeldige toonhoogte-overgang of -markering: [{inner}]",
+            start,
         )
+
+    def _parse_pitch_marker(self) -> PitchMarkerNode | PitchTransitionNode:
+        """Backwards-compatible alias for bracket-directive parsing."""
+        return self._parse_bracket_directive()
 
     def _parse_pitch_marker_modifier(self, raw_modifier: str, start: int) -> list[str]:
         if raw_modifier == "":

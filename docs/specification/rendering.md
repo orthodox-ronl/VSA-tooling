@@ -53,6 +53,14 @@ wordt gerenderd als een horizontale streep rond het verticale midden van de teks
 
 Absolute toonhoogten worden niet in [toonhoogte-markeringen](@) opgenomen en worden dus ook niet als onderdeel daarvan gerenderd.
 
+#### Toonhoogte-overgang
+
+Een [toonhoogte-overgang](@) van de vorm `[<oude-EHM>:<nieuwe-EHM>]` wordt
+**niet** gerenderd in SVG of print-PDF. Er is geen pitch-marker-lijn, geen
+glyph en geen extra spatie in de layout. MusicXML-export past wel de
+relatieve toonhoogte-cursor aan (rechter-EHM), zodat de klinkende lijn na de
+overgang op de nieuwe hoogte verdergaat.
+
 #### Kolombreedtes en rijhoogtes
 
 Voor elke kolom `i` wordt een minimale kolombreedte `W[i]` bepaald.

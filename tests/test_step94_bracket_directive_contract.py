@@ -30,6 +30,7 @@ def test_current_directive_docs_define_bracket_dispatch_contract():
         (
             "bracket-token ::=",
             'height-marker ::= "[" [ EHM ] ":]"',
+            'pitch-transition ::= "[" [ EHM ] ":" EHM "]"',
             "Bracket-directives zijn tokens tussen `[` en `]`",
             "De parser moet eerst bepalen welk type bracket-token is aangetroffen",
         ),

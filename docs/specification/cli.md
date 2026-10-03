@@ -117,15 +117,18 @@ examples\demo.md:blok-1:1:1: VSA-SYNTAX-EMPTY-SCOPE: Scope zonder zangelement.
 
 ### Veelvoorkomende foutcodes
 
-| Foutcode                                | Betekenis                                   | Wat doen?                                                |
-| --------------------------------------- | ------------------------------------------- | -------------------------------------------------------- |
-| `VSA-SYNTAX-EMPTY-SCOPE`                | `{}` gevonden                               | zet tekst of [zangelement](@) in de [scope](@)           |
-| `VSA-SYNTAX-UNCLOSED-SCOPE`             | `{tekst` zonder `}`                         | sluit de [scope](@) af                                   |
-| `VSA-SYNTAX-UNEXPECTED-CLOSE-BRACE`     | losse `}`                                   | verwijder of herstel de [scope](@)                       |
-| `VSA-SYNTAX-WHITESPACE-IN-SCOPE`        | spatie binnen `{...}`                       | splits tekst buiten de scope of gebruik correcte notatie |
-| `VSA-SYNTAX-UNCLOSED-PITCH-MARKER`      | `[` zonder `]`                              | sluit [pitch-marker](@) af                               |
-| `VSA-SYNTAX-PITCH-MARKER-MISSING-COLON` | [pitch-marker](@) zonder `:`                | gebruik bijvoorbeeld `[:]`                               |
-| `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`  | aantallen hoogte/lengteposities passen niet | controleer samengestelde [modifiers](@)                  |
+| Foutcode                                 | Betekenis                                      | Wat doen?                                                             |
+| ---------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------- |
+| `VSA-SYNTAX-EMPTY-SCOPE`                 | `{}` gevonden                                  | zet tekst of [zangelement](@) in de [scope](@)                        |
+| `VSA-SYNTAX-UNCLOSED-SCOPE`              | `{tekst` zonder `}`                            | sluit de [scope](@) af                                                |
+| `VSA-SYNTAX-UNEXPECTED-CLOSE-BRACE`      | losse `}`                                      | verwijder of herstel de [scope](@)                                    |
+| `VSA-SYNTAX-WHITESPACE-IN-SCOPE`         | spatie binnen `{...}`                          | splits tekst buiten de scope of gebruik correcte notatie              |
+| `VSA-SYNTAX-UNCLOSED-PITCH-MARKER`       | `[` zonder `]`                                 | sluit [pitch-marker](@) af                                            |
+| `VSA-SYNTAX-PITCH-MARKER-MISSING-COLON`  | [pitch-marker](@) zonder `:`                   | gebruik bijvoorbeeld `[:]`                                            |
+| `VSA-SYNTAX-INVALID-PITCH-TRANSITION`    | ongeldige [toonhoogte-overgang](@)             | gebruik `[<oude-EHM>:<nieuwe-EHM>]` met geldige EHM                   |
+| `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`   | aantallen hoogte/lengteposities passen niet    | controleer samengestelde [modifiers](@)                               |
+| `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`    | markering wijkt af van berekende cursor        | markering/scopes aanpassen of [toonhoogte-overgang](@) gebruiken      |
+| `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH` | linker-EHM van overgang klopt niet met cursor  | pas `[oud:nieuw]` of voorgaande notatie aan                           |
 
 ### Wat doe je bij fouten?
 

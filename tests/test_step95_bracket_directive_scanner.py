@@ -14,7 +14,9 @@ def test_bracket_directive_end_token_is_single_contract_value():
 def test_finds_single_pitch_marker_directive():
     directives = find_bracket_directives("[:] Heer")
 
-    assert directives == [BracketDirective(start=0, end=3, body="")]
+    assert directives == [
+        BracketDirective(start=0, end=3, body="", kind="pitch_marker")
+    ]
 
 
 def test_finds_multiple_directives_in_order():

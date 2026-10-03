@@ -69,7 +69,15 @@ import xml.etree.ElementTree as ET
 from datetime import date
 from typing import Any
 
-from .ast import ControlTokenNode, Document, Node, PitchMarkerNode, ScopeNode, TextNode
+from .ast import (
+    ControlTokenNode,
+    Document,
+    Node,
+    PitchMarkerNode,
+    PitchTransitionNode,
+    ScopeNode,
+    TextNode,
+)
 from .duration_model import UnknownELM, elm_to_duration
 from .music import Duration, Pitch
 from .pitch_resolver import PitchResolver, key_fifths
@@ -116,10 +124,10 @@ _PUNCT_ONLY_RE = re.compile(r"^\W+$")
 
 
 def _segments_between_height_markers(nodes: list[Node]) -> list[list[int]]:
-    """Node-index lists for spans between hoogte-markeringen (and before/after)."""
+    """Node-index lists for spans between hoogte-markeringen/overgangen."""
     segments: list[list[int]] = [[]]
     for index, node in enumerate(nodes):
-        if isinstance(node, PitchMarkerNode):
+        if isinstance(node, (PitchMarkerNode, PitchTransitionNode)):
             segments.append([])
         else:
             segments[-1].append(index)
@@ -460,6 +468,11 @@ class MusicXMLRenderer:
         for node_index, node in enumerate(document.nodes):
             if isinstance(node, PitchMarkerNode):
                 continue  # already handled above; not notes
+
+            if isinstance(node, PitchTransitionNode):
+                # Stille sprong in relatieve toonhoogte voor export-cursor.
+                resolver.apply_start_marker(node.to_ehm)
+                continue
 
             if isinstance(node, TextNode):
                 if sung_indices is not None and node_index not in sung_indices:
