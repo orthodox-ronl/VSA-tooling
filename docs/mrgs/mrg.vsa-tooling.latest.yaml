@@ -33,7 +33,7 @@ entries:
       - "Afgeleiden worden niet getrackt in de [bron-repository](@); ze worden gegenereerd tijdens de build."
     scopetag: "bron"
     locator: "afgeleide.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/afgeleide"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/afgeleide"
     headingids:
       - "afgeleide"
       - "motivatie"
@@ -53,7 +53,7 @@ entries:
       - "Niet verwarren met het [canonieke id](@) zelf, noch met [herkomst](@) (waar iets vandaan komt)."
     scopetag: "bron"
     locator: "alias.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/alias"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/alias"
     headingids:
       - "alias"
       - "motivatie"
@@ -119,7 +119,7 @@ entries:
       - "Repositories voor de [VSA-tooling](https://github.com/orthodox-ronl/VSA-tooling/), of parochie-specifieke zaken en vendor-checkouts zijn geen bron-repository."
     scopetag: "bron"
     locator: "bron-repository.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/bron-repository"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/bron-repository"
     headingids:
       - "bron-repository"
       - "motivatie"
@@ -147,7 +147,7 @@ entries:
           - "HTML bestanden zoals die zijn gegenereerd uit geautomatiseerde workflows."
     scopetag: "bron"
     locator: "bronbestand.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/bronbestand"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/bronbestand"
     headingids:
       - "bronbestand"
       - "motivatie"
@@ -170,7 +170,7 @@ entries:
       - "Niet verwarren met [alias](@) (menselijke werknaam) of met [herkomst](@) (waar iets vandaan komt)."
     scopetag: "bron"
     locator: "canoniek-id.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/canoniek-id"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/canoniek-id"
     headingids:
       - "canonieke-id"
       - "motivatie"
@@ -190,7 +190,7 @@ entries:
       - "Niet verwarren met [samenstelling](@) (parochie-markdown met `:::include`) of sjabloon (markdown met `:::include zoek=`)."
     scopetag: "bron"
     locator: "compositie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/compositie"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/compositie"
     headingids:
       - "compositie"
       - "motivatie"
@@ -229,7 +229,7 @@ entries:
       - "Het bestaan van een conversiemechanisme is het criterium waarmee onderscheid wordt gemaakt tussen [bronbestand](@) en [afgeleide](@)."
     scopetag: "bron"
     locator: "conversiemechanisme.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/conversiemechanisme"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/conversiemechanisme"
     headingids:
       - "conversiemechanisme"
       - "motivatie"
@@ -331,7 +331,7 @@ entries:
       - "Voorbeeld: `:::include svg zoek=\"…\" :::` kiest exporttype `svg`."
     scopetag: "bron"
     locator: "exportmechanisme.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/exportmechanisme"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/exportmechanisme"
     headingids:
       - "exportmechanisme"
       - "motivatie"
@@ -351,7 +351,7 @@ entries:
       - "Huidige exporttypen: `svg`, `coria`, `mxl`."
     scopetag: "bron"
     locator: "exporttype.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/exporttype"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/exporttype"
     headingids:
       - "exporttype"
       - "motivatie"
@@ -486,7 +486,7 @@ entries:
       - "Registratie vindt plaats via [promotie](@): een PR naar de [bron-repository](@) met [source-entry](@) en [bronbestand](@)."
     scopetag: "bron"
     locator: "geregistreerde-representatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/geregistreerde-representatie"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/geregistreerde-representatie"
     headingids:
       - "geregistreerde-representatie"
       - "motivatie"
@@ -526,7 +526,7 @@ entries:
       - "Herkomst is geen bestand; het is metadata (zoals `reference:` in `zangstuk.yaml`)."
     scopetag: "bron"
     locator: "herkomst.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/herkomst"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/herkomst"
     headingids:
       - "herkomst"
       - "motivatie"
@@ -650,7 +650,7 @@ entries:
       - "Een manifest is zelf geen [representatie](@), [bronbestand](@) of [samenstelling](@)."
     scopetag: "bron"
     locator: "manifest.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/manifest"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/manifest"
     headingids:
       - "manifest"
       - "motivatie"
@@ -726,7 +726,7 @@ entries:
       - "Parochie-lokale representaties staan onder `content-source/lokaal/<zangstuk-id>/<variant-id>/…`."
     scopetag: "bron"
     locator: "parochie-lokale-representatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/parochie-lokale-representatie"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/parochie-lokale-representatie"
     headingids:
       - "parochie-lokale-representatie"
       - "motivatie"
@@ -789,7 +789,7 @@ entries:
       - "Promotie vereist een PR op de [bron-repository](@) met [source-entry](@) én [bronbestand](@)."
     scopetag: "bron"
     locator: "promotie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/promotie"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/promotie"
     headingids:
       - "promotie"
       - "motivatie"
@@ -862,7 +862,7 @@ entries:
       - "Onder dezelfde [uitvoeringsvorm](@) mogen meerdere representaties bestaan (bijv. scan + getrouwe [vsa-bestand](@))."
     scopetag: "bron"
     locator: "representatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/representatie"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/representatie"
     headingids:
       - "representatie"
       - "motivatie"
@@ -917,7 +917,7 @@ entries:
       - "Niet verwarren met [compositie](@) (org-brede ordered list van [zangstukken](@) in yaml) of sjabloon (markdown met `:::include zoek=`)."
     scopetag: "bron"
     locator: "samenstelling.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/samenstelling"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/samenstelling"
     headingids:
       - "samenstelling"
       - "motivatie"
@@ -957,7 +957,7 @@ entries:
       - "Meerdere source-entries kunnen meerdere [representaties](@) registreren, of (legacy) nog niet onderscheiden [variant](@)/[uitvoeringsvorm](@)-structuur bevatten — bij nieuw werk gebruik het vier-niveaumodel."
     scopetag: "bron"
     locator: "source-entry.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/source-entry"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/source-entry"
     headingids:
       - "source-entry"
       - "voorbeelden-van-source-entries"
@@ -1046,7 +1046,7 @@ entries:
           - "de verdeling van lettergrepen over de noten"
     scopetag: "bron"
     locator: "uitvoeringsvorm.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/uitvoeringsvorm"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/uitvoeringsvorm"
     headingids:
       - "uitvoeringsvorm"
       - "motivatie"
@@ -1086,7 +1086,7 @@ entries:
       - "Vergelijkbare begrippen die buiten de scope van deze terminologie ook wel worden gehanteerd zijn `bewerking`, `versie`, `setting`, `compositievariant`."
     scopetag: "bron"
     locator: "variant.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/variant"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/variant"
     headingids:
       - "variant"
       - "motivatie"
@@ -1126,7 +1126,7 @@ entries:
       - "vsa-bestanden"
     scopetag: "bron"
     locator: "vsa-bestand.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/vsa-bestand"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/vsa-bestand"
     headingids:
       - "vsa-bestand"
       - "structuur"
@@ -1166,7 +1166,7 @@ entries:
       - "vsa-notaties"
     scopetag: "bron"
     locator: "vsa-notatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/vsa-notatie"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/vsa-notatie"
     headingids:
       - "vsa-notatie"
       - "kernprincipes"
@@ -1273,7 +1273,7 @@ entries:
       - "vsa-tools"
     scopetag: "bron"
     locator: "vsa-tooling.md"
-    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/vsa-tooling"
+    navurl: "https://orthodox-ronl.github.io/bron/terms/vsa-tooling"
     headingids:
       - "vsa-tooling"
       - "wat-je-ermee-doet"
