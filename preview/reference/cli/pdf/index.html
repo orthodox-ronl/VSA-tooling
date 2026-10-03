@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>docs/fix-toonhoogte-overgang-link</code>
-  , gebouwd 2026-10-03 09:46 CEST.
+   — branch <code>development</code>
+  , gebouwd 2026-10-03 09:52 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4929,13 +4929,14 @@ paginaeinden, en <code>:::web-only:::</code> verdwijnt (print-only blijft).</p>
 catalogus-<code>zoek=</code>, includes, directives, SVG-render. Daarna wordt de
 gegenereerde Markdown naar HTML omgezet (Hugo-shortcodes voor print/web
 inbegrepen) en via Edge/Chrome/Chromium naar PDF geprint.</p>
-<p><strong>Papierformaat:</strong> A4 staand (210×297 mm). Dat staat in de print-CSS
-(<code>@page</code>), niet als aparte Chrome-CLI-flag. Zonder die CSS zou headless
-Chrome op US Letter terugvallen — dat doen wij niet.</p>
+<p><strong>Papierformaat (canoniek P6):</strong> A4 staand (210×297 mm). Dat staat in de
+print-CSS (<code>@page</code>), niet als aparte Chrome-CLI-flag. Zonder die CSS zou
+headless Chrome op US Letter terugvallen — dat is <strong>niet</strong> canoniek. Zie
+<a href="../../../formats/canonical-checklists/#checklist-pdf-afgeleide-van-mscz">canonieke checklists — PDF P6</a>.</p>
 <p>Coria- en MusicXML-links horen bij de website en komen niet in de PDF.</p>
-<p>Partituur-PDF vanuit <code>.mvsa</code>/<code>.mscz</code> (<code>mvsa pdf</code>) gaat via MuseScore; daar
-komt A4 uit de MuseScore-Style van het <code>.mscz</code> (zie
-<a href="../../../formats/mscz-leesbaarheid/">MSCZ-leesbaarheid</a>).</p>
+<p>Partituur-PDF vanuit <code>.mvsa</code>/<code>.mscz</code> (<code>mvsa pdf</code>) valt onder dezelfde
+checklist-P6; daar komt A4 uit de MuseScore-Style van het <code>.mscz</code> (zie
+<a href="../../../formats/mscz-leesbaarheid/">MSCZ-leesbaarheid</a> en MSCZ S7).</p>
 <p>Vóór het renderen geldt dezelfde validatie als <a href="../validate/"><code>vsa validate</code></a>.
 Fouten gebruiken hetzelfde formaat: bestand, regel, kolom, code, bronregel.</p>
 <h2 id="argumenten-en-opties">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties" title="Permanent link">&para;</a></h2>
