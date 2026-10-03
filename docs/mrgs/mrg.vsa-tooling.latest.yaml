@@ -83,7 +83,7 @@ entries:
       - "ast"
     termid: "concept:ast"
     vsntag: "vsa-tooling"
-  - git_date: 2026-08-09T00:00:00.000Z
+  - git_date: 2026-10-03T00:00:00.000Z
     slug: "bracket-directive"
     term: "bracket-directive"
     termType: "concept"
@@ -749,7 +749,7 @@ entries:
       - "parser"
     termid: "concept:parser"
     vsntag: "vsa-tooling"
-  - git_date: 2026-08-09T00:00:00.000Z
+  - git_date: 2026-10-03T00:00:00.000Z
     slug: "pitch-marker"
     term: "pitch-marker"
     termType: "concept"
@@ -767,6 +767,7 @@ entries:
       - "hoogtemarkers"
     glossaryNotes:
       - "Voorbeeld: `[:]` of `[/:]` vóór of na zangtekst; zonder afsluitende `:` is het geen pitch-marker."
+      - "Onderscheid met [toonhoogte-overgang](@): `[//:/]` is geen pitch-marker (niet-lege inhoud na de middelste `:`)."
     scopetag: "vsa-tooling"
     locator: "pitch-marker.md"
     navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/pitch-marker"
@@ -1005,6 +1006,30 @@ entries:
       - "motivatie"
       - "gerelateerd-/-verder-lezen"
     termid: "concept:template-frase"
+    vsntag: "vsa-tooling"
+  - git_date: 2026-10-03T00:00:00.000Z
+    slug: "toonhoogte-overgang"
+    term: "toonhoogte-overgang"
+    termType: "concept"
+    glossaryTerm: "Toonhoogte-overgang"
+    glossaryText: "een [bracket-directive](@) van de vorm `[<oude-EHM>:<nieuwe-EHM>]` die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad."
+    glossaryAlias: "Pitch-transition"
+    formPhrases:
+      - "toonhoogte-overgang"
+      - "toonhoogte-overgangen"
+      - "pitch-transition"
+      - "pitch-transitions"
+    glossaryNotes:
+      - "Werknaam in VSA-tooling. Canonieke org-term hoort via glossary-PR op bron (`docs/specs/terminologie.md`)."
+      - "Onderscheid met [pitch-marker](@) / [hoogte-markering](@): markering eindigt op `:]`; overgang heeft niet-lege inhoud na de middelste `:` vóór `]`."
+    scopetag: "vsa-tooling"
+    locator: "toonhoogte-overgang.md"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/toonhoogte-overgang"
+    headingids:
+      - "toonhoogte-overgang"
+      - "motivatie"
+      - "gerelateerd-/-verder-lezen"
+    termid: "concept:toonhoogte-overgang"
     vsntag: "vsa-tooling"
   - git_date: 2026-08-08T00:00:00.000Z
     term: "uitvoeringsvorm"
