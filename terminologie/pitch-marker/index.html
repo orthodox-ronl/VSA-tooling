@@ -4663,12 +4663,14 @@
 toonhoogte of toonpositie aan. Vorm: <code>[&lt;EHM&gt;:]</code> — bijvoorbeeld <code>[:]</code> of <code>[/:]</code>.</p>
 <p>De <a class="og-termref" href="/VSA-tooling/terminologie/parser" title="Parser: een component die VSA-brontekst of tokens volgens de grammatica omzet naar expliciete AST / Syntactische Boom-nodes, bronlocaties behoudt en geen semantische reparaties of renderlogica uitvoert.">parser</a> bewaart pitch-markers als positionele tokens in de volgorde van
 de bron; een <a class="og-termref" href="/VSA-tooling/terminologie/bracket-directive" title="Bracket-directive: een tekstfragment dat als afzonderlijk VSA-token tussen <code>[</code> en <code>]</code> voorkomt en door bracket-dispatch wordt geclassificeerd voordat de inhoudelijke parsing verdergaat.">bracket-directive</a> zonder afsluitende dubbele punt valt niet
-onder dit begrip.</p>
+onder dit begrip. Een <a class="og-termref" href="/VSA-tooling/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> <code>[&lt;EHM&gt;:&lt;EHM&gt;]</code> is een ander
+token: die eindigt niet op <code>:]</code> en wordt niet als pitch-marker gerenderd.</p>
 <p>Goede/valide voorbeelden van Pitch-marker zijn:
 - <code>[:]</code> of <code>[/:]</code> (afgesloten met <code>:</code>)
 - Lege of geldige <a class="og-termref" href="/VSA-tooling/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a> vóór de <code>:</code></p>
 <p>Geen goede/niet valide voorbeelden van Pitch-marker zijn:
 - <code>[/]</code> zonder <code>:</code> (<a class="og-termref" href="/VSA-tooling/terminologie/control-token" title="Control-token: een Bracket-directive / Bracket-token waarvan de tokenwaarde een ondersteunde control-tokenvorm is, zoals <code>[*]</code>, <code>[/]</code>, <code>[*?]</code> of <code>[/?]</code>, en die niet als Pitch-marker / Hoogte-markering wordt geparseerd.">control-token</a> of andere)
+- <code>[//:/]</code> (<a class="og-termref" href="/VSA-tooling/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a>, geen markering)
 - Ongeldige <a class="og-termref" href="/VSA-tooling/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a>-vorm binnen de brackets</p>
 <h2 id="motivatie">Motivatie<a class="headerlink" href="#motivatie" title="Permanent link">&para;</a></h2>
 <p>Zonder expliciete markering is relatieve toonhoogte in platte tekst niet
@@ -4676,7 +4678,8 @@ machineleesbaar. Pitch-markers maken hoogte-afspraken in de notatie toetsbaar
 (validatie) en renderbaar (SVG).</p>
 <h2 id="gerelateerd-verder-lezen">Gerelateerd / verder lezen<a class="headerlink" href="#gerelateerd-verder-lezen" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a class="og-termref" href="/VSA-tooling/terminologie/hoogte-modifier" title="Hoogte-modifier: een Modifier die voor het zangelement in een VSA-scope staat en bestaat uit een geldige EHM of uit meerdere geldige EHMs gescheiden door <code>&amp;</code>.">hoogte-modifier</a>, <a class="og-termref" href="/VSA-tooling/terminologie/bracket-directive" title="Bracket-directive: een tekstfragment dat als afzonderlijk VSA-token tussen <code>[</code> en <code>]</code> voorkomt en door bracket-dispatch wordt geclassificeerd voordat de inhoudelijke parsing verdergaat.">bracket-directive</a>, <a class="og-termref" href="/VSA-tooling/terminologie/vsa-scope" title="VSA-scope: een tekstfragment dat met <code>{</code> begint, met <code>}</code> eindigt, geen whitespace binnen de accolades bevat en door de Parser kan worden opgesplitst in optionele Hoogte-modifier, verplicht zangelement en optionele Lengte-modifier.">vsa-scope</a>, <a class="og-termref" href="/VSA-tooling/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a></li>
+<li><a class="og-termref" href="/VSA-tooling/terminologie/hoogte-modifier" title="Hoogte-modifier: een Modifier die voor het zangelement in een VSA-scope staat en bestaat uit een geldige EHM of uit meerdere geldige EHMs gescheiden door <code>&amp;</code>.">hoogte-modifier</a>, <a class="og-termref" href="/VSA-tooling/terminologie/bracket-directive" title="Bracket-directive: een tekstfragment dat als afzonderlijk VSA-token tussen <code>[</code> en <code>]</code> voorkomt en door bracket-dispatch wordt geclassificeerd voordat de inhoudelijke parsing verdergaat.">bracket-directive</a>, <a class="og-termref" href="/VSA-tooling/terminologie/vsa-scope" title="VSA-scope: een tekstfragment dat met <code>{</code> begint, met <code>}</code> eindigt, geen whitespace binnen de accolades bevat en door de Parser kan worden opgesplitst in optionele Hoogte-modifier, verplicht zangelement en optionele Lengte-modifier.">vsa-scope</a>, <a class="og-termref" href="/VSA-tooling/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a>,
+  <a class="og-termref" href="/VSA-tooling/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a></li>
 <li>Specificatie: <a href="../../specification/syntax/">syntax</a> (bracket-/hoogte-secties)</li>
 </ul>
 
@@ -4715,7 +4718,7 @@ machineleesbaar. Pitch-markers maken hoogte-afspraken in de notatie toetsbaar
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-09
+        Bijgewerkt: 2026-10-03
         
       </p>
       

@@ -2081,6 +2081,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kolombreedtes-en-rijhoogtes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5039,6 +5050,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kolombreedtes-en-rijhoogtes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5347,7 +5369,7 @@
 <h1 id="rendering-en-export">Rendering en export<a class="headerlink" href="#rendering-en-export" title="Permanent link">&para;</a></h1>
 <p>Dit document consolideert het rendering- en exportcontract voor <a class="og-termref" href="/VSA-tooling/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a>.</p>
 <p>Het omvat de algemene renderingregels uit de hoofdspecificatie en de latere SVG-, glyph-, layout- en configuratiespecificaties.
-Onder renderen verstaan we het omzetten van gevalideerde <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> naar een ander weergave- of uitwisselingsformaat.</p>
+Onder renderen verstaan we het omzetten van gevalideerde <a class="og-termref" href="/bron/preview/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> naar een ander weergave- of uitwisselingsformaat.</p>
 <p>Deze specificatie behandelt twee doelen:</p>
 <ol>
 <li><strong>SVG</strong>: visuele weergave van tekst met VSA-glyphs boven en onder de tekst.</li>
@@ -5355,7 +5377,7 @@ Onder renderen verstaan we het omzetten van gevalideerde <a class="og-termref" h
 </ol>
 <h3 id="svg-rendering">SVG-rendering<a class="headerlink" href="#svg-rendering" title="Permanent link">&para;</a></h3>
 <h4 id="algemeen-model">Algemeen model<a class="headerlink" href="#algemeen-model" title="Permanent link">&para;</a></h4>
-<p>Een <a class="og-termref" href="/bron/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstuk</a> wordt visueel in zijn geheel gerenderd naar SVG.</p>
+<p>Een <a class="og-termref" href="/bron/preview/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstuk</a> wordt visueel in zijn geheel gerenderd naar SVG.</p>
 <p>De invoer wordt behandeld als Unicode NFC. Dit maakt gebruik mogelijk voor teksten in onder meer Nederlands, Duits, Engels, Russisch, Grieks en Roemeens.</p>
 <p>Een <a class="og-termref" href="/VSA-tooling/terminologie/vsa-scope" title="VSA-scope: een tekstfragment dat met <code>{</code> begint, met <code>}</code> eindigt, geen whitespace binnen de accolades bevat en door de Parser kan worden opgesplitst in optionele Hoogte-modifier, verplicht zangelement en optionele Lengte-modifier.">zangelement-scope</a> wordt gerenderd op een grid met <code>N</code> kolommen en drie rijen:</p>
 <table>
@@ -5397,6 +5419,12 @@ Onder renderen verstaan we het omzetten van gevalideerde <a class="og-termref" h
 </code></pre></div>
 <p>wordt gerenderd als een horizontale streep rond het verticale midden van de tekstregel, met daarboven de rendering van de opgegeven <a class="og-termref" href="/VSA-tooling/terminologie/hoogte-modifier" title="Hoogte-modifier: een Modifier die voor het zangelement in een VSA-scope staat en bestaat uit een geldige EHM of uit meerdere geldige EHMs gescheiden door <code>&amp;</code>.">hoogte-modifier</a>. Als geen <a class="og-termref" href="/VSA-tooling/terminologie/hoogte-modifier" title="Hoogte-modifier: een Modifier die voor het zangelement in een VSA-scope staat en bestaat uit een geldige EHM of uit meerdere geldige EHMs gescheiden door <code>&amp;</code>.">hoogte-modifier</a> aanwezig is, wordt alleen de horizontale streep weergegeven.</p>
 <p>Absolute toonhoogten worden niet in <a class="og-termref" href="/VSA-tooling/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">toonhoogte-markeringen</a> opgenomen en worden dus ook niet als onderdeel daarvan gerenderd.</p>
+<h4 id="toonhoogte-overgang">Toonhoogte-overgang<a class="headerlink" href="#toonhoogte-overgang" title="Permanent link">&para;</a></h4>
+<p>Een <a class="og-termref" href="/VSA-tooling/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> wordt
+<strong>niet</strong> gerenderd in SVG of print-PDF. Er is geen pitch-marker-lijn, geen
+glyph en geen extra spatie in de layout. MusicXML-export past wel de
+relatieve toonhoogte-cursor aan (rechter-EHM), zodat de klinkende lijn na de
+overgang op de nieuwe hoogte verdergaat.</p>
 <h4 id="kolombreedtes-en-rijhoogtes">Kolombreedtes en rijhoogtes<a class="headerlink" href="#kolombreedtes-en-rijhoogtes" title="Permanent link">&para;</a></h4>
 <p>Voor elke kolom <code>i</code> wordt een minimale kolombreedte <code>W[i]</code> bepaald.</p>
 <p><code>W[i]</code> is de grootste van:</p>
@@ -6143,7 +6171,7 @@ te worden gerepliceerd; daarvoor is deze export bedoeld.</p>
 <h2 id="bron-docsspecvsa-svg-rendering-specmd">Bron: <code>docs/spec/vsa-svg-rendering-spec.md</code><a class="headerlink" href="#bron-docsspecvsa-svg-rendering-specmd" title="Permanent link">&para;</a></h2>
 <h1 id="vsa-svg-rendering-specification-draft-2">VSA SVG Rendering Specification (Draft 2)<a class="headerlink" href="#vsa-svg-rendering-specification-draft-2" title="Permanent link">&para;</a></h1>
 <h2 id="doel-en-scope">Doel en scope<a class="headerlink" href="#doel-en-scope" title="Permanent link">&para;</a></h2>
-<p>Dit document beschrijft de SVG-rendering van <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a>.</p>
+<p>Dit document beschrijft de SVG-rendering van <a class="og-termref" href="/bron/preview/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a>.</p>
 <p>De VSA-taalspecificatie (deze map) definieert:</p>
 <ul>
 <li>syntax;</li>
@@ -8679,7 +8707,7 @@ local_heights = height_markers[1:]
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-29
+        Bijgewerkt: 2026-10-03
         
       </p>
       

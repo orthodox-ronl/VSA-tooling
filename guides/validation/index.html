@@ -1657,6 +1657,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Diagnose bij problemen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#liturgie-keten-bewuste-hoogtesprong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Liturgie-keten: bewuste hoogtesprong
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4841,6 +4858,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Diagnose bij problemen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#liturgie-keten-bewuste-hoogtesprong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Liturgie-keten: bewuste hoogtesprong
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4898,7 +4932,7 @@
 <strong>Niet:</strong> SVG maken — dat is <a href="../svg-export/">SVG exporteren</a> /
 <a href="../../reference/cli/svg/"><code>vsa svg</code></a>.</p>
 </div>
-<p><strong>Antwoord in het kort:</strong> <code>vsa validate</code> controleert of <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a>
+<p><strong>Antwoord in het kort:</strong> <code>vsa validate</code> controleert of <a class="og-termref" href="/bron/preview/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a>
 bruikbaar is. Lees de foutregel (bestand → blok → regel → code), herstel, opnieuw.</p>
 <h2 id="wanneer-valideren">Wanneer valideren?<a class="headerlink" href="#wanneer-valideren" title="Permanent link">&para;</a></h2>
 <table>
@@ -4991,6 +5025,10 @@ vsa validate examples\docs-walkthroughs\svg-phrase-kort.vsa
 <tr>
 <td><a class="og-termref" href="/VSA-tooling/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">pitch-marker</a> heeft dubbele punt</td>
 <td><code>[//]</code></td>
+</tr>
+<tr>
+<td><a class="og-termref" href="/VSA-tooling/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> verbindt opeenvolgende hoogtes zonder mismatch</td>
+<td>zie liturgie-keten</td>
 </tr>
 <tr>
 <td><a class="og-termref" href="/VSA-tooling/terminologie/hoogte-modifier" title="Hoogte-modifier: een Modifier die voor het zangelement in een VSA-scope staat en bestaat uit een geldige EHM of uit meerdere geldige EHMs gescheiden door <code>&amp;</code>.">hoogte-modifier</a>- en <a class="og-termref" href="/VSA-tooling/terminologie/lengte-modifier" title="Lengte-modifier: een Modifier die na het zangelement in een VSA-scope staat en bestaat uit een geldige ELM of uit meerdere geldige ELMs gescheiden door <code>&amp;</code>.">lengte-modifier</a>-posities passen bij elkaar</td>
@@ -5102,6 +5140,16 @@ ERROR: VSA-SYNTAX-UNCLOSED-SCOPE: Scope zonder afsluitende accolade.
 <td><a class="og-termref" href="/VSA-tooling/terminologie/modifier" title="Modifier: een tekenreeks die binnen een VSA-scope als Hoogte-modifier voor het zangelement of als Lengte-modifier na het zangelement wordt geparseerd.">Modifiers</a> tellen; zie <a href="../../specification/semantics/">semantics</a></td>
 </tr>
 <tr>
+<td><code>VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH</code></td>
+<td>Lokale markering wijkt af van berekende cursor</td>
+<td>Markering of scopes aanpassen; of bewuste sprong via <a class="og-termref" href="/VSA-tooling/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a></td>
+</tr>
+<tr>
+<td><code>VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH</code></td>
+<td>Linker-EHM van <code>[oud:nieuw]</code> klopt niet met cursor</td>
+<td>Linkerhoogte laten matchen met de huidige markering/cursor</td>
+</tr>
+<tr>
 <td><code>OK</code> lokaal, CI faalt</td>
 <td>Andere map / andere <code>vsa.toml</code></td>
 <td>Zelfde pad als CI; severity-overrides controleren</td>
@@ -5113,6 +5161,16 @@ ERROR: VSA-SYNTAX-UNCLOSED-SCOPE: Scope zonder afsluitende accolade.
 </tr>
 </tbody>
 </table>
+<h3 id="liturgie-keten-bewuste-hoogtesprong">Liturgie-keten: bewuste hoogtesprong<a class="headerlink" href="#liturgie-keten-bewuste-hoogtesprong" title="Permanent link">&para;</a></h3>
+<p>Eindigt een antifoon op <code>[//:]</code> en begint een tropaar “in het echt” op
+<code>[/:]</code>, dan faalt validate zonder overgang. Zet tussen beide stukken een
+stille <a class="og-termref" href="/VSA-tooling/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> — die verschijnt niet op het blad:</p>
+<div class="highlight"><pre><span></span><code>[//:] … einde antifoon … [//:]
+[//:/]
+[/:] Gij … begin tropaar … [/:]
+</code></pre></div>
+<p>Gebruik geen kunstmatige dalende EHM op het eerste woord van de tropaar
+(bijvoorbeeld <code>{\Gij}</code>): dat verandert de melodie.</p>
 <p>Concrete fail + Fix: man-page <a href="../../reference/cli/validate/"><code>vsa validate</code></a>.</p>
 <h2 id="severity-overrides">Severity-overrides<a class="headerlink" href="#severity-overrides" title="Permanent link">&para;</a></h2>
 <p>In <a class="og-termref" href="/VSA-tooling/terminologie/vsa-toml" title="vsa.toml: een projectconfiguratiebestand met de naam <code>vsa.toml</code> dat herkende VSA-toolinginstellingen bevat voor rendering, output of validatie.">vsa.toml</a> kun je sommige <strong>semantische</strong> meldingen tijdelijk als
@@ -5165,7 +5223,7 @@ ERROR: VSA-SYNTAX-UNCLOSED-SCOPE: Scope zonder afsluitende accolade.
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-19
+        Bijgewerkt: 2026-10-03
         
       </p>
       

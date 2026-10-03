@@ -4922,7 +4922,7 @@ verdere verwerking (SVG, Hugo-Markdown, MusicXML).</p>
 </code></pre></div>
 <h2 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h2>
 <p><code>vsa validate</code> voert drie controlefasen achtereenvolgens uit op elk gevonden
-<a class="og-termref" href="/VSA-tooling/terminologie/vsa-blokken" title="VSA-blok: een tekstfragment in een Markdownbestand dat begint met <code>::: vsa-notatie</code> en eindigt met <code>:::</code>, beide aan het begin van een regel, met daartussen VSA-notatie; typisch ontdekt en verwerkt door de Vsa-toolset (o.a. <code>vsa blocks</code>, <code>vsa validate</code>, <code>vsa process</code>).">VSA-blok</a> of <a class="og-termref" href="/bron/terms/vsa-bestand" title="vsa-bestand: Een bestand met de extensie <code>.vsa</code> waarvan de inhoud uitsluitend syntactisch geldige Vsa-notatie bevat — d.w.z. door de Vsa-tooling foutloos wordt geparseerd en gevalideerd.">vsa-bestand</a>:</p>
+<a class="og-termref" href="/VSA-tooling/terminologie/vsa-blokken" title="VSA-blok: een tekstfragment in een Markdownbestand dat begint met <code>::: vsa-notatie</code> en eindigt met <code>:::</code>, beide aan het begin van een regel, met daartussen VSA-notatie; typisch ontdekt en verwerkt door de Vsa-toolset (o.a. <code>vsa blocks</code>, <code>vsa validate</code>, <code>vsa process</code>).">VSA-blok</a> of <a class="og-termref" href="/bron/preview/terms/vsa-bestand" title="vsa-bestand: Een bestand met de extensie <code>.vsa</code> waarvan de inhoud uitsluitend syntactisch geldige Vsa-notatie bevat — d.w.z. door de Vsa-tooling foutloos wordt geparseerd en gevalideerd.">vsa-bestand</a>:</p>
 <table>
 <thead>
 <tr>
@@ -5133,6 +5133,11 @@ soort fouten tegelijk wilt zien.</p>
 <td>Gebruik bijvoorbeeld <code>[:]</code>.</td>
 </tr>
 <tr>
+<td><code>VSA-SYNTAX-INVALID-PITCH-TRANSITION</code></td>
+<td>Ongeldige toonhoogte-overgang</td>
+<td>Gebruik <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> met geldige EHM-waarden.</td>
+</tr>
+<tr>
 <td><code>VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH</code></td>
 <td>Aantallen hoogte-/lengteposities passen niet</td>
 <td>Controleer samengestelde <a class="og-termref" href="/VSA-tooling/terminologie/modifier" title="Modifier: een tekenreeks die binnen een VSA-scope als Hoogte-modifier voor het zangelement of als Lengte-modifier na het zangelement wordt geparseerd.">modifiers</a>.</td>
@@ -5140,7 +5145,12 @@ soort fouten tegelijk wilt zien.</p>
 <tr>
 <td><code>VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH</code></td>
 <td>Berekende hoogte komt niet overeen met marker</td>
-<td>Pas de eindmarkering of de scope-modifiers aan.</td>
+<td>Pas de eindmarkering of de scope-modifiers aan; of gebruik een overgang.</td>
+</tr>
+<tr>
+<td><code>VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH</code></td>
+<td>Linkerhoogte van <code>[oud:nieuw]</code> klopt niet</td>
+<td>Laat de linker-EHM overeenkomen met de huidige cursor.</td>
 </tr>
 </tbody>
 </table>
@@ -5188,7 +5198,7 @@ soort fouten tegelijk wilt zien.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-09
+        Bijgewerkt: 2026-10-03
         
       </p>
       
