@@ -13,7 +13,7 @@ formPhrases:
   - pitch transition
   - pitch transitions
 glossaryNotes:
-  - "Org-term (discoverability): [bron/docs/terms/toonhoogte-overgang.md](https://github.com/orthodox-ronl/bron/blob/docs/toonhoogte-overgang-term/docs/terms/toonhoogte-overgang.md). Normatieve syntax/semantiek/rendering blijft hier in VSA-tooling."
+  - "Org-term (discoverability): [bron/docs/terms/toonhoogte-overgang.md](https://github.com/orthodox-ronl/bron/blob/main/docs/terms/toonhoogte-overgang.md). Normatieve syntax/semantiek/rendering blijft hier in VSA-tooling."
   - "Onderscheid met [pitch-marker](@) / [hoogte-markering](@): markering eindigt op `:]`; overgang heeft niet-lege inhoud na de middelste `:` vóór `]`."
 ---
 
