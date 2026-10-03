@@ -4924,7 +4924,13 @@ paginaeinden, en <code>:::web-only:::</code> verdwijnt (print-only blijft).</p>
 catalogus-<code>zoek=</code>, includes, directives, SVG-render. Daarna wordt de
 gegenereerde Markdown naar HTML omgezet (Hugo-shortcodes voor print/web
 inbegrepen) en via Edge/Chrome/Chromium naar PDF geprint.</p>
+<p><strong>Papierformaat:</strong> A4 staand (210×297 mm). Dat staat in de print-CSS
+(<code>@page</code>), niet als aparte Chrome-CLI-flag. Zonder die CSS zou headless
+Chrome op US Letter terugvallen — dat doen wij niet.</p>
 <p>Coria- en MusicXML-links horen bij de website en komen niet in de PDF.</p>
+<p>Partituur-PDF vanuit <code>.mvsa</code>/<code>.mscz</code> (<code>mvsa pdf</code>) gaat via MuseScore; daar
+komt A4 uit de MuseScore-Style van het <code>.mscz</code> (zie
+<a href="../../../formats/mscz-leesbaarheid/">MSCZ-leesbaarheid</a>).</p>
 <p>Vóór het renderen geldt dezelfde validatie als <a href="../validate/"><code>vsa validate</code></a>.
 Fouten gebruiken hetzelfde formaat: bestand, regel, kolom, code, bronregel.</p>
 <h2 id="argumenten-en-opties">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties" title="Permanent link">&para;</a></h2>
@@ -5108,7 +5114,7 @@ Installeer Microsoft Edge of Google Chrome, of zet CHROME_PATH naar het .exe-bes
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-27
+        Bijgewerkt: 2026-10-03
         
       </p>
       

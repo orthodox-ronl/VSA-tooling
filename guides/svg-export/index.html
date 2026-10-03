@@ -4904,7 +4904,7 @@
 
 <h1 id="svg-exporteren">SVG exporteren<a class="headerlink" href="#svg-exporteren" title="Permanent link">&para;</a></h1>
 <p><a href="../../reference/cli/svg/"><code>vsa svg</code></a>, <a href="../../reference/cli/process/"><code>vsa process</code></a>
-en <a href="../../reference/cli/build-markdown/"><code>vsa build-markdown</code></a> renderen <a class="og-termref" href="/bron/preview/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> naar
+en <a href="../../reference/cli/build-markdown/"><code>vsa build-markdown</code></a> renderen <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> naar
 <strong>SVG</strong> — een schaalbare vectorafbeelding die je inline toont naast gewone
 tekst, op scherm of afdruk. Dit is de meest gebruikte workflow: geen
 externe player nodig, werkt zonder JavaScript, en schaalt scherp op elk
@@ -5067,7 +5067,7 @@ wijst naar de verkeerde plek.</p>
 <p>SVG's die je met <a href="../../reference/cli/svg/"><code>vsa svg</code></a>,
 <a href="../../reference/cli/process/"><code>vsa process</code></a> of
 <a href="../../reference/cli/build-markdown/"><code>vsa build-markdown</code></a> genereert,
-zijn <strong><a class="og-termref" href="/bron/preview/terms/afgeleide" title="Afgeleide: Een bestand dat volledig en herhaalbaar door een Conversiemechanisme uit een Bronbestand wordt gegenereerd, en dat (dus) niet als Bronbestand in de Bron-repository staat.">afgeleide</a></strong> bestanden uit de <code>.vsa</code>-bron en horen niet gecommit
+zijn <strong><a class="og-termref" href="/bron/terms/afgeleide" title="Afgeleide: Een bestand dat volledig en herhaalbaar door een Conversiemechanisme uit een Bronbestand wordt gegenereerd, en dat (dus) niet als Bronbestand in de Bron-repository staat.">afgeleide</a></strong> bestanden uit de <code>.vsa</code>-bron en horen niet gecommit
 te worden naast de bron. Gebruik
 lokaal een map als <code>generated\</code> (of <code>tmp\</code>) die in <code>.gitignore</code> staat:</p>
 <div class="highlight"><pre><span></span><code>mijn-repo/
@@ -5080,7 +5080,7 @@ lokaal een map als <code>generated\</code> (of <code>tmp\</code>) die in <code>.
 <p>In een Hugo-consumer-site komt de <code>assets_dir</code> overeen met de <code>static\vsa</code>-map
 van die site (zie <a href="../../manuals/consumer-site/">consumer-site.md</a> en
 <a href="../reuse-vsa-tooling/">reuse-vsa-tooling.md</a> voor het volledige
-build-in-CI-voorbeeld). In de <a class="og-termref" href="/bron/preview/terms/bron-repository" title="Bron-repository: De git-repository <code>orthodox-ronl/bron</code> (of een expliciet aangewezen opvolger); de centrale opslagplaats voor Representaties van Uitvoeringsvormen (van Varianten) van Zangstukken, alsmede voor de specificaties van de opslag, en van manieren om daarin te zoeken.">bron-repository</a> zelf worden geen <a class="og-termref" href="/bron/preview/terms/afgeleide" title="Afgeleide: Een bestand dat volledig en herhaalbaar door een Conversiemechanisme uit een Bronbestand wordt gegenereerd, en dat (dus) niet als Bronbestand in de Bron-repository staat.">afgeleide</a>
+build-in-CI-voorbeeld). In de <a class="og-termref" href="/bron/terms/bron-repository" title="Bron-repository: De git-repository <code>orthodox-ronl/bron</code> (of een expliciet aangewezen opvolger); de centrale opslagplaats voor Representaties van Uitvoeringsvormen (van Varianten) van Zangstukken, alsmede voor de specificaties van de opslag, en van manieren om daarin te zoeken.">bron-repository</a> zelf worden geen <a class="og-termref" href="/bron/terms/afgeleide" title="Afgeleide: Een bestand dat volledig en herhaalbaar door een Conversiemechanisme uit een Bronbestand wordt gegenereerd, en dat (dus) niet als Bronbestand in de Bron-repository staat.">afgeleide</a>
 SVG's opgeslagen — daar staat alleen de <code>.vsa</code>-bron (zie
 <a href="https://github.com/orthodox-ronl/bron/blob/main/docs/specs/repo-structuur.md">repo-structuur</a>
 en het <code>derived/</code>-concept daar voor build-output dat nooit in git komt).</p>
@@ -5123,7 +5123,7 @@ en het <code>derived/</code>-concept daar voor build-output dat nooit in git kom
 <li><a class="og-termref" href="/VSA-tooling/terminologie/vsa-toml" title="vsa.toml: een projectconfiguratiebestand met de naam <code>vsa.toml</code> dat herkende VSA-toolinginstellingen bevat voor rendering, output of validatie.">vsa.toml</a>-defaults en voorrang: <a href="../../reference/config/">config.md</a></li>
 <li>Consumer-site-structuur: <a href="../../manuals/consumer-site/">consumer-site.md</a></li>
 <li>Integratie in andere repo's/CI: <a href="../reuse-vsa-tooling/">reuse-vsa-tooling.md</a></li>
-<li>Bron-contracten (normatief): <a href="https://orthodox-ronl.github.io/bron/reference/conversie-vsa-svg/">conversie-vsa-svg</a>, <a href="https://orthodox-ronl.github.io/bron/reference/exporttype-svg/">exporttype-svg</a> (<a class="og-termref" href="/bron/preview/terms/exporttype" title="Exporttype: De naam die in een <code>:::include &lt;exporttype&gt;</code>-directive aangeeft welk Exportmechanisme wordt gebruikt, zoals <code>svg</code>, <code>coria</code> of <code>mxl</code>.">exporttype</a> <code>svg</code>)</li>
+<li>Bron-contracten (normatief): <a href="https://orthodox-ronl.github.io/bron/reference/conversie-vsa-svg/">conversie-vsa-svg</a>, <a href="https://orthodox-ronl.github.io/bron/reference/exporttype-svg/">exporttype-svg</a> (<a class="og-termref" href="/bron/terms/exporttype" title="Exporttype: De naam die in een <code>:::include &lt;exporttype&gt;</code>-directive aangeeft welk Exportmechanisme wordt gebruikt, zoals <code>svg</code>, <code>coria</code> of <code>mxl</code>.">exporttype</a> <code>svg</code>)</li>
 </ul>
 
 
