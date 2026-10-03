@@ -31,36 +31,44 @@ _DROP_SINGLE = frozenset(
 _PAIRED_KEEP = frozenset({"print-only", "keep-together"})
 _PAIRED_DROP = frozenset({"web-only"})
 
-_PRINT_CSS = """
-@page { size: A4; margin: 1cm 2cm; }
-html { font-size: 18px; }
-body {
+# Chrome/Edge headless ``--print-to-pdf`` zet preferCSSPageSize=true.
+# Zonder geldige @page-size valt CDP terug op US Letter (8.5×11 in).
+# Expliciete A4-maten (mm) i.p.v. alleen het keyword — stabieler over browsers.
+_A4_PAGE_CSS = (
+    "/* papier: A4 staand — niet US Letter */\n"
+    "@page { size: 210mm 297mm; margin: 1cm 2cm; }"
+)
+
+_PRINT_CSS = f"""
+{_A4_PAGE_CSS}
+html {{ font-size: 18px; }}
+body {{
   font-family: Arial, sans-serif;
   line-height: 1.55;
   color: #111;
   margin: 0;
-}
-h1, h2, h3, h4 { page-break-after: avoid; }
-.pagebreak { break-before: page; page-break-before: always; }
-.web-only { display: none; }
-.keep-together {
+}}
+h1, h2, h3, h4 {{ page-break-after: avoid; }}
+.pagebreak {{ break-before: page; page-break-before: always; }}
+.web-only {{ display: none; }}
+.keep-together {{
   break-inside: avoid;
   page-break-inside: avoid;
-}
+}}
 .keep-together > p:empty,
-.print-only > p:empty {
+.print-only > p:empty {{
   display: none;
   margin: 0;
   padding: 0;
-}
-img, .vsa-notation { max-width: 100%; height: auto; }
-.vsa-container { margin: 1.25rem 0; max-width: 100%; }
-.vsa-notation {
+}}
+img, .vsa-notation {{ max-width: 100%; height: auto; }}
+.vsa-container {{ margin: 1.25rem 0; max-width: 100%; }}
+.vsa-notation {{
   border: 1px solid #d0d0d0;
   padding: 0;
   background: #fff;
-}
-.keep-together .vsa-notation { width: var(--vsa-scale, auto); }
+}}
+.keep-together .vsa-notation {{ width: var(--vsa-scale, auto); }}
 """
 
 
@@ -283,6 +291,12 @@ def html_file_to_pdf(
     *,
     chrome_command: list[str] | None = None,
 ) -> None:
+    """Print HTML to PDF via Chrome/Edge headless.
+
+    Papierformaat komt uit de HTML (``@page`` A4 / 210×297 mm), niet uit een
+    Chrome-CLI-flag. Headless zet ``preferCSSPageSize``; zonder CSS is de
+    CDP-default US Letter.
+    """
     command = list(chrome_command) if chrome_command else [str(find_chrome())]
     html_uri = html_path.resolve().as_uri()
     pdf_path.parent.mkdir(parents=True, exist_ok=True)
