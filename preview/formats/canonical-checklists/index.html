@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-03 09:54 CEST.
+   — branch <code>fix/coria-source-encoding</code>
+  , gebouwd 2026-10-03 11:16 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4996,6 +4996,11 @@ en Oefenhoek <code>VSA-demo/scripts/mscz-product-transforms.md</code> (Coria-kol
 <td>M16</td>
 <td><strong>Leidende <code>\|:</code></strong></td>
 <td>Forward-repeat links op de <strong>eerste inhoudsmaat</strong>; geen lege rustmaat vóór die inhoud (zelfde semantiek als MSCZ S16).</td>
+</tr>
+<tr>
+<td>M17</td>
+<td><strong>Geen <code>source</code>+<code>encoding</code></strong></td>
+<td>Coria geeft <code>translation failed</code> als <code>&lt;identification&gt;</code> zowel <code>&lt;source&gt;</code> als <code>&lt;encoding&gt;</code> heeft. Playback-sanitize verwijdert <code>&lt;source&gt;</code>; bronvermelding in <code>miscellaneous-field name="bron"</code>. Bij licentie in <code>&lt;rights&gt;</code> eist <code>mxl validate</code> die misc-bron.</td>
 </tr>
 </tbody>
 </table>
