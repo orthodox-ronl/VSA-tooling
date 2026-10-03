@@ -21,7 +21,15 @@ catalogus-`zoek=`, includes, directives, SVG-render. Daarna wordt de
 gegenereerde Markdown naar HTML omgezet (Hugo-shortcodes voor print/web
 inbegrepen) en via Edge/Chrome/Chromium naar PDF geprint.
 
+**Papierformaat:** A4 staand (210×297 mm). Dat staat in de print-CSS
+(`@page`), niet als aparte Chrome-CLI-flag. Zonder die CSS zou headless
+Chrome op US Letter terugvallen — dat doen wij niet.
+
 Coria- en MusicXML-links horen bij de website en komen niet in de PDF.
+
+Partituur-PDF vanuit `.mvsa`/`.mscz` (`mvsa pdf`) gaat via MuseScore; daar
+komt A4 uit de MuseScore-Style van het `.mscz` (zie
+[MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md)).
 
 Vóór het renderen geldt dezelfde validatie als [`vsa validate`](validate.md).
 Fouten gebruiken hetzelfde formaat: bestand, regel, kolom, code, bronregel.
