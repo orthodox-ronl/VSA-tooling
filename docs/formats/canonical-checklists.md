@@ -1,9 +1,9 @@
 # Canonieke checklists (.mxl / .mscz / PDF)
 
 Doel: vastleggen wat **wij** als normale vorm zien in gegenereerde of
-genormaliseerde `.mxl` / `.mscz` (en afgeleide MuseScore-PDF). Dat zijn de
-targets voor export én voor eventuele diagonaal-normalisatie (zelfde formaat
-→ ons profiel).
+genormaliseerde `.mxl` / `.mscz` (en afgeleide PDF’s). Dat zijn de targets
+voor export én voor eventuele diagonaal-normalisatie (zelfde formaat → ons
+profiel). PDF’s zijn canoniek **A4 staand** (zie checklist PDF P6).
 
 Geen herdefinitie van MusicXML of MuseScore — alleen onze conventies.
 Normatieve eenstemmige MusicXML-details:
@@ -99,19 +99,24 @@ checklist (beperkt wat wij vastleggen; geen volledige MuseScore-spec).
 
 MuseScore-/basispartituur-PDF is **geen** apart bronformaat: dezelfde
 visuele afspraken als MSCZ (twee balken, geen stem-indicaties, lyrics tussen
-de balken, A4). Geen lettergreep-explosie, geen vier Coria-parts in de PDF.
+de balken). Geen lettergreep-explosie, geen vier Coria-parts in de PDF.
 Transforms: Oefenhoek `mscz-product-transforms.md` (PDF-kolom).
+
+**Canonieke pagina:** elke door ons geproduceerde PDF is **A4 staand**
+(210×297 mm). US Letter is **niet** canoniek — noch voor partituur-PDF
+(`mvsa pdf` / MuseScore), noch voor Markdown-PDF ([`vsa pdf`](../reference/cli/pdf.md)).
 
 | #   | Eis                                  | Toelichting                                                                                                                                                                                      |
 | --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| P1  | **Erft MSCZ S2–S5, S7–S10, S14–S19** | SA/TB, geen partijnamen, lyrics tussen balken, A4/Style, recite-spacers, maatstrepen; geen mid-systeem-HBox/spookmaten; cues als SystemText.                                                     |
+| P1  | **Erft MSCZ S2–S5, S7–S10, S14–S19** | SA/TB, geen partijnamen, lyrics tussen balken, Style/recite-spacers, maatstrepen; geen mid-systeem-HBox/spookmaten; cues als SystemText. (A4 via S7 én expliciet P6.)                            |
 | P2  | **Recite blijft compact**            | Printmodel (`\|\|O\|\|`); geen Coria-kwart-per-lettergreep.                                                                                                                                      |
 | P3  | **Geen Coria-links**                 | Oefenmateriaal hoort niet in papieren/PDF-uitgave (tenzij later bewust toegevoegd).                                                                                                              |
 | P4  | **Copyright-regel + colofon**        | **Later** (nog niet verplicht in deze toolchain): korte copyright-regel op **elke** pagina (footer) én een colofon (zoals Oefenhoek `mscz-partituur-contract`). Niet vergeten bij PDF-producten. |
 | P5  | **Provenance (Oefenhoek)**           | Optioneel: partituur-hash / generator-meta zoals in product-transforms — nog niet verplicht in VSA-tooling-export.                                                                               |
+| P6  | **A4 staand**                        | Paginaformaat **A4** (210×297 mm), niet US Letter. Partituur: MuseScore-Style (`pageWidth`/`pageHeight`, zie MSCZ S7). Markdown-PDF (`vsa pdf`): print-CSS `@page` 210×297 mm.                   |
 
-*(Los daarvan: [`vsa pdf`](../reference/cli/pdf.md) render Markdown+VSA naar A4 —
-andere pipeline, geen MuseScore-partituur.)*
+[`vsa pdf`](../reference/cli/pdf.md) is een andere pipeline (Markdown + VSA-SVG,
+geen MuseScore-partituur) maar valt onder **dezelfde** A4-eis (P6).
 
 ## Verschillen bewust hangende houden
 

@@ -46,14 +46,14 @@ Bij review van `.mscz` / MuseScore-PDF:
 Bron: [rendering-pitfalls](../specification-vsa-templates/rendering-pitfalls.md)
 (één anker per lettergreep; onzichtbare kop, zichtbare lyric).
 
-| #   | Regel                                                                                                                                                                                                                                                                                          |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | **Geen** lange joined lyric onder één recite-noot als die tekst breder is dan de noot/maat.                                                                                                                                                                                                    |
-| R2  | Lange recite (`n ≥ 6`): **1–(n−2)–1** — eerste midden-lettergreep op `\|\|O\|\|`; overige midden-lettergrepen elk op een **spacer**.                                                                                                                                                           |
-| R3  | Spacers: MuseScore ``visible=0`` **én** ``play=0`` op de nootkop (lyrics blijven); **niet** MusicXML `print-object="no"` op de hele `<note>` (verbergt lyrics in PDF). ``\|\|O\|\|`` = `headType` breve met metrische **randduur** (geen `durationType=breve` — die blaast de maatbreedte op). |
-| R4  | **Geen** melisma-extender (`ticks`) of frase-slur onder recite-body.                                                                                                                                                                                                                           |
-| R5  | Maatlengte = som van de noten (+ spacers); elke slot ≈ randduur zodat speelduur = `n ×` rand (= Coria). Spacers klinken niet (`play=0`); de ticks blijven voor de layout.                                                                                                                      |
-| R6  | Kortere recite (`n < 6`): één zichtbare noot per lettergreep (geen collapse).                                                                                                                                                                                                                  |
+| #   | Regel                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | **Geen** lange joined lyric onder één recite-noot als die tekst breder is dan de noot/maat.                                                                                                                                                                                                                                                                                                                    |
+| R2  | Lange recite (`n ≥ 6`): **1–(n−2)–1** — eerste midden-lettergreep op `\|\|O\|\|`; overige midden-lettergrepen elk op een **spacer**.                                                                                                                                                                                                                                                                           |
+| R3  | Spacers: MuseScore ``visible=0`` **én** ``play=0`` op de nootkop (lyrics blijven); **niet** MusicXML `print-object="no"` op de hele `<note>` (verbergt lyrics in PDF). ``\|\|O\|\|`` = `headType` breve met metrische **randduur** (geen `durationType=breve` — die blaast de maatbreedte op).                                                                                                                 |
+| R4  | **Geen** melisma-extender (`ticks`) of frase-slur onder recite-body.                                                                                                                                                                                                                                                                                                                                           |
+| R5  | Maatlengte = som van de noten (+ spacers); elke slot ≈ randduur zodat speelduur = `n ×` rand (= Coria). Spacers klinken niet (`play=0`); de ticks blijven voor de layout.                                                                                                                                                                                                                                      |
+| R6  | Kortere recite (`n < 6`): één zichtbare noot per lettergreep (geen collapse).                                                                                                                                                                                                                                                                                                                                  |
 | R7  | Melisma same-pitch: **I1** (MusicXML-partituur) — alleen ongestipte standaardduuren ≤ whole of tie-keten; nooit `type=breve` / gestipte sommen in MusicXML (MuseScore-importcorruptie). **I2** — lange holds als tie-keten i.p.v. heraangeslagen hakken. **MSCZ-postprocess** — die tie-ketens samentrekken tot **één compacte noot, inclusief gestipt** (leesbaar 3/4 i.p.v. 2/4+1/4); pure hold zonder slur. |
 
 ### Canonieke printvorm 1–(n−2)–1 (MSCZ)
@@ -100,18 +100,18 @@ lettergreep een klinkende noot. Same-pitch **melisma** wél samentrekken
 
 ## M — Maten, nummers, sleutels, maatstrepen
 
-| #   | Regel                                                                                                                        |
-| --- | ---------------------------------------------------------------------------------------------------------------------------- |
-| M1  | Maatnummers: eerste maat van elk systeem.                                                                                    |
-| M2  | Eindmaatstreep per systeem zichtbaar.                                                                                        |
-| M3  | Geen zichtbare maatsoort-getallen bij verborgen/`senza-misura`-TimeSig.                                                      |
-| M4  | Twee balken SA/TB; G/F; geen partijnamen.                                                                                    |
-| M5  | Geen lege derde balk.                                                                                                        |
-| M6  | Sectie-einde (`\|\|` in `.mvsa`): dubbele maatstreep (`light-light`); slot = `light-heavy`.                                  |
-| M7  | Stokken: S en T **omhoog** (voice 1); A en B **omlaag** (voice 2).                                                           |
+| #   | Regel                                                                                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ |
+| M1  | Maatnummers: eerste maat van elk systeem.                                                                                      |
+| M2  | Eindmaatstreep per systeem zichtbaar.                                                                                          |
+| M3  | Geen zichtbare maatsoort-getallen bij verborgen/`senza-misura`-TimeSig.                                                        |
+| M4  | Twee balken SA/TB; G/F; geen partijnamen.                                                                                      |
+| M5  | Geen lege derde balk.                                                                                                          |
+| M6  | Sectie-einde (`\|\|` in `.mvsa`): dubbele maatstreep (`light-light`); slot = `light-heavy`.                                    |
+| M7  | Stokken: S en T **omhoog** (voice 1); A en B **omlaag** (voice 2).                                                             |
 | M8  | Melisma-print: same-pitch → compacte noot (MSCZ-postprocess) of tie-keten in MusicXML (S13 / R7); slur alleen bij toonwissels. |
-| M9  | Leidende `\|:` → linker forward-repeat op eerste **inhoudsmaat**; geen lege rustmaat ervoor.                                 |
-| M10 | `:\|` → backward-repeat met herhaalpunten; niet alleen `light-light` zonder dots.                                            |
+| M9  | Leidende `\|:` → linker forward-repeat op eerste **inhoudsmaat**; geen lege rustmaat ervoor.                                   |
+| M10 | `:\|` → backward-repeat met herhaalpunten; niet alleen `light-light` zonder dots.                                              |
 
 ---
 
@@ -139,14 +139,14 @@ Contract: checklist MSCZ **S14–S19**. MuseScore-gedrag dat we vermijden:
 
 ## P — Pagina / systeem (A4)
 
-| #   | Regel                                                                                        |
-| --  | ----------------------------------------------------------------------                       |
-| P1  | Papier A4 staand; marges 15 mm.                                                              |
-| P2  | Geen inspring eerste systeem.                                                                |
-| P3  | Verticaal: pagina niet vullen; `minSystemDistance`/`maxSystemDistance` vast (niet “spread”). |
-| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                     |
-| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText). |
-| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                    |
+| #   | Regel                                                                                                                         |
+| --  | ----------------------------------------------------------------------                                                        |
+| P1  | Papier A4 staand; marges 15 mm. (Canoniek ook: checklist [PDF P6](canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).) |
+| P2  | Geen inspring eerste systeem.                                                                                                 |
+| P3  | Verticaal: pagina niet vullen; `minSystemDistance`/`maxSystemDistance` vast (niet “spread”).                                  |
+| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                      |
+| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                  |
+| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                     |
 
 ---
 

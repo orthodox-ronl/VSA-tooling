@@ -306,7 +306,12 @@ Maakt een **print-PDF** van de partituur (voor zangers), via MuseScore CLI.
 `--layout` / `--bibliotheek-id` gelden alleen bij bron `.mvsa` (zelfde
 betekenis als bij [`mscz`](#vsa-mvsa-mscz)).
 
-Dit is **niet** [`vsa pdf`](pdf.md) (Markdown + VSA-SVG naar A4 via browser).
+**Canoniek:** A4 staand (checklist
+[PDF P6](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz));
+via MuseScore-Style van het `.mscz` (MSCZ S7). US Letter is niet canoniek.
+
+Dit is **niet** [`vsa pdf`](pdf.md) (Markdown + VSA-SVG via browser; wél
+dezelfde A4-eis P6).
 
 ### Argumenten en opties
 

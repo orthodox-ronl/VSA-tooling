@@ -21,31 +21,32 @@ catalogus-`zoek=`, includes, directives, SVG-render. Daarna wordt de
 gegenereerde Markdown naar HTML omgezet (Hugo-shortcodes voor print/web
 inbegrepen) en via Edge/Chrome/Chromium naar PDF geprint.
 
-**Papierformaat:** A4 staand (210×297 mm). Dat staat in de print-CSS
-(`@page`), niet als aparte Chrome-CLI-flag. Zonder die CSS zou headless
-Chrome op US Letter terugvallen — dat doen wij niet.
+**Papierformaat (canoniek P6):** A4 staand (210×297 mm). Dat staat in de
+print-CSS (`@page`), niet als aparte Chrome-CLI-flag. Zonder die CSS zou
+headless Chrome op US Letter terugvallen — dat is **niet** canoniek. Zie
+[canonieke checklists — PDF P6](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).
 
 Coria- en MusicXML-links horen bij de website en komen niet in de PDF.
 
-Partituur-PDF vanuit `.mvsa`/`.mscz` (`mvsa pdf`) gaat via MuseScore; daar
-komt A4 uit de MuseScore-Style van het `.mscz` (zie
-[MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md)).
+Partituur-PDF vanuit `.mvsa`/`.mscz` (`mvsa pdf`) valt onder dezelfde
+checklist-P6; daar komt A4 uit de MuseScore-Style van het `.mscz` (zie
+[MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md) en MSCZ S7).
 
 Vóór het renderen geldt dezelfde validatie als [`vsa validate`](validate.md).
 Fouten gebruiken hetzelfde formaat: bestand, regel, kolom, code, bronregel.
 
 ## Argumenten en opties
 
-| Naam                          | Verplicht | Betekenis                                                                                          | Default                                           | Beperkingen        |
-| ----------------------------- | --------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------ |
-| `input`                       | Ja        | Markdownbestand (`.md` / `.markdown`).                                                             | —                                                 | Moet bestaan.      |
-| `-o`, `--output OUTPUT`       | Nee       | Pad van de PDF.                                                                                    | `<stem>.pdf` in de huidige map                    | Wordt overschreven |
-| `--content-root CONTENT_ROOT` | Nee       | Root voor catalogus-includes (`lokaal/`).                                                          | Eerste bovenliggende map met `lokaal/`, anders de map van `input` | —     |
-| `--bron-root BRON_ROOT`       | Nee       | Root van de bron-repo.                                                                             | Auto (`vendor/bron` of `../bron`)                 | —                  |
-| `--config CONFIG`             | Nee       | Pad naar een alternatief `vsa.toml`.                                                               | Auto-detectie                                     | —                  |
-| `--max-line-width N`          | Nee       | Maximale SVG-regelbreedte.                                                                         | `max-line-width` uit `vsa.toml`, anders `800`     | Getal (float)      |
-| `--chrome CHROME`             | Nee       | Pad naar Edge, Chrome of Chromium.                                                                 | `CHROME_PATH` / `EDGE_PATH` / auto-detectie       | Bestaan            |
-| `-h`, `--help`                | Nee       | Toon hulp.                                                                                         | —                                                 | —                  |
+| Naam                          | Verplicht | Betekenis                                                                                          | Default                                                           | Beperkingen        |
+| ----------------------------- | --------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------ |
+| `input`                       | Ja        | Markdownbestand (`.md` / `.markdown`).                                                             | —                                                                 | Moet bestaan.      |
+| `-o`, `--output OUTPUT`       | Nee       | Pad van de PDF.                                                                                    | `<stem>.pdf` in de huidige map                                    | Wordt overschreven |
+| `--content-root CONTENT_ROOT` | Nee       | Root voor catalogus-includes (`lokaal/`).                                                          | Eerste bovenliggende map met `lokaal/`, anders de map van `input` | —                  |
+| `--bron-root BRON_ROOT`       | Nee       | Root van de bron-repo.                                                                             | Auto (`vendor/bron` of `../bron`)                                 | —                  |
+| `--config CONFIG`             | Nee       | Pad naar een alternatief `vsa.toml`.                                                               | Auto-detectie                                                     | —                  |
+| `--max-line-width N`          | Nee       | Maximale SVG-regelbreedte.                                                                         | `max-line-width` uit `vsa.toml`, anders `800`                     | Getal (float)      |
+| `--chrome CHROME`             | Nee       | Pad naar Edge, Chrome of Chromium.                                                                 | `CHROME_PATH` / `EDGE_PATH` / auto-detectie                       | Bestaan            |
+| `-h`, `--help`                | Nee       | Toon hulp.                                                                                         | —                                                                 | —                  |
 
 ## Output
 
