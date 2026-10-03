@@ -5,7 +5,7 @@ terminology:
   glossarydir: "mrgs"
   defaultvsn: "vsa-tooling"
   defaulttype: "concept"
-  website: "https://orthodox-ronl.github.io/VSA-tooling/preview"
+  website: "https://orthodox-ronl.github.io/VSA-tooling"
   navpath: "/terminologie"
   navid: "slug"
   license: "../LICENSE"
@@ -33,7 +33,7 @@ entries:
       - "Afgeleiden worden niet getrackt in de [bron-repository](@); ze worden gegenereerd tijdens de build."
     scopetag: "bron"
     locator: "afgeleide.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/afgeleide"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/afgeleide"
     headingids:
       - "afgeleide"
       - "motivatie"
@@ -53,7 +53,7 @@ entries:
       - "Niet verwarren met het [canonieke id](@) zelf, noch met [herkomst](@) (waar iets vandaan komt)."
     scopetag: "bron"
     locator: "alias.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/alias"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/alias"
     headingids:
       - "alias"
       - "motivatie"
@@ -78,7 +78,7 @@ entries:
       - "syntactische-bomen"
     scopetag: "vsa-tooling"
     locator: "ast.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/ast"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/ast"
     headingids:
       - "ast"
     termid: "concept:ast"
@@ -97,7 +97,7 @@ entries:
       - "bracket-tokens"
     scopetag: "vsa-tooling"
     locator: "bracket-directive.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/bracket-directive"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/bracket-directive"
     headingids:
       - "bracket-directive"
     termid: "concept:bracket-directive"
@@ -119,7 +119,7 @@ entries:
       - "Repositories voor de [VSA-tooling](https://github.com/orthodox-ronl/VSA-tooling/), of parochie-specifieke zaken en vendor-checkouts zijn geen bron-repository."
     scopetag: "bron"
     locator: "bron-repository.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/bron-repository"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/bron-repository"
     headingids:
       - "bron-repository"
       - "motivatie"
@@ -147,7 +147,7 @@ entries:
           - "HTML bestanden zoals die zijn gegenereerd uit geautomatiseerde workflows."
     scopetag: "bron"
     locator: "bronbestand.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/bronbestand"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/bronbestand"
     headingids:
       - "bronbestand"
       - "motivatie"
@@ -170,7 +170,7 @@ entries:
       - "Niet verwarren met [alias](@) (menselijke werknaam) of met [herkomst](@) (waar iets vandaan komt)."
     scopetag: "bron"
     locator: "canoniek-id.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/canoniek-id"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/canoniek-id"
     headingids:
       - "canonieke-id"
       - "motivatie"
@@ -190,7 +190,7 @@ entries:
       - "Niet verwarren met [samenstelling](@) (parochie-markdown met `:::include`) of sjabloon (markdown met `:::include zoek=`)."
     scopetag: "bron"
     locator: "compositie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/compositie"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/compositie"
     headingids:
       - "compositie"
       - "motivatie"
@@ -212,7 +212,7 @@ entries:
       - "renderer-directives"
     scopetag: "vsa-tooling"
     locator: "control-token.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/control-token"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/control-token"
     headingids:
       - "control-token"
     termid: "concept:control-token"
@@ -229,7 +229,7 @@ entries:
       - "Het bestaan van een conversiemechanisme is het criterium waarmee onderscheid wordt gemaakt tussen [bronbestand](@) en [afgeleide](@)."
     scopetag: "bron"
     locator: "conversiemechanisme.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/conversiemechanisme"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/conversiemechanisme"
     headingids:
       - "conversiemechanisme"
       - "motivatie"
@@ -250,7 +250,7 @@ entries:
       - "diagnostische-meldingen"
     scopetag: "vsa-tooling"
     locator: "diagnostic.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/diagnostic"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/diagnostic"
     headingids:
       - "diagnostic"
     termid: "concept:diagnostic"
@@ -272,7 +272,7 @@ entries:
       - "Een begin-[pitch-marker](@) / [hoogte-markering](@) `[:]` betekent: start op de do-context."
     scopetag: "vsa-tooling"
     locator: "do-context.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/do-context"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/do-context"
     headingids:
       - "do-context"
       - "motivatie"
@@ -294,7 +294,7 @@ entries:
       - "ehms"
     scopetag: "vsa-tooling"
     locator: "enkelvoudige-hoogte-modifier.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/enkelvoudige-hoogte-modifier"
     headingids:
       - "enkelvoudige-hoogte-modifier"
     termid: "concept:enkelvoudige-hoogte-modifier"
@@ -314,7 +314,7 @@ entries:
       - "elms"
     scopetag: "vsa-tooling"
     locator: "enkelvoudige-lengte-modifier.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/enkelvoudige-lengte-modifier"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/enkelvoudige-lengte-modifier"
     headingids:
       - "enkelvoudige-lengte-modifier"
     termid: "concept:enkelvoudige-lengte-modifier"
@@ -331,7 +331,7 @@ entries:
       - "Voorbeeld: `:::include svg zoek=\"…\" :::` kiest exporttype `svg`."
     scopetag: "bron"
     locator: "exportmechanisme.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/exportmechanisme"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/exportmechanisme"
     headingids:
       - "exportmechanisme"
       - "motivatie"
@@ -351,7 +351,7 @@ entries:
       - "Huidige exporttypen: `svg`, `coria`, `mxl`."
     scopetag: "bron"
     locator: "exporttype.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/exporttype"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/exporttype"
     headingids:
       - "exporttype"
       - "motivatie"
@@ -381,7 +381,7 @@ entries:
       - "docs-fixture"
     scopetag: "vsa-tooling"
     locator: "fixture.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/fixture"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/fixture"
     headingids:
       - "fixture"
     termid: "concept:fixture"
@@ -403,7 +403,7 @@ entries:
       - "Schrijf in docs ‘formulelabel’ (TermRef) als je het bladmerk als geheel bedoelt; gebruik [frase-id](@) of [frase-anker](@) als je het type bedoelt."
     scopetag: "vsa-tooling"
     locator: "formulelabel.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/formulelabel"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/formulelabel"
     headingids:
       - "formulelabel"
       - "status"
@@ -427,7 +427,7 @@ entries:
       - "Schrijf in docs ‘frase-anker’ (TermRef), niet los ‘anker’."
     scopetag: "vsa-tooling"
     locator: "frase-anker.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/frase-anker"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/frase-anker"
     headingids:
       - "frase-anker"
       - "motivatie"
@@ -449,7 +449,7 @@ entries:
       - "Schrijf in docs ‘frase-id’ (TermRef), niet los ‘id’ of ‘frase-nummer’."
     scopetag: "vsa-tooling"
     locator: "frase-id.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/frase-id"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/frase-id"
     headingids:
       - "frase-id"
       - "status"
@@ -468,7 +468,7 @@ entries:
       - "geldige-vsa"
     scopetag: "vsa-tooling"
     locator: "geldige-vsa-notatie.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/geldige-vsa-notatie"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/geldige-vsa-notatie"
     headingids:
       - "geldige-vsa-notatie"
     termid: "concept:geldige-vsa-notatie"
@@ -486,7 +486,7 @@ entries:
       - "Registratie vindt plaats via [promotie](@): een PR naar de [bron-repository](@) met [source-entry](@) en [bronbestand](@)."
     scopetag: "bron"
     locator: "geregistreerde-representatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/geregistreerde-representatie"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/geregistreerde-representatie"
     headingids:
       - "geregistreerde-representatie"
       - "motivatie"
@@ -508,7 +508,7 @@ entries:
       - "[Pitch-markers](@) / [hoogte-markeringen](@) en [control-tokens](@) kunnen eveneens als glyphs of layout-aanwijzingen worden weergegeven."
     scopetag: "vsa-tooling"
     locator: "glyph.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/glyph"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/glyph"
     headingids:
       - "glyph"
       - "motivatie"
@@ -526,7 +526,7 @@ entries:
       - "Herkomst is geen bestand; het is metadata (zoals `reference:` in `zangstuk.yaml`)."
     scopetag: "bron"
     locator: "herkomst.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/herkomst"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/herkomst"
     headingids:
       - "herkomst"
       - "motivatie"
@@ -548,7 +548,7 @@ entries:
       - "height-modifiers"
     scopetag: "vsa-tooling"
     locator: "hoogte-modifier.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/hoogte-modifier"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/hoogte-modifier"
     headingids:
       - "hoogte-modifier"
     termid: "concept:hoogte-modifier"
@@ -567,7 +567,7 @@ entries:
       - "hugo-contentsets"
     scopetag: "vsa-tooling"
     locator: "hugo-output.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/hugo-output"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/hugo-output"
     headingids:
       - "hugo-output"
     termid: "concept:hugo-output"
@@ -588,7 +588,7 @@ entries:
       - "Voorbeeld: `refrein: @include-vsa zoek=\"Troparion\"` — alleen de `@include-vsa …`-substring wordt vervangen."
     scopetag: "vsa-tooling"
     locator: "include-vsa.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/include-vsa"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/include-vsa"
     headingids:
       - "@include-vsa"
       - "motivatie"
@@ -610,7 +610,7 @@ entries:
       - "Voorbeeld bij `do: F4`, `mode: major`: `mi` = A4, `sol-1` = C4."
     scopetag: "vsa-tooling"
     locator: "laddergraad.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/laddergraad"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/laddergraad"
     headingids:
       - "laddergraad"
       - "motivatie"
@@ -632,7 +632,7 @@ entries:
       - "length-modifiers"
     scopetag: "vsa-tooling"
     locator: "lengte-modifier.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/lengte-modifier"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/lengte-modifier"
     headingids:
       - "lengte-modifier"
     termid: "concept:lengte-modifier"
@@ -650,7 +650,7 @@ entries:
       - "Een manifest is zelf geen [representatie](@), [bronbestand](@) of [samenstelling](@)."
     scopetag: "bron"
     locator: "manifest.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/manifest"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/manifest"
     headingids:
       - "manifest"
       - "motivatie"
@@ -671,7 +671,7 @@ entries:
       - "blokparameters"
     scopetag: "vsa-tooling"
     locator: "metadata.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/metadata"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/metadata"
     headingids:
       - "metadata"
     termid: "concept:metadata"
@@ -687,7 +687,7 @@ entries:
       - "modifiers"
     scopetag: "vsa-tooling"
     locator: "modifier.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/modifier"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/modifier"
     headingids:
       - "modifier"
     termid: "concept:modifier"
@@ -706,7 +706,7 @@ entries:
       - "Samengestelde [modifiers](@) met `&`, zoals `{/&/tekst_&-}`, leveren meerdere muzikale posities binnen één [scope](@) (melisma)."
     scopetag: "vsa-tooling"
     locator: "muzikale-positie.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/muzikale-positie"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/muzikale-positie"
     headingids:
       - "muzikale-positie"
       - "motivatie"
@@ -726,7 +726,7 @@ entries:
       - "Parochie-lokale representaties staan onder `content-source/lokaal/<zangstuk-id>/<variant-id>/…`."
     scopetag: "bron"
     locator: "parochie-lokale-representatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/parochie-lokale-representatie"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/parochie-lokale-representatie"
     headingids:
       - "parochie-lokale-representatie"
       - "motivatie"
@@ -744,7 +744,7 @@ entries:
       - "parsers"
     scopetag: "vsa-tooling"
     locator: "parser.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/parser"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/parser"
     headingids:
       - "parser"
     termid: "concept:parser"
@@ -770,7 +770,7 @@ entries:
       - "Onderscheid met [toonhoogte-overgang](@): `[//:/]` is geen pitch-marker (niet-lege inhoud na de middelste `:`)."
     scopetag: "vsa-tooling"
     locator: "pitch-marker.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/pitch-marker"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/pitch-marker"
     headingids:
       - "pitch-marker"
       - "motivatie"
@@ -789,7 +789,7 @@ entries:
       - "Promotie vereist een PR op de [bron-repository](@) met [source-entry](@) én [bronbestand](@)."
     scopetag: "bron"
     locator: "promotie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/promotie"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/promotie"
     headingids:
       - "promotie"
       - "motivatie"
@@ -807,7 +807,7 @@ entries:
       - "publicaties"
     scopetag: "vsa-tooling"
     locator: "publicatie.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/publicatie"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/publicatie"
     headingids:
       - "publicatie"
     termid: "concept:publicatie"
@@ -826,7 +826,7 @@ entries:
       - "In YAML: `role: recite`. In MuseScore-MSCX: halfnoot (2 tellen), stemloos, `<headType>breve</headType>`."
     scopetag: "vsa-tooling"
     locator: "reciteertoon.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/reciteertoon"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/reciteertoon"
     headingids:
       - "reciteertoon"
       - "motivatie"
@@ -844,7 +844,7 @@ entries:
       - "renderers"
     scopetag: "vsa-tooling"
     locator: "renderer.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/renderer"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/renderer"
     headingids:
       - "renderer"
     termid: "concept:renderer"
@@ -862,7 +862,7 @@ entries:
       - "Onder dezelfde [uitvoeringsvorm](@) mogen meerdere representaties bestaan (bijv. scan + getrouwe [vsa-bestand](@))."
     scopetag: "bron"
     locator: "representatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/representatie"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/representatie"
     headingids:
       - "representatie"
       - "motivatie"
@@ -882,7 +882,7 @@ entries:
       - "samengestelde-hoogte-modifiers"
     scopetag: "vsa-tooling"
     locator: "samengestelde-hoogte-modifier.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/samengestelde-hoogte-modifier"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/samengestelde-hoogte-modifier"
     headingids:
       - "samengestelde-hoogte-modifier"
     termid: "concept:samengestelde-hoogte-modifier"
@@ -899,7 +899,7 @@ entries:
       - "samengestelde-lengte-modifiers"
     scopetag: "vsa-tooling"
     locator: "samengestelde-lengte-modifier.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/samengestelde-lengte-modifier"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/samengestelde-lengte-modifier"
     headingids:
       - "samengestelde-lengte-modifier"
     termid: "concept:samengestelde-lengte-modifier"
@@ -917,7 +917,7 @@ entries:
       - "Niet verwarren met [compositie](@) (org-brede ordered list van [zangstukken](@) in yaml) of sjabloon (markdown met `:::include zoek=`)."
     scopetag: "bron"
     locator: "samenstelling.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/samenstelling"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/samenstelling"
     headingids:
       - "samenstelling"
       - "motivatie"
@@ -940,7 +940,7 @@ entries:
       - "ernstniveaus"
     scopetag: "vsa-tooling"
     locator: "severity.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/severity"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/severity"
     headingids:
       - "severity"
     termid: "concept:severity"
@@ -957,7 +957,7 @@ entries:
       - "Meerdere source-entries kunnen meerdere [representaties](@) registreren, of (legacy) nog niet onderscheiden [variant](@)/[uitvoeringsvorm](@)-structuur bevatten — bij nieuw werk gebruik het vier-niveaumodel."
     scopetag: "bron"
     locator: "source-entry.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/source-entry"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/source-entry"
     headingids:
       - "source-entry"
       - "voorbeelden-van-source-entries"
@@ -979,7 +979,7 @@ entries:
       - "Schrijf in docs ‘template-event’, niet los ‘event’."
     scopetag: "vsa-tooling"
     locator: "template-event.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/template-event"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/template-event"
     headingids:
       - "template-event"
       - "motivatie"
@@ -1000,7 +1000,7 @@ entries:
       - "Schrijf in docs bij voorkeur ‘template-frase’ (TermRef), niet los ‘frase’."
     scopetag: "vsa-tooling"
     locator: "template-frase.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/template-frase"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/template-frase"
     headingids:
       - "template-frase"
       - "motivatie"
@@ -1024,7 +1024,7 @@ entries:
       - "Onderscheid met [pitch-marker](@) / [hoogte-markering](@): markering eindigt op `:]`; overgang heeft niet-lege inhoud na de middelste `:` vóór `]`."
     scopetag: "vsa-tooling"
     locator: "toonhoogte-overgang.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/toonhoogte-overgang"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/toonhoogte-overgang"
     headingids:
       - "toonhoogte-overgang"
       - "motivatie"
@@ -1046,7 +1046,7 @@ entries:
           - "de verdeling van lettergrepen over de noten"
     scopetag: "bron"
     locator: "uitvoeringsvorm.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/uitvoeringsvorm"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/uitvoeringsvorm"
     headingids:
       - "uitvoeringsvorm"
       - "motivatie"
@@ -1065,7 +1065,7 @@ entries:
       - "validators"
     scopetag: "vsa-tooling"
     locator: "validator.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/validator"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/validator"
     headingids:
       - "validator"
     termid: "concept:validator"
@@ -1086,7 +1086,7 @@ entries:
       - "Vergelijkbare begrippen die buiten de scope van deze terminologie ook wel worden gehanteerd zijn `bewerking`, `versie`, `setting`, `compositievariant`."
     scopetag: "bron"
     locator: "variant.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/variant"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/variant"
     headingids:
       - "variant"
       - "motivatie"
@@ -1106,7 +1106,7 @@ entries:
       - "vsa-s"
     scopetag: "vsa-tooling"
     locator: "vsa.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/vsa"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/vsa"
     headingids:
       - "vsa"
       - "gebruik-van-deze-en-vergelijkbare-termen-in-de-'bron'-repo."
@@ -1126,7 +1126,7 @@ entries:
       - "vsa-bestanden"
     scopetag: "bron"
     locator: "vsa-bestand.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/vsa-bestand"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/vsa-bestand"
     headingids:
       - "vsa-bestand"
       - "structuur"
@@ -1146,12 +1146,12 @@ entries:
       - "vsa-blok"
     scopetag: "vsa-tooling"
     locator: "vsa-blokken.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/vsa-blokken"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/vsa-blokken"
     headingids:
       - "vsa-blok"
     termid: "concept:vsa-blokken"
     vsntag: "vsa-tooling"
-  - git_date: 2026-08-19T00:00:00.000Z
+  - git_date: 2026-10-03T00:00:00.000Z
     term: "vsa-notatie"
     termType: "concept"
     glossaryTerm: "VSA-notatie"
@@ -1160,12 +1160,13 @@ entries:
       - "Een [vsa-bestand](@) is een [bronbestand](@) en tevens een [representatie](@) van een [uitvoeringsvorm](@)."
       - "VSA-notatie sluit aan bij de notatiepraktijk zoals beschreven in het Nederlandse Liturgikon (Den Haag, 1968)."
       - "VSA-notatie is niet bedoeld als vervanging van historische neumennotaties, maar als een formeel definieerbare variant van de vereenvoudigde praktijk in Nederlandse orthodoxe parochies."
+      - "Bracket-tokens zoals hoogte-markeringen en [toonhoogte-overgang](@) zijn onderdeel van de notatiesyntaxis; de normatieve grammatica staat in [vsa-tooling](@)."
     formPhrases:
       - "vsa-notatie"
       - "vsa-notaties"
     scopetag: "bron"
     locator: "vsa-notatie.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/vsa-notatie"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/vsa-notatie"
     headingids:
       - "vsa-notatie"
       - "kernprincipes"
@@ -1192,7 +1193,7 @@ entries:
       - "Lege `{}` of `{te kst}` (spatie) zijn geen geldige VSA-scope."
     scopetag: "vsa-tooling"
     locator: "vsa-scope.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/vsa-scope"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/vsa-scope"
     headingids:
       - "vsa-scope"
       - "motivatie"
@@ -1210,7 +1211,7 @@ entries:
       - "vsa-teksten"
     scopetag: "vsa-tooling"
     locator: "vsa-tekst.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/vsa-tekst"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/vsa-tekst"
     headingids:
       - "vsa-tekst"
     termid: "concept:vsa-tekst"
@@ -1231,7 +1232,7 @@ entries:
       - "Een vsa-template is geen [zangstuk](@bron); het is een herbruikbare formulebeschrijving."
     scopetag: "vsa-tooling"
     locator: "vsa-template.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/vsa-template"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/vsa-template"
     headingids:
       - "vsa-template"
       - "motivatie"
@@ -1252,7 +1253,7 @@ entries:
       - "projectconfiguraties"
     scopetag: "vsa-tooling"
     locator: "vsa-toml.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/vsa-toml"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/vsa-toml"
     headingids:
       - "vsa.toml"
     termid: "concept:vsa-toml"
@@ -1272,7 +1273,7 @@ entries:
       - "vsa-tools"
     scopetag: "bron"
     locator: "vsa-tooling.md"
-    navurl: "https://orthodox-ronl.github.io/bron/terms/vsa-tooling"
+    navurl: "https://orthodox-ronl.github.io/bron/preview/terms/vsa-tooling"
     headingids:
       - "vsa-tooling"
       - "wat-je-ermee-doet"
@@ -1291,7 +1292,7 @@ entries:
       - "vsa-toolset"
     scopetag: "vsa-tooling"
     locator: "vsa-toolset.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/vsa-toolset"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/vsa-toolset"
     headingids:
       - "vsa.toolset"
     termid: "concept:vsa-toolset"
@@ -1310,7 +1311,7 @@ entries:
       - "Lege `{}` heeft geen zangelement en is geen geldige scope."
     scopetag: "vsa-tooling"
     locator: "zangelement.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/zangelement"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/zangelement"
     headingids:
       - "zangelement"
       - "motivatie"
@@ -1328,7 +1329,7 @@ entries:
       - "zangstukken"
     scopetag: "vsa-tooling"
     locator: "zangstuk.md"
-    navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/zangstuk"
+    navurl: "https://orthodox-ronl.github.io/VSA-tooling/terminologie/zangstuk"
     headingids:
       - "zangstuk"
     termid: "concept:zangstuk"
