@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import re
 
-from .ast import TextNode, ScopeNode, PitchMarkerNode
+from .ast import TextNode, ScopeNode, PitchMarkerNode, PitchTransitionNode
 from .scope_layout import build_scope_layout, estimate_text_width
 from .spacing_policy import whitespace_width
 
@@ -63,6 +63,9 @@ def split_text_node(node: TextNode):
 
 def iter_layout_nodes(document):
     for node in document.nodes:
+        if isinstance(node, PitchTransitionNode):
+            # Stille toonhoogte-overgang: geen breedte, geen regelbreuk-effect.
+            continue
         if isinstance(node, TextNode):
             yield from split_text_node(node)
         else:

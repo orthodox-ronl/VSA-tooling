@@ -18,8 +18,8 @@ formPhrases:
 
 Bracket-directives / [bracket-tokens](@) zijn de `[...]`-tokens die de
 [parser](@) eerst routeert naar een specifiek parserpad, bijvoorbeeld
-[pitch-marker](@) / [hoogte-markering](@), [control-token](@), onbekende
-directive of syntaxfout.
+[pitch-marker](@) / [hoogte-markering](@), [toonhoogte-overgang](@),
+[control-token](@), onbekende directive of syntaxfout.
 
 Goede/valide voorbeelden van Bracket-directive zijn:
 - `[...]`-token vóór inhoudelijke parsing

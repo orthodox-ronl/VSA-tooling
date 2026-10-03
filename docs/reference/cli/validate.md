@@ -141,16 +141,18 @@ soort fouten tegelijk wilt zien.
 
 ### Veelvoorkomende foutcodes
 
-| Foutcode                                 | Betekenis                                      | Wat doen?                                                    |
-| ---------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------ |
-| `VSA-SYNTAX-EMPTY-SCOPE`                 | `{}` gevonden                                  | Zet tekst of een [zangelement](@) in de [scope](@).          |
-| `VSA-SYNTAX-UNCLOSED-SCOPE`              | `{tekst` zonder `}`                            | Sluit de [scope](@) af.                                      |
-| `VSA-SYNTAX-UNEXPECTED-CLOSE-BRACE`      | Losse `}`                                      | Verwijder of herstel de [scope](@).                          |
-| `VSA-SYNTAX-WHITESPACE-IN-SCOPE`         | Spatie binnen `{...}`                          | Splits tekst buiten de scope of gebruik correcte notatie.    |
-| `VSA-SYNTAX-UNCLOSED-PITCH-MARKER`       | `[` zonder `]`                                 | Sluit de [pitch-marker](@) af.                               |
-| `VSA-SYNTAX-PITCH-MARKER-MISSING-COLON`  | Pitch-marker zonder `:`                        | Gebruik bijvoorbeeld `[:]`.                                  |
-| `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`   | Aantallen hoogte-/lengteposities passen niet   | Controleer samengestelde [modifiers](@).                     |
-| `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`    | Berekende hoogte komt niet overeen met marker  | Pas de eindmarkering of de scope-modifiers aan.              |
+| Foutcode                                   | Betekenis                                         | Wat doen?                                                                |
+| ------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------ |
+| `VSA-SYNTAX-EMPTY-SCOPE`                   | `{}` gevonden                                     | Zet tekst of een [zangelement](@) in de [scope](@).                      |
+| `VSA-SYNTAX-UNCLOSED-SCOPE`                | `{tekst` zonder `}`                               | Sluit de [scope](@) af.                                                  |
+| `VSA-SYNTAX-UNEXPECTED-CLOSE-BRACE`        | Losse `}`                                         | Verwijder of herstel de [scope](@).                                      |
+| `VSA-SYNTAX-WHITESPACE-IN-SCOPE`           | Spatie binnen `{...}`                             | Splits tekst buiten de scope of gebruik correcte notatie.                |
+| `VSA-SYNTAX-UNCLOSED-PITCH-MARKER`         | `[` zonder `]`                                    | Sluit de [pitch-marker](@) af.                                           |
+| `VSA-SYNTAX-PITCH-MARKER-MISSING-COLON`    | Pitch-marker zonder `:`                           | Gebruik bijvoorbeeld `[:]`.                                              |
+| `VSA-SYNTAX-INVALID-PITCH-TRANSITION`      | Ongeldige toonhoogte-overgang                     | Gebruik `[<oude-EHM>:<nieuwe-EHM>]` met geldige EHM-waarden.             |
+| `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`     | Aantallen hoogte-/lengteposities passen niet      | Controleer samengestelde [modifiers](@).                                 |
+| `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`      | Berekende hoogte komt niet overeen met marker     | Pas de eindmarkering of de scope-modifiers aan; of gebruik een overgang. |
+| `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH`   | Linkerhoogte van `[oud:nieuw]` klopt niet         | Laat de linker-EHM overeenkomen met de huidige cursor.                   |
 
 Zie [diagnostics.md](../diagnostics.md) voor de volledige lijst en severity-instellingen.
 

@@ -236,11 +236,11 @@ zonder nieuwe prefix: die landt op de **natuurlijke** laddertoon van de
 nieuwe graad. Een maatstreep (`//`, `[*]`, …) **beëindigt het VSA-accidens
 niet**; zelfde-toon na een maatstreep houdt de chromatische klinktoon vast.
 
-| Situatie | Klassieke notatie | [VSA](@) |
-| -------- | ----------------- | -------- |
+| Situatie                                                         | Klassieke notatie                  | [VSA](@)                                                  |
+| ---------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------- |
 | C♯, daarna opnieuw C in dezelfde maat (via andere toon ertussen) | C blijft kruis tot maatstreep of ♮ | terugkeer via `\` / `/` zonder prefix → **natuurlijke** C |
-| C♯, daarna zelfde toon (`-` / recite) | C♯ | C♯ |
-| C♯, maatstreep, daarna opnieuw C zonder nieuw teken | meestal natuurlijke C | zelfde-toon na maatstreep → **nog steeds** C♯ |
+| C♯, daarna zelfde toon (`-` / recite)                            | C♯                                 | C♯                                                        |
+| C♯, maatstreep, daarna opnieuw C zonder nieuw teken              | meestal natuurlijke C              | zelfde-toon na maatstreep → **nog steeds** C♯             |
 
 Werkvoorbeelden: [Halftoon-prefix combinaties (voorbeelden)](#halftoon-prefix-combinaties-voorbeelden)
 en [Kruis en mol](../reference/voorbeelden/kruis-en-mol.md#tot-hoever-werkt-de-halftoon).
@@ -271,40 +271,40 @@ is weer de natuurlijke laddertoon.
 
 #### Halftoon-prefix: cursor vs. klinkende toon (normatief)
 
-| [EHM](@) | Cursor (basis) | Accidens op aankomsttoon | Daarna |
-| -------- | -------------- | ------------------------ | ------ |
+| [EHM](@) | Cursor (basis) | Accidens op aankomsttoon | Daarna                                                                          |
+| -------- | -------------- | ------------------------ | ------------------------------------------------------------------------------- |
 | `#/`     | +1 graad       | kruis                    | volgende ladderstap: natuurlijke nieuwe graad; `~`/`-`/recite: zelfde klinktoon |
-| `b/`     | +1 graad       | mol                      | idem |
-| `#\`     | −1 graad       | kruis                    | idem |
-| `b\`     | −1 graad       | mol                      | idem |
-| `#-`     | 0              | kruis op huidige graad   | `~`/`-`/recite houden die klinktoon |
-| `b-`     | 0              | mol op huidige graad     | `~`/`-`/recite houden die klinktoon |
+| `b/`     | +1 graad       | mol                      | idem                                                                            |
+| `#\`     | −1 graad       | kruis                    | idem                                                                            |
+| `b\`     | −1 graad       | mol                      | idem                                                                            |
+| `#-`     | 0              | kruis op huidige graad   | `~`/`-`/recite houden die klinktoon                                             |
+| `b-`     | 0              | mol op huidige graad     | `~`/`-`/recite houden die klinktoon                                             |
 
 #### Acceptatievoorbeelden (normatief)
 
 Met `do="C4"` en `mode="major"`, startcursor op do (graad 0):
 
-| Reeks | Cursor na reeks | Klinkende tonen (spelling) | Eindklank = start? |
-| ----- | --------------- | -------------------------- | ------------------ |
-| `#\` daarna `/` | do (0) | B3# (ti met kruis), daarna C4 | ja |
-| `b/` | re (1) | D♭4 | nee (cursor op re) |
-| `b/` daarna `-` | re (1) | D♭4, daarna D♭4 (zelfde toon) | — |
-| `#-` | do (0) | C#4 | cursor ongewijzigd |
-| `b-` | do (0) | C♭4 | cursor ongewijzigd |
+| Reeks           | Cursor na reeks | Klinkende tonen (spelling)    | Eindklank = start? |
+| --------------- | --------------- | ----------------------------- | ------------------ |
+| `#\` daarna `/` | do (0)          | B3# (ti met kruis), daarna C4 | ja                 |
+| `b/`            | re (1)          | D♭4                           | nee (cursor op re) |
+| `b/` daarna `-` | re (1)          | D♭4, daarna D♭4 (zelfde toon) | —                  |
+| `#-`            | do (0)          | C#4                           | cursor ongewijzigd |
+| `b-`            | do (0)          | C♭4                           | cursor ongewijzigd |
 
 Met startmarkering `[/:]` (graad = re = D4):
 
-| Reeks | Klinkende tonen | Cursor-eind |
-| ----- | --------------- | ----------- |
-| `{+\go}{ri}{/os}` | D→C♯→C♯→D | weer re |
-| `{+\go}ri{/os}` (ongescopte `ri`) | D→C♯→C♯→D | weer re |
+| Reeks                             | Klinkende tonen | Cursor-eind |
+| --------------------------------- | --------------- | ----------- |
+| `{+\go}{ri}{/os}`                 | D→C♯→C♯→D       | weer re     |
+| `{+\go}ri{/os}` (ongescopte `ri`) | D→C♯→C♯→D       | weer re     |
 
 Met `do="F4"` en `mode="major"` (non-C, enharmoniek):
 
-| Reeks | Cursor na reeks | Klinkende tonen (spelling) | Eindklank = start? |
-| ----- | --------------- | -------------------------- | ------------------ |
-| `#\` daarna `/` | do (0) | E4# (ti met kruis), daarna F4 | ja |
-| `b/` | re (1) | G♭4 | cursor op re |
+| Reeks           | Cursor na reeks | Klinkende tonen (spelling)    | Eindklank = start? |
+| --------------- | --------------- | ----------------------------- | ------------------ |
+| `#\` daarna `/` | do (0)          | E4# (ti met kruis), daarna F4 | ja                 |
+| `b/`            | re (1)          | G♭4                           | cursor op re       |
 
 Contrast met het afgewezen float-model: onder “netto = basis ± ½” zou
 `+\` gevolgd door `/` klinken als `b/` (blijvend een half trede verschoven).
@@ -387,11 +387,11 @@ latere C’s in de maat wijzigen tot een herstelteken of maatstreep. In
 [:] {#-Cis}{/Re}{\Do} [:]
 ```
 
-| Lettergreep | Klinkend | Waarom |
-| ----------- | -------- | ------ |
-| Cis | C♯ | `#-` zet kruis op do |
-| Re | D | `/` = ladderstap → natuurlijke re |
-| Do | C | `\` = ladderstap → **natuurlijke** do (geen blijvend kruis op C) |
+| Lettergreep | Klinkend | Waarom                                                           |
+| ----------- | -------- | ---------------------------------------------------------------- |
+| Cis         | C♯       | `#-` zet kruis op do                                             |
+| Re          | D        | `/` = ladderstap → natuurlijke re                                |
+| Do          | C        | `\` = ladderstap → **natuurlijke** do (geen blijvend kruis op C) |
 
 In klassieke notatie zou de laatste C in dezelfde maat nog C♯ zijn tenzij
 een ♮ geschreven staat. [VSA](@) hoeft geen herstelteken-prefix: de
@@ -404,12 +404,12 @@ ladderstap zonder prefix is genoeg. MusicXML-export zet wél een zichtbaar
 [:] {#-Cis}{-nog} // {-verder} [:]
 ```
 
-| Lettergreep | Klinkend | Waarom |
-| ----------- | -------- | ------ |
-| Cis | C♯ | `#-` |
-| nog | C♯ | `-` = zelfde toon |
-| (maatstreep) | — | beëindigt het VSA-accidens **niet** |
-| verder | C♯ | `-` na maatstreep houdt nog steeds Cis |
+| Lettergreep  | Klinkend | Waarom                                 |
+| ------------ | -------- | -------------------------------------- |
+| Cis          | C♯       | `#-`                                   |
+| nog          | C♯       | `-` = zelfde toon                      |
+| (maatstreep) | —        | beëindigt het VSA-accidens **niet**    |
+| verder       | C♯       | `-` na maatstreep houdt nog steeds Cis |
 
 In klassieke notatie zou `verder` zonder nieuw kruis meestal natuurlijke C
 zijn. In [VSA](@) blijft de klinkende toon chromatisch tot er een
@@ -421,10 +421,10 @@ ladderstap zonder prefix komt.
 [:] {#-Cis} // {/Re} [:]
 ```
 
-| Lettergreep | Klinkend | Waarom |
-| ----------- | -------- | ------ |
-| Cis | C♯ | `#-` |
-| Re | D | `/` na de maatstreep → natuurlijke re; cursor op re |
+| Lettergreep | Klinkend | Waarom                                              |
+| ----------- | -------- | --------------------------------------------------- |
+| Cis         | C♯       | `#-`                                                |
+| Re          | D        | `/` na de maatstreep → natuurlijke re; cursor op re |
 
 #### Kruis op een dalende stap, daarna omhoog — cursor en natuurlijke toon herstellen
 
@@ -434,10 +434,10 @@ Met `do="C4"`, start `[:]`:
 [:] {+\neer}{/terug} [:]
 ```
 
-| Stap | [EHM](@) | Cursor | Klinkend | Toelichting |
-| ---- | -------- | ------ | -------- | ----------- |
-| 1 | `+\` (`#\`) | ti | B♯ | ladderstap omlaag + kruis op aankomst |
-| 2 | `/` | do | C | ladderstap omhoog; **geen** prefix → natuurlijke do |
+| Stap | [EHM](@)    | Cursor | Klinkend | Toelichting                                         |
+| ---- | ----------- | ------ | -------- | --------------------------------------------------- |
+| 1    | `+\` (`#\`) | ti     | B♯       | ladderstap omlaag + kruis op aankomst               |
+| 2    | `/`         | do     | C        | ladderstap omhoog; **geen** prefix → natuurlijke do |
 
 De eindmarkering `[:]` slaagt: cursor en klinkende eindtoon zijn weer do.
 Onder het afgewezen “basis ± ½”-model zou stap 2 klinken als D♭ en zou de
@@ -449,10 +449,10 @@ eindcontrole falen.
 [:] {b/om}{-hoog} [/:]
 ```
 
-| Stap | [EHM](@) | Cursor | Klinkend | Toelichting |
-| ---- | -------- | ------ | -------- | ----------- |
-| 1 | `b/` | re | D♭ | ladderstap omhoog + mol |
-| 2 | `-` | re | D♭ | zelfde toon: mol blijft zonder `b-` opnieuw |
+| Stap | [EHM](@) | Cursor | Klinkend | Toelichting                                 |
+| ---- | -------- | ------ | -------- | ------------------------------------------- |
+| 1    | `b/`     | re     | D♭       | ladderstap omhoog + mol                     |
+| 2    | `-`      | re     | D♭       | zelfde toon: mol blijft zonder `b-` opnieuw |
 
 Eindmarkering `[/:]` controleert alleen de **graad** re, niet of re mol of
 natuurlijk klinkt.
@@ -463,11 +463,11 @@ natuurlijk klinkt.
 [/:] {+\go}{ri}{/os} [/:]
 ```
 
-| Lettergreep | Bron | Klinkend (start re = D) |
-| ----------- | ---- | ----------------------- |
-| go | `+\` | C♯ |
-| ri | impliciet `~` | C♯ (zelfde klinktoon) |
-| os | `/` | D (natuurlijke re) |
+| Lettergreep | Bron          | Klinkend (start re = D) |
+| ----------- | ------------- | ----------------------- |
+| go          | `+\`          | C♯                      |
+| ri          | impliciet `~` | C♯ (zelfde klinktoon)   |
+| os          | `/`           | D (natuurlijke re)      |
 
 `{+\go}ri{/os}` (ongescopte `ri`) klinkt hetzelfde.
 
@@ -479,9 +479,9 @@ natuurlijk klinkt.
 
 | Noot | `<alter>` | Zichtbaar `<accidental>` |
 | ---- | --------- | ------------------------ |
-| Cis | `1` | `sharp` |
-| Re | (geen) | (geen) |
-| Do | (geen) | `natural` (herstelteken) |
+| Cis  | `1`       | `sharp`                  |
+| Re   | (geen)    | (geen)                   |
+| Do   | (geen)    | `natural` (herstelteken) |
 
 [VSA](@) heeft geen aparte herstelteken-prefix; de natuurlijke C volgt uit
 `\` zonder prefix. De MusicXML-export voegt het herstelteken toe zodat de
@@ -489,16 +489,16 @@ partituur dezelfde semantiek toont als de klinkende toonreeks.
 
 #### Combinatietabel (snelle referentie)
 
-| [EHM](@) | Cursor | Accidens | Typisch gebruik |
-| -------- | ------ | -------- | --------------- |
-| `#/` of `+/` | +1 | kruis | chromatische stijging |
-| `b/` | +1 | mol | chromatische stijging met mol |
-| `#\` of `+\` | −1 | kruis | chromatische daling (Liturgikon-`+` op `\`) |
-| `b\` | −1 | mol | chromatische daling met mol |
-| `#-` of `+-` | 0 | kruis | kruis op huidige graad |
-| `b-` | 0 | mol | mol op huidige graad |
-| `-` / `~` na accidens | 0 | (geen nieuwe) | houdt klinkende toon inclusief accidens |
-| `/` of `\` na accidens | ±1 | (geen) | natuurlijke nieuwe graad |
+| [EHM](@)               | Cursor | Accidens      | Typisch gebruik                             |
+| ---------------------- | ------ | ------------- | ------------------------------------------- |
+| `#/` of `+/`           | +1     | kruis         | chromatische stijging                       |
+| `b/`                   | +1     | mol           | chromatische stijging met mol               |
+| `#\` of `+\`           | −1     | kruis         | chromatische daling (Liturgikon-`+` op `\`) |
+| `b\`                   | −1     | mol           | chromatische daling met mol                 |
+| `#-` of `+-`           | 0      | kruis         | kruis op huidige graad                      |
+| `b-`                   | 0      | mol           | mol op huidige graad                        |
+| `-` / `~` na accidens  | 0      | (geen nieuwe) | houdt klinkende toon inclusief accidens     |
+| `/` of `\` na accidens | ±1     | (geen)        | natuurlijke nieuwe graad                    |
 
 ### Interpretatie van ELMs
 
@@ -560,6 +560,25 @@ en om dit ook aan het eind van een [zangstuk](@bron) te doen (ter controle voor 
 Indien twee [zangstukken](@bron) elkaar opvolgen, kan dat vanuit [VSA](@) perspectief dan ook
 gezien worden als een enkel [zangstuk](@bron) met tussenliggende [hoogte-markeringen](@).
 
+### Toonhoogte-overgang
+
+Een [toonhoogte-overgang](@) van de vorm `[<oud>:<nieuw>]` is een stille
+cursor-sprong tussen melodische segmenten in dezelfde bron.
+
+1. De validator berekent de laddergraad-cursor ná het voorgaande materiaal
+   (zelfde logica als bij lokale [hoogte-markeringen](@)).
+2. De linker-EHM moet met die cursor overeenkomen; anders volgt
+   `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH`.
+3. Na een geldige overgang staat de cursor op de rechter-EHM. Volgende
+   [hoogte-markeringen](@) en MusicXML-/stanza-export gebruiken die nieuwe
+   cursor.
+4. De overgang zelf verschijnt niet in SVG of print; zie
+   [rendering](rendering.md).
+
+Gebruik een toonhoogte-overgang wanneer opeenvolgende stukken bewust op een
+andere relatieve hoogte beginnen (bijvoorbeeld antifoon op `[//:]` gevolgd
+door tropaar op `[/:]`). Verdraai de tropaar-tekst niet met kunstmatige
+EHM’s op het eerste woord.
 
  Een beginmarkering `[:]` betekent dat de zang op de [do-context](@) begint. Een markering `[//:]` betekent dat de zang twee ladderstappen boven de [do-context](@) begint.
 

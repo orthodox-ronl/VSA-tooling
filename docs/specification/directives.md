@@ -34,7 +34,17 @@ Voorbeelden:
 [\:]
 ```
 
-Deze hebben uitsluitend betrekking op toonhoogte.
+Deze hebben uitsluitend betrekking op toonhoogte en worden op het blad getoond.
+
+## Toonhoogte-overgang
+
+```text
+[<oude-EHM>:<nieuwe-EHM>]
+```
+
+Voorbeelden: `[//:/]`, `[/://]`, `[:/]`. Dit is geen [hoogte-markering](@):
+de body eindigt niet op `:` vlak vóór `]`, en het token wordt niet gerenderd.
+Zie [syntax](syntax.md) en [semantics](semantics.md).
 
 ## Control tokens
 
@@ -87,9 +97,12 @@ volledig configureerbaar.
 ```ebnf
 bracket-token ::=
       height-marker
+    | pitch-transition
     | control-token ;
 
 height-marker ::= "[" [ EHM ] ":]" ;
+
+pitch-transition ::= "[" [ EHM ] ":" EHM "]" ;
 
 control-token ::=
       "[/]"
@@ -171,7 +184,7 @@ Zie [catalogus-zoek-api — twee contextlagen](https://github.com/orthodox-ronl/
 
 | Onderdeel                                                                                                                      | Status              |
 | ------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `expand_include_vsa` in [`include_vsa.py`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/src/vsa/include_vsa.py) | **Geïmplementeerd** |
+| `expand_include_vsa` in [`include_vsa.py`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/src/vsa/include_vsa.py)      | **Geïmplementeerd** |
 | `@include-vsa id=` / `lokaal=`                                                                                                 | **Geïmplementeerd** |
 | `@include-vsa zoek=`                                                                                                           | **Geïmplementeerd** |
 | Integratie validate / svg / musicxml / build-markdown                                                                          | **Geïmplementeerd** |
