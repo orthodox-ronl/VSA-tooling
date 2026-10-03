@@ -236,6 +236,46 @@ _LICENSE_IN_TEXT = re.compile(
 )
 
 
+def _misc_field(ident: ET.Element, name: str) -> ET.Element | None:
+    misc = _child(ident, "miscellaneous")
+    if misc is None:
+        return None
+    for field in _children(misc, "miscellaneous-field"):
+        if field.get("name") == name:
+            return field
+    return None
+
+
+def _set_misc_field(ident: ET.Element, name: str, value: str) -> None:
+    misc = _child(ident, "miscellaneous")
+    if misc is None:
+        misc = ET.SubElement(ident, "miscellaneous")
+    field = _misc_field(ident, name)
+    if field is None:
+        field = ET.SubElement(misc, "miscellaneous-field", name=name)
+    field.text = value
+
+
+def strip_coria_identification_source(root: ET.Element) -> int:
+    """Verwijder ``identification/source`` (Coria faalt op source+encoding).
+
+    Bewaar de tekst in ``miscellaneous-field name="bron"`` als die nog leeg is.
+    Returns aantal verwijderde ``<source>``-elementen.
+    """
+    n = 0
+    ident = _child(root, "identification")
+    if ident is None:
+        return 0
+    source_el = _child(ident, "source")
+    if source_el is None:
+        return 0
+    text = _text(source_el)
+    if text and not _text(_misc_field(ident, "bron")):
+        _set_misc_field(ident, "bron", text)
+    ident.remove(source_el)
+    return 1
+
+
 def sanitize_coria_importer(root: ET.Element) -> None:
     """Strip visuele MusicXML die Coria's vertaler laat crashen (VSA-demo-port)."""
     root.set("version", "3.1")
@@ -252,7 +292,10 @@ def sanitize_coria_importer(root: ET.Element) -> None:
             for el in list(enc):
                 if local(el.tag) == "supports":
                     enc.remove(el)
-        _ensure_source_when_rights_is_license(root, ident)
+        # Coria: ``<source>`` + ``<encoding>`` → "translation failed".
+        # Bronvermelding blijft in miscellaneous-field ``bron``.
+        strip_coria_identification_source(root)
+        _ensure_bron_misc_when_rights_is_license(root, ident)
     for el in list(root.iter()):
         for attr in list(el.attrib):
             if attr.startswith(_LAYOUT_ATTR_PREFIXES) or attr in _LAYOUT_ATTRS:
@@ -274,16 +317,17 @@ def sanitize_coria_importer(root: ET.Element) -> None:
                 plist.remove(el)
 
 
-def _ensure_source_when_rights_is_license(
+def _ensure_bron_misc_when_rights_is_license(
     root: ET.Element, ident: ET.Element
 ) -> None:
-    """Checklist META: rights met licentie eist een niet-lege ``source``."""
-    source_el = _child(ident, "source")
-    rights_el = _child(ident, "rights")
-    source = _text(source_el)
-    rights = _text(rights_el)
-    if source:
+    """Checklist META: rights met licentie eist bron in misc-field ``bron``.
+
+    Geen ``identification/source``: Coria faalt op source+encoding.
+    """
+    if _text(_misc_field(ident, "bron")):
         return
+    rights_el = _child(ident, "rights")
+    rights = _text(rights_el)
     if not rights or not _LICENSE_IN_TEXT.search(rights):
         return
     title = ""
@@ -291,16 +335,7 @@ def _ensure_source_when_rights_is_license(
         if local(el.tag) == "work-title" and (el.text or "").strip():
             title = (el.text or "").strip()
             break
-    text = title or "partituur"
-    if source_el is None:
-        source_el = ET.Element("source")
-        # Prefer source after rights when both exist.
-        if rights_el is not None:
-            idx = list(ident).index(rights_el) + 1
-            ident.insert(idx, source_el)
-        else:
-            ident.append(source_el)
-    source_el.text = text
+    _set_misc_field(ident, "bron", title or "partituur")
 
 
 def _key_alters(fifths: int) -> dict[str, int]:

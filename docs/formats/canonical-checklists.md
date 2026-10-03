@@ -55,6 +55,7 @@ en Oefenhoek `VSA-demo/scripts/mscz-product-transforms.md` (Coria-kolom).
 | M14 | **Voortekens**                 | `<accidental>` aanwezig voor betrouwbare playback.                                                                                                                                                                                                                             |
 | M15 | **``@tekst``-pauze**           | Mid-flow `@tekst` (niet maat 1): zelfde `[PAUZE]`-maat als na `\|\|` (cue op de pauzemaat). Geen dubbele pauze als de vorige maat al sectie-einde is.                                                                                                                          |
 | M16 | **Leidende `\|:`**             | Forward-repeat links op de **eerste inhoudsmaat**; geen lege rustmaat vóór die inhoud (zelfde semantiek als MSCZ S16).                                                                                                                                                         |
+| M17 | **Geen `source`+`encoding`**   | Coria geeft `translation failed` als `<identification>` zowel `<source>` als `<encoding>` heeft. Playback-sanitize verwijdert `<source>`; bronvermelding in `miscellaneous-field name="bron"`. Bij licentie in `<rights>` eist `mxl validate` die misc-bron.                 |
 
 **Normalize-target MXL → MXL:** `mxl normalize` (zie
 [`mxl` CLI](../reference/cli/mxl.md)) herschrijft naar deze checklist +
