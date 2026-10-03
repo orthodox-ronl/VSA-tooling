@@ -191,6 +191,16 @@ def _check_piano(
         )
 
 
+def _misc_bron(ident: ET.Element) -> str:
+    misc = _child(ident, "miscellaneous")
+    if misc is None:
+        return ""
+    for field in _children(misc, "miscellaneous-field"):
+        if field.get("name") == "bron":
+            return _text(field)
+    return ""
+
+
 def _check_identification(root: ET.Element) -> list[ChecklistFinding]:
     findings: list[ChecklistFinding] = []
     ident = _child(root, "identification")
@@ -198,6 +208,18 @@ def _check_identification(root: ET.Element) -> list[ChecklistFinding]:
         return findings
     source = _text(_child(ident, "source"))
     rights = _text(_child(ident, "rights"))
+    encoding = _child(ident, "encoding")
+    bron = _misc_bron(ident)
+    # Coria play_from_url: ``<source>`` + ``<encoding>`` → "translation failed".
+    if source and encoding is not None:
+        findings.append(
+            ChecklistFinding(
+                "META",
+                "identification/source mag niet samen met encoding "
+                "(Coria: translation failed); zet bron in "
+                "miscellaneous-field name=\"bron\"",
+            )
+        )
     if source and _LICENSE_IN_SOURCE.search(source):
         findings.append(
             ChecklistFinding(
@@ -206,12 +228,17 @@ def _check_identification(root: ET.Element) -> list[ChecklistFinding]:
                 "(hoort in rights, niet source)",
             )
         )
-    if not source and rights and _LICENSE_IN_SOURCE.search(rights):
+    if (
+        not source
+        and not bron
+        and rights
+        and _LICENSE_IN_SOURCE.search(rights)
+    ):
         findings.append(
             ChecklistFinding(
                 "META",
-                "identification/source ontbreekt terwijl rights een "
-                "licentie bevat (bron ontbreekt)",
+                "miscellaneous-field name=\"bron\" ontbreekt terwijl rights "
+                "een licentie bevat (bronvermelding ontbreekt)",
             )
         )
     return findings
