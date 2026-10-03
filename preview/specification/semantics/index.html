@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-03 08:31 CEST.
+  , gebouwd 2026-10-03 09:30 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2254,6 +2254,17 @@
     <span class="md-ellipsis">
       
         Toonhoogte-markeringen
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
       
     </span>
   </a>
@@ -5292,6 +5303,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tekstmarkeringen-buiten-scopes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6150,6 +6172,24 @@ Een latere <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-m
 en om dit ook aan het eind van een <a class="og-termref" href="/bron/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstuk</a> te doen (ter controle voor zangers).
 Indien twee <a class="og-termref" href="/bron/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstukken</a> elkaar opvolgen, kan dat vanuit <a class="og-termref" href="/VSA-tooling/preview/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> perspectief dan ook
 gezien worden als een enkel <a class="og-termref" href="/bron/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstuk</a> met tussenliggende <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">hoogte-markeringen</a>.</p>
+<h3 id="toonhoogte-overgang">Toonhoogte-overgang<a class="headerlink" href="#toonhoogte-overgang" title="Permanent link">&para;</a></h3>
+<p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> van de vorm <code>[&lt;oud&gt;:&lt;nieuw&gt;]</code> is een stille
+cursor-sprong tussen melodische segmenten in dezelfde bron.</p>
+<ol>
+<li>De validator berekent de laddergraad-cursor ná het voorgaande materiaal
+   (zelfde logica als bij lokale <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">hoogte-markeringen</a>).</li>
+<li>De linker-EHM moet met die cursor overeenkomen; anders volgt
+   <code>VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH</code>.</li>
+<li>Na een geldige overgang staat de cursor op de rechter-EHM. Volgende
+   <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">hoogte-markeringen</a> en MusicXML-/stanza-export gebruiken die nieuwe
+   cursor.</li>
+<li>De overgang zelf verschijnt niet in SVG of print; zie
+   <a href="../rendering/">rendering</a>.</li>
+</ol>
+<p>Gebruik een toonhoogte-overgang wanneer opeenvolgende stukken bewust op een
+andere relatieve hoogte beginnen (bijvoorbeeld antifoon op <code>[//:]</code> gevolgd
+door tropaar op <code>[/:]</code>). Verdraai de tropaar-tekst niet met kunstmatige
+EHM’s op het eerste woord.</p>
 <p>Een beginmarkering <code>[:]</code> betekent dat de zang op de <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> begint. Een markering <code>[//:]</code> betekent dat de zang twee ladderstappen boven de <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> begint.</p>
 <p>Een eindmarkering kan worden gebruikt als visuele afsluiting en als semantische eindcontrole. Een ontbrekende eindmarkering is toegestaan en betekent dat er geen expliciete eindtooncontrole is genoteerd. Een eindmarkering <code>[:]</code> is niet leeg in semantische zin: zij betekent dat de zang op de <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> eindigt en is equivalent aan <code>[-:]</code> c.q. <code>[~:]</code>. Een markering <code>[//:]</code> betekent dat de zang twee ladderstappen boven de <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a> eindigt. Een implementatie mag een aanwezige eindmarkering controleren tegen de berekende eindtoon van het <a class="og-termref" href="/bron/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstuk</a>.</p>
 <h3 id="tekstmarkeringen-buiten-scopes">Tekstmarkeringen buiten scopes<a class="headerlink" href="#tekstmarkeringen-buiten-scopes" title="Permanent link">&para;</a></h3>
@@ -6219,7 +6259,7 @@ maar mogen door <a class="og-termref" href="/VSA-tooling/preview/terminologie/re
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-18
+        Bijgewerkt: 2026-10-03
         
       </p>
       

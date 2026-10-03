@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-03 08:31 CEST.
+  , gebouwd 2026-10-03 09:30 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4741,7 +4741,13 @@
 [//:]
 [\:]
 </code></pre></div>
-<p>Deze hebben uitsluitend betrekking op toonhoogte.</p>
+<p>Deze hebben uitsluitend betrekking op toonhoogte en worden op het blad getoond.</p>
+<h2 id="toonhoogte-overgang">Toonhoogte-overgang<a class="headerlink" href="#toonhoogte-overgang" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]
+</code></pre></div>
+<p>Voorbeelden: <code>[//:/]</code>, <code>[/://]</code>, <code>[:/]</code>. Dit is geen <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">hoogte-markering</a>:
+de body eindigt niet op <code>:</code> vlak vóór <code>]</code>, en het token wordt niet gerenderd.
+Zie <a href="../syntax/">syntax</a> en <a href="../semantics/">semantics</a>.</p>
 <h2 id="control-tokens">Control tokens<a class="headerlink" href="#control-tokens" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>[/]
 [*]
@@ -4799,9 +4805,12 @@
 <h2 id="ebnf">EBNF<a class="headerlink" href="#ebnf" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="k">bracket-token </span><span class="err">::</span><span class="o">=</span>
       <span class="k">height-marker</span>
+    <span class="p">|</span> <span class="k">pitch-transition</span>
     <span class="p">|</span> <span class="k">control-token </span><span class="p">;</span>
 
 <span class="k">height-marker </span><span class="err">::</span><span class="o">=</span> <span class="s2">"["</span> <span class="p">[</span> <span class="k">EHM </span><span class="p">]</span> <span class="s2">":]"</span> <span class="p">;</span>
+
+<span class="k">pitch-transition </span><span class="err">::</span><span class="o">=</span> <span class="s2">"["</span> <span class="p">[</span> <span class="k">EHM </span><span class="p">]</span> <span class="s2">":"</span> <span class="k">EHM </span><span class="s2">"]"</span> <span class="p">;</span>
 
 <span class="k">control-token </span><span class="err">::</span><span class="o">=</span>
       <span class="s2">"[/]"</span>
@@ -5260,7 +5269,7 @@ in bron-docs; korte samenvatting blijft in sectie 3 en 3b hierboven.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-05
+        Bijgewerkt: 2026-10-03
         
       </p>
       

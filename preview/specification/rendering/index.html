@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-03 08:31 CEST.
+  , gebouwd 2026-10-03 09:30 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2079,6 +2079,17 @@
     <span class="md-ellipsis">
       
         Toonhoogte-markering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
       
     </span>
   </a>
@@ -5044,6 +5055,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kolombreedtes-en-rijhoogtes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5402,6 +5424,12 @@ Onder renderen verstaan we het omzetten van gevalideerde <a class="og-termref" h
 </code></pre></div>
 <p>wordt gerenderd als een horizontale streep rond het verticale midden van de tekstregel, met daarboven de rendering van de opgegeven <a class="og-termref" href="/VSA-tooling/preview/terminologie/hoogte-modifier" title="Hoogte-modifier: een Modifier die voor het zangelement in een VSA-scope staat en bestaat uit een geldige EHM of uit meerdere geldige EHMs gescheiden door <code>&amp;</code>.">hoogte-modifier</a>. Als geen <a class="og-termref" href="/VSA-tooling/preview/terminologie/hoogte-modifier" title="Hoogte-modifier: een Modifier die voor het zangelement in een VSA-scope staat en bestaat uit een geldige EHM of uit meerdere geldige EHMs gescheiden door <code>&amp;</code>.">hoogte-modifier</a> aanwezig is, wordt alleen de horizontale streep weergegeven.</p>
 <p>Absolute toonhoogten worden niet in <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">toonhoogte-markeringen</a> opgenomen en worden dus ook niet als onderdeel daarvan gerenderd.</p>
+<h4 id="toonhoogte-overgang">Toonhoogte-overgang<a class="headerlink" href="#toonhoogte-overgang" title="Permanent link">&para;</a></h4>
+<p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> wordt
+<strong>niet</strong> gerenderd in SVG of print-PDF. Er is geen pitch-marker-lijn, geen
+glyph en geen extra spatie in de layout. MusicXML-export past wel de
+relatieve toonhoogte-cursor aan (rechter-EHM), zodat de klinkende lijn na de
+overgang op de nieuwe hoogte verdergaat.</p>
 <h4 id="kolombreedtes-en-rijhoogtes">Kolombreedtes en rijhoogtes<a class="headerlink" href="#kolombreedtes-en-rijhoogtes" title="Permanent link">&para;</a></h4>
 <p>Voor elke kolom <code>i</code> wordt een minimale kolombreedte <code>W[i]</code> bepaald.</p>
 <p><code>W[i]</code> is de grootste van:</p>
@@ -8684,7 +8712,7 @@ local_heights = height_markers[1:]
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-29
+        Bijgewerkt: 2026-10-03
         
       </p>
       

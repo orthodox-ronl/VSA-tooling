@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-03 08:31 CEST.
+  , gebouwd 2026-10-03 09:30 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5138,6 +5138,11 @@ soort fouten tegelijk wilt zien.</p>
 <td>Gebruik bijvoorbeeld <code>[:]</code>.</td>
 </tr>
 <tr>
+<td><code>VSA-SYNTAX-INVALID-PITCH-TRANSITION</code></td>
+<td>Ongeldige toonhoogte-overgang</td>
+<td>Gebruik <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> met geldige EHM-waarden.</td>
+</tr>
+<tr>
 <td><code>VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH</code></td>
 <td>Aantallen hoogte-/lengteposities passen niet</td>
 <td>Controleer samengestelde <a class="og-termref" href="/VSA-tooling/preview/terminologie/modifier" title="Modifier: een tekenreeks die binnen een VSA-scope als Hoogte-modifier voor het zangelement of als Lengte-modifier na het zangelement wordt geparseerd.">modifiers</a>.</td>
@@ -5145,7 +5150,12 @@ soort fouten tegelijk wilt zien.</p>
 <tr>
 <td><code>VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH</code></td>
 <td>Berekende hoogte komt niet overeen met marker</td>
-<td>Pas de eindmarkering of de scope-modifiers aan.</td>
+<td>Pas de eindmarkering of de scope-modifiers aan; of gebruik een overgang.</td>
+</tr>
+<tr>
+<td><code>VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH</code></td>
+<td>Linkerhoogte van <code>[oud:nieuw]</code> klopt niet</td>
+<td>Laat de linker-EHM overeenkomen met de huidige cursor.</td>
 </tr>
 </tbody>
 </table>
@@ -5193,7 +5203,7 @@ soort fouten tegelijk wilt zien.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-09
+        Bijgewerkt: 2026-10-03
         
       </p>
       

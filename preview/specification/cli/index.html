@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-03 08:31 CEST.
+  , gebouwd 2026-10-03 09:30 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4809,9 +4809,24 @@
 <td>gebruik bijvoorbeeld <code>[:]</code></td>
 </tr>
 <tr>
+<td><code>VSA-SYNTAX-INVALID-PITCH-TRANSITION</code></td>
+<td>ongeldige <a class="og-termref" href="/VSA-tooling/preview/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a></td>
+<td>gebruik <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> met geldige EHM</td>
+</tr>
+<tr>
 <td><code>VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH</code></td>
 <td>aantallen hoogte/lengteposities passen niet</td>
 <td>controleer samengestelde <a class="og-termref" href="/VSA-tooling/preview/terminologie/modifier" title="Modifier: een tekenreeks die binnen een VSA-scope als Hoogte-modifier voor het zangelement of als Lengte-modifier na het zangelement wordt geparseerd.">modifiers</a></td>
+</tr>
+<tr>
+<td><code>VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH</code></td>
+<td>markering wijkt af van berekende cursor</td>
+<td>markering/scopes aanpassen of <a class="og-termref" href="/VSA-tooling/preview/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> gebruiken</td>
+</tr>
+<tr>
+<td><code>VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH</code></td>
+<td>linker-EHM van overgang klopt niet met cursor</td>
+<td>pas <code>[oud:nieuw]</code> of voorgaande notatie aan</td>
 </tr>
 </tbody>
 </table>
@@ -5480,7 +5495,7 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-03
         
       </p>
       

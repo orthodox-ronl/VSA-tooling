@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-03 08:31 CEST.
+  , gebouwd 2026-10-03 09:30 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2044,6 +2044,17 @@
     <span class="md-ellipsis">
       
         Toonhoogte-markering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
       
     </span>
   </a>
@@ -4939,6 +4950,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#toonhoogte-overgang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toonhoogte-overgang
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#absolute-toonhoogte-binnen-hugo-blokmetadata" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5547,6 +5569,49 @@ Dat betekent
 Indien twee <a class="og-termref" href="/bron/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstukken</a> elkaar opvolgen, kan dat dus ook (vanuit <a class="og-termref" href="/VSA-tooling/preview/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> perspectief) gezien worden
 als een enkel <a class="og-termref" href="/bron/terms/zangstuk" title="Zangstuk: Een liturgisch-muzikaal geheel met een stabiele <code>zangstuk-id</code>, waaronder nul of meer Varianten bestaan.">zangstuk</a> met tussenliggende <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">toonhoogte-markeringen</a>.</p>
 <p>De tekst <code>:]</code> is de syntactische afsluiter van een <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">toonhoogte-markering</a>. Hij wordt visueel gerenderd als een horizontale lijn rond het verticale midden van de tekstregel, met daarboven de rendering van de <a class="og-termref" href="/VSA-tooling/preview/terminologie/enkelvoudige-hoogte-modifier" title="Enkelvoudige hoogte-modifier: een Hoogte-modifier die uit precies één geldige EHM bestaat: een basis-hoogtebeweging, eventueel voorafgegaan door een halftoon-prefix.">EHM</a>.</p>
+<h3 id="toonhoogte-overgang">Toonhoogte-overgang<a class="headerlink" href="#toonhoogte-overgang" title="Permanent link">&para;</a></h3>
+<p>Een <a class="og-termref" href="/VSA-tooling/preview/terminologie/toonhoogte-overgang" title="Toonhoogte-overgang: een Bracket-directive van de vorm <code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]</code> die een bewuste sprong in relatieve toonhoogte aangeeft zonder zichtbare output op het blad.">toonhoogte-overgang</a> markeert een <strong>bewuste sprong</strong> in relatieve
+toonhoogte tussen opeenvolgende stukken in één VSA-bron, zonder iets op het
+blad te tonen en zonder de gezongen tekst te verdraaien.</p>
+<p>Vorm:</p>
+<div class="highlight"><pre><span></span><code>[&lt;oude-EHM&gt;:&lt;nieuwe-EHM&gt;]
+</code></pre></div>
+<p>De rechterzijde mag niet leeg zijn. Eindigt de inhoud tussen <code>[</code> en <code>]</code> op
+<code>:</code>, dan is het een gewone <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">toonhoogte-markering</a> (<code>[/:]</code>, <code>[//:]</code>, …),
+geen overgang.</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Betekenis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[//:/]</code></td>
+<td>overgang van <code>//</code> (+2) naar <code>/</code> (+1)</td>
+</tr>
+<tr>
+<td><code>[/://]</code></td>
+<td>overgang van <code>/</code> naar <code>//</code></td>
+</tr>
+<tr>
+<td><code>[:/]</code></td>
+<td>overgang van do (lege EHM) naar <code>/</code></td>
+</tr>
+<tr>
+<td><code>[/:]</code></td>
+<td>blijft gewone <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">toonhoogte-markering</a></td>
+</tr>
+<tr>
+<td><code>[//:]</code></td>
+<td>blijft gewone <a class="og-termref" href="/VSA-tooling/preview/terminologie/pitch-marker" title="Pitch-marker: een Bracket-directive / Bracket-token met de vorm <code>[&lt;EHM&gt;:]</code>, waarbij <code>&lt;EHM&gt;</code> leeg is of een geldige EHM bevat.">toonhoogte-markering</a></td>
+</tr>
+</tbody>
+</table>
+<p>Praktijkvoorbeeld: een antifoon eindigt op <code>[//:]</code>, daarna volgt <code>[//:/]</code>
+en een tropaar begint met <code>[/:]</code>. Zangers zien op het blad alleen de gewone
+markeringen; de overgang is uitsluitend voor validatie en export-cursor.</p>
 <h3 id="absolute-toonhoogte-binnen-hugo-blokmetadata">Absolute toonhoogte binnen Hugo blokmetadata<a class="headerlink" href="#absolute-toonhoogte-binnen-hugo-blokmetadata" title="Permanent link">&para;</a></h3>
 <p>Een absolute toonhoogte bestaat uit:</p>
 <div class="highlight"><pre><span></span><code>&lt;toonnaam&gt;&lt;optionele alteratie&gt;&lt;octaaf&gt;
@@ -5602,13 +5667,20 @@ Bb2
 <p>Let op: in EBNF wordt <code>\</code> als escape-teken gebruikt. Om het teken <code>\</code> zelf te noteren, wordt het in EBNF verdubbeld.</p>
 <div class="highlight"><pre><span></span><code><span class="k">zangstuk </span><span class="err">::</span><span class="o">=</span>
     <span class="p">{</span> <span class="k">whitespace </span><span class="p">}</span>
-    <span class="p">{</span> <span class="k">toonhoogte-markering </span><span class="p">|</span> <span class="k">non-scopechar </span><span class="p">|</span> <span class="k">scope </span><span class="p">}</span>
+    <span class="p">{</span> <span class="k">toonhoogte-markering </span><span class="p">|</span> <span class="k">toonhoogte-overgang </span><span class="p">|</span> <span class="k">non-scopechar </span><span class="p">|</span> <span class="k">scope </span><span class="p">}</span>
     <span class="p">{</span> <span class="k">whitespace </span><span class="p">}</span> <span class="p">;</span>
 
 <span class="k">toonhoogte-markering </span><span class="err">::</span><span class="o">=</span>
     <span class="s2">"["</span>
     <span class="p">[</span> <span class="k">EHM </span><span class="p">]</span>
     <span class="s2">":]"</span> <span class="p">;</span>
+
+<span class="k">toonhoogte-overgang </span><span class="err">::</span><span class="o">=</span>
+    <span class="s2">"["</span>
+    <span class="p">[</span> <span class="k">EHM </span><span class="p">]</span>
+    <span class="s2">":"</span>
+    <span class="k">EHM</span>
+    <span class="s2">"]"</span> <span class="p">;</span>
 
 <span class="k">non-scopechar </span><span class="err">::</span><span class="o">=</span>
     <span class="ni">? elk Unicode-karakter behalve "{" en "}" ?</span> <span class="p">;</span>
@@ -5700,7 +5772,7 @@ Bb2
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-29
+        Bijgewerkt: 2026-10-03
         
       </p>
       
