@@ -239,6 +239,9 @@ vsa musicxml lied.vsa lied.mxl --musicxml-profile engraving
 - **Coria laadt het `.mxl` niet?** Controleer of je niet per ongeluk
   `engraving` hebt gekozen; gebruik `playback` (de default). Op een website moet
   het `.mxl`-bestand via HTTPS bereikbaar zijn.
+- **Coria: `translation failed`?** Vaak staat er `<source>` én `<encoding>` in
+  `<identification>`. Het `playback`-pad verwijdert `<source>`; bronvermelding
+  hoort in `miscellaneous-field name="bron"` (checklist M17).
 - **Tempo staat er niet in?** Zet `tempo` expliciet in frontmatter; anders
   wordt geen tempo-markering geëxporteerd.
 - **Lettergrepen in reciteertoon:** gebruik een koppelteken in het woord
