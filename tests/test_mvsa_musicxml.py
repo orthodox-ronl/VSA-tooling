@@ -571,6 +571,38 @@ B: g&g&g&g&g&g&g&g ||
     assert '<slur type="start"' not in before
 
 
+def test_playback_long_same_pitch_hold_uses_tie_chain_not_fake_quarter():
+    """Acht kwarten same-pitch: geen type=quarter + duration=32 (MuseScore-chops).
+
+    Playback prefereert één noot ≤ 28; overflow → I2 whole+whole.
+    ``finalize_coria_musicxml`` stript ``<tie>`` (Coria); MuseScore speelt
+    dan wel heraanslag op de whole-grenzen, maar niet elke kwart.
+    """
+    text = """\
+@do F4
+@mode major
+@sectie x
+L: a_&_&_&_&_&_&_&_ ||
+S: g&g&g&g&g&g&g&g ||
+A: d&d&d&d&d&d&d&d ||
+T: c&c&c&c&c&c&c&c ||
+B: g&g&g&g&g&g&g&g ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    assert "<type>breve</type>" not in xml
+    # Geen mismatch: duration=32 bij type=quarter zou MuseScore elke kwart
+    # opnieuw aanslaan (bas-F “op tel 2” in gemengde piano-preview).
+    assert "<duration>32</duration>" not in xml
+    p3 = xml.split('<part id="P3">')[1].split("</part>")[0]
+    assert p3.count("<type>whole</type>") == 4
+    assert p3.count("<duration>16</duration>") == 4
+    assert "<type>quarter</type>" not in p3
+    # Partituur-export behoudt wel ties (geen Coria-sanitize).
+    partituur = export_mvsa_to_musicxml(text, layout="partituur")
+    assert '<tie type="start"/>' in partituur
+    assert '<tied type="start"/>' in partituur
+
+
 def test_alleluia_toon_2_partituur_no_breve_type():
     text = (EXAMPLES / "alleluia-toon-2.mvsa").read_text(encoding="utf-8")
     xml = export_mvsa_to_musicxml(text, layout="partituur")
