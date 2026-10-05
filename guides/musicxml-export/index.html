@@ -5265,6 +5265,9 @@ maatstrepen, typografie-hints of gedetailleerde melisma-lijnen nodig hebt:</p>
 <li><strong>Coria laadt het <code>.mxl</code> niet?</strong> Controleer of je niet per ongeluk
   <code>engraving</code> hebt gekozen; gebruik <code>playback</code> (de default). Op een website moet
   het <code>.mxl</code>-bestand via HTTPS bereikbaar zijn.</li>
+<li><strong>Coria: <code>translation failed</code>?</strong> Vaak staat er <code>&lt;source&gt;</code> én <code>&lt;encoding&gt;</code> in
+  <code>&lt;identification&gt;</code>. Het <code>playback</code>-pad verwijdert <code>&lt;source&gt;</code>; bronvermelding
+  hoort in <code>miscellaneous-field name="bron"</code> (checklist M17).</li>
 <li><strong>Tempo staat er niet in?</strong> Zet <code>tempo</code> expliciet in frontmatter; anders
   wordt geen tempo-markering geëxporteerd.</li>
 <li><strong>Lettergrepen in reciteertoon:</strong> gebruik een koppelteken in het woord
@@ -5308,7 +5311,7 @@ maatstrepen, typografie-hints of gedetailleerde melisma-lijnen nodig hebt:</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-29
+        Bijgewerkt: 2026-10-03
         
       </p>
       
