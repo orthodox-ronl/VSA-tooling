@@ -963,7 +963,9 @@ B: do ||
     assert "<source>Liturgikon, p.147-149</source>" in xml
     assert "CC BY-SA 4.0 — test" in xml
     playback = export_mvsa_to_musicxml(text, title="bestandsnaam", layout="playback")
-    assert "<source>Liturgikon, p.147-149</source>" in playback
+    # Playback: geen <source> naast <encoding> (Coria); bron in miscellaneous-field.
+    assert "<source>" not in playback
+    assert 'miscellaneous-field name="bron">Liturgikon, p.147-149</miscellaneous-field>' in playback
 
 
 def test_bron_optional_colon_accepted():
@@ -984,8 +986,11 @@ B: do ||
     assert not [
         d for d in doc.diagnostics if d.code == "MVSA-DIRECTIVE" and "bron" in d.message
     ]
-    xml = export_mvsa_to_musicxml(text, layout="playback")
-    assert "<source>koormap Hemelum</source>" in xml
+    partituur = export_mvsa_to_musicxml(text, layout="partituur")
+    assert "<source>koormap Hemelum</source>" in partituur
+    playback = export_mvsa_to_musicxml(text, layout="playback")
+    assert "<source>" not in playback
+    assert 'miscellaneous-field name="bron">koormap Hemelum</miscellaneous-field>' in playback
 
 
 def test_mscz_newline_emits_new_system():
