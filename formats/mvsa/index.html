@@ -4790,6 +4790,10 @@
 <td><a href="../../plans/mvsa-conversions/">mvsa-conversies</a></td>
 </tr>
 <tr>
+<td>Import uit <code>.mxl</code> / <code>.mscz</code></td>
+<td><a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a> (soft-wrap; holds; kuiser-normaalvorm)</td>
+</tr>
+<tr>
 <td>CLI</td>
 <td><a href="../../reference/cli/mvsa/"><code>mvsa</code></a> (<code>≡ vsa mvsa</code>)</td>
 </tr>
@@ -4799,6 +4803,18 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">Import = werkbank</p>
+<p>Score→<code>.mvsa</code> is een <strong>bewerkvorm</strong> voor de werkbank-fase (woordstreepjes,
+lege recite, lossy layout). Niet ongewijzigd als catalogusbron gebruiken.
+Zie <a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a>.</p>
+</div>
+<p><strong>Import (kort):</strong> <code>.mxl</code> gaat rechtstreeks naar de SATB-parser (P1–P4);
+<code>.mscz</code> eerst via MuseScore naar temp-<code>.mxl</code> en dezelfde SATB-explode als
+<a href="../../reference/cli/mscz/"><code>mscz mxl</code></a>. Default output is de <strong>canonieke
+schrijfvorm</strong> (kuiser-normaalvorm). Met <code>--pitch vsa</code> plakt de import
+check-only eindankers (a–g + cijfer) op systeemeinden; <code>doremi</code> / <code>a-g</code> doen
+dat niet. Tutorial: <a href="../../guides/mvsa-schrijven-101/#7-taak-bladmuziek--mvsa">mvsa schrijven 101 — bladmuziek</a>.</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mvsa validate examples\mvsa
 mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
@@ -4806,6 +4822,8 @@ mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
 mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.import.mvsa
+mvsa import generated\alleluia.mxl --pitch vsa -o generated\alleluia.vsa.mvsa
+mvsa validate generated\alleluia.vsa.mvsa
 vsa text examples\mvsa\alleluia-toon-8.mvsa
 </code></pre></div>
 <p>Via repo-script: <code>scripts\mvsa.cmd …</code></p>
@@ -4850,7 +4868,7 @@ vsa text examples\mvsa\alleluia-toon-8.mvsa
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       

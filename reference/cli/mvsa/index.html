@@ -6696,7 +6696,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
 </tr>
 <tr>
 <td><a href="#vsa-mvsa-import"><code>import</code></a></td>
-<td>Importeer <code>.mxl</code> / <code>.mscz</code> naar <code>.mvsa</code>.</td>
+<td>Importeer <code>.mxl</code> / <code>.mscz</code> → <code>.mvsa</code> (<strong>werkbank</strong>).</td>
 </tr>
 <tr>
 <td><a href="#vsa-mvsa-normalize"><code>normalize</code></a></td>
@@ -7261,6 +7261,26 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
 </code></pre></div>
 <hr />
 <h2 id="vsa-mvsa-import"><code>vsa mvsa import</code><a class="headerlink" href="#vsa-mvsa-import" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Alleen voor de werkbank-fase</p>
+<p>De importer (<code>mvsa import</code> / <code>mxl import</code> / <code>mscz import</code>) is bedoeld als
+<strong>bewerk-/startvorm</strong> in de werkbank — om van MuseScore/MusicXML naar
+bewerkbare <code>.mvsa</code> te komen en die handmatig af te maken. Niet als
+kant-en-klare catalogusbron.</p>
+<p>Belangrijkste redenen:</p>
+<ol>
+<li><strong>Lettergreepstreepjes</strong> — MuseScore-lyrics zetten streepjes tussen
+   lettergrepen van één woord vaak verkeerd of inconsistente; de canonieke
+   vorm (<code>hei-li</code>, spaties <em>vóór</em> <code>-li</code> bij breedte) moet je nabewerken.</li>
+<li><strong>Lyrics-gaten</strong> — noten zonder bruikbare tekst worden lege recite
+   (<code>()~</code> / <code>()_</code>); multi-lettergreep op één noot wordt recite <code>( … )</code>.
+   Dat houdt de sync, maar is geen nette zangstuktekst.</li>
+<li><strong>Lossy</strong> — MuseScore-layout en partituurdetails vallen weg; succes is
+   pitch/duur/lyrics-equivalentie, niet een publicatieklare partituur.</li>
+</ol>
+<p>Na import: controleren, kuisen, valideren — pas daarna (in de bibliotheek)
+accepteren naar de catalogus.</p>
+</div>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
                 [--octave-style {@oct,marker}] [--section SECTION]
@@ -7282,13 +7302,40 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
 </tr>
 <tr>
 <td><code>.mscz</code></td>
-<td>Eerst MuseScore CLI → temp <code>.mxl</code>, daarna zelfde parser</td>
+<td>MuseScore CLI → temp <code>.mxl</code> → <strong>SATB-normalisatie</strong> (zelfde explode als <a href="../mscz/"><code>mscz mxl</code></a>) → parser</td>
 </tr>
 </tbody>
 </table>
 <p>Stemhoogten worden in de gekozen <code>--pitch</code>-vorm geschreven; <code>@do</code> / <code>@mode</code>
 komen uit de toonsoort (majeur-aanname); <code>@oct</code> wordt per stem afgeleid.
 Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
+<p><strong>Leesbaarheid van de uitvoer</strong></p>
+<ul>
+<li>Soft-wrap: LSATB-systemen van ongeveer 80 tekens
+  (<code>DEFAULT_SYSTEM_SOFT_WIDTH</code>). Eén maat die alleen al langer is blijft één
+  systeem.</li>
+<li>Same-pitch holds: opeenvolgende dezelfde toonhoogte (ook over maatgrenzen)
+  wordt op de stemregels als <code>-</code> geschreven.</li>
+<li>Multi-lettergreep lyrics op één noot (spaties, <code>-</code>, of soft hyphen) worden
+  recite <code>( … )</code> i.p.v. één geplakte lettergreep. Een lone extender <code>-</code> wordt
+  lege recite <code>()~</code>. Trailing <code>.</code> op lyric-tekst wordt weggestript.</li>
+<li><strong>Normaalvorm:</strong> standaard schrijft import daarna de canonieke vorm via
+  <a href="#vsa-mvsa-kuiser"><code>mvsa kuiser</code></a> (standaard-lengte op L als <code>~</code>, maatstrepen
+  sync, kolomuitlijning) — zie
+  <a href="../../../specification-mvsa/syntax/">syntax — canonieke schrijfvorm</a> en
+  <a href="../../../specification-mvsa/semantics/#canonieke-layout-vs-tolerantie">semantiek — canonieke layout</a>.</li>
+</ul>
+<p>Bij complexe MuseScore-lyrics is soms <code>--no-align</code> nodig (sla kuiser/align
+over) — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
+<code>kuiser</code> zijn advies, geen import-fout.</p>
+<p>Bij <code>--pitch vsa</code> plakt de import op elke stemregel een <strong>eindanker</strong> met
+absolute toonhoogte (a–g met wetenschappelijk cijfer) direct achter de
+<strong>laatste maatstreep</strong> van elk systeem, bijvoorbeeld <code>|g4</code> of <code>||a4</code>. Dat zijn
+check-only ankers: na wijzigingen in het <code>.mvsa</code> vangt <code>mvsa validate</code> een
+mismatch op (<code>MVSA-BAR-ANKER</code>). Op de lyrics-regel (<code>L:</code>) blijven de strepen
+kaal. Bij <code>--pitch doremi</code> en <code>--pitch a-g</code> komen die eindankers niet.</p>
+<p>Syntax van eindankers:
+<a href="../../../specification-mvsa/syntax/#eindanker-aan-de-maatstreep">specification-mvsa — eindanker</a>.</p>
 <h3 id="argumenten-en-opties_5">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties_5" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -7339,7 +7386,7 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
 <tr>
 <td><code>--no-align</code></td>
 <td>Nee</td>
-<td>Geen kolomuitlijning</td>
+<td>Geen kuiser-normaalvorm (geen align)</td>
 <td>uit</td>
 </tr>
 </tbody>
@@ -7347,6 +7394,8 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
 <h3 id="voorbeelden_4">Voorbeelden<a class="headerlink" href="#voorbeelden_4" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
+vsa mvsa import lied.mxl -o lied.mvsa --pitch vsa
+vsa mvsa validate lied.mvsa
 </code></pre></div>
 <hr />
 <h2 id="vsa-mvsa-normalize"><code>vsa mvsa normalize</code><a class="headerlink" href="#vsa-mvsa-normalize" title="Permanent link">&para;</a></h2>
@@ -7495,6 +7544,9 @@ conflicterende strepen faalt de kuiser met een duidelijke fout.</p>
   gevallen naar <code>~</code>.</li>
 <li><strong>Ambigu</strong> (<code>hei- li</code>, <code>li-&amp;--ge</code>): waarschuwing op stderr met
   <code>bestand:regel:kolom</code> — geen stille collapse naar <code>hei-li</code>.</li>
+<li><strong>Pyphen</strong> (ontbrekende / verdachte woordstreepjes): advies-warnings;
+  geen validate-fout. Sync-telling blijft leidend; bij complexe
+  MuseScore-importlyrics soms <code>--no-align</code>.</li>
 </ul>
 <p><code>normalize</code> blijft het conversiepad (pitch-herschrijf naar een apart
 uitvoerbestand). <code>kuiser</code> is het dagelijkse authoring-commando.</p>
@@ -7616,7 +7668,7 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-03
+        Bijgewerkt: 2026-10-08
         
       </p>
       

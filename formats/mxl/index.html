@@ -4787,7 +4787,7 @@
 </tr>
 <tr>
 <td>Import → <code>.mvsa</code></td>
-<td><a href="../../reference/cli/mxl/"><code>mxl import</code></a></td>
+<td><a href="../../reference/cli/mxl/"><code>mxl import</code></a> (= <a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a>; SATB P1–P4)</td>
 </tr>
 <tr>
 <td>→ <code>.mscz</code></td>
@@ -4803,6 +4803,16 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">Import = werkbank</p>
+<p><code>mxl import</code> is een <strong>bewerkvorm</strong> voor de werkbank (woordstreepjes, lege
+recite, lossy). Zie
+<a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a>.</p>
+</div>
+<p><strong>Import:</strong> de MusicXML-bron wordt direct geparst als vier parts (P1–P4 =
+S/A/T/B). Soft-wrap ~80 tekens, same-pitch holds als <code>-</code>, multi-lettergreep
+lyrics als recite. Kies <code>--pitch doremi</code>, <code>a-g</code> (alias <code>abc</code>), of <code>vsa</code>
+(EHM + absolute eindankers op systeemeinden).</p>
 <p>Dit is <strong>geen</strong> herdefinitie van de MusicXML-standaard: we documenteren
 <strong>onze</strong> export-/importprofielen.</p>
 <p><strong>Normaalvorm (checklist):</strong>
@@ -4817,6 +4827,8 @@ collapse-sommen; <strong>MSCZ-postprocess</strong> maakt daarna compacte gestipt
 Oefenhoek-Coria-transforms: <code>VSA-demo/scripts/mscz-product-transforms.md</code>.</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
+mxl import generated\alleluia.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
+mvsa validate generated\from-mxl.vsa.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
 vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
 </code></pre></div>
@@ -4863,7 +4875,7 @@ vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       

@@ -4882,7 +4882,8 @@
 Zie het conversieplan:
 <a href="../../../plans/mvsa-conversions/">mvsa-conversions</a>.</p>
 <p>Alias voor import: <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> (zelfde
-MSCZ→mxl→mvsa-keten).</p>
+MSCZ→mxl→mvsa-keten). <strong>Werkbank-bewerkvorm</strong> — niet ongewijzigd als
+catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout).</p>
 <p>Alias voor platte tekst: <a href="../text/"><code>vsa text</code></a> (zelfde extractie; ook
 <code>.mxl</code> / <code>.vsa</code> / <code>.mvsa</code>).</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
@@ -4904,7 +4905,7 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 <tbody>
 <tr>
 <td><code>import</code></td>
-<td>Importeer naar <code>.mvsa</code> (via MuseScore → temp <code>.mxl</code>).</td>
+<td>Importeer naar <code>.mvsa</code> (MuseScore → temp <code>.mxl</code> → SATB-explode → parser).</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -4916,8 +4917,14 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 </tr>
 </tbody>
 </table>
+<p><strong>Import-opties</strong> (<code>--pitch</code>, <code>--no-align</code>, soft-wrap, eindankers bij <code>vsa</code>,
+kuiser-normaalvorm): zelfde keten als
+<a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. De MSCZ-stap gebruikt dezelfde
+SATB-explode als <code>mscz mxl</code>.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
+mscz import generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
+vsa mvsa validate generated\from-mscz.vsa.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
 </code></pre></div>
@@ -4967,7 +4974,7 @@ mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       

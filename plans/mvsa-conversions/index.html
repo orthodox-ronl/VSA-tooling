@@ -5588,7 +5588,7 @@ Windows: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>, <code>scri
 </tr>
 <tr>
 <td>Import</td>
-<td>Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ</td>
+<td><strong>Werkbank-bewerkvorm</strong> (niet catalogus-klaar): lossy; woordstreepjes/lyrics nakijken; succes = pitch/duur/lyrics-equivalentie. <code>.mxl</code> → SATB P1–P4; <code>.mscz</code> → MuseScore → SATB-explode; soft-wrap; holds; recite; <code>--pitch vsa</code> → eindankers</td>
 </tr>
 <tr>
 <td>Scope</td>
@@ -5629,15 +5629,26 @@ identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code>
 <p><strong>Criterium (gehaald):</strong> met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
 (<code>tests/test_mvsa_mscz.py</code>; skip als MuseScore ontbreekt).</p>
 <h3 id="stap-4-import-score-mvsa">Stap 4 — Import (score → mvsa) ✅<a class="headerlink" href="#stap-4-import-score-mvsa" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa import PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style @oct
+<div class="highlight"><pre><span></span><code>vsa mvsa import PATH [-o OUT] --pitch {doremi,a-g,vsa} --octave-style @oct
 </code></pre></div>
 <ul>
-<li>Bron: <code>.mxl</code> / <code>.musicxml</code> direct; <code>.mscz</code> via MuseScore → mxl.</li>
-<li>Top-level <code>mxl import</code> / <code>mscz import</code> volgt tot stap 5 (nu onder <code>vsa mvsa import</code>).</li>
+<li>Bron: <code>.mxl</code> / <code>.musicxml</code> direct (SATB P1–P4); <code>.mscz</code> via MuseScore →
+  temp-<code>.mxl</code> → <strong>SATB-explode</strong> (zelfde als <code>mscz mxl</code>) → parser.</li>
+<li>Soft-wrap ~80 tekens per LSATB-systeem; één te lange maat blijft één systeem.</li>
+<li>Same-pitch holds (ook over maatgrenzen) → <code>-</code> op stemregels.</li>
+<li>Multi-lettergreep lyrics op één noot → recite <code>( … )</code>; lone extender →
+  lege recite <code>()~</code>; trailing <code>.</code> gestript.</li>
+<li>Default: <strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L, bars sync, kolommen);
+  <code>--no-align</code> slaat die stap over.</li>
+<li>Top-level <code>mxl import</code> / <code>mscz import</code> = alias van <code>vsa mvsa import</code>.</li>
+<li><code>abc</code> blijft alias van <code>a-g</code>. Pyphen-warnings via <code>kuiser</code> zijn advies.</li>
 </ul>
 <p><strong>Criterium (gehaald):</strong> roundtrip <code>mvsa → mxl → mvsa</code> pitch-equivalent op
 <code>alleluia-toon-8.canonieke.mvsa</code> sectie <code>schets2-oct-doremi</code> voor <code>--pitch
-doremi</code> en <code>a-g</code> (<code>tests/test_mvsa_import.py</code>).</p>
+doremi</code>, <code>a-g</code> en <code>vsa</code> (<code>tests/test_mvsa_import.py</code>). Bij <code>--pitch vsa</code>
+plakt import absolute eindankers (a–g+cijfer) op de laatste maatstreep van
+elk LSATB-systeem (check-only; <code>MVSA-BAR-ANKER</code> bij mismatch na edits).
+Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 <h3 id="stap-5-bron-commands-man-paginas">Stap 5 — Bron-commands + man-pagina’s ✅<a class="headerlink" href="#stap-5-bron-commands-man-paginas" title="Permanent link">&para;</a></h3>
 <p>Top-level console-scripts + <code>scripts\*.cmd</code>:</p>
 <table>
@@ -5732,7 +5743,7 @@ werken.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       

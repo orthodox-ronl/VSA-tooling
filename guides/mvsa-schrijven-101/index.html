@@ -5410,7 +5410,7 @@ elkaar (per frase één stijl is leesbaarder).</p>
 </tr>
 <tr>
 <td><code>vsa</code></td>
-<td>eerste toon absoluut, daarna EHM</td>
+<td>eerste toon absoluut, daarna EHM; bij <strong>import</strong> ook absolute eindankers op systeemeinden (<code>\|\|a4</code>)</td>
 </tr>
 <tr>
 <td><code>preserve</code></td>
@@ -5432,12 +5432,13 @@ vsa mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
 <p><code>S-:</code> zet de lopende toon op “zelfde toon als schrijf-do-anker <code>-</code>”; daarna
 EHM’s. Zie <a href="../../specification-mvsa/semantics/#absolute-en-relatieve-hoogte">Semantiek — absolute en relatieve hoogte</a>.</p>
 <p>??? tip "Welke stijl kiezen?"
-| Situatie                         | Suggestie                                      |
-| -------------------------------- | ---------------------------------------------- |
-| Overname van MuseScore / MXL     | import <code>--pitch doremi</code> of <code>a-g</code> (cijfers)     |
-| Liturgische ladder / toon        | doremi + <code>@oct</code>                                |
-| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM     |
-| Lange stapsgewijze frase         | EHM na één absoluut anker                      |</p>
+| Situatie                         | Suggestie                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Overname van MuseScore / MXL     | import <code>--pitch doremi</code> of <code>a-g</code> (cijfers)                                     |
+| Import + foutzoeken na edits     | <code>--pitch vsa</code> (EHM + absolute eindankers op systeemeinden)                     |
+| Liturgische ladder / toon        | doremi + <code>@oct</code>                                                                |
+| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM                                     |
+| Lange stapsgewijze frase         | EHM na één absoluut anker                                                      |</p>
 <hr />
 <h2 id="5-octaven-oct-do-octaaf-en-cijfers">5. Octaven: <code>@oct</code>, do-octaaf en cijfers<a class="headerlink" href="#5-octaven-oct-do-octaaf-en-cijfers" title="Permanent link">&para;</a></h2>
 <h3 id="schrijfoctaaf-oct">Schrijfoctaaf (<code>@oct</code>)<a class="headerlink" href="#schrijfoctaaf-oct" title="Permanent link">&para;</a></h3>
@@ -5550,24 +5551,55 @@ en <a href="../../specification-mvsa/syntax/#toonnamen-ag">Syntax — toonnamen 
 </tbody>
 </table>
 <p>Gebruik eindankers om vergissingen te vangen: als de lopende toon niet matcht,
-faalt validate.</p>
+faalt validate (<code>MVSA-BAR-ANKER</code>). Bij import met <code>--pitch vsa</code> plakt de
+toolchain zulke check-only ankers (a–g + cijfer) automatisch op systeemeinden;
+zie <a href="#7-taak-bladmuziek--mvsa">taak bladmuziek</a>.</p>
 <div class="highlight"><pre><span></span><code>S: fa so- mi&amp;do&amp;re&amp;mi fa mi ||mi
 </code></pre></div>
 <hr />
 <h2 id="7-taak-bladmuziek-mvsa">7. Taak: bladmuziek → mvsa<a class="headerlink" href="#7-taak-bladmuziek-mvsa" title="Permanent link">&para;</a></h2>
-<p><strong>Doel:</strong> een bestaande partituur (MusicXML / MuseScore) als tekstbron.</p>
+<p><strong>Doel:</strong> een bestaande partituur (MusicXML / MuseScore) als tekstbron in de
+<strong>werkbank</strong> (bewerken tot hij klaar is voor de catalogus).</p>
+<div class="admonition warning">
+<p class="admonition-title">Import = werkbank, niet catalogus</p>
+<p><code>vsa mvsa import</code> (en <code>mxl</code>/<code>mscz import</code>) levert een <strong>starttekst</strong>, geen
+afgewerkt zangstuk. Gebruik de uitkomst om te redigeren en te valideren;
+publiceer of accepteer hem niet ongewijzigd als catalogusbron.</p>
+<p>Waarom dat nodig is:</p>
+<ol>
+<li><strong>Woordstreepjes</strong> tussen lettergrepen kloppen vaak niet (MuseScore vs.
+   canonieke <code>hei-li</code> / <code>hei  -li</code>).</li>
+<li><strong>Lege recite</strong> (<code>()~</code>) en geplakte multi-lettergreep-recite moeten soms
+   herschreven worden tot nette L-tekst.</li>
+<li><strong>Layout en MuseScore-details</strong> gaan verloren; alleen toon, duur en
+   lyrics-equivalentie blijven.</li>
+</ol>
+</div>
 <ol>
 <li>Exporteer of bewaar als <code>.mxl</code> / <code>.mscz</code>.</li>
 <li>Importeer naar <code>.mvsa</code> met een pitch-vorm:
    <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa import bron.mxl -o lied.mvsa --pitch doremi
 </code></pre></div>
-   Of <code>--pitch a-g</code> als je bladcijfers wilt (<code>bb4</code>, <code>c5</code>).</li>
+   Of <code>--pitch a-g</code> als je bladcijfers wilt (<code>bb4</code>, <code>c5</code>). Voor EHM plus
+   check-only eindankers op systeemeinden (handig na edits):
+   <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa import bron.mxl -o lied.mvsa --pitch vsa
+vsa mvsa validate lied.mvsa
+</code></pre></div></li>
 <li>Zet bovenaan <code>@do</code> / <code>@mode</code> / <code>@oct</code> goed (import vult dit grotendeels in).</li>
 <li>Controleer L-tekst (import kan lelijk syllabificeren) en sync.</li>
 <li><code>vsa mvsa validate lied.mvsa</code></li>
-<li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code></li>
+<li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code> (Pyphen-warnings zijn
+   advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
+   <code>--no-align</code>.</li>
 </ol>
+<p>Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
+same-pitch holds als <code>-</code> op stemregels; multi-lettergreep lyrics op één noot
+als recite <code>( … )</code>; daarna <strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L,
+kolomuitlijning). Keten: <code>.mxl</code> → parser; <code>.mscz</code> → MuseScore → temp-<code>.mxl</code> →
+SATB-explode (zelfde als <code>mscz mxl</code>) → parser → kuiser. Details:
+<a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>.</p>
 <p>Referentie-voorbeeld (bladcijfers):
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa"><code>kleine-intocht-zondag-hemelum.mvsa</code></a>.</p>
 <p>??? tip "Van MuseScore-scherm naar tekst"
@@ -5755,7 +5787,7 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       
