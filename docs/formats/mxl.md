@@ -15,6 +15,11 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 | Platte gezongen tekst    | [`vsa text`](../reference/cli/text.md) (ook op `{stam}.mscz.mxl`)                                                 |
 | Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                                             |
 
+!!! warning "Import = werkbank"
+    `mxl import` is een **bewerkvorm** voor de werkbank (woordstreepjes, lege
+    recite, lossy). Zie
+    [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
+
 **Import:** de MusicXML-bron wordt direct geparst als vier parts (P1–P4 =
 S/A/T/B). Soft-wrap ~80 tekens, same-pitch holds als `-`, multi-lettergreep
 lyrics als recite. Kies `--pitch doremi`, `a-g` (alias `abc`), of `vsa`

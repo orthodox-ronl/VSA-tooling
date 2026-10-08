@@ -8,6 +8,7 @@ Playback-checklist:
 
 Alias voor import: [`vsa mvsa import`](mvsa.md#vsa-mvsa-import) (zelfde
 SATB-parser, soft-wrap, holds, recite en `--pitch`-gedrag).
+**Werkbank-bewerkvorm** — niet ongewijzigd als catalogusbron gebruiken.
 
 ## Synopsis
 

@@ -5,7 +5,8 @@ Zie het conversieplan:
 [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 Alias voor import: [`vsa mvsa import`](mvsa.md#vsa-mvsa-import) (zelfde
-MSCZ→mxl→mvsa-keten).
+MSCZ→mxl→mvsa-keten). **Werkbank-bewerkvorm** — niet ongewijzigd als
+catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout).
 
 Alias voor platte tekst: [`vsa text`](text.md) (zelfde extractie; ook
 `.mxl` / `.vsa` / `.mvsa`).

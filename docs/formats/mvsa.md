@@ -15,6 +15,11 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 | CLI                                 | [`mvsa`](../reference/cli/mvsa.md) (`≡ vsa mvsa`)                                                |
 | Platte gezongen tekst               | [`vsa text`](../reference/cli/text.md)                                                           |
 
+!!! warning "Import = werkbank"
+    Score→`.mvsa` is een **bewerkvorm** voor de werkbank-fase (woordstreepjes,
+    lege recite, lossy layout). Niet ongewijzigd als catalogusbron gebruiken.
+    Zie [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
+
 **Import (kort):** `.mxl` gaat rechtstreeks naar de SATB-parser (P1–P4);
 `.mscz` eerst via MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
 [`mscz mxl`](../reference/cli/mscz.md). Default output is de **canonieke

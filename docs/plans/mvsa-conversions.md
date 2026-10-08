@@ -131,7 +131,7 @@ Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
 | MSCZ uit mvsa    | **Keten** `mvsa → partituur-mxl (SA/TB) → mscz` + strip labels — checklist-conform                                                                                                                                                                               |
 | MXL ↔ MSCZ CLI   | `mxl mscz` → partituur; `mscz mxl` → vier Coria-parts                                                                                                                                                                                                            |
 | Octaaf in output | Altijd `@oct` in gegenereerde canonieke mvsa                                                                                                                                                                                                                     |
-| Import           | Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ. `.mxl` → SATB P1–P4; `.mscz` → MuseScore → SATB-explode (zoals `mscz mxl`) → parser; soft-wrap ~80; same-pitch holds `-`; multi-lettergreep lyrics → recite; `--pitch vsa` → eindankers |
+| Import           | **Werkbank-bewerkvorm** (niet catalogus-klaar): lossy; woordstreepjes/lyrics nakijken; succes = pitch/duur/lyrics-equivalentie. `.mxl` → SATB P1–P4; `.mscz` → MuseScore → SATB-explode; soft-wrap; holds; recite; `--pitch vsa` → eindankers                    |
 | Scope            | Geen `@voices` / blokhergebruik tenzij export het eist                                                                                                                                                                                                           |
 
 ---

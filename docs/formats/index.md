@@ -23,9 +23,9 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
   op `.vsa` / `.mvsa` / MusicXML / `.mscz` (geen aparte matrixkolom; schrijft
   geen `.mvsa`-sibling). Alias op MuseScore-bron: [`mscz text`](../reference/cli/mscz.md).
 - Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
-- **Import** (`.mxl` / `.mscz` → `.mvsa`): soft-wrap, holds, recite;
-  `--pitch vsa` zet eindankers — zie
-  [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
+- **Import** (`.mxl` / `.mscz` → `.mvsa`): **werkbank-bewerkvorm** (niet
+  catalogus-klaar); soft-wrap, holds, recite; `--pitch vsa` zet eindankers —
+  zie [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 - Normaalvorm-checklists MXL / MSCZ / PDF: [canonieke checklists](canonical-checklists.md)
   (MXL = vier parts; MSCZ = twee balken SA/TB zonder stem-labels).
   Leesbaarheid partituur: [MSCZ-leesbaarheid](mscz-leesbaarheid.md).

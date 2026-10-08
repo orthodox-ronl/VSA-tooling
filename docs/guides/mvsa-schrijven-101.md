@@ -292,7 +292,22 @@ S: fa so- mi&do&re&mi fa mi ||mi
 
 ## 7. Taak: bladmuziek → mvsa
 
-**Doel:** een bestaande partituur (MusicXML / MuseScore) als tekstbron.
+**Doel:** een bestaande partituur (MusicXML / MuseScore) als tekstbron in de
+**werkbank** (bewerken tot hij klaar is voor de catalogus).
+
+!!! warning "Import = werkbank, niet catalogus"
+    `vsa mvsa import` (en `mxl`/`mscz import`) levert een **starttekst**, geen
+    afgewerkt zangstuk. Gebruik de uitkomst om te redigeren en te valideren;
+    publiceer of accepteer hem niet ongewijzigd als catalogusbron.
+
+    Waarom dat nodig is:
+
+    1. **Woordstreepjes** tussen lettergrepen kloppen vaak niet (MuseScore vs.
+       canonieke `hei-li` / `hei  -li`).
+    2. **Lege recite** (`()~`) en geplakte multi-lettergreep-recite moeten soms
+       herschreven worden tot nette L-tekst.
+    3. **Layout en MuseScore-details** gaan verloren; alleen toon, duur en
+       lyrics-equivalentie blijven.
 
 1. Exporteer of bewaar als `.mxl` / `.mscz`.
 2. Importeer naar `.mvsa` met een pitch-vorm:

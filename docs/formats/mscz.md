@@ -10,7 +10,7 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 | Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore)                                          |
 | Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (via MuseScore; ook vanaf `.mscz`)                                     |
 | Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak                                       |
-| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md) (MuseScore → temp-mxl → SATB-explode; soft-wrap ~80; `--pitch vsa` = eindankers) |
+| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; `--pitch vsa` = eindankers)   |
 | → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                                                     |
 | Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)                                           |
 | Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                                                                  |
@@ -46,6 +46,11 @@ mvsa mscz lied.mvsa -o generated\lied.plain.mscz --layout plain
 **Bibliotheek-id:** consumer bepaalt de waarde; geef die met
 `--bibliotheek-id` (colofon bij `partituur`). Pad-afleiding is alleen een
 fallback.
+
+!!! warning "Import = werkbank"
+    `mscz import` is een **bewerkvorm** voor de werkbank-fase, geen
+    catalogus-klaar product. Zie
+    [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 ## Typische commando’s
 

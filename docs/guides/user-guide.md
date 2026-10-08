@@ -24,7 +24,7 @@ VSA-notatie  →  validate  →  SVG / MusicXML / Hugo-Markdown
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Lokaal installeren en eerste `OK`                  | [Starten](../getting-started/README.md)                                                                                                      |
 | `.mvsa` leren typen (L, stemmen, octaven)          | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                  |
-| Bladmuziek (`.mxl` / `.mscz`) → `.mvsa`            | [mvsa schrijven 101 — bladmuziek](mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa) · [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) |
+| Bladmuziek → `.mvsa` (**werkbank**-import)         | [mvsa schrijven 101 — bladmuziek](mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa) · [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) |
 | Het juiste commando kiezen                         | [CLI-taken](cli-taken.md)                                                                                                                    |
 | Begrijpen waarom validate faalt                    | [Validatie](validation.md) · [`vsa validate`](../reference/cli/validate.md)                                                                  |
 | Eén bestand of site als SVG                        | [SVG exporteren](svg-export.md)                                                                                                              |

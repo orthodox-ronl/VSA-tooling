@@ -41,7 +41,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
 | [`mscz`](#vsa-mvsa-mscz)             | Exporteer `.mvsa` naar MuseScore (`.mscz`).                  |
 | [`pdf`](#vsa-mvsa-pdf)               | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).       |
 | [`audio`](#vsa-mvsa-audio)           | Exporteer naar audio (``.mp3``) voor preview-luisteren.      |
-| [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` naar `.mvsa`.                     |
+| [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` → `.mvsa` (**werkbank**).         |
 | [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen).            |
 | [`kuiser`](#vsa-mvsa-kuiser)         | Authoring-kuiser: strepen syncen, woordstreep, align.        |
 
@@ -376,6 +376,26 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
 ---
 
 ## `vsa mvsa import`
+
+!!! warning "Alleen voor de werkbank-fase"
+    De importer (`mvsa import` / `mxl import` / `mscz import`) is bedoeld als
+    **bewerk-/startvorm** in de werkbank — om van MuseScore/MusicXML naar
+    bewerkbare `.mvsa` te komen en die handmatig af te maken. Niet als
+    kant-en-klare catalogusbron.
+
+    Belangrijkste redenen:
+
+    1. **Lettergreepstreepjes** — MuseScore-lyrics zetten streepjes tussen
+       lettergrepen van één woord vaak verkeerd of inconsistente; de canonieke
+       vorm (`hei-li`, spaties *vóór* `-li` bij breedte) moet je nabewerken.
+    2. **Lyrics-gaten** — noten zonder bruikbare tekst worden lege recite
+       (`()~` / `()_`); multi-lettergreep op één noot wordt recite `( … )`.
+       Dat houdt de sync, maar is geen nette zangstuktekst.
+    3. **Lossy** — MuseScore-layout en partituurdetails vallen weg; succes is
+       pitch/duur/lyrics-equivalentie, niet een publicatieklare partituur.
+
+    Na import: controleren, kuisen, valideren — pas daarna (in de bibliotheek)
+    accepteren naar de catalogus.
 
 ### Synopsis
 
