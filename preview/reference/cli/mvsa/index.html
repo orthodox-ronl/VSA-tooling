@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-08 15:38 CEST.
+  , gebouwd 2026-10-08 16:09 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -7303,11 +7303,15 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
   wordt op de stemregels als <code>-</code> geschreven.</li>
 <li>Multi-lettergreep lyrics op één noot (spaties, <code>-</code>, of soft hyphen) worden
   recite <code>( … )</code> i.p.v. één geplakte lettergreep. Een lone extender <code>-</code> wordt
-  lege recite <code>()…</code>. Trailing <code>.</code> op lyric-tekst wordt weggestript.</li>
+  lege recite <code>()~</code>. Trailing <code>.</code> op lyric-tekst wordt weggestript.</li>
+<li><strong>Normaalvorm:</strong> standaard schrijft import daarna de canonieke vorm via
+  <a href="#vsa-mvsa-kuiser"><code>mvsa kuiser</code></a> (standaard-lengte op L als <code>~</code>, maatstrepen
+  sync, kolomuitlijning) — zie
+  <a href="../../../specification-mvsa/syntax/">syntax — canonieke schrijfvorm</a> en
+  <a href="../../../specification-mvsa/semantics/#canonieke-layout-vs-tolerantie">semantiek — canonieke layout</a>.</li>
 </ul>
-<p>Voor canonieke kolomuitlijning: <a href="#vsa-mvsa-kuiser"><code>mvsa kuiser</code></a>. Bij
-complexe MuseScore-lyrics is soms <code>--no-align</code> (of <code>kuiser</code> zonder align)
-nodig — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
+<p>Bij complexe MuseScore-lyrics is soms <code>--no-align</code> nodig (sla kuiser/align
+over) — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
 <code>kuiser</code> zijn advies, geen import-fout.</p>
 <p>Bij <code>--pitch vsa</code> plakt de import op elke stemregel een <strong>eindanker</strong> met
 absolute toonhoogte (a–g met wetenschappelijk cijfer) direct achter de
@@ -7367,7 +7371,7 @@ kaal. Bij <code>--pitch doremi</code> en <code>--pitch a-g</code> komen die eind
 <tr>
 <td><code>--no-align</code></td>
 <td>Nee</td>
-<td>Geen kolomuitlijning</td>
+<td>Geen kuiser-normaalvorm (geen align)</td>
 <td>uit</td>
 </tr>
 </tbody>
