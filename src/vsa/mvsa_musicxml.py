@@ -1055,8 +1055,9 @@ def _position_to_notes(
             notes, plpos, opens_hyphen=opens_hyphen, number=num
         )
     # Same-pitch melisma (S13/R7 / M5a). Partituur: I1 ongestipte pack + ties.
-    # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot (Coria
-    # stript ties → half+kwart zou heraangeslagen klinken).
+    # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot zolang
+    # representeerbaar (≤ 28). Langer → I2-tie-keten (MuseScore speelt
+    # type/duration-mismatch als heraangeslagen kwarten).
     return _collapse_same_pitch_melisma(
         notes, allow_dotted=(layout == "playback")
     )
@@ -1146,22 +1147,28 @@ def _pack_same_pitch_run(
     total = sum(_note_divs(n) for n in run)
 
     if allow_dotted:
-        # Coria stript ``<tie>``: always one sounding note for a same-pitch hold.
+        # Coria stript ``<tie>``: prefer one sounding note when representable.
         # Keep intentional dotted ELM slots (``_.``) when the run is already one note.
         if len(run) == 1:
             return list(run)
         dur, div_override = _duration_from_divs(total)
-        return [
-            NoteEvent(
-                pitch=first.pitch,
-                duration=dur,
-                lyrics=list(first.lyrics),
-                recite=first.recite,
-                spacer=first.spacer,
-                duration_divisions=div_override,
-                stemless=first.stemless,
-            )
-        ]
+        if div_override is None:
+            # ≤ double-dotted whole: één MusicXML-duur, type en duration matchen.
+            return [
+                NoteEvent(
+                    pitch=first.pitch,
+                    duration=dur,
+                    lyrics=list(first.lyrics),
+                    recite=first.recite,
+                    spacer=first.spacer,
+                    duration_divisions=None,
+                    stemless=first.stemless,
+                )
+            ]
+        # Langer dan één standaardduur (bijv. 8 kwarten = 32): nooit
+        # ``type=quarter`` + ``duration=32`` — MuseScore heraanslaat elke
+        # kwart. Fall through naar I2-tie-keten (ongestipt ≤ whole).
+        # Coria kan bij tie-joins heraanslaan; beter dan per-kwart chops.
 
     parts = _pack_safe_divs(total, allow_dotted=False)
     if not parts:
@@ -1201,11 +1208,13 @@ def _collapse_same_pitch_melisma(
 ) -> list[NoteEvent]:
     """Same-pitch melisma → collapse and/or tie-keten (S13/R7).
 
-    *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één noot.
+    *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één
+    noot zolang de som ≤ dubbelgepunt whole (28). Langer → I2-tie-keten
+    (geen ``type``/``duration``-mismatch; MuseScore heraanslaat anders).
     Partituur/MSCZ (default): **I1** ongestipt ≤ whole; **I2** tie-keten.
 
-    Slur alleen bij toonwissels binnen het melisma; pure hold → ties (partituur)
-    of één noot (playback).
+    Slur alleen bij toonwissels binnen het melisma; pure hold → ties
+    (partituur, of playback bij overflow) of één noot (playback ≤ 28).
     """
     if len(notes) <= 1:
         return notes
