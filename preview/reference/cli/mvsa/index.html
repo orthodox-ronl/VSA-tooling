@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-08 16:09 CEST.
+  , gebouwd 2026-10-08 16:19 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -6701,7 +6701,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
 </tr>
 <tr>
 <td><a href="#vsa-mvsa-import"><code>import</code></a></td>
-<td>Importeer <code>.mxl</code> / <code>.mscz</code> naar <code>.mvsa</code>.</td>
+<td>Importeer <code>.mxl</code> / <code>.mscz</code> → <code>.mvsa</code> (<strong>werkbank</strong>).</td>
 </tr>
 <tr>
 <td><a href="#vsa-mvsa-normalize"><code>normalize</code></a></td>
@@ -7266,6 +7266,26 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
 </code></pre></div>
 <hr />
 <h2 id="vsa-mvsa-import"><code>vsa mvsa import</code><a class="headerlink" href="#vsa-mvsa-import" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Alleen voor de werkbank-fase</p>
+<p>De importer (<code>mvsa import</code> / <code>mxl import</code> / <code>mscz import</code>) is bedoeld als
+<strong>bewerk-/startvorm</strong> in de werkbank — om van MuseScore/MusicXML naar
+bewerkbare <code>.mvsa</code> te komen en die handmatig af te maken. Niet als
+kant-en-klare catalogusbron.</p>
+<p>Belangrijkste redenen:</p>
+<ol>
+<li><strong>Lettergreepstreepjes</strong> — MuseScore-lyrics zetten streepjes tussen
+   lettergrepen van één woord vaak verkeerd of inconsistente; de canonieke
+   vorm (<code>hei-li</code>, spaties <em>vóór</em> <code>-li</code> bij breedte) moet je nabewerken.</li>
+<li><strong>Lyrics-gaten</strong> — noten zonder bruikbare tekst worden lege recite
+   (<code>()~</code> / <code>()_</code>); multi-lettergreep op één noot wordt recite <code>( … )</code>.
+   Dat houdt de sync, maar is geen nette zangstuktekst.</li>
+<li><strong>Lossy</strong> — MuseScore-layout en partituurdetails vallen weg; succes is
+   pitch/duur/lyrics-equivalentie, niet een publicatieklare partituur.</li>
+</ol>
+<p>Na import: controleren, kuisen, valideren — pas daarna (in de bibliotheek)
+accepteren naar de catalogus.</p>
+</div>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
                 [--octave-style {@oct,marker}] [--section SECTION]

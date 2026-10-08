@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-08 16:09 CEST.
+  , gebouwd 2026-10-08 16:19 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4817,7 +4817,7 @@ voor de <strong>partituur-workflow</strong>; Coria gebruikt <code>.mxl</code>.</
 </tr>
 <tr>
 <td>Import → <code>.mvsa</code></td>
-<td><a href="../../reference/cli/mscz/"><code>mscz import</code></a> (MuseScore → temp-mxl → SATB-explode; soft-wrap ~80; <code>--pitch vsa</code> = eindankers)</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz import</code></a> (<strong>werkbank</strong>-bewerkvorm; SATB-explode; soft-wrap; <code>--pitch vsa</code> = eindankers)</td>
 </tr>
 <tr>
 <td>→ <code>.mxl</code></td>
@@ -4874,6 +4874,12 @@ mvsa mscz lied.mvsa -o generated\lied.plain.mscz --layout plain
 <p><strong>Bibliotheek-id:</strong> consumer bepaalt de waarde; geef die met
 <code>--bibliotheek-id</code> (colofon bij <code>partituur</code>). Pad-afleiding is alleen een
 fallback.</p>
+<div class="admonition warning">
+<p class="admonition-title">Import = werkbank</p>
+<p><code>mscz import</code> is een <strong>bewerkvorm</strong> voor de werkbank-fase, geen
+catalogus-klaar product. Zie
+<a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a>.</p>
+</div>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <p><div class="highlight"><pre><span></span><code>mscz import generated\alleluia.mscz --pitch a-g -o generated\from-mscz.mvsa
 mscz import generated\alleluia.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa

@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-08 16:09 CEST.
+  , gebouwd 2026-10-08 16:19 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5563,7 +5563,23 @@ zie <a href="#7-taak-bladmuziek--mvsa">taak bladmuziek</a>.</p>
 </code></pre></div>
 <hr />
 <h2 id="7-taak-bladmuziek-mvsa">7. Taak: bladmuziek → mvsa<a class="headerlink" href="#7-taak-bladmuziek-mvsa" title="Permanent link">&para;</a></h2>
-<p><strong>Doel:</strong> een bestaande partituur (MusicXML / MuseScore) als tekstbron.</p>
+<p><strong>Doel:</strong> een bestaande partituur (MusicXML / MuseScore) als tekstbron in de
+<strong>werkbank</strong> (bewerken tot hij klaar is voor de catalogus).</p>
+<div class="admonition warning">
+<p class="admonition-title">Import = werkbank, niet catalogus</p>
+<p><code>vsa mvsa import</code> (en <code>mxl</code>/<code>mscz import</code>) levert een <strong>starttekst</strong>, geen
+afgewerkt zangstuk. Gebruik de uitkomst om te redigeren en te valideren;
+publiceer of accepteer hem niet ongewijzigd als catalogusbron.</p>
+<p>Waarom dat nodig is:</p>
+<ol>
+<li><strong>Woordstreepjes</strong> tussen lettergrepen kloppen vaak niet (MuseScore vs.
+   canonieke <code>hei-li</code> / <code>hei  -li</code>).</li>
+<li><strong>Lege recite</strong> (<code>()~</code>) en geplakte multi-lettergreep-recite moeten soms
+   herschreven worden tot nette L-tekst.</li>
+<li><strong>Layout en MuseScore-details</strong> gaan verloren; alleen toon, duur en
+   lyrics-equivalentie blijven.</li>
+</ol>
+</div>
 <ol>
 <li>Exporteer of bewaar als <code>.mxl</code> / <code>.mscz</code>.</li>
 <li>Importeer naar <code>.mvsa</code> met een pitch-vorm:
