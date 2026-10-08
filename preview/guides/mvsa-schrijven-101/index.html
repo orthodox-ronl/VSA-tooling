@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-05 11:17 CEST.
+  , gebouwd 2026-10-08 15:26 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5415,7 +5415,7 @@ elkaar (per frase één stijl is leesbaarder).</p>
 </tr>
 <tr>
 <td><code>vsa</code></td>
-<td>eerste toon absoluut, daarna EHM</td>
+<td>eerste toon absoluut, daarna EHM; bij <strong>import</strong> ook absolute eindankers op systeemeinden (<code>\|\|a4</code>)</td>
 </tr>
 <tr>
 <td><code>preserve</code></td>
@@ -5437,12 +5437,13 @@ vsa mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
 <p><code>S-:</code> zet de lopende toon op “zelfde toon als schrijf-do-anker <code>-</code>”; daarna
 EHM’s. Zie <a href="../../specification-mvsa/semantics/#absolute-en-relatieve-hoogte">Semantiek — absolute en relatieve hoogte</a>.</p>
 <p>??? tip "Welke stijl kiezen?"
-| Situatie                         | Suggestie                                      |
-| -------------------------------- | ---------------------------------------------- |
-| Overname van MuseScore / MXL     | import <code>--pitch doremi</code> of <code>a-g</code> (cijfers)     |
-| Liturgische ladder / toon        | doremi + <code>@oct</code>                                |
-| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM     |
-| Lange stapsgewijze frase         | EHM na één absoluut anker                      |</p>
+| Situatie                         | Suggestie                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Overname van MuseScore / MXL     | import <code>--pitch doremi</code> of <code>a-g</code> (cijfers)                                     |
+| Import + foutzoeken na edits     | <code>--pitch vsa</code> (EHM + absolute eindankers op systeemeinden)                     |
+| Liturgische ladder / toon        | doremi + <code>@oct</code>                                                                |
+| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM                                     |
+| Lange stapsgewijze frase         | EHM na één absoluut anker                                                      |</p>
 <hr />
 <h2 id="5-octaven-oct-do-octaaf-en-cijfers">5. Octaven: <code>@oct</code>, do-octaaf en cijfers<a class="headerlink" href="#5-octaven-oct-do-octaaf-en-cijfers" title="Permanent link">&para;</a></h2>
 <h3 id="schrijfoctaaf-oct">Schrijfoctaaf (<code>@oct</code>)<a class="headerlink" href="#schrijfoctaaf-oct" title="Permanent link">&para;</a></h3>
@@ -5760,7 +5761,7 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       

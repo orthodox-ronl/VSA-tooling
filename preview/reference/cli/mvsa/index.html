@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-05 11:17 CEST.
+  , gebouwd 2026-10-08 15:26 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -7287,13 +7287,23 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
 </tr>
 <tr>
 <td><code>.mscz</code></td>
-<td>Eerst MuseScore CLI → temp <code>.mxl</code>, daarna zelfde parser</td>
+<td>MuseScore CLI → temp <code>.mxl</code> → <strong>SATB-normalisatie</strong> (zelfde explode als <a href="../mscz/"><code>mscz mxl</code></a>) → parser</td>
 </tr>
 </tbody>
 </table>
 <p>Stemhoogten worden in de gekozen <code>--pitch</code>-vorm geschreven; <code>@do</code> / <code>@mode</code>
 komen uit de toonsoort (majeur-aanname); <code>@oct</code> wordt per stem afgeleid.
 Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
+<p>De uitvoer wordt in <strong>meerdere LSATB-systemen</strong> gezet (ongeveer 80 tekens per
+regel), zodat je het resultaat in een editor kunt lezen. Eén maat die alleen al
+langer is dan die breedte blijft één systeem. Voor canonieke kolomuitlijning:
+<a href="#vsa-mvsa-kuiser"><code>mvsa kuiser</code></a> (bij complexe MuseScore-lyrics soms
+<code>--no-align</code> / <code>kuiser</code> zonder align nodig — de sync-telling blijft leidend).</p>
+<p>Bij <code>--pitch vsa</code> plakt de import op elke stemregel een <strong>eindanker</strong> met
+absolute toonhoogte (a–g met cijfer) direct achter de <strong>laatste maatstreep</strong>
+van elk systeem, bijvoorbeeld <code>|g4</code> of <code>||a4</code>. Dat zijn check-only ankers:
+na wijzigingen in het <code>.mvsa</code> vangt <code>mvsa validate</code> een mismatch op
+(<code>MVSA-BAR-ANKER</code>). Op de lyrics-regel (<code>L:</code>) blijven de strepen kaal.</p>
 <h3 id="argumenten-en-opties_5">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties_5" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -7621,7 +7631,7 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-03
+        Bijgewerkt: 2026-10-08
         
       </p>
       

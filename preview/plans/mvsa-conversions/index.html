@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-05 11:17 CEST.
+  , gebouwd 2026-10-08 15:26 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5593,7 +5593,7 @@ Windows: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>, <code>scri
 </tr>
 <tr>
 <td>Import</td>
-<td>Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ</td>
+<td>Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ. MSCZ-import: MuseScore → SATB-explode (zoals <code>mscz mxl</code>) → parser; LSATB-systemen soft-wrap ~80 tekens</td>
 </tr>
 <tr>
 <td>Scope</td>
@@ -5642,7 +5642,9 @@ identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code>
 </ul>
 <p><strong>Criterium (gehaald):</strong> roundtrip <code>mvsa → mxl → mvsa</code> pitch-equivalent op
 <code>alleluia-toon-8.canonieke.mvsa</code> sectie <code>schets2-oct-doremi</code> voor <code>--pitch
-doremi</code> en <code>a-g</code> (<code>tests/test_mvsa_import.py</code>).</p>
+doremi</code>, <code>a-g</code> en <code>vsa</code> (<code>tests/test_mvsa_import.py</code>). Bij <code>--pitch vsa</code>
+plakt import absolute eindankers (a–g+cijfer) op de laatste maatstreep van
+elk LSATB-systeem (check-only; <code>MVSA-BAR-ANKER</code> bij mismatch na edits).</p>
 <h3 id="stap-5-bron-commands-man-paginas">Stap 5 — Bron-commands + man-pagina’s ✅<a class="headerlink" href="#stap-5-bron-commands-man-paginas" title="Permanent link">&para;</a></h3>
 <p>Top-level console-scripts + <code>scripts\*.cmd</code>:</p>
 <table>
@@ -5737,7 +5739,7 @@ werken.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       
