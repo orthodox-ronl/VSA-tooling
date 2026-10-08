@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-08 15:26 CEST.
+  , gebouwd 2026-10-08 15:38 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4888,7 +4888,8 @@ Zie het conversieplan:
 <a href="../../../plans/mvsa-conversions/">mvsa-conversions</a>.
 Playback-checklist:
 <a href="../../../formats/canonical-checklists/#checklist-mxl-coria--playback">canonical-checklists — MXL</a>.</p>
-<p>Alias voor import: <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>.</p>
+<p>Alias voor import: <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> (zelfde
+SATB-parser, soft-wrap, holds, recite en <code>--pitch</code>-gedrag).</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mxl [-h] {import,mscz,validate,normalize} …
 mxl import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
@@ -4908,7 +4909,7 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 <tbody>
 <tr>
 <td><code>import</code></td>
-<td>Importeer naar <code>.mvsa</code> (zelfde pad als <code>vsa mvsa import</code>).</td>
+<td>Importeer naar <code>.mvsa</code>: direct SATB P1–P4 (zelfde pad als <code>vsa mvsa import</code>).</td>
 </tr>
 <tr>
 <td><code>mscz</code></td>
@@ -4924,8 +4925,13 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 </tr>
 </tbody>
 </table>
+<p><strong>Import-opties</strong> (<code>--pitch</code>, <code>--no-align</code>, soft-wrap ~80, eindankers bij
+<code>vsa</code>): zie <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. Bij complexe lyrics
+soms <code>--no-align</code>; sync-telling blijft leidend.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mxl import generated\alleluia-schets2.mxl --pitch doremi -o generated\from-mxl.mvsa
+mxl import generated\alleluia-schets2.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
+vsa mvsa validate generated\from-mxl.vsa.mvsa
 mxl mscz generated\alleluia-schets2.mxl -o generated\from-mxl.mscz
 mxl validate content-source\bibliotheek\…\lied.mscz.mxl --profile satb
 mxl normalize raw.mxl -o out.mxl --apply-timing
@@ -4977,7 +4983,7 @@ mxl normalize raw.mxl -o out.mxl --apply-timing
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-08
         
       </p>
       

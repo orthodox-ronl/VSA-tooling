@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-08 15:26 CEST.
+  , gebouwd 2026-10-08 15:38 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5556,7 +5556,9 @@ en <a href="../../specification-mvsa/syntax/#toonnamen-ag">Syntax — toonnamen 
 </tbody>
 </table>
 <p>Gebruik eindankers om vergissingen te vangen: als de lopende toon niet matcht,
-faalt validate.</p>
+faalt validate (<code>MVSA-BAR-ANKER</code>). Bij import met <code>--pitch vsa</code> plakt de
+toolchain zulke check-only ankers (a–g + cijfer) automatisch op systeemeinden;
+zie <a href="#7-taak-bladmuziek--mvsa">taak bladmuziek</a>.</p>
 <div class="highlight"><pre><span></span><code>S: fa so- mi&amp;do&amp;re&amp;mi fa mi ||mi
 </code></pre></div>
 <hr />
@@ -5568,12 +5570,24 @@ faalt validate.</p>
    <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa import bron.mxl -o lied.mvsa --pitch doremi
 </code></pre></div>
-   Of <code>--pitch a-g</code> als je bladcijfers wilt (<code>bb4</code>, <code>c5</code>).</li>
+   Of <code>--pitch a-g</code> als je bladcijfers wilt (<code>bb4</code>, <code>c5</code>). Voor EHM plus
+   check-only eindankers op systeemeinden (handig na edits):
+   <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa import bron.mxl -o lied.mvsa --pitch vsa
+vsa mvsa validate lied.mvsa
+</code></pre></div></li>
 <li>Zet bovenaan <code>@do</code> / <code>@mode</code> / <code>@oct</code> goed (import vult dit grotendeels in).</li>
 <li>Controleer L-tekst (import kan lelijk syllabificeren) en sync.</li>
 <li><code>vsa mvsa validate lied.mvsa</code></li>
-<li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code></li>
+<li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code> (Pyphen-warnings zijn
+   advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
+   <code>--no-align</code>.</li>
 </ol>
+<p>Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
+same-pitch holds als <code>-</code> op stemregels; multi-lettergreep lyrics op één noot
+als recite <code>( … )</code>. Keten: <code>.mxl</code> → parser; <code>.mscz</code> → MuseScore → temp-<code>.mxl</code>
+→ SATB-explode (zelfde als <code>mscz mxl</code>) → parser. Details:
+<a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>.</p>
 <p>Referentie-voorbeeld (bladcijfers):
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa"><code>kleine-intocht-zondag-hemelum.mvsa</code></a>.</p>
 <p>??? tip "Van MuseScore-scherm naar tekst"
