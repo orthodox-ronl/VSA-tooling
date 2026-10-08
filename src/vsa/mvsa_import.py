@@ -1,10 +1,19 @@
 """Import MusicXML / MSCZ into .mvsa (draft-v0).
 
 Primary path: parse SATB MusicXML (as emitted by ``mvsa musicxml``).
-``.mscz`` is converted to ``.mxl`` via MuseScore CLI first.
+``.mscz`` is converted to ``.mxl`` via MuseScore CLI, then normalized to
+four-part Coria/SATB (same explode as ``mscz mxl``) before parsing.
 
 Lossy by design: layout and MuseScore-only details are dropped. Success =
 pitch / duration / lyrics-equivalent roundtrip where the source was our MXL.
+
+Imported LSATB systems are soft-wrapped to about
+:data:`DEFAULT_SYSTEM_SOFT_WIDTH` characters so the result stays readable
+in an editor (one long measure may exceed the width alone).
+
+With ``--pitch vsa``, each stem line gets a check-only absolute pitch
+**eindanker** glued to the last bar of every system (e.g. ``||a4``), so
+later edits can be caught by ``mvsa validate`` (``MVSA-BAR-ANKER``).
 """
 
 from __future__ import annotations
@@ -33,6 +42,9 @@ from .pitch_resolver import _SCALE_INTERVALS, parse_pitch_string
 
 # MusicXML part id → stem letter (matches mvsa_musicxml.PARTS)
 _PART_VOICE = {"P1": "S", "P2": "A", "P3": "T", "P4": "B"}
+
+# Soft wrap for imported LSATB systems (full line incl. ``L: `` prefix).
+DEFAULT_SYSTEM_SOFT_WIDTH = 80
 
 # Reverse of duration_model default (prefer ~ for quarter)
 _DURATION_TO_ELM: dict[tuple[str, int], str] = {
@@ -98,6 +110,7 @@ def import_score_to_mvsa(
     align: bool = True,
     section_id: str = "import",
     musescore: Path | None = None,
+    system_soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
 ) -> str:
     """Read ``.mxl`` / ``.musicxml`` / ``.mscz`` and return mvsa text."""
     pitch = canonicalize_pitch_form(pitch)
@@ -115,6 +128,10 @@ def import_score_to_mvsa(
         raise MvsaImportError(
             "octave-style 'marker' is nog niet geïmplementeerd; gebruik @oct"
         )
+    if system_soft_width < 1:
+        raise MvsaImportError(
+            f"system_soft_width moet ≥ 1 zijn; kreeg {system_soft_width}"
+        )
 
     path = Path(path)
     suffix = path.suffix.lower()
@@ -129,6 +146,10 @@ def import_score_to_mvsa(
             except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
                 raise MvsaImportError(str(exc)) from exc
             xml = read_musicxml_file(tmp_mxl)
+            # MuseScore partituur is often SA/TB; explode to P1–P4 like mscz mxl.
+            from .musicxml_playback_normalize import normalize_playback_musicxml
+
+            xml = normalize_playback_musicxml(xml, apply_timing=True)
         elif suffix in {".mxl", ".musicxml", ".xml"}:
             xml = read_musicxml_file(path)
         else:
@@ -141,6 +162,7 @@ def import_score_to_mvsa(
             score,
             pitch_form=pitch,
             section_id=section_id,
+            system_soft_width=system_soft_width,
         )
         if align:
             text = align_mvsa_text(text)
@@ -159,6 +181,7 @@ def import_score_path(
     align: bool = True,
     section_id: str = "import",
     musescore: Path | None = None,
+    system_soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
 ) -> None:
     text = import_score_to_mvsa(
         path,
@@ -167,6 +190,7 @@ def import_score_path(
         align=align,
         section_id=section_id,
         musescore=musescore,
+        system_soft_width=system_soft_width,
     )
     out = Path(out)
     if out.suffix.lower() != ".mvsa":
@@ -232,6 +256,11 @@ def parse_musicxml_satb(xml: str) -> _Score:
                 if _find(note_el, "rest") is not None:
                     # Skip filler rests (empty measures from export)
                     continue
+                if _find(note_el, "chord") is not None:
+                    # Chord tone shares onset with previous note; not a new slot.
+                    continue
+                if _find(note_el, "grace") is not None:
+                    continue
                 pitch_el = _find(note_el, "pitch")
                 if pitch_el is None:
                     continue
@@ -281,6 +310,7 @@ def score_to_mvsa(
     *,
     pitch_form: str,
     section_id: str = "import",
+    system_soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
 ) -> str:
     do_p = parse_pitch_string(score.do)
     intervals = _SCALE_INTERVALS[score.mode]
@@ -300,6 +330,8 @@ def score_to_mvsa(
     n_meas = len(score.parts["S"])
     l_segs: list[str] = []
     voice_segs: dict[str, list[str]] = {v: [] for v in "SATB"}
+    # Carry last written pitch per stem so same-height holds become ``-``.
+    last_pitch: dict[str, Pitch | None] = {v: None for v in "SATB"}
 
     for mi in range(n_meas):
         s_notes = score.parts["S"][mi]
@@ -308,33 +340,163 @@ def score_to_mvsa(
         for letter in "SATB":
             v_notes = score.parts[letter][mi]
             v_positions = _group_positions(v_notes, mirror_of=positions)
-            voice_segs[letter].append(
-                _format_voice_measure(
-                    v_positions,
-                    pitch_form=pitch_form,
-                    do=do_p,
-                    intervals=intervals,
-                    writing_oct=writing_oct[letter],
-                )
+            seg, last_pitch[letter] = _format_voice_measure(
+                v_positions,
+                pitch_form=pitch_form,
+                do=do_p,
+                intervals=intervals,
+                writing_oct=writing_oct[letter],
+                last_pitch=last_pitch[letter],
             )
+            voice_segs[letter].append(seg)
 
-    bars = ["|"] * (n_meas - 1) + ["||"] if n_meas else ["||"]
-
-    def join_segs(segs: list[str]) -> str:
-        parts: list[str] = []
-        for i, seg in enumerate(segs):
-            parts.append(seg)
-            if i < len(bars):
-                parts.append(f" {bars[i]}")
-                if i + 1 < len(segs):
-                    parts.append(" ")
-        return "".join(parts).rstrip()
-
-    lines.append(f"L: {join_segs(l_segs)}")
-    for letter in "SATB":
-        lines.append(f"{letter}: {join_segs(voice_segs[letter])}")
+    ranges = _pack_system_ranges(
+        l_segs,
+        voice_segs,
+        soft_width=system_soft_width,
+        pitch_form=pitch_form,
+        score=score,
+    )
+    for si, (start, end) in enumerate(ranges):
+        is_last = si == len(ranges) - 1
+        chunk_l = l_segs[start:end]
+        chunk_v = {letter: voice_segs[letter][start:end] for letter in "SATB"}
+        n = end - start
+        if n <= 0:
+            continue
+        if is_last:
+            bars = ["|"] * (n - 1) + ["||"]
+        else:
+            bars = ["|"] * n
+        lines.append(f"L: {_join_measure_segs(chunk_l, bars)}")
+        for letter in "SATB":
+            voice_bars = _bars_with_system_eindanker(
+                bars,
+                pitch_form=pitch_form,
+                end_pitch=_last_sounding_in_range(score, letter, start, end),
+            )
+            lines.append(
+                f"{letter}: {_join_measure_segs(chunk_v[letter], voice_bars)}"
+            )
+        if not is_last:
+            lines.append("")
     lines.append("")
     return "\n".join(lines)
+
+
+def _last_sounding_in_range(
+    score: _Score, letter: str, start: int, end: int
+) -> Pitch | None:
+    """Last pitched note in measures ``[start, end)`` for one stem (or None)."""
+    last: Pitch | None = None
+    for mi in range(start, end):
+        for note in score.parts.get(letter, [])[mi]:
+            if note.pitch is not None:
+                last = note.pitch
+    return last
+
+
+def _bars_with_system_eindanker(
+    bars: list[str],
+    *,
+    pitch_form: str,
+    end_pitch: Pitch | None,
+) -> list[str]:
+    """Glue absolute pitch onto the last bar when importing as ``vsa``.
+
+    Lyrics lines keep bare bars; stem lines get e.g. ``||a4`` / ``|f#4`` so
+    ``mvsa validate`` can catch pitch drift after edits (``MVSA-BAR-ANKER``).
+    """
+    if pitch_form != "vsa" or not bars or end_pitch is None:
+        return bars
+    out = list(bars)
+    out[-1] = f"{out[-1]}{format_abc_scientific(end_pitch)}"
+    return out
+
+
+def _join_measure_segs(segs: list[str], bars: list[str]) -> str:
+    parts: list[str] = []
+    for i, seg in enumerate(segs):
+        parts.append(seg)
+        if i < len(bars):
+            parts.append(f" {bars[i]}")
+            if i + 1 < len(segs):
+                parts.append(" ")
+    return "".join(parts).rstrip()
+
+
+def _system_content_width(
+    l_segs: list[str],
+    voice_segs: dict[str, list[str]],
+    start: int,
+    end: int,
+    *,
+    final_system: bool,
+    pitch_form: str = "doremi",
+    score: _Score | None = None,
+) -> int:
+    """Max length of ``L:/S:/A:/T:/B:`` lines for measures ``[start, end)``."""
+    n = end - start
+    if n <= 0:
+        return 0
+    if final_system:
+        bars = ["|"] * (n - 1) + ["||"]
+    else:
+        bars = ["|"] * n
+    widths = [len(f"L: {_join_measure_segs(l_segs[start:end], bars)}")]
+    for letter in "SATB":
+        ep = (
+            _last_sounding_in_range(score, letter, start, end)
+            if score is not None
+            else None
+        )
+        voice_bars = _bars_with_system_eindanker(
+            bars, pitch_form=pitch_form, end_pitch=ep
+        )
+        joined = _join_measure_segs(voice_segs[letter][start:end], voice_bars)
+        widths.append(len(f"{letter}: {joined}"))
+    return max(widths)
+
+
+def _pack_system_ranges(
+    l_segs: list[str],
+    voice_segs: dict[str, list[str]],
+    *,
+    soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
+    pitch_form: str = "doremi",
+    score: _Score | None = None,
+) -> list[tuple[int, int]]:
+    """Pack measure indices into ``[start, end)`` ranges under soft_width.
+
+    A single measure that alone exceeds ``soft_width`` still gets its own
+    system. Intermediate systems are sized as non-final (trailing ``|``);
+    the last packed range is measured as final (``||``) when it is the
+    whole piece, but packing decisions use non-final width so adding a
+    measure later does not under-estimate.
+    """
+    n = len(l_segs)
+    if n == 0:
+        return []
+    ranges: list[tuple[int, int]] = []
+    start = 0
+    for i in range(n):
+        trial_end = i + 1
+        # While packing, treat the trial as a non-final system (ends with |).
+        # The true last system may end with || (one char longer) — acceptable.
+        width = _system_content_width(
+            l_segs,
+            voice_segs,
+            start,
+            trial_end,
+            final_system=False,
+            pitch_form=pitch_form,
+            score=score,
+        )
+        if start < i and width > soft_width:
+            ranges.append((start, i))
+            start = i
+    ranges.append((start, n))
+    return ranges
 
 
 # --- position grouping / formatting -----------------------------------------
@@ -411,12 +573,13 @@ def _group_positions(
         while j < len(notes) and not notes[j].lyrics:
             group.append(notes[j])
             j += 1
-        recite = n0.is_breve or (
-            bool(n0.lyrics) and n0.is_breve
-        )
-        # Also treat breve as recite even without lyric
-        if n0.is_breve:
-            recite = True
+        lyric_text = n0.lyrics[0].text if n0.lyrics else ""
+        multi_syllable = _lyric_looks_multi_syllable(lyric_text)
+        recite = bool(n0.is_breve) or multi_syllable
+        if multi_syllable and len(group) > 1:
+            # Recite underlay on the visible note; lyric-less followers are often
+            # failed expand/spacers — keep one slot (same pitch/duur as n0).
+            group = [n0]
         positions.append(_Position(notes=group, recite=recite))
         i = j
     return positions
@@ -427,10 +590,11 @@ def _format_l_measure(positions: list[_Position]) -> str:
     for idx, pos in enumerate(positions):
         n0 = pos.notes[0]
         lyric = n0.lyrics[0] if n0.lyrics else None
-        text = lyric.text if lyric else ""
+        raw = lyric.text if lyric else ""
         syllabic = lyric.syllabic if lyric else "single"
 
         if pos.recite:
+            text = _clean_recite_lyric_text(raw)
             body = f"({text})" if text else "()"
             # Explicit non-breve duration after ) if present
             if not n0.is_breve:
@@ -439,16 +603,89 @@ def _format_l_measure(positions: list[_Position]) -> str:
             parts.append(body)
             continue
 
+        text = _clean_import_lyric_text(raw)
         elms = [_duration_to_elm(n.duration) for n in pos.notes]
+        # Lyric-less / extender-only slot: bare ``~`` is not an L-position —
+        # use empty recite ``()~`` so sync-telling matches the stem.
+        if not text:
+            body = "()" + elms[0]
+            if len(elms) > 1:
+                body += "&" + "&".join(elms[1:])
+            parts.append(body)
+            continue
         # First syllable / text
         if syllabic in ("end", "middle") and text:
             token = f"-{text}{elms[0]}"
         else:
-            token = f"{text}{elms[0]}" if text else elms[0]
+            token = f"{text}{elms[0]}"
         if len(elms) > 1:
             token += "&" + "&".join(elms[1:])
         parts.append(token)
     return " ".join(parts)
+
+
+def _lyric_looks_multi_syllable(text: str) -> bool:
+    """True when one MusicXML lyric encodes multiple syllables (recite underlay).
+
+    Signals: whitespace between parts, or a soft hyphen between word characters
+    (``die-tot``, ``ko-nink-rijk``). Lone extender ``-`` is not multi-syllable.
+    """
+    t = (text or "").strip()
+    if not t or t == "-":
+        return False
+    if any(ch.isspace() for ch in t):
+        return True
+    # Soft hyphen between letters/digits (not a leading syllabic ``-li``).
+    for i, ch in enumerate(t):
+        if ch != "-" or i == 0 or i + 1 >= len(t):
+            continue
+        left, right = t[i - 1], t[i + 1]
+        if (left.isalnum() or left in "',.") and (
+            right.isalnum() or right in "',."
+        ):
+            return True
+    return False
+
+
+def _clean_recite_lyric_text(text: str) -> str:
+    """Keep spaces/hyphens inside recite ``( … )``; trim extender-only / ELM ``.``."""
+    t = (text or "").strip()
+    if not t or t == "-":
+        return ""
+    # Sentence-final ``.`` before ``)`` is fine as punctuation; trailing-only
+    # period that was meant as duration is rare inside multi-syllable underlay.
+    # Collapse runs of whitespace for stable tokens.
+    t = " ".join(t.split())
+    return t
+
+
+def _clean_import_lyric_text(text: str) -> str:
+    """Normalize single-syllable MusicXML lyric text for non-recite L-tokens.
+
+    - Lone ``-`` (melisma extender) → empty (emitted as ``()…``).
+    - Trailing ``.`` is an ELM character in mvsa; strip sentence-final ``.``.
+    - Soft hyphens / spaces should already have been routed to recite; if they
+      remain, collapse so the L-parser does not invent extra positions.
+      Trailing comma alone (``gen,``) is kept.
+    """
+    t = (text or "").strip()
+    if not t or t == "-":
+        return ""
+    # Avoid ``ren._`` parsing as syllable ``ren`` + ELM ``.`` (dropping ``_``).
+    while t.endswith(".") and len(t) > 1:
+        t = t[:-1].rstrip()
+    if not t or t == "-":
+        return ""
+    trailing_comma = t.endswith(",")
+    t = t.replace("-", "")
+    t = "".join(t.split())
+    # Letters / apostrophe only — comma/colon mid-token would split L-positions.
+    t = "".join(ch for ch in t if ch.isalpha() or ch == "'")
+    if trailing_comma and t:
+        t += ","
+    if not t:
+        return ""
+    return t
 
 
 def _format_voice_measure(
@@ -458,17 +695,22 @@ def _format_voice_measure(
     do: Pitch,
     intervals: list[int],
     writing_oct: int,
-) -> str:
+    last_pitch: Pitch | None = None,
+) -> tuple[str, Pitch | None]:
+    """Format one measure of stem tokens; same height as previous → ``-``.
+
+    ``last_pitch`` carries across measures so holds stay readable. Returns
+    ``(segment, new_last_pitch)``.
+    """
     tokens: list[str] = []
     prev_degree: int | None = None
-    last_pitch: Pitch | None = None
     for pos in positions:
         slots: list[str] = []
         for note in pos.notes:
             if note.pitch is None:
                 slots.append("-")
                 continue
-            if last_pitch is not None and note.pitch == last_pitch and pitch_form == "vsa":
+            if last_pitch is not None and note.pitch == last_pitch:
                 slots.append("-")
             elif pitch_form == "abc":
                 slots.append(format_abc_scientific(note.pitch))
@@ -487,7 +729,7 @@ def _format_voice_measure(
                 prev_degree = deg
             last_pitch = note.pitch
         tokens.append("&".join(slots))
-    return " ".join(tokens)
+    return " ".join(tokens), last_pitch
 
 
 def _duration_to_elm(dur: Duration) -> str:

@@ -171,12 +171,12 @@ elkaar (per frase één stijl is leesbaarder).
 
 Bij `import` / `normalize` kies je een **doelspelling**:
 
-| `--pitch`    | Schrijft …                                              |
-| ------------ | ------------------------------------------------------- |
-| `doremi`     | laddergraden                                            |
-| `a-g`        | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`) |
-| `vsa`        | eerste toon absoluut, daarna EHM                        |
-| `preserve`   | (alleen normalize) bronspelling behouden — **default**  |
+| `--pitch`    | Schrijft …                                                                                           |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| `doremi`     | laddergraden                                                                                         |
+| `a-g`        | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`)                                              |
+| `vsa`        | eerste toon absoluut, daarna EHM; bij **import** ook absolute eindankers op systeemeinden (`\|\|a4`) |
+| `preserve`   | (alleen normalize) bronspelling behouden — **default**                                               |
 
 `abc` blijft een **alias** van `a-g` (oude scripts).
 
@@ -203,12 +203,13 @@ S-: / \2 / fa ||
 EHM’s. Zie [Semantiek — absolute en relatieve hoogte](../specification-mvsa/semantics.md#absolute-en-relatieve-hoogte).
 
 ??? tip "Welke stijl kiezen?"
-| Situatie                         | Suggestie                                      |
-| -------------------------------- | ---------------------------------------------- |
-| Overname van MuseScore / MXL     | import `--pitch doremi` of `a-g` (cijfers)     |
-| Liturgische ladder / toon        | doremi + `@oct`                                |
-| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM     |
-| Lange stapsgewijze frase         | EHM na één absoluut anker                      |
+| Situatie                         | Suggestie                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Overname van MuseScore / MXL     | import `--pitch doremi` of `a-g` (cijfers)                                     |
+| Import + foutzoeken na edits     | `--pitch vsa` (EHM + absolute eindankers op systeemeinden)                     |
+| Liturgische ladder / toon        | doremi + `@oct`                                                                |
+| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM                                     |
+| Lange stapsgewijze frase         | EHM na één absoluut anker                                                      |
 
 ---
 

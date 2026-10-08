@@ -389,14 +389,26 @@ vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
 
 Importeert een partituur naar `.mvsa`:
 
-| Bron                          | Pad                                                     |
-| ----------------------------- | ------------------------------------------------------- |
-| `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4)                             |
-| `.mscz`                       | Eerst MuseScore CLI → temp `.mxl`, daarna zelfde parser |
+| Bron                          | Pad                                                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4)                                                                             |
+| `.mscz`                       | MuseScore CLI → temp `.mxl` → **SATB-normalisatie** (zelfde explode als [`mscz mxl`](mscz.md)) → parser |
 
 Stemhoogten worden in de gekozen `--pitch`-vorm geschreven; `@do` / `@mode`
 komen uit de toonsoort (majeur-aanname); `@oct` wordt per stem afgeleid.
 Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
+
+De uitvoer wordt in **meerdere LSATB-systemen** gezet (ongeveer 80 tekens per
+regel), zodat je het resultaat in een editor kunt lezen. Eén maat die alleen al
+langer is dan die breedte blijft één systeem. Voor canonieke kolomuitlijning:
+[`mvsa kuiser`](#vsa-mvsa-kuiser) (bij complexe MuseScore-lyrics soms
+`--no-align` / `kuiser` zonder align nodig — de sync-telling blijft leidend).
+
+Bij `--pitch vsa` plakt de import op elke stemregel een **eindanker** met
+absolute toonhoogte (a–g met cijfer) direct achter de **laatste maatstreep**
+van elk systeem, bijvoorbeeld `|g4` of `||a4`. Dat zijn check-only ankers:
+na wijzigingen in het `.mvsa` vangt `mvsa validate` een mismatch op
+(`MVSA-BAR-ANKER`). Op de lyrics-regel (`L:`) blijven de strepen kaal.
 
 ### Argumenten en opties
 

@@ -126,13 +126,13 @@ Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
 
 ## 4. Trade-offs (kort)
 
-| Onderwerp        | Keuze in dit plan                                                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| MSCZ uit mvsa    | **Keten** `mvsa → partituur-mxl (SA/TB) → mscz` + strip labels — checklist-conform                                               |
-| MXL ↔ MSCZ CLI   | `mxl mscz` → partituur; `mscz mxl` → vier Coria-parts                                                                            |
-| Octaaf in output | Altijd `@oct` in gegenereerde canonieke mvsa                                                                                     |
-| Import           | Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ                                                          |
-| Scope            | Geen `@voices` / blokhergebruik tenzij export het eist                                                                           |
+| Onderwerp        | Keuze in dit plan                                                                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MSCZ uit mvsa    | **Keten** `mvsa → partituur-mxl (SA/TB) → mscz` + strip labels — checklist-conform                                                                                              |
+| MXL ↔ MSCZ CLI   | `mxl mscz` → partituur; `mscz mxl` → vier Coria-parts                                                                                                                           |
+| Octaaf in output | Altijd `@oct` in gegenereerde canonieke mvsa                                                                                                                                    |
+| Import           | Lossy; succes = pitch/duur/lyrics-equivalentie, niet byte-identiek MSCZ. MSCZ-import: MuseScore → SATB-explode (zoals `mscz mxl`) → parser; LSATB-systemen soft-wrap ~80 tekens |
+| Scope            | Geen `@voices` / blokhergebruik tenzij export het eist                                                                                                                          |
 
 ---
 
@@ -188,7 +188,9 @@ vsa mvsa import PATH [-o OUT] --pitch {doremi,abc,vsa} --octave-style @oct
 
 **Criterium (gehaald):** roundtrip `mvsa → mxl → mvsa` pitch-equivalent op
 `alleluia-toon-8.canonieke.mvsa` sectie `schets2-oct-doremi` voor `--pitch
-doremi` en `a-g` (`tests/test_mvsa_import.py`).
+doremi`, `a-g` en `vsa` (`tests/test_mvsa_import.py`). Bij `--pitch vsa`
+plakt import absolute eindankers (a–g+cijfer) op de laatste maatstreep van
+elk LSATB-systeem (check-only; `MVSA-BAR-ANKER` bij mismatch na edits).
 
 ### Stap 5 — Bron-commands + man-pagina’s ✅
 

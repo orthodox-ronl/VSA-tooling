@@ -25,7 +25,7 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 
 | Subcommando | Doel                                                                              |
 | ----------- | --------------------------------------------------------------------------------- |
-| `import`    | Importeer naar `.mvsa` (via MuseScore → temp `.mxl`).                             |
+| `import`    | Importeer naar `.mvsa` (MuseScore → temp `.mxl` → SATB-explode → parser).         |
 | `mxl`       | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts.              |
 | `text`      | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).  |
 
