@@ -5,15 +5,15 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 
 ## Wat hoort hier
 
-| Onderwerp             | Waar                                                                                   |
-| --------------------- | -------------------------------------------------------------------------------------- |
-| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore)      |
-| Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (via MuseScore; ook vanaf `.mscz`) |
-| Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak   |
-| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md) (via SATB-explode; soft-wrap ~80)            |
-| → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                 |
-| Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)       |
-| Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                              |
+| Onderwerp             | Waar                                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore)                                          |
+| Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (via MuseScore; ook vanaf `.mscz`)                                     |
+| Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak                                       |
+| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md) (MuseScore → temp-mxl → SATB-explode; soft-wrap ~80; `--pitch vsa` = eindankers) |
+| → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                                                     |
+| Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)                                           |
+| Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                                                                  |
 
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
 verwachten voor bruikbare SATB + lyrics.
@@ -50,12 +50,13 @@ fallback.
 ## Typische commando’s
 
 ```cmd
-mscz import generated\alleluia.mscz --pitch abc -o generated\from-mscz.mvsa
+mscz import generated\alleluia.mscz --pitch a-g -o generated\from-mscz.mvsa
+mscz import generated\alleluia.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
+mvsa validate generated\from-mscz.vsa.mvsa
 mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 ```
-
 Via repo-script: `scripts\mscz.cmd …`
 
 Vereist MuseScore 4 (of 3) lokaal, tenzij je alleen `.mxl` gebruikt.

@@ -398,17 +398,31 @@ Stemhoogten worden in de gekozen `--pitch`-vorm geschreven; `@do` / `@mode`
 komen uit de toonsoort (majeur-aanname); `@oct` wordt per stem afgeleid.
 Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
 
-De uitvoer wordt in **meerdere LSATB-systemen** gezet (ongeveer 80 tekens per
-regel), zodat je het resultaat in een editor kunt lezen. Eén maat die alleen al
-langer is dan die breedte blijft één systeem. Voor canonieke kolomuitlijning:
-[`mvsa kuiser`](#vsa-mvsa-kuiser) (bij complexe MuseScore-lyrics soms
-`--no-align` / `kuiser` zonder align nodig — de sync-telling blijft leidend).
+**Leesbaarheid van de uitvoer**
+
+- Soft-wrap: LSATB-systemen van ongeveer 80 tekens
+  (`DEFAULT_SYSTEM_SOFT_WIDTH`). Eén maat die alleen al langer is blijft één
+  systeem.
+- Same-pitch holds: opeenvolgende dezelfde toonhoogte (ook over maatgrenzen)
+  wordt op de stemregels als `-` geschreven.
+- Multi-lettergreep lyrics op één noot (spaties, `-`, of soft hyphen) worden
+  recite `( … )` i.p.v. één geplakte lettergreep. Een lone extender `-` wordt
+  lege recite `()…`. Trailing `.` op lyric-tekst wordt weggestript.
+
+Voor canonieke kolomuitlijning: [`mvsa kuiser`](#vsa-mvsa-kuiser). Bij
+complexe MuseScore-lyrics is soms `--no-align` (of `kuiser` zonder align)
+nodig — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
+`kuiser` zijn advies, geen import-fout.
 
 Bij `--pitch vsa` plakt de import op elke stemregel een **eindanker** met
-absolute toonhoogte (a–g met cijfer) direct achter de **laatste maatstreep**
-van elk systeem, bijvoorbeeld `|g4` of `||a4`. Dat zijn check-only ankers:
-na wijzigingen in het `.mvsa` vangt `mvsa validate` een mismatch op
-(`MVSA-BAR-ANKER`). Op de lyrics-regel (`L:`) blijven de strepen kaal.
+absolute toonhoogte (a–g met wetenschappelijk cijfer) direct achter de
+**laatste maatstreep** van elk systeem, bijvoorbeeld `|g4` of `||a4`. Dat zijn
+check-only ankers: na wijzigingen in het `.mvsa` vangt `mvsa validate` een
+mismatch op (`MVSA-BAR-ANKER`). Op de lyrics-regel (`L:`) blijven de strepen
+kaal. Bij `--pitch doremi` en `--pitch a-g` komen die eindankers niet.
+
+Syntax van eindankers:
+[specification-mvsa — eindanker](../../specification-mvsa/syntax.md#eindanker-aan-de-maatstreep).
 
 ### Argumenten en opties
 
@@ -427,6 +441,8 @@ na wijzigingen in het `.mvsa` vangt `mvsa validate` een mismatch op
 ```cmd
 vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
+vsa mvsa import lied.mxl -o lied.mvsa --pitch vsa
+vsa mvsa validate lied.mvsa
 ```
 
 ---
@@ -534,6 +550,9 @@ Gedrag t.o.v. `-` op L (draft-spec):
   gevallen naar `~`.
 - **Ambigu** (`hei- li`, `li-&--ge`): waarschuwing op stderr met
   `bestand:regel:kolom` — geen stille collapse naar `hei-li`.
+- **Pyphen** (ontbrekende / verdachte woordstreepjes): advies-warnings;
+  geen validate-fout. Sync-telling blijft leidend; bij complexe
+  MuseScore-importlyrics soms `--no-align`.
 
 `normalize` blijft het conversiepad (pitch-herschrijf naar een apart
 uitvoerbestand). `kuiser` is het dagelijkse authoring-commando.

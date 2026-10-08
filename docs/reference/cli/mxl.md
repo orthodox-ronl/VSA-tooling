@@ -6,7 +6,8 @@ Zie het conversieplan:
 Playback-checklist:
 [canonical-checklists — MXL](../../formats/canonical-checklists.md#checklist-mxl-coria--playback).
 
-Alias voor import: [`vsa mvsa import`](mvsa.md#vsa-mvsa-import).
+Alias voor import: [`vsa mvsa import`](mvsa.md#vsa-mvsa-import) (zelfde
+SATB-parser, soft-wrap, holds, recite en `--pitch`-gedrag).
 
 ## Synopsis
 
@@ -23,15 +24,21 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 
 | Subcommando  | Doel                                                                                          |
 | ------------ | --------------------------------------------------------------------------------------------- |
-| `import`     | Importeer naar `.mvsa` (zelfde pad als `vsa mvsa import`).                                    |
+| `import`     | Importeer naar `.mvsa`: direct SATB P1–P4 (zelfde pad als `vsa mvsa import`).                 |
 | `mscz`       | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore.                        |
 | `validate`   | Lees-gate: M2/M8, Coria-importer-tags, meta (source ≠ licentie). Profiel `satb` of `mono`.    |
 | `normalize`  | Schrijf playback-MXL: explode + piano + sanitize; met `--apply-timing` ook recite/pauzes.     |
+
+**Import-opties** (`--pitch`, `--no-align`, soft-wrap ~80, eindankers bij
+`vsa`): zie [`vsa mvsa import`](mvsa.md#vsa-mvsa-import). Bij complexe lyrics
+soms `--no-align`; sync-telling blijft leidend.
 
 ## Voorbeelden
 
 ```cmd
 mxl import generated\alleluia-schets2.mxl --pitch doremi -o generated\from-mxl.mvsa
+mxl import generated\alleluia-schets2.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
+vsa mvsa validate generated\from-mxl.vsa.mvsa
 mxl mscz generated\alleluia-schets2.mxl -o generated\from-mxl.mscz
 mxl validate content-source\bibliotheek\…\lied.mscz.mxl --profile satb
 mxl normalize raw.mxl -o out.mxl --apply-timing

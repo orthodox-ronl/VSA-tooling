@@ -29,10 +29,16 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 | `mxl`       | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts.              |
 | `text`      | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).  |
 
+**Import-opties** (`--pitch`, `--no-align`, soft-wrap, eindankers bij `vsa`):
+zelfde keten als [`vsa mvsa import`](mvsa.md#vsa-mvsa-import). De MSCZ-stap
+gebruikt dezelfde SATB-explode als `mscz mxl`.
+
 ## Voorbeelden
 
 ```cmd
 mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
+mscz import generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
+vsa mvsa validate generated\from-mscz.vsa.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
 ```

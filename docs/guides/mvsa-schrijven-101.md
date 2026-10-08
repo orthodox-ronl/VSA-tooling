@@ -280,7 +280,9 @@ en [Syntax — toonnamen (a–g)](../specification-mvsa/syntax.md#toonnamen-ag).
 | Token **aan** de maatstreep     | **checkt** alleen (wijzigt niet)         | `\|mi`, `\|/`    |
 
 Gebruik eindankers om vergissingen te vangen: als de lopende toon niet matcht,
-faalt validate.
+faalt validate (`MVSA-BAR-ANKER`). Bij import met `--pitch vsa` plakt de
+toolchain zulke check-only ankers (a–g + cijfer) automatisch op systeemeinden;
+zie [taak bladmuziek](#7-taak-bladmuziek--mvsa).
 
 ```text
 S: fa so- mi&do&re&mi fa mi ||mi
@@ -298,11 +300,25 @@ S: fa so- mi&do&re&mi fa mi ||mi
    cd /d C:\Git\orthodox-ronl\VSA-tooling
    vsa mvsa import bron.mxl -o lied.mvsa --pitch doremi
    ```
-   Of `--pitch a-g` als je bladcijfers wilt (`bb4`, `c5`).
+   Of `--pitch a-g` als je bladcijfers wilt (`bb4`, `c5`). Voor EHM plus
+   check-only eindankers op systeemeinden (handig na edits):
+   ```cmd
+   cd /d C:\Git\orthodox-ronl\VSA-tooling
+   vsa mvsa import bron.mxl -o lied.mvsa --pitch vsa
+   vsa mvsa validate lied.mvsa
+   ```
 3. Zet bovenaan `@do` / `@mode` / `@oct` goed (import vult dit grotendeels in).
 4. Controleer L-tekst (import kan lelijk syllabificeren) en sync.
 5. `vsa mvsa validate lied.mvsa`
-6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa`
+6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa` (Pyphen-warnings zijn
+   advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
+   `--no-align`.
+
+Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
+same-pitch holds als `-` op stemregels; multi-lettergreep lyrics op één noot
+als recite `( … )`. Keten: `.mxl` → parser; `.mscz` → MuseScore → temp-`.mxl`
+→ SATB-explode (zelfde als `mscz mxl`) → parser. Details:
+[`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 Referentie-voorbeeld (bladcijfers):
 [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa).

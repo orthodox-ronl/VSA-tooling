@@ -206,6 +206,11 @@ Op **lyrics-regels** horen geen eindankers; daar blijft de kale streep. Voor
 sync van maatstrepen telt alleen het **bar-token** (zonder anker): `L` met `|`
 en `S` met `|mi` zijn synchroon.
 
+**Import-gebruik:** `vsa mvsa import --pitch vsa` plakt zulke check-only
+eindankers (absolute a–g + cijfer) aan de laatste maatstreep van elk
+LSATB-systeem op de stemregels; de `L:`-regel blijft zonder ankers. Zie
+[`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
+
 ## 5. Sectie
 
 ### Begin
