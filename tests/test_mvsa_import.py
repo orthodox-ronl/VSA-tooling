@@ -172,7 +172,7 @@ def test_sa_tb_normalize_then_import_keeps_lyric_slots():
     first_l = l_line.split("|", 1)[0]
     first_s = s_line.split("|", 1)[0]
     first_a = a_line.split("|", 1)[0]
-    assert "Wij~" in first_l
+    assert "Wij~" in first_l  # canonieke standaard-lengte als ``~``
     assert "Che.&." in first_l
     assert "-ru~" in first_l
     # "ru" is one quarter — not a long melisma tail of filler notes.
@@ -645,7 +645,7 @@ def test_hyphen_extender_and_trailing_period_lyrics_validate():
 
 
 def test_lyricless_leading_notes_emit_empty_recite():
-    """Notes without lyrics (melisma into a new measure) → ``()~``, not bare ``~``."""
+    """Notes without lyrics → empty recite ``()~``, not bare ``~``."""
     xml = _satb_score_xml(
         {
             "P1": """\
@@ -694,9 +694,20 @@ def test_lyricless_leading_notes_emit_empty_recite():
     l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
     first = l_line.split("|", 1)[0]
     assert "()~" in first
+    assert "ons~" in first and "nu_" in first
     assert re.search(r"(^| )~ ons", first) is None
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_import_writes_canonical_default_tilde():
+    """Canonieke normaalvorm: standaard-kwart op L als ``~`` (ook lone)."""
+    from vsa.mvsa_import import _l_duration_suffix
+
+    assert _l_duration_suffix(["~"]) == "~"
+    assert _l_duration_suffix(["_"]) == "_"
+    assert _l_duration_suffix(["~", "~"]) == "~&~"
+    assert _l_duration_suffix([".", "."]) == ".&."
 
 
 def test_chord_tones_do_not_create_extra_slots():
@@ -812,3 +823,20 @@ def test_import_without_align_stays_valid(tmp_path: Path):
     diags = validate_mvsa_text(imported)
     assert not [d for d in diags if d.severity == "error"], diags
     assert sum(1 for ln in imported.splitlines() if ln.startswith("L:")) >= 1
+
+
+def test_import_default_runs_kuiser_normaalvorm(tmp_path: Path):
+    """Default import: kuiser-normaalvorm (canonieke ``~`` + kolomalign)."""
+    from vsa.mvsa_kuiser import kuiser_mvsa_text
+
+    text = ALLELUIA.read_text(encoding="utf-8")
+    mxl_xml = export_mvsa_to_musicxml(text, section_id="schets3-oct-doremi")
+    mxl = tmp_path / "alleluia.mxl"
+    write_musicxml_output(mxl, mxl_xml)
+    imported = import_score_to_mvsa(mxl, pitch="abc", align=True)
+    again = kuiser_mvsa_text(imported, pitch="preserve", align=True).text
+    assert imported == again  # idempotent normaalvorm
+    l_line = next(ln for ln in imported.splitlines() if ln.startswith("L:"))
+    assert "~" in l_line
+    diags = validate_mvsa_text(imported)
+    assert not [d for d in diags if d.severity == "error"], diags

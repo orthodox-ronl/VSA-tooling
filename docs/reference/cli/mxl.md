@@ -30,8 +30,8 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 | `normalize`  | Schrijf playback-MXL: explode + piano + sanitize; met `--apply-timing` ook recite/pauzes.     |
 
 **Import-opties** (`--pitch`, `--no-align`, soft-wrap ~80, eindankers bij
-`vsa`): zie [`vsa mvsa import`](mvsa.md#vsa-mvsa-import). Bij complexe lyrics
-soms `--no-align`; sync-telling blijft leidend.
+`vsa`, kuiser-normaalvorm): zie [`vsa mvsa import`](mvsa.md#vsa-mvsa-import).
+Bij complexe lyrics soms `--no-align`; sync-telling blijft leidend.
 
 ## Voorbeelden
 

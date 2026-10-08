@@ -316,8 +316,9 @@ S: fa so- mi&do&re&mi fa mi ||mi
 
 Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
 same-pitch holds als `-` op stemregels; multi-lettergreep lyrics op één noot
-als recite `( … )`. Keten: `.mxl` → parser; `.mscz` → MuseScore → temp-`.mxl`
-→ SATB-explode (zelfde als `mscz mxl`) → parser. Details:
+als recite `( … )`; daarna **kuiser-normaalvorm** (canonieke `~` op L,
+kolomuitlijning). Keten: `.mxl` → parser; `.mscz` → MuseScore → temp-`.mxl` →
+SATB-explode (zelfde als `mscz mxl`) → parser → kuiser. Details:
 [`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 Referentie-voorbeeld (bladcijfers):

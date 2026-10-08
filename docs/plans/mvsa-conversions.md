@@ -188,10 +188,11 @@ vsa mvsa import PATH [-o OUT] --pitch {doremi,a-g,vsa} --octave-style @oct
 - Soft-wrap ~80 tekens per LSATB-systeem; één te lange maat blijft één systeem.
 - Same-pitch holds (ook over maatgrenzen) → `-` op stemregels.
 - Multi-lettergreep lyrics op één noot → recite `( … )`; lone extender →
-  lege recite; trailing `.` gestript.
+  lege recite `()~`; trailing `.` gestript.
+- Default: **kuiser-normaalvorm** (canonieke `~` op L, bars sync, kolommen);
+  `--no-align` slaat die stap over.
 - Top-level `mxl import` / `mscz import` = alias van `vsa mvsa import`.
-- `abc` blijft alias van `a-g`. Bij complexe lyrics: `--no-align`;
-  Pyphen-warnings via `kuiser` zijn advies.
+- `abc` blijft alias van `a-g`. Pyphen-warnings via `kuiser` zijn advies.
 
 **Criterium (gehaald):** roundtrip `mvsa → mxl → mvsa` pitch-equivalent op
 `alleluia-toon-8.canonieke.mvsa` sectie `schets2-oct-doremi` voor `--pitch

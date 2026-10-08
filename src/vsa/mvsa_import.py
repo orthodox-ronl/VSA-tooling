@@ -11,6 +11,10 @@ Imported LSATB systems are soft-wrapped to about
 :data:`DEFAULT_SYSTEM_SOFT_WIDTH` characters so the result stays readable
 in an editor (one long measure may exceed the width alone).
 
+By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
+(canonieke schrijfvorm / normaalvorm: standaard-lengte als ``~``, maatstrepen
+sync, kolomuitlijning). Pass ``align=False`` (CLI ``--no-align``) to skip.
+
 With ``--pitch vsa``, each stem line gets a check-only absolute pitch
 **eindanker** glued to the last bar of every system (e.g. ``||a4``), so
 later edits can be caught by ``mvsa validate`` (``MVSA-BAR-ANKER``).
@@ -28,7 +32,7 @@ from xml.etree import ElementTree as ET
 
 from .music import Duration, Pitch
 from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
-from .mvsa_align import align_mvsa_text
+from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_text
 from .mvsa_normalize import (
     OCTAVE_STYLES,
     PITCH_FORMS,
@@ -38,6 +42,7 @@ from .mvsa_normalize import (
     format_ehm,
     pitch_to_degree_and_chrom,
 )
+from .mvsa_validate import MvsaValidationError
 from .pitch_resolver import _SCALE_INTERVALS, parse_pitch_string
 
 # MusicXML part id → stem letter (matches mvsa_musicxml.PARTS)
@@ -165,7 +170,15 @@ def import_score_to_mvsa(
             system_soft_width=system_soft_width,
         )
         if align:
-            text = align_mvsa_text(text)
+            # Canonieke normaalvorm (syntax/semantics): ~ op L, bars sync, kolommen.
+            try:
+                text = kuiser_mvsa_text(
+                    text, pitch="preserve", octave_style=octave_style, align=True
+                ).text
+            except (MvsaKuiserError, MvsaValidationError) as exc:
+                raise MvsaImportError(
+                    f"import-normaalvorm (kuiser) mislukt: {exc}"
+                ) from exc
         return text
     finally:
         if tmp_mxl is not None:
@@ -585,6 +598,15 @@ def _group_positions(
     return positions
 
 
+def _l_duration_suffix(elms: list[str]) -> str:
+    """ELM-suffix for one L-positie (canonieke vorm: standaard-kwart als ``~``)."""
+    if not elms:
+        return ""
+    if len(elms) == 1:
+        return elms[0]
+    return "&".join(elms)
+
+
 def _format_l_measure(positions: list[_Position]) -> str:
     parts: list[str] = []
     for idx, pos in enumerate(positions):
@@ -598,8 +620,7 @@ def _format_l_measure(positions: list[_Position]) -> str:
             body = f"({text})" if text else "()"
             # Explicit non-breve duration after ) if present
             if not n0.is_breve:
-                elm = _duration_to_elm(n0.duration)
-                body += elm
+                body += _l_duration_suffix([_duration_to_elm(n0.duration)])
             parts.append(body)
             continue
 
@@ -608,19 +629,11 @@ def _format_l_measure(positions: list[_Position]) -> str:
         # Lyric-less / extender-only slot: bare ``~`` is not an L-position —
         # use empty recite ``()~`` so sync-telling matches the stem.
         if not text:
-            body = "()" + elms[0]
-            if len(elms) > 1:
-                body += "&" + "&".join(elms[1:])
-            parts.append(body)
+            parts.append("()" + _l_duration_suffix(elms))
             continue
         # First syllable / text
-        if syllabic in ("end", "middle") and text:
-            token = f"-{text}{elms[0]}"
-        else:
-            token = f"{text}{elms[0]}"
-        if len(elms) > 1:
-            token += "&" + "&".join(elms[1:])
-        parts.append(token)
+        prefix = f"-{text}" if syllabic in ("end", "middle") and text else text
+        parts.append(prefix + _l_duration_suffix(elms))
     return " ".join(parts)
 
 

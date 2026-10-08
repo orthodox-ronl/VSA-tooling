@@ -407,11 +407,15 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
   wordt op de stemregels als `-` geschreven.
 - Multi-lettergreep lyrics op één noot (spaties, `-`, of soft hyphen) worden
   recite `( … )` i.p.v. één geplakte lettergreep. Een lone extender `-` wordt
-  lege recite `()…`. Trailing `.` op lyric-tekst wordt weggestript.
+  lege recite `()~`. Trailing `.` op lyric-tekst wordt weggestript.
+- **Normaalvorm:** standaard schrijft import daarna de canonieke vorm via
+  [`mvsa kuiser`](#vsa-mvsa-kuiser) (standaard-lengte op L als `~`, maatstrepen
+  sync, kolomuitlijning) — zie
+  [syntax — canonieke schrijfvorm](../../specification-mvsa/syntax.md) en
+  [semantiek — canonieke layout](../../specification-mvsa/semantics.md#canonieke-layout-vs-tolerantie).
 
-Voor canonieke kolomuitlijning: [`mvsa kuiser`](#vsa-mvsa-kuiser). Bij
-complexe MuseScore-lyrics is soms `--no-align` (of `kuiser` zonder align)
-nodig — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
+Bij complexe MuseScore-lyrics is soms `--no-align` nodig (sla kuiser/align
+over) — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
 `kuiser` zijn advies, geen import-fout.
 
 Bij `--pitch vsa` plakt de import op elke stemregel een **eindanker** met
@@ -434,7 +438,7 @@ Syntax van eindankers:
 | `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)               | `@oct`               |
 | `--section`          | Nee       | `@sectie`-id in de output                   | `import`             |
 | `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                 | auto                 |
-| `--no-align`         | Nee       | Geen kolomuitlijning                        | uit                  |
+| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)        | uit                  |
 
 ### Voorbeelden
 

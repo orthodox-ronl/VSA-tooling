@@ -6,18 +6,19 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 
 ## Wat hoort hier
 
-| Onderwerp                           | Waar                                                                                       |
-| ----------------------------------- | ------------------------------------------------------------------------------------------ |
-| Canonieke schrijfvorm, sync, recite | [Syntax](../specification-mvsa/syntax.md), [Semantiek](../specification-mvsa/semantics.md) |
-| Validatieregels                     | [Validatie](../specification-mvsa/validation.md)                                           |
-| Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                            |
-| Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap ~80; holds; recite)   |
-| CLI                                 | [`mvsa`](../reference/cli/mvsa.md) (`≡ vsa mvsa`)                                          |
-| Platte gezongen tekst               | [`vsa text`](../reference/cli/text.md)                                                     |
+| Onderwerp                           | Waar                                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Canonieke schrijfvorm, sync, recite | [Syntax](../specification-mvsa/syntax.md), [Semantiek](../specification-mvsa/semantics.md)       |
+| Validatieregels                     | [Validatie](../specification-mvsa/validation.md)                                                 |
+| Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                                  |
+| Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap; holds; kuiser-normaalvorm) |
+| CLI                                 | [`mvsa`](../reference/cli/mvsa.md) (`≡ vsa mvsa`)                                                |
+| Platte gezongen tekst               | [`vsa text`](../reference/cli/text.md)                                                           |
 
 **Import (kort):** `.mxl` gaat rechtstreeks naar de SATB-parser (P1–P4);
 `.mscz` eerst via MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
-[`mscz mxl`](../reference/cli/mscz.md). Met `--pitch vsa` plakt de import
+[`mscz mxl`](../reference/cli/mscz.md). Default output is de **canonieke
+schrijfvorm** (kuiser-normaalvorm). Met `--pitch vsa` plakt de import
 check-only eindankers (a–g + cijfer) op systeemeinden; `doremi` / `a-g` doen
 dat niet. Tutorial: [mvsa schrijven 101 — bladmuziek](../guides/mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa).
 
