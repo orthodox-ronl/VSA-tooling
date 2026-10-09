@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-09 20:39 CEST.
+  , gebouwd 2026-10-10 00:29 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5035,6 +5035,11 @@ en Oefenhoek <code>VSA-demo/scripts/mscz-product-transforms.md</code> (Coria-kol
 <td><strong>Monofone part</strong></td>
 <td>Elke playback-part is <strong>één</strong> oefenlijn: geen <code>&lt;staves&gt;</code>≠1, geen tweede clef (<code>number="2"</code>), noten met <code>staff</code>/<code>voice</code> = 1 (of weggelaten), geen <code>&lt;backup&gt;</code>/<code>&lt;forward&gt;</code>/<code>&lt;chord/&gt;</code>. Partituur-restanten (TB op staff 2, MuseScore-voice 5/6, octaaf-akkoorden) worden bij export genormaliseerd. Divisi als aparte B2/S2-parts: later.</td>
 </tr>
+<tr>
+<td>M19</td>
+<td><strong><code>encoding</code> vóór <code>miscellaneous</code></strong></td>
+<td>Coria geeft <code>translation failed</code> als <code>&lt;miscellaneous&gt;</code> in <code>&lt;identification&gt;</code> vóór <code>&lt;encoding&gt;</code> staat (ook zonder <code>&lt;source&gt;</code>). Sanitize herschikt; <code>mxl validate</code> faalt bij verkeerde volgorde. <code>&lt;notehead&gt;</code> hoort niet in playback-MXL (M4 / Coria faalt o.a. op <code>none</code>).</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Normalize-target MXL → MXL:</strong> <code>mxl normalize</code> (zie
@@ -5355,7 +5360,7 @@ geen MuseScore-partituur) maar valt onder <strong>dezelfde</strong> A4-eis (P6).
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-10
         
       </p>
       
