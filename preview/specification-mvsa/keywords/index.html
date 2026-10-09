@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-09 11:32 CEST.
+  , gebouwd 2026-10-09 12:17 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5415,7 +5415,7 @@ dezelfde quoted-stringvorm; <code>@tempo</code> is een BPM-getal zonder aanhalin
 <tr>
 <td><code>@tempo</code></td>
 <td><code>@tempo 72</code></td>
-<td>metronoom + <code>sound tempo</code></td>
+<td><code>sound tempo</code> (onzichtbaar)</td>
 <td>(via MusicXML)</td>
 </tr>
 <tr>
@@ -5431,9 +5431,11 @@ Vorm: <code>@tempo</code> + spatie + geheel getal <strong>1–999</strong> (geen
 bijvoorbeeld <code>@tempo 72</code>. Laatste waarde in het bestand wint. <strong>Default</strong> als
 je <code>@tempo</code> weglaat: <strong>130</strong> (zelfde default als eenstemmige VSA).</p>
 <p>Bij export naar MusicXML (playback/Coria én partituur) komt op de <strong>eerste
-maat</strong> van de bovenste part een metronoommarkering (kwartnoot = BPM) plus
-<code>&lt;sound tempo="…"/&gt;</code>. MSCZ-export loopt via die partituur-MusicXML, dus het
-tempo komt ook in MuseScore mee.</p>
+maat</strong> van de bovenste part <code>&lt;sound tempo="…"/&gt;</code> (kwartnoot = BPM) plus een
+metronoommarkering met <code>print-object="no"</code>. Het tempo stuurt afspelen
+(audio/Coria); op het blad, in <code>.mscz</code> en in de PDF blijft de metronoom
+<strong>onzichtbaar</strong>. MSCZ-nabewerking zet MuseScore-<code>Tempo</code> bovendien op
+<code>visible=0</code> voor het geval de import de markering toch zichtbaar maakt.</p>
 <div class="highlight"><pre><span></span><code>@tempo 72
 </code></pre></div>
 <p><strong>Niet gebruiken</strong> voor tekstuele tempo-aanduidingen (“langzaam”, “Andante”) —
