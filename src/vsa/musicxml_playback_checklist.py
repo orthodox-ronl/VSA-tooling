@@ -144,6 +144,7 @@ def validate_playback_musicxml(
                     f"verwacht 4 body-parts, kreeg {len(body_parts)}",
                 )
             )
+        findings.extend(_check_monophonic_parts(body_parts))
     else:
         if not score_parts:
             findings.append(ChecklistFinding("M2", "geen score-part"))
@@ -151,8 +152,80 @@ def validate_playback_musicxml(
             _check_piano(score_parts[0], score_parts[0].get("id") or "P1", findings)
         if not body_parts:
             findings.append(ChecklistFinding("M2", "geen body <part>"))
+        else:
+            findings.extend(_check_monophonic_parts(body_parts))
 
     findings.extend(_check_identification(root))
+    return findings
+
+
+def _check_monophonic_parts(body_parts: list[ET.Element]) -> list[ChecklistFinding]:
+    """M18: elke part is één oefenlijn (geen partituur-restanten).
+
+    Maximaal één finding per (part, schendingstype) — geen spam per noot.
+    """
+    findings: list[ChecklistFinding] = []
+    for part in body_parts:
+        pid = part.get("id") or "?"
+        seen: set[str] = set()
+
+        def _once(kind: str, message: str) -> None:
+            if kind in seen:
+                return
+            seen.add(kind)
+            findings.append(ChecklistFinding("M18", message))
+
+        for el in part.iter():
+            tag = local(el.tag)
+            if tag == "staves":
+                text = _text(el)
+                if text and text != "1":
+                    _once(
+                        "staves",
+                        f"{pid}: <staves>{text}</staves> "
+                        "(verwacht één balk per playback-part)",
+                    )
+            elif tag == "clef" and el.get("number") not in (None, "1"):
+                _once(
+                    "clef",
+                    f"{pid}: clef number={el.get('number')!r} "
+                    "(alleen clef zonder number of number=1)",
+                )
+            elif tag in {"backup", "forward"}:
+                _once(
+                    tag,
+                    f"{pid}: <{tag}> in playback-part "
+                    "(meerstemmig restant; Coria = één lijn per part)",
+                )
+            elif tag != "note":
+                continue
+            staff = None
+            voice = None
+            has_chord = False
+            for child in el:
+                ctag = local(child.tag)
+                if ctag == "staff":
+                    staff = _text(child)
+                elif ctag == "voice":
+                    voice = _text(child)
+                elif ctag == "chord":
+                    has_chord = True
+            if has_chord:
+                _once(
+                    "chord",
+                    f"{pid}: <chord/> in playback-part "
+                    "(octaaf/divisi → één toon; B2 later apart)",
+                )
+            if staff and staff != "1":
+                _once(
+                    "staff",
+                    f"{pid}: note staff={staff!r} (verwacht 1)",
+                )
+            if voice and voice != "1":
+                _once(
+                    "voice",
+                    f"{pid}: note voice={voice!r} (verwacht 1)",
+                )
     return findings
 
 

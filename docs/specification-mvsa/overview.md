@@ -63,9 +63,11 @@ De kuiser-**tool** (`mvsa kuiser`) past de canonieke-vormregels uit
 | `@do`     | `F4`                   |
 | `@mode`   | `major`                |
 | `@oct`    | `0` voor elke stem     |
+| `@tempo`  | `130` (BPM)            |
 
-Zie [Keywords](keywords.md) en
-[Semantiek — directives](semantics.md#directives-do-mode-oct).
+Zie [Keywords](keywords.md),
+[Semantiek — directives](semantics.md#directives-do-mode-oct) en de
+[metadata-brug](../guides/metadata-brug.md) (gedeelde velden met `.vsa`).
 
 ## Termen in deze specificatie
 

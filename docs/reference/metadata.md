@@ -1,5 +1,8 @@
 # Metadatareferentie
 
+Gedeelde begrippen met mvsa (Nederlandse termen, andere schrijfwijze):
+[Metadata-brug](../guides/metadata-brug.md).
+
 ## Markdown-blokmetadata
 
 Metadata kan direct onder de openingsregel van een VSA-codeblok staan.

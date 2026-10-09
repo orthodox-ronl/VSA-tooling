@@ -13,6 +13,7 @@
 # Overige schetsen zijn pitch-equivalent; `@oct` blijft ongewijzigd.
 # Tenor onder `@oct T=-1` met `+` zodat die boven de bas blijft.
 
+@toon "8"
 @do F4
 @mode major
 

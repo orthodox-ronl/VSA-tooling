@@ -181,7 +181,7 @@ class MusicXMLRenderer:
     :param explicit_keys: Set of metadata keys that were explicitly provided
         (not just default values).  When given, the tempo direction is only
         emitted if ``"tempo"`` is in this set.  Pass ``None`` (default) to
-        always emit the tempo direction.
+        always emit the tempo direction (``print-object="no"``; playback only).
     """
 
     def __init__(
@@ -398,7 +398,7 @@ class MusicXMLRenderer:
     def _fill_part(self, part: ET.Element, document: Document) -> None:
         do_str = self._meta.get("do", "F4")
         mode = self._meta.get("mode", "major")
-        tempo_str = self._meta.get("tempo", "120")
+        tempo_str = self._meta.get("tempo", "130")
         duration_model = self._meta.get("duration-model", "default")
         meter_str = self._meta.get("meter", "")
         reciting_mode = self._meta.get("reciting-mode", RECITING_MODE_QUARTERS)
@@ -632,17 +632,22 @@ class MusicXMLRenderer:
         ET.SubElement(clef, "line").text = "2"
 
     def _add_tempo_direction(self, measure: ET.Element, tempo_str: str) -> None:
-        # Only emit a visible tempo mark when tempo was explicitly specified.
-        # When explicit_keys is None (untracked callers) we always emit.
+        # Emit playback tempo when explicitly specified (or always when
+        # explicit_keys is untracked). Metronome is print-object=no so it
+        # stays off the MuseScore sheet / PDF.
         if self._explicit_keys is not None and "tempo" not in self._explicit_keys:
             return
 
         try:
             bpm = int(float(tempo_str))
         except (ValueError, TypeError):
-            bpm = 120
+            bpm = 130
 
-        direction = ET.SubElement(measure, "direction", placement="above")
+        direction = ET.SubElement(
+            measure,
+            "direction",
+            {"placement": "above", "print-object": "no"},
+        )
         dt = ET.SubElement(direction, "direction-type")
         metro = ET.SubElement(dt, "metronome", parentheses="no")
         ET.SubElement(metro, "beat-unit").text = "quarter"

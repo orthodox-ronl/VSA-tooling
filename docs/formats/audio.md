@@ -29,19 +29,24 @@ afspeelknop.
 
 ## Conversies
 
-| Bron                         | Commando                                      |
-| ---------------------------- | --------------------------------------------- |
-| ``.mxl`` / ``.musicxml``     | `vsa audio` / `mvsa audio`                    |
-| ``.vsa``                     | `vsa audio` (via playback MusicXML)           |
-| ``.mvsa``                    | `mvsa audio` (via playback MusicXML)          |
+| Bron                         | Commando                                                              |
+| ---------------------------- | --------------------------------------------------------------------- |
+| ``.mxl`` / ``.musicxml``     | `vsa audio` / `mvsa audio`                                            |
+| ``.vsa``                     | `vsa audio` (via playback MusicXML)                                   |
+| ``.mvsa``                    | `mvsa audio` (via playback MusicXML)                                  |
 | ``.mscz``                    | `vsa audio` / `mvsa audio` (via genormaliseerde playback-MXL + piano) |
 
 Default-formaat: **``.mp3``**. Optioneel ``--format ogg`` of ``wav``, of
 ``[audio] format`` in ``vsa.toml``.
 
-Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). Canonieke
-playback-MXL gebruikt **piano** op elke partij (checklist M8). Bitrate en
-extra instrumentkeuze buiten die piano zijn in v1 MuseScore-defaults.
+Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). In `.mvsa`
+zet je het afspeeltempo met [`@tempo`](../specification-mvsa/keywords.md)
+(BPM; default **130**); dat gaat mee in MusicXML-`sound tempo` (metronoom
+onzichtbaar op blad/PDF) en dus in `mvsa audio` / Coria. Gedeelde namen met
+`.vsa`:
+[metadata-brug](../guides/metadata-brug.md). Canonieke playback-MXL gebruikt
+**piano** op elke partij (checklist M8). Bitrate en extra instrumentkeuze
+buiten die piano zijn in v1 MuseScore-defaults.
 
 ## Bestandsnaamgeving
 

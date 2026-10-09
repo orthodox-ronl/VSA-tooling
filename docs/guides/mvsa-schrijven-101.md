@@ -77,6 +77,8 @@ horen **vóór** of **tussen** LSATB-systemen — niet tussen `L:` en `S:`.
 | `@tekst`         | Cue / systeembrontekst (priesterregel, …) boven het volgende systeem     | —                    |
 | `@title`         | Titel van het zangstuk (MusicXML `<work-title>`, MuseScore-titel)        | bestandsnaam         |
 | `@bron`          | Bron van de partituur (boek/koormap); MusicXML `<source>`, MSCZ-colofon  | —                    |
+| `@tempo`         | BPM voor beluisteren/oefenen (MusicXML-metronoom + playback)             | `130`                |
+| `@toon`          | Kerktoon / oktoechos (MusicXML `tone`)                                   | —                    |
 | `@composer` e.d. | Metadata (componist, copyright, ondertitel, …)                           | zie keywords-lijst   |
 
 Sticky: `@do` / `@mode` / `@oct` gelden vanaf het **eerstvolgende** LSATB-systeem
@@ -87,6 +89,7 @@ is alleen nodig als je commentaar op die scheidingsregel wilt.
     ```text
     @title "Alleluia - Toon 1"
     @bron "koormap Hemelum"
+    @tempo 72
     @do F4
     @mode major
     @oct S=0 A=0 T=-1 B=-1

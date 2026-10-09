@@ -141,7 +141,7 @@ def test_musicxml_cursor_jumps_on_transition():
     doc = Parser(text).parse()
     assert SemanticValidator(doc, source_text=text).validate().ok
     xml = MusicXMLRenderer(
-        metadata={"do": "C4", "mode": "major", "tempo": "120"}
+        metadata={"do": "C4", "mode": "major", "tempo": "130"}
     ).render(doc)
     # Zonder overgang zou Bb nog op E (degree 2) klinken; met [//:/]
     # springt de cursor naar D (degree 1).

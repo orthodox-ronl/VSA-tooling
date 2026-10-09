@@ -56,6 +56,7 @@ en Oefenhoek `VSA-demo/scripts/mscz-product-transforms.md` (Coria-kolom).
 | M15 | **``@tekst``-pauze**           | Mid-flow `@tekst` (niet maat 1): zelfde `[PAUZE]`-maat als na `\|\|` (cue op de pauzemaat). Geen dubbele pauze als de vorige maat al sectie-einde is.                                                                                                                          |
 | M16 | **Leidende `\|:`**             | Forward-repeat links op de **eerste inhoudsmaat**; geen lege rustmaat vóór die inhoud (zelfde semantiek als MSCZ S16).                                                                                                                                                         |
 | M17 | **Geen `source`+`encoding`**   | Coria geeft `translation failed` als `<identification>` zowel `<source>` als `<encoding>` heeft. Playback-sanitize verwijdert `<source>`; bronvermelding in `miscellaneous-field name="bron"`. Bij licentie in `<rights>` eist `mxl validate` die misc-bron.                 |
+| M18 | **Monofone part**              | Elke playback-part is **één** oefenlijn: geen `<staves>`≠1, geen tweede clef (`number="2"`), noten met `staff`/`voice` = 1 (of weggelaten), geen `<backup>`/`<forward>`/`<chord/>`. Partituur-restanten (TB op staff 2, MuseScore-voice 5/6, octaaf-akkoorden) worden bij export genormaliseerd. Divisi als aparte B2/S2-parts: later. |
 
 **Normalize-target MXL → MXL:** `mxl normalize` (zie
 [`mxl` CLI](../reference/cli/mxl.md)) herschrijft naar deze checklist +
@@ -123,7 +124,7 @@ geen MuseScore-partituur) maar valt onder **dezelfde** A4-eis (P6).
 
 | Onderwerp          | `.mxl` (Coria)                                                        | `.mscz` / MuseScore-PDF (partituur)                                                                                |
 | ------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Balken / parts     | vier parts S/A/T/B                                                    | twee balken SA + TB                                                                                                |
+| Balken / parts     | vier parts S/A/T/B; **monofoon** per part (M18)                       | twee balken SA + TB                                                                                                |
 | Stem-labels        | part-namen Soprano…Bass (Coria-UI)                                    | **geen** zichtbare stem-indicaties                                                                                 |
 | Instrument / MIDI  | piano op elke part (`keyboard.piano.grand`, M8)                       | geen Coria-MIDI-eis (leesblad); MuseScore kiest bij openen meestal piano                                           |
 | Lyrics             | op elke part                                                          | één laag tussen de balken                                                                                          |

@@ -260,6 +260,37 @@ S: do ||
     assert any(d.code == "MVSA-META" and d.severity == "error" for d in diags)
 
 
+def test_validate_tempo_ok_and_bad():
+    ok = """\
+@tempo 72
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    assert validate_mvsa_text(ok) == []
+
+    bad = """\
+@tempo langzaam
+@sectie demo
+L: a_ ||
+S: do ||
+"""
+    diags = validate_mvsa_text(bad)
+    assert any(d.code == "MVSA-TEMPO" and d.severity == "error" for d in diags)
+
+    zero = """\
+@tempo 0
+@sectie demo
+L: a_ ||
+S: do ||
+"""
+    diags_zero = validate_mvsa_text(zero)
+    assert any(d.code == "MVSA-TEMPO" for d in diags_zero)
+
+
 def test_validate_tekst_orphan_warning():
     text = """\
 @sectie demo

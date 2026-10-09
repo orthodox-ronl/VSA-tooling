@@ -23,7 +23,21 @@ CI gebruikt `examples\consumer-minimal\content-source`.
 | `mxl` | top-level `mxl` (import / mscz; bron `.mxl`) |
 | `mscz` | top-level `mscz` (import / mxl; bron `.mscz`) |
 | `check-docs` | docs-hygiene |
+| `migrate-metadata` | dry-run/`--apply`: zet `@toon` (uit titel/pad) en optioneel `--tempo` (`@tempo 130`) op `.mvsa` |
 
 Python-helpers blijven in `scripts/`. Oude namen (`docs-serve`, `ci`, `bootstrap`) zijn aliases.
+
+**Content-migratie metadata** (bibliotheek of tooling-voorbeelden), eerst dry-run:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\bibliotheek
+C:\Git\orthodox-ronl\VSA-tooling\scripts\migrate-metadata.cmd content-source
+
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\migrate-metadata.cmd examples\mvsa --apply
+```
+
+Alleen `@toon` als die uit `@title` (`Toon N`) of pad (`toon-N`) volgt.
+Met `--tempo` ook `@tempo 130` als die ontbreekt (export-default is al 130).
 
 Geen aparte bootstrap-stap: `_ensure` checkt PATH (Python 3.14, optioneel Node) en pip't packages.

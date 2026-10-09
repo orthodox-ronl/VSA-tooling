@@ -158,7 +158,7 @@ MusicXML-export gebruikt dezelfde defaults als de Hugo [blokmetadata](@) in [Syn
 | ----------------------- | ---------------------- |
 | `do`                    | `F4`                   |
 | `mode`                  | `major`                |
-| `tempo`                 | `120 BPM`              |
+| `tempo`                 | `130 BPM`              |
 | `duration-model`        | `default`              |
 | `validate-ending`       | `true`                 |
 | `reciting-mode`         | `quarters`             |

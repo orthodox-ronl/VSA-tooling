@@ -25,17 +25,18 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 
 ## Documenten
 
-| Document                         | Inhoud                                              |
-| -------------------------------- | --------------------------------------------------- |
-| [Doel en scope](overview.md)     | Idee, niet-doelen, termen, defaults                 |
-| [Syntax](syntax.md)              | Bestandsvorm, markers, maten, secties, L en stemmen |
-| [Semantiek](semantics.md)        | Sync, recite, hoogte, directives, pitfalls          |
-| [Keywords (`@…`)](keywords.md)   | Gedefinieerde `@`-regels: wat, wanneer, wel/niet    |
-| [Speelplan](speelplan.md)        | `@blok` / `@speelplan`: bladvorm vs klinkende vorm  |
-| [Validatie](validation.md)       | Geldigheidsregels (draft)                           |
-| [Voorbeelden](examples.md)       | Pointers naar `examples/mvsa/`                      |
-| [Open punten](open-points.md)    | Centrale backlog (nu + later)                       |
-| [Versionering](versioning.md)    | Draft-versiebeleid                                  |
+| Document                                    | Inhoud                                              |
+| ------------------------------------------- | --------------------------------------------------- |
+| [Doel en scope](overview.md)                | Idee, niet-doelen, termen, defaults                 |
+| [Syntax](syntax.md)                         | Bestandsvorm, markers, maten, secties, L en stemmen |
+| [Semantiek](semantics.md)                   | Sync, recite, hoogte, directives, pitfalls          |
+| [Keywords (`@…`)](keywords.md)              | Gedefinieerde `@`-regels: wat, wanneer, wel/niet    |
+| [Metadata-brug](../guides/metadata-brug.md) | Gedeelde velden `.vsa` ↔ `.mvsa` (NL-termen)        |
+| [Speelplan](speelplan.md)                   | `@blok` / `@speelplan`: bladvorm vs klinkende vorm  |
+| [Validatie](validation.md)                  | Geldigheidsregels (draft)                           |
+| [Voorbeelden](examples.md)                  | Pointers naar `examples/mvsa/`                      |
+| [Open punten](open-points.md)               | Centrale backlog (nu + later)                       |
+| [Versionering](versioning.md)               | Draft-versiebeleid                                  |
 
 ## Bewust buiten scope (nu)
 
