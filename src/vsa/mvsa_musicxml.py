@@ -567,6 +567,7 @@ def export_mvsa_to_musicxml(
 
     ctx = sections[0].systems[0].context if sections and sections[0].systems else StickyContext()
     effective_title = doc.title if doc.title else title
+    tempo = getattr(doc, "tempo", None)
     meta = {
         "composer": getattr(doc, "composer", None),
         "copyright": getattr(doc, "copyright", None),
@@ -575,6 +576,7 @@ def export_mvsa_to_musicxml(
         "tekstdichter": getattr(doc, "tekstdichter", None),
         "arrangeur": getattr(doc, "arrangeur", None),
         "vertaler": getattr(doc, "vertaler", None),
+        "tempo": str(tempo) if tempo is not None else None,
         "bibliotheek_id": resolve_bibliotheek_id(bibliotheek_id, source_path),
     }
     if layout == "partituur":
@@ -1764,6 +1766,33 @@ def _emit_staff_text_directions(out: list[str], texts: list[str]) -> None:
         out.append("</direction>")
 
 
+def _parse_tempo_bpm(meta: dict[str, str | None] | None) -> int | None:
+    """BPM uit document-meta ``tempo`` (``@tempo``); None als afwezig/ongeldig."""
+    raw = ((meta or {}).get("tempo") or "").strip()
+    if not raw:
+        return None
+    try:
+        bpm = int(raw)
+    except ValueError:
+        return None
+    if bpm < 1 or bpm > 999:
+        return None
+    return bpm
+
+
+def _emit_tempo_direction(out: list[str], bpm: int) -> None:
+    """Zichtbare metronoom + playback-``sound tempo`` (kwart = BPM)."""
+    out.append('<direction placement="above">')
+    out.append("<direction-type>")
+    out.append('<metronome parentheses="no">')
+    out.append("<beat-unit>quarter</beat-unit>")
+    out.append(f"<per-minute>{bpm}</per-minute>")
+    out.append("</metronome>")
+    out.append("</direction-type>")
+    out.append(f'<sound tempo="{bpm}"/>')
+    out.append("</direction>")
+
+
 def _insert_playback_pauze_measures(
     voice_measures: dict[str, list[list[NoteEvent]]],
     bar_styles: list[str],
@@ -1947,6 +1976,7 @@ def _emit_score_playback(
     emit_parts: list[dict] = list(parts) if parts is not None else list(PARTS)
     if extra_parts:
         emit_parts = emit_parts + list(extra_parts)
+    tempo_bpm = _parse_tempo_bpm(meta)
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -1970,7 +2000,7 @@ def _emit_score_playback(
         out.append("</score-part>")
     out.append("</part-list>")
 
-    for part in emit_parts:
+    for part_idx, part in enumerate(emit_parts):
         voice = part["voice"]
         measures = list(voice_measures.get(voice, []))
         while len(measures) < n_measures:
@@ -1989,6 +2019,8 @@ def _emit_score_playback(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
+                if part_idx == 0 and tempo_bpm is not None:
+                    _emit_tempo_direction(out, tempo_bpm)
             # Staff-tekst alleen op de bovenste balk (Soprano).
             if part["voice"] == "S":
                 if new_systems[mi]:
@@ -2071,6 +2103,7 @@ def _emit_score_partituur(
         rep_times.append(None)
     while len(navs) < n_measures:
         navs.append([])
+    tempo_bpm = _parse_tempo_bpm(meta)
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -2118,6 +2151,8 @@ def _emit_score_partituur(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
+                if top_staff and tempo_bpm is not None:
+                    _emit_tempo_direction(out, tempo_bpm)
             if top_staff:
                 if new_systems[mi]:
                     out.append('<print new-system="yes"/>')

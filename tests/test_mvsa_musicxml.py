@@ -962,6 +962,7 @@ def test_title_composer_copyright_in_musicxml():
 @vertaler "NL-redactie"
 @bron "Liturgikon, p.147-149"
 @copyright "CC BY-SA 4.0 — test"
+@tempo 72
 @toon "1"
 @taal "nl"
 @do F4
@@ -982,6 +983,7 @@ B: do ||
     assert doc.vertaler == "NL-redactie"
     assert doc.bron == "Liturgikon, p.147-149"
     assert doc.copyright == "CC BY-SA 4.0 — test"
+    assert doc.tempo == 72
     assert doc.toon == "1"
     assert doc.taal == "nl"
     xml = export_mvsa_to_musicxml(text, title="bestandsnaam", layout="partituur")
@@ -994,10 +996,51 @@ B: do ||
     assert '<creator type="translator">NL-redactie</creator>' in xml
     assert "<source>Liturgikon, p.147-149</source>" in xml
     assert "CC BY-SA 4.0 — test" in xml
+    assert "<per-minute>72</per-minute>" in xml
+    assert 'sound tempo="72"' in xml
+    assert xml.count("<per-minute>72</per-minute>") == 1
     playback = export_mvsa_to_musicxml(text, title="bestandsnaam", layout="playback")
     # Playback: geen <source> naast <encoding> (Coria); bron in miscellaneous-field.
     assert "<source>" not in playback
     assert 'miscellaneous-field name="bron">Liturgikon, p.147-149</miscellaneous-field>' in playback
+    assert "<per-minute>72</per-minute>" in playback
+    assert 'sound tempo="72"' in playback
+    assert playback.count("<per-minute>72</per-minute>") == 1
+
+
+def test_tempo_last_wins_and_absent_by_default():
+    with_tempo = """\
+@tempo 60
+@tempo 90
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    doc = parse_mvsa(with_tempo)
+    assert doc.tempo == 90
+    xml = export_mvsa_to_musicxml(with_tempo, title="x", layout="partituur")
+    assert "<per-minute>90</per-minute>" in xml
+    assert "<per-minute>60</per-minute>" not in xml
+
+    without = """\
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    assert parse_mvsa(without).tempo is None
+    bare = export_mvsa_to_musicxml(without, title="x", layout="playback")
+    assert "<per-minute>" not in bare
+    assert "sound tempo=" not in bare
 
 
 def test_bron_optional_colon_accepted():

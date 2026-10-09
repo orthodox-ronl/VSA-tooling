@@ -24,6 +24,7 @@ from .mvsa_validate import (
     STICKY_DIRECTIVES,
     STRING_META_DIRECTIVES,
     TAAL_ASSIGN_RE,
+    TEMPO_RE,
     MvsaDiagnostic,
     _BarSplit,
     _ELMS,
@@ -185,6 +186,7 @@ class ParsedDocument:
     tekstdichter: str | None = None
     arrangeur: str | None = None
     vertaler: str | None = None
+    tempo: int | None = None
     # Gereserveerd (nog niet in export).
     toon: str | None = None
     taal: str | None = None
@@ -315,6 +317,9 @@ def parse_mvsa(text: str) -> ParsedDocument:
                 elif name == "mscz-newline":
                     if not rest:
                         pending_mscz_newline.append(line_no)
+                elif name == "tempo":
+                    if rest and TEMPO_RE.fullmatch(rest):
+                        doc_meta["tempo"] = rest
                 elif name in STRING_META_DIRECTIVES:
                     value = parse_tekst_argument(rest)
                     if value is not None:
@@ -469,6 +474,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
         tekstdichter=doc_meta.get("tekstdichter"),
         arrangeur=doc_meta.get("arrangeur"),
         vertaler=doc_meta.get("vertaler"),
+        tempo=int(doc_meta["tempo"]) if "tempo" in doc_meta else None,
         toon=doc_meta.get("toon"),
         taal=doc_meta.get("taal"),
         genre=doc_meta.get("genre"),

@@ -339,12 +339,12 @@ niet bedoeld als layout-sturing.
 
 ---
 
-## Document-metadata (titel, personen, bron)
+## Document-metadata (titel, personen, bron, tempo)
 
 Deze keywords zetten **partituur-metadata** (bovenaan of in MuseScore-info),
-niet cues bij een LSATB-systeem. Vorm steeds: quoted string, laatste waarde in
-het bestand wint. `@title` staat hierboven apart uitgelegd; dezelfde stringvorm
-geldt voor de keywords hieronder.
+niet cues bij een LSATB-systeem. Laatste waarde in het bestand wint. `@title`
+staat hierboven apart uitgelegd. De persoons-/bron-keywords hieronder gebruiken
+dezelfde quoted-stringvorm; `@tempo` is een BPM-getal zonder aanhalingstekens.
 
 ### Actief (gaan mee naar MusicXML / MuseScore)
 
@@ -358,6 +358,24 @@ geldt voor de keywords hieronder.
 | `@vertaler`     | `@vertaler "NL: …"`                  | `<creator type="translator">` | `translator`   |
 | `@bron`         | `@bron "Liturgikon, p.147-149"`      | `<source>` (+ MSCZ-colofon)   | `source`       |
 | `@copyright`    | `@copyright "CC BY-SA 4.0 — …"`      | `<rights>` (+ footer/colofon) | `copyright`    |
+| `@tempo`        | `@tempo 72`                          | metronoom + `sound tempo`     | (via MusicXML) |
+
+**`@tempo`.** Aantal **slagen per minuut** (BPM) voor beluisteren en oefenen.
+Vorm: `@tempo` + spatie + geheel getal **1–999** (geen aanhalingstekens),
+bijvoorbeeld `@tempo 72`. Laatste waarde in het bestand wint. Zonder `@tempo`
+kiest de speler/MuseScore een eigen default.
+
+Bij export naar MusicXML (playback/Coria én partituur) komt op de **eerste
+maat** van de bovenste part een metronoommarkering (kwartnoot = BPM) plus
+`<sound tempo="…"/>`. MSCZ-export loopt via die partituur-MusicXML, dus het
+tempo komt ook in MuseScore mee.
+
+```text
+@tempo 72
+```
+
+**Niet gebruiken** voor tekstuele tempo-aanduidingen (“langzaam”, “Andante”) —
+alleen een BPM-getal. Niet midden in een LSATB-systeem.
 
 **`@composer`.** Naam of aanduiding van de **componist** (of traditionele
 toeschrijving), zoals die rechtsboven op het blad / in MuseScore-info

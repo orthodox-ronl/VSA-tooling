@@ -398,7 +398,7 @@ class MusicXMLRenderer:
     def _fill_part(self, part: ET.Element, document: Document) -> None:
         do_str = self._meta.get("do", "F4")
         mode = self._meta.get("mode", "major")
-        tempo_str = self._meta.get("tempo", "120")
+        tempo_str = self._meta.get("tempo", "130")
         duration_model = self._meta.get("duration-model", "default")
         meter_str = self._meta.get("meter", "")
         reciting_mode = self._meta.get("reciting-mode", RECITING_MODE_QUARTERS)
@@ -640,7 +640,7 @@ class MusicXMLRenderer:
         try:
             bpm = int(float(tempo_str))
         except (ValueError, TypeError):
-            bpm = 120
+            bpm = 130
 
         direction = ET.SubElement(measure, "direction", placement="above")
         dt = ET.SubElement(direction, "direction-type")
