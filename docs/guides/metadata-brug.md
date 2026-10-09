@@ -52,6 +52,21 @@ Niet forceren naar het andere formaat:
 | `@taal` (hulptekst / Coria-labels)                  | `part-name`, `midi-*`, `typografie.*`              |
 | `@genre`, `@opmerkingen` (gereserveerd)             | `@include-vsa`                                     |
 
+## Bestaande `.mvsa` bijwerken
+
+Script in VSA-tooling (eerst dry-run, dan `--apply`):
+
+```cmd
+cd /d C:\Git\orthodox-ronl\bibliotheek
+C:\Git\orthodox-ronl\VSA-tooling\scripts\migrate-metadata.cmd content-source
+
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\migrate-metadata.cmd examples\mvsa --apply
+```
+
+Zet `@toon "N"` als die volgt uit titel of pad. Optioneel `--tempo` voor
+expliciet `@tempo 130`. Zie `scripts/README.md`.
+
 ## Zie ook
 
 - [Keywords (mvsa)](../specification-mvsa/keywords.md)
