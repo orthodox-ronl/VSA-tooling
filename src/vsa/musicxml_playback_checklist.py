@@ -293,6 +293,20 @@ def _check_identification(root: ET.Element) -> list[ChecklistFinding]:
                 "miscellaneous-field name=\"bron\"",
             )
         )
+    # Coria: ``miscellaneous`` vóór ``encoding`` → "translation failed".
+    child_tags = [local(c.tag) for c in ident]
+    if (
+        "encoding" in child_tags
+        and "miscellaneous" in child_tags
+        and child_tags.index("miscellaneous") < child_tags.index("encoding")
+    ):
+        findings.append(
+            ChecklistFinding(
+                "META",
+                "identification/miscellaneous mag niet vóór encoding "
+                "(Coria: translation failed); zet encoding vóór miscellaneous",
+            )
+        )
     if source and _LICENSE_IN_SOURCE.search(source):
         findings.append(
             ChecklistFinding(
