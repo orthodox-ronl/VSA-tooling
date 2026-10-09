@@ -9,8 +9,11 @@ from vsa.musicxml_package import write_musicxml_output
 from vsa.musicxml_playback_normalize import normalize_playback_musicxml
 from vsa.mvsa_import import (
     DEFAULT_SYSTEM_SOFT_WIDTH,
+    do_from_fifths,
     import_score_to_mvsa,
+    join_import_syllables,
     parse_musicxml_satb,
+    read_mscz_key_fifths,
     score_to_mvsa,
 )
 from vsa.mvsa_musicxml import export_mvsa_to_musicxml
@@ -187,8 +190,8 @@ def test_sa_tb_normalize_then_import_keeps_lyric_slots():
     assert not [d for d in diags if d.severity == "error"], diags
 
 
-def test_repeated_pitch_uses_hold_dash():
-    """Opeenvolgende dezelfde toonhoogte → ``-`` op stemregels (leesbaarheid)."""
+def test_repeated_pitch_with_lyrics_collapses_to_recite():
+    """Same-pitch notes each with a lyric → one recite; holds only for melisma."""
     xml = _satb_score_xml(
         {
             "P1": """\
@@ -282,13 +285,376 @@ def test_repeated_pitch_uses_hold_dash():
     )
     score = parse_musicxml_satb(xml)
     text = score_to_mvsa(score, pitch_form="abc", system_soft_width=200)
+    l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
     s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
-    # maat1: a4 - - b4 | maat2: - (zelfde b4) a4 a4&- (melisma)
-    assert re.search(r"a4\s+-\s+-", s_line)
-    assert re.search(r"b4\s+\|", s_line) or "| -" in s_line or "|-" in s_line.replace(
-        " ", ""
+    # maat1: three same-pitch lyrics → one recite; then d on b4
+    assert "(a b c)" in l_line
+    assert re.search(r"a4\s+b4", s_line)
+    assert not re.search(r"a4\s+-\s+-", s_line)
+    # maat2: pair f + g stays separate (drempel ≥3); g + lyric-less → melisma
+    assert "(f g)" not in l_line
+    assert "-&-" in s_line.replace(" ", "") or re.search(r"-\s*&\s*-", s_line)
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_join_import_syllables_repairs_musescore_word_boundaries():
+    """Syllabic-aware join + targeted MuseScore hacks."""
+    assert join_import_syllables(
+        ["Wij", "heb", "ben", "het", "wa", "re"],
+        ["single", "begin", "middle", "middle", "end", "single"],
+    ) == "Wij heb-ben het wa-re"
+    assert join_import_syllables(
+        ["Ver", "vuld zij on-ze mond", "met"]
+    ) == "Ver-vuld zij on-ze mond met"
+    assert join_import_syllables(
+        ["he", "mel", "se", "Geest"],
+        ["begin", "middle", "end", "single"],
+    ) == "he-mel-se-Geest"
+    # MuseScore often puts ``Geest`` as chain ``end`` (N≥4 bigrams + merge).
+    assert join_import_syllables(
+        ["he", "mel", "se", "Geest"],
+        ["begin", "middle", "middle", "end"],
+    ) == "he-mel-se-Geest"
+    # Same result when MuseScore marks all as single.
+    assert join_import_syllables(
+        ["he", "mel", "se", "Geest"],
+        ["single", "single", "single", "single"],
+    ) == "he-mel-se-Geest"
+    # Underlay string with spaces: glue ``aan``+``bid-den``.
+    assert join_import_syllables(
+        ["aan bid-den de on-deel-ba-re"], ["single"]
+    ) == "aan-bid-den de on-deel-ba-re"
+    # Closed-class: ``ons``+``heeft`` / ``Gij``+``hebt`` must not glue.
+    assert join_import_syllables(
+        ["ons", "heeft"], ["single", "single"]
+    ) == "ons heeft"
+    assert join_import_syllables(
+        ["Gij", "hebt"], ["single", "single"]
+    ) == "Gij hebt"
+    # Pending single prepends into begin…end (``aan-bid-den``).
+    assert join_import_syllables(
+        ["aan", "bid", "den"],
+        ["single", "begin", "end"],
+    ) == "aan-bid-den"
+    # Or extends into an already-hyphenated MuseScore token.
+    assert join_import_syllables(
+        ["aan", "bid-den"], ["single", "single"]
+    ) == "aan-bid-den"
+    # Trailing attach yields to a better next word (``ge-loof``).
+    assert join_import_syllables(
+        ["wa", "re", "ge", "loof"],
+        ["begin", "end", "single", "single"],
+    ) == "wa-re ge-loof"
+    # Short capital compounds (allowlist); not ``Licht-aan``.
+    assert join_import_syllables(
+        ["Be", "waar", "ons", "in"],
+        ["single", "single", "single", "single"],
+    ) == "Be-waar ons in"
+    assert join_import_syllables(
+        ["Ont", "ferm"], ["single", "single"]
+    ) == "Ont-ferm"
+    assert join_import_syllables(
+        ["Licht", "aan"], ["single", "single"]
+    ) == "Licht aan"
+
+
+def test_pair_of_same_pitch_lyrics_does_not_collapse_to_recite():
+    """Exactly two same-pitch syllables (e.g. we/gen) stay separate positions."""
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>2</duration><type>half</type>
+        <lyric number="1"><syllabic>middle</syllabic><text>we</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>2</duration><type>half</type>
+        <lyric number="1"><syllabic>end</syllabic><text>gen</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>2</duration><type>half</type></note>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>2</duration><type>half</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>2</duration><type>half</type></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>2</duration><type>half</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>G</step><octave>3</octave></pitch><duration>2</duration><type>half</type></note>
+      <note><pitch><step>G</step><octave>3</octave></pitch><duration>2</duration><type>half</type></note>
+    </measure>""",
+        }
     )
-    assert "&-" in s_line
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
+    assert "(we" not in l_line
+    assert "(we-gen)" not in l_line
+    assert "we" in l_line and "gen" in l_line
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_simple_flanks_absorb_into_multi_syllable_underlay_recite():
+    """Ver + underlay + met on one pitch → one recite (MuseScore underlay)."""
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Ver</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic>
+          <text>vuld zij on-ze mond</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>met</text></lyric>
+      </note>
+      <note>
+        <pitch><step>C</step><octave>5</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Uw</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>G</step><octave>3</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>G</step><octave>3</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>G</step><octave>3</octave></pitch><duration>1</duration><type>quarter</type></note>
+      <note><pitch><step>G</step><octave>3</octave></pitch><duration>1</duration><type>quarter</type></note>
+    </measure>""",
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
+    first = l_line.split("|", 1)[0]
+    assert "Ver~" not in first
+    assert "met~" not in first
+    assert "(Ver-vuld zij on-ze mond met)" in first
+    assert "Uw~" in first or "Uw" in first
+    s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
+    assert re.search(r"Bb4\s+c5", s_line)
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_same_pitch_syllabic_run_collapses_like_musescore_recite():
+    """MuseScore-style expanded recite (same pitch + syllabic) → one ``( … )``."""
+    # Mimics wij-hebben opening: six Bb quarters then half Licht / aan / schouwd.
+    s_notes = """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Wij</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>begin</syllabic><text>heb</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>middle</syllabic><text>ben</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>middle</syllabic><text>het</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>end</syllabic><text>wa</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>re</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>2</duration><type>half</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Licht</text></lyric>
+      </note>
+      <note>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>2</duration><type>half</type>
+        <lyric number="1"><syllabic>begin</syllabic><text>aan</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>2</duration><type>half</type>
+        <lyric number="1"><syllabic>end</syllabic><text>schouwd</text></lyric>
+      </note>
+    </measure>"""
+
+    def held(step: str, oct_: str, alter: str | None = None) -> str:
+        alt = f"<alter>{alter}</alter>" if alter else ""
+        notes = []
+        for _ in range(6):
+            notes.append(
+                f"<note><pitch><step>{step}</step>{alt}"
+                f"<octave>{oct_}</octave></pitch>"
+                f"<duration>1</duration><type>quarter</type></note>"
+            )
+        notes.append(
+            f"<note><pitch><step>{step}</step>{alt}"
+            f"<octave>{oct_}</octave></pitch>"
+            f"<duration>2</duration><type>half</type></note>"
+        )
+        # aan / schouwd counterparts (pitch steps for A/T/B ignored for sync)
+        notes.append(
+            f"<note><pitch><step>{step}</step>{alt}"
+            f"<octave>{oct_}</octave></pitch>"
+            f"<duration>2</duration><type>half</type></note>"
+        )
+        notes.append(
+            f"<note><pitch><step>{step}</step>{alt}"
+            f"<octave>{oct_}</octave></pitch>"
+            f"<duration>2</duration><type>half</type></note>"
+        )
+        return (
+            '<measure number="1">'
+            "<attributes><divisions>1</divisions></attributes>"
+            + "".join(notes)
+            + "</measure>"
+        )
+
+    xml = _satb_score_xml(
+        {
+            "P1": s_notes,
+            "P2": held("G", "4"),
+            "P3": held("D", "4"),
+            "P4": held("G", "3"),
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc", system_soft_width=200)
+    l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
+    s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
+    first_l = l_line.split("|", 1)[0]
+    first_s = s_line.split("|", 1)[0]
+    # Six Bb lyric notes → one recite with repaired word boundaries.
+    assert "(Wij heb-ben het wa-re)" in first_l
+    assert "heb-ben-het-wa" not in first_l
+    assert "Licht_" in first_l
+    assert "aan_" in first_l
+    assert "-schouwd_" in first_l or "schouwd_" in first_l
+    assert "Wij~" not in first_l
+    assert "heb~" not in first_l
+    assert re.search(r"Bb4\s+-\s+a4\s+Bb4", first_s) or re.search(
+        r"Bb4\s+a4\s+Bb4", first_s
+    )
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_word_split_across_barline_between_two_recites():
+    """One word (wa-re) in two recites separated by a barline → ``)-`` link."""
+
+    def voice_meas(
+        number: int,
+        step: str,
+        oct_: str,
+        *,
+        lyric: str = "",
+        alter: str | None = None,
+        attrs: bool = False,
+    ) -> str:
+        alt = f"<alter>{alter}</alter>" if alter else ""
+        key = (
+            "<attributes><divisions>1</divisions>"
+            "<key><fifths>-1</fifths></key></attributes>\n      "
+            if attrs
+            else ""
+        )
+        ly = (
+            f'<lyric number="1"><syllabic>single</syllabic>'
+            f"<text>{lyric}</text></lyric>"
+            if lyric
+            else ""
+        )
+        return f"""\
+    <measure number="{number}">
+      {key}<note>
+        <pitch><step>{step}</step>{alt}<octave>{oct_}</octave></pitch>
+        <duration>4</duration><type>whole</type>
+        {ly}
+      </note>
+    </measure>"""
+
+    # Measure 1: multi-syllable underlay ending mid-word ``wa``;
+    # measure 2: ``re`` as its own underlay/recite on same pitch.
+    xml = _satb_score_xml(
+        {
+            "P1": voice_meas(
+                1, "B", "4", lyric="foo wa", alter="-1", attrs=True
+            )
+            + "\n"
+            # Space → multi-syllable underlay → second recite (not a bare syllable).
+            + voice_meas(2, "B", "4", lyric="re meer", alter="-1"),
+            "P2": voice_meas(1, "G", "4", lyric="", attrs=True)
+            + "\n"
+            + voice_meas(2, "G", "4", lyric=""),
+            "P3": voice_meas(1, "D", "4", lyric="", attrs=True)
+            + "\n"
+            + voice_meas(2, "D", "4", lyric=""),
+            "P4": voice_meas(1, "G", "3", lyric="", attrs=True)
+            + "\n"
+            + voice_meas(2, "G", "3", lyric=""),
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc", system_soft_width=200)
+    l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
+    # Canonical: woordstreepje after first recite (ELM allowed before ``-``),
+    # then second recite starting with the continuation syllable.
+    compact = l_line.replace(" ", "")
+    assert re.search(r"\(foowa\)[_.]*-\|\(re", compact)
+    assert "(foo wa)" in l_line
+    assert "(re" in l_line
+    assert "wa-re" not in l_line  # not one recite across the bar
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 
@@ -428,8 +794,12 @@ def test_multi_syllable_lyric_on_one_note_becomes_recite():
     text = score_to_mvsa(score, pitch_form="abc")
     l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
     first = l_line.split("|", 1)[0]
-    assert "(ons, die-tot U zin-gen: al)~" in first
+    # Underlay repaired; same-pitch flank ``le`` absorbed; ``ja`` may link.
+    assert "ons," in first
+    assert "die-tot" in first or "die tot" in first
+    assert "al" in first
     assert "onsdietotUzingenal" not in first
+    assert "ja_" in first
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 
@@ -840,3 +1210,101 @@ def test_import_default_runs_kuiser_normaalvorm(tmp_path: Path):
     assert "~" in l_line
     diags = validate_mvsa_text(imported)
     assert not [d for d in diags if d.severity == "error"], diags
+
+
+def test_do_from_fifths_circle():
+    assert do_from_fifths(0) == "C4"
+    assert do_from_fifths(-1) == "F4"
+    assert do_from_fifths(1) == "G4"
+    assert do_from_fifths(-2) == "Bb4"
+
+
+def test_musicxml_fifths_sets_at_do():
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration><type>whole</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Heer</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>-1</fifths></key></attributes>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>-1</fifths></key></attributes>
+      <note><pitch><step>A</step><octave>3</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>-1</fifths></key></attributes>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    assert score.do == "F4"
+    text = score_to_mvsa(score, pitch_form="abc")
+    assert "@do F4" in text
+
+
+def test_import_do_cli_overrides_fifths(tmp_path: Path):
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>0</fifths></key></attributes>
+      <note>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>4</duration><type>whole</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Heer</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>G</step><octave>3</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>E</step><octave>3</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>C</step><octave>3</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+        }
+    )
+    mxl = tmp_path / "c-major.mxl"
+    write_musicxml_output(mxl, xml)
+    imported = import_score_to_mvsa(mxl, pitch="abc", do="F4")
+    assert "@do F4" in imported
+    assert "@do C4" not in imported
+
+
+def test_read_mscz_key_fifths_from_template_and_wij_hebben():
+    template = (
+        Path(__file__).resolve().parents[1]
+        / "docs"
+        / "specification-vsa-templates"
+        / "library"
+        / "tropaar-toon-4"
+        / "examples"
+        / "corpus"
+        / "T4-01-johannes-voorloper.mscz"
+    )
+    wij = EXAMPLES / "wij-hebben" / "wij-hebben-het-ware-licht-default-hemelum.mscz"
+    assert template.is_file()
+    assert wij.is_file()
+    assert read_mscz_key_fifths(template) == -1
+    assert do_from_fifths(read_mscz_key_fifths(template)) == "F4"
+    # Hemelum-bron heeft geen KeySig in de .mscx → None (geen gok).
+    assert read_mscz_key_fifths(wij) is None

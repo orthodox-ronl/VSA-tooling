@@ -400,7 +400,7 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
 ### Synopsis
 
 ```text
-vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
+vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
                 [--octave-style {@oct,marker}] [--section SECTION]
                 [--musescore PATH] [--no-align] path
 ```
@@ -414,8 +414,14 @@ Importeert een partituur naar `.mvsa`:
 | `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4)                                                                             |
 | `.mscz`                       | MuseScore CLI → temp `.mxl` → **SATB-normalisatie** (zelfde explode als [`mscz mxl`](mscz.md)) → parser |
 
-Stemhoogten worden in de gekozen `--pitch`-vorm geschreven; `@do` / `@mode`
-komen uit de toonsoort (majeur-aanname); `@oct` wordt per stem afgeleid.
+Stemhoogten worden in de gekozen `--pitch`-vorm geschreven; `@mode` is
+majeur (aanname); `@oct` wordt per stem afgeleid. `@do` volgt deze volgorde:
+
+1. `--do` op de command line (bijv. `F4`);
+2. bij `.mscz`: aantal kruisen/mollen uit MuseScore `KeySig` (`concertKey`);
+3. anders MusicXML `<key><fifths>` (na MuseScore-conversie of uit `.mxl`);
+4. anders fallback `F4` als er geen voortekening in het bestand staat.
+
 Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
 
 **Leesbaarheid van de uitvoer**
@@ -428,6 +434,21 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
 - Multi-lettergreep lyrics op één noot (spaties, `-`, of soft hyphen) worden
   recite `( … )` i.p.v. één geplakte lettergreep. Een lone extender `-` wordt
   lege recite `()~`. Trailing `.` op lyric-tekst wordt weggestript.
+- **Same-pitch recite:** opeenvolgende noten met dezelfde toonhoogte **én**
+  duur die elk een eenvoudige lettergreep dragen, worden vanaf **3**
+  lettergrepen één recite `( … )`. Daarnaast worden lettergrepen direct
+  vóór/na een underlay-recite op dezelfde toon én duur meegenomen (bijv.
+  `Ver` + `(vuld zij …)` + `met` → één recite). Losse paren zoals
+  `we`/`gen` blijven aparte posities.
+- **Woordgrenzen:** MusicXML-`syllabic` stuurt de groepen. Twee `single`s
+  worden alleen gehypheneerd als Pyphen dat bevestigt (met closed-class- en
+  hoofdletter-guards: `Be-waar`, niet `ons-heeft` / `Licht-aan`). Een
+  `begin`…`end`-keten wordt opnieuw gelettergreepd (`heb-ben het wa-re`);
+  een losse `single` ervoor of erna mag meedoen (`aan-bid-den`,
+  `he-mel-se-Geest`) tenzij de volgende lettergreep een beter woord vormt
+  (`ge-loof` i.p.v. `wa-re-ge`). Woordstreepjes tussen L-posities alleen als
+  de rechterkant `middle`/`end` is (of een recite). Over een maatstreep
+  tussen twee recites: `(… wa)- | (re …)`.
 - **Normaalvorm:** standaard schrijft import daarna de canonieke vorm via
   [`mvsa kuiser`](#vsa-mvsa-kuiser) (standaard-lengte op L als `~`, maatstrepen
   sync, kolomuitlijning) — zie
@@ -450,21 +471,23 @@ Syntax van eindankers:
 
 ### Argumenten en opties
 
-| Naam                 | Verplicht | Betekenis                                   | Default              |
-| -------------------- | --------- | ------------------------------------------- | -------------------- |
-| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.             | —                    |
-| `--pitch`            | Ja        | `doremi`, `a-g` (of alias `abc`), of `vsa`. | —                    |
-| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                            | `<stem>.import.mvsa` |
-| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)               | `@oct`               |
-| `--section`          | Nee       | `@sectie`-id in de output                   | `import`             |
-| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                 | auto                 |
-| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)        | uit                  |
+| Naam                 | Verplicht | Betekenis                                                         | Default              |
+| -------------------- | --------- | ----------------------------------------------------------------- | -------------------- |
+| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.                                   | —                    |
+| `--pitch`            | Ja        | `doremi`, `a-g` (of alias `abc`), of `vsa`.                       | —                    |
+| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                                                  | `<stem>.import.mvsa` |
+| `--do`               | Nee       | Forceer `@do` (bijv. `F4`). Zonder: KeySig / fifths / fallback.   | afgeleid             |
+| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)                                     | `@oct`               |
+| `--section`          | Nee       | `@sectie`-id in de output                                         | `import`             |
+| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                                       | auto                 |
+| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)                              | uit                  |
 
 ### Voorbeelden
 
 ```cmd
 vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
+vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4
 vsa mvsa import lied.mxl -o lied.mvsa --pitch vsa
 vsa mvsa validate lied.mvsa
 ```

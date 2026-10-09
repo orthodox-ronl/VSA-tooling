@@ -666,7 +666,8 @@ def _build_parser():
             "voorbeelden:\n"
             "  vsa mvsa import generated\\lied.mxl -o generated\\lied.import.mvsa "
             "--pitch doremi\n"
-            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g"
+            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g\n"
+            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4"
         ),
     )
     m_import.add_argument(
@@ -685,6 +686,15 @@ def _build_parser():
         choices=["doremi", "a-g", "abc", "vsa"],
         required=True,
         help="Doel-spelling op stemregels (a-g = toonnamen met cijfer; abc = alias).",
+    )
+    m_import.add_argument(
+        "--do",
+        metavar="PITCH",
+        default=None,
+        help=(
+            "Forceer @do (bijv. F4). Zonder --do: uit MSCZ-KeySig / "
+            "MusicXML-fifths; anders F4."
+        ),
     )
     m_import.add_argument(
         "--octave-style",
@@ -1762,6 +1772,7 @@ def _cmd_mvsa_import(args) -> int:
             align=not args.no_align,
             section_id=args.section,
             musescore=musescore,
+            do=getattr(args, "do", None),
         )
     except MvsaImportError as exc:
         print(f"{path}: ERROR: {exc}", file=sys.stderr)
