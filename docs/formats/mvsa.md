@@ -13,7 +13,7 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 | Metadata ↔ `.vsa` (NL-termen)       | [Metadata-brug](../guides/metadata-brug.md)                                                      |
 | Validatieregels                     | [Validatie](../specification-mvsa/validation.md)                                                 |
 | Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                                  |
-| Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap; holds; kuiser-normaalvorm) |
+| Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap; same-pitch recite; kuiser) |
 | CLI                                 | [`mvsa`](../reference/cli/mvsa.md) (`≡ vsa mvsa`)                                                |
 | Platte gezongen tekst               | [`vsa text`](../reference/cli/text.md)                                                           |
 

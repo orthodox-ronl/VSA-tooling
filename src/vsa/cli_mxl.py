@@ -21,6 +21,8 @@ def main(argv: list[str] | None = None) -> int:
         forwarded = ["mvsa", "import", ns.path, "--pitch", ns.pitch]
         if ns.output:
             forwarded.extend(["-o", ns.output])
+        if ns.do:
+            forwarded.extend(["--do", ns.do])
         if ns.octave_style:
             forwarded.extend(["--octave-style", ns.octave_style])
         if ns.section:
@@ -88,6 +90,12 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=["doremi", "a-g", "abc", "vsa"],
         required=True,
         help="Doel-spelling (a-g = toonnamen met cijfer; abc = alias).",
+    )
+    imp.add_argument(
+        "--do",
+        metavar="PITCH",
+        default=None,
+        help="Forceer @do (bijv. F4). Zonder: uit MusicXML-fifths.",
     )
     imp.add_argument(
         "--octave-style",
