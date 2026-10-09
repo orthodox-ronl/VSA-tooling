@@ -102,6 +102,9 @@ def ensure_playback_musicxml(xml: str) -> str:
     exports SA/TB as **one** ``score-part`` with ``<staff>1``/``2`` (voices
     1/2 and 5/6); that is exploded the same way. Already-four-part SATB is
     returned with canonical part names.
+
+    Elke playback-part is **monofoon**: één balk, ``staff``/``voice`` = 1,
+    geen ``<chord/>``-leden (octaven/divisi-koppen → één toon; B2 later).
     """
     root = ET.fromstring(xml)
     score_parts = _score_parts(root)
@@ -109,19 +112,20 @@ def ensure_playback_musicxml(xml: str) -> str:
 
     if len(score_parts) >= 4 and {"P1", "P2", "P3", "P4"}.issubset(by_id):
         _normalize_playback_part_list(root)
-        return _serialize(root)
-
-    if len(score_parts) == 2 and {"P1", "P2"}.issubset(by_id):
-        return _explode_partituur_to_playback(root, by_id)
-
-    if len(score_parts) == 1:
+    elif len(score_parts) == 2 and {"P1", "P2"}.issubset(by_id):
+        root = _explode_partituur_to_playback(root, by_id)
+    elif len(score_parts) == 1:
         only = next(iter(by_id.values()))
         if _part_uses_two_staves(only):
             synthetic = _virtual_sa_tb_parts_from_one_part(only)
-            return _explode_partituur_to_playback(root, synthetic)
+            root = _explode_partituur_to_playback(root, synthetic)
+        else:
+            _normalize_playback_part_list(root)
+    else:
+        # Fallback: rename whatever we have; keep structure.
+        _normalize_playback_part_list(root)
 
-    # Fallback: rename whatever we have; keep structure.
-    _normalize_playback_part_list(root)
+    _ensure_monophonic_parts(root)
     return _serialize(root)
 
 
@@ -193,7 +197,7 @@ def _split_measure_by_staff(meas: ET.Element) -> tuple[ET.Element, ET.Element]:
 
 def _explode_partituur_to_playback(
     root: ET.Element, by_id: dict[str, ET.Element]
-) -> str:
+) -> ET.Element:
     title = _work_title(root)
     p1_meas = [el for el in by_id["P1"] if local(el.tag) == "measure"]
     p2_meas = [el for el in by_id["P2"] if local(el.tag) == "measure"]
@@ -250,26 +254,101 @@ def _explode_partituur_to_playback(
             if voice == "S" and src_staff is not None:
                 for el in src_staff:
                     if local(el.tag) == "direction":
-                        meas.append(copy.deepcopy(el))
-            notes = voice_streams[voice][mi]
-            if not notes:
+                        direction = copy.deepcopy(el)
+                        _set_element_staff(direction, "1")
+                        meas.append(direction)
+            primaries = [
+                n for n in voice_streams[voice][mi] if not _has_chord(n)
+            ]
+            if not primaries:
                 rest = ET.SubElement(meas, "note")
                 ET.SubElement(rest, "rest")
                 ET.SubElement(rest, "duration").text = "16"
+                ET.SubElement(rest, "voice").text = "1"
                 ET.SubElement(rest, "type").text = "whole"
+                ET.SubElement(rest, "staff").text = "1"
             else:
-                soprano = voice_streams["S"][mi]
-                for idx, note in enumerate(notes):
+                soprano = [
+                    n for n in voice_streams["S"][mi] if not _has_chord(n)
+                ]
+                for idx, note in enumerate(primaries):
                     n = copy.deepcopy(note)
-                    for ch in list(n):
-                        if local(ch.tag) == "chord":
-                            n.remove(ch)
+                    _normalize_playback_note(n)
                     if voice != "S":
                         _ensure_lyrics_from(n, soprano, idx)
                     meas.append(n)
             _copy_barlines(meas, src_staff, is_last=(mi == n_meas - 1))
 
-    return _serialize(new_root)
+    return new_root
+
+
+def _ensure_monophonic_parts(root: ET.Element) -> None:
+    """Elke body-part: één balk, voice 1, geen chord-leden / backup / forward."""
+    for _pid, part in _iter_parts(root):
+        for meas in (el for el in part if local(el.tag) == "measure"):
+            _ensure_monophonic_measure(meas)
+
+
+def _ensure_monophonic_measure(meas: ET.Element) -> None:
+    for child in list(meas):
+        tag = local(child.tag)
+        if tag in {"backup", "forward"}:
+            meas.remove(child)
+            continue
+        if tag == "attributes":
+            _ensure_monophonic_attributes(child)
+            continue
+        if tag == "direction":
+            _set_element_staff(child, "1")
+            continue
+        if tag != "note":
+            continue
+        if _has_chord(child):
+            meas.remove(child)
+            continue
+        _normalize_playback_note(child)
+
+
+def _ensure_monophonic_attributes(attrs: ET.Element) -> None:
+    for child in list(attrs):
+        tag = local(child.tag)
+        if tag == "staves":
+            attrs.remove(child)
+        elif tag == "clef" and child.get("number") not in (None, "1"):
+            attrs.remove(child)
+
+
+def _normalize_playback_note(note: ET.Element) -> None:
+    """Zet ``<voice>1</voice>`` en ``<staff>1</staff>``; verwijder ``<chord/>``."""
+    for ch in list(note):
+        if local(ch.tag) == "chord":
+            note.remove(ch)
+    voice_el = None
+    staff_el = None
+    for ch in note:
+        tag = local(ch.tag)
+        if tag == "voice":
+            voice_el = ch
+        elif tag == "staff":
+            staff_el = ch
+    if voice_el is None:
+        voice_el = ET.SubElement(note, "voice")
+    voice_el.text = "1"
+    if staff_el is None:
+        staff_el = ET.SubElement(note, "staff")
+    staff_el.text = "1"
+
+
+def _set_element_staff(el: ET.Element, staff: str) -> None:
+    staff_el = None
+    for ch in el:
+        if local(ch.tag) == "staff":
+            staff_el = ch
+            break
+    if staff_el is None:
+        ET.SubElement(el, "staff").text = staff
+    else:
+        staff_el.text = staff
 
 
 def _split_staff_measure(

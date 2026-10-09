@@ -206,6 +206,190 @@ def test_one_part_two_staff_musescore_explodes_to_satb():
     parts = [el for el in root if local(el.tag) == "part"]
     assert [p.get("id") for p in parts] == ["P1", "P2", "P3", "P4"]
     assert _child_local(root, "defaults") is None
+    for part in parts:
+        assert part.find(".//staves") is None
+        assert part.find(".//backup") is None
+        for note in part.findall(".//note"):
+            assert note.find("chord") is None
+            assert note.findtext("staff") == "1"
+            assert note.findtext("voice") == "1"
+
+
+def test_m18_rejects_staff_two_on_bass():
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P1">
+      <part-name>Soprano</part-name>
+      <score-instrument id="P1-I1">
+        <instrument-name/><instrument-sound>keyboard.piano.grand</instrument-sound>
+      </score-instrument>
+      <midi-device id="P1-I1" port="1"/>
+      <midi-instrument id="P1-I1">
+        <midi-channel>1</midi-channel><midi-program>1</midi-program>
+        <volume>78.7402</volume><pan>0</pan>
+      </midi-instrument>
+    </score-part>
+    <score-part id="P2">
+      <part-name>Alto</part-name>
+      <score-instrument id="P2-I1">
+        <instrument-name/><instrument-sound>keyboard.piano.grand</instrument-sound>
+      </score-instrument>
+      <midi-device id="P2-I1" port="1"/>
+      <midi-instrument id="P2-I1">
+        <midi-channel>2</midi-channel><midi-program>1</midi-program>
+        <volume>78.7402</volume><pan>0</pan>
+      </midi-instrument>
+    </score-part>
+    <score-part id="P3">
+      <part-name>Tenor</part-name>
+      <score-instrument id="P3-I1">
+        <instrument-name/><instrument-sound>keyboard.piano.grand</instrument-sound>
+      </score-instrument>
+      <midi-device id="P3-I1" port="1"/>
+      <midi-instrument id="P3-I1">
+        <midi-channel>3</midi-channel><midi-program>1</midi-program>
+        <volume>78.7402</volume><pan>0</pan>
+      </midi-instrument>
+    </score-part>
+    <score-part id="P4">
+      <part-name>Bass</part-name>
+      <score-instrument id="P4-I1">
+        <instrument-name/><instrument-sound>keyboard.piano.grand</instrument-sound>
+      </score-instrument>
+      <midi-device id="P4-I1" port="1"/>
+      <midi-instrument id="P4-I1">
+        <midi-channel>4</midi-channel><midi-program>1</midi-program>
+        <volume>78.7402</volume><pan>0</pan>
+      </midi-instrument>
+    </score-part>
+  </part-list>
+  <part id="P1"><measure number="1"><note><rest/><duration>4</duration><voice>1</voice><type>whole</type><staff>1</staff></note></measure></part>
+  <part id="P2"><measure number="1"><note><rest/><duration>4</duration><voice>1</voice><type>whole</type><staff>1</staff></note></measure></part>
+  <part id="P3"><measure number="1"><note><rest/><duration>4</duration><voice>1</voice><type>whole</type><staff>1</staff></note></measure></part>
+  <part id="P4">
+    <measure number="1">
+      <note>
+        <pitch><step>F</step><octave>2</octave></pitch>
+        <duration>4</duration><voice>6</voice><type>whole</type><staff>2</staff>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    findings = validate_playback_musicxml(xml, profile="satb")
+    codes = {f.code for f in findings}
+    assert "M18" in codes
+    assert any("staff=" in f.message for f in findings if f.code == "M18")
+
+
+def test_bass_octave_chord_collapses_to_primary():
+    """Octaaf-akkoord in bas → één noot (primaire toon), geen tweede noot in de tijd."""
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <work><work-title>Octaaf</work-title></work>
+  <part-list>
+    <score-part id="P1"><part-name></part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <staves>2</staves>
+        <clef number="1"><sign>G</sign><line>2</line></clef>
+        <clef number="2"><sign>F</sign><line>4</line></clef>
+      </attributes>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>1</voice><type>whole</type><staff>1</staff>
+        <lyric number="1"><syllabic>single</syllabic><text>Heer</text></lyric>
+      </note>
+      <backup><duration>4</duration></backup>
+      <note>
+        <pitch><step>E</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>2</voice><type>whole</type><staff>1</staff>
+      </note>
+      <backup><duration>4</duration></backup>
+      <note>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>5</voice><type>whole</type><staff>2</staff>
+      </note>
+      <backup><duration>4</duration></backup>
+      <note>
+        <pitch><step>F</step><octave>2</octave></pitch>
+        <duration>4</duration><voice>6</voice><type>whole</type><staff>2</staff>
+      </note>
+      <note>
+        <chord/>
+        <pitch><step>F</step><octave>3</octave></pitch>
+        <duration>4</duration><voice>6</voice><type>whole</type><staff>2</staff>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    cleaned = normalize_playback_musicxml(xml, apply_timing=False)
+    findings = validate_playback_musicxml(cleaned, profile="satb")
+    assert findings == [], findings
+    root = ET.fromstring(cleaned.split("?>", 1)[-1].lstrip())
+    bass = root.find("./part[@id='P4']")
+    assert bass is not None
+    notes = bass.findall(".//note")
+    pitched = [n for n in notes if n.find("pitch") is not None]
+    assert len(pitched) == 1
+    assert pitched[0].findtext("pitch/step") == "F"
+    assert pitched[0].findtext("pitch/octave") == "2"
+    assert pitched[0].find("chord") is None
+    assert pitched[0].findtext("staff") == "1"
+    assert pitched[0].findtext("voice") == "1"
+
+
+def test_normalize_fixes_already_four_part_staff_two():
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P1"><part-name>Soprano</part-name></score-part>
+    <score-part id="P2"><part-name>Alto</part-name></score-part>
+    <score-part id="P3"><part-name>Tenor</part-name></score-part>
+    <score-part id="P4"><part-name>Bass</part-name></score-part>
+  </part-list>
+  <part id="P1"><measure number="1"><note><rest/><duration>4</duration><voice>1</voice><type>whole</type><staff>1</staff></note></measure></part>
+  <part id="P2"><measure number="1"><note><rest/><duration>4</duration><voice>2</voice><type>whole</type><staff>1</staff></note></measure></part>
+  <part id="P3"><measure number="1"><note><rest/><duration>4</duration><voice>5</voice><type>whole</type><staff>2</staff></note></measure></part>
+  <part id="P4">
+    <measure number="1">
+      <note>
+        <pitch><step>F</step><octave>2</octave></pitch>
+        <duration>4</duration><voice>6</voice><type>whole</type><staff>2</staff>
+      </note>
+      <note>
+        <chord/>
+        <pitch><step>F</step><octave>3</octave></pitch>
+        <duration>4</duration><voice>6</voice><type>whole</type><staff>2</staff>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    cleaned = normalize_playback_musicxml(xml, apply_timing=False)
+    findings = validate_playback_musicxml(cleaned, profile="satb")
+    assert findings == [], findings
+    root = ET.fromstring(cleaned.split("?>", 1)[-1].lstrip())
+    for part in root.findall("part"):
+        for note in part.findall(".//note"):
+            assert note.find("chord") is None
+            assert note.findtext("staff") == "1"
+            assert note.findtext("voice") == "1"
+    bass_notes = [
+        n
+        for n in root.find("./part[@id='P4']").findall(".//note")
+        if n.find("pitch") is not None
+    ]
+    assert len(bass_notes) == 1
+    assert bass_notes[0].findtext("pitch/octave") == "2"
 
 
 def test_meta_source_looks_like_license():
