@@ -4916,7 +4916,7 @@ catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout).</p>
 <code>.mxl</code> / <code>.vsa</code> / <code>.mvsa</code>).</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mscz [-h] {import,mxl,text} …
-mscz import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
+mscz import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
             [--octave-style {@oct,marker}] [--section SECTION]
             [--musescore PATH] [--no-align] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
@@ -4945,12 +4945,14 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 </tr>
 </tbody>
 </table>
-<p><strong>Import-opties</strong> (<code>--pitch</code>, <code>--no-align</code>, soft-wrap, eindankers bij <code>vsa</code>,
-kuiser-normaalvorm): zelfde keten als
-<a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. De MSCZ-stap gebruikt dezelfde
-SATB-explode als <code>mscz mxl</code>.</p>
+<p><strong>Import-opties</strong> (<code>--pitch</code>, <code>--do</code>, <code>--no-align</code>, soft-wrap, eindankers bij
+<code>vsa</code>, kuiser-normaalvorm): zelfde keten als
+<a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. <code>@do</code> komt uit de MuseScore-
+voortekening (<code>KeySig</code> / <code>concertKey</code>) tenzij je <code>--do</code> meegeeft. De
+MSCZ-stap gebruikt dezelfde SATB-explode als <code>mscz mxl</code>.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
+mscz import generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
 mscz import generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
 vsa mvsa validate generated\from-mscz.vsa.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
@@ -5002,7 +5004,7 @@ mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-08
+        Bijgewerkt: 2026-10-09
         
       </p>
       
