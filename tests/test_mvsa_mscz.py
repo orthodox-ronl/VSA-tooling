@@ -79,6 +79,8 @@ def test_apply_partituur_style_on_minimal_mscz(tmp_path: Path):
         "<Instrument><longName>Soprano</longName>"
         "<shortName>S</shortName><trackName>Soprano</trackName>"
         "</Instrument></Part>"
+        "<Tempo><tempo>2.1667</tempo>"
+        "<text>quarter = 130</text></Tempo>"
         "</Score></museScore>"
     )
     path = tmp_path / "t.mscz"
@@ -91,6 +93,9 @@ def test_apply_partituur_style_on_minimal_mscz(tmp_path: Path):
     assert "<pageWidth>8.26772</pageWidth>" in out
     assert "<minSystemDistance>8</minSystemDistance>" in out
     assert "<lyricsOddFontFace>Source Sans 3</lyricsOddFontFace>" in out
+    assert "<Tempo>" in out
+    assert "<visible>0</visible>" in out
+    assert "<tempo>2.1667</tempo>" in out
 
 
 def test_promote_tekst_staff_text_to_system_text(tmp_path: Path):

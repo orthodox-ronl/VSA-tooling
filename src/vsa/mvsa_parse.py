@@ -163,6 +163,8 @@ class ParsedSystem:
     staff_texts: list[str] = field(default_factory=list)
     # ``@mscz-newline`` vóór dit systeem → MuseScore new-system bij MSCZ-export.
     mscz_newline: bool = False
+    # ``@tempo`` direct vóór dit systeem (BPM); None = geen tempo-wissel hier.
+    tempo: int | None = None
 
 
 @dataclass
@@ -210,6 +212,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
     pending_sectie: tuple[str, int, str] | None = None
     pending_staff_texts: list[tuple[str, int]] = []  # (text, line_no)
     pending_mscz_newline: list[int] = []  # line numbers
+    pending_tempo: tuple[int, int] | None = None  # (bpm, line_no)
     doc_meta: dict[str, str] = {}
     speelplan: list[str] | None = None
     speelplan_line: int | None = None
@@ -319,7 +322,10 @@ def parse_mvsa(text: str) -> ParsedDocument:
                         pending_mscz_newline.append(line_no)
                 elif name == "tempo":
                     if rest and TEMPO_RE.fullmatch(rest):
-                        doc_meta["tempo"] = rest
+                        pending_tempo = (int(rest), line_no)
+                        # Document-tempo = eerste @tempo (starttempo voor meta).
+                        if "tempo" not in doc_meta:
+                            doc_meta["tempo"] = rest
                 elif name in STRING_META_DIRECTIVES:
                     value = parse_tekst_argument(rest)
                     if value is not None:
@@ -408,9 +414,11 @@ def parse_mvsa(text: str) -> ParsedDocument:
             identities=identities,
             staff_texts=[t for t, _ in pending_staff_texts],
             mscz_newline=bool(pending_mscz_newline),
+            tempo=pending_tempo[0] if pending_tempo is not None else None,
         )
         pending_staff_texts.clear()
         pending_mscz_newline.clear()
+        pending_tempo = None
         system.measures = _build_measures(system, diagnostics)
 
         if current is None:
@@ -456,6 +464,15 @@ def parse_mvsa(text: str) -> ParsedDocument:
                 "MVSA-MSCZ-NEWLINE",
                 "@mscz-newline zonder volgend LSATB-systeem",
                 nl_line,
+                severity="warning",
+            )
+        )
+    if pending_tempo is not None:
+        diagnostics.append(
+            MvsaDiagnostic(
+                "MVSA-TEMPO",
+                "@tempo zonder volgend LSATB-systeem",
+                pending_tempo[1],
                 severity="warning",
             )
         )

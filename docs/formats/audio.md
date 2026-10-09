@@ -41,8 +41,9 @@ Default-formaat: **``.mp3``**. Optioneel ``--format ogg`` of ``wav``, of
 
 Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). In `.mvsa`
 zet je het afspeeltempo met [`@tempo`](../specification-mvsa/keywords.md)
-(BPM; default **130**); dat gaat mee in MusicXML-metronoom/`sound tempo` en
-dus in `mvsa audio` / Coria. Gedeelde namen met `.vsa`:
+(BPM; default **130**); dat gaat mee in MusicXML-`sound tempo` (metronoom
+onzichtbaar op blad/PDF) en dus in `mvsa audio` / Coria. Gedeelde namen met
+`.vsa`:
 [metadata-brug](../guides/metadata-brug.md). Canonieke playback-MXL gebruikt
 **piano** op elke partij (checklist M8). Bitrate en extra instrumentkeuze
 buiten die piano zijn in v1 MuseScore-defaults.

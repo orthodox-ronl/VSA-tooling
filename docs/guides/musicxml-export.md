@@ -141,14 +141,14 @@ De meeste instellingen staan in YAML-frontmatter bovenaan je `.vsa`-bestand
 
 ### Muziek
 
-| Instelling             | Wat het doet                                                                                     | Standaard      |
-| ---------------------- | ------------------------------------------------------------------------------------------------ | -------------- |
-| `do`                   | Grondtoon (bijv. `F4`)                                                                           | `F4`           |
-| `mode`                 | `major` of `minor`                                                                               | `major`        |
-| `tempo`                | Tempo in BPM (alleen zichtbaar als je het expliciet zet)                                         | `120`          |
-| `meter`                | Maatsoort, bijv. `4/4` (optioneel)                                                               | —              |
-| `reciting-mode`        | Ongescopte tekst: `quarters` (één kwartnoot per woord) of `whole` (één hele noot bij ≥4 woorden) | `quarters`     |
-| **`musicxml-profile`** | **`playback`** (Coria/MuseScore) of **`engraving`** (partituurbewerking)                         | **`playback`** |
+| Instelling             | Wat het doet                                                                                              | Standaard      |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- | -------------- |
+| `do`                   | Grondtoon (bijv. `F4`)                                                                                    | `F4`           |
+| `mode`                 | `major` of `minor`                                                                                        | `major`        |
+| `tempo`                | Tempo in BPM voor afspelen (metronoom onzichtbaar op blad/PDF; alleen gezet als je het expliciet opgeeft) | `130`          |
+| `meter`                | Maatsoort, bijv. `4/4` (optioneel)                                                                        | —              |
+| `reciting-mode`        | Ongescopte tekst: `quarters` (één kwartnoot per woord) of `whole` (één hele noot bij ≥4 woorden)          | `quarters`     |
+| **`musicxml-profile`** | **`playback`** (Coria/MuseScore) of **`engraving`** (partituurbewerking)                                  | **`playback`** |
 
 ### Identificatie (titels in het bestand)
 

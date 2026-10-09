@@ -30,13 +30,14 @@ Alleen de **begrippen** en exportgedrag gelijk houden.
 | vertaler       | `@vertaler "…"`         | *(geen standaardveld)*                       | `<creator type="translator">`                             |
 | bron           | `@bron "…"`             | *(geen standaardveld; optioneel vrij)*       | `<source>` / misc `bron` (Coria); MSCZ-colofon            |
 | copyright      | `@copyright "…"`        | `identificatie.rights`                       | `<rights>` / copyright                                    |
-| tempo          | `@tempo 72`             | `muziek.tempo` / `tempo="72"`                | metronoom + `sound tempo`                                 |
+| tempo          | `@tempo 72`             | `muziek.tempo` / `tempo="72"`                | `sound tempo` (metronoom onzichtbaar op blad/PDF)         |
 | toon           | `@toon "8"`             | `identificatie.tone` / `tone="…"`            | `miscellaneous-field name="tone"`                         |
 | do (grondtoon) | `@do F4`                | `muziek.do` / `do="F4"`                      | key / pitch-context                                       |
 | modus          | `@mode major`           | `muziek.mode` / `mode="major"`               | key mode                                                  |
 
 **Tempo-default:** in beide formaten **130** BPM als je geen tempo opgeeft
-(export zet dan toch metronoom/`sound tempo` 130 in mvsa-MusicXML).
+(export zet dan toch `sound tempo` 130 in mvsa-MusicXML; de metronoom blijft
+onzichtbaar op blad, `.mscz` en PDF).
 
 **Toon:** kerktoon / oktoechos-nummer. Keyword en term: **toon**; in MusicXML
 blijft de veldnaam `tone` (compatibel met bestaande VSA-export).

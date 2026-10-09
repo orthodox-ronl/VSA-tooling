@@ -464,6 +464,8 @@ def export_mvsa_to_musicxml(
     measure_left_styles: list[str | None] = []
     measure_staff_texts: list[list[str]] = []
     measure_new_system: list[bool] = []
+    # BPM per maatindex; None = geen tempo-wissel (vorige blijft).
+    measure_tempos: list[int | None] = []
     # Speelblok-id → (eerste_maatindex, laatste_maatindex) in bladvorm.
     blok_measure_range: dict[str, tuple[int, int]] = {}
     score_started = False
@@ -490,9 +492,14 @@ def export_mvsa_to_musicxml(
                     # Alleen ``@mscz-newline`` forceert een MuseScore-systeembreuk.
                     wants_break = bool(getattr(system, "mscz_newline", False))
                     measure_new_system.append(wants_break and score_started)
+                    sys_tempo = getattr(system, "tempo", None)
+                    measure_tempos.append(
+                        int(sys_tempo) if sys_tempo is not None else None
+                    )
                 else:
                     measure_staff_texts.append([])
                     measure_new_system.append(False)
+                    measure_tempos.append(None)
             if system.measures:
                 score_started = True
         if (
@@ -561,6 +568,7 @@ def export_mvsa_to_musicxml(
             bar_styles,
             measure_staff_texts,
             measure_left_styles,
+            measure_tempos,
         )
 
     from .bibliotheek_id import resolve_bibliotheek_id
@@ -580,6 +588,9 @@ def export_mvsa_to_musicxml(
         "tempo": str(tempo) if tempo is not None else None,
         "bibliotheek_id": resolve_bibliotheek_id(bibliotheek_id, source_path),
     }
+    # Starttempo op maat 1 als geen @tempo vóór het eerste systeem.
+    if measure_tempos and measure_tempos[0] is None:
+        measure_tempos[0] = _parse_tempo_bpm(meta)
     if layout == "partituur":
         return _emit_score_partituur(
             voice_measures,
@@ -595,6 +606,7 @@ def export_mvsa_to_musicxml(
             measure_ending_stop=ending_stop,
             measure_repeat_times=repeat_times,
             measure_nav_marks=nav_marks,
+            measure_tempos=measure_tempos,
             meta=meta,
         )
 
@@ -642,6 +654,7 @@ def export_mvsa_to_musicxml(
         measure_new_system=measure_new_system,
         measure_cue_gap=measure_cue_gap,
         measure_pauze=measure_pauze,
+        measure_tempos=measure_tempos,
         meta=meta,
         parts=playback_parts,
         extra_parts=extra_parts,
@@ -1786,8 +1799,12 @@ def _parse_tempo_bpm(meta: dict[str, str | None] | None) -> int:
 
 
 def _emit_tempo_direction(out: list[str], bpm: int) -> None:
-    """Zichtbare metronoom + playback-``sound tempo`` (kwart = BPM)."""
-    out.append('<direction placement="above">')
+    """Playback-``sound tempo`` (kwart = BPM); metronoom onzichtbaar op blad/PDF.
+
+    ``print-object="no"`` houdt de markering weg uit MuseScore-partituur en
+    PDF; afspelen (audio/Coria) gebruikt nog steeds ``sound tempo``.
+    """
+    out.append('<direction placement="above" print-object="no">')
     out.append("<direction-type>")
     out.append('<metronome parentheses="no">')
     out.append("<beat-unit>quarter</beat-unit>")
@@ -1803,6 +1820,7 @@ def _insert_playback_pauze_measures(
     bar_styles: list[str],
     measure_staff_texts: list[list[str]],
     measure_left_styles: list[str | None] | None = None,
+    measure_tempos: list[int | None] | None = None,
 ) -> list[bool]:
     """``[PAUZE]``-maten voor Coria: na sectie-einde én vóór mid-flow ``@tekst``.
 
@@ -1810,6 +1828,7 @@ def _insert_playback_pauze_measures(
     - Vóór een koormaat met ``@tekst`` als die niet de eerste maat is en de
       vorige maat nog geen sectie-eindestreep had (geen dubbele pauze).
     Cue-teksten van de volgende koormaat verhuizen naar de pauzemaat.
+    Tempo-wissels blijven op de koormaat (pauzemaat krijgt ``None``).
     """
     n = max(
         len(bar_styles),
@@ -1823,6 +1842,9 @@ def _insert_playback_pauze_measures(
     if measure_left_styles is not None:
         while len(measure_left_styles) < n:
             measure_left_styles.append(None)
+    if measure_tempos is not None:
+        while len(measure_tempos) < n:
+            measure_tempos.append(None)
     for measures in voice_measures.values():
         while len(measures) < n:
             measures.append([])
@@ -1850,6 +1872,8 @@ def _insert_playback_pauze_measures(
         measure_staff_texts.insert(i + 1, cues)
         if measure_left_styles is not None:
             measure_left_styles.insert(i + 1, None)
+        if measure_tempos is not None:
+            measure_tempos.insert(i + 1, None)
         pauze.insert(i + 1, True)
     return pauze
 
@@ -1961,6 +1985,7 @@ def _emit_score_playback(
     measure_new_system: list[bool] | None = None,
     measure_cue_gap: list[bool] | None = None,
     measure_pauze: list[bool] | None = None,
+    measure_tempos: list[int | None] | None = None,
     meta: dict[str, str | None] | None = None,
     parts: list[dict] | None = None,
     extra_parts: list[dict] | None = None,
@@ -1974,6 +1999,7 @@ def _emit_score_playback(
     new_systems = list(measure_new_system or [])
     cue_gaps = list(measure_cue_gap or [])
     pauzes = list(measure_pauze or [])
+    tempos = list(measure_tempos or [])
     while len(left_styles) < n_measures:
         left_styles.append(None)
     while len(staff_texts) < n_measures:
@@ -1984,11 +2010,14 @@ def _emit_score_playback(
         cue_gaps.append(False)
     while len(pauzes) < n_measures:
         pauzes.append(False)
+    while len(tempos) < n_measures:
+        tempos.append(None)
 
     emit_parts: list[dict] = list(parts) if parts is not None else list(PARTS)
     if extra_parts:
         emit_parts = emit_parts + list(extra_parts)
-    tempo_bpm = _parse_tempo_bpm(meta)
+    if tempos and tempos[0] is None:
+        tempos[0] = _parse_tempo_bpm(meta)
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -2031,8 +2060,9 @@ def _emit_score_playback(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
-                if part_idx == 0:
-                    _emit_tempo_direction(out, tempo_bpm)
+            # Tempo alleen op de bovenste part (wijzigt afspeelsnelheid).
+            if part_idx == 0 and tempos[mi] is not None:
+                _emit_tempo_direction(out, tempos[mi])
             # Staff-tekst alleen op de bovenste balk (Soprano).
             if part["voice"] == "S":
                 if new_systems[mi]:
@@ -2081,6 +2111,7 @@ def _emit_score_partituur(
     measure_ending_stop: list[str | None] | None = None,
     measure_repeat_times: list[int | None] | None = None,
     measure_nav_marks: list[list[str]] | None = None,
+    measure_tempos: list[int | None] | None = None,
     meta: dict[str, str | None] | None = None,
 ) -> str:
     """Twee balken SA/TB: voice 1 (S/T) stok omhoog, voice 2 (A/B) stok omlaag."""
@@ -2097,6 +2128,7 @@ def _emit_score_partituur(
     end_stops = list(measure_ending_stop or [])
     rep_times = list(measure_repeat_times or [])
     navs = list(measure_nav_marks or [])
+    tempos = list(measure_tempos or [])
     while len(left_styles) < n_measures:
         left_styles.append(None)
     while len(staff_texts) < n_measures:
@@ -2115,7 +2147,10 @@ def _emit_score_partituur(
         rep_times.append(None)
     while len(navs) < n_measures:
         navs.append([])
-    tempo_bpm = _parse_tempo_bpm(meta)
+    while len(tempos) < n_measures:
+        tempos.append(None)
+    if tempos and tempos[0] is None:
+        tempos[0] = _parse_tempo_bpm(meta)
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -2163,8 +2198,8 @@ def _emit_score_partituur(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
-                if top_staff:
-                    _emit_tempo_direction(out, tempo_bpm)
+            if top_staff and tempos[mi] is not None:
+                _emit_tempo_direction(out, tempos[mi])
             if top_staff:
                 if new_systems[mi]:
                     out.append('<print new-system="yes"/>')

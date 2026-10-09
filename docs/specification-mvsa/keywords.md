@@ -361,7 +361,7 @@ dezelfde quoted-stringvorm; `@tempo` is een BPM-getal zonder aanhalingstekens.
 | `@vertaler`     | `@vertaler "NL: …"`                  | `<creator type="translator">` | `translator`   |
 | `@bron`         | `@bron "Liturgikon, p.147-149"`      | `<source>` (+ MSCZ-colofon)   | `source`       |
 | `@copyright`    | `@copyright "CC BY-SA 4.0 — …"`      | `<rights>` (+ footer/colofon) | `copyright`    |
-| `@tempo`        | `@tempo 72`                          | metronoom + `sound tempo`     | (via MusicXML) |
+| `@tempo`        | `@tempo 72`                          | `sound tempo` (onzichtbaar)   | (via MusicXML) |
 | `@toon`         | `@toon "8"`                          | `miscellaneous-field` `tone`  | (via MusicXML) |
 
 **`@tempo`.** Aantal **slagen per minuut** (BPM) voor beluisteren en oefenen.
@@ -370,9 +370,11 @@ bijvoorbeeld `@tempo 72`. Laatste waarde in het bestand wint. **Default** als
 je `@tempo` weglaat: **130** (zelfde default als eenstemmige VSA).
 
 Bij export naar MusicXML (playback/Coria én partituur) komt op de **eerste
-maat** van de bovenste part een metronoommarkering (kwartnoot = BPM) plus
-`<sound tempo="…"/>`. MSCZ-export loopt via die partituur-MusicXML, dus het
-tempo komt ook in MuseScore mee.
+maat** van de bovenste part `<sound tempo="…"/>` (kwartnoot = BPM) plus een
+metronoommarkering met `print-object="no"`. Het tempo stuurt afspelen
+(audio/Coria); op het blad, in `.mscz` en in de PDF blijft de metronoom
+**onzichtbaar**. MSCZ-nabewerking zet MuseScore-`Tempo` bovendien op
+`visible=0` voor het geval de import de markering toch zichtbaar maakt.
 
 ```text
 @tempo 72
