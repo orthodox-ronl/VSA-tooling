@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-09 11:17 CEST.
+  , gebouwd 2026-10-09 11:32 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1558,6 +1558,17 @@
     <span class="md-ellipsis">
       
         Alleen in één formaat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bestaande-mvsa-bijwerken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bestaande .mvsa bijwerken
       
     </span>
   </a>
@@ -4778,6 +4789,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bestaande-mvsa-bijwerken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bestaande .mvsa bijwerken
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#zie-ook" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4958,6 +4980,16 @@ blijft de veldnaam <code>tone</code> (compatibel met bestaande VSA-export).</p>
 </tr>
 </tbody>
 </table>
+<h2 id="bestaande-mvsa-bijwerken">Bestaande <code>.mvsa</code> bijwerken<a class="headerlink" href="#bestaande-mvsa-bijwerken" title="Permanent link">&para;</a></h2>
+<p>Script in VSA-tooling (eerst dry-run, dan <code>--apply</code>):</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\bibliotheek
+C:\Git\orthodox-ronl\VSA-tooling\scripts\migrate-metadata.cmd content-source
+
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\migrate-metadata.cmd examples\mvsa --apply
+</code></pre></div>
+<p>Zet <code>@toon "N"</code> als die volgt uit titel of pad. Optioneel <code>--tempo</code> voor
+expliciet <code>@tempo 130</code>. Zie <code>scripts/README.md</code>.</p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../../specification-mvsa/keywords/">Keywords (mvsa)</a></li>
