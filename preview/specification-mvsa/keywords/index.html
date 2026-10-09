@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-09 10:48 CEST.
+  , gebouwd 2026-10-09 11:17 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1449,6 +1449,34 @@
     
   
     mvsa schrijven 101
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/metadata-brug/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metadata-brug (.vsa ↔ .mvsa)
   
 
     
@@ -5066,6 +5094,8 @@
 <p><strong>Voor wie:</strong> wie een <code>.mvsa</code> typt in VSCode (koorpartituur, litanieën,
 antwoorden) en wil weten welke <code>@</code>-regels bestaan, wat ze doen, en wanneer je
 ze wél of juist níet gebruikt.</p>
+<p>Gedeelde metadata met eenstemmige <code>.vsa</code> (Nederlandse termen, andere
+schrijfwijze): <a href="../../guides/metadata-brug/">Metadata-brug</a>.</p>
 <p>Een <strong>keyword-regel</strong> is een regel die (na optionele spaties) begint met <code>@</code>,
 daarna een keyword, daarna spatie, daarna argumenten die bij dat keyword
 horen:</p>
@@ -5388,12 +5418,18 @@ dezelfde quoted-stringvorm; <code>@tempo</code> is een BPM-getal zonder aanhalin
 <td>metronoom + <code>sound tempo</code></td>
 <td>(via MusicXML)</td>
 </tr>
+<tr>
+<td><code>@toon</code></td>
+<td><code>@toon "8"</code></td>
+<td><code>miscellaneous-field</code> <code>tone</code></td>
+<td>(via MusicXML)</td>
+</tr>
 </tbody>
 </table>
 <p><strong><code>@tempo</code>.</strong> Aantal <strong>slagen per minuut</strong> (BPM) voor beluisteren en oefenen.
 Vorm: <code>@tempo</code> + spatie + geheel getal <strong>1–999</strong> (geen aanhalingstekens),
-bijvoorbeeld <code>@tempo 72</code>. Laatste waarde in het bestand wint. Zonder <code>@tempo</code>
-kiest de speler/MuseScore een eigen default.</p>
+bijvoorbeeld <code>@tempo 72</code>. Laatste waarde in het bestand wint. <strong>Default</strong> als
+je <code>@tempo</code> weglaat: <strong>130</strong> (zelfde default als eenstemmige VSA).</p>
 <p>Bij export naar MusicXML (playback/Coria én partituur) komt op de <strong>eerste
 maat</strong> van de bovenste part een metronoommarkering (kwartnoot = BPM) plus
 <code>&lt;sound tempo="…"/&gt;</code>. MSCZ-export loopt via die partituur-MusicXML, dus het
@@ -5402,6 +5438,13 @@ tempo komt ook in MuseScore mee.</p>
 </code></pre></div>
 <p><strong>Niet gebruiken</strong> voor tekstuele tempo-aanduidingen (“langzaam”, “Andante”) —
 alleen een BPM-getal. Niet midden in een LSATB-systeem.</p>
+<p><strong><code>@toon</code>.</strong> Kerktoon / oktoechos-nummer van het zangstuk (catalogus en
+MusicXML). Vorm: quoted string, bv. <code>@toon "8"</code>. Gaat mee als
+<code>&lt;miscellaneous-field name="tone"&gt;</code> in <code>&lt;identification&gt;</code> (zelfde veldnaam
+als eenstemmige VSA <code>tone</code>). Zie de
+<a href="../../guides/metadata-brug/">metadata-brug</a>.</p>
+<div class="highlight"><pre><span></span><code>@toon "8"
+</code></pre></div>
 <p><strong><code>@composer</code>.</strong> Naam of aanduiding van de <strong>componist</strong> (of traditionele
 toeschrijving), zoals die rechtsboven op het blad / in MuseScore-info
 verschijnt. Gebruik dit <strong>niet</strong> voor het boek of blad waar je uit overneemt —
@@ -5451,11 +5494,6 @@ namen vastliggen voor later gebruik.</p>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>@toon</code></td>
-<td>Kerktoon / oktoechos-nummer van het zangstuk</td>
-<td><code>@toon "8"</code></td>
-</tr>
 <tr>
 <td><code>@genre</code></td>
 <td>Soort zangstuk (litanie, tropaar, …) voor catalogus/filters</td>
