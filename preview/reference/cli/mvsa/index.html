@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-09 12:17 CEST.
+  , gebouwd 2026-10-09 20:39 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -7315,7 +7315,7 @@ kant-en-klare catalogusbron.</p>
 accepteren naar de catalogus.</p>
 </div>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
+<div class="highlight"><pre><span></span><code>vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
                 [--octave-style {@oct,marker}] [--section SECTION]
                 [--musescore PATH] [--no-align] path
 </code></pre></div>
@@ -7339,9 +7339,15 @@ accepteren naar de catalogus.</p>
 </tr>
 </tbody>
 </table>
-<p>Stemhoogten worden in de gekozen <code>--pitch</code>-vorm geschreven; <code>@do</code> / <code>@mode</code>
-komen uit de toonsoort (majeur-aanname); <code>@oct</code> wordt per stem afgeleid.
-Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
+<p>Stemhoogten worden in de gekozen <code>--pitch</code>-vorm geschreven; <code>@mode</code> is
+majeur (aanname); <code>@oct</code> wordt per stem afgeleid. <code>@do</code> volgt deze volgorde:</p>
+<ol>
+<li><code>--do</code> op de command line (bijv. <code>F4</code>);</li>
+<li>bij <code>.mscz</code>: aantal kruisen/mollen uit MuseScore <code>KeySig</code> (<code>concertKey</code>);</li>
+<li>anders MusicXML <code>&lt;key&gt;&lt;fifths&gt;</code> (na MuseScore-conversie of uit <code>.mxl</code>);</li>
+<li>anders fallback <code>F4</code> als er geen voortekening in het bestand staat.</li>
+</ol>
+<p>Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
 <p><strong>Leesbaarheid van de uitvoer</strong></p>
 <ul>
 <li>Soft-wrap: LSATB-systemen van ongeveer 80 tekens
@@ -7352,6 +7358,21 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.</p>
 <li>Multi-lettergreep lyrics op één noot (spaties, <code>-</code>, of soft hyphen) worden
   recite <code>( … )</code> i.p.v. één geplakte lettergreep. Een lone extender <code>-</code> wordt
   lege recite <code>()~</code>. Trailing <code>.</code> op lyric-tekst wordt weggestript.</li>
+<li><strong>Same-pitch recite:</strong> opeenvolgende noten met dezelfde toonhoogte <strong>én</strong>
+  duur die elk een eenvoudige lettergreep dragen, worden vanaf <strong>3</strong>
+  lettergrepen één recite <code>( … )</code>. Daarnaast worden lettergrepen direct
+  vóór/na een underlay-recite op dezelfde toon én duur meegenomen (bijv.
+  <code>Ver</code> + <code>(vuld zij …)</code> + <code>met</code> → één recite). Losse paren zoals
+  <code>we</code>/<code>gen</code> blijven aparte posities.</li>
+<li><strong>Woordgrenzen:</strong> MusicXML-<code>syllabic</code> stuurt de groepen. Twee <code>single</code>s
+  worden alleen gehypheneerd als Pyphen dat bevestigt (met closed-class- en
+  hoofdletter-guards: <code>Be-waar</code>, niet <code>ons-heeft</code> / <code>Licht-aan</code>). Een
+  <code>begin</code>…<code>end</code>-keten wordt opnieuw gelettergreepd (<code>heb-ben het wa-re</code>);
+  een losse <code>single</code> ervoor of erna mag meedoen (<code>aan-bid-den</code>,
+  <code>he-mel-se-Geest</code>) tenzij de volgende lettergreep een beter woord vormt
+  (<code>ge-loof</code> i.p.v. <code>wa-re-ge</code>). Woordstreepjes tussen L-posities alleen als
+  de rechterkant <code>middle</code>/<code>end</code> is (of een recite). Over een maatstreep
+  tussen twee recites: <code>(… wa)- | (re …)</code>.</li>
 <li><strong>Normaalvorm:</strong> standaard schrijft import daarna de canonieke vorm via
   <a href="#vsa-mvsa-kuiser"><code>mvsa kuiser</code></a> (standaard-lengte op L als <code>~</code>, maatstrepen
   sync, kolomuitlijning) — zie
@@ -7399,6 +7420,12 @@ kaal. Bij <code>--pitch doremi</code> en <code>--pitch a-g</code> komen die eind
 <td><code>&lt;stem&gt;.import.mvsa</code></td>
 </tr>
 <tr>
+<td><code>--do</code></td>
+<td>Nee</td>
+<td>Forceer <code>@do</code> (bijv. <code>F4</code>). Zonder: KeySig / fifths / fallback.</td>
+<td>afgeleid</td>
+</tr>
+<tr>
 <td><code>--octave-style</code></td>
 <td>Nee</td>
 <td><code>@oct</code> of <code>marker</code> (nog niet)</td>
@@ -7427,6 +7454,7 @@ kaal. Bij <code>--pitch doremi</code> en <code>--pitch a-g</code> komen die eind
 <h3 id="voorbeelden_4">Voorbeelden<a class="headerlink" href="#voorbeelden_4" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
+vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4
 vsa mvsa import lied.mxl -o lied.mvsa --pitch vsa
 vsa mvsa validate lied.mvsa
 </code></pre></div>
@@ -7701,7 +7729,7 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-08
+        Bijgewerkt: 2026-10-09
         
       </p>
       
