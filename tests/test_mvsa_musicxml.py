@@ -999,16 +999,18 @@ B: do ||
     assert "<per-minute>72</per-minute>" in xml
     assert 'sound tempo="72"' in xml
     assert xml.count("<per-minute>72</per-minute>") == 1
+    assert 'miscellaneous-field name="tone">1</miscellaneous-field>' in xml
     playback = export_mvsa_to_musicxml(text, title="bestandsnaam", layout="playback")
     # Playback: geen <source> naast <encoding> (Coria); bron in miscellaneous-field.
     assert "<source>" not in playback
     assert 'miscellaneous-field name="bron">Liturgikon, p.147-149</miscellaneous-field>' in playback
+    assert 'miscellaneous-field name="tone">1</miscellaneous-field>' in playback
     assert "<per-minute>72</per-minute>" in playback
     assert 'sound tempo="72"' in playback
     assert playback.count("<per-minute>72</per-minute>") == 1
 
 
-def test_tempo_last_wins_and_absent_by_default():
+def test_tempo_last_wins_and_default_130():
     with_tempo = """\
 @tempo 60
 @tempo 90
@@ -1039,8 +1041,27 @@ B: do ||
 """
     assert parse_mvsa(without).tempo is None
     bare = export_mvsa_to_musicxml(without, title="x", layout="playback")
-    assert "<per-minute>" not in bare
-    assert "sound tempo=" not in bare
+    assert "<per-minute>130</per-minute>" in bare
+    assert 'sound tempo="130"' in bare
+    assert bare.count("<per-minute>130</per-minute>") == 1
+
+
+def test_toon_alone_emits_identification_misc():
+    text = """\
+@toon "8"
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    doc = parse_mvsa(text)
+    assert doc.toon == "8"
+    xml = export_mvsa_to_musicxml(text, title="x", layout="partituur")
+    assert 'miscellaneous-field name="tone">8</miscellaneous-field>' in xml
 
 
 def test_bron_optional_colon_accepted():

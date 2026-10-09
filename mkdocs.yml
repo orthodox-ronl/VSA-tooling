@@ -113,6 +113,7 @@ nav:
     - Consumer-site — waar hoort wat: manuals/consumer-site.md
     - "Releases: taggen en pinnen": manuals/releases.md
     - mvsa schrijven 101: guides/mvsa-schrijven-101.md
+    - Metadata-brug (.vsa ↔ .mvsa): guides/metadata-brug.md
     - Gebruikershandleiding: guides/user-guide.md
     - CLI-taken: guides/cli-taken.md
     - Validatie: guides/validation.md

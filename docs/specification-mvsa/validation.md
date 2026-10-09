@@ -75,11 +75,12 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    `@start`), layout (`@tekst`, `@mscz-newline`, `@sectie`, `@blok`,
    `@speelplan`, `@---`), actieve metadata (`@title`, `@ondertitel`,
    `@composer`, `@tekstdichter`, `@arrangeur`, `@vertaler`, `@bron`,
-   `@copyright`, `@tempo`), en gereserveerde metadata (`@toon`, `@genre`,
+   `@copyright`, `@tempo`, `@toon`), en gereserveerde metadata (`@genre`,
    `@opmerkingen`). Sticky `@taal` (`nl`/`ksl`/`auto`, of
    `Lap=aap Lus=noot` op lyrics-ids) stuurt hulptekst-richting en Coria-partnamen
    (zie [keywords — @taal](keywords.md#taal)). `@oct` / `@start` gebruiken
-   dezelfde stemidentifiers als de stemregels.
+   dezelfde stemidentifiers als de stemregels. Gedeelde metadata-namen
+   (Nederlands): [metadata-brug](../guides/metadata-brug.md).
 10. Sticky / `@tekst` / metadata met ongeldige waarde: **error**
     (`MVSA-META` voor string-metadata; `MVSA-TEMPO` voor `@tempo` buiten
     1–999). `@mscz-newline` met argumenten: **error**. `@tekst` of

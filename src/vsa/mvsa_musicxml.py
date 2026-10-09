@@ -576,6 +576,7 @@ def export_mvsa_to_musicxml(
         "tekstdichter": getattr(doc, "tekstdichter", None),
         "arrangeur": getattr(doc, "arrangeur", None),
         "vertaler": getattr(doc, "vertaler", None),
+        "toon": getattr(doc, "toon", None),
         "tempo": str(tempo) if tempo is not None else None,
         "bibliotheek_id": resolve_bibliotheek_id(bibliotheek_id, source_path),
     }
@@ -1766,17 +1767,21 @@ def _emit_staff_text_directions(out: list[str], texts: list[str]) -> None:
         out.append("</direction>")
 
 
-def _parse_tempo_bpm(meta: dict[str, str | None] | None) -> int | None:
-    """BPM uit document-meta ``tempo`` (``@tempo``); None als afwezig/ongeldig."""
+# Zelfde default als eenstemmige VSA (``tempo="130"`` / ``muziek.tempo``).
+DEFAULT_TEMPO_BPM = 130
+
+
+def _parse_tempo_bpm(meta: dict[str, str | None] | None) -> int:
+    """BPM uit document-meta ``tempo`` (``@tempo``); default ``DEFAULT_TEMPO_BPM``."""
     raw = ((meta or {}).get("tempo") or "").strip()
     if not raw:
-        return None
+        return DEFAULT_TEMPO_BPM
     try:
         bpm = int(raw)
     except ValueError:
-        return None
+        return DEFAULT_TEMPO_BPM
     if bpm < 1 or bpm > 999:
-        return None
+        return DEFAULT_TEMPO_BPM
     return bpm
 
 
@@ -1873,7 +1878,7 @@ def _emit_pauze_rest(out: list[str], *, with_lyric: bool) -> None:
 
 
 def _emit_identification(out: list[str], meta: dict[str, str | None] | None) -> None:
-    """MusicXML ``<identification>``: creators, rights, source."""
+    """MusicXML ``<identification>``: creators, rights, source, toon."""
     if not meta:
         return
     creators: list[tuple[str, str]] = []
@@ -1895,7 +1900,8 @@ def _emit_identification(out: list[str], meta: dict[str, str | None] | None) -> 
             else f"Bibliotheek-id: {bib}"
         )
     source = (meta.get("bron") or "").strip()
-    if not creators and not rights and not source:
+    toon = (meta.get("toon") or "").strip()
+    if not creators and not rights and not source and not toon:
         return
     out.append("<identification>")
     for mxml_type, value in creators:
@@ -1904,6 +1910,12 @@ def _emit_identification(out: list[str], meta: dict[str, str | None] | None) -> 
         out.append(f"<rights>{escape(rights)}</rights>")
     if source:
         out.append(f"<source>{escape(source)}</source>")
+    if toon:
+        out.append("<miscellaneous>")
+        out.append(
+            f'<miscellaneous-field name="tone">{escape(toon)}</miscellaneous-field>'
+        )
+        out.append("</miscellaneous>")
     out.append("</identification>")
 
 
@@ -2019,7 +2031,7 @@ def _emit_score_playback(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
-                if part_idx == 0 and tempo_bpm is not None:
+                if part_idx == 0:
                     _emit_tempo_direction(out, tempo_bpm)
             # Staff-tekst alleen op de bovenste balk (Soprano).
             if part["voice"] == "S":
@@ -2151,7 +2163,7 @@ def _emit_score_partituur(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
-                if top_staff and tempo_bpm is not None:
+                if top_staff:
                     _emit_tempo_direction(out, tempo_bpm)
             if top_staff:
                 if new_systems[mi]:

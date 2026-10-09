@@ -10,6 +10,7 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Canonieke schrijfvorm, sync, recite | [Syntax](../specification-mvsa/syntax.md), [Semantiek](../specification-mvsa/semantics.md)       |
 | `@`-keywords (titel, tempo, …)      | [Keywords](../specification-mvsa/keywords.md)                                                    |
+| Metadata ↔ `.vsa` (NL-termen)       | [Metadata-brug](../guides/metadata-brug.md)                                                      |
 | Validatieregels                     | [Validatie](../specification-mvsa/validation.md)                                                 |
 | Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                                  |
 | Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap; holds; kuiser-normaalvorm) |

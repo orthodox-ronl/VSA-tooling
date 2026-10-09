@@ -88,9 +88,7 @@ STRING_META_DIRECTIVES = frozenset(
     }
 )
 # Nog geen MuseScore/MusicXML-invulling; wel parse + validate.
-RESERVED_META_DIRECTIVES = frozenset(
-    {"toon", "genre", "opmerkingen"}
-)
+RESERVED_META_DIRECTIVES = frozenset({"genre", "opmerkingen"})
 # Sticky context (geldig vanaf eerstvolgend LSATB-systeem tot herzetting).
 STICKY_DIRECTIVES = frozenset({"do", "mode", "oct", "start", "taal"})
 ALLOWED_MODES = frozenset({"major", "minor"})

@@ -6,6 +6,9 @@
 antwoorden) en wil weten welke `@`-regels bestaan, wat ze doen, en wanneer je
 ze wél of juist níet gebruikt.
 
+Gedeelde metadata met eenstemmige `.vsa` (Nederlandse termen, andere
+schrijfwijze): [Metadata-brug](../guides/metadata-brug.md).
+
 Een **keyword-regel** is een regel die (na optionele spaties) begint met `@`,
 daarna een keyword, daarna spatie, daarna argumenten die bij dat keyword
 horen:
@@ -359,11 +362,12 @@ dezelfde quoted-stringvorm; `@tempo` is een BPM-getal zonder aanhalingstekens.
 | `@bron`         | `@bron "Liturgikon, p.147-149"`      | `<source>` (+ MSCZ-colofon)   | `source`       |
 | `@copyright`    | `@copyright "CC BY-SA 4.0 — …"`      | `<rights>` (+ footer/colofon) | `copyright`    |
 | `@tempo`        | `@tempo 72`                          | metronoom + `sound tempo`     | (via MusicXML) |
+| `@toon`         | `@toon "8"`                          | `miscellaneous-field` `tone`  | (via MusicXML) |
 
 **`@tempo`.** Aantal **slagen per minuut** (BPM) voor beluisteren en oefenen.
 Vorm: `@tempo` + spatie + geheel getal **1–999** (geen aanhalingstekens),
-bijvoorbeeld `@tempo 72`. Laatste waarde in het bestand wint. Zonder `@tempo`
-kiest de speler/MuseScore een eigen default.
+bijvoorbeeld `@tempo 72`. Laatste waarde in het bestand wint. **Default** als
+je `@tempo` weglaat: **130** (zelfde default als eenstemmige VSA).
 
 Bij export naar MusicXML (playback/Coria én partituur) komt op de **eerste
 maat** van de bovenste part een metronoommarkering (kwartnoot = BPM) plus
@@ -376,6 +380,16 @@ tempo komt ook in MuseScore mee.
 
 **Niet gebruiken** voor tekstuele tempo-aanduidingen (“langzaam”, “Andante”) —
 alleen een BPM-getal. Niet midden in een LSATB-systeem.
+
+**`@toon`.** Kerktoon / oktoechos-nummer van het zangstuk (catalogus en
+MusicXML). Vorm: quoted string, bv. `@toon "8"`. Gaat mee als
+`<miscellaneous-field name="tone">` in `<identification>` (zelfde veldnaam
+als eenstemmige VSA `tone`). Zie de
+[metadata-brug](../guides/metadata-brug.md).
+
+```text
+@toon "8"
+```
 
 **`@composer`.** Naam of aanduiding van de **componist** (of traditionele
 toeschrijving), zoals die rechtsboven op het blad / in MuseScore-info
@@ -432,7 +446,6 @@ namen vastliggen voor later gebruik.
 
 | Keyword        | Bedoeling                                                           | Voorbeeld                        |
 | -------------- | ------------------------------------------------------------------- | -------------------------------- |
-| `@toon`        | Kerktoon / oktoechos-nummer van het zangstuk                        | `@toon "8"`                      |
 | `@genre`       | Soort zangstuk (litanie, tropaar, …) voor catalogus/filters         | `@genre "litanie"`               |
 | `@opmerkingen` | Redactionele notities voor de bewerker (niet bedoeld als bladtekst) | `@opmerkingen "nog controleren"` |
 
