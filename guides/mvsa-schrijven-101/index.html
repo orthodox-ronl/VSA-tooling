@@ -16,7 +16,7 @@
         <link rel="prev" href="../../manuals/releases/">
       
       
-        <link rel="next" href="../user-guide/">
+        <link rel="next" href="../metadata-brug/">
       
       
         
@@ -1718,6 +1718,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metadata-brug/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metadata-brug (.vsa ↔ .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -5272,6 +5300,16 @@ horen <strong>vóór</strong> of <strong>tussen</strong> LSATB-systemen — niet
 <td>—</td>
 </tr>
 <tr>
+<td><code>@tempo</code></td>
+<td>BPM voor beluisteren/oefenen (MusicXML-metronoom + playback)</td>
+<td><code>130</code></td>
+</tr>
+<tr>
+<td><code>@toon</code></td>
+<td>Kerktoon / oktoechos (MusicXML <code>tone</code>)</td>
+<td>—</td>
+</tr>
+<tr>
 <td><code>@composer</code> e.d.</td>
 <td>Metadata (componist, copyright, ondertitel, …)</td>
 <td>zie keywords-lijst</td>
@@ -5284,6 +5322,7 @@ is alleen nodig als je commentaar op die scheidingsregel wilt.</p>
 <p>??? tip "Voorbeeld: typische SATB-kop"
     <div class="highlight"><pre><span></span><code>@title "Alleluia - Toon 1"
 @bron "koormap Hemelum"
+@tempo 72
 @do F4
 @mode major
 @oct S=0 A=0 T=-1 B=-1
@@ -5787,7 +5826,7 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-08
+        Bijgewerkt: 2026-10-09
         
       </p>
       

@@ -1586,6 +1586,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../guides/metadata-brug/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metadata-brug (.vsa ↔ .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../guides/user-guide/" class="md-nav__link">
         
   
@@ -4923,9 +4951,14 @@ afspeelknop.</p>
 </table>
 <p>Default-formaat: <strong><code>.mp3</code></strong>. Optioneel <code>--format ogg</code> of <code>wav</code>, of
 <code>[audio] format</code> in <code>vsa.toml</code>.</p>
-<p>Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). Canonieke
-playback-MXL gebruikt <strong>piano</strong> op elke partij (checklist M8). Bitrate en
-extra instrumentkeuze buiten die piano zijn in v1 MuseScore-defaults.</p>
+<p>Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). In <code>.mvsa</code>
+zet je het afspeeltempo met <a href="../../specification-mvsa/keywords/"><code>@tempo</code></a>
+(BPM; default <strong>130</strong>); dat gaat mee in MusicXML-<code>sound tempo</code> (metronoom
+onzichtbaar op blad/PDF) en dus in <code>mvsa audio</code> / Coria. Gedeelde namen met
+<code>.vsa</code>:
+<a href="../../guides/metadata-brug/">metadata-brug</a>. Canonieke playback-MXL gebruikt
+<strong>piano</strong> op elke partij (checklist M8). Bitrate en extra instrumentkeuze
+buiten die piano zijn in v1 MuseScore-defaults.</p>
 <h2 id="bestandsnaamgeving">Bestandsnaamgeving<a class="headerlink" href="#bestandsnaamgeving" title="Permanent link">&para;</a></h2>
 <p>In <code>generated/</code> bij voorkeur <code>stem.brontype.mp3</code> (of <code>.ogg</code> / <code>.wav</code>).
 CLI-default mag simpel blijven. Zie
@@ -4996,7 +5029,7 @@ CLI-default mag simpel blijven. Zie
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-30
+        Bijgewerkt: 2026-10-09
         
       </p>
       

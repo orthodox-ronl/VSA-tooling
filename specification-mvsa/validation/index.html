@@ -1464,6 +1464,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../guides/metadata-brug/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metadata-brug (.vsa ↔ .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../guides/user-guide/" class="md-nav__link">
         
   
@@ -4931,15 +4959,16 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
    <code>@start</code>), layout (<code>@tekst</code>, <code>@mscz-newline</code>, <code>@sectie</code>, <code>@blok</code>,
    <code>@speelplan</code>, <code>@---</code>), actieve metadata (<code>@title</code>, <code>@ondertitel</code>,
    <code>@composer</code>, <code>@tekstdichter</code>, <code>@arrangeur</code>, <code>@vertaler</code>, <code>@bron</code>,
-   <code>@copyright</code>), en gereserveerde metadata (<code>@toon</code>, <code>@genre</code>,
+   <code>@copyright</code>, <code>@tempo</code>, <code>@toon</code>), en gereserveerde metadata (<code>@genre</code>,
    <code>@opmerkingen</code>). Sticky <code>@taal</code> (<code>nl</code>/<code>ksl</code>/<code>auto</code>, of
    <code>Lap=aap Lus=noot</code> op lyrics-ids) stuurt hulptekst-richting en Coria-partnamen
    (zie <a href="../keywords/#taal">keywords — @taal</a>). <code>@oct</code> / <code>@start</code> gebruiken
-   dezelfde stemidentifiers als de stemregels.</li>
+   dezelfde stemidentifiers als de stemregels. Gedeelde metadata-namen
+   (Nederlands): <a href="../../guides/metadata-brug/">metadata-brug</a>.</li>
 <li>Sticky / <code>@tekst</code> / metadata met ongeldige waarde: <strong>error</strong>
-    (<code>MVSA-META</code> voor string-metadata). <code>@mscz-newline</code> met argumenten:
-    <strong>error</strong>. <code>@tekst</code> of <code>@mscz-newline</code> zonder volgend LSATB-systeem:
-    <strong>warning</strong>.</li>
+    (<code>MVSA-META</code> voor string-metadata; <code>MVSA-TEMPO</code> voor <code>@tempo</code> buiten
+    1–999). <code>@mscz-newline</code> met argumenten: <strong>error</strong>. <code>@tekst</code> of
+    <code>@mscz-newline</code> zonder volgend LSATB-systeem: <strong>warning</strong>.</li>
 </ol>
 <h2 id="canonieke-vorm-warning">Canonieke vorm (warning)<a class="headerlink" href="#canonieke-vorm-warning" title="Permanent link">&para;</a></h2>
 <ol>
@@ -5000,7 +5029,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-09
         
       </p>
       
