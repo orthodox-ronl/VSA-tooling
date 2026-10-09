@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-09 10:04 CEST.
+  , gebouwd 2026-10-09 10:48 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3001,15 +3001,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#document-metadata-titel-personen-bron" class="md-nav__link">
+  <a href="#document-metadata-titel-personen-bron-tempo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Document-metadata (titel, personen, bron)
+        Document-metadata (titel, personen, bron, tempo)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Document-metadata (titel, personen, bron)">
+    <nav class="md-nav" aria-label="Document-metadata (titel, personen, bron, tempo)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4965,15 +4965,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#document-metadata-titel-personen-bron" class="md-nav__link">
+  <a href="#document-metadata-titel-personen-bron-tempo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Document-metadata (titel, personen, bron)
+        Document-metadata (titel, personen, bron, tempo)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Document-metadata (titel, personen, bron)">
+    <nav class="md-nav" aria-label="Document-metadata (titel, personen, bron, tempo)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5318,11 +5318,11 @@ Op het eerste systeem van de partituur is een explicit new-system overbodig
 maat van dat systeem. Op playback/MXL is de markering aanwezig maar voor Coria
 niet bedoeld als layout-sturing.</p>
 <hr />
-<h2 id="document-metadata-titel-personen-bron">Document-metadata (titel, personen, bron)<a class="headerlink" href="#document-metadata-titel-personen-bron" title="Permanent link">&para;</a></h2>
+<h2 id="document-metadata-titel-personen-bron-tempo">Document-metadata (titel, personen, bron, tempo)<a class="headerlink" href="#document-metadata-titel-personen-bron-tempo" title="Permanent link">&para;</a></h2>
 <p>Deze keywords zetten <strong>partituur-metadata</strong> (bovenaan of in MuseScore-info),
-niet cues bij een LSATB-systeem. Vorm steeds: quoted string, laatste waarde in
-het bestand wint. <code>@title</code> staat hierboven apart uitgelegd; dezelfde stringvorm
-geldt voor de keywords hieronder.</p>
+niet cues bij een LSATB-systeem. Laatste waarde in het bestand wint. <code>@title</code>
+staat hierboven apart uitgelegd. De persoons-/bron-keywords hieronder gebruiken
+dezelfde quoted-stringvorm; <code>@tempo</code> is een BPM-getal zonder aanhalingstekens.</p>
 <h3 id="actief-gaan-mee-naar-musicxml-musescore">Actief (gaan mee naar MusicXML / MuseScore)<a class="headerlink" href="#actief-gaan-mee-naar-musicxml-musescore" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -5382,8 +5382,26 @@ geldt voor de keywords hieronder.</p>
 <td><code>&lt;rights&gt;</code> (+ footer/colofon)</td>
 <td><code>copyright</code></td>
 </tr>
+<tr>
+<td><code>@tempo</code></td>
+<td><code>@tempo 72</code></td>
+<td>metronoom + <code>sound tempo</code></td>
+<td>(via MusicXML)</td>
+</tr>
 </tbody>
 </table>
+<p><strong><code>@tempo</code>.</strong> Aantal <strong>slagen per minuut</strong> (BPM) voor beluisteren en oefenen.
+Vorm: <code>@tempo</code> + spatie + geheel getal <strong>1–999</strong> (geen aanhalingstekens),
+bijvoorbeeld <code>@tempo 72</code>. Laatste waarde in het bestand wint. Zonder <code>@tempo</code>
+kiest de speler/MuseScore een eigen default.</p>
+<p>Bij export naar MusicXML (playback/Coria én partituur) komt op de <strong>eerste
+maat</strong> van de bovenste part een metronoommarkering (kwartnoot = BPM) plus
+<code>&lt;sound tempo="…"/&gt;</code>. MSCZ-export loopt via die partituur-MusicXML, dus het
+tempo komt ook in MuseScore mee.</p>
+<div class="highlight"><pre><span></span><code>@tempo 72
+</code></pre></div>
+<p><strong>Niet gebruiken</strong> voor tekstuele tempo-aanduidingen (“langzaam”, “Andante”) —
+alleen een BPM-getal. Niet midden in een LSATB-systeem.</p>
 <p><strong><code>@composer</code>.</strong> Naam of aanduiding van de <strong>componist</strong> (of traditionele
 toeschrijving), zoals die rechtsboven op het blad / in MuseScore-info
 verschijnt. Gebruik dit <strong>niet</strong> voor het boek of blad waar je uit overneemt —
@@ -5609,7 +5627,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-09
         
       </p>
       

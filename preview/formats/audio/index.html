@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-09 10:04 CEST.
+  , gebouwd 2026-10-09 10:48 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4928,9 +4928,12 @@ afspeelknop.</p>
 </table>
 <p>Default-formaat: <strong><code>.mp3</code></strong>. Optioneel <code>--format ogg</code> of <code>wav</code>, of
 <code>[audio] format</code> in <code>vsa.toml</code>.</p>
-<p>Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). Canonieke
-playback-MXL gebruikt <strong>piano</strong> op elke partij (checklist M8). Bitrate en
-extra instrumentkeuze buiten die piano zijn in v1 MuseScore-defaults.</p>
+<p>Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). In <code>.mvsa</code>
+zet je het afspeeltempo met <a href="../../specification-mvsa/keywords/"><code>@tempo</code></a>
+(BPM); dat gaat mee in MusicXML-metronoom/<code>sound tempo</code> en dus in
+<code>mvsa audio</code> / Coria. Canonieke playback-MXL gebruikt <strong>piano</strong> op elke partij
+(checklist M8). Bitrate en extra instrumentkeuze buiten die piano zijn in v1
+MuseScore-defaults.</p>
 <h2 id="bestandsnaamgeving">Bestandsnaamgeving<a class="headerlink" href="#bestandsnaamgeving" title="Permanent link">&para;</a></h2>
 <p>In <code>generated/</code> bij voorkeur <code>stem.brontype.mp3</code> (of <code>.ogg</code> / <code>.wav</code>).
 CLI-default mag simpel blijven. Zie
@@ -5001,7 +5004,7 @@ CLI-default mag simpel blijven. Zie
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-30
+        Bijgewerkt: 2026-10-09
         
       </p>
       
