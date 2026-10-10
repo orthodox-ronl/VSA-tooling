@@ -403,6 +403,12 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
     Na import: controleren, kuisen, valideren — pas daarna (in de bibliotheek)
     accepteren naar de catalogus.
 
+    Elk importbestand krijgt na `# Imported: …` een ASCII-**waarschuwingsbanner**
+    (zelfde tekst via `mvsa import` / `mxl import` / `mscz import`) met een
+    checklist: woordstreepjes, recite-grenzen, A/T/B-uitlijning, ritme/maten,
+    metadata. Die banner is geen catalogus-label — hij herinnert eraan dat het
+    een schets is.
+
 ### Synopsis
 
 ```text
@@ -435,6 +441,11 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
 - Soft-wrap: LSATB-systemen van ongeveer 80 tekens
   (`DEFAULT_SYSTEM_SOFT_WIDTH`). Eén maat die alleen al langer is blijft één
   systeem.
+- **A/T/B-uitlijning:** onderstemmen volgen de L/S-posities op **duur** (niet
+  op noot-index of lyrics van A/T/B). Een lange noot die meerdere S-slots
+  dekt, wordt gesplitst/gepaddet (`c4&-` + hold `-`); een lyric-loze spacer na
+  zo’n noot steelt geen volgende lettergreep. Dat voorkomt verschoven Bb/T/B
+  bij MSCZ-import waar A/T/B weinig of scheve lyrics hebben.
 - Same-pitch holds: opeenvolgende dezelfde toonhoogte (ook over maatgrenzen)
   wordt op de stemregels als `-` geschreven.
 - Multi-lettergreep lyrics op één noot (spaties, `-`, of soft hyphen) worden
@@ -448,16 +459,21 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
   `we`/`gen` blijven aparte posities.
 - **Woordgrenzen:** MusicXML-`syllabic` stuurt de groepen. Twee `single`s
   worden alleen gehypheneerd als Pyphen dat bevestigt (met closed-class- en
-  hoofdletter-guards: `Be-waar`, niet `ons-heeft` / `Licht-aan`). Een
-  `begin`…`end`-keten wordt opnieuw gelettergreepd (`heb-ben het wa-re`);
-  een losse `single` ervoor of erna mag meedoen (`aan-bid-den`,
-  `he-mel-se-Geest`) tenzij de volgende lettergreep een beter woord vormt
-  (`ge-loof` i.p.v. `wa-re-ge`). Woordstreepjes tussen L-posities alleen als
-  de rechterkant `middle`/`end` is (of een recite). Over een maatstreep
-  tussen twee recites: `(… wa)- | (re …)`.
+  hoofdletter-guards: `Be-waar`, niet `ons-heeft` / `Licht-aan` /
+  `steun-van` / `dag-gaan`). Een `begin`…`end`-keten wordt opnieuw
+  gelettergreepd (`heb-ben het wa-re`); spaties in een `end`-lyric horen bij
+  volgende woorden (`psalm` + `zin-gen voor mijn God` → `psalm-zin-gen voor
+  mijn God`). Gebroken MuseScore-ketens: tweede `begin` telt als `middle`
+  (`Ja-cob`); spaced fragments in recite worden hersteld (`we der ke` →
+  `we-der-ke`). Losse `single` ervoor of erna mag meedoen
+  (`aan-bid-den`, `he-mel-se-Geest`) tenzij de volgende lettergreep een beter
+  woord vormt (`ge-loof` i.p.v. `wa-re-ge`). Woordstreepjes tussen
+  L-posities alleen als de rechterkant `middle`/`end` is (of een recite),
+  plus korte eigennaam-begin (`Ja_-cob`). Over een maatstreep tussen twee
+  recites: `(… wa)- | (re …)`.
 - **Normaalvorm:** standaard schrijft import daarna de canonieke vorm via
-  [`mvsa kuiser`](#vsa-mvsa-kuiser) (standaard-lengte op L als `~`, maatstrepen
-  sync, kolomuitlijning) — zie
+  [`mvsa kuiser`](#vsa-mvsa-kuiser) (lone standaard-`~` op L weggelaten; `~`
+  blijft bij `&`-melisma en na `)`; maatstrepen sync, kolomuitlijning) — zie
   [syntax — canonieke schrijfvorm](../../specification-mvsa/syntax.md) en
   [semantiek — canonieke layout](../../specification-mvsa/semantics.md#canonieke-layout-vs-tolerantie).
 
@@ -595,12 +611,14 @@ Default schrijft **in-place**. Gebruik `--check` als dry-run (exit 1 als er
 iets zou wijzigen). Na afloop moet validate geen errors meer geven; bij
 conflicterende strepen faalt de kuiser met een duidelijke fout.
 
-Gedrag t.o.v. `-` op L (draft-spec):
+Gedrag t.o.v. `-` / `~` op L (draft-spec):
 
-- **Canoniek:** standaard-lengte als `~`; woordstreepje direct vóór de
-  lettergreep (`-li`), met spaties *ervóór* bij extra breedte (`…_&_  -li`).
+- **Canoniek:** lone standaard-lengte zonder `~` (impliciet); `~` wél bij
+  `&`-melisma (`ziel~&~`) en na recite-`)` bij niet-breve duur. Woordstreepje
+  direct vóór de lettergreep (`-li`), met spaties *ervóór* bij extra breedte
+  (`…_&_  -li`).
 - **Invoer:** kale ELM-`-` mag (o.a. melisma); kuiser herschrijft eenduidige
-  gevallen naar `~`.
+  gevallen naar `~` en laat daarna lone `~` weg.
 - **Ambigu** (`hei- li`, `li-&--ge`): waarschuwing op stderr met
   `bestand:regel:kolom` — geen stille collapse naar `hei-li`.
 - **Pyphen** (ontbrekende / verdachte woordstreepjes): advies-warnings;

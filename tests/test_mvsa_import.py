@@ -9,6 +9,7 @@ from vsa.musicxml_package import write_musicxml_output
 from vsa.musicxml_playback_normalize import normalize_playback_musicxml
 from vsa.mvsa_import import (
     DEFAULT_SYSTEM_SOFT_WIDTH,
+    IMPORT_SKETCH_WARNING_BANNER,
     do_from_fifths,
     import_score_to_mvsa,
     join_import_syllables,
@@ -175,13 +176,15 @@ def test_sa_tb_normalize_then_import_keeps_lyric_slots():
     first_l = l_line.split("|", 1)[0]
     first_s = s_line.split("|", 1)[0]
     first_a = a_line.split("|", 1)[0]
-    assert "Wij~" in first_l  # canonieke standaard-lengte als ``~``
+    assert re.search(r"\bWij\b", first_l)  # lone standaard-``~`` weggelaten
+    assert "Wij~" not in first_l
     assert "Che.&." in first_l
-    assert "-ru~" in first_l
+    assert "-ru" in first_l
     # "ru" is one quarter — not a long melisma tail of filler notes.
     after_ru = first_l.split("-ru", 1)[1]
-    assert after_ru.startswith("~")
-    assert "&" not in after_ru.split()[0]
+    assert not after_ru.startswith("~")
+    token = after_ru.split()[0] if after_ru.split() else ""
+    assert "&" not in token
     # Same height as previous position → ``-`` (niet opnieuw ``a4``).
     assert re.search(r"a4\s+-\s+g4\s+f4&g4\s+a4", first_s)
     assert "f4" in first_a
@@ -357,6 +360,55 @@ def test_join_import_syllables_repairs_musescore_word_boundaries():
     assert join_import_syllables(
         ["Licht", "aan"], ["single", "single"]
     ) == "Licht aan"
+    # Embedded spaces in end lyric (psalm-zin-gen voor …).
+    assert join_import_syllables(
+        ["psalm", "zin-gen voor mijn God,"],
+        ["begin", "end"],
+    ) == "psalm-zin-gen voor mijn God,"
+    # Premature MuseScore end leaves ``we der ke`` spaced; recite-repair joins them.
+    assert join_import_syllables(
+        ["hij", "zal", "we", "der", "ke", "ren"],
+        ["begin", "middle", "middle", "end", "middle", "end"],
+    ) == "hij zal we der ke ren"
+    # Double begin (Jacob / zondaars).
+    assert join_import_syllables(
+        ["Ja", "co", "b,"], ["begin", "begin", "end"]
+    ) == "Ja-cob,"
+    assert join_import_syllables(
+        ["zon", "daar", "s."], ["begin", "begin", "end"]
+    ) == "zon-daars"
+    # False compounds stay spaced.
+    assert join_import_syllables(
+        ["dag", "gaan"], ["single", "single"]
+    ) == "dag gaan"
+    assert join_import_syllables(
+        ["Heer", "richt"], ["begin", "middle"]
+    ) == "Heer richt"
+    assert join_import_syllables(
+        ["Heer", "richt", "de"], ["begin", "middle", "end"]
+    ) == "Heer richt de"
+    assert join_import_syllables(
+        ["steun", "van"], ["single", "single"]
+    ) == "steun van"
+    assert join_import_syllables(
+        ["van", "ge"], ["single", "single"]
+    ) == "van ge"
+
+
+def test_repair_recite_underlay_splits_false_compounds_and_fills_gaps():
+    from vsa.mvsa_import import _repair_recite_underlay
+
+    assert _repair_recite_underlay("en hij zal we der ke") == "en hij zal we-der-ke"
+    assert _repair_recite_underlay("op die dag gaan al") == "op die dag gaan al"
+    assert _repair_recite_underlay("Hij is de steun-van") == "Hij is de steun van"
+    assert (
+        _repair_recite_underlay("de Heer-richt de ge bro")
+        == "de Heer richt de ge-bro"
+    )
+    assert (
+        _repair_recite_underlay("psalm-zin gen voor mijn God, zo")
+        == "psalm-zin-gen voor mijn God, zo"
+    )
 
 
 def test_pair_of_same_pitch_lyrics_does_not_collapse_to_recite():
@@ -1063,21 +1115,255 @@ def test_lyricless_leading_notes_emit_empty_recite():
     text = score_to_mvsa(score, pitch_form="abc")
     l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
     first = l_line.split("|", 1)[0]
-    assert "()~" in first
-    assert "ons~" in first and "nu_" in first
+    assert "()~" in first  # na ``)`` blijft ``~`` (anders breve)
+    assert re.search(r"\bons\b", first) and "nu_" in first
+    assert "ons~" not in first
     assert re.search(r"(^| )~ ons", first) is None
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 
 
-def test_import_writes_canonical_default_tilde():
-    """Canonieke normaalvorm: standaard-kwart op L als ``~`` (ook lone)."""
+def test_import_omits_lone_tilde_keeps_melisma_and_recite():
+    """Canonieke L: lone ``~`` weg; ``~&~`` en post-``)`` ``~`` blijven."""
     from vsa.mvsa_import import _l_duration_suffix
 
-    assert _l_duration_suffix(["~"]) == "~"
+    assert _l_duration_suffix(["~"]) == ""
     assert _l_duration_suffix(["_"]) == "_"
     assert _l_duration_suffix(["~", "~"]) == "~&~"
     assert _l_duration_suffix([".", "."]) == ".&."
+    assert _l_duration_suffix(["~"], after_recite=True) == "~"
+
+
+def test_import_output_contains_sketch_warning_banner():
+    """Every import path embeds the catalogus-schets waarschuwingsbanner."""
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions><key><fifths>0</fifths></key></attributes>
+      <note>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>4</duration><type>whole</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Heer</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>1</divisions></attributes>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>""",
+        },
+        title="Bannerproef",
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    assert text.startswith("# Imported: Bannerproef\n")
+    assert IMPORT_SKETCH_WARNING_BANNER in text
+    imported_at = text.index("# Imported:")
+    banner_at = text.index("WAARSCHUWING:")
+    do_at = text.index("@do ")
+    assert imported_at < banner_at < do_at
+    assert "DIT BESTAND IS GEÏMPORTEERD" in text
+    assert "woordstreepjes" in text
+
+
+def test_mirror_aligns_long_tenor_by_duration_not_lyric_spacer():
+    """T whole + lyric-less quarter must not steal the next S slot (Bb3).
+
+    MSCZ→MXL often leaves a spacer after a long underlay note. Index/lyric
+    mirroring pulled that spacer into ``c4&-`` and shifted Bb3 one position
+    early. Duration-align against S keeps ``c4&- - Bb3 …``.
+    """
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Zijn</text></lyric>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>8</duration><type>half</type>
+        <lyric number="1"><syllabic>single</syllabic><text>geest</text></lyric>
+      </note>
+      <note>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>8</duration><type>half</type>
+      </note>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>zal</text></lyric>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>van</text></lyric>
+      </note>
+      <note>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>hem</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>8</duration><type>half</type>
+        <lyric number="1"><syllabic>begin</syllabic><text>uit</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>
+        <duration>8</duration><type>half</type>
+        <lyric number="1"><syllabic>end</syllabic><text>gaan,</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions></attributes>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>8</duration><type>half</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>8</duration><type>half</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>8</duration><type>half</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>8</duration><type>half</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions></attributes>
+      <note>
+        <pitch><step>A</step><octave>3</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Zijn</text></lyric>
+      </note>
+      <note>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>16</duration><type>whole</type>
+        <lyric number="1"><syllabic>single</syllabic><text>geest</text></lyric>
+      </note>
+      <note>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+      </note>
+      <note>
+        <pitch><step>B</step><alter>-1</alter><octave>3</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>zal</text></lyric>
+      </note>
+      <note>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>van</text></lyric>
+      </note>
+      <note>
+        <pitch><step>D</step><octave>4</octave></pitch>
+        <duration>8</duration><type>half</type>
+        <lyric number="1"><syllabic>single</syllabic><text>hem</text></lyric>
+      </note>
+      <note>
+        <pitch><step>D</step><octave>4</octave></pitch>
+        <duration>8</duration><type>half</type>
+        <lyric number="1"><syllabic>single</syllabic><text>uit</text></lyric>
+      </note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions></attributes>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>C</step><octave>3</octave></pitch><duration>8</duration><type>half</type></note>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>8</duration><type>half</type></note>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>B</step><alter>-1</alter><octave>2</octave></pitch><duration>8</duration><type>half</type></note>
+      <note><pitch><step>B</step><alter>-1</alter><octave>2</octave></pitch><duration>8</duration><type>half</type></note>
+    </measure>""",
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    t_line = next(ln for ln in text.splitlines() if ln.startswith("T:"))
+    body = t_line.split("|", 1)[0].removeprefix("T:").strip()
+    # Hold after c4&- for S's f4; Bb3 only then (not inside the melisma).
+    assert re.search(r"c4\s*&\s*-\s+-\s+Bb3\s+c4\s+d4", body), body
+    assert "c4&- Bb3" not in body.replace(" ", "")
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_mirror_aligns_bass_without_lyrics_by_duration():
+    """Lyric-less B with a long note covering S melisma pads, does not index-steal."""
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Loof</text></lyric>
+      </note>
+      <note>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+      </note>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>mijn</text></lyric>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>ziel</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions></attributes>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions></attributes>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>A</step><octave>3</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>B</step><alter>-1</alter><octave>3</octave></pitch><duration>4</duration><type>quarter</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>4</divisions></attributes>
+      <note><pitch><step>C</step><octave>3</octave></pitch><duration>8</duration><type>half</type></note>
+      <note><pitch><step>F</step><octave>3</octave></pitch><duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>B</step><alter>-1</alter><octave>2</octave></pitch><duration>4</duration><type>quarter</type></note>
+    </measure>""",
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    b_line = next(ln for ln in text.splitlines() if ln.startswith("B:"))
+    body = b_line.split("|", 1)[0].removeprefix("B:").strip()
+    # half C covers g4&a4 → c3&-; then f3 for "mijn", Bb2 for "ziel".
+    assert re.search(r"c3\s*&\s*-\s+f3\s+Bb2", body), body
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
 
 
 def test_chord_tones_do_not_create_extra_slots():

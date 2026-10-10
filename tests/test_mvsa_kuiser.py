@@ -18,7 +18,7 @@ from vsa.mvsa_validate import validate_mvsa_text
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "mvsa"
 
 
-def test_kuiser_rewrites_elm_dash_to_tilde():
+def test_kuiser_rewrites_elm_dash_then_omits_lone_tilde():
     text = """\
 @do F4
 @mode major
@@ -30,11 +30,30 @@ T: la- so- so- ||
 B: re  re  do  ||
 """
     result = kuiser_mvsa_text(text, align=False)
-    # ELM '-' → '~'; no collapse to woordstreepje.
-    assert re.search(r"L:\s*hei~\s+li~\s+ge", result.text)
+    # ELM '-' → '~' → lone '~' weggelaten; geen collapse naar woordstreepje.
+    assert re.search(r"L:\s*hei\s+li\s+ge", result.text)
+    assert "hei~" not in result.text
     assert "hei-li" not in result.text
     assert any("ambiguë" in w.message for w in result.warnings)
     assert all(w.line >= 1 and w.column >= 1 for w in result.warnings)
+    diags = validate_mvsa_text(result.text)
+    assert not [d for d in diags if d.severity == "error"]
+
+
+def test_kuiser_keeps_tilde_in_melisma_and_after_recite():
+    text = """\
+@do F4
+@mode major
+@sectie a
+L: ziel~&~ (ia)~ ||
+S: fa&so   la   ||
+A: re&re   re   ||
+T: la-&so- so-  ||
+B: re&re   re   ||
+"""
+    result = kuiser_mvsa_text(text, align=False)
+    assert "ziel~&~" in result.text
+    assert "(ia)~" in result.text
     diags = validate_mvsa_text(result.text)
     assert not [d for d in diags if d.severity == "error"]
 
@@ -232,7 +251,8 @@ B: re re ||
     assert "ambiguë" in err
     assert mvsa_main(["kuiser", str(src)]) == 0
     body = src.read_text(encoding="utf-8")
-    assert "hei~" in body
+    assert re.search(r"L:\s*hei\s+li\b", body)
+    assert "hei~" not in body
     assert "hei-li" not in body
     assert mvsa_main(["kuiser", str(src), "--check"]) == 0
 

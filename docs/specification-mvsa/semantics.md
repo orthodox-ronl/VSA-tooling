@@ -182,8 +182,11 @@ Het teken `~` is op de L-regel **alleen** ELM (duur). Recite markeer je met
 - In melisma’s heeft ELM-`~` de voorkeur boven ELM-`-` vóór een
   lettergreepstreepje: schrijf `li~&~-ge`, niet `li-&--ge` (dubbele `-` is
   ambigu voor lezer en kuiser).
-- **Canoniek** op L: standaard-lengte als `~`; kale ELM-`-` is invoer-tolerantie
-  (kuiser → `~`). Woordstreepje met extra breedte: spaties **vóór** `-letter`
+- **Canoniek** op L: lone standaard-lengte is **impliciet** (geen `~` na de
+  lettergreep). Schrijf `~` wél in `&`-melisma (`ziel~&~`) en na recite-`)`
+  als de duur geen breve is (`()~`, `(ia)~` — zonder ELM na `)` = breve).
+  Kale ELM-`-` is invoer-tolerantie (kuiser → eerst `~`, daarna lone `~`
+  weglaten). Woordstreepje met extra breedte: spaties **vóór** `-letter`
   (`…_&_  -li`).
 
 De kuiser mag recite-haakjes niet stilzwijgend weghalen of ELM-`~` niet in
@@ -193,7 +196,7 @@ woordstreepjes veranderen.
 
 | Onderwerp              | Canoniek                                                                                         | Kuiser                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| Standaard-lengte op L  | `~` (niet kale ELM-`-`); `-` hoort bij lettergrepen                                              | Herschrijft eenduidige ELM-`-` → `~`; waarschuwt bij ambiguë `-` (regel + kolom)                |
+| Standaard-lengte op L  | Lone `~` weggelaten; `~` bij `&`-melisma en na `)` (niet-breve); `-` hoort bij lettergrepen      | Eenduidige ELM-`-` → `~`, daarna lone `~` weg; waarschuwt bij ambiguë `-` (regel + kolom)       |
 | Woordstreepjes         | `-` direct vóór de volgende lettergreep; bij breedte spaties *ervóór* (`hei  -li`)               | Geen stille `hei- li`→`hei-li`-collapse; Pyphen-warnings bij ontbrekende / verdachte streepjes  |
 | Maat-/sectiestrepen    | Op alle LSATB-regels op dezelfde posities                                                        | Mag strepen van één regel naar de andere kopiëren als eenduidig                                 |
 | **Kolomuitlijning**    | Zie [Syntax — canonieke kolomuitlijning](syntax.md#canonieke-kolomuitlijning-lsatb)              | Mag losser zijn; gegenereerde output en voorbeelden zijn strikt                                 |

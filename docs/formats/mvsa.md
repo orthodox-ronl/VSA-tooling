@@ -20,6 +20,7 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 !!! warning "Import = werkbank"
     Score→`.mvsa` is een **bewerkvorm** voor de werkbank-fase (woordstreepjes,
     lege recite, lossy layout). Niet ongewijzigd als catalogusbron gebruiken.
+    De import zet bovenaan een ASCII-waarschuwingsbanner met checklist.
     Zie [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 **Import (kort):** `.mxl` gaat rechtstreeks naar de SATB-parser (P1–P4);

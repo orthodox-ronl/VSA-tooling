@@ -16,17 +16,22 @@ MusicXML ``fifths``, else ``F4``.
 
 Syllable/word boundaries follow MusicXML ``syllabic`` groups (``single``
 never glues to another ``single``; ``begin``…``end`` is re-hyphenated with
-Pyphen; long MuseScore chains use in-group bigrams). Cross-position
-woordstreepjes only when the right side is ``middle``/``end`` (or a recite).
-A word split by a barline between two recites gets a canonical ``)-`` link.
+Pyphen; long MuseScore chains use longest in-group matches). Spaces inside
+an ``end`` lyric stay as word breaks; a second ``begin`` counts as ``middle``
+(``Ja-cob``). False compounds (``dag-gaan``, ``steun-van``) stay spaced.
+Recite underlay is repaired lightly (``we der ke`` → ``we-der-ke``) without
+re-gluing whole words. Cross-position woordstreepjes when the right side is
+``middle``/``end`` (or a recite), plus short proper-name begins. A word
+split by a barline between two recites gets a canonical ``)-`` link.
 
 Imported LSATB systems are soft-wrapped to about
 :data:`DEFAULT_SYSTEM_SOFT_WIDTH` characters so the result stays readable
 in an editor (one long measure may exceed the width alone).
 
 By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
-(canonieke schrijfvorm / normaalvorm: standaard-lengte als ``~``, maatstrepen
-sync, kolomuitlijning). Pass ``align=False`` (CLI ``--no-align``) to skip.
+(canonieke schrijfvorm / normaalvorm: lone standaard-``~`` op L weggelaten,
+``~`` wél bij ``&``-melisma en na ``)``; maatstrepen sync, kolomuitlijning).
+Pass ``align=False`` (CLI ``--no-align``) to skip.
 
 With ``--pitch vsa``, each stem line gets a check-only absolute pitch
 **eindanker** glued to the last bar of every system (e.g. ``||a4``), so
@@ -65,6 +70,23 @@ _PART_VOICE = {"P1": "S", "P2": "A", "P3": "T", "P4": "B"}
 
 # Soft wrap for imported LSATB systems (full line incl. ``L: `` prefix).
 DEFAULT_SYSTEM_SOFT_WIDTH = 80
+
+# Shown after ``# Imported: …`` on every import output (mvsa/mxl/mscz import).
+IMPORT_SKETCH_WARNING_BANNER = """\
+#  ##########################################################################  #
+#  #                                                                        #  #
+#  #   WAARSCHUWING:                                                        #  #
+#  #                                                                        #  #
+#  #   DIT BESTAND IS GEÏMPORTEERD UIT EEN PARTITUUR EN IS EEN SCHETS.      #  #
+#  #   CONTROLEER VÓÓR OPNAME IN DE CATALOGUS TEN MINSTE:                   #  #
+#  #   - woordstreepjes (te veel / te weinig / valse koppelingen)           #  #
+#  #   - lettergreepgrenzen in recite ( ... )                               #  #
+#  #   - uitlijning A/T/B t.o.v. L/S (verschoven of ontbrekende -)          #  #
+#  #   - ritme & / duren / maatstrepen t.o.v. de bronpartituur              #  #
+#  #   - ontbrekende metadata (bijv. @tempo) die niet meekwam bij import    #  #
+#  #                                                                        #  #
+#  ##########################################################################  #\
+"""
 
 # Reverse of duration_model default (prefer ~ for quarter)
 _DURATION_TO_ELM: dict[tuple[str, int], str] = {
@@ -270,7 +292,7 @@ def import_score_to_mvsa(
             system_soft_width=system_soft_width,
         )
         if align:
-            # Canonieke normaalvorm (syntax/semantics): ~ op L, bars sync, kolommen.
+            # Canonieke normaalvorm: lone ~ weg, bars sync, kolommen.
             try:
                 text = kuiser_mvsa_text(
                     text, pitch="preserve", octave_style=octave_style, align=True
@@ -431,6 +453,7 @@ def score_to_mvsa(
 
     lines: list[str] = [
         f"# Imported: {score.title}",
+        *IMPORT_SKETCH_WARNING_BANNER.splitlines(),
         f"@do {score.do}",
         f"@mode {score.mode}",
     ]
@@ -626,6 +649,9 @@ class _Position:
     # How many source notes this position consumed (may exceed len(notes)
     # after same-pitch recite collapse or multi-syllable trim).
     source_count: int = 0
+    # Total MusicXML duration (divisions at 4 per quarter) of the source span.
+    # Kept after recite collapse / multi-syllable trim so A/T/B can mirror by time.
+    duration_units: int = 0
     # Word continues after this position (barline / next position): emit ``)-``
     # after a recite, or rely on ``leading_word_hyphen`` on the next syllable.
     word_continues_after: bool = False
@@ -639,6 +665,119 @@ def _position_source_count(pos: _Position) -> int:
     return pos.source_count if pos.source_count > 0 else len(pos.notes)
 
 
+def _note_duration_units(note: _Note) -> int:
+    return note.duration.divisions_value
+
+
+def _position_duration_units(pos: _Position) -> int:
+    if pos.duration_units > 0:
+        return pos.duration_units
+    total = sum(_note_duration_units(n) for n in pos.notes)
+    if total > 0:
+        return total
+    # Last resort: assume one quarter per source note.
+    return _position_source_count(pos) * 4
+
+
+def _fit_mirror_chunk(
+    chunk: list[_Note],
+    n_slots: int,
+    hold_pitch: Pitch | None,
+    hold_dur: Duration,
+) -> tuple[list[_Note], Pitch | None, Duration]:
+    """Truncate or pad ``chunk`` to ``n_slots``; update hold pitch/duration."""
+    if chunk and chunk[-1].pitch is not None:
+        hold_pitch = chunk[-1].pitch
+        hold_dur = chunk[-1].duration
+    if len(chunk) > n_slots:
+        chunk = chunk[:n_slots]
+        if chunk and chunk[-1].pitch is not None:
+            hold_pitch = chunk[-1].pitch
+            hold_dur = chunk[-1].duration
+    elif len(chunk) < n_slots:
+        fill = hold_pitch if hold_pitch is not None else Pitch("C", 4, 0.0)
+        while len(chunk) < n_slots:
+            chunk.append(_Note(pitch=fill, duration=hold_dur, lyrics=[]))
+        if hold_pitch is None:
+            hold_pitch = fill
+    return chunk, hold_pitch, hold_dur
+
+
+def _mirror_positions_by_duration(
+    notes: list[_Note],
+    mirror_of: list[_Position],
+) -> list[_Position]:
+    """Align A/T/B to S positions by duration, not note index or lyrics.
+
+    A long note that covers several S slots is split/padded into those slots.
+    A lyric-less spacer after a long note is not stolen into the previous
+    melisma (MSCZ imports often leave such spacers when underlay is incomplete).
+    Leftover duration from a partially consumed note feeds the next position.
+    """
+    out: list[_Position] = []
+    i = 0
+    rem_pitch: Pitch | None = None
+    rem_units = 0
+    rem_dur = Duration("quarter", 0)
+    hold_pitch: Pitch | None = None
+    hold_dur = Duration("quarter", 0)
+
+    for pos in mirror_of:
+        n_slots = len(pos.notes)
+        n_src = _position_source_count(pos)
+        need = _position_duration_units(pos)
+        chunk: list[_Note] = []
+        got = 0
+
+        while got < need:
+            if rem_units > 0:
+                take = min(rem_units, need - got)
+                chunk.append(
+                    _Note(pitch=rem_pitch, duration=rem_dur, lyrics=[])
+                )
+                if rem_pitch is not None:
+                    hold_pitch = rem_pitch
+                    hold_dur = rem_dur
+                rem_units -= take
+                if rem_units == 0:
+                    rem_pitch = None
+                got += take
+                continue
+            if i >= len(notes):
+                break
+            note = notes[i]
+            i += 1
+            units = _note_duration_units(note)
+            if note.pitch is not None:
+                hold_pitch = note.pitch
+                hold_dur = note.duration
+            if got + units <= need:
+                chunk.append(note)
+                got += units
+            else:
+                take = need - got
+                chunk.append(
+                    _Note(pitch=note.pitch, duration=note.duration, lyrics=[])
+                )
+                rem_pitch = note.pitch
+                rem_units = units - take
+                rem_dur = note.duration
+                got = need
+
+        chunk, hold_pitch, hold_dur = _fit_mirror_chunk(
+            chunk, n_slots, hold_pitch, hold_dur
+        )
+        out.append(
+            _Position(
+                notes=chunk,
+                recite=pos.recite,
+                source_count=n_src,
+                duration_units=need,
+            )
+        )
+    return out
+
+
 def _group_positions(
     notes: list[_Note],
     *,
@@ -647,57 +786,12 @@ def _group_positions(
     """Group notes into L-length positions (lyric starts / melisma).
 
     When ``mirror_of`` is set (for A/T/B), emit one position per S position with
-    the same slot count. If the voice has lyrics, consume by lyric/melisma
-    groups so a shorter collapsed melisma (M5a) does not steal the next
-    syllable; pad with the last pitch held (re-export collapses pads again).
-    Recite positions (including same-pitch lyric runs) consume
-    ``source_count`` notes index-aligned. Without lyrics, fall back to
-    index-aligned chunks of S's sizes.
+    the same slot count, consuming the voice by **duration** against each S
+    position (long notes split/padded; leftover duration carries to the next
+    position). Lyric text on A/T/B does not drive slot boundaries — S/L does.
     """
     if mirror_of is not None:
-        out: list[_Position] = []
-        i = 0
-        hold_pitch: Pitch | None = None
-        hold_dur = Duration("quarter", 0)
-        by_lyrics = any(n.lyrics for n in notes)
-        for pos in mirror_of:
-            n = len(pos.notes)
-            n_src = _position_source_count(pos)
-            if by_lyrics and not pos.recite:
-                chunk: list[_Note] = []
-                if i < len(notes):
-                    chunk.append(notes[i])
-                    i += 1
-                    while i < len(notes) and not notes[i].lyrics:
-                        chunk.append(notes[i])
-                        i += 1
-            else:
-                chunk = list(notes[i : i + n_src])
-                i += n_src
-            if chunk and chunk[-1].pitch is not None:
-                hold_pitch = chunk[-1].pitch
-                hold_dur = chunk[-1].duration
-            if len(chunk) > n:
-                chunk = chunk[:n]
-                if chunk and chunk[-1].pitch is not None:
-                    hold_pitch = chunk[-1].pitch
-                    hold_dur = chunk[-1].duration
-            elif len(chunk) < n:
-                fill = hold_pitch if hold_pitch is not None else Pitch("C", 4, 0.0)
-                while len(chunk) < n:
-                    chunk.append(
-                        _Note(
-                            pitch=fill,
-                            duration=hold_dur,
-                            lyrics=[],
-                        )
-                    )
-                if hold_pitch is None:
-                    hold_pitch = fill
-            out.append(
-                _Position(notes=chunk, recite=pos.recite, source_count=n_src)
-            )
-        return out
+        return _mirror_positions_by_duration(notes, mirror_of)
 
     positions: list[_Position] = []
     i = 0
@@ -729,11 +823,13 @@ def _group_positions(
                 and notes[j].pitch == run[0].pitch
             ):
                 j += 1
+            span = notes[i:j]
             positions.append(
                 _Position(
                     notes=[collapsed],
                     recite=True,
                     source_count=j - i,
+                    duration_units=sum(_note_duration_units(n) for n in span),
                     syllabic="single",
                 )
             )
@@ -752,6 +848,7 @@ def _group_positions(
         multi_syllable = _lyric_looks_multi_syllable(lyric_text)
         recite = bool(n0.is_breve) or multi_syllable
         source_len = len(group)
+        duration_units = sum(_note_duration_units(n) for n in group)
         if multi_syllable and len(group) > 1:
             # Recite underlay on the visible note; lyric-less followers are often
             # failed expand/spacers — keep one slot (same pitch/duur as n0).
@@ -771,11 +868,13 @@ def _group_positions(
                 notes=group,
                 recite=recite,
                 source_count=source_len,
+                duration_units=duration_units,
                 syllabic=syllabic,
             )
         )
         i = j
     positions = _coalesce_same_pitch_lyric_positions(positions)
+    positions = _merge_fragment_lyric_positions(positions)
     _apply_word_links_in_sequence(positions)
     return positions
 
@@ -825,6 +924,7 @@ def _merge_positions_to_recite(run: list[_Position]) -> _Position:
         notes=[collapsed],
         recite=True,
         source_count=sum(_position_source_count(p) for p in run),
+        duration_units=sum(_position_duration_units(p) for p in run),
         syllabic="single",
     )
 
@@ -926,13 +1026,25 @@ def _split_syllable_punct(text: str) -> tuple[str, str]:
 
 
 def _syllable_units(token: str) -> list[tuple[str, str]]:
-    """Return ``(match_core, display)`` units for one flattened token."""
-    core, punct = _split_syllable_punct(token)
+    """Return ``(match_core, display)`` units for one flattened token.
+
+    Space-separated pieces are separate units (MuseScore often puts
+    ``zin-gen voor mijn God`` in one ``end`` lyric).
+    """
+    raw = (token or "").strip()
+    if not raw:
+        return []
+    if any(ch.isspace() for ch in raw):
+        units: list[tuple[str, str]] = []
+        for piece in raw.split():
+            units.extend(_syllable_units(piece))
+        return units
+    core, punct = _split_syllable_punct(raw)
     if not core:
         return []
     if "-" in core:
         bits = [b for b in core.split("-") if b]
-        units: list[tuple[str, str]] = []
+        units = []
         for i, bit in enumerate(bits):
             units.append((bit, bit + (punct if i == len(bits) - 1 else "")))
         return units
@@ -942,19 +1054,53 @@ def _syllable_units(token: str) -> list[tuple[str, str]]:
 # Function words that must not start or end a hyphenated compound
 # (Pyphen happily hyphenates nonsense like ``het-wa`` / ``mond-met``).
 # Keep ``aan``/``in``/``op`` out so real compounds like ``aan-schouwd`` work.
+# Include ``van``/``is``/``tot``/``mijn`` — frequent false compounds in underlay
+# (``steun-van``, ``is-van``, ``tot-stof``, ``mijn-God``).
 _CLOSED_CLASS = frozenset(
     """
     wij ik jij gij je u uw hij zij het we jullie men
-    ons hun hen
+    ons hun hen mijn
     de den der des een en er of maar want dat die dit dus
-    te met zonder
+    te met zonder van is tot zal voor
     zo nu dan wat wie hoe hier daar nog wel eens
+    """.split()
+)
+
+# Function words that must not *end* a glued compound. Omits short articles /
+# endings (``de``/``den``/``te``) that are also common final syllables
+# (``aan-bid-den``). Includes prepositions kept out of ``_CLOSED_CLASS`` as
+# starters (``aan``/``in``/``op``).
+_CLOSED_CLASS_LAST = frozenset(
+    """
+    wij ik jij gij je u uw hij zij het we jullie men
+    ons hun hen mijn
+    een en er of maar want dat die dit dus
+    met zonder van is tot zal voor
+    zo nu dan wat wie hoe hier daar nog wel eens
+    aan in op
     """.split()
 )
 
 # Short capitalised prefixes that may start a compound (``Be-waar``).
 _SHORT_CAPITAL_COMPOUND_STARTERS = frozenset(
     "be ont al ge ver her er".split()
+)
+
+# Pyphen false positives: two real words that concatenate into a "valid" hyphenation.
+_FALSE_COMPOUND_PAIRS = frozenset(
+    {
+        ("dag", "gaan"),
+        ("heer", "richt"),
+        ("steun", "van"),
+        ("weg", "van"),
+        ("van", "ge"),
+        ("al", "zijn"),
+        ("tot", "stof"),
+        ("is", "van"),
+        ("van", "zon"),
+        ("van", "wees"),
+        ("mijn", "god"),
+    }
 )
 
 
@@ -969,17 +1115,57 @@ def _pyphen_matches_syllables(cores: list[str]) -> bool:
     )
 
 
+def _is_false_compound_pair(left: str, right: str) -> bool:
+    return (left.casefold(), right.casefold()) in _FALSE_COMPOUND_PAIRS
+
+
 def _can_hyphenate_syllables(cores: list[str]) -> bool:
-    """Pyphen match, rejecting closed-class glue (``het-wa``, ``mond-met``)."""
+    """Pyphen match, rejecting closed-class glue (``het-wa``, ``mond-met``).
+
+    Exception: pronoun ``we`` may start a content word of ≥3 syllables
+    (``we-der-ke``); interior closed-class lookalikes (``der``) are allowed
+    only in that ``we-…`` pattern. Adjacent false-compound pairs
+    (``dag``+``gaan``, ``Heer``+``richt``) are always rejected, also inside
+    longer n-grams (``Heer-richt-de-ge``).
+    """
     if not cores:
         return False
-    if cores[0].casefold() in _CLOSED_CLASS:
+    if any(
+        _is_false_compound_pair(cores[i], cores[i + 1])
+        for i in range(len(cores) - 1)
+    ):
         return False
-    if cores[-1].casefold() in _CLOSED_CLASS:
+    if not _pyphen_matches_syllables(cores):
         return False
-    if any(c.casefold() in _CLOSED_CLASS for c in cores[1:-1]):
+    first = cores[0].casefold()
+    last = cores[-1].casefold()
+    we_word = first == "we" and len(cores) >= 3
+    if first in _CLOSED_CLASS and not we_word:
         return False
-    return _pyphen_matches_syllables(cores)
+    if last in _CLOSED_CLASS_LAST:
+        return False
+    # Articles as last of a bigram (``richt-de``, ``deel-te``).
+    if len(cores) == 2 and last in ("de", "den", "te", "der", "des"):
+        return False
+    # ``de``/``te`` after an already-complete word (``wiens-hel-per``|``de``,
+    # ``heer-lijk-heid``|``te``) — keep ``den`` for infinitives (``aan-bid-den``).
+    if last in ("de", "te") and len(cores) >= 3 and _pyphen_matches_syllables(
+        cores[:-1]
+    ):
+        return False
+    for i, core in enumerate(cores):
+        cf = core.casefold()
+        if cf not in _CLOSED_CLASS:
+            continue
+        if i == 0 and we_word:
+            continue
+        if we_word and 0 < i < len(cores) - 1:
+            continue
+        # Final syllable already checked above.
+        if i == len(cores) - 1:
+            continue
+        return False
+    return True
 
 
 def _format_word(chunk: list[tuple[str, str]]) -> str:
@@ -1044,22 +1230,27 @@ def _merge_underlay_word_list(words: list[str]) -> list[str]:
 
 
 def _bigrams_in_chain(units: list[tuple[str, str]]) -> list[str]:
-    """Greedy bigrams inside a long MuseScore begin…end chain (N≥4)."""
+    """Greedy longest matches (4/3/2) inside a long begin…end chain (N≥4)."""
     words: list[list[tuple[str, str]]] = []
     i = 0
     n = len(units)
     while i < n:
-        if (
-            i + 1 < n
-            and not units[i + 1][1][:1].isupper()
-            and _can_hyphenate_syllables([units[i][0], units[i + 1][0]])
-        ):
-            words.append([units[i], units[i + 1]])
-            i += 2
-        else:
+        matched = False
+        for width in (4, 3, 2):
+            if i + width > n:
+                continue
+            if any(units[i + k][1][:1].isupper() for k in range(1, width)):
+                continue
+            cores = [units[i + k][0] for k in range(width)]
+            if _can_hyphenate_syllables(cores):
+                words.append(units[i : i + width])
+                i += width
+                matched = True
+                break
+        if not matched:
             words.append([units[i]])
             i += 1
-    # Bigram + light suffix mono → trigram (``he-mel`` + ``se``).
+    # Bigram/trigram + light suffix mono → longer word (``he-mel`` + ``se``).
     suffix_mono = frozenset("se te de je ke ge ne re le pe ve me".split())
     finished: list[str] = []
     j = 0
@@ -1067,16 +1258,12 @@ def _bigrams_in_chain(units: list[tuple[str, str]]) -> list[str]:
         mono = words[j + 1][0][0].casefold() if j + 1 < len(words) else ""
         if (
             j + 1 < len(words)
-            and len(words[j]) == 2
+            and len(words[j]) in (2, 3)
             and len(words[j + 1]) == 1
             and mono in suffix_mono
             and not words[j + 1][0][1][:1].isupper()
             and _can_hyphenate_syllables(
-                [
-                    words[j][0][0],
-                    words[j][1][0],
-                    words[j + 1][0][0],
-                ]
+                [u[0] for u in words[j]] + [words[j + 1][0][0]]
             )
         ):
             finished.append(_format_word(words[j] + words[j + 1]))
@@ -1171,29 +1358,70 @@ def _prepend_flank_to_chain(
     return out
 
 
+def _format_units_as_words(units: list[tuple[str, str]]) -> list[str]:
+    """Hyphenate a contiguous syllable-unit run into one or more words."""
+    if not units:
+        return []
+    cores = [u[0] for u in units]
+    last_punct = _split_syllable_punct(units[-1][1])[1]
+    if len(units) <= 3:
+        joined = "".join(cores)
+        hyp = hyphenate_dutch_word(joined)
+        hyp_parts = hyp.split("-")
+        absorb_letter = (
+            len(cores) >= 2
+            and len(cores[-1]) == 1
+            and len(hyp_parts) == len(cores) - 1
+            and not any(
+                _is_false_compound_pair(hyp_parts[i], hyp_parts[i + 1])
+                for i in range(len(hyp_parts) - 1)
+            )
+            and (
+                hyp_parts[0].casefold() not in _CLOSED_CLASS
+                or (
+                    hyp_parts[0].casefold() == "we" and len(hyp_parts) >= 3
+                )
+            )
+        )
+        if _can_hyphenate_syllables(cores) or absorb_letter:
+            if units[0][1][:1].isupper() and hyp[:1].islower():
+                hyp = hyp[0].upper() + hyp[1:]
+            return [hyp + last_punct]
+    # N≤3 false compound / closed-class, or longer chain: greedy pieces.
+    return _merge_hyphen_word_list(_bigrams_in_chain(units))
+
+
 def _format_syllabic_chain(
     chain: list[tuple[str, str]],
     trailing_single: str | None = None,
 ) -> list[str]:
-    """Format a begin…(middle)*…end group; optional trailing single (``wa-re``)."""
-    units: list[tuple[str, str]] = []
+    """Format a begin…(middle)*…end group; optional trailing single (``wa-re``).
+
+    When an ``end`` lyric embeds spaces (``zin-gen voor mijn God``), only the
+    first space-separated word closes the syllabic word; the rest stay separate.
+    """
+    words: list[str] = []
+    pending_units: list[tuple[str, str]] = []
     for text, _syl in chain:
-        units.extend(_syllable_units(text))
-    if not units:
-        return []
-    if len(units) <= 3:
-        joined = "".join(u[0] for u in units)
-        # Preserve capitalisation of the first display syllable.
-        hyp = hyphenate_dutch_word(joined)
-        if units[0][1][:1].isupper() and hyp[:1].islower():
-            hyp = hyp[0].upper() + hyp[1:]
-        # Keep trailing punctuation from the last unit.
-        last_punct = _split_syllable_punct(units[-1][1])[1]
-        words = [hyp + last_punct]
-    else:
-        words = _merge_hyphen_word_list(_bigrams_in_chain(units))
+        pieces = text.split()
+        if not pieces:
+            continue
+        if len(pieces) == 1:
+            pending_units.extend(_syllable_units(pieces[0]))
+            continue
+        # First piece continues the syllabic word; remainder are new words.
+        pending_units.extend(_syllable_units(pieces[0]))
+        words.extend(_format_units_as_words(pending_units))
+        pending_units = []
+        for piece in pieces[1:]:
+            words.extend(
+                _merge_underlay_word_list([_hyphenate_underlay_word(piece)])
+            )
+    if pending_units:
+        words.extend(_format_units_as_words(pending_units))
     if trailing_single:
         words = _attach_trailing_syllable(words, trailing_single)
+    # Cautious glue only (``he-mel``+``se``); do not re-join space-split words.
     return _merge_hyphen_word_list(words)
 
 
@@ -1271,6 +1499,10 @@ def join_import_lyrics(items: list[tuple[str, str]]) -> str:
                     continue
                 if s2 == "middle":
                     chain.append((t2, s2))
+                    i += 1
+                elif s2 == "begin":
+                    # Broken MuseScore: second begin inside a word (Ja/co/b).
+                    chain.append((t2, "middle"))
                     i += 1
                 elif s2 == "end":
                     chain.append((t2, s2))
@@ -1373,7 +1605,8 @@ def _two_syllables_form_word(left: str, right: str) -> bool:
     if la[:1].isupper() and (
         la.casefold() not in _SHORT_CAPITAL_COMPOUND_STARTERS
     ):
-        return False
+        # Short proper-name syllables (``Ja-cob``); not long tokens (``Licht-aan``).
+        return len(la) <= 3 and _pyphen_matches_syllables([la, ra])
     return _can_hyphenate_syllables([la, ra])
 
 
@@ -1382,6 +1615,87 @@ def _right_accepts_word_link(right: _Position) -> bool:
     if right.recite:
         return True
     return (right.syllabic or "single") in ("middle", "end")
+
+
+def _left_is_open_begin(left: _Position) -> bool:
+    """True when left started a word that MuseScore never closed (second begin)."""
+    return (left.syllabic or "single") == "begin" and not left.recite
+
+
+def _lyric_core(text: str) -> str:
+    core, _ = _split_syllable_punct(_clean_import_lyric_text(text) or text.strip())
+    return core.replace("-", "")
+
+
+def _combined_is_one_syllable(left: str, right: str) -> bool:
+    """True when left+right collapse to one Pyphen syllable (``co``+``b`` → cob).
+
+    Only single-letter leftovers are merged (``b``, ``s``) — longer pieces like
+    ``ont`` must not glue onto ``Heer`` as ``Heeront``.
+    """
+    la = _lyric_core(left)
+    ra = _lyric_core(right)
+    if not la or not ra or len(ra) != 1:
+        return False
+    return len(hyphenate_dutch_word(la + ra).split("-")) == 1
+
+
+def _merge_fragment_lyric_positions(positions: list[_Position]) -> list[_Position]:
+    """Merge a one-syllable continuation into the previous lyric (``co``+``b``).
+
+    Keeps the follower notes as melisma slots so S/A/T/B sync stays aligned.
+    """
+    if len(positions) < 2:
+        return positions
+    out: list[_Position] = []
+    for pos in positions:
+        if (
+            out
+            and not out[-1].recite
+            and not pos.recite
+            and out[-1].notes
+            and pos.notes
+            and out[-1].notes[0].lyrics
+            and pos.notes[0].lyrics
+            and (pos.syllabic or "single") in ("middle", "end", "begin")
+            and _combined_is_one_syllable(
+                out[-1].notes[0].lyrics[0].text,
+                pos.notes[0].lyrics[0].text,
+            )
+        ):
+            prev = out[-1]
+            left = prev.notes[0].lyrics[0].text
+            right = pos.notes[0].lyrics[0].text
+            la = _lyric_core(left)
+            ra, rp = _split_syllable_punct(
+                _clean_import_lyric_text(right) or right.strip()
+            )
+            ra = ra.replace("-", "")
+            merged = la + ra + rp
+            if left[:1].isupper() and merged[:1].islower():
+                merged = merged[0].upper() + merged[1:]
+            # Rebuild previous position: lyric on first note, melisma notes after.
+            new_notes = list(prev.notes) + [
+                _Note(pitch=n.pitch, duration=n.duration, lyrics=[])
+                for n in pos.notes
+            ]
+            new_notes[0] = _Note(
+                pitch=new_notes[0].pitch,
+                duration=new_notes[0].duration,
+                lyrics=[_Lyric(text=merged, syllabic=pos.syllabic or "end")],
+                is_breve=new_notes[0].is_breve,
+            )
+            out[-1] = _Position(
+                notes=new_notes,
+                recite=False,
+                source_count=prev.source_count + pos.source_count,
+                duration_units=_position_duration_units(prev)
+                + _position_duration_units(pos),
+                syllabic=pos.syllabic or "end",
+            )
+        else:
+            out.append(pos)
+    return out
 
 
 def _allow_capital_compound_link(left: _Position, right: _Position) -> bool:
@@ -1404,9 +1718,15 @@ def _apply_word_links_in_sequence(positions: list[_Position]) -> None:
     for i in range(len(positions) - 1):
         left = positions[i]
         right = positions[i + 1]
-        if not _right_accepts_word_link(right) and not _allow_capital_compound_link(
+        accept = _right_accepts_word_link(right) or _allow_capital_compound_link(
             left, right
+        )
+        # Second ``begin`` after an open begin (Ja / co) still continues the word.
+        if not accept and _left_is_open_begin(left) and (
+            (right.syllabic or "single") == "begin"
         ):
+            accept = True
+        if not accept:
             continue
         left_syl = _edge_syllable(left, first=False)
         right_syl = _edge_syllable(right, first=True)
@@ -1455,11 +1775,19 @@ def _apply_cross_measure_word_links(
             first.leading_word_hyphen = True
 
 
-def _l_duration_suffix(elms: list[str]) -> str:
-    """ELM-suffix for one L-positie (canonieke vorm: standaard-kwart als ``~``)."""
+def _l_duration_suffix(
+    elms: list[str], *, after_recite: bool = False
+) -> str:
+    """ELM-suffix for one L-positie.
+
+    Lone standaard-``~`` is impliciet en wordt weggelaten — behalve na
+    recite-``)`` (zonder ELM = breve) en in ``&``-melisma (``ziel~&~``).
+    """
     if not elms:
         return ""
     if len(elms) == 1:
+        if elms[0] == "~" and not after_recite:
+            return ""
         return elms[0]
     return "&".join(elms)
 
@@ -1473,15 +1801,17 @@ def _format_l_measure(positions: list[_Position]) -> str:
         syllabic = lyric.syllabic if lyric else "single"
 
         if pos.recite:
-            text = (
-                join_import_lyrics([(raw, "single")]) if raw.strip() else ""
-            )
-            if not text:
-                text = _clean_recite_lyric_text(raw)
+            # Underlay was already joined at collapse time; do not re-run
+            # join_import_lyrics as one ``single`` (that re-glues ``dag gaan``
+            # → ``dag-gaan``). Only light repair of false compounds / gaps.
+            text = _repair_recite_underlay(raw) if raw.strip() else ""
             body = f"({text})" if text else "()"
-            # Explicit non-breve duration after ) if present
+            # Explicit non-breve duration after ) if present (keep ``~``:
+            # bare ``)`` means breve, not quarter).
             if not n0.is_breve:
-                body += _l_duration_suffix([_duration_to_elm(n0.duration)])
+                body += _l_duration_suffix(
+                    [_duration_to_elm(n0.duration)], after_recite=True
+                )
             if pos.word_continues_after:
                 body += "-"
             piece = body
@@ -1491,7 +1821,7 @@ def _format_l_measure(positions: list[_Position]) -> str:
             # Lyric-less / extender-only slot: bare ``~`` is not an L-position —
             # use empty recite ``()~`` so sync-telling matches the stem.
             if not text:
-                piece = "()" + _l_duration_suffix(elms)
+                piece = "()" + _l_duration_suffix(elms, after_recite=True)
             else:
                 prev = positions[idx - 1] if idx > 0 else None
                 # ``)-`` on a previous recite already links the word.
@@ -1507,12 +1837,10 @@ def _format_l_measure(positions: list[_Position]) -> str:
                     text = f"-{text}"
                 piece = text + _l_duration_suffix(elms)
 
-        # Glue ``(… Al)-`` + ``le~`` → ``(… Al)-le~`` (no space).
-        if (
-            parts
-            and parts[-1].endswith("-")
-            and piece
-            and piece[0].isalpha()
+        # Glue ``(… Al)-`` + ``le~`` and ``Za_`` + ``-lig`` (no space).
+        if parts and piece and (
+            piece.startswith("-")
+            or (parts[-1].endswith("-") and piece[0].isalpha())
         ):
             parts[-1] += piece
         else:
@@ -1553,6 +1881,105 @@ def _clean_recite_lyric_text(text: str) -> str:
     # Collapse runs of whitespace for stable tokens.
     t = " ".join(t.split())
     return t
+
+
+def _split_false_compound_token(token: str) -> list[str]:
+    """Split known false compounds (``steun-van`` → ``steun``, ``van``)."""
+    core, punct = _split_syllable_punct(token)
+    if "-" not in core:
+        return [token]
+    bits = [b for b in core.split("-") if b]
+    if len(bits) == 2 and _is_false_compound_pair(bits[0], bits[1]):
+        return [bits[0], bits[1] + punct]
+    return [token]
+
+
+def _merge_underlay_syllable_gaps(words: list[str]) -> list[str]:
+    """Join spaced syllable fragments when Pyphen confirms (``we der ke``).
+
+    Only short unhyphenated tokens (≤3 letters) are considered — full words
+    like ``gaan`` stay separate.
+    """
+    if len(words) < 2:
+        return words
+    out: list[str] = []
+    i = 0
+    while i < len(words):
+        matched = False
+        for width in (4, 3, 2):
+            if i + width > len(words):
+                continue
+            chunk = words[i : i + width]
+            cores: list[str] = []
+            ok = True
+            for wi, w in enumerate(chunk):
+                c, p = _split_syllable_punct(w)
+                if not c or "-" in c or len(c) > 3:
+                    ok = False
+                    break
+                if p and wi != len(chunk) - 1:
+                    ok = False
+                    break
+                cores.append(c)
+            if not ok:
+                continue
+            if _can_hyphenate_syllables(cores):
+                last_punct = _split_syllable_punct(chunk[-1])[1]
+                hyp = hyphenate_dutch_word("".join(cores)) + last_punct
+                if chunk[0][:1].isupper() and hyp[:1].islower():
+                    hyp = hyp[0].upper() + hyp[1:]
+                out.append(hyp)
+                i += width
+                matched = True
+                break
+        if not matched:
+            out.append(words[i])
+            i += 1
+    return out
+
+
+def _extend_hyphen_stem_with_fragment(words: list[str]) -> list[str]:
+    """``psalm-zin`` + ``gen`` → ``psalm-zin-gen`` when Pyphen confirms."""
+    if len(words) < 2:
+        return words
+    out: list[str] = []
+    i = 0
+    while i < len(words):
+        if i + 1 < len(words) and "-" in words[i]:
+            left_bits = [
+                _split_syllable_punct(b)[0] for b in words[i].split("-") if b
+            ]
+            r_core, r_punct = _split_syllable_punct(words[i + 1])
+            if (
+                left_bits
+                and r_core
+                and "-" not in r_core
+                and len(r_core) <= 3
+                and r_core.casefold() not in ("de", "te")
+                and _can_hyphenate_syllables(left_bits + [r_core])
+            ):
+                hyp = hyphenate_dutch_word("".join(left_bits + [r_core]))
+                if words[i][:1].isupper() and hyp[:1].islower():
+                    hyp = hyp[0].upper() + hyp[1:]
+                out.append(hyp + r_punct)
+                i += 2
+                continue
+        out.append(words[i])
+        i += 1
+    return out
+
+
+def _repair_recite_underlay(text: str) -> str:
+    """Light repair for already-joined recite underlay (no re-glue of words)."""
+    t = _clean_recite_lyric_text(text)
+    if not t:
+        return ""
+    words: list[str] = []
+    for raw in t.split():
+        words.extend(_split_false_compound_token(raw))
+    words = _extend_hyphen_stem_with_fragment(words)
+    words = _merge_underlay_syllable_gaps(words)
+    return " ".join(words)
 
 
 def _clean_import_lyric_text(text: str) -> str:
