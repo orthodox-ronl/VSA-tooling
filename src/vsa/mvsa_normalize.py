@@ -13,10 +13,8 @@ from .music import Pitch
 from .mvsa_align import align_mvsa_text
 from .mvsa_musicxml import (
     MvsaExportError,
-    _apply_line_ehm,
-    _apply_start,
     _resolve_slot,
-    _voice_resolver,
+    seed_voice_resolver,
 )
 from .mvsa_parse import parse_mvsa
 from .mvsa_validate import (
@@ -106,6 +104,7 @@ def normalize_mvsa_text(
 
     # (system_start_line, marker) -> (new voice content, output ehm | None)
     rewrites: dict[tuple[int, str], tuple[str, str | None]] = {}
+    pitch_carry: dict[str, Pitch] = {}
 
     for section in doc.sections:
         for system in section.systems:
@@ -120,12 +119,12 @@ def normalize_mvsa_text(
             line_ehms = getattr(system, "line_ehms", {}) or {}
             for vm in voice_markers:
                 letter = vm[0]
-                resolvers[letter] = _voice_resolver(ctx, letter)
-                if ctx.start:
-                    _apply_start(resolvers[letter], ctx.start, letter)
-                line_ehm = line_ehms.get(vm)
-                if line_ehm is not None:
-                    _apply_line_ehm(resolvers[letter], line_ehm)
+                resolvers[letter] = seed_voice_resolver(
+                    ctx,
+                    vm,
+                    line_ehm=line_ehms.get(vm),
+                    carried=pitch_carry.get(letter),
+                )
 
             last_pitch: dict[str, Pitch | None] = {vm[0]: None for vm in voice_markers}
             prev_degree: dict[str, int | None] = {vm[0]: None for vm in voice_markers}
@@ -176,6 +175,8 @@ def normalize_mvsa_text(
 
             out_ehm: str | None = "-" if pitch == "vsa" else None
             for vm in voice_markers:
+                letter = vm[0]
+                pitch_carry[letter] = resolvers[letter].current_pitch
                 bars = _split_bars(system.lines[vm])
                 parts: list[str] = []
                 segs = new_segs[vm]

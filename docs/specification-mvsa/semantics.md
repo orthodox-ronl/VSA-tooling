@@ -117,6 +117,30 @@ vereisen een cijfer (`so-2`).
 `@start S=-` en `S-:` betekenen voor stem `S` hetzelfde beginanker; de
 identifier-vorm is de voorkeur als de EHM bij die stemregel hoort.
 
+### Lopende toon over systeembraken
+
+De **lopende toon** van elke stem loopt door over LSATB-systeembraken (lege
+regel tussen systemen), in de volgorde waarin export of validatie de systemen
+afloopt:
+
+| Context                          | Volgorde                                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------- |
+| Export **playback** (``.mxl``)   | `sections_for_layout`: bij `@speelplan` de **klinkende** (uitgeschreven) vorm |
+| Export **partituur** (``.mscz``) | Bladvorm: documentvolgorde, elk speelblok één keer (tenzij expand-vangnet)    |
+| Eindanker-check / normalize      | Documentvolgorde                                                              |
+
+Gevolg: een kale `-` (of `~` als hoogte) aan het **begin** van een nieuw
+systeem betekent “zelfde toon als de laatste klinkende noot van die stem in
+het vorige systeem” — precies wat soft-wrap na import schrijft.
+
+**Beginanker wint:** staat op de nieuwe stemregel een EHM in de
+regelidentifier (`S-:`, `T\6:`, …) of een expliciete `@start`-toewijzing voor
+die stem, dan wordt de lopende toon **opnieuw gezet** en geldt leading `-`
+ten opzichte van dat anker (niet ten opzichte van het vorige systeem).
+
+Zonder beginanker en zonder eerdere toon blijft het gedrag: `-` klinkt als
+schrijf-do (zoals binnen één systeem vóór de eerste absolute toon).
+
 ## Ankers: zetten vs. checken
 
 | Plaats                          | Rol                                                             | Voorbeeld     |

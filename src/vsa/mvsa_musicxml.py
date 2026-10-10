@@ -470,12 +470,18 @@ def export_mvsa_to_musicxml(
     blok_measure_range: dict[str, tuple[int, int]] = {}
     score_started = False
     systems_flat: list = []
+    # Lopende toon per stem over mvsa-systeembraken (exportvolgorde =
+    # sections_for_layout: playback = speelplan-expansie, partituur = blad).
+    pitch_carry: dict[str, Pitch] = {}
     for section in sections:
         section_start = len(bar_styles)
         for system in section.systems:
             systems_flat.append(system)
-            events_by_voice = _system_to_events(
-                system, layout=layout, hulptekst=hulptekst
+            events_by_voice, pitch_carry = _system_to_events(
+                system,
+                layout=layout,
+                hulptekst=hulptekst,
+                pitch_carry=pitch_carry,
             )
             for voice, measures in events_by_voice.items():
                 voice_measures.setdefault(voice, [])
@@ -759,12 +765,53 @@ def _add_lyric_layer_to_notes(
     )
 
 
+def _start_maps_voice(start_rest: str | None, marker: str) -> bool:
+    """True when sticky ``@start`` names this stem (explicit beginanker)."""
+    if not start_rest:
+        return False
+    mapping: dict[str, str] = {}
+    for part in split_directive_assignments(start_rest):
+        if "=" not in part:
+            continue
+        key, _, _val = part.partition("=")
+        mapping[key.strip()] = _val.strip()
+    return resolve_stem_map_key(mapping, marker) is not None
+
+
+def seed_voice_resolver(
+    ctx: StickyContext,
+    marker: str,
+    *,
+    line_ehm: str | None = None,
+    carried: Pitch | None = None,
+) -> PitchResolver:
+    """Resolver for one stem at the start of an LSATB-systeem.
+
+    Beginanker on the regelidentifier (``S-:``) or an explicit ``@start``
+    entry for this stem resets the lopende toon. Otherwise a pitch carried
+    from the previous systeem in export/document order seeds ``-`` / ``~``
+    and relative EHM (soft-wrap holds).
+    """
+    resolver = _voice_resolver(ctx, marker)
+    if ctx.start:
+        _apply_start(resolver, ctx.start, marker)
+    if line_ehm is not None:
+        _apply_line_ehm(resolver, line_ehm)
+        return resolver
+    if _start_maps_voice(ctx.start, marker):
+        return resolver
+    if carried is not None:
+        resolver.set_absolute_pitch(carried)
+    return resolver
+
+
 def _system_to_events(
     system,
     *,
     layout: MvsaLayout = "playback",
     hulptekst: bool = False,
-) -> dict[str, list[list[NoteEvent]]]:
+    pitch_carry: dict[str, Pitch] | None = None,
+) -> tuple[dict[str, list[list[NoteEvent]]], dict[str, Pitch]]:
     ctx: StickyContext = system.context
     lyric_markers = [m for m in system.markers if is_lyrics_stem(m)]
     if not lyric_markers:
@@ -791,16 +838,17 @@ def _system_to_events(
     def _vkey(vm: str) -> str:
         return vm if layout == "playback" else vm[0]
 
+    prev_carry = pitch_carry or {}
     resolvers: dict[str, PitchResolver] = {}
     line_ehms = getattr(system, "line_ehms", {}) or {}
     for m in voice_markers:
         key = _vkey(m)
-        resolvers[key] = _voice_resolver(ctx, m)
-        if ctx.start:
-            _apply_start(resolvers[key], ctx.start, m)
-        line_ehm = line_ehms.get(m)
-        if line_ehm is not None:
-            _apply_line_ehm(resolvers[key], line_ehm)
+        resolvers[key] = seed_voice_resolver(
+            ctx,
+            m,
+            line_ehm=line_ehms.get(m),
+            carried=prev_carry.get(key),
+        )
 
     result: dict[str, list[list[NoteEvent]]] = {_vkey(m): [] for m in voice_markers}
     if layout == "partituur":
@@ -863,7 +911,11 @@ def _system_to_events(
         for p in PARTS:
             if p["voice"] not in result:
                 result[p["voice"]] = [[] for _ in system.measures]
-    return result
+
+    new_carry = dict(prev_carry)
+    for key, resolver in resolvers.items():
+        new_carry[key] = resolver.current_pitch
+    return result, new_carry
 
 
 def writing_do_pitch(ctx: StickyContext, marker: str) -> Pitch:

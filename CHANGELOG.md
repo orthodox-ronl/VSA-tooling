@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- MVSA→MusicXML: soft-wrap-`-` over systeembraken houdt de lopende toon
+  (beginanker/`@start` reset); zelfde carry in eindanker-check en normalize
+
 ## 0.2.0 - MVSA-authoring, export en preview-audio
 
 - MVSA: parser, validatie, normalize/align, **`mvsa kuiser`** (canonieke authoring-vorm)

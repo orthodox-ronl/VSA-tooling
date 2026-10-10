@@ -22,6 +22,7 @@ EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "mvsa"
 INTOCHT = EXAMPLES / "kleine-intocht-zondag-hemelum.mvsa"
 INTOCHT_SCHETS = EXAMPLES / "test-kleine-intocht-zondag-hemelum.mvsa"
 ALLELUIA = EXAMPLES / "alleluia-toon-8.mvsa"
+ALLELUIA_TOON_1 = EXAMPLES / "alleluia-toon-1.mvsa"
 
 
 def _part_pitches(xml: str, part_id: str) -> list[tuple[str, str, str]]:
@@ -31,6 +32,21 @@ def _part_pitches(xml: str, part_id: str) -> list[tuple[str, str, str]]:
         r"<step>(\w)</step>(?:<alter>(-?\d)</alter>)?<octave>(\d)</octave>",
         body,
     )
+
+
+def _part_measure_pitches(
+    xml: str, part_id: str
+) -> list[list[tuple[str, str, str]]]:
+    marker = f'<part id="{part_id}">'
+    body = xml.split(marker)[1].split("</part>")[0]
+    measures = re.findall(r"<measure[^>]*>(.*?)</measure>", body, re.S)
+    return [
+        re.findall(
+            r"<step>(\w)</step>(?:<alter>(-?\d)</alter>)?<octave>(\d)</octave>",
+            m,
+        )
+        for m in measures
+    ]
 
 
 def _part_lyrics(xml: str, part_id: str) -> list[tuple[str, str]]:
@@ -723,6 +739,53 @@ def test_line_ehm_is_beginanker():
         "@sectie x\nL: a_ ||\nS: / ||\nA: - ||\nT: - ||\nB: - ||\n"
     )
     assert _all_pitches(with_label) == _all_pitches(with_start)
+
+
+def test_intocht_hold_dash_carries_across_systems():
+    """``kleine-intocht-zondag-hemelum``: soft-wrap ``-`` = vorige systeemeinde."""
+    xml = export_mvsa_to_musicxml(INTOCHT.read_text(encoding="utf-8"))
+    # Systeem1 = maten 0–1; systeem2 = maat 2 (begint met ``-``); systeem3 = maat 3.
+    for pid in ("P1", "P2", "P3", "P4"):
+        measures = _part_measure_pitches(xml, pid)
+        assert len(measures) == 4
+        assert measures[2][0] == measures[1][-1]
+        assert measures[3][0] == measures[2][-1]
+    # Concrete tonen (S/A/T/B) op de soft-wrap-maten.
+    assert _part_measure_pitches(xml, "P1")[2][0] == ("B", "-1", "4")
+    assert _part_measure_pitches(xml, "P2")[2][0] == ("G", "", "4")
+    assert _part_measure_pitches(xml, "P3")[2][0] == ("D", "", "4")
+    assert _part_measure_pitches(xml, "P4")[2][0] == ("G", "", "3")
+    assert _part_measure_pitches(xml, "P1")[3][0] == ("A", "", "4")
+    assert _part_measure_pitches(xml, "P2")[3][0] == ("F", "", "4")
+    assert _part_measure_pitches(xml, "P3")[3][0] == ("C", "", "4")
+    assert _part_measure_pitches(xml, "P4")[3][0] == ("F", "", "3")
+
+
+def test_alleluia_toon_1_beginanker_wins_across_speelplan_blocks():
+    """``alleluia-toon-1``: speelplan-expansie; beginanker reset (geen carry)."""
+    xml = export_mvsa_to_musicxml(
+        ALLELUIA_TOON_1.read_text(encoding="utf-8"), layout="playback"
+    )
+    # Plan 1,2,1,2,1,3 → zes maten; blok1 start op schrijf-do (S-:), blok2 op S/: (=G).
+    s = _part_measure_pitches(xml, "P1")
+    assert len(s) == 6
+    assert [m[0] for m in s] == [
+        ("F", "", "4"),
+        ("G", "", "4"),
+        ("F", "", "4"),
+        ("G", "", "4"),
+        ("F", "", "4"),
+        ("G", "", "4"),
+    ]
+    a = _part_measure_pitches(xml, "P2")
+    assert [m[0] for m in a] == [
+        ("C", "", "4"),
+        ("E", "", "4"),
+        ("C", "", "4"),
+        ("E", "", "4"),
+        ("C", "", "4"),
+        ("E", "", "4"),
+    ]
 
 
 def test_vsa_mode_beginanker_uses_schrijf_do():

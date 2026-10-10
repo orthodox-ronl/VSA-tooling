@@ -25,9 +25,13 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 **Import (kort):** `.mxl` gaat rechtstreeks naar de SATB-parser (P1–P4);
 `.mscz` eerst via MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
 [`mscz mxl`](../reference/cli/mscz.md). Default output is de **canonieke
-schrijfvorm** (kuiser-normaalvorm). Met `--pitch vsa` plakt de import
-check-only eindankers (a–g + cijfer) op systeemeinden; `doremi` / `a-g` doen
-dat niet. Tutorial: [mvsa schrijven 101 — bladmuziek](../guides/mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa).
+schrijfvorm** (kuiser-normaalvorm). Soft-wrap zet same-pitch holds als `-`
+ook over systeembraken; export en eindanker-check zetten die weer om naar de
+vorige toon (tenzij een beginanker reset) — zie
+[Semantiek — lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
+Met `--pitch vsa` plakt de import check-only eindankers (a–g + cijfer) op
+systeemeinden; `doremi` / `a-g` doen dat niet. Tutorial:
+[mvsa schrijven 101 — bladmuziek](../guides/mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa).
 
 ## Typische commando’s
 

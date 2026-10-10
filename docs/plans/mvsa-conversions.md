@@ -186,7 +186,9 @@ vsa mvsa import PATH [-o OUT] --pitch {doremi,a-g,vsa} --octave-style @oct
 - Bron: `.mxl` / `.musicxml` direct (SATB P1–P4); `.mscz` via MuseScore →
   temp-`.mxl` → **SATB-explode** (zelfde als `mscz mxl`) → parser.
 - Soft-wrap ~80 tekens per LSATB-systeem; één te lange maat blijft één systeem.
-- Same-pitch holds (ook over maatgrenzen) → `-` op stemregels.
+- Same-pitch holds (ook over maat- en **systeem**grenzen) → `-` op stemregels;
+  export/validatie dragen de lopende toon over (beginanker reset) — zie
+  [semantics — systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
 - Multi-lettergreep lyrics op één noot → recite `( … )`; lone extender →
   lege recite `()~`; trailing `.` gestript.
 - Default: **kuiser-normaalvorm** (canonieke `~` op L, bars sync, kolommen);
