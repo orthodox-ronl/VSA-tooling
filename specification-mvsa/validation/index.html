@@ -4949,7 +4949,10 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
 8a. Optioneel eindanker direct na een maatstreep (geen spatie): zie
    <a href="../syntax/#eindanker-aan-de-maatstreep">Syntax — eindanker</a>. Ongeldige anker-
    tekst of mismatch met de berekende lopende toon: <strong>error</strong> (<code>MVSA-BAR-ANKER</code>).
-   Een kale streep is geen anker. Lyrics-regels met een anker-suffix: error.</li>
+   Een kale streep is geen anker. Lyrics-regels met een anker-suffix: error.
+   De berekende lopende toon loopt door over systeembraken in documentvolgorde
+   (soft-wrap-<code>-</code>); een beginanker op de nieuwe regel reset die toon — zie
+   <a href="../semantics/#lopende-toon-over-systeembraken">Semantiek — lopende toon over systeembraken</a>.</li>
 </ol>
 <h2 id="directives-keywords">Directives / keywords<a class="headerlink" href="#directives-keywords" title="Permanent link">&para;</a></h2>
 <ol>
@@ -5029,7 +5032,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-10
         
       </p>
       

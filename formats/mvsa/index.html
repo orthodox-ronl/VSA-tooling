@@ -4848,9 +4848,13 @@ Zie <a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code>
 <p><strong>Import (kort):</strong> <code>.mxl</code> gaat rechtstreeks naar de SATB-parser (P1–P4);
 <code>.mscz</code> eerst via MuseScore naar temp-<code>.mxl</code> en dezelfde SATB-explode als
 <a href="../../reference/cli/mscz/"><code>mscz mxl</code></a>. Default output is de <strong>canonieke
-schrijfvorm</strong> (kuiser-normaalvorm). Met <code>--pitch vsa</code> plakt de import
-check-only eindankers (a–g + cijfer) op systeemeinden; <code>doremi</code> / <code>a-g</code> doen
-dat niet. Tutorial: <a href="../../guides/mvsa-schrijven-101/#7-taak-bladmuziek--mvsa">mvsa schrijven 101 — bladmuziek</a>.</p>
+schrijfvorm</strong> (kuiser-normaalvorm). Soft-wrap zet same-pitch holds als <code>-</code>
+ook over systeembraken; export en eindanker-check zetten die weer om naar de
+vorige toon (tenzij een beginanker reset) — zie
+<a href="../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">Semantiek — lopende toon over systeembraken</a>.
+Met <code>--pitch vsa</code> plakt de import check-only eindankers (a–g + cijfer) op
+systeemeinden; <code>doremi</code> / <code>a-g</code> doen dat niet. Tutorial:
+<a href="../../guides/mvsa-schrijven-101/#7-taak-bladmuziek--mvsa">mvsa schrijven 101 — bladmuziek</a>.</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mvsa validate examples\mvsa
 mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
@@ -4904,7 +4908,7 @@ vsa text examples\mvsa\alleluia-toon-8.mvsa
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-10
         
       </p>
       

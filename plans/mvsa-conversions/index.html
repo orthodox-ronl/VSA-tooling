@@ -5663,7 +5663,9 @@ identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code>
 <li>Bron: <code>.mxl</code> / <code>.musicxml</code> direct (SATB P1–P4); <code>.mscz</code> via MuseScore →
   temp-<code>.mxl</code> → <strong>SATB-explode</strong> (zelfde als <code>mscz mxl</code>) → parser.</li>
 <li>Soft-wrap ~80 tekens per LSATB-systeem; één te lange maat blijft één systeem.</li>
-<li>Same-pitch holds (ook over maatgrenzen) → <code>-</code> op stemregels.</li>
+<li>Same-pitch holds (ook over maat- en <strong>systeem</strong>grenzen) → <code>-</code> op stemregels;
+  export/validatie dragen de lopende toon over (beginanker reset) — zie
+  <a href="../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">semantics — systeembraken</a>.</li>
 <li>Multi-lettergreep lyrics op één noot → recite <code>( … )</code>; lone extender →
   lege recite <code>()~</code>; trailing <code>.</code> gestript.</li>
 <li>Default: <strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L, bars sync, kolommen);
@@ -5771,7 +5773,7 @@ werken.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-08
+        Bijgewerkt: 2026-10-10
         
       </p>
       
