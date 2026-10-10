@@ -17,7 +17,8 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 
 !!! warning "Import = werkbank"
     `mxl import` is een **bewerkvorm** voor de werkbank (woordstreepjes, lege
-    recite, lossy). Zie
+    recite, lossy). De output begint met dezelfde waarschuwingsbanner als
+    `mvsa import`. Zie
     [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 **Import:** de MusicXML-bron wordt direct geparst als vier parts (P1–P4 =

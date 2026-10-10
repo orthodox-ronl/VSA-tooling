@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- MVSA-import: A/T/B spiegelen op **duur** t.o.v. S (niet noot-index/lyrics),
+  zodat lange noten + lyric-loze spacers (typisch MSCZ) Bb/T niet verschuiven
+- MVSA-import: gerichte lyric-hacks — spaties in `end`-lyrics, `we-der-ke`,
+  geen valse `dag-gaan`/`steun-van`/`Heer-richt`, `Ja_-cob` / `zon_-daars`
+- MVSA L-normaalvorm: lone standaard-`~` weglaten; `~` blijft bij `&`-melisma
+  en na recite-`)` (kuiser + import)
+- MVSA-import: ASCII-waarschuwingsbanner na `# Imported:` (schets/checklist;
+  alle entrypoints `mvsa`/`mxl`/`mscz import`)
+- Testfixtures hersteld: `test-alleluia-toon-8.mvsa` en
+  `test-kleine-intocht-zondag-hemelum.mvsa` (multi-`@sectie` voor roundtrips;
+  ≠ catalogus-voorbeelden). `test-trisagion-…` blijft weg (geen testgebruik)
 - MVSA→MusicXML: soft-wrap-`-` over systeembraken houdt de lopende toon
   (beginanker/`@start` reset); zelfde carry in eindanker-check en normalize
 

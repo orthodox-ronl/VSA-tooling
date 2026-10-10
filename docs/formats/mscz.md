@@ -49,7 +49,9 @@ fallback.
 
 !!! warning "Import = werkbank"
     `mscz import` is een **bewerkvorm** voor de werkbank-fase, geen
-    catalogus-klaar product. Zie
+    catalogus-klaar product. De output begint met dezelfde
+    waarschuwingsbanner als `mvsa import`. Onderstemmen A/T/B worden op duur
+    tegen S uitgelijnd; zie
     [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 ## Typische commando’s

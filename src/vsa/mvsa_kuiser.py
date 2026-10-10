@@ -2,8 +2,10 @@
 
 Past de kuiser-toleranties uit de draft-spec toe:
 
-1. op L: canonieke standaard-lengte als ``~`` (niet kale ELM-``-``);
-   samengestelde ELM’s zoals ``-.`` blijven; input-``-`` als duur mag;
+1. op L: eenduidige ELM-``-`` → ``~``; daarna lone standaard-``~`` weglaten
+   (impliciete kwart). ``~`` blijft bij ``&``-melisma (``ziel~&~``) en na
+   recite-``)`` (``()~`` / ``(ia)~`` — zonder ELM = breve). Samengestelde
+   ELM’s zoals ``-.`` blijven;
 2. waarschuwing bij ambiguë ``-`` (regel + kolom) — geen stille
    ``hei- li``→``hei-li``-collapse (dat breekt o.a. ``…_&_  -li``);
 3. semantische woordstreepjes: waarschuwing bij ontbrekende streepjes
@@ -29,7 +31,13 @@ from .mvsa_normalize import (
     MvsaNormalizeError,
     normalize_mvsa_text,
 )
-from .mvsa_parse import _ELMS, _is_syllable_char, _is_woordstreepje, parse_l_positions
+from .mvsa_parse import (
+    _ELMS,
+    _is_syllable_char,
+    _is_woordstreepje,
+    _read_elms,
+    parse_l_positions,
+)
 from .mvsa_validate import (
     MvsaValidationError,
     _BarSplit,
@@ -168,7 +176,9 @@ def _repair_systems(text: str) -> tuple[str, list[KuiserWarning]]:
             warnings.extend(
                 _semantic_hyphen_warnings(content, line_no, content_start)
             )
-            contents[mk] = _canonicalize_l_standard_elms(content)
+            contents[mk] = _omit_implicit_lone_tildes(
+                _canonicalize_l_standard_elms(content)
+            )
 
         try:
             contents = _sync_bars(contents, order, line=start_line)
@@ -383,6 +393,90 @@ def _canonicalize_l_standard_elms(content: str) -> str:
     for idx in dashes:
         chars[idx] = "~"
     return "".join(chars)
+
+
+def _omit_implicit_lone_tildes(content: str) -> str:
+    """Drop lone standaard-``~`` on L; keep melisma ``~&…`` and post-``)`` ELMs."""
+    s = content
+    n = len(s)
+    drop: list[tuple[int, int]] = []
+    i = 0
+    while i < n:
+        bar = _bar_starts_at(s, i)
+        if bar:
+            i += len(bar)
+            _anchor, i = _read_bar_anchor(s, i)
+            continue
+        if s[i].isspace() or s[i] in ",;:!?":
+            i += 1
+            continue
+        if s[i] == ".":
+            is_elm_dot = any(
+                s.startswith(e, i) and e in (".", "..", "_.", "-.", "~.")
+                for e in _ELMS
+            )
+            if not is_elm_dot:
+                i += 1
+                continue
+
+        if s[i] == "(":
+            close = s.find(")", i + 1)
+            if close < 0:
+                break
+            i = close + 1
+            # Recite duration: keep ``~`` (bare ``)`` = breve).
+            _elms, i = _read_elms(s, i, allow_bare_dash=False)
+            continue
+
+        if _is_woordstreepje(s[i]) and not (
+            i + 1 < n and _is_syllable_char(s[i + 1])
+        ):
+            i += 1
+            continue
+
+        if _is_woordstreepje(s[i]) and i + 1 < n and _is_syllable_char(s[i + 1]):
+            i += 1
+
+        lead_start = i
+        leading, i = _read_elms(s, i)
+        if leading == ["~"]:
+            drop.append((lead_start, i))
+
+        while i < n:
+            if _bar_starts_at(s, i):
+                break
+            start = i
+            while i < n and (_is_syllable_char(s[i]) or s[i] in "'’ʹ"):
+                i += 1
+            if i == start:
+                break
+            while i < n and s[i] in ",;:!?":
+                i += 1
+            elm_start = i
+            elms, i = _read_elms(s, i)
+            if elms == ["~"]:
+                drop.append((elm_start, i))
+            while i < n and s[i] in ",;:!?":
+                i += 1
+            if (
+                i < n
+                and _is_woordstreepje(s[i])
+                and i + 1 < n
+                and _is_syllable_char(s[i + 1])
+            ):
+                i += 1
+                continue
+            break
+
+    if not drop:
+        return content
+    parts: list[str] = []
+    cursor = 0
+    for a, b in drop:
+        parts.append(s[cursor:a])
+        cursor = b
+    parts.append(s[cursor:])
+    return "".join(parts)
 
 
 def _bare_elm_dash_indices(s: str) -> list[int]:

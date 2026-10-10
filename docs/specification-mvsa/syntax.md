@@ -134,10 +134,12 @@ breder is dan de lettergreep tot aan de volgende anker-kolom, komt er ruimte
 *vóór* het streepje (`le -lu`), zodat stemtokens met spaties gescheiden blijven
 en de ankers (eerste letters / eerste noottekens) toch onder elkaar staan.
 Vermijd `le-  lu` (streepje direct gevolgd door spaties): die vorm leest de
-parser als ELM `-` op “le”, niet als woordstreepje. Canoniek schrijf je
-standaard-lengte op L als `~`, en een woordstreepje **direct vóór** de
-volgende lettergreep — met eventuele spaties *ervóór* als de stemregels
-meer breedte nodig hebben (`hei_&_&_  -li`, niet `hei_&_&_-li`).
+parser als ELM `-` op “le”, niet als woordstreepje. Canoniek laat je lone
+standaard-lengte op L **weg** (impliciete `~`); schrijf `~` wél naast `&`
+in melisma (`ziel~&~`) en na recite-`)` bij niet-breve duur. Een
+woordstreepje staat **direct vóór** de volgende lettergreep — met eventuele
+spaties *ervóór* als de stemregels meer breedte nodig hebben
+(`hei_&_&_  -li`, niet `hei_&_&_-li`).
 
 ```text
 L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&-&-&_         i_  a__  ||

@@ -301,7 +301,9 @@ S: fa so- mi&do&re&mi fa mi ||mi
 !!! warning "Import = werkbank, niet catalogus"
     `vsa mvsa import` (en `mxl`/`mscz import`) levert een **starttekst**, geen
     afgewerkt zangstuk. Gebruik de uitkomst om te redigeren en te valideren;
-    publiceer of accepteer hem niet ongewijzigd als catalogusbron.
+    publiceer of accepteer hem niet ongewijzigd als catalogusbron. Bovenaan
+    staat een ASCII-waarschuwingsbanner met checklist (woordstreepjes, recite,
+    A/T/B, ritme, metadata).
 
     Waarom dat nodig is:
 
@@ -326,7 +328,11 @@ S: fa so- mi&do&re&mi fa mi ||mi
    vsa mvsa validate lied.mvsa
    ```
 3. Zet bovenaan `@do` / `@mode` / `@oct` goed (import vult dit grotendeels in).
-4. Controleer L-tekst (import kan lelijk syllabificeren) en sync.
+4. Controleer L-tekst en sync. Import herstelt veel MuseScore-fouten
+   (valse `dag-gaan` / `steun-van`, ontbrekende `we-der-ke`, spaties in
+   underlay), maar niet alles — bekijk vooral recite `( … )` en
+   woordstreepjes. A/T/B volgen L/S op duur; controleer holds (`-`) en
+   `&`-melisma’s tegen de bronpartituur.
 5. `vsa mvsa validate lied.mvsa`
 6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa` (Pyphen-warnings zijn
    advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
@@ -337,7 +343,8 @@ same-pitch holds als `-` op stemregels (ook over systeembraken; export zet die
 weer om naar de vorige toon — zie
 [lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken));
 multi-lettergreep lyrics op één noot als recite `( … )`; daarna
-**kuiser-normaalvorm** (canonieke `~` op L, kolomuitlijning). Keten: `.mxl` →
+**kuiser-normaalvorm** (lone standaard-`~` op L weggelaten; kolomuitlijning).
+Keten: `.mxl` →
 parser; `.mscz` → MuseScore → temp-`.mxl` → SATB-explode (zelfde als
 `mscz mxl`) → parser → kuiser. Details:
 [`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).

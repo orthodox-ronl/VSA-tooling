@@ -6,7 +6,8 @@ Zie het conversieplan:
 
 Alias voor import: [`vsa mvsa import`](mvsa.md#vsa-mvsa-import) (zelfde
 MSCZ→mxl→mvsa-keten). **Werkbank-bewerkvorm** — niet ongewijzigd als
-catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout).
+catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout). De
+output begint met dezelfde waarschuwingsbanner als `mvsa import`.
 
 Alias voor platte tekst: [`vsa text`](text.md) (zelfde extractie; ook
 `.mxl` / `.vsa` / `.mvsa`).
@@ -34,7 +35,9 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 `vsa`, kuiser-normaalvorm): zelfde keten als
 [`vsa mvsa import`](mvsa.md#vsa-mvsa-import). `@do` komt uit de MuseScore-
 voortekening (`KeySig` / `concertKey`) tenzij je `--do` meegeeft. De
-MSCZ-stap gebruikt dezelfde SATB-explode als `mscz mxl`.
+MSCZ-stap gebruikt dezelfde SATB-explode als `mscz mxl`. A/T/B volgen L/S
+op **duur** (lange noten worden gesplitst/gepaddet), zodat ontbrekende of
+scheve lyrics op de onderstemmen de posities niet verschuiven.
 
 ## Voorbeelden
 
