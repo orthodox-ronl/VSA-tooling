@@ -1,0 +1,72 @@
+# Alleluia toon 8 — mvsa-experiment (niet door `vsa` geparsed)
+#
+# Draft-spec: docs/specification-mvsa/  |  plan §6, §2.2–§2.4
+#
+# Oorspronkelijke schets (één L-regel, nog VSA-accolades):
+#
+#   L: ~Al-le-lu-ia,~Al-le-lu-ia,~al-{le}-{lu_&-&-&_&}{i_}{\a__}
+#
+# Bij @do F4 major, schrijfoctaaf 0 (F4…E5):
+#   do=F4  re=G4  mi=A4  fa=Bb4  so/sol=C5  la=D5  si/ti=E5
+#
+# Referentie klinkende tonen: schets3-oct-ag (bladmuziek).
+# Overige schetsen zijn pitch-equivalent; `@oct` blijft ongewijzigd.
+# Tenor onder `@oct T=-1` met `+` zodat die boven de bas blijft.
+
+@toon "8"
+@do F4
+@mode major
+
+# --- Schets 1: do-re-mi, schrijfoctaaf 0 (suffix i.p.v. @oct) ---
+
+@sectie schets1-doremi
+L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&~&~&_         i_  a__  ||
+S: fa                             so-  mi&do&re&mi       fa  mi   ||
+A: re                             re   do&la-&si-&do     re  si-  ||
+T: la-                            so-  so-&mi-&so-&so-   la- so-# ||
+B: re-                            si-2 do-&la-2&so-2&do- re- mi-  ||
+
+# --- Schets 2: mix toonnamen, zelfde klinkende tonen (geen @oct) ---
+
+@sectie schets2-mix
+L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le-lu_&~&~&_   i_ a__ ||
+S: Bb                             c  a&f&g&a     Bb a   ||
+A: g                              g  f&d&e&f     g  e   ||
+T: d                              c  c&a-&c&c    d  c#  ||
+B: g-                             e- f-&d-&c-&f- g- a-  ||
+
+# --- Schets 3: zelfde muziek, @oct T=-1 B=-1 ---
+
+@oct S=0 A=0 T=-1 B=-1
+
+@sectie schets3-oct-doremi
+L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le -lu_&~&~&_     i_ a__ ||
+S: fa                             so- mi&do&re&mi   fa mi  ||
+A: re                             re  do&la-&si-&do re si- ||
+T: la                             so  so&mi&so&so   la so# ||
+B: re                             si- do&la-&so-&do re mi  ||
+
+@sectie schets3-oct-ag
+L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le-lu_&~&~&_  i_ a__ ||
+S: Bb                             c  a&f&g&a    Bb a   ||
+A: g                              g  f&d&e&f    g  e   ||
+T: d+                             c+ c+&a&c+&c+ d+ c#+ ||
+B: g                              e  f&d&c&f    g  a   ||
+
+# Zelfde frase, bladcijfers (@oct telt niet op het cijfer):
+
+@sectie schets3-bladcijfer
+L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le-lu_&~&~&_   i_  a__ ||
+S: Bb4                            c4 a4&f4&g4&a4 Bb4 a4  ||
+A: g4                             g4 f4&d4&e4&f4 g4  e4  ||
+T: d4                             c4 c4&a3&c4&c4 d4  c#4 ||
+B: g3                             e3 f3&d3&c3&f3 g3  a3  ||
+
+# --- Schets 4: zelfde muziek, EHM na een beginanker ---
+
+@sectie schets4-ehm
+L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le -lu_&~&~&_     i_ a__ ||
+S: fa                             \6  /5&\2&/&/     /  \   ||
+A: re                             -   \&\2&/&/      /  \2  ||
+T: la                             \   -&\2&/2&-     /  #\  ||
+B: re                             si- do&la-&so-&do re mi  ||
