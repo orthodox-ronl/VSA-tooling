@@ -108,6 +108,10 @@ blokken (zie hierboven).
    elk één keer.
 3. Zonder `@speelplan`: geen expansie; labels `@blok` mogen redactioneel zijn
    (ongebruikte ids: geen error).
+4. **Lopende toon / soft-wrap-`-`:** volgt de exportvolgorde van die layout
+   (playback = klinkende keten na expansie; partituur = bladvorm). Zelfde
+   regels als
+   [Semantiek — lopende toon over systeembraken](semantics.md#lopende-toon-over-systeembraken).
 
 ## Validatie (fase 1)
 

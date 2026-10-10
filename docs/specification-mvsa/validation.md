@@ -66,6 +66,9 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    [Syntax — eindanker](syntax.md#eindanker-aan-de-maatstreep). Ongeldige anker-
    tekst of mismatch met de berekende lopende toon: **error** (`MVSA-BAR-ANKER`).
    Een kale streep is geen anker. Lyrics-regels met een anker-suffix: error.
+   De berekende lopende toon loopt door over systeembraken in documentvolgorde
+   (soft-wrap-`-`); een beginanker op de nieuwe regel reset die toon — zie
+   [Semantiek — lopende toon over systeembraken](semantics.md#lopende-toon-over-systeembraken).
 
 ## Directives / keywords
 

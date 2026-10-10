@@ -449,7 +449,10 @@ Op een stemregel staan alleen **hoogte-stukken**, gescheiden door spaties:
   toonnamen `c`…`b`, `Bb`, `fis`, …;
 - octaaf: suffix `-` / `+` / `-1` / `+2` / … of wetenschappelijk cijfer op
   toonnamen (`g3`, `bb4`);
-- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots).
+- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots);
+- kale `-` / `~` als hoogte: **zelfde toon** als de lopende toon van die stem
+  (ook over een systeembreuk heen, tenzij een beginanker reset — zie
+  [Semantiek — lopende toon over systeembraken](semantics.md#lopende-toon-over-systeembraken)).
 
 Of de regel **standaard** relatief of absoluut is, volgt uit de
 [regelidentifier](#regelidentifier): met EHM (`S-:`) relatief + beginanker;

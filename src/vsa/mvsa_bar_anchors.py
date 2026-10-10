@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from .music import Pitch
 from .mvsa_musicxml import (
-    _apply_line_ehm,
-    _apply_start,
     _expand_start_ehm,
     _resolve_slot,
-    _voice_resolver,
+    seed_voice_resolver,
     writing_do_pitch,
 )
 from .mvsa_parse import (
@@ -28,16 +26,28 @@ from .pitch_resolver import (
 
 def collect_bar_anchor_diagnostics(doc: ParsedDocument) -> list[MvsaDiagnostic]:
     out: list[MvsaDiagnostic] = []
+    # Documentvolgorde: lopende toon loopt door over systeembraken (zelfde
+    # soft-wrap-``-`` als export), tenzij een beginanker reset.
+    pitch_carry: dict[str, Pitch] = {}
     for section in doc.sections:
         for system in section.systems:
-            out.extend(_check_system_bar_anchors(system))
+            diags, pitch_carry = _check_system_bar_anchors(
+                system, pitch_carry=pitch_carry
+            )
+            out.extend(diags)
     return out
 
 
-def _check_system_bar_anchors(system: ParsedSystem) -> list[MvsaDiagnostic]:
+def _check_system_bar_anchors(
+    system: ParsedSystem,
+    *,
+    pitch_carry: dict[str, Pitch] | None = None,
+) -> tuple[list[MvsaDiagnostic], dict[str, Pitch]]:
     diags: list[MvsaDiagnostic] = []
     ctx = system.context
     line_ehms = getattr(system, "line_ehms", {}) or {}
+    prev_carry = pitch_carry or {}
+    new_carry = dict(prev_carry)
 
     for marker in system.markers:
         if is_lyrics_stem(marker):
@@ -55,12 +65,12 @@ def _check_system_bar_anchors(system: ParsedSystem) -> list[MvsaDiagnostic]:
             continue
 
         letter = marker[0]
-        resolver = _voice_resolver(ctx, letter)
-        if ctx.start:
-            _apply_start(resolver, ctx.start, letter)
-        line_ehm = line_ehms.get(marker)
-        if line_ehm is not None:
-            _apply_line_ehm(resolver, line_ehm)
+        resolver = seed_voice_resolver(
+            ctx,
+            marker,
+            line_ehm=line_ehms.get(marker),
+            carried=prev_carry.get(letter),
+        )
 
         last_pitch: Pitch | None = None
         dead = False
@@ -129,7 +139,9 @@ def _check_system_bar_anchors(system: ParsedSystem) -> list[MvsaDiagnostic]:
                         line_no,
                     )
                 )
-    return diags
+        if not dead:
+            new_carry[letter] = resolver.current_pitch
+    return diags, new_carry
 
 
 def _expected_pitch_for_anchor(anchor: str, ctx: StickyContext, letter: str) -> Pitch:
@@ -144,7 +156,7 @@ def _expected_pitch_for_anchor(anchor: str, ctx: StickyContext, letter: str) -> 
         return degree_to_pitch(do_p, degree, intervals)
 
     # Absolute ladder / scientific: resolve on a throwaway writing-do resolver.
-    r = _voice_resolver(ctx, letter)
+    r = seed_voice_resolver(ctx, letter)
     r.apply_start_marker([])
     return _resolve_slot(tok, r, ctx, letter, last_pitch=None)
 

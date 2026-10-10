@@ -128,6 +128,12 @@ Exporteert **één** `.mvsa`-bestand naar SATB MusicXML (`.mxl` of
 `.musicxml`/`.xml`). Zonder `--section` gaan alle `@sectie`-blokken achter
 elkaar in één partituur; met `--section` alleen die sectie-id.
 
+Kale `-` op een stemregel aan het begin van een nieuw LSATB-systeem houdt de
+lopende toon van het vorige systeem (soft-wrap); een beginanker of expliciete
+`@start`-toewijzing reset die toon. Bij `@speelplan` volgt die keten de
+klinkende vorm. Zie
+[lopende toon over systeembraken](../../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
+
 Playback (Coria): standaard vier parts S/A/T/B met **piano** op elke partij
 ([checklist M8](../../formats/canonical-checklists.md#checklist-mxl-coria-playback)).
 Stemidentifiers in het `.mvsa`-bestand (`Sop:`, `cantus:`, …) worden op dit
