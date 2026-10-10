@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-10 14:57 CEST.
+  , gebouwd 2026-10-10 23:16 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5590,10 +5590,12 @@ breder is dan de lettergreep tot aan de volgende anker-kolom, komt er ruimte
 <em>vóór</em> het streepje (<code>le -lu</code>), zodat stemtokens met spaties gescheiden blijven
 en de ankers (eerste letters / eerste noottekens) toch onder elkaar staan.
 Vermijd <code>le-  lu</code> (streepje direct gevolgd door spaties): die vorm leest de
-parser als ELM <code>-</code> op “le”, niet als woordstreepje. Canoniek schrijf je
-standaard-lengte op L als <code>~</code>, en een woordstreepje <strong>direct vóór</strong> de
-volgende lettergreep — met eventuele spaties <em>ervóór</em> als de stemregels
-meer breedte nodig hebben (<code>hei_&amp;_&amp;_  -li</code>, niet <code>hei_&amp;_&amp;_-li</code>).</p>
+parser als ELM <code>-</code> op “le”, niet als woordstreepje. Canoniek laat je lone
+standaard-lengte op L <strong>weg</strong> (impliciete <code>~</code>); schrijf <code>~</code> wél naast <code>&amp;</code>
+in melisma (<code>ziel~&amp;~</code>) en na recite-<code>)</code> bij niet-breve duur. Een
+woordstreepje staat <strong>direct vóór</strong> de volgende lettergreep — met eventuele
+spaties <em>ervóór</em> als de stemregels meer breedte nodig hebben
+(<code>hei_&amp;_&amp;_  -li</code>, niet <code>hei_&amp;_&amp;_-li</code>).</p>
 <div class="highlight"><pre><span></span><code>L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&amp;-&amp;-&amp;_         i_  a__  ||
 S: fa                             so   mi&amp;do&amp;re&amp;mi       fa  mi   ||
 A: re                             re   do&amp;fa-&amp;si-&amp;do     re  si-  ||
