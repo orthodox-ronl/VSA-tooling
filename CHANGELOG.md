@@ -10,8 +10,9 @@
   en na recite-`)` (kuiser + import)
 - MVSA-import: ASCII-waarschuwingsbanner na `# Imported:` (schets/checklist;
   alle entrypoints `mvsa`/`mxl`/`mscz import`)
-- Testfixture `examples/mvsa/test-alleluia-toon-8.mvsa` hersteld (multi-schets
-  voor import/normalize/export-roundtrips; ≠ catalogus-`alleluia-toon-8`)
+- Testfixtures hersteld: `test-alleluia-toon-8.mvsa` en
+  `test-kleine-intocht-zondag-hemelum.mvsa` (multi-`@sectie` voor roundtrips;
+  ≠ catalogus-voorbeelden). `test-trisagion-…` blijft weg (geen testgebruik)
 - MVSA→MusicXML: soft-wrap-`-` over systeembraken houdt de lopende toon
   (beginanker/`@start` reset); zelfde carry in eindanker-check en normalize
 
