@@ -7313,6 +7313,11 @@ kant-en-klare catalogusbron.</p>
 </ol>
 <p>Na import: controleren, kuisen, valideren — pas daarna (in de bibliotheek)
 accepteren naar de catalogus.</p>
+<p>Elk importbestand krijgt na <code># Imported: …</code> een ASCII-<strong>waarschuwingsbanner</strong>
+(zelfde tekst via <code>mvsa import</code> / <code>mxl import</code> / <code>mscz import</code>) met een
+checklist: woordstreepjes, recite-grenzen, A/T/B-uitlijning, ritme/maten,
+metadata. Die banner is geen catalogus-label — hij herinnert eraan dat het
+een schets is.</p>
 </div>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
@@ -7353,6 +7358,11 @@ majeur (aanname); <code>@oct</code> wordt per stem afgeleid. <code>@do</code> vo
 <li>Soft-wrap: LSATB-systemen van ongeveer 80 tekens
   (<code>DEFAULT_SYSTEM_SOFT_WIDTH</code>). Eén maat die alleen al langer is blijft één
   systeem.</li>
+<li><strong>A/T/B-uitlijning:</strong> onderstemmen volgen de L/S-posities op <strong>duur</strong> (niet
+  op noot-index of lyrics van A/T/B). Een lange noot die meerdere S-slots
+  dekt, wordt gesplitst/gepaddet (<code>c4&amp;-</code> + hold <code>-</code>); een lyric-loze spacer na
+  zo’n noot steelt geen volgende lettergreep. Dat voorkomt verschoven Bb/T/B
+  bij MSCZ-import waar A/T/B weinig of scheve lyrics hebben.</li>
 <li>Same-pitch holds: opeenvolgende dezelfde toonhoogte (ook over maatgrenzen)
   wordt op de stemregels als <code>-</code> geschreven.</li>
 <li>Multi-lettergreep lyrics op één noot (spaties, <code>-</code>, of soft hyphen) worden
@@ -7366,16 +7376,21 @@ majeur (aanname); <code>@oct</code> wordt per stem afgeleid. <code>@do</code> vo
   <code>we</code>/<code>gen</code> blijven aparte posities.</li>
 <li><strong>Woordgrenzen:</strong> MusicXML-<code>syllabic</code> stuurt de groepen. Twee <code>single</code>s
   worden alleen gehypheneerd als Pyphen dat bevestigt (met closed-class- en
-  hoofdletter-guards: <code>Be-waar</code>, niet <code>ons-heeft</code> / <code>Licht-aan</code>). Een
-  <code>begin</code>…<code>end</code>-keten wordt opnieuw gelettergreepd (<code>heb-ben het wa-re</code>);
-  een losse <code>single</code> ervoor of erna mag meedoen (<code>aan-bid-den</code>,
-  <code>he-mel-se-Geest</code>) tenzij de volgende lettergreep een beter woord vormt
-  (<code>ge-loof</code> i.p.v. <code>wa-re-ge</code>). Woordstreepjes tussen L-posities alleen als
-  de rechterkant <code>middle</code>/<code>end</code> is (of een recite). Over een maatstreep
-  tussen twee recites: <code>(… wa)- | (re …)</code>.</li>
+  hoofdletter-guards: <code>Be-waar</code>, niet <code>ons-heeft</code> / <code>Licht-aan</code> /
+  <code>steun-van</code> / <code>dag-gaan</code>). Een <code>begin</code>…<code>end</code>-keten wordt opnieuw
+  gelettergreepd (<code>heb-ben het wa-re</code>); spaties in een <code>end</code>-lyric horen bij
+  volgende woorden (<code>psalm</code> + <code>zin-gen voor mijn God</code> → <code>psalm-zin-gen voor
+  mijn God</code>). Gebroken MuseScore-ketens: tweede <code>begin</code> telt als <code>middle</code>
+  (<code>Ja-cob</code>); spaced fragments in recite worden hersteld (<code>we der ke</code> →
+  <code>we-der-ke</code>). Losse <code>single</code> ervoor of erna mag meedoen
+  (<code>aan-bid-den</code>, <code>he-mel-se-Geest</code>) tenzij de volgende lettergreep een beter
+  woord vormt (<code>ge-loof</code> i.p.v. <code>wa-re-ge</code>). Woordstreepjes tussen
+  L-posities alleen als de rechterkant <code>middle</code>/<code>end</code> is (of een recite),
+  plus korte eigennaam-begin (<code>Ja_-cob</code>). Over een maatstreep tussen twee
+  recites: <code>(… wa)- | (re …)</code>.</li>
 <li><strong>Normaalvorm:</strong> standaard schrijft import daarna de canonieke vorm via
-  <a href="#vsa-mvsa-kuiser"><code>mvsa kuiser</code></a> (standaard-lengte op L als <code>~</code>, maatstrepen
-  sync, kolomuitlijning) — zie
+  <a href="#vsa-mvsa-kuiser"><code>mvsa kuiser</code></a> (lone standaard-<code>~</code> op L weggelaten; <code>~</code>
+  blijft bij <code>&amp;</code>-melisma en na <code>)</code>; maatstrepen sync, kolomuitlijning) — zie
   <a href="../../../specification-mvsa/syntax/">syntax — canonieke schrijfvorm</a> en
   <a href="../../../specification-mvsa/semantics/#canonieke-layout-vs-tolerantie">semantiek — canonieke layout</a>.</li>
 </ul>
@@ -7597,12 +7612,14 @@ vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 <p>Default schrijft <strong>in-place</strong>. Gebruik <code>--check</code> als dry-run (exit 1 als er
 iets zou wijzigen). Na afloop moet validate geen errors meer geven; bij
 conflicterende strepen faalt de kuiser met een duidelijke fout.</p>
-<p>Gedrag t.o.v. <code>-</code> op L (draft-spec):</p>
+<p>Gedrag t.o.v. <code>-</code> / <code>~</code> op L (draft-spec):</p>
 <ul>
-<li><strong>Canoniek:</strong> standaard-lengte als <code>~</code>; woordstreepje direct vóór de
-  lettergreep (<code>-li</code>), met spaties <em>ervóór</em> bij extra breedte (<code>…_&amp;_  -li</code>).</li>
+<li><strong>Canoniek:</strong> lone standaard-lengte zonder <code>~</code> (impliciet); <code>~</code> wél bij
+  <code>&amp;</code>-melisma (<code>ziel~&amp;~</code>) en na recite-<code>)</code> bij niet-breve duur. Woordstreepje
+  direct vóór de lettergreep (<code>-li</code>), met spaties <em>ervóór</em> bij extra breedte
+  (<code>…_&amp;_  -li</code>).</li>
 <li><strong>Invoer:</strong> kale ELM-<code>-</code> mag (o.a. melisma); kuiser herschrijft eenduidige
-  gevallen naar <code>~</code>.</li>
+  gevallen naar <code>~</code> en laat daarna lone <code>~</code> weg.</li>
 <li><strong>Ambigu</strong> (<code>hei- li</code>, <code>li-&amp;--ge</code>): waarschuwing op stderr met
   <code>bestand:regel:kolom</code> — geen stille collapse naar <code>hei-li</code>.</li>
 <li><strong>Pyphen</strong> (ontbrekende / verdachte woordstreepjes): advies-warnings;

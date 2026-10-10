@@ -5603,7 +5603,9 @@ zie <a href="#7-taak-bladmuziek--mvsa">taak bladmuziek</a>.</p>
 <p class="admonition-title">Import = werkbank, niet catalogus</p>
 <p><code>vsa mvsa import</code> (en <code>mxl</code>/<code>mscz import</code>) levert een <strong>starttekst</strong>, geen
 afgewerkt zangstuk. Gebruik de uitkomst om te redigeren en te valideren;
-publiceer of accepteer hem niet ongewijzigd als catalogusbron.</p>
+publiceer of accepteer hem niet ongewijzigd als catalogusbron. Bovenaan
+staat een ASCII-waarschuwingsbanner met checklist (woordstreepjes, recite,
+A/T/B, ritme, metadata).</p>
 <p>Waarom dat nodig is:</p>
 <ol>
 <li><strong>Woordstreepjes</strong> tussen lettergrepen kloppen vaak niet (MuseScore vs.
@@ -5627,7 +5629,11 @@ vsa mvsa import bron.mxl -o lied.mvsa --pitch vsa
 vsa mvsa validate lied.mvsa
 </code></pre></div></li>
 <li>Zet bovenaan <code>@do</code> / <code>@mode</code> / <code>@oct</code> goed (import vult dit grotendeels in).</li>
-<li>Controleer L-tekst (import kan lelijk syllabificeren) en sync.</li>
+<li>Controleer L-tekst en sync. Import herstelt veel MuseScore-fouten
+   (valse <code>dag-gaan</code> / <code>steun-van</code>, ontbrekende <code>we-der-ke</code>, spaties in
+   underlay), maar niet alles — bekijk vooral recite <code>( … )</code> en
+   woordstreepjes. A/T/B volgen L/S op duur; controleer holds (<code>-</code>) en
+   <code>&amp;</code>-melisma’s tegen de bronpartituur.</li>
 <li><code>vsa mvsa validate lied.mvsa</code></li>
 <li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code> (Pyphen-warnings zijn
    advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
@@ -5638,7 +5644,8 @@ same-pitch holds als <code>-</code> op stemregels (ook over systeembraken; expor
 weer om naar de vorige toon — zie
 <a href="../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">lopende toon over systeembraken</a>);
 multi-lettergreep lyrics op één noot als recite <code>( … )</code>; daarna
-<strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L, kolomuitlijning). Keten: <code>.mxl</code> →
+<strong>kuiser-normaalvorm</strong> (lone standaard-<code>~</code> op L weggelaten; kolomuitlijning).
+Keten: <code>.mxl</code> →
 parser; <code>.mscz</code> → MuseScore → temp-<code>.mxl</code> → SATB-explode (zelfde als
 <code>mscz mxl</code>) → parser → kuiser. Details:
 <a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>.</p>

@@ -4911,7 +4911,8 @@ Zie het conversieplan:
 <a href="../../../plans/mvsa-conversions/">mvsa-conversions</a>.</p>
 <p>Alias voor import: <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> (zelfde
 MSCZ→mxl→mvsa-keten). <strong>Werkbank-bewerkvorm</strong> — niet ongewijzigd als
-catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout).</p>
+catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout). De
+output begint met dezelfde waarschuwingsbanner als <code>mvsa import</code>.</p>
 <p>Alias voor platte tekst: <a href="../text/"><code>vsa text</code></a> (zelfde extractie; ook
 <code>.mxl</code> / <code>.vsa</code> / <code>.mvsa</code>).</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
@@ -4949,7 +4950,9 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 <code>vsa</code>, kuiser-normaalvorm): zelfde keten als
 <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. <code>@do</code> komt uit de MuseScore-
 voortekening (<code>KeySig</code> / <code>concertKey</code>) tenzij je <code>--do</code> meegeeft. De
-MSCZ-stap gebruikt dezelfde SATB-explode als <code>mscz mxl</code>.</p>
+MSCZ-stap gebruikt dezelfde SATB-explode als <code>mscz mxl</code>. A/T/B volgen L/S
+op <strong>duur</strong> (lange noten worden gesplitst/gepaddet), zodat ontbrekende of
+scheve lyrics op de onderstemmen de posities niet verschuiven.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
 mscz import generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
@@ -5004,7 +5007,7 @@ mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-10
         
       </p>
       
