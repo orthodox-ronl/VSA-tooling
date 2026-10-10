@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-10 00:29 CEST.
+  , gebouwd 2026-10-10 14:57 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -6850,6 +6850,11 @@ vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
 <p>Exporteert <strong>één</strong> <code>.mvsa</code>-bestand naar SATB MusicXML (<code>.mxl</code> of
 <code>.musicxml</code>/<code>.xml</code>). Zonder <code>--section</code> gaan alle <code>@sectie</code>-blokken achter
 elkaar in één partituur; met <code>--section</code> alleen die sectie-id.</p>
+<p>Kale <code>-</code> op een stemregel aan het begin van een nieuw LSATB-systeem houdt de
+lopende toon van het vorige systeem (soft-wrap); een beginanker of expliciete
+<code>@start</code>-toewijzing reset die toon. Bij <code>@speelplan</code> volgt die keten de
+klinkende vorm. Zie
+<a href="../../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">lopende toon over systeembraken</a>.</p>
 <p>Playback (Coria): standaard vier parts S/A/T/B met <strong>piano</strong> op elke partij
 (<a href="../../../formats/canonical-checklists/#checklist-mxl-coria-playback">checklist M8</a>).
 Stemidentifiers in het <code>.mvsa</code>-bestand (<code>Sop:</code>, <code>cantus:</code>, …) worden op dit
@@ -7729,7 +7734,7 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-10
         
       </p>
       

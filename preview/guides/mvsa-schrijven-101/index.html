@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-10 00:29 CEST.
+  , gebouwd 2026-10-10 14:57 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5639,10 +5639,13 @@ vsa mvsa validate lied.mvsa
    <code>--no-align</code>.</li>
 </ol>
 <p>Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
-same-pitch holds als <code>-</code> op stemregels; multi-lettergreep lyrics op één noot
-als recite <code>( … )</code>; daarna <strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L,
-kolomuitlijning). Keten: <code>.mxl</code> → parser; <code>.mscz</code> → MuseScore → temp-<code>.mxl</code> →
-SATB-explode (zelfde als <code>mscz mxl</code>) → parser → kuiser. Details:
+same-pitch holds als <code>-</code> op stemregels (ook over systeembraken; export zet die
+weer om naar de vorige toon — zie
+<a href="../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">lopende toon over systeembraken</a>);
+multi-lettergreep lyrics op één noot als recite <code>( … )</code>; daarna
+<strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L, kolomuitlijning). Keten: <code>.mxl</code> →
+parser; <code>.mscz</code> → MuseScore → temp-<code>.mxl</code> → SATB-explode (zelfde als
+<code>mscz mxl</code>) → parser → kuiser. Details:
 <a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>.</p>
 <p>Referentie-voorbeeld (bladcijfers):
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa"><code>kleine-intocht-zondag-hemelum.mvsa</code></a>.</p>
@@ -5831,7 +5834,7 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-10
         
       </p>
       

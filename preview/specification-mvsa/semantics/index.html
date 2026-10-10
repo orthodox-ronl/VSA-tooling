@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-10 00:29 CEST.
+  , gebouwd 2026-10-10 14:57 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2966,6 +2966,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Absolute en relatieve hoogte">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lopende-toon-over-systeembraken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lopende toon over systeembraken
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4915,6 +4932,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Absolute en relatieve hoogte">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lopende-toon-over-systeembraken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lopende toon over systeembraken
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5131,6 +5165,41 @@ of toonnaam telt <strong>extra</strong> t.o.v. het schrijfoctaaf.</p>
 vereisen een cijfer (<code>so-2</code>).</p>
 <p><code>@start S=-</code> en <code>S-:</code> betekenen voor stem <code>S</code> hetzelfde beginanker; de
 identifier-vorm is de voorkeur als de EHM bij die stemregel hoort.</p>
+<h3 id="lopende-toon-over-systeembraken">Lopende toon over systeembraken<a class="headerlink" href="#lopende-toon-over-systeembraken" title="Permanent link">&para;</a></h3>
+<p>De <strong>lopende toon</strong> van elke stem loopt door over LSATB-systeembraken (lege
+regel tussen systemen), in de volgorde waarin export of validatie de systemen
+afloopt:</p>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Volgorde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Export <strong>playback</strong> (<code>.mxl</code>)</td>
+<td><code>sections_for_layout</code>: bij <code>@speelplan</code> de <strong>klinkende</strong> (uitgeschreven) vorm</td>
+</tr>
+<tr>
+<td>Export <strong>partituur</strong> (<code>.mscz</code>)</td>
+<td>Bladvorm: documentvolgorde, elk speelblok één keer (tenzij expand-vangnet)</td>
+</tr>
+<tr>
+<td>Eindanker-check / normalize</td>
+<td>Documentvolgorde</td>
+</tr>
+</tbody>
+</table>
+<p>Gevolg: een kale <code>-</code> (of <code>~</code> als hoogte) aan het <strong>begin</strong> van een nieuw
+systeem betekent “zelfde toon als de laatste klinkende noot van die stem in
+het vorige systeem” — precies wat soft-wrap na import schrijft.</p>
+<p><strong>Beginanker wint:</strong> staat op de nieuwe stemregel een EHM in de
+regelidentifier (<code>S-:</code>, <code>T\6:</code>, …) of een expliciete <code>@start</code>-toewijzing voor
+die stem, dan wordt de lopende toon <strong>opnieuw gezet</strong> en geldt leading <code>-</code>
+ten opzichte van dat anker (niet ten opzichte van het vorige systeem).</p>
+<p>Zonder beginanker en zonder eerdere toon blijft het gedrag: <code>-</code> klinkt als
+schrijf-do (zoals binnen één systeem vóór de eerste absolute toon).</p>
 <h2 id="ankers-zetten-vs-checken">Ankers: zetten vs. checken<a class="headerlink" href="#ankers-zetten-vs-checken" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -5290,7 +5359,7 @@ op mvsa-laddergraden is <code>+</code> octaaf.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-29
+        Bijgewerkt: 2026-10-10
         
       </p>
       
