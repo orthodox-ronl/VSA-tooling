@@ -16,7 +16,7 @@ Repo-breed kompas (niet alleen mvsa): repo-bestand
 
 ## Nu (eerstvolgende tooling)
 
-*(leeg — volgende werk uit [Backlog](#backlog-bewust-later))*
+*(leeg — `zoektekst` vullen/checken: [`vsa zoektekst`](../reference/cli/zoektekst.md))*
 
 Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
 `examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa audio`).
@@ -43,11 +43,11 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 
 ### Tooling / conversies
 
-| Punt                              | Toelichting                                                                                                                                | Richting                                                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| Exports / gebruik                 | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages) |
-| Hulptekst / parallelle lyrics     | **MVP export klaar** (lyric 2, `@taal`, Coria-parts, vrije ids); transliterator-kwaliteit + checklist M-items nog open                    | [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md); [reviewcorpus](../plans/hulptekst-reviewcorpus.md) |
-| TEv2 docs-opschonen               | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                         |
+| Punt                              | Toelichting                                                                                                                                | Richting                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Exports / gebruik                 | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages)       |
+| Hulptekst / parallelle lyrics     | **MVP export klaar** (lyric 2, `@taal`, Coria-parts, vrije ids); transliterator-kwaliteit + checklist M-items nog open                     | [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md); [reviewcorpus](../plans/hulptekst-reviewcorpus.md) |
+| TEv2 docs-opschonen               | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                               |
 
 ---
 

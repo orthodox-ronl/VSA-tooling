@@ -31,6 +31,10 @@ MusicXML of MuseScore.
 Volledige keyword-lijst: [Keywords (`@…`)](../specification-mvsa/keywords.md).
 Voorbeelden in de repo: [`examples/mvsa/`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa).
 
+**Catalogusbron:** zet bovenaan YAML met `zoektekst` (platte gezongen tekst)
+zodat Ctrl+Shift+F in de editor werkt — contract:
+[Zoektekst](../formats/zoektekst.md).
+
 ---
 
 ## 1. Minimaal bestand

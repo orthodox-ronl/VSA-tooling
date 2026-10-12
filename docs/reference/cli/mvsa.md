@@ -67,7 +67,7 @@ mvsa kuiser -h
 ### Synopsis
 
 ```text
-vsa mvsa validate [-h] path
+vsa mvsa validate [-h] [--require-zoektekst] path
 ```
 
 ### Beschrijving
@@ -84,10 +84,11 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 
 ### Argumenten en opties
 
-| Naam           | Verplicht | Betekenis                                      | Default | Beperkingen   |
-| -------------- | --------- | ---------------------------------------------- | ------- | ------------- |
-| `path`         | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.  | —       | Moet bestaan. |
-| `-h`, `--help` | Nee       | Toon hulp voor dit subcommando.                | —       | —             |
+| Naam                   | Verplicht | Betekenis                                                                        | Default | Beperkingen   |
+| ---------------------- | --------- | -------------------------------------------------------------------------------- | ------- | ------------- |
+| `path`                 | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.                                    | —       | Moet bestaan. |
+| `--require-zoektekst`  | Nee       | Eis YAML-`zoektekst` gelijk aan body (catalogus); zie [zoektekst](zoektekst.md). | Uit     | —             |
+| `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                                  | —       | —             |
 
 ### Output
 
@@ -109,7 +110,11 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 ```cmd
 vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa --require-zoektekst
 ```
+
+Voor alleen vullen/checken van `zoektekst` zonder overige validate:
+[`vsa zoektekst`](zoektekst.md).
 
 ---
 

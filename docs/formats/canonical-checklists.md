@@ -146,10 +146,14 @@ Traceerbaarheid van conversies — **niet verplicht** op elke `-o`.
 | Regel                                                  | Voorbeeld                                                                          |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
 | Bij voorkeur in `generated/`: `stem.brontype.doeltype` | `alleluia.mvsa.mxl`, `alleluia.mscz.mvsa`, `tropaar.vsa.mxl`                       |
-| Zoektekst / lyrics-product (conventie)                 | `lied.vsa.lyrics.txt`, `lied.mvsa.lyrics.txt`, `lied.mscz.lyrics.txt`              |
+| Zoektekst in canonieke `.vsa` / `.mvsa`                | Veld `zoektekst` in YAML-frontmatter — zie [zoektekst](zoektekst.md)               |
+| Lyrics-product (optioneel; o.a. uit `.mscz` / `.mxl`)  | `lied.mscz.lyrics.txt` via [`vsa text -o`](../reference/cli/text.md)               |
 | **Laatste** segment = echte extensie voor tools        | `.mxl`, `.mvsa`, `.mscz`, `.mp3` / `.ogg` / `.wav`, of `.txt` bij lyrics-producten |
 | CLI-default mag enkelvoudig blijven                    | `-o out.mxl` of `<stem>.mxl`                                                       |
 | Geen fout als de naam “simpel” is                      | normalize/export falen niet op ontbrekende dubbele extensie                        |
+
+Een sibling `*.vsa.lyrics.txt` / `*.mvsa.lyrics.txt` is **niet** verplicht naast
+een canonieke bron; editorzoeken loopt via `zoektekst` in het bronbestand.
 
 In `examples/mvsa/` worden conversieproducten **niet** gecommit (zie
 `.gitignore`); alleen bron-`.mvsa` (+ README / ISSUES).

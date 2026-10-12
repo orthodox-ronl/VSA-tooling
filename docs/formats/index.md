@@ -19,9 +19,11 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 - **Audio (``.mp3`` / ``.ogg`` / ``.wav``):** preview-luisteren; CLI
   [`vsa audio`](../reference/cli/audio.md) — zie [`.mp3` / audio](audio.md).
 - **``.midi`` / ``.mid``:** **niet gepland** (preview = audio) — zie [`.midi`](midi.md).
-- **Platte gezongen tekst (zoekindex):** [`vsa text`](../reference/cli/text.md)
-  op `.vsa` / `.mvsa` / MusicXML / `.mscz` (geen aparte matrixkolom; schrijft
-  geen `.mvsa`-sibling). Alias op MuseScore-bron: [`mscz text`](../reference/cli/mscz.md).
+- **Zoektekst in canonieke `.vsa` / `.mvsa`:** veld `zoektekst` in
+  YAML-frontmatter — [zoektekst](zoektekst.md). Extractie / export:
+  [`vsa text`](../reference/cli/text.md) op `.vsa` / `.mvsa` / MusicXML /
+  `.mscz` (geen aparte matrixkolom; schrijft geen `.mvsa`-sibling). Alias op
+  MuseScore-bron: [`mscz text`](../reference/cli/mscz.md).
 - Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 - **Import** (`.mxl` / `.mscz` → `.mvsa`): **werkbank-bewerkvorm** (niet
   catalogus-klaar); soft-wrap, holds, recite; `--pitch vsa` zet eindankers —
@@ -57,9 +59,11 @@ Na `pip install -e .` staan `vsa`, `mvsa`, `mxl` en `mscz` op PATH.
 ## Bestandsnaamgeving (kort)
 
 In `generated/` bij voorkeur `stem.brontype.doeltype` (laatste = echte
-extensie), bv. `alleluia.mvsa.mxl`, `lied.mvsa.mp3`, of voor zoektekst
-`lied.mscz.lyrics.txt` (via [`vsa text`](../reference/cli/text.md)).
-CLI-`-o` mag simpel blijven. Details:
+extensie), bv. `alleluia.mvsa.mxl`, `lied.mvsa.mp3`. Optioneel lyrics-product
+uit `.mscz` / `.mxl`: `lied.mscz.lyrics.txt` via
+[`vsa text`](../reference/cli/text.md) — niet verplicht naast canonieke
+`.vsa` / `.mvsa` (daar: [`zoektekst`](zoektekst.md)). CLI-`-o` mag simpel
+blijven. Details:
 [canonieke checklists — naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ## Windows `.cmd`-scripts
