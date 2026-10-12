@@ -4946,16 +4946,16 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/mvsa/#vsa-mvsa-mscz"><code>vsa mvsa mscz</code></a> / <a href="../../reference/cli/mvsa/#vsa-mvsa-pdf"><code>pdf</code></a></td>
 </tr>
 <tr>
-<td>mvsa → preview-<code>.mp3</code> (draft)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mp3"><code>vsa mvsa mp3</code></a> (of top-level <a href="../../reference/cli/audio/"><code>vsa audio</code></a>)</td>
+<td>mvsa → preview-audio (draft)</td>
+<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mp3"><code>vsa mvsa mp3</code>/<code>ogg</code>/<code>wav</code></a> (of top-level <a href="../../reference/cli/audio/"><code>vsa audio</code></a>)</td>
 </tr>
 <tr>
 <td>MusicXML / MuseScore → <code>.mvsa</code> (<strong>werkbank</strong>-import)</td>
 <td><a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> / <a href="../../reference/cli/mxl/"><code>mxl import</code></a> / <a href="../../reference/cli/mscz/"><code>mscz import</code></a></td>
 </tr>
 <tr>
-<td>Import + eindankers (foutzoeken)</td>
-<td><code>vsa mvsa import … --pitch vsa</code> daarna <a href="../../reference/cli/mvsa/#vsa-mvsa-validate"><code>validate</code></a></td>
+<td>Import + ankers (navigatie / foutzoeken)</td>
+<td><code>vsa mvsa import …</code> (default <code>ag-vsa</code>) daarna <a href="../../reference/cli/mvsa/#vsa-mvsa-validate"><code>validate</code></a></td>
 </tr>
 <tr>
 <td><code>.mvsa</code> leren schrijven</td>
@@ -5004,7 +5004,7 @@ vsa zoektekst examples\mvsa --check
 <p><code>vsa text -o …lyrics.txt</code> blijft nuttig voor export uit <code>.mscz</code> / <code>.mxl</code> of
 site-build; een sibling <code>.lyrics.txt</code> is niet verplicht naast de canonieke bron.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa --pitch vsa
+vsa mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
 vsa mvsa validate generated\alleluia.import.mvsa
 </code></pre></div>
 <h2 id="bronnen">Bronnen<a class="headerlink" href="#bronnen" title="Permanent link">&para;</a></h2>

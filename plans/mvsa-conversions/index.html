@@ -1396,10 +1396,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bestandsnaamgeving-conventie-niet-afgedwongen" class="md-nav__link">
+  <a href="#bestandsnaamgeving-conventie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bestandsnaamgeving (conventie, niet afgedwongen)
+        Bestandsnaamgeving (conventie)
       
     </span>
   </a>
@@ -4895,10 +4895,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bestandsnaamgeving-conventie-niet-afgedwongen" class="md-nav__link">
+  <a href="#bestandsnaamgeving-conventie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bestandsnaamgeving (conventie, niet afgedwongen)
+        Bestandsnaamgeving (conventie)
       
     </span>
   </a>
@@ -5198,10 +5198,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bestandsnaamgeving-conventie-niet-afgedwongen" class="md-nav__link">
+  <a href="#bestandsnaamgeving-conventie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bestandsnaamgeving (conventie, niet afgedwongen)
+        Bestandsnaamgeving (conventie)
       
     </span>
   </a>
@@ -5483,8 +5483,9 @@ canonieke vorm brengen (zelfde formaat).</p>
 <p><strong>Diagonaal (expliciet):</strong></p>
 <ul>
 <li><strong><code>.mvsa</code> → <code>.mvsa</code>:</strong> default <strong>behoud noteernamen</strong> (<code>preserve</code>); optioneel
-  herschrijven naar <code>doremi</code> / <code>a-g</code> (alias <code>abc</code>) / <code>vsa</code>; octaafstijl (<code>@oct</code> vs. later
-  marker); kolom- + maatstreep-uitlijning (kuiser / <code>align_mvsa_columns</code>).</li>
+  herschrijven naar <code>doremi</code> / <code>a-g</code> (alias <code>abc</code>) / <code>vsa</code> / <code>ag-vsa</code>; octaafstijl
+  (<code>@oct</code> vs. later marker); kolom- + maatstreep-uitlijning (kuiser /
+  <code>align_mvsa_columns</code>).</li>
 <li><strong><code>.vsa</code> → <code>.vsa</code>:</strong> alleen waar tooling al een canonieke schrijfvorm afdwingt
   of gaat afdwingen; geen scope-creep hier.</li>
 <li><strong><code>.mxl</code> → <code>.mxl</code> / <code>.mscz</code> → <code>.mscz</code>:</strong> normaliseer naar de
@@ -5551,8 +5552,12 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td><strong>Default</strong> bij <code>.mvsa</code> → <code>.mvsa</code>: laat bronspelling staan</td>
 </tr>
 <tr>
+<td><code>ag-vsa</code></td>
+<td><strong>Import-default.</strong> Per systeem: eerste noot absolute a–g, daarna EHM; a–g-eindanker op systeemeinde</td>
+</tr>
+<tr>
 <td><code>doremi</code></td>
-<td>Laddergraden <code>do</code> <code>re</code> <code>mi</code> … (+ octaafsuffix / <code>#</code>/<code>b</code>); import-default</td>
+<td>Laddergraden <code>do</code> <code>re</code> <code>mi</code> … (+ octaafsuffix / <code>#</code>/<code>b</code>)</td>
 </tr>
 <tr>
 <td><code>a-g</code></td>
@@ -5560,7 +5565,7 @@ canonieke vorm brengen (zelfde formaat).</p>
 </tr>
 <tr>
 <td><code>vsa</code></td>
-<td>Relatief: EHM <code>/</code> <code>\</code> <code>-</code> <code>/3</code> … op stemregels</td>
+<td>Eerste toon absoluut (doremi), daarna EHM; bij import ook a–g-eindankers</td>
 </tr>
 </tbody>
 </table>
@@ -5593,11 +5598,11 @@ expliciete herschrijf-<code>pitch</code> verandert de hoogte-spelling op S/A/T/B
 <code>[LSATB] digit* ":"</code> gebruikt cijfers voor <strong>stemnummer</strong> (<code>T1:</code>); signed
 octaaf in de marker is een bewuste syntax-uitbreiding later, niet stilzwijgend
 hergebruik van <code>digit*</code>.</p>
-<h3 id="bestandsnaamgeving-conventie-niet-afgedwongen">Bestandsnaamgeving (conventie, niet afgedwongen)<a class="headerlink" href="#bestandsnaamgeving-conventie-niet-afgedwongen" title="Permanent link">&para;</a></h3>
+<h3 id="bestandsnaamgeving-conventie">Bestandsnaamgeving (conventie)<a class="headerlink" href="#bestandsnaamgeving-conventie" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Default CLI-output: eenvoudig (<code>-o out.mxl</code>, bron-stem → <code>.mxl</code>).</li>
-<li>Optioneel in <code>generated/</code>: bron-extensie meenemen voor herkomst, bv.
-  <code>naam.mvsa.mxl</code>, <code>naam.mscz.mvsa</code>, <code>naam.vsa.mp3</code>.</li>
+<li>Default CLI-output (zonder <code>-o</code>): <code>stem.brontype.doeltype</code>, bv.
+  <code>naam.mvsa.mxl</code>, <code>naam.mscz.mxl</code>, <code>naam.mvsa.mp3</code>.</li>
+<li>Expliciet <code>-o</code> mag een korte naam blijven (<code>-o out.mxl</code>).</li>
 <li>Tools kijken naar de <strong>laatste</strong> extensie.</li>
 <li>Normatieve korte tekst + checklist-context:
   <a href="../../formats/canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</li>
@@ -5622,7 +5627,7 @@ hergebruik van <code>digit*</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -5672,7 +5677,7 @@ Windows: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>, <code>scri
 </tr>
 <tr>
 <td>Import</td>
-<td><strong>Werkbank-bewerkvorm</strong> (niet catalogus-klaar): lossy; woordstreepjes/lyrics nakijken; succes = pitch/duur/lyrics-equivalentie. <code>.mxl</code> → SATB P1–P4; <code>.mscz</code> → MuseScore → SATB-explode; soft-wrap; holds; recite; <code>--pitch vsa</code> → eindankers</td>
+<td><strong>Werkbank-bewerkvorm</strong> (niet catalogus-klaar): lossy; woordstreepjes/lyrics nakijken; succes = pitch/duur/lyrics-equivalentie. <code>.mxl</code> → SATB P1–P4; <code>.mscz</code> → MuseScore → SATB-explode; soft-wrap; holds; recite; default <code>ag-vsa</code> → ankers + eindankers</td>
 </tr>
 <tr>
 <td>Scope</td>
@@ -5686,21 +5691,21 @@ Windows: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>, <code>scri
 <p><strong>Criterium:</strong> dit plan staat in MkDocs; <code>specification-mvsa</code> en <code>open-points</code>
 verwijzen ernaar; diagonaal is expliciet in de matrix.</p>
 <h3 id="stap-2-normalize-diagonaal-mvsa-mvsa">Stap 2 — <code>normalize</code> (diagonaal <code>.mvsa</code> → <code>.mvsa</code>) ✅<a class="headerlink" href="#stap-2-normalize-diagonaal-mvsa-mvsa" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa}] --octave-style @oct
+<div class="highlight"><pre><span></span><code>vsa mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa,ag-vsa}] --octave-style @oct
 </code></pre></div>
 <ul>
 <li><strong>Default <code>--pitch preserve</code>:</strong> noteernamen op S/A/T/B blijven zoals in de
   <code>.mvsa</code>-bron; alleen canonieke kolomuitlijning. Expliciet <code>doremi</code> / <code>a-g</code> /
-  <code>vsa</code> herschrijft hoogten.</li>
-<li>Import uit <code>.mxl</code>/<code>.mscz</code> gebruikt <strong><code>doremi</code></strong> als default (geen bronnotatie
+  <code>vsa</code> / <code>ag-vsa</code> herschrijft hoogten.</li>
+<li>Import uit <code>.mxl</code>/<code>.mscz</code> gebruikt <strong><code>ag-vsa</code></strong> als default (geen bronnotatie
   om te bewaren).</li>
 <li>Marker-octaaf-schrijven nog niet (<code>--octave-style marker</code> → foutmelding).</li>
 <li>EHM-cijfervormen <code>/3</code> / <code>\2</code> worden bij resolve ondersteund.</li>
 </ul>
 <p><strong>Criterium (gehaald):</strong> <code>preserve</code> houdt bladcijfer/do-re-mi/mix intact;
 <code>schets2-oct-doremi</code>: <code>normalize --pitch a-g</code> → validate OK → MusicXML-pitches
-identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code> pitch-equivalent
-(<code>tests/test_mvsa_normalize.py</code>).</p>
+identiek; ook <code>doremi → abc → doremi</code>, <code>--pitch vsa</code> en <code>--pitch ag-vsa</code>
+pitch-equivalent (<code>tests/test_mvsa_normalize.py</code>).</p>
 <h3 id="stap-3-mscz-export-uit-mvsa">Stap 3 — MSCZ-export uit mvsa ✅<a class="headerlink" href="#stap-3-mscz-export-uit-mvsa" title="Permanent link">&para;</a></h3>
 <p>Keten: <code>.mvsa</code> → <strong>partituur</strong>-<code>.mxl</code> (SA/TB, lege part-namen) → MuseScore CLI
 → <code>.mscz</code> → stem-indicaties uit.</p>
@@ -5713,7 +5718,7 @@ identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code>
 <p><strong>Criterium (gehaald):</strong> met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
 (<code>tests/test_mvsa_mscz.py</code>; skip als MuseScore ontbreekt).</p>
 <h3 id="stap-4-import-score-mvsa">Stap 4 — Import (score → mvsa) ✅<a class="headerlink" href="#stap-4-import-score-mvsa" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa import PATH [-o OUT] --pitch {doremi,a-g,vsa} --octave-style @oct
+<div class="highlight"><pre><span></span><code>vsa mvsa import PATH [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}] --octave-style @oct
 </code></pre></div>
 <ul>
 <li>Bron: <code>.mxl</code> / <code>.musicxml</code> direct (SATB P1–P4); <code>.mscz</code> via MuseScore →
@@ -5724,17 +5729,18 @@ identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code>
   <a href="../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">semantics — systeembraken</a>.</li>
 <li>Multi-lettergreep lyrics op één noot → recite <code>( … )</code>; lone extender →
   lege recite <code>()~</code>; trailing <code>.</code> gestript.</li>
-<li>Default: <strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L, bars sync, kolommen);
-  <code>--no-align</code> slaat die stap over.</li>
+<li>Default <code>--pitch ag-vsa</code>: per systeem eerste noot absolute a–g, daarna EHM,
+  a–g-eindanker; daarna <strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L, bars sync,
+  kolommen); <code>--no-align</code> slaat die stap over.</li>
 <li>Top-level <code>mxl import</code> / <code>mscz import</code> = alias van <code>vsa mvsa import</code>.</li>
 <li><code>abc</code> blijft alias van <code>a-g</code>. Pyphen-warnings via <code>kuiser</code> zijn advies.</li>
 </ul>
 <p><strong>Criterium (gehaald):</strong> roundtrip <code>mvsa → mxl → mvsa</code> pitch-equivalent op
 <code>alleluia-toon-8.canonieke.mvsa</code> sectie <code>schets2-oct-doremi</code> voor <code>--pitch
-doremi</code>, <code>a-g</code> en <code>vsa</code> (<code>tests/test_mvsa_import.py</code>). Bij <code>--pitch vsa</code>
-plakt import absolute eindankers (a–g+cijfer) op de laatste maatstreep van
-elk LSATB-systeem (check-only; <code>MVSA-BAR-ANKER</code> bij mismatch na edits).
-Niet bij <code>doremi</code> / <code>a-g</code>.</p>
+doremi</code>, <code>a-g</code> en <code>vsa</code> (<code>tests/test_mvsa_import.py</code>). Bij <code>--pitch ag-vsa</code>
+(default) en <code>--pitch vsa</code> plakt import absolute eindankers (a–g+cijfer) op
+de laatste maatstreep van elk LSATB-systeem (check-only; <code>MVSA-BAR-ANKER</code> bij
+mismatch na edits). Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 <h3 id="stap-5-bron-commands-man-paginas">Stap 5 — Bron-commands + man-pagina’s ✅<a class="headerlink" href="#stap-5-bron-commands-man-paginas" title="Permanent link">&para;</a></h3>
 <p>Top-level console-scripts + <code>scripts\*.cmd</code>:</p>
 <table>
@@ -5749,7 +5755,7 @@ Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>

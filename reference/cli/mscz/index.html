@@ -4973,7 +4973,7 @@ output begint met dezelfde waarschuwingsbanner als <code>mvsa import</code>.</p>
 <code>.mxl</code> / <code>.vsa</code> / <code>.mvsa</code>).</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mscz [-h] {import,mxl,text} …
-mscz import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
+mscz import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
             [--octave-style {@oct,marker}] [--section SECTION]
             [--musescore PATH] [--no-align] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
@@ -4994,7 +4994,7 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 </tr>
 <tr>
 <td><code>mxl</code></td>
-<td>Naar Coria-<code>.mxl</code>: MuseScore-export, daarna explode naar vier parts.</td>
+<td>Naar Coria-<code>.mxl</code>: MuseScore-export, daarna explode naar vier parts. Default: <code>&lt;bronnaam&gt;.mxl</code> (bijv. <code>lied.mscz.mxl</code>).</td>
 </tr>
 <tr>
 <td><code>text</code></td>
@@ -5002,18 +5002,19 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 </tr>
 </tbody>
 </table>
-<p><strong>Import-opties</strong> (<code>--pitch</code>, <code>--do</code>, <code>--no-align</code>, soft-wrap, eindankers bij
-<code>vsa</code>, kuiser-normaalvorm): zelfde keten als
+<p><strong>Import-opties</strong> (<code>--pitch</code> default <code>ag-vsa</code>, <code>--do</code>, <code>--no-align</code>, soft-wrap,
+eindankers bij <code>ag-vsa</code>/<code>vsa</code>, kuiser-normaalvorm): zelfde keten als
 <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. <code>@do</code> komt uit de MuseScore-
 voortekening (<code>KeySig</code> / <code>concertKey</code>) tenzij je <code>--do</code> meegeeft. De
 MSCZ-stap gebruikt dezelfde SATB-explode als <code>mscz mxl</code>. A/T/B volgen L/S
 op <strong>duur</strong> (lange noten worden gesplitst/gepaddet), zodat ontbrekende of
 scheve lyrics op de onderstemmen de posities niet verschuiven.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
+<div class="highlight"><pre><span></span><code>mscz import generated\alleluia-schets2.mscz -o generated\from-mscz.mvsa
+mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
 mscz import generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
 mscz import generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
-vsa mvsa validate generated\from-mscz.vsa.mvsa
+vsa mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
 </code></pre></div>
@@ -5063,7 +5064,7 @@ mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-10
+        Bijgewerkt: 2026-10-12
         
       </p>
       

@@ -4942,7 +4942,7 @@ afspeelknop.</p>
 </tr>
 <tr>
 <td>CLI-command</td>
-<td><code>vsa audio</code> / <code>mvsa mp3</code></td>
+<td><code>vsa audio</code> / <code>mvsa mp3</code> / <code>ogg</code> / <code>wav</code></td>
 </tr>
 </tbody>
 </table>
@@ -4989,7 +4989,7 @@ afspeelknop.</p>
 <tbody>
 <tr>
 <td><code>.mxl</code> / <code>.musicxml</code></td>
-<td><code>vsa audio</code> / <code>mvsa mp3</code></td>
+<td><code>vsa audio</code> / <code>mvsa mp3</code> / <code>ogg</code> / <code>wav</code></td>
 </tr>
 <tr>
 <td><code>.vsa</code></td>
@@ -4997,16 +4997,17 @@ afspeelknop.</p>
 </tr>
 <tr>
 <td><code>.mvsa</code></td>
-<td><code>mvsa mp3</code> (via playback MusicXML)</td>
+<td><code>mvsa mp3</code> / <code>ogg</code> / <code>wav</code> (via playback MusicXML)</td>
 </tr>
 <tr>
 <td><code>.mscz</code></td>
-<td><code>vsa audio</code> / <code>mvsa mp3</code> (via genormaliseerde playback-MXL + piano)</td>
+<td><code>vsa audio</code> / <code>mvsa mp3</code> / <code>ogg</code> / <code>wav</code> (via playback-MXL + piano)</td>
 </tr>
 </tbody>
 </table>
-<p>Default-formaat: <strong><code>.mp3</code></strong>. Optioneel <code>--format ogg</code> of <code>wav</code>, of
-<code>[audio] format</code> in <code>vsa.toml</code>.</p>
+<p>Bij <code>mvsa</code> is het <strong>subcommando het formaat</strong> (<code>mp3</code> / <code>ogg</code> / <code>wav</code>).
+Bij <code>vsa audio</code>: <code>--format</code> of <code>[audio] format</code> in <code>vsa.toml</code>
+(default <strong><code>.mp3</code></strong>).</p>
 <p>Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). In <code>.mvsa</code>
 zet je het afspeeltempo met <a href="../../specification-mvsa/keywords/"><code>@tempo</code></a>
 (BPM; default <strong>130</strong>); dat gaat mee in MusicXML-<code>sound tempo</code> (metronoom
@@ -5016,8 +5017,9 @@ onzichtbaar op blad/PDF) en dus in <code>mvsa mp3</code> / Coria. Gedeelde namen
 <strong>piano</strong> op elke partij (checklist M8). Bitrate en extra instrumentkeuze
 buiten die piano zijn in v1 MuseScore-defaults.</p>
 <h2 id="bestandsnaamgeving">Bestandsnaamgeving<a class="headerlink" href="#bestandsnaamgeving" title="Permanent link">&para;</a></h2>
-<p>In <code>generated/</code> bij voorkeur <code>stem.brontype.mp3</code> (of <code>.ogg</code> / <code>.wav</code>).
-CLI-default mag simpel blijven. Zie
+<p>Zonder <code>-o</code>: <code>stem.brontype.mp3</code> (of <code>.ogg</code> / <code>.wav</code>), bv.
+<code>lied.mvsa.mp3</code>. In <code>generated/</code> hetzelfde patroon. Expliciet <code>-o</code> mag
+een korte naam blijven. Zie
 <a href="../canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</p>
 <h2 id="ownership">Ownership<a class="headerlink" href="#ownership" title="Permanent link">&para;</a></h2>
 <table>
@@ -5030,7 +5032,7 @@ CLI-default mag simpel blijven. Zie
 <tbody>
 <tr>
 <td>VSA-tooling</td>
-<td>Artefact genereren (<code>vsa audio</code> / <code>mvsa mp3</code>)</td>
+<td>Artefact genereren (<code>vsa audio</code> / <code>mvsa mp3</code>/<code>ogg</code>/<code>wav</code>)</td>
 </tr>
 <tr>
 <td>Consumer</td>
