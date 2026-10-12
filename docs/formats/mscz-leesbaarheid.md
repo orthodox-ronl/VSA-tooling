@@ -38,6 +38,9 @@ Bij review van `.mscz` / MuseScore-PDF:
 10. Leidende `|:` maakt **geen** lege rustmaat; herhaalpunten (`:|`) blijven
     zichtbaar.
 11. Alle `@tekst`-cues staan als SystemText (ook meerregelig met `...`).
+12. **Geen** zichtbare metronoom/tempo-tekst op het blad of in de PDF; afspelen
+    gebruikt wel `@tempo` / default 130 via `sound tempo` (MSCZ: Tempo
+    `visible=0`).
 
 ---
 

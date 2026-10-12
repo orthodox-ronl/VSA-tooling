@@ -31,6 +31,10 @@ MusicXML of MuseScore.
 Volledige keyword-lijst: [Keywords (`@…`)](../specification-mvsa/keywords.md).
 Voorbeelden in de repo: [`examples/mvsa/`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa).
 
+**Catalogusbron:** zet bovenaan YAML met `zoektekst` (platte gezongen tekst)
+zodat Ctrl+Shift+F in de editor werkt — contract:
+[Zoektekst](../formats/zoektekst.md).
+
 ---
 
 ## 1. Minimaal bestand
@@ -77,6 +81,8 @@ horen **vóór** of **tussen** LSATB-systemen — niet tussen `L:` en `S:`.
 | `@tekst`         | Cue / systeembrontekst (priesterregel, …) boven het volgende systeem     | —                    |
 | `@title`         | Titel van het zangstuk (MusicXML `<work-title>`, MuseScore-titel)        | bestandsnaam         |
 | `@bron`          | Bron van de partituur (boek/koormap); MusicXML `<source>`, MSCZ-colofon  | —                    |
+| `@tempo`         | BPM voor beluisteren/oefenen (MusicXML-metronoom + playback)             | `130`                |
+| `@toon`          | Kerktoon / oktoechos (MusicXML `tone`)                                   | —                    |
 | `@composer` e.d. | Metadata (componist, copyright, ondertitel, …)                           | zie keywords-lijst   |
 
 Sticky: `@do` / `@mode` / `@oct` gelden vanaf het **eerstvolgende** LSATB-systeem
@@ -87,6 +93,7 @@ is alleen nodig als je commentaar op die scheidingsregel wilt.
     ```text
     @title "Alleluia - Toon 1"
     @bron "koormap Hemelum"
+    @tempo 72
     @do F4
     @mode major
     @oct S=0 A=0 T=-1 B=-1
@@ -171,12 +178,12 @@ elkaar (per frase één stijl is leesbaarder).
 
 Bij `import` / `normalize` kies je een **doelspelling**:
 
-| `--pitch`    | Schrijft …                                              |
-| ------------ | ------------------------------------------------------- |
-| `doremi`     | laddergraden                                            |
-| `a-g`        | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`) |
-| `vsa`        | eerste toon absoluut, daarna EHM                        |
-| `preserve`   | (alleen normalize) bronspelling behouden — **default**  |
+| `--pitch`    | Schrijft …                                                                                           |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| `doremi`     | laddergraden                                                                                         |
+| `a-g`        | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`)                                              |
+| `vsa`        | eerste toon absoluut, daarna EHM; bij **import** ook absolute eindankers op systeemeinden (`\|\|a4`) |
+| `preserve`   | (alleen normalize) bronspelling behouden — **default**                                               |
 
 `abc` blijft een **alias** van `a-g` (oude scripts).
 
@@ -203,12 +210,13 @@ S-: / \2 / fa ||
 EHM’s. Zie [Semantiek — absolute en relatieve hoogte](../specification-mvsa/semantics.md#absolute-en-relatieve-hoogte).
 
 ??? tip "Welke stijl kiezen?"
-| Situatie                         | Suggestie                                      |
-| -------------------------------- | ---------------------------------------------- |
-| Overname van MuseScore / MXL     | import `--pitch doremi` of `a-g` (cijfers)     |
-| Liturgische ladder / toon        | doremi + `@oct`                                |
-| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM     |
-| Lange stapsgewijze frase         | EHM na één absoluut anker                      |
+| Situatie                         | Suggestie                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Overname van MuseScore / MXL     | import `--pitch doremi` of `a-g` (cijfers)                                     |
+| Import + foutzoeken na edits     | `--pitch vsa` (EHM + absolute eindankers op systeemeinden)                     |
+| Liturgische ladder / toon        | doremi + `@oct`                                                                |
+| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM                                     |
+| Lange stapsgewijze frase         | EHM na één absoluut anker                                                      |
 
 ---
 
@@ -279,7 +287,9 @@ en [Syntax — toonnamen (a–g)](../specification-mvsa/syntax.md#toonnamen-ag).
 | Token **aan** de maatstreep     | **checkt** alleen (wijzigt niet)         | `\|mi`, `\|/`    |
 
 Gebruik eindankers om vergissingen te vangen: als de lopende toon niet matcht,
-faalt validate.
+faalt validate (`MVSA-BAR-ANKER`). Bij import met `--pitch vsa` plakt de
+toolchain zulke check-only ankers (a–g + cijfer) automatisch op systeemeinden;
+zie [taak bladmuziek](#7-taak-bladmuziek--mvsa).
 
 ```text
 S: fa so- mi&do&re&mi fa mi ||mi
@@ -289,7 +299,24 @@ S: fa so- mi&do&re&mi fa mi ||mi
 
 ## 7. Taak: bladmuziek → mvsa
 
-**Doel:** een bestaande partituur (MusicXML / MuseScore) als tekstbron.
+**Doel:** een bestaande partituur (MusicXML / MuseScore) als tekstbron in de
+**werkbank** (bewerken tot hij klaar is voor de catalogus).
+
+!!! warning "Import = werkbank, niet catalogus"
+    `vsa mvsa import` (en `mxl`/`mscz import`) levert een **starttekst**, geen
+    afgewerkt zangstuk. Gebruik de uitkomst om te redigeren en te valideren;
+    publiceer of accepteer hem niet ongewijzigd als catalogusbron. Bovenaan
+    staat een ASCII-waarschuwingsbanner met checklist (woordstreepjes, recite,
+    A/T/B, ritme, metadata).
+
+    Waarom dat nodig is:
+
+    1. **Woordstreepjes** tussen lettergrepen kloppen vaak niet (MuseScore vs.
+       canonieke `hei-li` / `hei  -li`).
+    2. **Lege recite** (`()~`) en geplakte multi-lettergreep-recite moeten soms
+       herschreven worden tot nette L-tekst.
+    3. **Layout en MuseScore-details** gaan verloren; alleen toon, duur en
+       lyrics-equivalentie blijven.
 
 1. Exporteer of bewaar als `.mxl` / `.mscz`.
 2. Importeer naar `.mvsa` met een pitch-vorm:
@@ -297,11 +324,36 @@ S: fa so- mi&do&re&mi fa mi ||mi
    cd /d C:\Git\orthodox-ronl\VSA-tooling
    vsa mvsa import bron.mxl -o lied.mvsa --pitch doremi
    ```
-   Of `--pitch a-g` als je bladcijfers wilt (`bb4`, `c5`).
+   Of `--pitch a-g` als je bladcijfers wilt (`bb4`, `c5`). Voor EHM plus
+   check-only eindankers op systeemeinden (handig na edits):
+   ```cmd
+   cd /d C:\Git\orthodox-ronl\VSA-tooling
+   vsa mvsa import bron.mxl -o lied.mvsa --pitch vsa
+   vsa mvsa validate lied.mvsa
+   ```
 3. Zet bovenaan `@do` / `@mode` / `@oct` goed (import vult dit grotendeels in).
-4. Controleer L-tekst (import kan lelijk syllabificeren) en sync.
+4. Controleer L-tekst en sync. Import herstelt veel MuseScore-fouten
+   (valse `dag-gaan` / `steun-van`, ontbrekende `we-der-ke`, spaties in
+   underlay), maar niet alles — bekijk vooral recite `( … )` en
+   woordstreepjes. A/T/B volgen L/S op duur; controleer holds (`-`) en
+   `&`-melisma’s tegen de bronpartituur (onderstemmen met meer toonwissels
+   dan S in dezelfde tijd blijven als `&`-melisma; L/S krijgen holds;
+   minder noten worden naar duur gepaddet).
 5. `vsa mvsa validate lied.mvsa`
-6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa`
+6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa` (Pyphen-warnings zijn
+   advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
+   `--no-align`.
+
+Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
+same-pitch holds als `-` op stemregels (ook over systeembraken; export zet die
+weer om naar de vorige toon — zie
+[lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken));
+multi-lettergreep lyrics op één noot als recite `( … )`; daarna
+**kuiser-normaalvorm** (lone standaard-`~` op L weggelaten; kolomuitlijning).
+Keten: `.mxl` →
+parser; `.mscz` → MuseScore → temp-`.mxl` → SATB-explode (zelfde als
+`mscz mxl`) → parser → kuiser. Details:
+[`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 Referentie-voorbeeld (bladcijfers):
 [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa).
@@ -348,7 +400,7 @@ Voorbeeld met meerdere equivalente schetsen:
 | Stap               | Commando (voorbeeld)                                      |
 | ------------------ | --------------------------------------------------------- |
 | Valideren          | `vsa mvsa validate lied.mvsa`                             |
-| MusicXML           | `vsa mvsa musicxml lied.mvsa -o generated\lied.mxl`       |
+| MusicXML           | `vsa mvsa mxl lied.mvsa -o generated\lied.mxl`       |
 | MuseScore          | `vsa mvsa mscz lied.mvsa -o generated\lied.mscz`          |
 | Eén sectie         | voeg `--section sectie-id` toe                            |
 | Uitlijnen / kuisen | `vsa mvsa kuiser lied.mvsa`                               |
@@ -356,7 +408,7 @@ Voorbeeld met meerdere equivalente schetsen:
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
+vsa mvsa mxl examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
 ```
 
 CLI-detail: [mvsa-referentie](../reference/cli/mvsa.md). Formaten-hub:

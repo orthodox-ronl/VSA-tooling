@@ -21,7 +21,7 @@ def test_frontmatter_promotes_playback_and_bron() -> None:
     text = """---
 do: F4
 mode: major
-tempo: 120
+tempo: 130
 partituur:
   title: Test
   composer: Traditioneel
@@ -45,7 +45,7 @@ def test_musicxml_emits_source_from_bron_uitgangspunt() -> None:
         {
             "do": "F4",
             "mode": "major",
-            "tempo": 120,
+            "tempo": 130,
             "bron": {"uitgangspunt": "Meneon I, p.12-13"},
             "partituur": {"title": "Voorbeeld", "composer": "Traditioneel"},
         }

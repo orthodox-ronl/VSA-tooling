@@ -15,6 +15,8 @@ SECTIE_ID_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
 # Speelblok-id: cijfers of sectie-vorm (zie speelplan.md).
 BLOK_ID_RE = re.compile(r"^(?:[1-9][0-9]*|[a-z][a-z0-9_-]*)$")
 DO_RE = re.compile(r"^[A-Ga-g](#|b)?[0-9]$")
+# Document-tempo: geheel getal BPM (1–999), bv. ``@tempo 72``.
+TEMPO_RE = re.compile(r"^[1-9]\d{0,2}$")
 OCT_ASSIGN_RE = re.compile(r"^([A-Za-z0-9_-]+)=(-?\d+)$")
 # Per lyrics-laag: ``Lap=nl``, ``Lus=noot``, ``L'=ksl`` (``L'`` ≡ ``L1``).
 TAAL_ASSIGN_RE = re.compile(
@@ -60,6 +62,7 @@ ALLOWED_DIRECTIVES = frozenset(
         "tekstdichter",
         "arrangeur",
         "vertaler",
+        "tempo",
         # Gereserveerd: geaccepteerd, nog niet in export/praktijk.
         "toon",
         "genre",
@@ -85,9 +88,7 @@ STRING_META_DIRECTIVES = frozenset(
     }
 )
 # Nog geen MuseScore/MusicXML-invulling; wel parse + validate.
-RESERVED_META_DIRECTIVES = frozenset(
-    {"toon", "genre", "opmerkingen"}
-)
+RESERVED_META_DIRECTIVES = frozenset({"genre", "opmerkingen"})
 # Sticky context (geldig vanaf eerstvolgend LSATB-systeem tot herzetting).
 STICKY_DIRECTIVES = frozenset({"do", "mode", "oct", "start", "taal"})
 ALLOWED_MODES = frozenset({"major", "minor"})
@@ -319,8 +320,11 @@ def validate_mvsa_path(path: Path) -> list[MvsaDiagnostic]:
 
 
 def collect_mvsa_files(path: Path) -> list[Path]:
+    """Verzamel ``.mvsa``-paden. Geen binaire bestanden (``.mscz`` e.d.)."""
     if path.is_file():
-        return [path]
+        if path.suffix.lower() == ".mvsa":
+            return [path]
+        return []
     return sorted(path.rglob("*.mvsa"))
 
 
@@ -330,8 +334,11 @@ def collect_mvsa_files(path: Path) -> list[Path]:
 
 
 def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Section]:
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    _frontmatter, body, line_base = strip_yaml_frontmatter(text)
     # Strip HTML comments (may span lines) so nested content is ignored.
-    cleaned = HTML_COMMENT_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    cleaned = HTML_COMMENT_RE.sub(lambda m: "\n" * m.group(0).count("\n"), body)
     lines = cleaned.splitlines()
 
     sections: list[_Section] = []
@@ -344,7 +351,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
 
     while i < n:
         raw = lines[i]
-        line_no = i + 1
+        line_no = i + 1 + line_base
         stripped = raw.strip()
 
         if not stripped or stripped.startswith("#"):
@@ -446,13 +453,13 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                     MvsaDiagnostic(
                         "MVSA-EHM-L",
                         f"lyrics-regelidentifier mag geen EHM bevatten: {rid.prefix!r}",
-                        i + 1,
+                        i + 1 + line_base,
                     )
                 )
             content = s2[rid.match_end :].lstrip()
             system_lines.append(
                 _RawLine(
-                    i + 1,
+                    i + 1 + line_base,
                     rid.stem_id,
                     content,
                     ehm=rid.ehm,
@@ -676,6 +683,16 @@ def _validate_directive_value(
                     f"ongeldige @tekst-waarde {rest!r} "
                     f'(verwacht een string tussen dubbele aanhalingstekens, '
                     f'bv. @tekst "P: …")',
+                    line_no,
+                )
+            )
+    elif name == "tempo":
+        if not rest or not TEMPO_RE.fullmatch(rest):
+            diagnostics.append(
+                MvsaDiagnostic(
+                    "MVSA-TEMPO",
+                    f"ongeldige @tempo-waarde {rest!r} "
+                    f"(verwacht BPM als geheel getal 1–999, bv. @tempo 72)",
                     line_no,
                 )
             )

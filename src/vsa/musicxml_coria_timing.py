@@ -208,11 +208,21 @@ def _serialize(root: ET.Element) -> str:
 
 _DOCTYPE_RE = re.compile(r"<!DOCTYPE[^>]*(?:\[.*?\])?\s*>", re.I | re.S)
 
-_NOTE_MARKUP = frozenset({"beam", "stem", "notations", "accidental"})
+# notehead: Coria play_from_url → translation failed bij o.a. notehead=none
+_NOTE_MARKUP = frozenset({"beam", "stem", "notations", "accidental", "notehead"})
 _LAYOUT_ATTR_PREFIXES = ("default-", "relative-")
 _LAYOUT_ATTRS = frozenset({"width", "print-object", "color"})
 CORIA_FORBIDDEN_TAGS = frozenset(
-    {"beam", "stem", "notations", "part-group", "movement-title", "supports", "tie"}
+    {
+        "beam",
+        "stem",
+        "notations",
+        "notehead",
+        "part-group",
+        "movement-title",
+        "supports",
+        "tie",
+    }
 )
 _STEPS = "CDEFGAB"
 _SHARP_ORDER = "FCGDAEB"
@@ -276,6 +286,34 @@ def strip_coria_identification_source(root: ET.Element) -> int:
     return 1
 
 
+def reorder_identification_encoding_before_misc(ident: ET.Element) -> bool:
+    """Zet ``encoding`` vóór ``miscellaneous`` (Coria: anders translation failed).
+
+    Live Coria (okt 2026): ``miscellaneous`` vóór ``encoding`` in
+    ``identification`` → "translation failed", ook zonder ``source``.
+    Werkende product-MXL (trisagion / mscz) hebben encoding eerst.
+    Returns True als de volgorde is aangepast.
+    """
+    children = list(ident)
+    enc_idx = next(
+        (i for i, c in enumerate(children) if local(c.tag) == "encoding"), None
+    )
+    misc_idx = next(
+        (i for i, c in enumerate(children) if local(c.tag) == "miscellaneous"),
+        None,
+    )
+    if enc_idx is None or misc_idx is None or enc_idx < misc_idx:
+        return False
+    enc = children[enc_idx]
+    ident.remove(enc)
+    children = list(ident)
+    misc_idx = next(
+        i for i, c in enumerate(children) if local(c.tag) == "miscellaneous"
+    )
+    ident.insert(misc_idx, enc)
+    return True
+
+
 def sanitize_coria_importer(root: ET.Element) -> None:
     """Strip visuele MusicXML die Coria's vertaler laat crashen (VSA-demo-port)."""
     root.set("version", "3.1")
@@ -296,6 +334,8 @@ def sanitize_coria_importer(root: ET.Element) -> None:
         # Bronvermelding blijft in miscellaneous-field ``bron``.
         strip_coria_identification_source(root)
         _ensure_bron_misc_when_rights_is_license(root, ident)
+        # Coria: ``miscellaneous`` vóór ``encoding`` → "translation failed".
+        reorder_identification_encoding_before_misc(ident)
     for el in list(root.iter()):
         for attr in list(el.attrib):
             if attr.startswith(_LAYOUT_ATTR_PREFIXES) or attr in _LAYOUT_ATTRS:

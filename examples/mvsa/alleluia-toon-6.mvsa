@@ -4,6 +4,7 @@
 @composer     "Traditioneel"
 @bron "koormap Hemelum"
 @copyright "CC BY-SA 4.0"
+@toon "6"
 
 @do F4
 @mode major

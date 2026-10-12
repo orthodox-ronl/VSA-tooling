@@ -60,7 +60,7 @@ VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH = "warning"
 | `vsa process`        | Ja                        | Nee                 |
 | `vsa build-markdown` | Ja                        | Nee                 |
 | `vsa audio`          | Nee                       | Ja (`format`)       |
-| `mvsa audio`         | Nee                       | Ja (`format`)       |
+| `mvsa mp3`         | Nee                       | Ja (`format`)       |
 | `vsa svg`            | Nee                       | Nee                 |
 | `vsa blocks`         | Nee                       | Nee                 |
 | `vsa parse`          | Nee                       | Nee                 |

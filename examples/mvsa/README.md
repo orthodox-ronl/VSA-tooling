@@ -6,7 +6,7 @@ Wel:
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
 De `.mvsa`-bestanden volgen de draft-spec
@@ -39,7 +39,7 @@ Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 
 **Hulptekst exporteren:** `--hulptekst` = lyric 2 op dezelfde noten (blad/MSCZ).
 `--hulptekst-as-parts` = Coria-keuze-parts `{stem} ({label})`. Zie
-[`docs/reference/cli/mvsa.md`](../../docs/reference/cli/mvsa.md#vsa-mvsa-musicxml)
+[`docs/reference/cli/mvsa.md`](../../docs/reference/cli/mvsa.md#vsa-mvsa-mxl)
 en [`@taal`](../../docs/specification-mvsa/keywords.md#taal).
 
 **Speelplan vs `|:…:|`:** vaste klinkende volgorde → één `@speelplan` per

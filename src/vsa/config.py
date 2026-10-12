@@ -62,7 +62,7 @@ class ValidationConfig:
 
 @dataclass
 class AudioConfig:
-    """Defaults for ``vsa audio`` / ``mvsa audio`` (preview-luisteren)."""
+    """Defaults for ``vsa audio`` / ``mvsa mp3`` (preview-luisteren)."""
 
     format: str = "mp3"
 

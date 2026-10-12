@@ -20,18 +20,19 @@ VSA-notatie  →  validate  →  SVG / MusicXML / Hugo-Markdown
 
 ## Welke taak → welke pagina?
 
-| Ik wil …                                           | Ga naar                                                                      |
-| -------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Lokaal installeren en eerste `OK`                  | [Starten](../getting-started/README.md)                                      |
-| `.mvsa` leren typen (L, stemmen, octaven)          | [mvsa schrijven 101](mvsa-schrijven-101.md)                                  |
-| Het juiste commando kiezen                         | [CLI-taken](cli-taken.md)                                                    |
-| Begrijpen waarom validate faalt                    | [Validatie](validation.md) · [`vsa validate`](../reference/cli/validate.md)  |
-| Eén bestand of site als SVG                        | [SVG exporteren](svg-export.md)                                              |
-| MusicXML / Coria                                   | [MusicXML-export](musicxml-export.md)                                        |
-| Platte gezongen tekst (zoek / lyrics)              | [`vsa text`](../reference/cli/text.md) · [CLI-taken](cli-taken.md)           |
-| Hugo-consumer / waar hoort wat                     | [Consumer-site](../manuals/consumer-site.md)                                 |
-| Tool in een andere repo of CI                      | [Integratie](../integratie/index.md)                                         |
-| Formele taalregels                                 | [Specificaties](../specification/README.md)                                  |
+| Ik wil …                                           | Ga naar                                                                                                                                      |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lokaal installeren en eerste `OK`                  | [Starten](../getting-started/README.md)                                                                                                      |
+| `.mvsa` leren typen (L, stemmen, octaven)          | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                  |
+| Bladmuziek → `.mvsa` (**werkbank**-import)         | [mvsa schrijven 101 — bladmuziek](mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa) · [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) |
+| Het juiste commando kiezen                         | [CLI-taken](cli-taken.md)                                                                                                                    |
+| Begrijpen waarom validate faalt                    | [Validatie](validation.md) · [`vsa validate`](../reference/cli/validate.md)                                                                  |
+| Eén bestand of site als SVG                        | [SVG exporteren](svg-export.md)                                                                                                              |
+| MusicXML / Coria                                   | [MusicXML-export](musicxml-export.md)                                                                                                        |
+| Platte gezongen tekst (zoek / lyrics)              | [`vsa text`](../reference/cli/text.md) · [CLI-taken](cli-taken.md)                                                                           |
+| Hugo-consumer / waar hoort wat                     | [Consumer-site](../manuals/consumer-site.md)                                                                                                 |
+| Tool in een andere repo of CI                      | [Integratie](../integratie/index.md)                                                                                                         |
+| Formele taalregels                                 | [Specificaties](../specification/README.md)                                                                                                  |
 
 ## Klaar als …
 

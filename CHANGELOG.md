@@ -1,9 +1,29 @@
 # Changelog
 
+## Unreleased
+
+- CLI: `mvsa musicxml` → `mvsa mxl`, `mvsa audio` → `mvsa mp3` (aliases
+  `musicxml` / `audio` blijven werken); documentatie bijgewerkt
+- `mvsa mxl` accepteert `.mscz` / `.mxl` (geen UTF-8-crash op binaire bronnen);
+  validate/normalize/kuiser/mscz geven een duidelijke fout bij verkeerd type
+- MVSA-import: A/T/B spiegelen op **duur** t.o.v. S (niet noot-index/lyrics),
+  zodat lange noten + lyric-loze spacers (typisch MSCZ) Bb/T niet verschuiven
+- MVSA-import: gerichte lyric-hacks — spaties in `end`-lyrics, `we-der-ke`,
+  geen valse `dag-gaan`/`steun-van`/`Heer-richt`, `Ja_-cob` / `zon_-daars`
+- MVSA L-normaalvorm: lone standaard-`~` weglaten; `~` blijft bij `&`-melisma
+  en na recite-`)` (kuiser + import)
+- MVSA-import: ASCII-waarschuwingsbanner na `# Imported:` (schets/checklist;
+  alle entrypoints `mvsa`/`mxl`/`mscz import`)
+- Testfixtures hersteld: `test-alleluia-toon-8.mvsa` en
+  `test-kleine-intocht-zondag-hemelum.mvsa` (multi-`@sectie` voor roundtrips;
+  ≠ catalogus-voorbeelden). `test-trisagion-…` blijft weg (geen testgebruik)
+- MVSA→MusicXML: soft-wrap-`-` over systeembraken houdt de lopende toon
+  (beginanker/`@start` reset); zelfde carry in eindanker-check en normalize
+
 ## 0.2.0 - MVSA-authoring, export en preview-audio
 
 - MVSA: parser, validatie, normalize/align, **`mvsa kuiser`** (canonieke authoring-vorm)
-- Export: MusicXML, MSCZ, PDF, preview-**audio** (`vsa audio` / `vsa mvsa audio` via MuseScore)
+- Export: MusicXML, MSCZ, PDF, preview-**audio** (`vsa audio` / `vsa mvsa mp3` via MuseScore)
 - Speelplan / layout voor partituur-navigatie
 - Align bewaart leidende `|:` (repeat-start) op alle stokken
 - Consumer-pin: tag `0.2.0` i.p.v. alleen `@main`

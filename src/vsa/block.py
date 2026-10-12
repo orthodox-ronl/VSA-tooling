@@ -7,7 +7,7 @@ from .parser import Parser
 DEFAULT_METADATA = {
     "do": "F4",
     "mode": "major",
-    "tempo": "120",
+    "tempo": "130",
     "validate-ending": "true",
     "duration-model": "default",
 }

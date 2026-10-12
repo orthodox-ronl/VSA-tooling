@@ -20,7 +20,7 @@ NotationKind = Literal["vsa", "mvsa"]
 DEFAULT_METADATA = {
     "do": "F4",
     "mode": "major",
-    "tempo": "120",
+    "tempo": "130",
     "validate-ending": "true",
     "duration-model": "default",
     "reciting-mode": "quarters",

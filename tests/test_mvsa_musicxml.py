@@ -22,6 +22,7 @@ EXAMPLES = Path(__file__).resolve().parents[1] / "examples" / "mvsa"
 INTOCHT = EXAMPLES / "kleine-intocht-zondag-hemelum.mvsa"
 INTOCHT_SCHETS = EXAMPLES / "test-kleine-intocht-zondag-hemelum.mvsa"
 ALLELUIA = EXAMPLES / "alleluia-toon-8.mvsa"
+ALLELUIA_TOON_1 = EXAMPLES / "alleluia-toon-1.mvsa"
 
 
 def _part_pitches(xml: str, part_id: str) -> list[tuple[str, str, str]]:
@@ -31,6 +32,21 @@ def _part_pitches(xml: str, part_id: str) -> list[tuple[str, str, str]]:
         r"<step>(\w)</step>(?:<alter>(-?\d)</alter>)?<octave>(\d)</octave>",
         body,
     )
+
+
+def _part_measure_pitches(
+    xml: str, part_id: str
+) -> list[list[tuple[str, str, str]]]:
+    marker = f'<part id="{part_id}">'
+    body = xml.split(marker)[1].split("</part>")[0]
+    measures = re.findall(r"<measure[^>]*>(.*?)</measure>", body, re.S)
+    return [
+        re.findall(
+            r"<step>(\w)</step>(?:<alter>(-?\d)</alter>)?<octave>(\d)</octave>",
+            m,
+        )
+        for m in measures
+    ]
 
 
 def _part_lyrics(xml: str, part_id: str) -> list[tuple[str, str]]:
@@ -337,7 +353,7 @@ def test_export_partituur_layout_two_staves():
     # ||O||-kop + play=0 op spacers volgt in MSCZ-postprocess (S8/R3).
     assert "<stem>none</stem>" in p1
     assert "<notehead>none</notehead>" in p1
-    assert 'print-object="no"' not in p1
+    assert '<note print-object="no"' not in p1
     assert "<type>breve</type>" not in p1
     # Eerste lettergreep van lange recite blijft zichtbare randnoot
     assert ("begin", "laat") in _part_lyrics(xml, "P1") or (
@@ -359,10 +375,71 @@ def test_export_playback_no_recite_collapse():
     xml = export_mvsa_to_musicxml(text, section_id="schets-a-bladcijfer")
     body = xml.split('<part id="P1">')[1].split("</part>")[0]
     assert "<type>breve</type>" not in body
-    assert 'print-object="no"' not in body
+    assert '<note print-object="no"' not in body
     assert ("single", "Zoon") in _part_lyrics(xml, "P1")
     # Melisma-extend blijft; slurs/notations gaan eraf in Coria-sanitize.
     assert "<extend" in body
+
+
+def test_export_empty_recite_melisma_keeps_all_slots_and_full_measure():
+    """``()~&~&.&.&~`` + multi-slot stem: all pitches, full 4/4 — not one quarter.
+
+    Import encodes lyric-less melisma as empty recite with ELM chain; export
+    must treat that as ordinary melisma (not M10 one-note-per-syllable).
+    """
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+@sectie t
+L: te ont van~&.&.  | ()~&~&.&.&~ ||
+S: a4 Bb4 c5&d5&c5  | Bb4&a4&g4&a4&Bb4 ||
+A: f4 g4  a4&Bb4&a4 | g4&f4&e4&f4&g4   ||
+T: -  -   -&-&-     | -&-&-&-&-        ||
+B: f3 -   -&-&-     | e3&f3&c3&-&-     ||
+"""
+    def _local(tag: str) -> str:
+        return tag.rsplit("}", 1)[-1]
+
+    for layout in ("playback", "partituur"):
+        xml = export_mvsa_to_musicxml(text, layout=layout)
+        root = ET.fromstring(xml)
+        for el in root.iter():
+            el.tag = _local(el.tag)
+        p1 = root.find("part")
+        assert p1 is not None
+        measures = p1.findall("measure")
+        assert len(measures) >= 2
+        m2 = measures[1]
+        div_el = m2.find("attributes/divisions")
+        if div_el is None or not (div_el.text or "").strip():
+            div_el = measures[0].find("attributes/divisions")
+        divisions = int((div_el.text if div_el is not None else None) or "4")
+        notes: list[str] = []
+        total = 0
+        for note in m2.findall("note"):
+            if note.find("chord") is not None:
+                continue
+            voice = note.findtext("voice") or "1"
+            if layout == "partituur" and voice != "1":
+                continue
+            staff = note.findtext("staff")
+            if layout == "partituur" and staff not in (None, "1"):
+                continue
+            dur = int(note.findtext("duration") or "0")
+            total += dur
+            pitch = note.find("pitch")
+            if pitch is None:
+                continue
+            step = pitch.findtext("step")
+            octv = pitch.findtext("octave")
+            alter = pitch.findtext("alter") or ""
+            notes.append(f"{step}{alter}{octv}")
+        assert abs(total / divisions - 4.0) < 1e-6, (layout, total, divisions, notes)
+        joined = "".join(notes)
+        assert "B" in joined and "A" in joined and "G" in joined, (layout, notes)
+        assert len(notes) >= 4, (layout, notes)
 
 
 def test_export_alleluia_toon1_melisma_slur_and_collapse():
@@ -571,6 +648,38 @@ B: g&g&g&g&g&g&g&g ||
     assert '<slur type="start"' not in before
 
 
+def test_playback_long_same_pitch_hold_uses_tie_chain_not_fake_quarter():
+    """Acht kwarten same-pitch: geen type=quarter + duration=32 (MuseScore-chops).
+
+    Playback prefereert één noot ≤ 28; overflow → I2 whole+whole.
+    ``finalize_coria_musicxml`` stript ``<tie>`` (Coria); MuseScore speelt
+    dan wel heraanslag op de whole-grenzen, maar niet elke kwart.
+    """
+    text = """\
+@do F4
+@mode major
+@sectie x
+L: a_&_&_&_&_&_&_&_ ||
+S: g&g&g&g&g&g&g&g ||
+A: d&d&d&d&d&d&d&d ||
+T: c&c&c&c&c&c&c&c ||
+B: g&g&g&g&g&g&g&g ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    assert "<type>breve</type>" not in xml
+    # Geen mismatch: duration=32 bij type=quarter zou MuseScore elke kwart
+    # opnieuw aanslaan (bas-F “op tel 2” in gemengde piano-preview).
+    assert "<duration>32</duration>" not in xml
+    p3 = xml.split('<part id="P3">')[1].split("</part>")[0]
+    assert p3.count("<type>whole</type>") == 4
+    assert p3.count("<duration>16</duration>") == 4
+    assert "<type>quarter</type>" not in p3
+    # Partituur-export behoudt wel ties (geen Coria-sanitize).
+    partituur = export_mvsa_to_musicxml(text, layout="partituur")
+    assert '<tie type="start"/>' in partituur
+    assert '<tied type="start"/>' in partituur
+
+
 def test_alleluia_toon_2_partituur_no_breve_type():
     text = (EXAMPLES / "alleluia-toon-2.mvsa").read_text(encoding="utf-8")
     xml = export_mvsa_to_musicxml(text, layout="partituur")
@@ -693,6 +802,53 @@ def test_line_ehm_is_beginanker():
     assert _all_pitches(with_label) == _all_pitches(with_start)
 
 
+def test_intocht_hold_dash_carries_across_systems():
+    """``kleine-intocht-zondag-hemelum``: soft-wrap ``-`` = vorige systeemeinde."""
+    xml = export_mvsa_to_musicxml(INTOCHT.read_text(encoding="utf-8"))
+    # Systeem1 = maten 0–1; systeem2 = maat 2 (begint met ``-``); systeem3 = maat 3.
+    for pid in ("P1", "P2", "P3", "P4"):
+        measures = _part_measure_pitches(xml, pid)
+        assert len(measures) == 4
+        assert measures[2][0] == measures[1][-1]
+        assert measures[3][0] == measures[2][-1]
+    # Concrete tonen (S/A/T/B) op de soft-wrap-maten.
+    assert _part_measure_pitches(xml, "P1")[2][0] == ("B", "-1", "4")
+    assert _part_measure_pitches(xml, "P2")[2][0] == ("G", "", "4")
+    assert _part_measure_pitches(xml, "P3")[2][0] == ("D", "", "4")
+    assert _part_measure_pitches(xml, "P4")[2][0] == ("G", "", "3")
+    assert _part_measure_pitches(xml, "P1")[3][0] == ("A", "", "4")
+    assert _part_measure_pitches(xml, "P2")[3][0] == ("F", "", "4")
+    assert _part_measure_pitches(xml, "P3")[3][0] == ("C", "", "4")
+    assert _part_measure_pitches(xml, "P4")[3][0] == ("F", "", "3")
+
+
+def test_alleluia_toon_1_beginanker_wins_across_speelplan_blocks():
+    """``alleluia-toon-1``: speelplan-expansie; beginanker reset (geen carry)."""
+    xml = export_mvsa_to_musicxml(
+        ALLELUIA_TOON_1.read_text(encoding="utf-8"), layout="playback"
+    )
+    # Plan 1,2,1,2,1,3 → zes maten; blok1 start op schrijf-do (S-:), blok2 op S/: (=G).
+    s = _part_measure_pitches(xml, "P1")
+    assert len(s) == 6
+    assert [m[0] for m in s] == [
+        ("F", "", "4"),
+        ("G", "", "4"),
+        ("F", "", "4"),
+        ("G", "", "4"),
+        ("F", "", "4"),
+        ("G", "", "4"),
+    ]
+    a = _part_measure_pitches(xml, "P2")
+    assert [m[0] for m in a] == [
+        ("C", "", "4"),
+        ("E", "", "4"),
+        ("C", "", "4"),
+        ("E", "", "4"),
+        ("C", "", "4"),
+        ("E", "", "4"),
+    ]
+
+
 def test_vsa_mode_beginanker_uses_schrijf_do():
     """``@oct`` shifts writing do; begin-EHM and EHM tokens count from there."""
     xml = export_mvsa_to_musicxml(
@@ -800,7 +956,7 @@ B: re ||
     # Geen verplichte MuseScore-systeembreuk vanuit @tekst.
     assert '<print new-system="yes"/>' not in xml
     # Mid-flow cue: dubbele streep + width; geen spacermaat / geen HBox.
-    assert 'print-object="no"' not in xml
+    assert '<note print-object="no"' not in xml
     assert xml.count("<bar-style>light-light</bar-style>") >= 1
     # Alleen op de bovenste balk (P1), niet op TB (P2).
     p1 = xml.split('<part id="P1">')[1].split("</part>")[0]
@@ -825,7 +981,7 @@ B: do ||
 """
     xml = export_mvsa_to_musicxml(text, layout="partituur")
     assert "alleen start" in xml
-    assert 'print-object="no"' not in xml
+    assert '<note print-object="no"' not in xml
     assert '<print new-system="yes"/>' not in xml
 
 
@@ -851,7 +1007,7 @@ B: re ||
     p1 = xml.split('<part id="P1">')[1].split("</part>")[0]
     assert "[PAUZE]" in p1
     # Geen @tekst-spacer op playback-pad.
-    assert 'print-object="no"' not in xml
+    assert '<note print-object="no"' not in xml
     # Cue van de volgende maat staat op de pauzemaat.
     assert p1.index("P: tweede") < p1.index("[PAUZE]")
     # Één pauze (|| + @tekst mogen niet dubbel pauzeren).
@@ -930,6 +1086,7 @@ def test_title_composer_copyright_in_musicxml():
 @vertaler "NL-redactie"
 @bron "Liturgikon, p.147-149"
 @copyright "CC BY-SA 4.0 — test"
+@tempo 72
 @toon "1"
 @taal "nl"
 @do F4
@@ -950,6 +1107,7 @@ B: do ||
     assert doc.vertaler == "NL-redactie"
     assert doc.bron == "Liturgikon, p.147-149"
     assert doc.copyright == "CC BY-SA 4.0 — test"
+    assert doc.tempo == 72
     assert doc.toon == "1"
     assert doc.taal == "nl"
     xml = export_mvsa_to_musicxml(text, title="bestandsnaam", layout="partituur")
@@ -962,10 +1120,133 @@ B: do ||
     assert '<creator type="translator">NL-redactie</creator>' in xml
     assert "<source>Liturgikon, p.147-149</source>" in xml
     assert "CC BY-SA 4.0 — test" in xml
+    assert "<per-minute>72</per-minute>" in xml
+    assert 'sound tempo="72"' in xml
+    assert '<direction placement="above" print-object="no">' in xml
+    assert xml.count("<per-minute>72</per-minute>") == 1
+    assert 'miscellaneous-field name="tone">1</miscellaneous-field>' in xml
     playback = export_mvsa_to_musicxml(text, title="bestandsnaam", layout="playback")
     # Playback: geen <source> naast <encoding> (Coria); bron in miscellaneous-field.
     assert "<source>" not in playback
     assert 'miscellaneous-field name="bron">Liturgikon, p.147-149</miscellaneous-field>' in playback
+    assert 'miscellaneous-field name="tone">1</miscellaneous-field>' in playback
+    assert "<per-minute>72</per-minute>" in playback
+    assert 'sound tempo="72"' in playback
+    # Coria-sanitize stript layout-attrs (o.a. print-object); playback is audio.
+    assert playback.count("<per-minute>72</per-minute>") == 1
+
+
+def test_tempo_before_system_last_pending_wins_and_default_130():
+    """Meerdere ``@tempo`` vóór hetzelfde systeem: laatste pending wint.
+
+    Document-meta ``doc.tempo`` = eerste ``@tempo`` in het bestand (starttempo).
+    """
+    with_tempo = """\
+@tempo 60
+@tempo 90
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    doc = parse_mvsa(with_tempo)
+    assert doc.tempo == 60
+    assert doc.sections[0].systems[0].tempo == 90
+    xml = export_mvsa_to_musicxml(with_tempo, title="x", layout="partituur")
+    assert "<per-minute>90</per-minute>" in xml
+    assert "<per-minute>60</per-minute>" not in xml
+
+    without = """\
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    assert parse_mvsa(without).tempo is None
+    bare = export_mvsa_to_musicxml(without, title="x", layout="playback")
+    assert "<per-minute>130</per-minute>" in bare
+    assert 'sound tempo="130"' in bare
+    assert bare.count("<per-minute>130</per-minute>") == 1
+
+
+def test_mid_score_tempo_emits_two_sound_tempos():
+    """``@tempo`` vóór een later systeem → tweede ``sound tempo`` op die maat."""
+    text = """\
+@tempo 60
+@do F4
+@mode major
+@sectie a
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+@tempo 90
+@sectie b
+L: b_ ||
+S: re ||
+A: re ||
+T: re ||
+B: re ||
+"""
+    doc = parse_mvsa(text)
+    assert doc.tempo == 60
+    assert doc.sections[0].systems[0].tempo == 60
+    assert doc.sections[1].systems[0].tempo == 90
+
+    for layout in ("partituur", "playback"):
+        xml = export_mvsa_to_musicxml(text, title="x", layout=layout)
+        assert xml.count("<per-minute>60</per-minute>") == 1
+        assert xml.count("<per-minute>90</per-minute>") == 1
+        assert 'sound tempo="60"' in xml
+        assert 'sound tempo="90"' in xml
+        # Eerste tempo vóór tweede in de score (bovenste part).
+        assert xml.index('sound tempo="60"') < xml.index('sound tempo="90"')
+
+
+def test_orphan_tempo_warns():
+    text = """\
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+@tempo 72
+"""
+    doc = parse_mvsa(text)
+    assert any(
+        d.code == "MVSA-TEMPO" and "zonder volgend" in d.message
+        for d in doc.diagnostics
+    )
+
+
+def test_toon_alone_emits_identification_misc():
+    text = """\
+@toon "8"
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    doc = parse_mvsa(text)
+    assert doc.toon == "8"
+    xml = export_mvsa_to_musicxml(text, title="x", layout="partituur")
+    assert 'miscellaneous-field name="tone">8</miscellaneous-field>' in xml
 
 
 def test_bron_optional_colon_accepted():
@@ -1019,7 +1300,7 @@ B: re ||
     xml = export_mvsa_to_musicxml(text, layout="partituur")
     assert xml.count('<print new-system="yes"/>') == 1
     # Met new-system geen cue-spacer nodig vóór de tweede maat.
-    assert 'print-object="no"' not in xml
+    assert '<note print-object="no"' not in xml
     p1 = xml.split('<part id="P1">')[1].split("</part>")[0]
     measures = p1.split("<measure ")
     # [1]=eerste maat, [2]=tweede maat met new-system + cue

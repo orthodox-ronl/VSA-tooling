@@ -464,16 +464,24 @@ def export_mvsa_to_musicxml(
     measure_left_styles: list[str | None] = []
     measure_staff_texts: list[list[str]] = []
     measure_new_system: list[bool] = []
+    # BPM per maatindex; None = geen tempo-wissel (vorige blijft).
+    measure_tempos: list[int | None] = []
     # Speelblok-id → (eerste_maatindex, laatste_maatindex) in bladvorm.
     blok_measure_range: dict[str, tuple[int, int]] = {}
     score_started = False
     systems_flat: list = []
+    # Lopende toon per stem over mvsa-systeembraken (exportvolgorde =
+    # sections_for_layout: playback = speelplan-expansie, partituur = blad).
+    pitch_carry: dict[str, Pitch] = {}
     for section in sections:
         section_start = len(bar_styles)
         for system in section.systems:
             systems_flat.append(system)
-            events_by_voice = _system_to_events(
-                system, layout=layout, hulptekst=hulptekst
+            events_by_voice, pitch_carry = _system_to_events(
+                system,
+                layout=layout,
+                hulptekst=hulptekst,
+                pitch_carry=pitch_carry,
             )
             for voice, measures in events_by_voice.items():
                 voice_measures.setdefault(voice, [])
@@ -490,9 +498,14 @@ def export_mvsa_to_musicxml(
                     # Alleen ``@mscz-newline`` forceert een MuseScore-systeembreuk.
                     wants_break = bool(getattr(system, "mscz_newline", False))
                     measure_new_system.append(wants_break and score_started)
+                    sys_tempo = getattr(system, "tempo", None)
+                    measure_tempos.append(
+                        int(sys_tempo) if sys_tempo is not None else None
+                    )
                 else:
                     measure_staff_texts.append([])
                     measure_new_system.append(False)
+                    measure_tempos.append(None)
             if system.measures:
                 score_started = True
         if (
@@ -561,12 +574,14 @@ def export_mvsa_to_musicxml(
             bar_styles,
             measure_staff_texts,
             measure_left_styles,
+            measure_tempos,
         )
 
     from .bibliotheek_id import resolve_bibliotheek_id
 
     ctx = sections[0].systems[0].context if sections and sections[0].systems else StickyContext()
     effective_title = doc.title if doc.title else title
+    tempo = getattr(doc, "tempo", None)
     meta = {
         "composer": getattr(doc, "composer", None),
         "copyright": getattr(doc, "copyright", None),
@@ -575,8 +590,13 @@ def export_mvsa_to_musicxml(
         "tekstdichter": getattr(doc, "tekstdichter", None),
         "arrangeur": getattr(doc, "arrangeur", None),
         "vertaler": getattr(doc, "vertaler", None),
+        "toon": getattr(doc, "toon", None),
+        "tempo": str(tempo) if tempo is not None else None,
         "bibliotheek_id": resolve_bibliotheek_id(bibliotheek_id, source_path),
     }
+    # Starttempo op maat 1 als geen @tempo vóór het eerste systeem.
+    if measure_tempos and measure_tempos[0] is None:
+        measure_tempos[0] = _parse_tempo_bpm(meta)
     if layout == "partituur":
         return _emit_score_partituur(
             voice_measures,
@@ -592,6 +612,7 @@ def export_mvsa_to_musicxml(
             measure_ending_stop=ending_stop,
             measure_repeat_times=repeat_times,
             measure_nav_marks=nav_marks,
+            measure_tempos=measure_tempos,
             meta=meta,
         )
 
@@ -639,6 +660,7 @@ def export_mvsa_to_musicxml(
         measure_new_system=measure_new_system,
         measure_cue_gap=measure_cue_gap,
         measure_pauze=measure_pauze,
+        measure_tempos=measure_tempos,
         meta=meta,
         parts=playback_parts,
         extra_parts=extra_parts,
@@ -659,7 +681,19 @@ def export_mvsa_path(
     hulptekst: bool = False,
     hulptekst_as_parts: bool = False,
 ) -> None:
-    text = path.read_text(encoding="utf-8-sig")
+    path = Path(path)
+    if path.suffix.lower() != ".mvsa":
+        raise MvsaExportError(
+            f"verwacht .mvsa als bron, kreeg {path.suffix or '(geen extensie)'} "
+            f"({path.name}). Voor .mscz/.mxl: gebruik mvsa mxl / mscz mxl."
+        )
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise MvsaExportError(
+            f"kan {path.name} niet als tekst lezen ({exc}). "
+            "Controleer of dit een .mvsa-bestand is."
+        ) from exc
     xml = export_mvsa_to_musicxml(
         text,
         title=path.stem,
@@ -743,12 +777,53 @@ def _add_lyric_layer_to_notes(
     )
 
 
+def _start_maps_voice(start_rest: str | None, marker: str) -> bool:
+    """True when sticky ``@start`` names this stem (explicit beginanker)."""
+    if not start_rest:
+        return False
+    mapping: dict[str, str] = {}
+    for part in split_directive_assignments(start_rest):
+        if "=" not in part:
+            continue
+        key, _, _val = part.partition("=")
+        mapping[key.strip()] = _val.strip()
+    return resolve_stem_map_key(mapping, marker) is not None
+
+
+def seed_voice_resolver(
+    ctx: StickyContext,
+    marker: str,
+    *,
+    line_ehm: str | None = None,
+    carried: Pitch | None = None,
+) -> PitchResolver:
+    """Resolver for one stem at the start of an LSATB-systeem.
+
+    Beginanker on the regelidentifier (``S-:``) or an explicit ``@start``
+    entry for this stem resets the lopende toon. Otherwise a pitch carried
+    from the previous systeem in export/document order seeds ``-`` / ``~``
+    and relative EHM (soft-wrap holds).
+    """
+    resolver = _voice_resolver(ctx, marker)
+    if ctx.start:
+        _apply_start(resolver, ctx.start, marker)
+    if line_ehm is not None:
+        _apply_line_ehm(resolver, line_ehm)
+        return resolver
+    if _start_maps_voice(ctx.start, marker):
+        return resolver
+    if carried is not None:
+        resolver.set_absolute_pitch(carried)
+    return resolver
+
+
 def _system_to_events(
     system,
     *,
     layout: MvsaLayout = "playback",
     hulptekst: bool = False,
-) -> dict[str, list[list[NoteEvent]]]:
+    pitch_carry: dict[str, Pitch] | None = None,
+) -> tuple[dict[str, list[list[NoteEvent]]], dict[str, Pitch]]:
     ctx: StickyContext = system.context
     lyric_markers = [m for m in system.markers if is_lyrics_stem(m)]
     if not lyric_markers:
@@ -775,16 +850,17 @@ def _system_to_events(
     def _vkey(vm: str) -> str:
         return vm if layout == "playback" else vm[0]
 
+    prev_carry = pitch_carry or {}
     resolvers: dict[str, PitchResolver] = {}
     line_ehms = getattr(system, "line_ehms", {}) or {}
     for m in voice_markers:
         key = _vkey(m)
-        resolvers[key] = _voice_resolver(ctx, m)
-        if ctx.start:
-            _apply_start(resolvers[key], ctx.start, m)
-        line_ehm = line_ehms.get(m)
-        if line_ehm is not None:
-            _apply_line_ehm(resolvers[key], line_ehm)
+        resolvers[key] = seed_voice_resolver(
+            ctx,
+            m,
+            line_ehm=line_ehms.get(m),
+            carried=prev_carry.get(key),
+        )
 
     result: dict[str, list[list[NoteEvent]]] = {_vkey(m): [] for m in voice_markers}
     if layout == "partituur":
@@ -847,7 +923,11 @@ def _system_to_events(
         for p in PARTS:
             if p["voice"] not in result:
                 result[p["voice"]] = [[] for _ in system.measures]
-    return result
+
+    new_carry = dict(prev_carry)
+    for key, resolver in resolvers.items():
+        new_carry[key] = resolver.current_pitch
+    return result, new_carry
 
 
 def writing_do_pitch(ctx: StickyContext, marker: str) -> Pitch:
@@ -940,7 +1020,17 @@ def _position_to_notes(
     slots = list(vpos.slots) if vpos.slots else ["-"]
     extra_lyric_layers = list(extra_lyric_layers or [])
 
-    if lpos.recite:
+    syllables = list(lpos.syllables) if lpos.syllables else []
+    has_recite_lyric = any((s or "").strip() for s in syllables)
+    # Import writes lyric-less melisma as empty recite ``()~&~&.…``; that must
+    # export as ordinary melisma (all ELM/slots), not one note per empty syl.
+    empty_recite_melisma = (
+        lpos.recite
+        and not has_recite_lyric
+        and max(len(elms), len(slots)) > 1
+    )
+
+    if lpos.recite and not empty_recite_melisma:
         pitch = _resolve_slot(
             slots[0] if slots else "-",
             resolver,
@@ -955,7 +1045,8 @@ def _position_to_notes(
             base_dur = elm_to_duration(lpos.elms[0])
         else:
             base_dur = elm_to_duration("~")  # kwart per lettergreep / rantrand
-        syllables = list(lpos.syllables) if lpos.syllables else [""]
+        if not syllables:
+            syllables = [""]
         n = len(syllables)
         out_notes: list[NoteEvent] = []
         for i, syl_text in enumerate(syllables):
@@ -1055,8 +1146,9 @@ def _position_to_notes(
             notes, plpos, opens_hyphen=opens_hyphen, number=num
         )
     # Same-pitch melisma (S13/R7 / M5a). Partituur: I1 ongestipte pack + ties.
-    # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot (Coria
-    # stript ties → half+kwart zou heraangeslagen klinken).
+    # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot zolang
+    # representeerbaar (≤ 28). Langer → I2-tie-keten (MuseScore speelt
+    # type/duration-mismatch als heraangeslagen kwarten).
     return _collapse_same_pitch_melisma(
         notes, allow_dotted=(layout == "playback")
     )
@@ -1146,22 +1238,28 @@ def _pack_same_pitch_run(
     total = sum(_note_divs(n) for n in run)
 
     if allow_dotted:
-        # Coria stript ``<tie>``: always one sounding note for a same-pitch hold.
+        # Coria stript ``<tie>``: prefer one sounding note when representable.
         # Keep intentional dotted ELM slots (``_.``) when the run is already one note.
         if len(run) == 1:
             return list(run)
         dur, div_override = _duration_from_divs(total)
-        return [
-            NoteEvent(
-                pitch=first.pitch,
-                duration=dur,
-                lyrics=list(first.lyrics),
-                recite=first.recite,
-                spacer=first.spacer,
-                duration_divisions=div_override,
-                stemless=first.stemless,
-            )
-        ]
+        if div_override is None:
+            # ≤ double-dotted whole: één MusicXML-duur, type en duration matchen.
+            return [
+                NoteEvent(
+                    pitch=first.pitch,
+                    duration=dur,
+                    lyrics=list(first.lyrics),
+                    recite=first.recite,
+                    spacer=first.spacer,
+                    duration_divisions=None,
+                    stemless=first.stemless,
+                )
+            ]
+        # Langer dan één standaardduur (bijv. 8 kwarten = 32): nooit
+        # ``type=quarter`` + ``duration=32`` — MuseScore heraanslaat elke
+        # kwart. Fall through naar I2-tie-keten (ongestipt ≤ whole).
+        # Coria kan bij tie-joins heraanslaan; beter dan per-kwart chops.
 
     parts = _pack_safe_divs(total, allow_dotted=False)
     if not parts:
@@ -1201,11 +1299,13 @@ def _collapse_same_pitch_melisma(
 ) -> list[NoteEvent]:
     """Same-pitch melisma → collapse and/or tie-keten (S13/R7).
 
-    *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één noot.
+    *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één
+    noot zolang de som ≤ dubbelgepunt whole (28). Langer → I2-tie-keten
+    (geen ``type``/``duration``-mismatch; MuseScore heraanslaat anders).
     Partituur/MSCZ (default): **I1** ongestipt ≤ whole; **I2** tie-keten.
 
-    Slur alleen bij toonwissels binnen het melisma; pure hold → ties (partituur)
-    of één noot (playback).
+    Slur alleen bij toonwissels binnen het melisma; pure hold → ties
+    (partituur, of playback bij overflow) of één noot (playback ≤ 28).
     """
     if len(notes) <= 1:
         return notes
@@ -1755,11 +1855,47 @@ def _emit_staff_text_directions(out: list[str], texts: list[str]) -> None:
         out.append("</direction>")
 
 
+# Zelfde default als eenstemmige VSA (``tempo="130"`` / ``muziek.tempo``).
+DEFAULT_TEMPO_BPM = 130
+
+
+def _parse_tempo_bpm(meta: dict[str, str | None] | None) -> int:
+    """BPM uit document-meta ``tempo`` (``@tempo``); default ``DEFAULT_TEMPO_BPM``."""
+    raw = ((meta or {}).get("tempo") or "").strip()
+    if not raw:
+        return DEFAULT_TEMPO_BPM
+    try:
+        bpm = int(raw)
+    except ValueError:
+        return DEFAULT_TEMPO_BPM
+    if bpm < 1 or bpm > 999:
+        return DEFAULT_TEMPO_BPM
+    return bpm
+
+
+def _emit_tempo_direction(out: list[str], bpm: int) -> None:
+    """Playback-``sound tempo`` (kwart = BPM); metronoom onzichtbaar op blad/PDF.
+
+    ``print-object="no"`` houdt de markering weg uit MuseScore-partituur en
+    PDF; afspelen (audio/Coria) gebruikt nog steeds ``sound tempo``.
+    """
+    out.append('<direction placement="above" print-object="no">')
+    out.append("<direction-type>")
+    out.append('<metronome parentheses="no">')
+    out.append("<beat-unit>quarter</beat-unit>")
+    out.append(f"<per-minute>{bpm}</per-minute>")
+    out.append("</metronome>")
+    out.append("</direction-type>")
+    out.append(f'<sound tempo="{bpm}"/>')
+    out.append("</direction>")
+
+
 def _insert_playback_pauze_measures(
     voice_measures: dict[str, list[list[NoteEvent]]],
     bar_styles: list[str],
     measure_staff_texts: list[list[str]],
     measure_left_styles: list[str | None] | None = None,
+    measure_tempos: list[int | None] | None = None,
 ) -> list[bool]:
     """``[PAUZE]``-maten voor Coria: na sectie-einde én vóór mid-flow ``@tekst``.
 
@@ -1767,6 +1903,7 @@ def _insert_playback_pauze_measures(
     - Vóór een koormaat met ``@tekst`` als die niet de eerste maat is en de
       vorige maat nog geen sectie-eindestreep had (geen dubbele pauze).
     Cue-teksten van de volgende koormaat verhuizen naar de pauzemaat.
+    Tempo-wissels blijven op de koormaat (pauzemaat krijgt ``None``).
     """
     n = max(
         len(bar_styles),
@@ -1780,6 +1917,9 @@ def _insert_playback_pauze_measures(
     if measure_left_styles is not None:
         while len(measure_left_styles) < n:
             measure_left_styles.append(None)
+    if measure_tempos is not None:
+        while len(measure_tempos) < n:
+            measure_tempos.append(None)
     for measures in voice_measures.values():
         while len(measures) < n:
             measures.append([])
@@ -1807,6 +1947,8 @@ def _insert_playback_pauze_measures(
         measure_staff_texts.insert(i + 1, cues)
         if measure_left_styles is not None:
             measure_left_styles.insert(i + 1, None)
+        if measure_tempos is not None:
+            measure_tempos.insert(i + 1, None)
         pauze.insert(i + 1, True)
     return pauze
 
@@ -1835,7 +1977,7 @@ def _emit_pauze_rest(out: list[str], *, with_lyric: bool) -> None:
 
 
 def _emit_identification(out: list[str], meta: dict[str, str | None] | None) -> None:
-    """MusicXML ``<identification>``: creators, rights, source."""
+    """MusicXML ``<identification>``: creators, rights, source, toon."""
     if not meta:
         return
     creators: list[tuple[str, str]] = []
@@ -1857,7 +1999,8 @@ def _emit_identification(out: list[str], meta: dict[str, str | None] | None) -> 
             else f"Bibliotheek-id: {bib}"
         )
     source = (meta.get("bron") or "").strip()
-    if not creators and not rights and not source:
+    toon = (meta.get("toon") or "").strip()
+    if not creators and not rights and not source and not toon:
         return
     out.append("<identification>")
     for mxml_type, value in creators:
@@ -1866,6 +2009,12 @@ def _emit_identification(out: list[str], meta: dict[str, str | None] | None) -> 
         out.append(f"<rights>{escape(rights)}</rights>")
     if source:
         out.append(f"<source>{escape(source)}</source>")
+    if toon:
+        out.append("<miscellaneous>")
+        out.append(
+            f'<miscellaneous-field name="tone">{escape(toon)}</miscellaneous-field>'
+        )
+        out.append("</miscellaneous>")
     out.append("</identification>")
 
 
@@ -1911,6 +2060,7 @@ def _emit_score_playback(
     measure_new_system: list[bool] | None = None,
     measure_cue_gap: list[bool] | None = None,
     measure_pauze: list[bool] | None = None,
+    measure_tempos: list[int | None] | None = None,
     meta: dict[str, str | None] | None = None,
     parts: list[dict] | None = None,
     extra_parts: list[dict] | None = None,
@@ -1924,6 +2074,7 @@ def _emit_score_playback(
     new_systems = list(measure_new_system or [])
     cue_gaps = list(measure_cue_gap or [])
     pauzes = list(measure_pauze or [])
+    tempos = list(measure_tempos or [])
     while len(left_styles) < n_measures:
         left_styles.append(None)
     while len(staff_texts) < n_measures:
@@ -1934,10 +2085,14 @@ def _emit_score_playback(
         cue_gaps.append(False)
     while len(pauzes) < n_measures:
         pauzes.append(False)
+    while len(tempos) < n_measures:
+        tempos.append(None)
 
     emit_parts: list[dict] = list(parts) if parts is not None else list(PARTS)
     if extra_parts:
         emit_parts = emit_parts + list(extra_parts)
+    if tempos and tempos[0] is None:
+        tempos[0] = _parse_tempo_bpm(meta)
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -1961,7 +2116,7 @@ def _emit_score_playback(
         out.append("</score-part>")
     out.append("</part-list>")
 
-    for part in emit_parts:
+    for part_idx, part in enumerate(emit_parts):
         voice = part["voice"]
         measures = list(voice_measures.get(voice, []))
         while len(measures) < n_measures:
@@ -1980,6 +2135,9 @@ def _emit_score_playback(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
+            # Tempo alleen op de bovenste part (wijzigt afspeelsnelheid).
+            if part_idx == 0 and tempos[mi] is not None:
+                _emit_tempo_direction(out, tempos[mi])
             # Staff-tekst alleen op de bovenste balk (Soprano).
             if part["voice"] == "S":
                 if new_systems[mi]:
@@ -2028,6 +2186,7 @@ def _emit_score_partituur(
     measure_ending_stop: list[str | None] | None = None,
     measure_repeat_times: list[int | None] | None = None,
     measure_nav_marks: list[list[str]] | None = None,
+    measure_tempos: list[int | None] | None = None,
     meta: dict[str, str | None] | None = None,
 ) -> str:
     """Twee balken SA/TB: voice 1 (S/T) stok omhoog, voice 2 (A/B) stok omlaag."""
@@ -2044,6 +2203,7 @@ def _emit_score_partituur(
     end_stops = list(measure_ending_stop or [])
     rep_times = list(measure_repeat_times or [])
     navs = list(measure_nav_marks or [])
+    tempos = list(measure_tempos or [])
     while len(left_styles) < n_measures:
         left_styles.append(None)
     while len(staff_texts) < n_measures:
@@ -2062,6 +2222,10 @@ def _emit_score_partituur(
         rep_times.append(None)
     while len(navs) < n_measures:
         navs.append([])
+    while len(tempos) < n_measures:
+        tempos.append(None)
+    if tempos and tempos[0] is None:
+        tempos[0] = _parse_tempo_bpm(meta)
 
     out: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -2109,6 +2273,8 @@ def _emit_score_partituur(
                     f"<clef><sign>{clef_sign}</sign><line>{clef_line}</line></clef>"
                 )
                 out.append("</attributes>")
+            if top_staff and tempos[mi] is not None:
+                _emit_tempo_direction(out, tempos[mi])
             if top_staff:
                 if new_systems[mi]:
                     out.append('<print new-system="yes"/>')

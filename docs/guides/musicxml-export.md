@@ -141,14 +141,14 @@ De meeste instellingen staan in YAML-frontmatter bovenaan je `.vsa`-bestand
 
 ### Muziek
 
-| Instelling             | Wat het doet                                                                                     | Standaard      |
-| ---------------------- | ------------------------------------------------------------------------------------------------ | -------------- |
-| `do`                   | Grondtoon (bijv. `F4`)                                                                           | `F4`           |
-| `mode`                 | `major` of `minor`                                                                               | `major`        |
-| `tempo`                | Tempo in BPM (alleen zichtbaar als je het expliciet zet)                                         | `120`          |
-| `meter`                | Maatsoort, bijv. `4/4` (optioneel)                                                               | —              |
-| `reciting-mode`        | Ongescopte tekst: `quarters` (één kwartnoot per woord) of `whole` (één hele noot bij ≥4 woorden) | `quarters`     |
-| **`musicxml-profile`** | **`playback`** (Coria/MuseScore) of **`engraving`** (partituurbewerking)                         | **`playback`** |
+| Instelling             | Wat het doet                                                                                              | Standaard      |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- | -------------- |
+| `do`                   | Grondtoon (bijv. `F4`)                                                                                    | `F4`           |
+| `mode`                 | `major` of `minor`                                                                                        | `major`        |
+| `tempo`                | Tempo in BPM voor afspelen (metronoom onzichtbaar op blad/PDF; alleen gezet als je het expliciet opgeeft) | `130`          |
+| `meter`                | Maatsoort, bijv. `4/4` (optioneel)                                                                        | —              |
+| `reciting-mode`        | Ongescopte tekst: `quarters` (één kwartnoot per woord) of `whole` (één hele noot bij ≥4 woorden)          | `quarters`     |
+| **`musicxml-profile`** | **`playback`** (Coria/MuseScore) of **`engraving`** (partituurbewerking)                                  | **`playback`** |
 
 ### Identificatie (titels in het bestand)
 
@@ -239,9 +239,12 @@ vsa musicxml lied.vsa lied.mxl --musicxml-profile engraving
 - **Coria laadt het `.mxl` niet?** Controleer of je niet per ongeluk
   `engraving` hebt gekozen; gebruik `playback` (de default). Op een website moet
   het `.mxl`-bestand via HTTPS bereikbaar zijn.
-- **Coria: `translation failed`?** Vaak staat er `<source>` én `<encoding>` in
-  `<identification>`. Het `playback`-pad verwijdert `<source>`; bronvermelding
-  hoort in `miscellaneous-field name="bron"` (checklist M17).
+- **Coria: `translation failed`?** Bekende oorzaken in `<identification>`:
+  `<source>` én `<encoding>` samen (M17); of `<miscellaneous>` vóór
+  `<encoding>` (M19). Het `playback`-pad verwijdert `<source>` en zet
+  `encoding` vóór `miscellaneous`; bronvermelding hoort in
+  `miscellaneous-field name="bron"`. Ook `<notehead>` (o.a. `none`) laat
+  Coria falen — sanitize stript die tag.
 - **Tempo staat er niet in?** Zet `tempo` expliciet in frontmatter; anders
   wordt geen tempo-markering geëxporteerd.
 - **Lettergrepen in reciteertoon:** gebruik een koppelteken in het woord

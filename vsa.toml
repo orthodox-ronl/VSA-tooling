@@ -10,6 +10,6 @@ max-line-width = 800
 # {{< vsa src="..." >}}
 output-mode = "shortcode"
 
-# Preview-audio (vsa audio / mvsa audio):
+# Preview-audio (vsa audio / mvsa mp3):
 # [audio]
 # format = "mp3"

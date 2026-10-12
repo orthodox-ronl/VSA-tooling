@@ -11,12 +11,36 @@ canonieke output schrijven volgen deze regels.
 Een mvsa-bestand is UTF-8-tekst. Lege regels en commentaar zijn toegestaan waar
 hieronder aangegeven.
 
-| Soort regel  | Vorm                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------ |
-| Commentaar   | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
-| Directive    | Regel die begint met `@` (zie [Keywords](keywords.md))                               |
-| Sectiekop    | `@sectie` + spatie + id                                                              |
-| LSATB-inhoud | Begint met een [regelidentifier](#regelidentifier)                                   |
+| Soort regel      | Vorm                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| YAML-frontmatter | Optioneel blok `---` … `---` aan het begin (o.a. `zoektekst`; zie hieronder)         |
+| Commentaar       | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
+| Directive        | Regel die begint met `@` (zie [Keywords](keywords.md))                               |
+| Sectiekop        | `@sectie` + spatie + id                                                              |
+| LSATB-inhoud     | Begint met een [regelidentifier](#regelidentifier)                                   |
+
+### YAML-frontmatter en `zoektekst`
+
+Canonieke catalogus-`.mvsa`-bestanden hebben aan het begin een YAML-kop met
+top-level **`zoektekst`**: de volledige platte gezongen tekst voor editorzoeken
+(Ctrl+Shift+F). Overige partituur-metadata blijft bij voorkeur via `@`-keywords.
+Normatief contract: [Zoektekst](../formats/zoektekst.md).
+
+```yaml
+---
+identificatie:
+  title: 2e Antifoon (zondag)
+zoektekst: >-
+  Eer aan de Vader, de Zoon, en de Heilige Geest. …
+---
+
+@do F4
+@mode major
+```
+
+Parser en validate strippen de YAML-kop (regelnummers blijven kloppen t.o.v.
+het hele bestand). Werkbank-import (`.mscz.mvsa` / banner) mag `zoektekst`
+nog missen tot het stuk catalogusbron wordt.
 
 ## 2. Regelidentifier
 
@@ -134,10 +158,12 @@ breder is dan de lettergreep tot aan de volgende anker-kolom, komt er ruimte
 *vóór* het streepje (`le -lu`), zodat stemtokens met spaties gescheiden blijven
 en de ankers (eerste letters / eerste noottekens) toch onder elkaar staan.
 Vermijd `le-  lu` (streepje direct gevolgd door spaties): die vorm leest de
-parser als ELM `-` op “le”, niet als woordstreepje. Canoniek schrijf je
-standaard-lengte op L als `~`, en een woordstreepje **direct vóór** de
-volgende lettergreep — met eventuele spaties *ervóór* als de stemregels
-meer breedte nodig hebben (`hei_&_&_  -li`, niet `hei_&_&_-li`).
+parser als ELM `-` op “le”, niet als woordstreepje. Canoniek laat je lone
+standaard-lengte op L **weg** (impliciete `~`); schrijf `~` wél naast `&`
+in melisma (`ziel~&~`) en na recite-`)` bij niet-breve duur. Een
+woordstreepje staat **direct vóór** de volgende lettergreep — met eventuele
+spaties *ervóór* als de stemregels meer breedte nodig hebben
+(`hei_&_&_  -li`, niet `hei_&_&_-li`).
 
 ```text
 L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&-&-&_         i_  a__  ||
@@ -205,6 +231,11 @@ opnieuw (dat doet wel een EHM in de
 Op **lyrics-regels** horen geen eindankers; daar blijft de kale streep. Voor
 sync van maatstrepen telt alleen het **bar-token** (zonder anker): `L` met `|`
 en `S` met `|mi` zijn synchroon.
+
+**Import-gebruik:** `vsa mvsa import --pitch vsa` plakt zulke check-only
+eindankers (absolute a–g + cijfer) aan de laatste maatstreep van elk
+LSATB-systeem op de stemregels; de `L:`-regel blijft zonder ankers. Zie
+[`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 ## 5. Sectie
 
@@ -444,7 +475,10 @@ Op een stemregel staan alleen **hoogte-stukken**, gescheiden door spaties:
   toonnamen `c`…`b`, `Bb`, `fis`, …;
 - octaaf: suffix `-` / `+` / `-1` / `+2` / … of wetenschappelijk cijfer op
   toonnamen (`g3`, `bb4`);
-- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots).
+- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots);
+- kale `-` / `~` als hoogte: **zelfde toon** als de lopende toon van die stem
+  (ook over een systeembreuk heen, tenzij een beginanker reset — zie
+  [Semantiek — lopende toon over systeembraken](semantics.md#lopende-toon-over-systeembraken)).
 
 Of de regel **standaard** relatief of absoluut is, volgt uit de
 [regelidentifier](#regelidentifier): met EHM (`S-:`) relatief + beginanker;

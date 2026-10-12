@@ -8,7 +8,7 @@
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
 `validate`: exitcode `0` = geen errors (warnings mogen). Exitcode `1` = minstens één error.
@@ -66,6 +66,9 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    [Syntax — eindanker](syntax.md#eindanker-aan-de-maatstreep). Ongeldige anker-
    tekst of mismatch met de berekende lopende toon: **error** (`MVSA-BAR-ANKER`).
    Een kale streep is geen anker. Lyrics-regels met een anker-suffix: error.
+   De berekende lopende toon loopt door over systeembraken in documentvolgorde
+   (soft-wrap-`-`); een beginanker op de nieuwe regel reset die toon — zie
+   [Semantiek — lopende toon over systeembraken](semantics.md#lopende-toon-over-systeembraken).
 
 ## Directives / keywords
 
@@ -75,25 +78,36 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    `@start`), layout (`@tekst`, `@mscz-newline`, `@sectie`, `@blok`,
    `@speelplan`, `@---`), actieve metadata (`@title`, `@ondertitel`,
    `@composer`, `@tekstdichter`, `@arrangeur`, `@vertaler`, `@bron`,
-   `@copyright`), en gereserveerde metadata (`@toon`, `@genre`,
+   `@copyright`, `@tempo`, `@toon`), en gereserveerde metadata (`@genre`,
    `@opmerkingen`). Sticky `@taal` (`nl`/`ksl`/`auto`, of
    `Lap=aap Lus=noot` op lyrics-ids) stuurt hulptekst-richting en Coria-partnamen
    (zie [keywords — @taal](keywords.md#taal)). `@oct` / `@start` gebruiken
-   dezelfde stemidentifiers als de stemregels.
+   dezelfde stemidentifiers als de stemregels. Gedeelde metadata-namen
+   (Nederlands): [metadata-brug](../guides/metadata-brug.md).
 10. Sticky / `@tekst` / metadata met ongeldige waarde: **error**
-    (`MVSA-META` voor string-metadata). `@mscz-newline` met argumenten:
-    **error**. `@tekst` of `@mscz-newline` zonder volgend LSATB-systeem:
-    **warning**.
+    (`MVSA-META` voor string-metadata; `MVSA-TEMPO` voor `@tempo` buiten
+    1–999). `@mscz-newline` met argumenten: **error**. `@tekst` of
+    `@mscz-newline` zonder volgend LSATB-systeem: **warning**.
+
+## Zoektekst (canonieke catalogusbron)
+
+11. Canonieke catalogus-`.mvsa`: YAML-frontmatter met top-level `zoektekst`,
+    genormaliseerd gelijk aan body-extractie (`vsa text`, zonder het veld zelf).
+    Contract: [Zoektekst](../formats/zoektekst.md). Afgedwongen met
+    [`vsa zoektekst --check`](../reference/cli/zoektekst.md) of
+    `mvsa validate --require-zoektekst` (niet standaard in elke validate —
+    voorbeelden zonder catalogus-`zoektekst` blijven groen). Werkbank-import
+    mag het veld nog missen.
 
 ## Canonieke vorm (warning)
 
-11. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden:
+12. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden:
     `mvsa kuiser` waarschuwt via Pyphen (alleen Latijnse lettergrepen) wanneer
     de splitsing **exact** overeenkomt (ontbrekend), zonder een volgend
     hoofdletter-woord vast te plakken. Streepje tussen twee hoofdletter-woorden
     zonder Pyphen-breuk: aparte warning. Liturgische / niet-Latijnse splits
     blijven stil.
-12. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
+13. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
     had kunnen syncen — of, na `mvsa kuiser`, alsnog inconsistent: error.
 
 ## Buiten v0-validatie / export-beperkingen

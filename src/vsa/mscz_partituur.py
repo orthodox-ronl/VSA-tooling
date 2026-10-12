@@ -1,7 +1,8 @@
 """Post-process MuseScore ``.mscz`` for canonieke partituur-conventies.
 
-Clears visible staff/instrument names and applies A4/leesbaarheid-Style
-(see docs/formats/mscz-leesbaarheid.md and VSA-demo mscz-partituur-contract).
+Clears visible staff/instrument names, hides Tempo marks (playback stays),
+and applies A4/leesbaarheid-Style (see docs/formats/mscz-leesbaarheid.md
+and VSA-demo mscz-partituur-contract).
 """
 
 from __future__ import annotations
@@ -93,6 +94,7 @@ _TRACK_NAME_RE = re.compile(
     re.DOTALL,
 )
 _STAFF_TEXT_RE = re.compile(r"<StaffText>(.*?)</StaffText>", re.DOTALL)
+_TEMPO_BLOCK_RE = re.compile(r"<Tempo\b[^>]*>.*?</Tempo>", re.DOTALL)
 _MEASURE_RE = re.compile(r"(<Measure\b[^>]*>)(.*?)(</Measure>)", re.DOTALL)
 _REST_BLOCK_RE = re.compile(r"<Rest\b[^>]*>.*?</Rest>", re.DOTALL)
 _CHORD_BLOCK_RE = re.compile(r"<Chord\b[^>]*>.*?</Chord>", re.DOTALL)
@@ -164,6 +166,7 @@ def apply_partituur_mscz_conventions(
         other = {n: zin.read(n) for n in names if n != mscx_name}
 
     mscx = _clear_instrument_names(mscx)
+    mscx = _hide_tempo_marks(mscx)
     mscx = _ensure_style_overrides(mscx)
     if system_texts:
         mscx = _promote_tekst_staff_texts(mscx, system_texts)
@@ -202,6 +205,27 @@ def apply_partituur_mscz_conventions(
             zout.writestr(n, data)
         zout.writestr(mscx_name, mscx.encode("utf-8"))
     tmp.replace(path)
+
+
+def _hide_tempo_marks(mscx: str) -> str:
+    """Zet MuseScore-``Tempo`` op ``visible=0`` (blad/PDF); playback blijft.
+
+    MusicXML zet al ``print-object="no"``; MuseScore-import maakt soms toch
+    een zichtbare Tempo-tekst. PDF gaat via deze partituur, dus hier forceren.
+    """
+
+    def hide(match: re.Match[str]) -> str:
+        block = match.group(0)
+        if re.search(r"<visible>\s*0\s*</visible>", block):
+            return block
+        return re.sub(
+            r"(<Tempo\b[^>]*>)",
+            r"\1\n            <visible>0</visible>",
+            block,
+            count=1,
+        )
+
+    return _TEMPO_BLOCK_RE.sub(hide, mscx)
 
 
 def _clear_instrument_names(mscx: str) -> str:

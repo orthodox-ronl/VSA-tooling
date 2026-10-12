@@ -21,6 +21,8 @@ def main(argv: list[str] | None = None) -> int:
         forwarded = ["mvsa", "import", ns.path, "--pitch", ns.pitch]
         if ns.output:
             forwarded.extend(["-o", ns.output])
+        if ns.do:
+            forwarded.extend(["--do", ns.do])
         if ns.octave_style:
             forwarded.extend(["--octave-style", ns.octave_style])
         if ns.section:
@@ -88,6 +90,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Doel-spelling (a-g = toonnamen met cijfer; abc = alias).",
     )
     imp.add_argument(
+        "--do",
+        metavar="PITCH",
+        default=None,
+        help="Forceer @do (bijv. F4). Zonder: uit KeySig/fifths.",
+    )
+    imp.add_argument(
         "--octave-style",
         choices=["@oct", "marker"],
         default="@oct",
@@ -153,12 +161,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
-    import os
-    import tempfile
-
-    from .musicxml_package import write_musicxml_output
-    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
-    from .mvsa_import import read_musicxml_file
+    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
+    from .musicxml_playback_normalize import export_mscz_to_playback_mxl
 
     path = Path(ns.path)
     if not path.is_file():
@@ -168,29 +172,15 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
         print(f"Verwacht .mscz als bron; kreeg {path.suffix!r}", file=sys.stderr)
         return 1
     out = Path(ns.output) if ns.output else path.with_suffix(".mxl")
-    if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
-        out = out.with_suffix(".mxl")
     musescore = Path(ns.musescore) if ns.musescore else None
-
-    fd, tmp_name = tempfile.mkstemp(suffix=".mxl", prefix="mscz-raw-")
-    os.close(fd)
-    tmp_mxl = Path(tmp_name)
     try:
-        try:
-            convert_with_musescore(path, tmp_mxl, musescore=musescore)
-            xml = read_musicxml_file(tmp_mxl)
-            from .musicxml_playback_normalize import normalize_playback_musicxml
-
-            playback = normalize_playback_musicxml(xml, apply_timing=True)
-            write_musicxml_output(out, playback)
-        except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
-            return 1
-        except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
-            return 1
-    finally:
-        tmp_mxl.unlink(missing_ok=True)
+        export_mscz_to_playback_mxl(path, out, musescore=musescore)
+    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
+    except Exception as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
     print(f"Geschreven: {out}")
     return 0
 

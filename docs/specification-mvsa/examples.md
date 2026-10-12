@@ -6,7 +6,7 @@ onder [`examples/mvsa/`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
 | Bestand                                                                                                                                         | Wat het illustreert                                                           |

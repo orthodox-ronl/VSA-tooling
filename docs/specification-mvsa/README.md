@@ -25,17 +25,19 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 
 ## Documenten
 
-| Document                         | Inhoud                                              |
-| -------------------------------- | --------------------------------------------------- |
-| [Doel en scope](overview.md)     | Idee, niet-doelen, termen, defaults                 |
-| [Syntax](syntax.md)              | Bestandsvorm, markers, maten, secties, L en stemmen |
-| [Semantiek](semantics.md)        | Sync, recite, hoogte, directives, pitfalls          |
-| [Keywords (`@…`)](keywords.md)   | Gedefinieerde `@`-regels: wat, wanneer, wel/niet    |
-| [Speelplan](speelplan.md)        | `@blok` / `@speelplan`: bladvorm vs klinkende vorm  |
-| [Validatie](validation.md)       | Geldigheidsregels (draft)                           |
-| [Voorbeelden](examples.md)       | Pointers naar `examples/mvsa/`                      |
-| [Open punten](open-points.md)    | Centrale backlog (nu + later)                       |
-| [Versionering](versioning.md)    | Draft-versiebeleid                                  |
+| Document                                    | Inhoud                                              |
+| ------------------------------------------- | --------------------------------------------------- |
+| [Doel en scope](overview.md)                | Idee, niet-doelen, termen, defaults                 |
+| [Syntax](syntax.md)                         | Bestandsvorm, markers, maten, secties, L en stemmen |
+| [Semantiek](semantics.md)                   | Sync, recite, hoogte, directives, pitfalls          |
+| [Keywords (`@…`)](keywords.md)              | Gedefinieerde `@`-regels: wat, wanneer, wel/niet    |
+| [Metadata-brug](../guides/metadata-brug.md) | Gedeelde velden `.vsa` ↔ `.mvsa` (NL-termen)        |
+| [Zoektekst](../formats/zoektekst.md)        | Platte gezongen tekst in YAML (`zoektekst`)         |
+| [Speelplan](speelplan.md)                   | `@blok` / `@speelplan`: bladvorm vs klinkende vorm  |
+| [Validatie](validation.md)                  | Geldigheidsregels (draft)                           |
+| [Voorbeelden](examples.md)                  | Pointers naar `examples/mvsa/`                      |
+| [Open punten](open-points.md)               | Centrale backlog (nu + later)                       |
+| [Versionering](versioning.md)               | Draft-versiebeleid                                  |
 
 ## Bewust buiten scope (nu)
 
@@ -47,7 +49,7 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
   normatieve M-items volgen later);
 - Los MIDI-bestand (preview = [audio](../formats/audio.md)).
 
-Wel beschikbaar: `vsa mvsa validate`, `musicxml`, `mscz`, `pdf`, `audio`,
+Wel beschikbaar: `vsa mvsa validate`, `mxl`, `mscz`, `pdf`, `mp3`,
 `import`, `normalize`, `kuiser`; hulptekst via `--hulptekst` /
 `--hulptekst-as-parts` (zie [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md)).
 Navigatiehub: [Formaten & CLI](../formats/index.md).
