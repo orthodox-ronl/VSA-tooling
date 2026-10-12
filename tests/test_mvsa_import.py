@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from vsa.musicxml_package import write_musicxml_output
@@ -1300,6 +1301,267 @@ def test_mirror_aligns_long_tenor_by_duration_not_lyric_spacer():
     # Hold after c4&- for S's f4; Bb3 only then (not inside the melisma).
     assert re.search(r"c4\s*&\s*-\s+-\s+Bb3\s+c4\s+d4", body), body
     assert "c4&- Bb3" not in body.replace(" ", "")
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_leading_hyphen_lyric_keeps_melisma_followers():
+    """``- le`` / ``'- le`` is one syllable — do not drop the next lyric-less note.
+
+    MuseScore often puts the continuation hyphen in the lyric text. Treating
+    that as multi-syllable underlay used to strip melisma followers and emit
+    an incomplete measure (e.g. F eighth without following G).
+    """
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>E</step><octave>4</octave></pitch>
+        <duration>4</duration><type>half</type>
+        <lyric number="1"><syllabic>end</syllabic><text>len,</text></lyric>
+      </note>
+      <note>
+        <pitch><step>E</step><octave>4</octave></pitch>
+        <duration>2</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>al</text></lyric>
+      </note>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+        <lyric number="1"><syllabic>single</syllabic><text>- le</text></lyric>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>2</duration><type>quarter</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note><pitch><step>C</step><octave>3</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>C</step><octave>3</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>C</step><octave>3</octave></pitch><duration>2</duration><type>quarter</type></note>
+    </measure>""",
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
+    s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
+    assert "(- le)" not in l_line
+    assert re.search(r"al-?le", l_line, re.I), l_line
+    assert re.search(r"f4\s*&\s*g4", s_line, re.I), s_line
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+    # Roundtrip durations: full 4/4 on S.
+    exported = export_mvsa_to_musicxml(text, layout="playback")
+    root = ET.fromstring(exported)
+    for el in root.iter():
+        if "}" in el.tag:
+            el.tag = el.tag.split("}", 1)[1]
+    meas = root.find("part").find("measure")
+    div = int(meas.findtext("attributes/divisions") or "4")
+    total = sum(
+        int(n.findtext("duration") or 0)
+        for n in meas.findall("note")
+        if n.find("chord") is None
+    )
+    assert abs(total / div - 4.0) < 1e-6, (total, div, text)
+
+
+def test_mirror_pads_understem_slots_by_duration_not_tail_holds():
+    """Dotted + eighth under four S-eighths → D D D E (not D E E E)."""
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+        <lyric number="1"><syllabic>single</syllabic><text>uit</text></lyric>
+      </note>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>A</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration><type>half</type>
+        <lyric number="1"><syllabic>begin</syllabic><text>beel</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note><pitch><step>A</step><octave>3</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>A</step><octave>3</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>B</step><octave>3</octave></pitch><duration>2</duration><type>quarter</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note>
+        <pitch><step>D</step><octave>3</octave></pitch>
+        <duration>3</duration><type>quarter</type><dot/>
+      </note>
+      <note>
+        <pitch><step>E</step><octave>3</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+      </note>
+      <note>
+        <pitch><step>F</step><octave>3</octave></pitch>
+        <duration>2</duration><type>quarter</type>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>3</octave></pitch>
+        <duration>2</duration><type>quarter</type>
+      </note>
+    </measure>""",
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    b_line = next(ln for ln in text.splitlines() if ln.startswith("B:"))
+    # First position under uit.&.&.&. : three D holds then E (duration-weighted).
+    first = b_line.split("|", 1)[0]
+    assert re.search(r"d3\s*&\s*-\s*&\s*-\s*&\s*e3", first, re.I), first
+    exported = export_mvsa_to_musicxml(text, layout="playback")
+    root = ET.fromstring(exported)
+    for el in root.iter():
+        if "}" in el.tag:
+            el.tag = el.tag.split("}", 1)[1]
+    bass = root.findall("part")[3]
+    meas = bass.find("measure")
+    div = int(meas.findtext("attributes/divisions") or "4")
+    pitches = []
+    for n in meas.findall("note"):
+        if n.find("chord") is not None:
+            continue
+        pitch = n.find("pitch")
+        if pitch is None:
+            continue
+        dur = int(n.findtext("duration") or 0)
+        alter = pitch.findtext("alter") or ""
+        pitches.append(
+            (f"{pitch.findtext('step')}{alter}{pitch.findtext('octave')}", round(dur / div, 4))
+        )
+    # After same-pitch collapse: D dotted + E eighth + F + G.
+    assert pitches[0] == ("D3", 1.5), pitches
+    assert pitches[1] == ("E3", 0.5), pitches
+    assert ("F3", 1.0) in pitches and ("G3", 1.0) in pitches
+
+
+def test_mirror_keeps_understem_pitch_changes_beyond_s_slots():
+    """T/B with more pitch changes than S slots must not lose tones (no truncate).
+
+    Classic MSCZ case: S holds one half on ``beel`` while T moves A3→B3 in two
+    quarters. Old import truncated to one slot and dropped B3; reconcile expands
+    L/S with holds so sync stays valid.
+    """
+    xml = _satb_score_xml(
+        {
+            "P1": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions><key><fifths>-1</fifths></key></attributes>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+        <lyric number="1"><syllabic>single</syllabic><text>uit</text></lyric>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+      </note>
+      <note>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+      </note>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration><type>half</type>
+        <lyric number="1"><syllabic>begin</syllabic><text>beel</text></lyric>
+      </note>
+    </measure>""",
+            "P2": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+    </measure>""",
+            "P3": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note><pitch><step>A</step><octave>3</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>A</step><octave>3</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>B</step><octave>3</octave></pitch><duration>2</duration><type>quarter</type></note>
+    </measure>""",
+            "P4": """\
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note>
+        <pitch><step>D</step><octave>3</octave></pitch>
+        <duration>3</duration><type>quarter</type><dot/>
+      </note>
+      <note>
+        <pitch><step>E</step><octave>3</octave></pitch>
+        <duration>1</duration><type>eighth</type>
+      </note>
+      <note>
+        <pitch><step>F</step><octave>3</octave></pitch>
+        <duration>2</duration><type>quarter</type>
+      </note>
+      <note>
+        <pitch><step>G</step><octave>3</octave></pitch>
+        <duration>2</duration><type>quarter</type>
+      </note>
+    </measure>""",
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="abc")
+    t_line = next(ln for ln in text.splitlines() if ln.startswith("T:"))
+    b_line = next(ln for ln in text.splitlines() if ln.startswith("B:"))
+    s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
+    l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
+    # Second L-position (beel): T must keep A→B; B must keep F→G.
+    assert re.search(r"a3\s*&\s*b3|-\s*&\s*b3", t_line, re.I), t_line
+    assert re.search(r"f3\s*&\s*g3|-\s*&\s*g3", b_line, re.I), b_line
+    # S expanded with hold so slot counts match (f4&-).
+    assert re.search(r"f4\s*&\s*-", s_line, re.I), s_line
+    assert re.search(r"beel[_~.]?\s*&", l_line, re.I), l_line
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 

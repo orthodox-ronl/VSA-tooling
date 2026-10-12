@@ -381,6 +381,67 @@ def test_export_playback_no_recite_collapse():
     assert "<extend" in body
 
 
+def test_export_empty_recite_melisma_keeps_all_slots_and_full_measure():
+    """``()~&~&.&.&~`` + multi-slot stem: all pitches, full 4/4 — not one quarter.
+
+    Import encodes lyric-less melisma as empty recite with ELM chain; export
+    must treat that as ordinary melisma (not M10 one-note-per-syllable).
+    """
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+@sectie t
+L: te ont van~&.&.  | ()~&~&.&.&~ ||
+S: a4 Bb4 c5&d5&c5  | Bb4&a4&g4&a4&Bb4 ||
+A: f4 g4  a4&Bb4&a4 | g4&f4&e4&f4&g4   ||
+T: -  -   -&-&-     | -&-&-&-&-        ||
+B: f3 -   -&-&-     | e3&f3&c3&-&-     ||
+"""
+    def _local(tag: str) -> str:
+        return tag.rsplit("}", 1)[-1]
+
+    for layout in ("playback", "partituur"):
+        xml = export_mvsa_to_musicxml(text, layout=layout)
+        root = ET.fromstring(xml)
+        for el in root.iter():
+            el.tag = _local(el.tag)
+        p1 = root.find("part")
+        assert p1 is not None
+        measures = p1.findall("measure")
+        assert len(measures) >= 2
+        m2 = measures[1]
+        div_el = m2.find("attributes/divisions")
+        if div_el is None or not (div_el.text or "").strip():
+            div_el = measures[0].find("attributes/divisions")
+        divisions = int((div_el.text if div_el is not None else None) or "4")
+        notes: list[str] = []
+        total = 0
+        for note in m2.findall("note"):
+            if note.find("chord") is not None:
+                continue
+            voice = note.findtext("voice") or "1"
+            if layout == "partituur" and voice != "1":
+                continue
+            staff = note.findtext("staff")
+            if layout == "partituur" and staff not in (None, "1"):
+                continue
+            dur = int(note.findtext("duration") or "0")
+            total += dur
+            pitch = note.find("pitch")
+            if pitch is None:
+                continue
+            step = pitch.findtext("step")
+            octv = pitch.findtext("octave")
+            alter = pitch.findtext("alter") or ""
+            notes.append(f"{step}{alter}{octv}")
+        assert abs(total / divisions - 4.0) < 1e-6, (layout, total, divisions, notes)
+        joined = "".join(notes)
+        assert "B" in joined and "A" in joined and "G" in joined, (layout, notes)
+        assert len(notes) >= 4, (layout, notes)
+
+
 def test_export_alleluia_toon1_melisma_slur_and_collapse():
     """le.&.: S verschillend → slur; A zelfde hoogte → samentrekken tot kwart."""
     text = (EXAMPLES / "alleluia-toon-1.mvsa").read_text(encoding="utf-8")

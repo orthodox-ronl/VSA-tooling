@@ -1,6 +1,6 @@
 """Import MusicXML / MSCZ into .mvsa (draft-v0).
 
-Primary path: parse SATB MusicXML (as emitted by ``mvsa musicxml``).
+Primary path: parse SATB MusicXML (as emitted by ``mvsa mxl``).
 ``.mscz`` is converted to ``.mxl`` via MuseScore CLI, then normalized to
 four-part Coria/SATB (same explode as ``mscz mxl``) before parsing.
 
@@ -98,6 +98,28 @@ _DURATION_TO_ELM: dict[tuple[str, int], str] = {
     ("eighth", 0): ".",
     ("16th", 0): "..",
 }
+
+# ``Duration.divisions_value`` at 4 divisions per quarter → note type.
+_UNITS_TO_DURATION: dict[int, Duration] = {
+    1: Duration("16th", 0),
+    2: Duration("eighth", 0),
+    3: Duration("eighth", 1),
+    4: Duration("quarter", 0),
+    6: Duration("quarter", 1),
+    8: Duration("half", 0),
+    12: Duration("half", 1),
+    16: Duration("whole", 0),
+}
+
+
+def _duration_from_division_units(units: int) -> Duration:
+    """Map MusicXML duration units (4 = quarter) to a :class:`Duration`."""
+    if units in _UNITS_TO_DURATION:
+        return _UNITS_TO_DURATION[units]
+    for candidate in (16, 12, 8, 6, 4, 3, 2, 1):
+        if units >= candidate and candidate in _UNITS_TO_DURATION:
+            return _UNITS_TO_DURATION[candidate]
+    return Duration("quarter", 0)
 
 # Major key: circle-of-fifths index → tonic spelling for ``@do …4``.
 # Same index as MusicXML ``<fifths>`` and MuseScore ``<concertKey>``.
@@ -476,12 +498,17 @@ def score_to_mvsa(
 
     for mi in range(n_meas):
         positions = s_positions_per_meas[mi]
+        mirrors: dict[str, list[_Position]] = {}
+        for letter in "ATB":
+            mirrors[letter] = _group_positions(
+                score.parts[letter][mi], mirror_of=positions
+            )
+        _reconcile_mirror_slot_counts(positions, mirrors)
         l_segs.append(_format_l_measure(positions))
+        voice_by_letter = {"S": positions, **mirrors}
         for letter in "SATB":
-            v_notes = score.parts[letter][mi]
-            v_positions = _group_positions(v_notes, mirror_of=positions)
             seg, last_pitch[letter] = _format_voice_measure(
-                v_positions,
+                voice_by_letter[letter],
                 pitch_form=pitch_form,
                 do=do_p,
                 intervals=intervals,
@@ -679,27 +706,103 @@ def _position_duration_units(pos: _Position) -> int:
     return _position_source_count(pos) * 4
 
 
+def _pitch_runs_with_units(chunk: list[_Note]) -> list[tuple[_Note, int]]:
+    """Collapse same-pitch runs; return ``(representative, total duration units)``."""
+    if not chunk:
+        return []
+    runs: list[tuple[_Note, int]] = []
+    cur = chunk[0]
+    units = max(1, _note_duration_units(cur))
+    for note in chunk[1:]:
+        if (
+            note.pitch is not None
+            and cur.pitch is not None
+            and note.pitch == cur.pitch
+        ):
+            units += max(1, _note_duration_units(note))
+            continue
+        runs.append((cur, units))
+        cur = note
+        units = max(1, _note_duration_units(note))
+    runs.append((cur, units))
+    return runs
+
+
+def _allocate_slots_by_weight(weights: list[int], n_slots: int) -> list[int]:
+    """Spread ``n_slots`` across runs by weight (each run ≥1 when possible)."""
+    k = len(weights)
+    if k == 0 or n_slots <= 0:
+        return []
+    if n_slots <= k:
+        return [1 if i < n_slots else 0 for i in range(k)]
+    weights = [max(1, w) for w in weights]
+    total = sum(weights)
+    quotas = [n_slots * w / total for w in weights]
+    alloc = [int(q) for q in quotas]
+    for i in range(k):
+        if alloc[i] < 1:
+            alloc[i] = 1
+    while sum(alloc) > n_slots:
+        i = max(range(k), key=lambda j: (alloc[j], quotas[j]))
+        if alloc[i] <= 1:
+            break
+        alloc[i] -= 1
+    while sum(alloc) < n_slots:
+        i = max(range(k), key=lambda j: (quotas[j] - alloc[j], weights[j]))
+        alloc[i] += 1
+    return alloc
+
+
 def _fit_mirror_chunk(
     chunk: list[_Note],
     n_slots: int,
     hold_pitch: Pitch | None,
     hold_dur: Duration,
+    *,
+    allow_extra_slots: bool = True,
 ) -> tuple[list[_Note], Pitch | None, Duration]:
-    """Truncate or pad ``chunk`` to ``n_slots``; update hold pitch/duration."""
-    if chunk and chunk[-1].pitch is not None:
-        hold_pitch = chunk[-1].pitch
-        hold_dur = chunk[-1].duration
-    if len(chunk) > n_slots:
-        chunk = chunk[:n_slots]
+    """Pad ``chunk`` up to ``n_slots``; keep real pitch changes (no silent drop).
+
+    Same-pitch runs collapse first. Extra pitch changes stay when
+    ``allow_extra_slots`` is true (reconcile expands L/S). Recite stays one
+    L-slot — extras truncated. Padding follows note durations (longer first
+    pitch gets more hold-slots), not “repeat last pitch at the end”.
+    """
+    runs = _pitch_runs_with_units(chunk)
+    if runs and runs[-1][0].pitch is not None:
+        hold_pitch = runs[-1][0].pitch
+        hold_dur = runs[-1][0].duration
+    if len(runs) > n_slots and not allow_extra_slots:
+        runs = runs[:n_slots]
+        if runs and runs[-1][0].pitch is not None:
+            hold_pitch = runs[-1][0].pitch
+            hold_dur = runs[-1][0].duration
+        chunk = [note for note, _u in runs]
+    elif len(runs) < n_slots:
+        if runs:
+            alloc = _allocate_slots_by_weight([u for _n, u in runs], n_slots)
+            out: list[_Note] = []
+            for (note, _u), n_alloc in zip(runs, alloc):
+                if n_alloc <= 0:
+                    continue
+                out.append(note)
+                for _ in range(n_alloc - 1):
+                    out.append(
+                        _Note(pitch=note.pitch, duration=note.duration, lyrics=[])
+                    )
+            chunk = out
+        else:
+            fill = hold_pitch if hold_pitch is not None else Pitch("C", 4, 0.0)
+            chunk = [
+                _Note(pitch=fill, duration=hold_dur, lyrics=[])
+                for _ in range(n_slots)
+            ]
+            hold_pitch = fill
         if chunk and chunk[-1].pitch is not None:
             hold_pitch = chunk[-1].pitch
             hold_dur = chunk[-1].duration
-    elif len(chunk) < n_slots:
-        fill = hold_pitch if hold_pitch is not None else Pitch("C", 4, 0.0)
-        while len(chunk) < n_slots:
-            chunk.append(_Note(pitch=fill, duration=hold_dur, lyrics=[]))
-        if hold_pitch is None:
-            hold_pitch = fill
+    else:
+        chunk = [note for note, _u in runs]
     return chunk, hold_pitch, hold_dur
 
 
@@ -710,9 +813,11 @@ def _mirror_positions_by_duration(
     """Align A/T/B to S positions by duration, not note index or lyrics.
 
     A long note that covers several S slots is split/padded into those slots.
-    A lyric-less spacer after a long note is not stolen into the previous
-    melisma (MSCZ imports often leave such spacers when underlay is incomplete).
-    Leftover duration from a partially consumed note feeds the next position.
+    Extra pitch changes in the same duration become extra ``&``-slots (kept;
+    reconciled onto L/S afterwards). A lyric-less spacer after a long note is
+    not stolen into the previous melisma (MSCZ imports often leave such
+    spacers when underlay is incomplete). Leftover duration from a partially
+    consumed note feeds the next position.
     """
     out: list[_Position] = []
     i = 0
@@ -765,7 +870,12 @@ def _mirror_positions_by_duration(
                 got = need
 
         chunk, hold_pitch, hold_dur = _fit_mirror_chunk(
-            chunk, n_slots, hold_pitch, hold_dur
+            chunk,
+            n_slots,
+            hold_pitch,
+            hold_dur,
+            # Recite is always one L-slot; cannot expand S under a recite body.
+            allow_extra_slots=not pos.recite,
         )
         out.append(
             _Position(
@@ -773,9 +883,143 @@ def _mirror_positions_by_duration(
                 recite=pos.recite,
                 source_count=n_src,
                 duration_units=need,
+                word_continues_after=pos.word_continues_after,
+                leading_word_hyphen=pos.leading_word_hyphen,
+                syllabic=pos.syllabic,
             )
         )
     return out
+
+
+def _expand_position_to_slot_count(
+    pos: _Position,
+    target_slots: int,
+    *,
+    duration_donor: list[_Note] | None = None,
+) -> _Position:
+    """Pad melisma to ``target_slots`` using this voice's pitch-duration weights.
+
+    Slot **pitches** follow this voice (longer tones get more holds). Slot
+    **durations** prefer ``duration_donor`` when it already has ``target_slots``
+    notes whose units sum to this position's span (avoids ELMs that MVSA cannot
+    write, e.g. dotted eighth). Otherwise split units evenly with representable
+    ELM sizes.
+    """
+    if target_slots < 1:
+        return pos
+    if len(pos.notes) >= target_slots:
+        return pos
+
+    runs = _pitch_runs_with_units(pos.notes)
+    total_units = pos.duration_units or sum(u for _n, u in runs)
+    if total_units <= 0:
+        total_units = target_slots * 4
+
+    slot_durs: list[Duration] | None = None
+    if duration_donor is not None and len(duration_donor) == target_slots:
+        cand_units = [max(1, _note_duration_units(n)) for n in duration_donor]
+        if sum(cand_units) == total_units:
+            slot_durs = [n.duration for n in duration_donor]
+
+    if slot_durs is None and total_units % target_slots == 0:
+        per = total_units // target_slots
+        dur = _duration_from_division_units(per)
+        if (dur.note_type, dur.dots) in _DURATION_TO_ELM:
+            slot_durs = [dur] * target_slots
+
+    if slot_durs is None:
+        # Last resort: equal undotted grid (may shorten if units do not divide).
+        per = max(1, total_units // target_slots)
+        for cand in (per, 4, 2, 1, 8):
+            dur = _duration_from_division_units(cand)
+            if (dur.note_type, dur.dots) in _DURATION_TO_ELM:
+                slot_durs = [dur] * target_slots
+                break
+        if slot_durs is None:
+            slot_durs = [Duration("quarter", 0)] * target_slots
+
+    if not runs:
+        fill = Pitch("C", 4, 0.0)
+        new_notes = [
+            _Note(pitch=fill, duration=slot_durs[i], lyrics=[])
+            for i in range(target_slots)
+        ]
+    else:
+        pitch_alloc = _allocate_slots_by_weight(
+            [u for _n, u in runs], target_slots
+        )
+        pitch_slots: list[Pitch | None] = []
+        for (note, _u), n_alloc in zip(runs, pitch_alloc):
+            for _ in range(n_alloc):
+                pitch_slots.append(note.pitch)
+        while len(pitch_slots) < target_slots:
+            pitch_slots.append(
+                pitch_slots[-1] if pitch_slots else Pitch("C", 4, 0.0)
+            )
+        pitch_slots = pitch_slots[:target_slots]
+
+        new_notes = [
+            _Note(
+                pitch=pitch_slots[i],
+                duration=slot_durs[i],
+                lyrics=[],
+            )
+            for i in range(target_slots)
+        ]
+        if pos.notes and pos.notes[0].lyrics and new_notes:
+            new_notes[0] = _Note(
+                pitch=new_notes[0].pitch,
+                duration=new_notes[0].duration,
+                lyrics=list(pos.notes[0].lyrics),
+                is_breve=pos.notes[0].is_breve,
+            )
+
+    return _Position(
+        notes=new_notes,
+        recite=pos.recite,
+        source_count=pos.source_count,
+        duration_units=pos.duration_units,
+        word_continues_after=pos.word_continues_after,
+        leading_word_hyphen=pos.leading_word_hyphen,
+        syllabic=pos.syllabic,
+    )
+
+
+def _reconcile_mirror_slot_counts(
+    lead: list[_Position],
+    mirrors: dict[str, list[_Position]],
+) -> None:
+    """Ensure S/A/T/B share melisma slot counts per L-position.
+
+    When an understem kept more pitch changes than S had slots, expand each
+    shorter voice with duration-weighted holds. Durations come from a voice
+    that already has the target slot count (usually the understem), so L-ELMs
+    stay representable and the measure length is preserved.
+    """
+    n = len(lead)
+    for i in range(n):
+        at_i = [lead[i]]
+        for letter in "ATB":
+            positions = mirrors.get(letter)
+            if positions is not None and i < len(positions):
+                at_i.append(positions[i])
+        target = max((len(p.notes) for p in at_i), default=0)
+        if target <= 0:
+            continue
+        donor_pos = next((p for p in at_i if len(p.notes) == target), None)
+        donor_notes = donor_pos.notes if donor_pos is not None else None
+        if len(lead[i].notes) < target:
+            lead[i] = _expand_position_to_slot_count(
+                lead[i], target, duration_donor=donor_notes
+            )
+        for letter in "ATB":
+            positions = mirrors.get(letter)
+            if positions is None or i >= len(positions):
+                continue
+            if len(positions[i].notes) < target:
+                positions[i] = _expand_position_to_slot_count(
+                    positions[i], target, duration_donor=donor_notes
+                )
 
 
 def _group_positions(
@@ -785,10 +1029,12 @@ def _group_positions(
 ) -> list[_Position]:
     """Group notes into L-length positions (lyric starts / melisma).
 
-    When ``mirror_of`` is set (for A/T/B), emit one position per S position with
-    the same slot count, consuming the voice by **duration** against each S
-    position (long notes split/padded; leftover duration carries to the next
-    position). Lyric text on A/T/B does not drive slot boundaries — S/L does.
+    When ``mirror_of`` is set (for A/T/B), emit one position per S position,
+    consuming the voice by **duration** against each S position (long notes
+    split/padded; extra pitch changes kept as ``&``-slots; leftover duration
+    carries to the next position). Lyric text on A/T/B does not drive slot
+    boundaries — S/L does. Call :func:`_reconcile_mirror_slot_counts` after
+    mirroring so L/S grow when an understem needed more slots.
     """
     if mirror_of is not None:
         return _mirror_positions_by_duration(notes, mirror_of)
@@ -849,10 +1095,13 @@ def _group_positions(
         recite = bool(n0.is_breve) or multi_syllable
         source_len = len(group)
         duration_units = sum(_note_duration_units(n) for n in group)
+        leading_hyphen = _lyric_text_has_leading_hyphen(lyric_text)
         if multi_syllable and len(group) > 1:
             # Recite underlay on the visible note; lyric-less followers are often
             # failed expand/spacers — keep one slot (same pitch/duur as n0).
             group = [n0]
+            duration_units = _note_duration_units(n0)
+            source_len = 1
         if multi_syllable:
             repaired = join_import_lyrics([(lyric_text, "single")])
             group = [
@@ -869,6 +1118,7 @@ def _group_positions(
                 recite=recite,
                 source_count=source_len,
                 duration_units=duration_units,
+                leading_word_hyphen=leading_hyphen,
                 syllabic=syllabic,
             )
         )
@@ -1848,22 +2098,35 @@ def _format_l_measure(positions: list[_Position]) -> str:
     return " ".join(parts)
 
 
+def _lyric_text_has_leading_hyphen(text: str) -> bool:
+    """MusicXML continuation written into the lyric (``- le``, ``'- de``)."""
+    t = (text or "").strip().lstrip("'\"")
+    return t.startswith("-") and bool(t.lstrip("-").strip())
+
+
 def _lyric_looks_multi_syllable(text: str) -> bool:
     """True when one MusicXML lyric encodes multiple syllables (recite underlay).
 
     Signals: whitespace between parts, or a soft hyphen between word characters
     (``die-tot``, ``ko-nink-rijk``). Lone extender ``-`` is not multi-syllable.
+    Leading syllabic markers (``- le``, ``'- de``) are one syllable — strip
+    them before the space/hyphen checks so melisma followers stay attached.
     """
     t = (text or "").strip()
     if not t or t == "-":
         return False
-    if any(ch.isspace() for ch in t):
+    # Drop MuseScore continuation prefix (``- `` / ``'- ``) before detecting
+    # real multi-syllable underlay.
+    core = t.lstrip("'\"").lstrip("-").strip()
+    if not core:
+        return False
+    if any(ch.isspace() for ch in core):
         return True
     # Soft hyphen between letters/digits (not a leading syllabic ``-li``).
-    for i, ch in enumerate(t):
-        if ch != "-" or i == 0 or i + 1 >= len(t):
+    for i, ch in enumerate(core):
+        if ch != "-" or i == 0 or i + 1 >= len(core):
             continue
-        left, right = t[i - 1], t[i + 1]
+        left, right = core[i - 1], core[i + 1]
         if (left.isalnum() or left in "',.") and (
             right.isalnum() or right in "',."
         ):
