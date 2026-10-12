@@ -481,6 +481,9 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
 - Soft-wrap: LSATB-systemen van ongeveer 80 tekens
   (`DEFAULT_SYSTEM_SOFT_WIDTH`). Eén maat die alleen al langer is blijft één
   systeem.
+- **Maatnavigatie:** vóór elk LSATB-systeem staat `#maat N` (`N` = 1-based
+  startmaat van dat systeem), zodat je makkelijk heen-en-weer kunt tussen
+  `.mvsa` en maatnummers in PDF / MuseScore.
 - **A/T/B-uitlijning:** onderstemmen volgen de L/S-posities op **duur** (niet
   op noot-index of lyrics van A/T/B). Een lange noot die meerdere S-slots
   dekt, wordt gesplitst/gepaddet (`c4&-` + hold `-`); een lyric-loze spacer na

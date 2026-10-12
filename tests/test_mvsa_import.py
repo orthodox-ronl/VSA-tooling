@@ -758,7 +758,8 @@ def test_import_soft_wraps_systems():
 """
     score = parse_musicxml_satb(xml)
     text = score_to_mvsa(score, pitch_form="abc", system_soft_width=35)
-    l_lines = [ln for ln in text.splitlines() if ln.startswith("L:")]
+    lines = text.splitlines()
+    l_lines = [ln for ln in lines if ln.startswith("L:")]
     assert len(l_lines) >= 2, (
         f"verwacht meerdere LSATB-systemen bij soft_width=35; kreeg {l_lines!r}"
     )
@@ -766,8 +767,64 @@ def test_import_soft_wraps_systems():
     for ln in l_lines[:-1]:
         assert ln.rstrip().endswith("|")
         assert not ln.rstrip().endswith("||")
+    maat_markers = [ln for ln in lines if ln.startswith("#maat ")]
+    assert len(maat_markers) == len(l_lines), (maat_markers, l_lines)
+    assert maat_markers[0] == "#maat 1"
+    # Each #maat sits directly above its L: line.
+    for i, ln in enumerate(lines):
+        if ln.startswith("L:"):
+            assert i > 0 and lines[i - 1].startswith("#maat "), lines[max(0, i - 2) : i + 1]
+    # Later systems start at a higher 1-based measure number.
+    nums = [int(m.split()[1]) for m in maat_markers]
+    assert nums == sorted(nums) and nums[0] == 1 and nums[-1] > 1
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], diags
+
+
+def test_import_maat_marker_survives_kuiser(tmp_path: Path):
+    """#maat N blijft boven elk systeem na import-normaalvorm (kuiser)."""
+    xml = _satb_score_xml(
+        {
+            "P1": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>-1</fifths></key></attributes>"
+                "<note><pitch><step>B</step><alter>-1</alter>"
+                "<octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type>"
+                '<lyric number="1"><syllabic>single</syllabic>'
+                "<text>Heer</text></lyric></note></measure>"
+            ),
+            "P2": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>-1</fifths></key></attributes>"
+                "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+            "P3": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>-1</fifths></key></attributes>"
+                "<note><pitch><step>D</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+            "P4": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>-1</fifths></key></attributes>"
+                "<note><pitch><step>G</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+        }
+    )
+    path = tmp_path / "one.musicxml"
+    path.write_text(xml, encoding="utf-8")
+    text = import_score_to_mvsa(path, pitch="abc", align=True)
+    lines = text.splitlines()
+    assert "#maat 1" in lines
+    idx = lines.index("#maat 1")
+    assert lines[idx + 1].startswith("L:")
 
 
 def test_clean_lyric_hyphen_and_trailing_period():

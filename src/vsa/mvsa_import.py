@@ -26,7 +26,9 @@ split by a barline between two recites gets a canonical ``)-`` link.
 
 Imported LSATB systems are soft-wrapped to about
 :data:`DEFAULT_SYSTEM_SOFT_WIDTH` characters so the result stays readable
-in an editor (one long measure may exceed the width alone).
+in an editor (one long measure may exceed the width alone). Each system is
+preceded by a ``#maat N`` comment (1-based start measure) for navigation
+against PDF / MuseScore measure numbers.
 
 By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
 (canonieke schrijfvorm / normaalvorm: lone standaard-``~`` op L weggelaten,
@@ -535,6 +537,8 @@ def score_to_mvsa(
             bars = ["|"] * (n - 1) + ["||"]
         else:
             bars = ["|"] * n
+        # 1-based; matches typical MusicXML / MuseScore / PDF measure numbers.
+        lines.append(f"#maat {start + 1}")
         lines.append(f"L: {_join_measure_segs(chunk_l, bars)}")
         for letter in "SATB":
             voice_bars = _bars_with_system_eindanker(

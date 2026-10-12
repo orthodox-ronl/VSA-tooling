@@ -345,6 +345,7 @@ S: fa so- mi&do&re&mi fa mi ||mi
    `--no-align`.
 
 Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
+vóór elk systeem `#maat N` (1-based startmaat, handig t.o.v. PDF/MuseScore);
 same-pitch holds als `-` op stemregels (ook over systeembraken; export zet die
 weer om naar de vorige toon — zie
 [lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken));

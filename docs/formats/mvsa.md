@@ -31,8 +31,10 @@ schrijfvorm** (kuiser-normaalvorm). Soft-wrap zet same-pitch holds als `-`
 ook over systeembraken; export en eindanker-check zetten die weer om naar de
 vorige toon (tenzij een beginanker reset) — zie
 [Semantiek — lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
-Met `--pitch vsa` plakt de import check-only eindankers (a–g + cijfer) op
-systeemeinden; `doremi` / `a-g` doen dat niet. Tutorial:
+Vóór elk LSATB-systeem zet import `#maat N` (1-based startmaat) voor
+navigatie t.o.v. PDF / MuseScore. Met `--pitch vsa` plakt de import
+check-only eindankers (a–g + cijfer) op systeemeinden; `doremi` / `a-g`
+doen dat niet. Tutorial:
 [mvsa schrijven 101 — bladmuziek](../guides/mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa).
 
 ## Typische commando’s
