@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 09:26 CEST.
+  , gebouwd 2026-10-12 13:41 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5697,7 +5697,9 @@ vsa mvsa validate lied.mvsa
    (valse <code>dag-gaan</code> / <code>steun-van</code>, ontbrekende <code>we-der-ke</code>, spaties in
    underlay), maar niet alles — bekijk vooral recite <code>( … )</code> en
    woordstreepjes. A/T/B volgen L/S op duur; controleer holds (<code>-</code>) en
-   <code>&amp;</code>-melisma’s tegen de bronpartituur.</li>
+   <code>&amp;</code>-melisma’s tegen de bronpartituur (onderstemmen met meer toonwissels
+   dan S in dezelfde tijd blijven als <code>&amp;</code>-melisma; L/S krijgen holds;
+   minder noten worden naar duur gepaddet).</li>
 <li><code>vsa mvsa validate lied.mvsa</code></li>
 <li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code> (Pyphen-warnings zijn
    advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
@@ -5758,7 +5760,7 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 </tr>
 <tr>
 <td>MusicXML</td>
-<td><code>vsa mvsa musicxml lied.mvsa -o generated\lied.mxl</code></td>
+<td><code>vsa mvsa mxl lied.mvsa -o generated\lied.mxl</code></td>
 </tr>
 <tr>
 <td>MuseScore</td>
@@ -5776,7 +5778,7 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 </table>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
+vsa mvsa mxl examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
 </code></pre></div>
 <p>CLI-detail: <a href="../../reference/cli/mvsa/">mvsa-referentie</a>. Formaten-hub:
 <a href="../../formats/">Formaten &amp; CLI</a>.</p>
