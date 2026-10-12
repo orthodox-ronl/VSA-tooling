@@ -36,9 +36,9 @@ mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
 mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
-mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
-mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
-mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
+mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
+mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
+mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 ```
 
 ## Subcommando's
@@ -452,7 +452,7 @@ vsa mvsa wav lied.mxl -o generated\lied.wav
 ### Synopsis
 
 ```text
-vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
+vsa mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
                 [--octave-style {@oct,marker}] [--section SECTION]
                 [--musescore PATH] [--no-align] path
 ```
@@ -466,8 +466,9 @@ Importeert een partituur naar `.mvsa`:
 | `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4)                                                                             |
 | `.mscz`                       | MuseScore CLI → temp `.mxl` → **SATB-normalisatie** (zelfde explode als [`mscz mxl`](mscz.md)) → parser |
 
-Stemhoogten worden in de gekozen `--pitch`-vorm geschreven; `@mode` is
-majeur (aanname); `@oct` wordt per stem afgeleid. `@do` volgt deze volgorde:
+Stemhoogten worden in de gekozen `--pitch`-vorm geschreven (default
+**`ag-vsa`**); `@mode` is majeur (aanname); `@oct` wordt per stem afgeleid.
+`@do` volgt deze volgorde:
 
 1. `--do` op de command line (bijv. `F4`);
 2. bij `.mscz`: aantal kruisen/mollen uit MuseScore `KeySig` (`concertKey`);
@@ -533,32 +534,42 @@ Bij complexe MuseScore-lyrics is soms `--no-align` nodig (sla kuiser/align
 over) — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
 `kuiser` zijn advies, geen import-fout.
 
-Bij `--pitch vsa` plakt de import op elke stemregel een **eindanker** met
+**Pitch-vormen bij import**
+
+| `--pitch`  | Stemregels                                                                              | Eindanker per systeem |
+| ---------- | --------------------------------------------------------------------------------------- | --------------------- |
+| `ag-vsa`   | **Default.** Eerste klinkende noot per LSATB-systeem absolute a–g; daarna EHM           | ja (a–g)              |
+| `vsa`      | Eerste toon absoluut als doremi; daarna EHM                                             | ja (a–g)              |
+| `doremi`   | Laddergraden                                                                            | nee                   |
+| `a-g`      | Toonnamen met wetenschappelijk cijfer (`bb4`, …); alias `abc`                           | nee                   |
+
+Bij `ag-vsa` en `vsa` plakt de import op elke stemregel een **eindanker** met
 absolute toonhoogte (a–g met wetenschappelijk cijfer) direct achter de
 **laatste maatstreep** van elk systeem, bijvoorbeeld `|g4` of `||a4`. Dat zijn
 check-only ankers: na wijzigingen in het `.mvsa` vangt `mvsa validate` een
 mismatch op (`MVSA-BAR-ANKER`). Op de lyrics-regel (`L:`) blijven de strepen
-kaal. Bij `--pitch doremi` en `--pitch a-g` komen die eindankers niet.
+kaal.
 
 Syntax van eindankers:
 [specification-mvsa — eindanker](../../specification-mvsa/syntax.md#eindanker-aan-de-maatstreep).
 
 ### Argumenten en opties
 
-| Naam                 | Verplicht | Betekenis                                                         | Default              |
-| -------------------- | --------- | ----------------------------------------------------------------- | -------------------- |
-| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.                                   | —                    |
-| `--pitch`            | Ja        | `doremi`, `a-g` (of alias `abc`), of `vsa`.                       | —                    |
-| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                                                  | `<stem>.import.mvsa` |
-| `--do`               | Nee       | Forceer `@do` (bijv. `F4`). Zonder: KeySig / fifths / fallback.   | afgeleid             |
-| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)                                     | `@oct`               |
-| `--section`          | Nee       | `@sectie`-id in de output                                         | `import`             |
-| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                                       | auto                 |
-| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)                              | uit                  |
+| Naam                 | Verplicht | Betekenis                                                                              | Default              |
+| -------------------- | --------- | -------------------------------------------------------------------------------------- | -------------------- |
+| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.                                                        | —                    |
+| `--pitch`            | Nee       | `ag-vsa` (default), `vsa`, `doremi`, of `a-g` (alias `abc`).                           | `ag-vsa`             |
+| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                                                                       | `<stem>.import.mvsa` |
+| `--do`               | Nee       | Forceer `@do` (bijv. `F4`). Zonder: KeySig / fifths / fallback.                        | afgeleid             |
+| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)                                                          | `@oct`               |
+| `--section`          | Nee       | `@sectie`-id in de output                                                              | `import`             |
+| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                                                            | auto                 |
+| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)                                                   | uit                  |
 
 ### Voorbeelden
 
 ```cmd
+vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa
 vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4
@@ -573,7 +584,7 @@ vsa mvsa validate lied.mvsa
 ### Synopsis
 
 ```text
-vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}]
+vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                    [--octave-style {@oct,marker}] [--no-align] path
 ```
 
@@ -589,18 +600,19 @@ kolom- en maatstreep-uitlijning gebeurt standaard. Zo blijf je
 meerdere schetsen met verschillende spellingen in één bestand intact.
 
 Wil je wél herschrijven naar één vorm, geef dan expliciet `--pitch doremi`,
-`a-g` of `vsa`. (`abc` is een alias van `a-g`.)
+`a-g`, `vsa` of `ag-vsa`. (`abc` is een alias van `a-g`.)
 
 **Import uit een ander formaat** (`.mxl` / `.mscz` via `mvsa import` / `mxl
-import`): daar is `--pitch` verplicht of default **`doremi`** — er is dan
-geen “bronnotatie” om te bewaren.
+import`): daar is de default **`ag-vsa`** — er is dan geen “bronnotatie” om
+te bewaren.
 
-| `--pitch`   | Gedrag                                                                |
-| ----------- | --------------------------------------------------------------------- |
-| `preserve`  | **Default** voor `.mvsa` → `.mvsa`: stemtokens ongewijzigd; wel align |
-| `doremi`    | Laddergraden t.o.v. `@do` / `@oct`                                    |
-| `a-g`       | Toonnamen met wetenschappelijk cijfer (`bb4`, `c5`, …); alias: `abc`  |
-| `vsa`       | Eerste toon absoluut (doremi), daarna EHM (`/`, `\2`, …)              |
+| `--pitch`   | Gedrag                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| `preserve`  | **Default** voor `.mvsa` → `.mvsa`: stemtokens ongewijzigd; wel align                           |
+| `doremi`    | Laddergraden t.o.v. `@do` / `@oct`                                                              |
+| `a-g`       | Toonnamen met wetenschappelijk cijfer (`bb4`, `c5`, …); alias: `abc`                            |
+| `vsa`       | Eerste toon absoluut (doremi), daarna EHM (`/`, `\2`, …)                                        |
+| `ag-vsa`    | Per LSATB-systeem: eerste noot absolute a–g, daarna EHM; a–g-eindanker op de laatste maatstreep |
 
 Kolom- en maatstreep-uitlijning gebeurt standaard (zelfde regels als
 `scripts/align_mvsa_columns.py`); zet `--no-align` om dat over te slaan.
@@ -612,7 +624,7 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 | Naam                    | Verplicht | Betekenis                                                            | Default                         |
 | ----------------------- | --------- | -------------------------------------------------------------------- | ------------------------------- |
 | `path`                  | Ja        | Bron-`.mvsa`-bestand.                                                | —                               |
-| `--pitch`               | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` om te herschrijven | `preserve` bij `.mvsa`-bron     |
+| `--pitch`               | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` / `ag-vsa`         | `preserve` bij `.mvsa`-bron     |
 | `-o`, `--output`        | Nee       | Uitvoerpad.                                                          | `<stem>.normalized.mvsa`        |
 | `--octave-style`        | Nee       | `@oct` (canoniek) of `marker` (nog niet klaar)                       | `@oct`                          |
 | `--no-align`            | Nee       | Geen kolomuitlijning.                                                | uit (wel alignen)               |
@@ -644,7 +656,7 @@ vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 ### Synopsis
 
 ```text
-vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}]
+vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                 [--octave-style {@oct,marker}] [--no-align] path [path …]
 ```
 

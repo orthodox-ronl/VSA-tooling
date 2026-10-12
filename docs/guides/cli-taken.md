@@ -27,7 +27,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | mvsa → MuseScore / print-PDF (draft)                 | [`vsa mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) / [`pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf)                                          |
 | mvsa → preview-audio (draft)                         | [`vsa mvsa mp3`/`ogg`/`wav`](../reference/cli/mvsa.md#vsa-mvsa-mp3) (of top-level [`vsa audio`](../reference/cli/audio.md))                         |
 | MusicXML / MuseScore → `.mvsa` (**werkbank**-import) | [`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) / [`mxl import`](../reference/cli/mxl.md) / [`mscz import`](../reference/cli/mscz.md) |
-| Import + eindankers (foutzoeken)                     | `vsa mvsa import … --pitch vsa` daarna [`validate`](../reference/cli/mvsa.md#vsa-mvsa-validate)                                                     |
+| Import + ankers (navigatie / foutzoeken)             | `vsa mvsa import …` (default `ag-vsa`) daarna [`validate`](../reference/cli/mvsa.md#vsa-mvsa-validate)                                              |
 | `.mvsa` leren schrijven                              | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                         |
 
 ## Exitcodes
@@ -76,7 +76,7 @@ site-build; een sibling `.lyrics.txt` is niet verplicht naast de canonieke bron.
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa --pitch vsa
+vsa mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
 vsa mvsa validate generated\alleluia.import.mvsa
 ```
 

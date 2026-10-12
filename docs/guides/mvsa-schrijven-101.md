@@ -178,18 +178,21 @@ elkaar (per frase één stijl is leesbaarder).
 
 Bij `import` / `normalize` kies je een **doelspelling**:
 
-| `--pitch`    | Schrijft …                                                                                           |
-| ------------ | ---------------------------------------------------------------------------------------------------- |
-| `doremi`     | laddergraden                                                                                         |
-| `a-g`        | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`)                                              |
-| `vsa`        | eerste toon absoluut, daarna EHM; bij **import** ook absolute eindankers op systeemeinden (`\|\|a4`) |
-| `preserve`   | (alleen normalize) bronspelling behouden — **default**                                               |
+| `--pitch`    | Schrijft …                                                                                                      |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
+| `ag-vsa`     | **Import-default.** Per systeem: eerste noot absolute a–g, daarna EHM; a–g-eindanker op systeemeinde (`\|\|a4`) |
+| `vsa`        | eerste toon absoluut (doremi), daarna EHM; bij import ook a–g-eindankers op systeemeinden                       |
+| `doremi`     | laddergraden                                                                                                    |
+| `a-g`        | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`)                                                         |
+| `preserve`   | (alleen normalize) bronspelling behouden — **default** bij normalize                                            |
 
 `abc` blijft een **alias** van `a-g` (oude scripts).
 
 ```cmd
+vsa mvsa import lied.mxl -o lied.mvsa
 vsa mvsa import lied.mxl -o lied.mvsa --pitch doremi
 vsa mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
+vsa mvsa normalize lied.mvsa --pitch ag-vsa -o lied.ag-vsa.mvsa
 ```
 
 ### Handige mix: anker absoluut, sprongen in EHM
@@ -210,13 +213,13 @@ S-: / \2 / fa ||
 EHM’s. Zie [Semantiek — absolute en relatieve hoogte](../specification-mvsa/semantics.md#absolute-en-relatieve-hoogte).
 
 ??? tip "Welke stijl kiezen?"
-| Situatie                         | Suggestie                                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------ |
-| Overname van MuseScore / MXL     | import `--pitch doremi` of `a-g` (cijfers)                                     |
-| Import + foutzoeken na edits     | `--pitch vsa` (EHM + absolute eindankers op systeemeinden)                     |
-| Liturgische ladder / toon        | doremi + `@oct`                                                                |
-| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM                                     |
-| Lange stapsgewijze frase         | EHM na één absoluut anker                                                      |
+| Situatie                         | Suggestie                                                                                 |
+| -------------------------------- | ----------------------------------------------------------------------------------------- |
+| Overname van MuseScore / MXL     | import zonder `--pitch` (**`ag-vsa`**) of expliciet `doremi` / `a-g`                      |
+| Import + navigatie + foutzoeken  | default `ag-vsa` (a–g per systeem + EHM + eindankers); of `--pitch vsa` (doremi-start)    |
+| Liturgische ladder / toon        | doremi + `@oct`                                                                           |
+| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM                                                |
+| Lange stapsgewijze frase         | EHM na één absoluut anker                                                                 |
 
 ---
 
@@ -287,9 +290,10 @@ en [Syntax — toonnamen (a–g)](../specification-mvsa/syntax.md#toonnamen-ag).
 | Token **aan** de maatstreep     | **checkt** alleen (wijzigt niet)         | `\|mi`, `\|/`    |
 
 Gebruik eindankers om vergissingen te vangen: als de lopende toon niet matcht,
-faalt validate (`MVSA-BAR-ANKER`). Bij import met `--pitch vsa` plakt de
-toolchain zulke check-only ankers (a–g + cijfer) automatisch op systeemeinden;
-zie [taak bladmuziek](#7-taak-bladmuziek--mvsa).
+faalt validate (`MVSA-BAR-ANKER`). Bij import met default `--pitch ag-vsa`
+(of expliciet `--pitch vsa`) plakt de toolchain zulke check-only ankers
+(a–g + cijfer) automatisch op systeemeinden; zie
+[taak bladmuziek](#7-taak-bladmuziek--mvsa).
 
 ```text
 S: fa so- mi&do&re&mi fa mi ||mi
@@ -319,18 +323,15 @@ S: fa so- mi&do&re&mi fa mi ||mi
        lyrics-equivalentie blijven.
 
 1. Exporteer of bewaar als `.mxl` / `.mscz`.
-2. Importeer naar `.mvsa` met een pitch-vorm:
+2. Importeer naar `.mvsa` (default `--pitch ag-vsa`: a–g per systeem, daarna
+   EHM, a–g-eindankers):
    ```cmd
    cd /d C:\Git\orthodox-ronl\VSA-tooling
-   vsa mvsa import bron.mxl -o lied.mvsa --pitch doremi
-   ```
-   Of `--pitch a-g` als je bladcijfers wilt (`bb4`, `c5`). Voor EHM plus
-   check-only eindankers op systeemeinden (handig na edits):
-   ```cmd
-   cd /d C:\Git\orthodox-ronl\VSA-tooling
-   vsa mvsa import bron.mxl -o lied.mvsa --pitch vsa
+   vsa mvsa import bron.mxl -o lied.mvsa
    vsa mvsa validate lied.mvsa
    ```
+   Of `--pitch doremi` / `--pitch a-g` als je overal laddergraden of bladcijfers
+   wilt. Voor doremi-start plus EHM (oudere VSA-stijl): `--pitch vsa`.
 3. Zet bovenaan `@do` / `@mode` / `@oct` goed (import vult dit grotendeels in).
 4. Controleer L-tekst en sync. Import herstelt veel MuseScore-fouten
    (valse `dag-gaan` / `steun-van`, ontbrekende `we-der-ke`, spaties in
@@ -338,7 +339,8 @@ S: fa so- mi&do&re&mi fa mi ||mi
    woordstreepjes. A/T/B volgen L/S op duur; controleer holds (`-`) en
    `&`-melisma’s tegen de bronpartituur (onderstemmen met meer toonwissels
    dan S in dezelfde tijd blijven als `&`-melisma; L/S krijgen holds;
-   minder noten worden naar duur gepaddet).
+   minder noten worden naar duur gepaddet). Gebruik `#maat N` boven elk
+   systeem om snel de juiste maat in PDF/MuseScore te vinden.
 5. `vsa mvsa validate lied.mvsa`
 6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa` (Pyphen-warnings zijn
    advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
@@ -346,6 +348,7 @@ S: fa so- mi&do&re&mi fa mi ||mi
 
 Wat de import al doet voor je: soft-wrap ~80 tekens per LSATB-systeem;
 vóór elk systeem `#maat N` (1-based startmaat, handig t.o.v. PDF/MuseScore);
+default `ag-vsa` (a–g-anker + EHM + eindanker per systeem);
 same-pitch holds als `-` op stemregels (ook over systeembraken; export zet die
 weer om naar de vorige toon — zie
 [lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken));
@@ -401,7 +404,7 @@ Voorbeeld met meerdere equivalente schetsen:
 | Stap               | Commando (voorbeeld)                                      |
 | ------------------ | --------------------------------------------------------- |
 | Valideren          | `vsa mvsa validate lied.mvsa`                             |
-| MusicXML           | `vsa mvsa mxl lied.mvsa -o generated\lied.mxl`       |
+| MusicXML           | `vsa mvsa mxl lied.mvsa -o generated\lied.mxl`            |
 | MuseScore          | `vsa mvsa mscz lied.mvsa -o generated\lied.mscz`          |
 | Eén sectie         | voeg `--section sectie-id` toe                            |
 | Uitlijnen / kuisen | `vsa mvsa kuiser lied.mvsa`                               |

@@ -385,9 +385,9 @@ def _build_parser():
             "      Exporteer naar print-PDF via MuseScore.\n"
             "  mp3|ogg|wav PATH [-o OUTPUT]\n"
             "      Exporteer naar preview-audio (.mp3 / .ogg / .wav) via MuseScore.\n"
-            "  import PATH [-o OUTPUT] --pitch {doremi,a-g,vsa}\n"
-            "      Importeer .mxl/.mscz naar .mvsa.\n"
-            "  normalize PATH [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}]\n"
+            "  import PATH [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]\n"
+            "      Importeer .mxl/.mscz naar .mvsa (default --pitch: ag-vsa).\n"
+            "  normalize PATH [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]\n"
             "      Canoniseer .mvsa (default: behoud noteernamen; optioneel herschrijf).\n"
             "  kuiser PATH [PATH…] [-o OUTPUT] [--check] [--pitch …]\n"
             "      Authoring-kuiser: strepen syncen, woordstreep-spatie, align "
@@ -666,11 +666,13 @@ def _build_parser():
         help="Importeer .mxl/.musicxml/.mscz naar .mvsa.",
         description=(
             "Lees SATB MusicXML (of MSCZ via MuseScore) en schrijf .mvsa. "
-            "Kies stem-spelling met --pitch. Zie docs/plans/mvsa-conversions.md."
+            "Default --pitch ag-vsa (a–g anker per systeem, daarna EHM, "
+            "a–g eindanker). Zie docs/plans/mvsa-conversions.md."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
+            "  vsa mvsa import generated\\lied.mxl -o generated\\lied.import.mvsa\n"
             "  vsa mvsa import generated\\lied.mxl -o generated\\lied.import.mvsa "
             "--pitch doremi\n"
             "  vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g\n"
@@ -690,9 +692,13 @@ def _build_parser():
     )
     m_import.add_argument(
         "--pitch",
-        choices=["doremi", "a-g", "abc", "vsa"],
-        required=True,
-        help="Doel-spelling op stemregels (a-g = toonnamen met cijfer; abc = alias).",
+        choices=["doremi", "a-g", "abc", "vsa", "ag-vsa"],
+        default="ag-vsa",
+        help=(
+            "Doel-spelling op stemregels (default: ag-vsa). "
+            "a-g = toonnamen met cijfer; abc = alias; "
+            "ag-vsa = a–g per systeem + EHM + eindanker."
+        ),
     )
     m_import.add_argument(
         "--do",
@@ -732,9 +738,9 @@ def _build_parser():
         description=(
             "Canoniseer een .mvsa-bestand. Default --pitch preserve: "
             "noteernamen op S/A/T/B blijven zoals in de bron; alleen "
-            "kolomuitlijning. Met --pitch doremi|a-g|vsa herschrijf je "
+            "kolomuitlijning. Met --pitch doremi|a-g|vsa|ag-vsa herschrijf je "
             "hoogten (abc blijft alias van a-g). "
-            "(Import uit .mxl/.mscz gebruikt doremi als default.) "
+            "(Import uit .mxl/.mscz gebruikt ag-vsa als default.) "
             "Zie docs/plans/mvsa-conversions.md."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -760,12 +766,12 @@ def _build_parser():
     )
     m_normalize.add_argument(
         "--pitch",
-        choices=["preserve", "doremi", "a-g", "abc", "vsa"],
+        choices=["preserve", "doremi", "a-g", "abc", "vsa", "ag-vsa"],
         default=None,
         help=(
             "Doel-spelling op stemregels. Default bij .mvsa-bron: preserve "
-            "(namen ongewijzigd). doremi / a-g / vsa herschrijven hoogten; "
-            "abc is alias van a-g."
+            "(namen ongewijzigd). doremi / a-g / vsa / ag-vsa herschrijven "
+            "hoogten; abc is alias van a-g."
         ),
     )
     m_normalize.add_argument(
@@ -823,7 +829,7 @@ def _build_parser():
     )
     m_kuiser.add_argument(
         "--pitch",
-        choices=["preserve", "doremi", "a-g", "abc", "vsa"],
+        choices=["preserve", "doremi", "a-g", "abc", "vsa", "ag-vsa"],
         default="preserve",
         help=(
             "Doel-spelling op stemregels (default: preserve). "
@@ -1602,8 +1608,8 @@ def _cmd_mvsa(args) -> int:
         "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa pdf PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
         "  vsa mvsa mp3|ogg|wav PATH [-o OUTPUT]\n"
-        "  vsa mvsa import PATH --pitch {doremi,a-g,vsa} [-o OUTPUT]\n"
-        "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa}] [-o OUTPUT]\n"
+        "  vsa mvsa import PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
+        "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
         "  vsa mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
         "Hulp: vsa mvsa -h | vsa mvsa kuiser -h",
         file=sys.stderr,

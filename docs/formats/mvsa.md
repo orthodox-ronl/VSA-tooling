@@ -32,9 +32,10 @@ ook over systeembraken; export en eindanker-check zetten die weer om naar de
 vorige toon (tenzij een beginanker reset) — zie
 [Semantiek — lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
 Vóór elk LSATB-systeem zet import `#maat N` (1-based startmaat) voor
-navigatie t.o.v. PDF / MuseScore. Met `--pitch vsa` plakt de import
-check-only eindankers (a–g + cijfer) op systeemeinden; `doremi` / `a-g`
-doen dat niet. Tutorial:
+navigatie t.o.v. PDF / MuseScore. Default `--pitch ag-vsa`: eerste noot per
+systeem absolute a–g, daarna EHM, plus check-only a–g-eindankers op
+systeemeinden. Hetzelfde eindanker-gedrag bij `--pitch vsa`; `doremi` /
+`a-g` zetten geen eindankers. Tutorial:
 [mvsa schrijven 101 — bladmuziek](../guides/mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa).
 
 ## Typische commando’s
@@ -45,9 +46,9 @@ mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
-mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.import.mvsa
-mvsa import generated\alleluia.mxl --pitch vsa -o generated\alleluia.vsa.mvsa
-mvsa validate generated\alleluia.vsa.mvsa
+mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
+mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
+mvsa validate generated\alleluia.import.mvsa
 vsa text examples\mvsa\alleluia-toon-8.mvsa
 ```
 

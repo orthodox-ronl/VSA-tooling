@@ -918,6 +918,135 @@ def test_default_soft_width_constant():
     assert DEFAULT_SYSTEM_SOFT_WIDTH == 80
 
 
+def test_ag_vsa_import_absolute_first_ehm_and_eindanker_per_system():
+    """``--pitch ag-vsa``: a–g eerste noot + EHM + a–g eindanker per systeem."""
+
+    def meas(step: str, oct_: str, *, lyric: str, number: int) -> str:
+        attrs = (
+            "<attributes><divisions>1</divisions>"
+            "<key><fifths>0</fifths></key></attributes>\n      "
+            if number == 1
+            else ""
+        )
+        return f"""\
+    <measure number="{number}">
+      {attrs}<note>
+        <pitch><step>{step}</step><octave>{oct_}</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>{lyric}</text></lyric>
+      </note>
+      <note>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>1</duration><type>quarter</type>
+        <lyric number="1"><syllabic>single</syllabic><text>x</text></lyric>
+      </note>
+      <note>
+        <pitch><step>B</step><octave>4</octave></pitch>
+        <duration>2</duration><type>half</type>
+        <lyric number="1"><syllabic>single</syllabic><text>y</text></lyric>
+      </note>
+    </measure>"""
+
+    # Twee maten → soft-width dwingt twee systemen; elk begint met a–g.
+    xml = _satb_score_xml(
+        {
+            "P1": meas("G", "4", lyric="een", number=1)
+            + "\n"
+            + meas("G", "4", lyric="twee", number=2),
+            "P2": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>0</fifths></key></attributes>"
+                "<note><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>\n"
+                '<measure number="2">'
+                "<note><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+            "P3": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>0</fifths></key></attributes>"
+                "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>\n"
+                '<measure number="2">'
+                "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+            "P4": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>0</fifths></key></attributes>"
+                "<note><pitch><step>C</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>\n"
+                '<measure number="2">'
+                "<note><pitch><step>C</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    text = score_to_mvsa(score, pitch_form="ag-vsa", system_soft_width=12)
+    s_lines = [ln for ln in text.splitlines() if ln.startswith("S:")]
+    assert len(s_lines) == 2, text
+    # Eerste noot per systeem absoluut a–g; daarna EHM; eindanker a–g.
+    for ln in s_lines:
+        body = ln[2:].lstrip()
+        first = body.split()[0].split("&")[0]
+        assert re.fullmatch(r"[a-gA-G][#b]*\d+", first), (first, ln)
+        assert re.search(r"[/\\]", body), ln  # EHM ergens in het systeem
+        assert re.search(r"\|+[a-gA-G#b]+\d\s*$", ln), ln
+    # Tweede systeem begint opnieuw met absolute a–g (niet kale hold).
+    assert s_lines[1].lstrip().startswith("S:") 
+    second_body = s_lines[1][2:].lstrip()
+    assert second_body.split()[0].startswith("g"), second_body
+    diags = validate_mvsa_text(text)
+    assert not [d for d in diags if d.severity == "error"], (diags, text)
+
+
+def test_import_default_pitch_is_ag_vsa(tmp_path: Path):
+    xml = _satb_score_xml(
+        {
+            "P1": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>0</fifths></key></attributes>"
+                "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type>"
+                '<lyric number="1"><syllabic>single</syllabic>'
+                "<text>Heer</text></lyric></note></measure>"
+            ),
+            "P2": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>0</fifths></key></attributes>"
+                "<note><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+            "P3": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>0</fifths></key></attributes>"
+                "<note><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+            "P4": (
+                '<measure number="1">'
+                "<attributes><divisions>1</divisions>"
+                "<key><fifths>0</fifths></key></attributes>"
+                "<note><pitch><step>C</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>whole</type></note></measure>"
+            ),
+        }
+    )
+    path = tmp_path / "one.musicxml"
+    path.write_text(xml, encoding="utf-8")
+    text = import_score_to_mvsa(path)  # default pitch
+    s = next(ln for ln in text.splitlines() if ln.startswith("S:"))
+    assert re.search(r"^S:\s*g4\b", s), s
+    assert re.search(r"\|\|g4\s*$", s), s
+
+
 def test_vsa_import_glues_absolute_eindanker_on_last_system_bar():
     """``--pitch vsa``: absolute toonhoogte als eindanker op laatste maatstreep."""
 

@@ -10,7 +10,7 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 | Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore)                                          |
 | Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (via MuseScore; ook vanaf `.mscz`)                                     |
 | Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak                                       |
-| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; `--pitch vsa` = eindankers)   |
+| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; default `ag-vsa` = ankers)    |
 | → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                                                     |
 | Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)                                           |
 | Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                                                                  |
@@ -57,9 +57,9 @@ fallback.
 ## Typische commando’s
 
 ```cmd
-mscz import generated\alleluia.mscz --pitch a-g -o generated\from-mscz.mvsa
-mscz import generated\alleluia.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
-mvsa validate generated\from-mscz.vsa.mvsa
+mscz import generated\alleluia.mscz -o generated\from-mscz.mvsa
+mscz import generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
+mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz

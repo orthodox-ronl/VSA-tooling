@@ -21,7 +21,7 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 
 scripts\mvsa.cmd -h
 scripts\mvsa.cmd validate examples\mvsa
-scripts\mxl.cmd import generated\alleluia.mxl --pitch doremi -o generated\x.mvsa
+scripts\mxl.cmd import generated\alleluia.mxl -o generated\x.mvsa
 scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\y.mxl
 ```
 
