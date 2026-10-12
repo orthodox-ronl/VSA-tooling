@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 15:00 CEST.
+  , gebouwd 2026-10-12 22:20 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1401,10 +1401,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bestandsnaamgeving-conventie-niet-afgedwongen" class="md-nav__link">
+  <a href="#bestandsnaamgeving-conventie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bestandsnaamgeving (conventie, niet afgedwongen)
+        Bestandsnaamgeving (conventie)
       
     </span>
   </a>
@@ -4900,10 +4900,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bestandsnaamgeving-conventie-niet-afgedwongen" class="md-nav__link">
+  <a href="#bestandsnaamgeving-conventie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bestandsnaamgeving (conventie, niet afgedwongen)
+        Bestandsnaamgeving (conventie)
       
     </span>
   </a>
@@ -5203,10 +5203,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bestandsnaamgeving-conventie-niet-afgedwongen" class="md-nav__link">
+  <a href="#bestandsnaamgeving-conventie" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bestandsnaamgeving (conventie, niet afgedwongen)
+        Bestandsnaamgeving (conventie)
       
     </span>
   </a>
@@ -5598,11 +5598,11 @@ expliciete herschrijf-<code>pitch</code> verandert de hoogte-spelling op S/A/T/B
 <code>[LSATB] digit* ":"</code> gebruikt cijfers voor <strong>stemnummer</strong> (<code>T1:</code>); signed
 octaaf in de marker is een bewuste syntax-uitbreiding later, niet stilzwijgend
 hergebruik van <code>digit*</code>.</p>
-<h3 id="bestandsnaamgeving-conventie-niet-afgedwongen">Bestandsnaamgeving (conventie, niet afgedwongen)<a class="headerlink" href="#bestandsnaamgeving-conventie-niet-afgedwongen" title="Permanent link">&para;</a></h3>
+<h3 id="bestandsnaamgeving-conventie">Bestandsnaamgeving (conventie)<a class="headerlink" href="#bestandsnaamgeving-conventie" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Default CLI-output: eenvoudig (<code>-o out.mxl</code>, bron-stem → <code>.mxl</code>).</li>
-<li>Optioneel in <code>generated/</code>: bron-extensie meenemen voor herkomst, bv.
-  <code>naam.mvsa.mxl</code>, <code>naam.mscz.mvsa</code>, <code>naam.vsa.mp3</code>.</li>
+<li>Default CLI-output (zonder <code>-o</code>): <code>stem.brontype.doeltype</code>, bv.
+  <code>naam.mvsa.mxl</code>, <code>naam.mscz.mxl</code>, <code>naam.mvsa.mp3</code>.</li>
+<li>Expliciet <code>-o</code> mag een korte naam blijven (<code>-o out.mxl</code>).</li>
 <li>Tools kijken naar de <strong>laatste</strong> extensie.</li>
 <li>Normatieve korte tekst + checklist-context:
   <a href="../../formats/canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</li>
@@ -5627,7 +5627,7 @@ hergebruik van <code>digit*</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -5754,7 +5754,7 @@ Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>

@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 15:00 CEST.
+  , gebouwd 2026-10-12 22:20 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4931,7 +4931,7 @@ specificaties; dit is de navigatiehub.</p>
 <td><code>mvsa kuiser</code> / <code>normalize</code></td>
 <td><code>mvsa mxl</code></td>
 <td><code>mvsa mscz</code></td>
-<td><code>mvsa mp3</code></td>
+<td><code>mvsa mp3</code>/<code>ogg</code>/<code>wav</code></td>
 <td>— (niet gepland)</td>
 </tr>
 <tr>
@@ -5073,12 +5073,13 @@ specificaties; dit is de navigatiehub.</p>
 </table>
 <p>Na <code>pip install -e .</code> staan <code>vsa</code>, <code>mvsa</code>, <code>mxl</code> en <code>mscz</code> op PATH.</p>
 <h2 id="bestandsnaamgeving-kort">Bestandsnaamgeving (kort)<a class="headerlink" href="#bestandsnaamgeving-kort" title="Permanent link">&para;</a></h2>
-<p>In <code>generated/</code> bij voorkeur <code>stem.brontype.doeltype</code> (laatste = echte
-extensie), bv. <code>alleluia.mvsa.mxl</code>, <code>lied.mvsa.mp3</code>. Optioneel lyrics-product
-uit <code>.mscz</code> / <code>.mxl</code>: <code>lied.mscz.lyrics.txt</code> via
+<p>Zonder <code>-o</code> schrijft de CLI <code>stem.brontype.doeltype</code> naast de bron (laatste
+segment = echte extensie), bv. <code>lied.mvsa</code> → <code>lied.mvsa.mscz</code>. In
+<code>generated/</code> hetzelfde patroon, bv. <code>alleluia.mvsa.mxl</code>, <code>lied.mvsa.mp3</code>.
+Optioneel lyrics-product uit <code>.mscz</code> / <code>.mxl</code>: <code>lied.mscz.lyrics.txt</code> via
 <a href="../reference/cli/text/"><code>vsa text</code></a> — niet verplicht naast canonieke
-<code>.vsa</code> / <code>.mvsa</code> (daar: <a href="zoektekst/"><code>zoektekst</code></a>). CLI-<code>-o</code> mag simpel
-blijven. Details:
+<code>.vsa</code> / <code>.mvsa</code> (daar: <a href="zoektekst/"><code>zoektekst</code></a>). Expliciet <code>-o</code> mag
+een korte naam blijven. Details:
 <a href="canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</p>
 <h2 id="windows-cmd-scripts">Windows <code>.cmd</code>-scripts<a class="headerlink" href="#windows-cmd-scripts" title="Permanent link">&para;</a></h2>
 <p>In de repo-root (via <code>scripts\</code>):</p>

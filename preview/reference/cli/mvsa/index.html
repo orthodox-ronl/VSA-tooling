@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 15:00 CEST.
+  , gebouwd 2026-10-12 22:20 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1523,15 +1523,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vsa-mvsa-mp3" class="md-nav__link">
+  <a href="#vsa-mvsa-mp3-ogg-wav" class="md-nav__link">
     <span class="md-ellipsis">
       
-        vsa mvsa mp3
+        vsa mvsa mp3 / ogg / wav
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="vsa mvsa mp3">
+    <nav class="md-nav" aria-label="vsa mvsa mp3 / ogg / wav">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4935,15 +4935,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vsa-mvsa-mp3" class="md-nav__link">
+  <a href="#vsa-mvsa-mp3-ogg-wav" class="md-nav__link">
     <span class="md-ellipsis">
       
-        vsa mvsa mp3
+        vsa mvsa mp3 / ogg / wav
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="vsa mvsa mp3">
+    <nav class="md-nav" aria-label="vsa mvsa mp3 / ogg / wav">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -6415,15 +6415,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vsa-mvsa-mp3" class="md-nav__link">
+  <a href="#vsa-mvsa-mp3-ogg-wav" class="md-nav__link">
     <span class="md-ellipsis">
       
-        vsa mvsa mp3
+        vsa mvsa mp3 / ogg / wav
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="vsa mvsa mp3">
+    <nav class="md-nav" aria-label="vsa mvsa mp3 / ogg / wav">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -6736,11 +6736,12 @@ lyrics-regels en stemregels. Normatieve draft-spec:
 <p><strong>Top-level alias:</strong> <code>mvsa …</code> is gelijk aan <code>vsa mvsa …</code> (console-script of
 <code>scripts\mvsa.cmd</code>). Bron-commands voor andere formaten: <a href="../mxl/"><code>mxl</code></a>,
 <a href="../mscz/"><code>mscz</code></a>.</p>
-<p>Subcommando’s zijn genoemd naar de <strong>uitvoer</strong> (zoals <code>mscz</code> / <code>pdf</code>):
-<code>mxl</code> en <code>mp3</code>. Oude namen <code>musicxml</code> en <code>audio</code> blijven als alias werken.</p>
+<p>Subcommando’s zijn genoemd naar de <strong>uitvoer</strong> (zoals <code>mscz</code> / <code>pdf</code> /
+<code>mp3</code> / <code>ogg</code> / <code>wav</code>). Oude namen <code>musicxml</code> en <code>audio</code> blijven als alias
+werken (<code>audio</code> ≡ <code>mp3</code>).</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mvsa [-h] {validate,mxl,mscz,pdf,mp3,import,normalize,kuiser} …
-vsa mvsa [-h] {validate,mxl,mscz,pdf,mp3,import,normalize,kuiser} …
+<div class="highlight"><pre><span></span><code>mvsa [-h] {validate,mxl,mscz,pdf,mp3,ogg,wav,import,normalize,kuiser} …
+vsa mvsa [-h] {validate,mxl,mscz,pdf,mp3,ogg,wav,import,normalize,kuiser} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
               [--hulptekst-as-parts] [--bibliotheek-id ID]
@@ -6751,8 +6752,12 @@ mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--layout PROFILE] [--bibliotheek-id ID] path
-mvsa mp3 [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
-           [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
+mvsa mp3 [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+           [--keep-mxl PATH] path
+mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+           [--keep-mxl PATH] path
+mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+           [--keep-mxl PATH] path
 mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
 mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
@@ -6783,8 +6788,8 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
 <td>Exporteer <code>.mvsa</code> of <code>.mscz</code> naar print-PDF (zangers).</td>
 </tr>
 <tr>
-<td><a href="#vsa-mvsa-mp3"><code>mp3</code></a></td>
-<td>Exporteer naar preview-audio (<code>.mp3</code>).</td>
+<td><a href="#vsa-mvsa-mp3"><code>mp3</code></a> / <code>ogg</code> / <code>wav</code></td>
+<td>Exporteer naar preview-audio (<code>.mp3</code> / <code>.ogg</code> / <code>.wav</code>).</td>
 </tr>
 <tr>
 <td><a href="#vsa-mvsa-import"><code>import</code></a></td>
@@ -6808,6 +6813,8 @@ mvsa mxl -h
 mvsa mscz -h
 mvsa pdf -h
 mvsa mp3 -h
+mvsa ogg -h
+mvsa wav -h
 mvsa import -h
 mvsa normalize -h
 mvsa kuiser -h
@@ -7003,7 +7010,7 @@ VSA).</p>
 <td><code>-o</code>, <code>--output</code></td>
 <td>Nee</td>
 <td>Uitvoerpad (<code>.mxl</code>, <code>.musicxml</code> of <code>.xml</code>).</td>
-<td><code>&lt;stem&gt;.mxl</code> naast het bronbestand</td>
+<td><code>&lt;bronnaam&gt;.mxl</code> (bijv. <code>lied.mvsa.mxl</code>)</td>
 <td>Andere extensie → wordt <code>.mxl</code>.</td>
 </tr>
 <tr>
@@ -7076,7 +7083,7 @@ VSA).</p>
 </tbody>
 </table>
 <h3 id="voorbeelden-succes">Voorbeelden — succes<a class="headerlink" href="#voorbeelden-succes" title="Permanent link">&para;</a></h3>
-<p>Standaard naast het bronbestand (<code>….mxl</code>):</p>
+<p>Standaard naast het bronbestand (<code>….mvsa.mxl</code>):</p>
 <div class="highlight"><pre><span></span><code>vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
 </code></pre></div>
 <p>Met expliciet uitvoerpad en één sectie:</p>
@@ -7158,7 +7165,7 @@ standaard Windows-pad
 <td><code>-o</code>, <code>--output</code></td>
 <td>Nee</td>
 <td>Uitvoer-<code>.mscz</code>.</td>
-<td><code>&lt;stem&gt;.mscz</code> naast het bronbestand</td>
+<td><code>&lt;bronnaam&gt;.mscz</code> (bijv. <code>lied.mvsa.mscz</code>)</td>
 </tr>
 <tr>
 <td><code>--section SECTION</code></td>
@@ -7284,7 +7291,7 @@ dezelfde A4-eis P6).</p>
 <td><code>-o</code>, <code>--output</code></td>
 <td>Nee</td>
 <td>Uitvoer-<code>.pdf</code>.</td>
-<td><code>&lt;stem&gt;.pdf</code> naast bron</td>
+<td><code>&lt;bronnaam&gt;.pdf</code> (bijv. <code>lied.mvsa.pdf</code>)</td>
 </tr>
 <tr>
 <td><code>--section</code></td>
@@ -7331,16 +7338,22 @@ vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 vsa mvsa pdf lied.mscz -o lied.pdf
 </code></pre></div>
 <hr />
-<h2 id="vsa-mvsa-mp3"><code>vsa mvsa mp3</code><a class="headerlink" href="#vsa-mvsa-mp3" title="Permanent link">&para;</a></h2>
+<h2 id="vsa-mvsa-mp3-ogg-wav"><code>vsa mvsa mp3</code> / <code>ogg</code> / <code>wav</code><a class="headerlink" href="#vsa-mvsa-mp3-ogg-wav" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_5">Synopsis<a class="headerlink" href="#synopsis_5" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa mp3 [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
-               [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
+<div class="highlight"><pre><span></span><code>vsa mvsa mp3 [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+               [--keep-mxl PATH] path
+vsa mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+               [--keep-mxl PATH] path
+vsa mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+               [--keep-mxl PATH] path
 </code></pre></div>
 <h3 id="beschrijving_4">Beschrijving<a class="headerlink" href="#beschrijving_4" title="Permanent link">&para;</a></h3>
-<p>Maakt een <strong>preview-audiobestand</strong> (default <code>.mp3</code>) via MuseScore: eerst
-playback-<code>.mxl</code> (vier parts), daarna audio. Bron mag <code>.mvsa</code>, <code>.mxl</code>,
-<code>.vsa</code> of <code>.mscz</code> (fallback) zijn. Alleen het artefact; de consumer-site
-zet de afspeelknop. Zie <a href="../audio/"><code>vsa audio</code></a> en <a href="../../../formats/audio/">formats/audio.md</a>.</p>
+<p>Maakt een <strong>preview-audiobestand</strong> via MuseScore: eerst playback-<code>.mxl</code>
+(vier parts), daarna audio. Het <strong>subcommando is het formaat</strong>: <code>mp3</code>, <code>ogg</code>
+of <code>wav</code>. Alias <code>audio</code> ≡ <code>mp3</code>. Bron mag <code>.mvsa</code>, <code>.mxl</code>, <code>.vsa</code> of
+<code>.mscz</code> (fallback) zijn. Alleen het artefact; de consumer-site zet de
+afspeelknop. Zie <a href="../audio/"><code>vsa audio</code></a> en
+<a href="../../../formats/audio/">formats/audio.md</a>.</p>
 <h3 id="argumenten-en-opties_4">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties_4" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -7362,13 +7375,7 @@ zet de afspeelknop. Zie <a href="../audio/"><code>vsa audio</code></a> en <a hre
 <td><code>-o</code>, <code>--output</code></td>
 <td>Nee</td>
 <td>Uitvoer-audio.</td>
-<td><code>&lt;stem&gt;.mp3</code> naast bron</td>
-</tr>
-<tr>
-<td><code>--format</code></td>
-<td>Nee</td>
-<td><code>mp3</code> / <code>ogg</code> / <code>wav</code> zonder extensie.</td>
-<td><code>mp3</code> of <code>[audio].format</code></td>
+<td><code>&lt;bronnaam&gt;.&lt;formaat&gt;</code> (bijv. <code>lied.mvsa.ogg</code>)</td>
 </tr>
 <tr>
 <td><code>--section</code></td>
@@ -7388,18 +7395,13 @@ zet de afspeelknop. Zie <a href="../audio/"><code>vsa audio</code></a> en <a hre
 <td>Bewaar tussenliggende playback-<code>.mxl</code>.</td>
 <td>temp (wordt verwijderd)</td>
 </tr>
-<tr>
-<td><code>--config</code></td>
-<td>Nee</td>
-<td>Pad naar <code>vsa.toml</code>.</td>
-<td>auto-detectie</td>
-</tr>
 </tbody>
 </table>
 <h3 id="voorbeelden_3">Voorbeelden<a class="headerlink" href="#voorbeelden_3" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa mp3 examples\mvsa\test-alleluia-toon-8.mvsa --section schets3-oct-doremi
 vsa mvsa mp3 lied.mvsa -o generated\lied.mp3
-vsa mvsa mp3 lied.mxl -o lied.ogg --format ogg
+vsa mvsa ogg lied.mvsa
+vsa mvsa wav lied.mxl -o generated\lied.wav
 </code></pre></div>
 <hr />
 <h2 id="vsa-mvsa-import"><code>vsa mvsa import</code><a class="headerlink" href="#vsa-mvsa-import" title="Permanent link">&para;</a></h2>

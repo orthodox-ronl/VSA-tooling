@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 15:00 CEST.
+  , gebouwd 2026-10-12 22:20 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5346,7 +5346,8 @@ geen MuseScore-partituur) maar valt onder <strong>dezelfde</strong> A4-eis (P6).
 </tbody>
 </table>
 <h2 id="bestandsnaamgeving-conventie">Bestandsnaamgeving (conventie)<a class="headerlink" href="#bestandsnaamgeving-conventie" title="Permanent link">&para;</a></h2>
-<p>Traceerbaarheid van conversies — <strong>niet verplicht</strong> op elke <code>-o</code>.</p>
+<p>Traceerbaarheid van conversies. Expliciet <code>-o</code> mag nog steeds een korte naam
+zijn.</p>
 <table>
 <thead>
 <tr>
@@ -5356,7 +5357,11 @@ geen MuseScore-partituur) maar valt onder <strong>dezelfde</strong> A4-eis (P6).
 </thead>
 <tbody>
 <tr>
-<td>Bij voorkeur in <code>generated/</code>: <code>stem.brontype.doeltype</code></td>
+<td>CLI-default (zonder <code>-o</code>): <code>stem.brontype.doeltype</code></td>
+<td><code>lied.mvsa</code> → <code>lied.mvsa.mscz</code>; <code>lied.mscz</code> → <code>lied.mscz.mxl</code></td>
+</tr>
+<tr>
+<td>Bij voorkeur in <code>generated/</code>: zelfde patroon</td>
 <td><code>alleluia.mvsa.mxl</code>, <code>alleluia.mscz.mvsa</code>, <code>tropaar.vsa.mxl</code></td>
 </tr>
 <tr>
@@ -5372,8 +5377,8 @@ geen MuseScore-partituur) maar valt onder <strong>dezelfde</strong> A4-eis (P6).
 <td><code>.mxl</code>, <code>.mvsa</code>, <code>.mscz</code>, <code>.mp3</code> / <code>.ogg</code> / <code>.wav</code>, of <code>.txt</code> bij lyrics-producten</td>
 </tr>
 <tr>
-<td>CLI-default mag enkelvoudig blijven</td>
-<td><code>-o out.mxl</code> of <code>&lt;stem&gt;.mxl</code></td>
+<td>Expliciet <code>-o</code> mag enkelvoudig blijven</td>
+<td><code>-o out.mxl</code> of <code>-o generated\lied.mscz</code></td>
 </tr>
 <tr>
 <td>Geen fout als de naam “simpel” is</td>
