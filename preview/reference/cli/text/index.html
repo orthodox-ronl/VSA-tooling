@@ -16,7 +16,7 @@
         <link rel="prev" href="../syllabify/">
       
       
-        <link rel="next" href="../musicxml/">
+        <link rel="next" href="../zoektekst/">
       
       
         
@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-10 23:22 CEST.
+   — branch <code>feat/zoektekst</code>
+  , gebouwd 2026-10-12 09:24 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -954,6 +954,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1025,10 +1053,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1046,8 +1074,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3872,6 +3900,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../musicxml/" class="md-nav__link">
         
   
@@ -4899,8 +4955,12 @@
 
 <h1 id="vsa-text-platte-gezongen-tekst"><code>vsa text</code> — platte gezongen tekst<a class="headerlink" href="#vsa-text-platte-gezongen-tekst" title="Permanent link">&para;</a></h1>
 <p>Haal de <strong>woorden</strong> uit een bronbestand, zonder notatie (geen EHM/ELM,
-geen stempartijen). Bedoeld voor zoekindex en lyrics-producten — niet voor
-bewerken.</p>
+geen stempartijen). Bedoeld voor zoekindex, lyrics-producten en als
+<strong>referentie</strong> voor het veld <a href="../../../formats/zoektekst/"><code>zoektekst</code></a> in
+canonieke <code>.vsa</code> / <code>.mvsa</code> — niet voor bewerken van de notatie.</p>
+<p>Op <code>.vsa</code> / <code>.mvsa</code> is de referentie de <strong>body</strong> (VSA-tekst of L-regels), niet
+het veld <code>zoektekst</code> (YAML-frontmatter wordt in beide formaten gestript). Zie
+<a href="../../../formats/zoektekst/#tooling">zoektekst — tooling</a>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>vsa text [-h] [-o OUTPUT] [--musescore PATH] path
 </code></pre></div>
@@ -4970,9 +5030,11 @@ MuseScore naar een temp-<code>.mxl</code> en leest daaruit. Er ontstaat geen
 </tbody>
 </table>
 <p>Geen stamp-header (<code># vsa-source-sha256:</code>) in deze tooling — dat hoort bij
-consumer lyrics-products. Bestandsnaamgeving (conventie):
-<code>{stam}.vsa.lyrics.txt</code> / <code>{stam}.mvsa.lyrics.txt</code> / <code>{stam}.mscz.lyrics.txt</code>
-— zie <a href="../../../formats/canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</p>
+consumer lyrics-products. Een sibling <code>*.lyrics.txt</code> is <strong>niet</strong> verplicht
+naast canonieke <code>.vsa</code> / <code>.mvsa</code> (daar: <a href="../../../formats/zoektekst/"><code>zoektekst</code></a>).
+Optioneel lyrics-product (o.a. uit <code>.mscz</code> / <code>.mxl</code>):
+<code>{stam}.mscz.lyrics.txt</code> — zie
+<a href="../../../formats/canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa text examples\minimal\001_plain_text.vsa
@@ -4983,6 +5045,8 @@ vsa text lied.mscz -o generated\lied.lyrics.txt
 <p>Alias voor alleen <code>.mscz</code>: <a href="../mscz/"><code>mscz text</code></a>.</p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
+<li><a href="../../../formats/zoektekst/">Zoektekst in canonieke bron</a></li>
+<li><a href="../zoektekst/"><code>vsa zoektekst</code></a> — veld vullen/controleren</li>
 <li><a href="../mscz/"><code>mscz</code></a> — MuseScore-bron: import / mxl / text</li>
 <li><a href="../syllabify/"><code>syllabify</code></a> — lettergreepstreepjes in <code>.vsa</code></li>
 <li>Conversieplan: <a href="../../../plans/mvsa-conversions/">mvsa-conversions</a></li>
@@ -5023,7 +5087,7 @@ vsa text lied.mscz -o generated\lied.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-02
+        Bijgewerkt: 2026-10-12
         
       </p>
       

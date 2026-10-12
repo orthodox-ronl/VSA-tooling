@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-10 23:22 CEST.
+   — branch <code>feat/zoektekst</code>
+  , gebouwd 2026-10-12 09:24 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -954,6 +954,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1025,10 +1053,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1046,8 +1074,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4420,6 +4448,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../musicxml/" class="md-nav__link">
         
   
@@ -6756,7 +6812,7 @@ mvsa kuiser -h
 <hr />
 <h2 id="vsa-mvsa-validate"><code>vsa mvsa validate</code><a class="headerlink" href="#vsa-mvsa-validate" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_1">Synopsis<a class="headerlink" href="#synopsis_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa validate [-h] path
+<div class="highlight"><pre><span></span><code>vsa mvsa validate [-h] [--require-zoektekst] path
 </code></pre></div>
 <h3 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h3>
 <p>Controleert <code>.mvsa</code>-bestanden op LSATB-structuur, maatstrepen en de
@@ -6801,6 +6857,13 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 <td>Moet bestaan.</td>
 </tr>
 <tr>
+<td><code>--require-zoektekst</code></td>
+<td>Nee</td>
+<td>Eis YAML-<code>zoektekst</code> gelijk aan body (catalogus); zie <a href="../zoektekst/">zoektekst</a>.</td>
+<td>Uit</td>
+<td>—</td>
+</tr>
+<tr>
 <td><code>-h</code>, <code>--help</code></td>
 <td>Nee</td>
 <td>Toon hulp voor dit subcommando.</td>
@@ -6839,7 +6902,10 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 <h3 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa --require-zoektekst
 </code></pre></div>
+<p>Voor alleen vullen/checken van <code>zoektekst</code> zonder overige validate:
+<a href="../zoektekst/"><code>vsa zoektekst</code></a>.</p>
 <hr />
 <h2 id="vsa-mvsa-musicxml"><code>vsa mvsa musicxml</code><a class="headerlink" href="#vsa-mvsa-musicxml" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_2">Synopsis<a class="headerlink" href="#synopsis_2" title="Permanent link">&para;</a></h3>
@@ -7751,7 +7817,7 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-10
+        Bijgewerkt: 2026-10-12
         
       </p>
       

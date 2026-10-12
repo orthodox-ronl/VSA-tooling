@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-10 23:22 CEST.
+   — branch <code>feat/zoektekst</code>
+  , gebouwd 2026-10-12 09:24 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -954,6 +954,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1025,10 +1053,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1046,8 +1074,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2871,6 +2899,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Bestand">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yaml-frontmatter-en-zoektekst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        YAML-frontmatter en zoektekst
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4122,6 +4167,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -5048,6 +5121,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Bestand">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yaml-frontmatter-en-zoektekst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        YAML-frontmatter en zoektekst
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5420,6 +5510,10 @@ hieronder aangegeven.</p>
 </thead>
 <tbody>
 <tr>
+<td>YAML-frontmatter</td>
+<td>Optioneel blok <code>---</code> … <code>---</code> aan het begin (o.a. <code>zoektekst</code>; zie hieronder)</td>
+</tr>
+<tr>
 <td>Commentaar</td>
 <td>Regel die (na optionele spaties) begint met <code>#</code>, of een HTML-commentaar <code>&lt;!-- … --&gt;</code></td>
 </tr>
@@ -5437,6 +5531,24 @@ hieronder aangegeven.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="yaml-frontmatter-en-zoektekst">YAML-frontmatter en <code>zoektekst</code><a class="headerlink" href="#yaml-frontmatter-en-zoektekst" title="Permanent link">&para;</a></h3>
+<p>Canonieke catalogus-<code>.mvsa</code>-bestanden hebben aan het begin een YAML-kop met
+top-level <strong><code>zoektekst</code></strong>: de volledige platte gezongen tekst voor editorzoeken
+(Ctrl+Shift+F). Overige partituur-metadata blijft bij voorkeur via <code>@</code>-keywords.
+Normatief contract: <a href="../../formats/zoektekst/">Zoektekst</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="nn">---</span>
+<span class="nt">identificatie</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2e Antifoon (zondag)</span>
+<span class="nt">zoektekst</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+<span class="w">  </span><span class="no">Eer aan de Vader, de Zoon, en de Heilige Geest. …</span>
+<span class="nn">---</span>
+
+<span class="err">@</span><span class="l l-Scalar l-Scalar-Plain">do F4</span>
+<span class="l l-Scalar l-Scalar-Plain">@mode major</span>
+</code></pre></div>
+<p>Parser en validate strippen de YAML-kop (regelnummers blijven kloppen t.o.v.
+het hele bestand). Werkbank-import (<code>.mscz.mvsa</code> / banner) mag <code>zoektekst</code>
+nog missen tot het stuk catalogusbron wordt.</p>
 <h2 id="2-regelidentifier">2. Regelidentifier<a class="headerlink" href="#2-regelidentifier" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>regelidentifier ::= stemidentifier [ EHM ] ":"
 stemidentifier  ::= [A-Za-z0-9_-]+   (* laatste teken mag geen "_" of "-" zijn *)
@@ -6171,7 +6283,7 @@ dezelfde kolom; zie
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-10
+        Bijgewerkt: 2026-10-12
         
       </p>
       
