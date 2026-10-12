@@ -22,7 +22,7 @@ canonieke vorm brengen (zelfde formaat).
 | Bron ↓ \ Doel →          | `.vsa`                        | `.mvsa`                | `.mxl` / `.musicxml`                                                                             | `.mscz`                                                                                                 | `.mp3` / audio         | `.midi` / `.mid`   |
 | ------------------------ | ----------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------ |
 | **`.vsa`**               | **normalize** (waar relevant) | — (niet v0)            | `vsa musicxml`                                                                                   | via MXL / templates                                                                                     | `vsa audio`            | — (niet gepland)   |
-| **`.mvsa`**              | —                             | **`normalize`**        | `mvsa musicxml`                                                                                  | **`mscz`** via mxl→MuseScore                                                                            | `mvsa audio`           | — (niet gepland)   |
+| **`.mvsa`**              | —                             | **`normalize`**        | `mvsa mxl`                                                                                       | **`mscz`** via mxl→MuseScore                                                                            | `mvsa mp3`             | — (niet gepland)   |
 | **`.mxl` / `.musicxml`** | —                             | **`import`**           | **normalize** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | MuseScore / `mxl mscz`                                                                                  | `vsa audio`            | — (niet gepland)   |
 | **`.mscz`**              | —                             | **`import`** (via mxl) | `mscz mxl`                                                                                       | **normalize** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | `vsa audio` (fallback) | — (niet gepland)   |
 | **`.midi` / `.mid`**     | —                             | —                      | —                                                                                                | —                                                                                                       | —                      | — (niet gepland)   |
@@ -113,7 +113,7 @@ Elke conversie-entry leest één brontype:
 | Command             | Bron                                  | Acties (richting)                                                                              |
 | ------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol                                      |
-| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, musicxml, mscz, pdf, audio, import, normalize                                        |
+| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, import, normalize                                               |
 | `mxl`               | `.mxl` / `.musicxml`                  | import → mvsa; mscz; **validate** / **normalize** (playback-checklist)                         |
 | `mscz`              | `.mscz`                               | import → mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)                                 |
 | `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte tekst (referentie voor [`zoektekst`](../formats/zoektekst.md); optioneel `.lyrics.txt`) |
@@ -172,7 +172,7 @@ vsa mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
 ```
 
 - Module: `vsa.mvsa_mscz` + `vsa.mscz_partituur` + `vsa.musescore_cli`.
-- Playback/Coria blijft `mvsa musicxml` (vier parts).
+- Playback/Coria blijft `mvsa mxl` (vier parts).
 
 **Criterium (gehaald):** met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
 (`tests/test_mvsa_mscz.py`; skip als MuseScore ontbreekt).
@@ -209,7 +209,7 @@ Top-level console-scripts + `scripts\*.cmd`:
 
 | Command             | Bron               | Acties                                            |
 | ------------------- | ------------------ | ------------------------------------------------- |
-| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, musicxml, mscz, import, normalize       |
+| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, mxl, mscz, pdf, mp3, import, normalize  |
 | `mxl`               | `.mxl`/`.musicxml` | import → mvsa; mscz                               |
 | `mscz`              | `.mscz`            | import → mvsa; mxl; **text** (lyrics, geen mvsa)  |
 | `vsa text`          | meerdere           | platte tekst incl. MusicXML / `.mscz`             |

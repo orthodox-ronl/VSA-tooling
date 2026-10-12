@@ -70,7 +70,7 @@ echo %ERRORLEVEL%
 | [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).              |
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                  |
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                    |
-| [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/export/import/pdf/audio (`mvsa` ≡ `vsa mvsa`).    |
+| [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/mxl/mscz/pdf/mp3/import (`mvsa` ≡ `vsa mvsa`).    |
 | [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: import → mvsa; mscz via MuseScore.                                |
 | [`mscz`](mscz.md)                                | Bron `.mscz`: import → mvsa; mxl via MuseScore; text (lyrics).                             |
 

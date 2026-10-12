@@ -61,7 +61,7 @@ if errorlevel 1 exit /b 1
 
 echo.
 echo make mxl %SRC%
-vsa mvsa musicxml "%SRC%" -o "%SRC%.mxl"
+vsa mvsa mxl "%SRC%" -o "%SRC%.mxl"
 if errorlevel 1 exit /b 1
 
 echo.

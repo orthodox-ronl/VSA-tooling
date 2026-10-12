@@ -8,5 +8,5 @@ kuiser-tool, …) staan in de **centrale backlog**:
 Markdown-fences `::: mvsa-notatie` / `::: mvsa` en alias `::: vsa` zijn klaar
 (validate + `build-markdown` + `:::include *.mvsa`).
 
-Preview-audio: `vsa audio` / `mvsa audio` (klaar). Los MIDI-bestand: niet
+Preview-audio: `vsa audio` / `mvsa mp3` (klaar). Los MIDI-bestand: niet
 gepland.

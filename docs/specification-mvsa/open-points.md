@@ -18,8 +18,8 @@ Repo-breed kompas (niet alleen mvsa): repo-bestand
 
 *(leeg — `zoektekst` vullen/checken: [`vsa zoektekst`](../reference/cli/zoektekst.md))*
 
-Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
-`examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa audio`).
+Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / mp3):
+`examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa mp3`).
 
 ---
 
@@ -59,7 +59,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 | Conversieslices                       | normalize, mscz-export, import, bron-commands — zie conversions-plan                                                                                                                                                                                   |
 | Kuiser-tool                           | `mvsa kuiser`: L-ELM `-`→`~`; ambiguë-`-`-warnings; semantische woordstreepjes (Pyphen, exact); maatstrepen syncen; align; `--check`. Bewust later: conflicterende gedeeltelijke strepen raden; marker-octaaf → `@oct`                                 |
 | `mvsa pdf`                            | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                                                                                                                                                                        |
-| `vsa`/`mvsa audio`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                                                                                                                                                                            |
+| `vsa`/`mvsa mp3`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                                                                                                                                                                            |
 | Los MIDI-bestand                      | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)                                                                                                                                                       |
 | Speelplan volta + D.S. al Fine / Coda | Partituur-nav: volta, D.S./D.C. al Fine, D.S./D.C. al Coda; MXL expansie; tests                                                                                                                                                                        |
 | `::: mvsa-notatie` / `::: mvsa`       | Markdown-fences + aliases `::: vsa` / `::: mvsa`; validate; build → Coria/MXL; `:::include *.mvsa`                                                                                                                                                     |

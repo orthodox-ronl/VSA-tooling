@@ -6,6 +6,8 @@ Keten: SATB-explode (M2) + piano (M8) → optioneel recite-explosie (M10) →
 
 from __future__ import annotations
 
+import os
+import tempfile
 from pathlib import Path
 
 from .musicxml_coria_timing import finalize_coria_musicxml
@@ -64,3 +66,34 @@ def normalize_playback_mxl_path(
     )
     write_musicxml_output(dest, normalized)
     return dest
+
+
+def export_mscz_to_playback_mxl(
+    mscz: Path,
+    out: Path,
+    *,
+    musescore: Path | None = None,
+) -> Path:
+    """``.mscz`` → MuseScore-``.mxl`` → Coria-playback-``.mxl``.
+
+    Zelfde keten als ``mscz mxl`` / ``mvsa mxl`` op een MuseScore-bron.
+    """
+    from .musescore_cli import convert_with_musescore
+
+    mscz = Path(mscz)
+    out = Path(out)
+    if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
+        out = out.with_suffix(".mxl")
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, raw_name = tempfile.mkstemp(suffix=".mxl", prefix="mscz-raw-")
+    os.close(fd)
+    raw_mxl = Path(raw_name)
+    try:
+        convert_with_musescore(mscz, raw_mxl, musescore=musescore)
+        xml = read_musicxml_file(raw_mxl)
+        playback = normalize_playback_musicxml(xml, apply_timing=True)
+        write_musicxml_output(out, playback)
+    finally:
+        raw_mxl.unlink(missing_ok=True)
+    return out

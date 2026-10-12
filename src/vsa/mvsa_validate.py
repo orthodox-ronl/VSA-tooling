@@ -320,8 +320,11 @@ def validate_mvsa_path(path: Path) -> list[MvsaDiagnostic]:
 
 
 def collect_mvsa_files(path: Path) -> list[Path]:
+    """Verzamel ``.mvsa``-paden. Geen binaire bestanden (``.mscz`` e.d.)."""
     if path.is_file():
-        return [path]
+        if path.suffix.lower() == ".mvsa":
+            return [path]
+        return []
     return sorted(path.rglob("*.mvsa"))
 
 

@@ -376,13 +376,13 @@ def _build_parser():
             "subcommando's:\n"
             "  validate PATH\n"
             "      Valideer .mvsa (bestand of map).\n"
-            "  musicxml PATH [-o OUTPUT] [--section SECTION]\n"
+            "  mxl PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar SATB MusicXML (.mxl/.musicxml).\n"
             "  mscz PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar MuseScore (.mscz) via .mxl.\n"
             "  pdf PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar print-PDF via MuseScore.\n"
-            "  audio PATH [-o OUTPUT] [--format {mp3,ogg,wav}]\n"
+            "  mp3 PATH [-o OUTPUT] [--format {mp3,ogg,wav}]\n"
             "      Exporteer naar preview-audio (.mp3) via MuseScore.\n"
             "  import PATH [-o OUTPUT] --pitch {doremi,a-g,vsa}\n"
             "      Importeer .mxl/.mscz naar .mvsa.\n"
@@ -394,9 +394,9 @@ def _build_parser():
             "\n"
             "voorbeelden:\n"
             "  vsa mvsa validate examples\\mvsa\n"
-            "  vsa mvsa musicxml lied.mvsa -o out.mxl --section schets1\n"
+            "  vsa mvsa mxl lied.mvsa -o out.mxl --section schets1\n"
             "  vsa mvsa mscz lied.mvsa -o out.mscz\n"
-            "  vsa mvsa audio lied.mvsa -o out.mp3\n"
+            "  vsa mvsa mp3 lied.mvsa -o out.mp3\n"
             "  vsa mvsa import out.mxl -o out.mvsa --pitch doremi\n"
             "  vsa mvsa normalize lied.mvsa -o out.mvsa\n"
             "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch a-g\n"
@@ -405,15 +405,15 @@ def _build_parser():
             "\n"
             "Top-level alias: mvsa …  (ook: mxl … / mscz … voor andere bronnen).\n"
             "\n"
-            "Hulp: vsa mvsa validate -h | vsa mvsa musicxml -h | "
-            "vsa mvsa mscz -h | vsa mvsa pdf -h | vsa mvsa audio -h | "
+            "Hulp: vsa mvsa validate -h | vsa mvsa mxl -h | "
+            "vsa mvsa mscz -h | vsa mvsa pdf -h | vsa mvsa mp3 -h | "
             "vsa mvsa import -h | vsa mvsa normalize -h | vsa mvsa kuiser -h"
         ),
     )
     mvsa_sub = mvsa.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,musicxml,mscz,pdf,audio,import,normalize,kuiser}",
+        metavar="{validate,mxl,mscz,pdf,mp3,import,normalize,kuiser}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -437,23 +437,27 @@ def _build_parser():
         ),
     )
     m_musicxml = mvsa_sub.add_parser(
-        "musicxml",
-        help="Exporteer .mvsa naar SATB MusicXML (.mxl/.musicxml).",
+        "mxl",
+        aliases=["musicxml"],
+        help="Exporteer .mvsa/.mscz/.mxl naar Coria-playback MusicXML.",
         description=(
-            "Exporteer een .mvsa-bestand naar SATB MusicXML. "
-            "Optioneel een @sectie-id; anders alle secties achter elkaar."
+            "Schrijf een Coria-playback-.mxl. Bron .mvsa: SATB-export. "
+            "Bron .mscz: MuseScore → playback-normalisatie (zelfde als mscz mxl). "
+            "Bron .mxl/.musicxml: normaliseer naar playback. "
+            "Alias: musicxml (verouderd)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa musicxml examples\\mvsa\\kleine-intocht-zondag-hemelum.mvsa\n"
-            "  vsa mvsa musicxml lied.mvsa -o generated\\lied.mxl\n"
-            "  vsa mvsa musicxml lied.mvsa --section schets-a-bladcijfer -o out.mxl"
+            "  vsa mvsa mxl examples\\mvsa\\kleine-intocht-zondag-hemelum.mvsa\n"
+            "  vsa mvsa mxl lied.mvsa -o generated\\lied.mxl\n"
+            "  vsa mvsa mxl lied.mvsa --section schets-a-bladcijfer -o out.mxl\n"
+            "  vsa mvsa mxl lied.mscz -o generated\\lied.mxl"
         ),
     )
     m_musicxml.add_argument(
         "path",
-        help=".mvsa-bestand om te exporteren.",
+        help=".mvsa-, .mscz- of .mxl/.musicxml-bestand.",
     )
     m_musicxml.add_argument(
         "-o",
@@ -466,7 +470,7 @@ def _build_parser():
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen deze @sectie-id exporteren (default: alle secties).",
+        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
     )
     m_musicxml.add_argument(
         "--bibliotheek-id",
@@ -474,7 +478,7 @@ def _build_parser():
         default=None,
         dest="bibliotheek_id",
         help=(
-            "Bibliotheek-id in MusicXML identification/rights "
+            "Alleen bij .mvsa: bibliotheek-id in MusicXML identification/rights "
             "(default: pad-sniff onder content-source/bibliotheek)."
         ),
     )
@@ -482,8 +486,8 @@ def _build_parser():
         "--hulptekst",
         action="store_true",
         help=(
-            "Tweede lyric-laag (number=2): ksl→Latijn / nl→Cyrillisch "
-            "per lettergreep."
+            "Alleen bij .mvsa: tweede lyric-laag (number=2): ksl→Latijn / "
+            "nl→Cyrillisch per lettergreep."
         ),
     )
     m_musicxml.add_argument(
@@ -491,10 +495,16 @@ def _build_parser():
         action="store_true",
         dest="hulptekst_as_parts",
         help=(
-            "Coria: extra SATB-parts met hulptekst (volume 0). "
+            "Alleen bij .mvsa: Coria-extra SATB-parts met hulptekst (volume 0). "
             "Part-namen: Soprano (ksl)/(nl) via @taal. "
             "Impliceert --hulptekst. Alleen playback-layout."
         ),
+    )
+    m_musicxml.add_argument(
+        "--musescore",
+        metavar="PATH",
+        default=None,
+        help="Pad naar MuseScore (alleen bij .mscz; default: auto).",
     )
     m_mscz = mvsa_sub.add_parser(
         "mscz",
@@ -639,20 +649,22 @@ def _build_parser():
         help="Bij .mvsa + layout partituur: expliciete bibliotheek-id voor colofon.",
     )
     m_audio = mvsa_sub.add_parser(
-        "audio",
+        "mp3",
+        aliases=["audio"],
         help="Exporteer .mvsa (of .mxl/.mscz) naar audio (.mp3) via MuseScore.",
         description=(
             "Preview-luisteren: playback-.mxl -> MuseScore -> .mp3/.ogg/.wav. "
             "Bron .mvsa/.vsa: eerst MusicXML-playback. .mscz: fallback via .mxl. "
-            "Alleen het artefact; de consumer-site maakt de afspeelknop."
+            "Alleen het artefact; de consumer-site maakt de afspeelknop. "
+            "Alias: audio (verouderd)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa audio examples\\mvsa\\alleluia-toon-1.mvsa\n"
-            "  vsa mvsa audio lied.mvsa -o generated\\lied.mp3\n"
-            "  vsa mvsa audio lied.mxl -o lied.ogg --format ogg\n"
-            "  vsa mvsa audio lied.mscz -o lied.mp3"
+            "  vsa mvsa mp3 examples\\mvsa\\alleluia-toon-1.mvsa\n"
+            "  vsa mvsa mp3 lied.mvsa -o generated\\lied.mp3\n"
+            "  vsa mvsa mp3 lied.mxl -o lied.ogg --format ogg\n"
+            "  vsa mvsa mp3 lied.mscz -o lied.mp3"
         ),
     )
     m_audio.add_argument(
@@ -1545,13 +1557,13 @@ def _cmd_template(args) -> int:
 def _cmd_mvsa(args) -> int:
     if getattr(args, "mvsa_command", None) == "validate":
         return _cmd_mvsa_validate(args)
-    if getattr(args, "mvsa_command", None) == "musicxml":
+    if getattr(args, "mvsa_command", None) in ("mxl", "musicxml"):
         return _cmd_mvsa_musicxml(args)
     if getattr(args, "mvsa_command", None) == "mscz":
         return _cmd_mvsa_mscz(args)
     if getattr(args, "mvsa_command", None) == "pdf":
         return _cmd_mvsa_pdf(args)
-    if getattr(args, "mvsa_command", None) == "audio":
+    if getattr(args, "mvsa_command", None) in ("mp3", "audio"):
         return _cmd_mvsa_audio(args)
     if getattr(args, "mvsa_command", None) == "import":
         return _cmd_mvsa_import(args)
@@ -1562,12 +1574,12 @@ def _cmd_mvsa(args) -> int:
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
         "Gebruik: vsa mvsa "
-        "{validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …\n"
+        "{validate,mxl,mscz,pdf,mp3,import,normalize,kuiser} …\n"
         "  vsa mvsa validate PATH\n"
-        "  vsa mvsa musicxml PATH [-o OUTPUT] [--section SECTION]\n"
+        "  vsa mvsa mxl PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa pdf PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
-        "  vsa mvsa audio PATH [-o OUTPUT] [--format {mp3,ogg,wav}]\n"
+        "  vsa mvsa mp3 PATH [-o OUTPUT] [--format {mp3,ogg,wav}]\n"
         "  vsa mvsa import PATH --pitch {doremi,a-g,vsa} [-o OUTPUT]\n"
         "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa}] [-o OUTPUT]\n"
         "  vsa mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
@@ -1712,9 +1724,14 @@ def _cmd_zoektekst(args) -> int:
 
 
 def _cmd_mvsa_musicxml(args) -> int:
+    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
+    from .musicxml_package import musicxml_output_suffix
+    from .musicxml_playback_normalize import (
+        export_mscz_to_playback_mxl,
+        normalize_playback_mxl_path,
+    )
     from .mvsa_musicxml import MvsaExportError, export_mvsa_path
     from .mvsa_validate import MvsaValidationError, format_diagnostic
-    from .musicxml_package import musicxml_output_suffix
 
     path = Path(args.path)
     if not path.is_file():
@@ -1723,15 +1740,59 @@ def _cmd_mvsa_musicxml(args) -> int:
     out = Path(args.output) if args.output else path.with_suffix(".mxl")
     if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
         out = out.with_suffix(musicxml_output_suffix(path=out))
+    suffix = path.suffix.lower()
+    mvsa_only = (
+        args.section
+        or getattr(args, "bibliotheek_id", None)
+        or bool(getattr(args, "hulptekst", False))
+        or bool(getattr(args, "hulptekst_as_parts", False))
+    )
     try:
-        export_mvsa_path(
-            path,
-            out,
-            section_id=args.section,
-            bibliotheek_id=getattr(args, "bibliotheek_id", None),
-            hulptekst=bool(getattr(args, "hulptekst", False)),
-            hulptekst_as_parts=bool(getattr(args, "hulptekst_as_parts", False)),
-        )
+        if suffix == ".mvsa":
+            export_mvsa_path(
+                path,
+                out,
+                section_id=args.section,
+                bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                hulptekst=bool(getattr(args, "hulptekst", False)),
+                hulptekst_as_parts=bool(
+                    getattr(args, "hulptekst_as_parts", False)
+                ),
+            )
+        elif suffix == ".mscz":
+            if mvsa_only:
+                print(
+                    "mvsa mxl: --section/--bibliotheek-id/--hulptekst/"
+                    "--hulptekst-as-parts gelden alleen bij .mvsa",
+                    file=sys.stderr,
+                )
+                return 1
+            musescore = (
+                Path(args.musescore) if getattr(args, "musescore", None) else None
+            )
+            export_mscz_to_playback_mxl(path, out, musescore=musescore)
+        elif suffix in {".mxl", ".musicxml", ".xml"}:
+            if mvsa_only:
+                print(
+                    "mvsa mxl: --section/--bibliotheek-id/--hulptekst/"
+                    "--hulptekst-as-parts gelden alleen bij .mvsa",
+                    file=sys.stderr,
+                )
+                return 1
+            if getattr(args, "musescore", None):
+                print(
+                    "mvsa mxl: --musescore geldt alleen bij .mscz",
+                    file=sys.stderr,
+                )
+                return 1
+            normalize_playback_mxl_path(path, out, apply_timing=True)
+        else:
+            print(
+                f"mvsa mxl verwacht .mvsa, .mscz of .mxl/.musicxml, "
+                f"kreeg: {path.name}",
+                file=sys.stderr,
+            )
+            return 1
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
             print(format_diagnostic(d, path), file=sys.stderr)
@@ -1739,6 +1800,9 @@ def _cmd_mvsa_musicxml(args) -> int:
     except MvsaExportError as exc:
         loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
         print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
         return 1
     print(f"Geschreven: {out}")
     return 0
@@ -1752,6 +1816,12 @@ def _cmd_mvsa_mscz(args) -> int:
     path = Path(args.path)
     if not path.is_file():
         print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    if path.suffix.lower() != ".mvsa":
+        print(
+            f"mvsa mscz verwacht .mvsa als bron, kreeg: {path.name}",
+            file=sys.stderr,
+        )
         return 1
     out = Path(args.output) if args.output else path.with_suffix(".mscz")
     keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
@@ -1934,6 +2004,12 @@ def _cmd_mvsa_normalize(args) -> int:
     if not path.is_file():
         print(f"Bestand niet gevonden: {path}", file=sys.stderr)
         return 1
+    if path.suffix.lower() != ".mvsa":
+        print(
+            f"mvsa normalize verwacht .mvsa als bron, kreeg: {path.name}",
+            file=sys.stderr,
+        )
+        return 1
     out = (
         Path(args.output)
         if args.output
@@ -1970,6 +2046,12 @@ def _cmd_mvsa_kuiser(args) -> int:
         if p.is_dir():
             files.extend(sorted(p.rglob("*.mvsa")))
         elif p.is_file():
+            if p.suffix.lower() != ".mvsa":
+                print(
+                    f"mvsa kuiser verwacht .mvsa (of een map), kreeg: {p.name}",
+                    file=sys.stderr,
+                )
+                return 1
             files.append(p)
         else:
             print(f"Pad niet gevonden: {p}", file=sys.stderr)

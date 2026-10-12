@@ -593,11 +593,11 @@ Draft-tooling voor meerstemmige `.mvsa`-bestanden (L + SATB). Zie
 ```cmd
 vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
-### Opties (`musicxml`)
+### Opties (`mxl`)
 
 | Optie                | Betekenis                                                          |
 | -------------------- | ------------------------------------------------------------------ |
@@ -608,4 +608,4 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
 
 - `validate`: bij succes zonder warnings één regel `OK`; anders diagnostiek
   en bij errors exitcode `1`.
-- `musicxml`: `Geschreven: <pad>` of fout op stderr.
+- `mxl`: `Geschreven: <pad>` of fout op stderr.

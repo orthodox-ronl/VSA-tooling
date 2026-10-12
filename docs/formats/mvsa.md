@@ -39,7 +39,7 @@ systeemeinden; `doremi` / `a-g` doen dat niet. Tutorial:
 
 ```cmd
 mvsa validate examples\mvsa
-mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
+mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
