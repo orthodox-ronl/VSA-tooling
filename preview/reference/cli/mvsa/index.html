@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 22:33 CEST.
+  , gebouwd 2026-10-12 23:22 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -6758,9 +6758,9 @@ mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
 mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
-mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
-mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
-mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
+mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
+mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
+mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 </code></pre></div>
 <h2 id="subcommandos">Subcommando's<a class="headerlink" href="#subcommandos" title="Permanent link">&para;</a></h2>
 <table>
@@ -7433,7 +7433,7 @@ metadata. Die banner is geen catalogus-label — hij herinnert eraan dat het
 een schets is.</p>
 </div>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
+<div class="highlight"><pre><span></span><code>vsa mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
                 [--octave-style {@oct,marker}] [--section SECTION]
                 [--musescore PATH] [--no-align] path
 </code></pre></div>
@@ -7457,8 +7457,9 @@ een schets is.</p>
 </tr>
 </tbody>
 </table>
-<p>Stemhoogten worden in de gekozen <code>--pitch</code>-vorm geschreven; <code>@mode</code> is
-majeur (aanname); <code>@oct</code> wordt per stem afgeleid. <code>@do</code> volgt deze volgorde:</p>
+<p>Stemhoogten worden in de gekozen <code>--pitch</code>-vorm geschreven (default
+<strong><code>ag-vsa</code></strong>); <code>@mode</code> is majeur (aanname); <code>@oct</code> wordt per stem afgeleid.
+<code>@do</code> volgt deze volgorde:</p>
 <ol>
 <li><code>--do</code> op de command line (bijv. <code>F4</code>);</li>
 <li>bij <code>.mscz</code>: aantal kruisen/mollen uit MuseScore <code>KeySig</code> (<code>concertKey</code>);</li>
@@ -7522,12 +7523,44 @@ majeur (aanname); <code>@oct</code> wordt per stem afgeleid. <code>@do</code> vo
 <p>Bij complexe MuseScore-lyrics is soms <code>--no-align</code> nodig (sla kuiser/align
 over) — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
 <code>kuiser</code> zijn advies, geen import-fout.</p>
-<p>Bij <code>--pitch vsa</code> plakt de import op elke stemregel een <strong>eindanker</strong> met
+<p><strong>Pitch-vormen bij import</strong></p>
+<table>
+<thead>
+<tr>
+<th><code>--pitch</code></th>
+<th>Stemregels</th>
+<th>Eindanker per systeem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ag-vsa</code></td>
+<td><strong>Default.</strong> Eerste klinkende noot per LSATB-systeem absolute a–g; daarna EHM</td>
+<td>ja (a–g)</td>
+</tr>
+<tr>
+<td><code>vsa</code></td>
+<td>Eerste toon absoluut als doremi; daarna EHM</td>
+<td>ja (a–g)</td>
+</tr>
+<tr>
+<td><code>doremi</code></td>
+<td>Laddergraden</td>
+<td>nee</td>
+</tr>
+<tr>
+<td><code>a-g</code></td>
+<td>Toonnamen met wetenschappelijk cijfer (<code>bb4</code>, …); alias <code>abc</code></td>
+<td>nee</td>
+</tr>
+</tbody>
+</table>
+<p>Bij <code>ag-vsa</code> en <code>vsa</code> plakt de import op elke stemregel een <strong>eindanker</strong> met
 absolute toonhoogte (a–g met wetenschappelijk cijfer) direct achter de
 <strong>laatste maatstreep</strong> van elk systeem, bijvoorbeeld <code>|g4</code> of <code>||a4</code>. Dat zijn
 check-only ankers: na wijzigingen in het <code>.mvsa</code> vangt <code>mvsa validate</code> een
 mismatch op (<code>MVSA-BAR-ANKER</code>). Op de lyrics-regel (<code>L:</code>) blijven de strepen
-kaal. Bij <code>--pitch doremi</code> en <code>--pitch a-g</code> komen die eindankers niet.</p>
+kaal.</p>
 <p>Syntax van eindankers:
 <a href="../../../specification-mvsa/syntax/#eindanker-aan-de-maatstreep">specification-mvsa — eindanker</a>.</p>
 <h3 id="argumenten-en-opties_5">Argumenten en opties<a class="headerlink" href="#argumenten-en-opties_5" title="Permanent link">&para;</a></h3>
@@ -7549,9 +7582,9 @@ kaal. Bij <code>--pitch doremi</code> en <code>--pitch a-g</code> komen die eind
 </tr>
 <tr>
 <td><code>--pitch</code></td>
-<td>Ja</td>
-<td><code>doremi</code>, <code>a-g</code> (of alias <code>abc</code>), of <code>vsa</code>.</td>
-<td>—</td>
+<td>Nee</td>
+<td><code>ag-vsa</code> (default), <code>vsa</code>, <code>doremi</code>, of <code>a-g</code> (alias <code>abc</code>).</td>
+<td><code>ag-vsa</code></td>
 </tr>
 <tr>
 <td><code>-o</code>, <code>--output</code></td>
@@ -7592,7 +7625,8 @@ kaal. Bij <code>--pitch doremi</code> en <code>--pitch a-g</code> komen die eind
 </tbody>
 </table>
 <h3 id="voorbeelden_4">Voorbeelden<a class="headerlink" href="#voorbeelden_4" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
+<div class="highlight"><pre><span></span><code>vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa
+vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4
 vsa mvsa import lied.mxl -o lied.mvsa --pitch vsa
@@ -7601,7 +7635,7 @@ vsa mvsa validate lied.mvsa
 <hr />
 <h2 id="vsa-mvsa-normalize"><code>vsa mvsa normalize</code><a class="headerlink" href="#vsa-mvsa-normalize" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_7">Synopsis<a class="headerlink" href="#synopsis_7" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}]
+<div class="highlight"><pre><span></span><code>vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                    [--octave-style {@oct,marker}] [--no-align] path
 </code></pre></div>
 <h3 id="beschrijving_6">Beschrijving<a class="headerlink" href="#beschrijving_6" title="Permanent link">&para;</a></h3>
@@ -7613,10 +7647,10 @@ noten blijven zoals in de bron</strong> (bladcijfer, do-re-mi, a–g, EHM, …).
 kolom- en maatstreep-uitlijning gebeurt standaard. Zo blijf je
 meerdere schetsen met verschillende spellingen in één bestand intact.</p>
 <p>Wil je wél herschrijven naar één vorm, geef dan expliciet <code>--pitch doremi</code>,
-<code>a-g</code> of <code>vsa</code>. (<code>abc</code> is een alias van <code>a-g</code>.)</p>
+<code>a-g</code>, <code>vsa</code> of <code>ag-vsa</code>. (<code>abc</code> is een alias van <code>a-g</code>.)</p>
 <p><strong>Import uit een ander formaat</strong> (<code>.mxl</code> / <code>.mscz</code> via <code>mvsa import</code> / <code>mxl
-import</code>): daar is <code>--pitch</code> verplicht of default <strong><code>doremi</code></strong> — er is dan
-geen “bronnotatie” om te bewaren.</p>
+import</code>): daar is de default <strong><code>ag-vsa</code></strong> — er is dan geen “bronnotatie” om
+te bewaren.</p>
 <table>
 <thead>
 <tr>
@@ -7640,6 +7674,10 @@ geen “bronnotatie” om te bewaren.</p>
 <tr>
 <td><code>vsa</code></td>
 <td>Eerste toon absoluut (doremi), daarna EHM (<code>/</code>, <code>\2</code>, …)</td>
+</tr>
+<tr>
+<td><code>ag-vsa</code></td>
+<td>Per LSATB-systeem: eerste noot absolute a–g, daarna EHM; a–g-eindanker op de laatste maatstreep</td>
 </tr>
 </tbody>
 </table>
@@ -7666,7 +7704,7 @@ geen “bronnotatie” om te bewaren.</p>
 <tr>
 <td><code>--pitch</code></td>
 <td>Nee</td>
-<td><code>preserve</code> (default), of <code>doremi</code> / <code>a-g</code> / <code>vsa</code> om te herschrijven</td>
+<td><code>preserve</code> (default), of <code>doremi</code> / <code>a-g</code> / <code>vsa</code> / <code>ag-vsa</code></td>
 <td><code>preserve</code> bij <code>.mvsa</code>-bron</td>
 </tr>
 <tr>
@@ -7721,7 +7759,7 @@ vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 <hr />
 <h2 id="vsa-mvsa-kuiser"><code>vsa mvsa kuiser</code><a class="headerlink" href="#vsa-mvsa-kuiser" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_8">Synopsis<a class="headerlink" href="#synopsis_8" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}]
+<div class="highlight"><pre><span></span><code>vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                 [--octave-style {@oct,marker}] [--no-align] path [path …]
 </code></pre></div>
 <h3 id="beschrijving_7">Beschrijving<a class="headerlink" href="#beschrijving_7" title="Permanent link">&para;</a></h3>

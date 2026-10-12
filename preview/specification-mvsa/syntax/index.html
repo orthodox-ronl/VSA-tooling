@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 22:33 CEST.
+  , gebouwd 2026-10-12 23:22 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5809,9 +5809,11 @@ opnieuw (dat doet wel een EHM in de
 <p>Op <strong>lyrics-regels</strong> horen geen eindankers; daar blijft de kale streep. Voor
 sync van maatstrepen telt alleen het <strong>bar-token</strong> (zonder anker): <code>L</code> met <code>|</code>
 en <code>S</code> met <code>|mi</code> zijn synchroon.</p>
-<p><strong>Import-gebruik:</strong> <code>vsa mvsa import --pitch vsa</code> plakt zulke check-only
-eindankers (absolute a–g + cijfer) aan de laatste maatstreep van elk
-LSATB-systeem op de stemregels; de <code>L:</code>-regel blijft zonder ankers. Zie
+<p><strong>Import-gebruik:</strong> <code>vsa mvsa import</code> (default <code>--pitch ag-vsa</code>) en
+<code>--pitch vsa</code> plakken zulke check-only eindankers (absolute a–g + cijfer)
+aan de laatste maatstreep van elk LSATB-systeem op de stemregels; de
+<code>L:</code>-regel blijft zonder ankers. Bij <code>ag-vsa</code> is bovendien de eerste
+klinkende noot van elk systeem absolute a–g (daarna EHM). Zie
 <a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>.</p>
 <h2 id="5-sectie">5. Sectie<a class="headerlink" href="#5-sectie" title="Permanent link">&para;</a></h2>
 <h3 id="begin">Begin<a class="headerlink" href="#begin" title="Permanent link">&para;</a></h3>

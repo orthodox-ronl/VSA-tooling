@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 22:33 CEST.
+  , gebouwd 2026-10-12 23:22 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4919,9 +4919,10 @@ ook over systeembraken; export en eindanker-check zetten die weer om naar de
 vorige toon (tenzij een beginanker reset) — zie
 <a href="../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">Semantiek — lopende toon over systeembraken</a>.
 Vóór elk LSATB-systeem zet import <code>#maat N</code> (1-based startmaat) voor
-navigatie t.o.v. PDF / MuseScore. Met <code>--pitch vsa</code> plakt de import
-check-only eindankers (a–g + cijfer) op systeemeinden; <code>doremi</code> / <code>a-g</code>
-doen dat niet. Tutorial:
+navigatie t.o.v. PDF / MuseScore. Default <code>--pitch ag-vsa</code>: eerste noot per
+systeem absolute a–g, daarna EHM, plus check-only a–g-eindankers op
+systeemeinden. Hetzelfde eindanker-gedrag bij <code>--pitch vsa</code>; <code>doremi</code> /
+<code>a-g</code> zetten geen eindankers. Tutorial:
 <a href="../../guides/mvsa-schrijven-101/#7-taak-bladmuziek--mvsa">mvsa schrijven 101 — bladmuziek</a>.</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mvsa validate examples\mvsa
@@ -4929,9 +4930,9 @@ mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
-mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.import.mvsa
-mvsa import generated\alleluia.mxl --pitch vsa -o generated\alleluia.vsa.mvsa
-mvsa validate generated\alleluia.vsa.mvsa
+mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
+mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
+mvsa validate generated\alleluia.import.mvsa
 vsa text examples\mvsa\alleluia-toon-8.mvsa
 </code></pre></div>
 <p>Via repo-script: <code>scripts\mvsa.cmd …</code></p>

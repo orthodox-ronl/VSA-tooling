@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 22:33 CEST.
+  , gebouwd 2026-10-12 23:22 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4905,7 +4905,8 @@ recite, lossy). De output begint met dezelfde waarschuwingsbanner als
 </div>
 <p><strong>Import:</strong> de MusicXML-bron wordt direct geparst als vier parts (P1–P4 =
 S/A/T/B). Soft-wrap ~80 tekens, same-pitch holds als <code>-</code>, multi-lettergreep
-lyrics als recite. Kies <code>--pitch doremi</code>, <code>a-g</code> (alias <code>abc</code>), of <code>vsa</code>
+lyrics als recite. Default <code>--pitch ag-vsa</code>; of kies <code>doremi</code>, <code>a-g</code> (alias
+<code>abc</code>), of <code>vsa</code>
 (EHM + absolute eindankers op systeemeinden).</p>
 <p>Dit is <strong>geen</strong> herdefinitie van de MusicXML-standaard: we documenteren
 <strong>onze</strong> export-/importprofielen.</p>
@@ -4920,9 +4921,9 @@ layout divergeert (partituur-MusicXML = I1 tie-keten zonder gestipte
 collapse-sommen; <strong>MSCZ-postprocess</strong> maakt daarna compacte gestipte noten).
 Oefenhoek-Coria-transforms: <code>VSA-demo/scripts/mscz-product-transforms.md</code>.</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
-mxl import generated\alleluia.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
-mvsa validate generated\from-mxl.vsa.mvsa
+<div class="highlight"><pre><span></span><code>mxl import generated\alleluia.mxl -o generated\from-mxl.mvsa
+mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.doremi.mvsa
+mvsa validate generated\from-mxl.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
 vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
 </code></pre></div>
