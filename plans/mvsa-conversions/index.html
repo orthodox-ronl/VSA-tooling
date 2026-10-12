@@ -949,6 +949,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1020,10 +1048,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1041,8 +1069,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3952,6 +3980,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -5359,9 +5415,9 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td><strong><code>.mvsa</code></strong></td>
 <td>—</td>
 <td><strong><code>normalize</code></strong></td>
-<td><code>mvsa musicxml</code></td>
+<td><code>mvsa mxl</code></td>
 <td><strong><code>mscz</code></strong> via mxl→MuseScore</td>
-<td><code>mvsa audio</code></td>
+<td><code>mvsa mp3</code></td>
 <td>— (niet gepland)</td>
 </tr>
 <tr>
@@ -5566,7 +5622,7 @@ hergebruik van <code>digit*</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, musicxml, mscz, pdf, audio, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -5581,7 +5637,7 @@ hergebruik van <code>digit*</code>.</p>
 <tr>
 <td><code>vsa text</code></td>
 <td><code>.vsa</code> / <code>.mvsa</code> / MusicXML / <code>.mscz</code></td>
-<td>platte gezongen tekst (zoekindex; geen <code>.mvsa</code>-sibling)</td>
+<td>platte tekst (referentie voor <a href="../../formats/zoektekst/"><code>zoektekst</code></a>; optioneel <code>.lyrics.txt</code>)</td>
 </tr>
 <tr>
 <td><code>vsa audio</code></td>
@@ -5652,7 +5708,7 @@ identiek; ook <code>doremi → abc → doremi</code> en <code>--pitch vsa</code>
 </code></pre></div>
 <ul>
 <li>Module: <code>vsa.mvsa_mscz</code> + <code>vsa.mscz_partituur</code> + <code>vsa.musescore_cli</code>.</li>
-<li>Playback/Coria blijft <code>mvsa musicxml</code> (vier parts).</li>
+<li>Playback/Coria blijft <code>mvsa mxl</code> (vier parts).</li>
 </ul>
 <p><strong>Criterium (gehaald):</strong> met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
 (<code>tests/test_mvsa_mscz.py</code>; skip als MuseScore ontbreekt).</p>
@@ -5693,7 +5749,7 @@ Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, musicxml, mscz, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, import, normalize</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -5773,7 +5829,7 @@ werken.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-10
+        Bijgewerkt: 2026-10-12
         
       </p>
       

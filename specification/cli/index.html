@@ -949,6 +949,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1020,10 +1048,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1041,8 +1069,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3741,6 +3769,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -5436,8 +5492,10 @@ exitcode <code>1</code>.</p>
 <h2 id="vsa-text-pad"><code>vsa text &lt;pad&gt;</code><a class="headerlink" href="#vsa-text-pad" title="Permanent link">&para;</a></h2>
 <h3 id="doel_10">Doel<a class="headerlink" href="#doel_10" title="Permanent link">&para;</a></h3>
 <p>Haal platte gezongen tekst uit <code>.vsa</code>, <code>.mvsa</code>, MusicXML (<code>.mxl</code> /
-<code>.musicxml</code> / <code>.xml</code>) of <code>.mscz</code> — zonder notatie, voor zoekindex of
-lyrics-producten. Schrijft geen <code>.mvsa</code>-sibling.</p>
+<code>.musicxml</code> / <code>.xml</code>) of <code>.mscz</code> — zonder notatie, voor zoekindex,
+lyrics-producten, of als referentie voor het veld
+<a href="../../formats/zoektekst/"><code>zoektekst</code></a>. Schrijft geen <code>.mvsa</code>-sibling.
+Op <code>.vsa</code> / <code>.mvsa</code> negeert extractie een bestaand <code>zoektekst</code>-veld.</p>
 <p>Volledige regel (MusicXML-lyrics, stemkeuze, <code>-o</code>): man-pagina
 <a href="../../reference/cli/text/">reference/cli/text.md</a>.</p>
 <h3 id="gebruik_9">Gebruik<a class="headerlink" href="#gebruik_9" title="Permanent link">&para;</a></h3>
@@ -5446,18 +5504,28 @@ vsa text lied.mscz.mxl -o generated\lied.mscz.lyrics.txt
 vsa text lied.mscz -o generated\lied.mscz.lyrics.txt
 </code></pre></div>
 <p>Alias voor alleen <code>.mscz</code>: <code>mscz text</code> (zelfde extractie via temp-<code>.mxl</code>).</p>
-<h2 id="vsa-mvsa"><code>vsa mvsa …</code><a class="headerlink" href="#vsa-mvsa" title="Permanent link">&para;</a></h2>
+<h2 id="vsa-zoektekst-pad"><code>vsa zoektekst &lt;pad&gt;…</code><a class="headerlink" href="#vsa-zoektekst-pad" title="Permanent link">&para;</a></h2>
 <h3 id="doel_11">Doel<a class="headerlink" href="#doel_11" title="Permanent link">&para;</a></h3>
+<p>Vul of controleer YAML-<code>zoektekst</code> in <code>.vsa</code> / <code>.mvsa</code> (editorzoeken).
+Default: in-place schrijven; <code>--check</code> alleen controleren.</p>
+<p>Man-pagina: <a href="../../reference/cli/zoektekst/">reference/cli/zoektekst.md</a>.
+Contract: <a href="../../formats/zoektekst/">formats/zoektekst.md</a>.</p>
+<h3 id="gebruik_10">Gebruik<a class="headerlink" href="#gebruik_10" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>vsa zoektekst examples\mvsa\alleluia-toon-1.mvsa
+vsa zoektekst examples\mvsa --check
+</code></pre></div>
+<h2 id="vsa-mvsa"><code>vsa mvsa …</code><a class="headerlink" href="#vsa-mvsa" title="Permanent link">&para;</a></h2>
+<h3 id="doel_12">Doel<a class="headerlink" href="#doel_12" title="Permanent link">&para;</a></h3>
 <p>Draft-tooling voor meerstemmige <code>.mvsa</code>-bestanden (L + SATB). Zie
 <a href="../../specification-mvsa/">specification-mvsa</a> en de man-pagina
 <a href="../../reference/cli/mvsa/">reference/cli/mvsa.md</a>.</p>
-<h3 id="gebruik_10">Gebruik<a class="headerlink" href="#gebruik_10" title="Permanent link">&para;</a></h3>
+<h3 id="gebruik_11">Gebruik<a class="headerlink" href="#gebruik_11" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 </code></pre></div>
-<h3 id="opties-musicxml">Opties (<code>musicxml</code>)<a class="headerlink" href="#opties-musicxml" title="Permanent link">&para;</a></h3>
+<h3 id="opties-mxl">Opties (<code>mxl</code>)<a class="headerlink" href="#opties-mxl" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -5480,7 +5548,7 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
 <ul>
 <li><code>validate</code>: bij succes zonder warnings één regel <code>OK</code>; anders diagnostiek
   en bij errors exitcode <code>1</code>.</li>
-<li><code>musicxml</code>: <code>Geschreven: &lt;pad&gt;</code> of fout op stderr.</li>
+<li><code>mxl</code>: <code>Geschreven: &lt;pad&gt;</code> of fout op stderr.</li>
 </ul>
 
 
@@ -5518,7 +5586,7 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-03
+        Bijgewerkt: 2026-10-12
         
       </p>
       

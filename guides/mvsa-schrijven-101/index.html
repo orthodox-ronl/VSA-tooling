@@ -949,6 +949,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1020,10 +1048,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1041,8 +1069,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3994,6 +4022,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -5216,6 +5272,9 @@ MusicXML of MuseScore.</p>
 </table>
 <p>Volledige keyword-lijst: <a href="../../specification-mvsa/keywords/">Keywords (<code>@…</code>)</a>.
 Voorbeelden in de repo: <a href="https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa"><code>examples/mvsa/</code></a>.</p>
+<p><strong>Catalogusbron:</strong> zet bovenaan YAML met <code>zoektekst</code> (platte gezongen tekst)
+zodat Ctrl+Shift+F in de editor werkt — contract:
+<a href="../../formats/zoektekst/">Zoektekst</a>.</p>
 <hr />
 <h2 id="1-minimaal-bestand">1. Minimaal bestand<a class="headerlink" href="#1-minimaal-bestand" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>@do F4
@@ -5633,7 +5692,9 @@ vsa mvsa validate lied.mvsa
    (valse <code>dag-gaan</code> / <code>steun-van</code>, ontbrekende <code>we-der-ke</code>, spaties in
    underlay), maar niet alles — bekijk vooral recite <code>( … )</code> en
    woordstreepjes. A/T/B volgen L/S op duur; controleer holds (<code>-</code>) en
-   <code>&amp;</code>-melisma’s tegen de bronpartituur.</li>
+   <code>&amp;</code>-melisma’s tegen de bronpartituur (onderstemmen met meer toonwissels
+   dan S in dezelfde tijd blijven als <code>&amp;</code>-melisma; L/S krijgen holds;
+   minder noten worden naar duur gepaddet).</li>
 <li><code>vsa mvsa validate lied.mvsa</code></li>
 <li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code> (Pyphen-warnings zijn
    advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
@@ -5694,7 +5755,7 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 </tr>
 <tr>
 <td>MusicXML</td>
-<td><code>vsa mvsa musicxml lied.mvsa -o generated\lied.mxl</code></td>
+<td><code>vsa mvsa mxl lied.mvsa -o generated\lied.mxl</code></td>
 </tr>
 <tr>
 <td>MuseScore</td>
@@ -5712,7 +5773,7 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 </table>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
+vsa mvsa mxl examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
 </code></pre></div>
 <p>CLI-detail: <a href="../../reference/cli/mvsa/">mvsa-referentie</a>. Formaten-hub:
 <a href="../../formats/">Formaten &amp; CLI</a>.</p>
@@ -5836,7 +5897,7 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-10
+        Bijgewerkt: 2026-10-12
         
       </p>
       

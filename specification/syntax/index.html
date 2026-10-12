@@ -949,6 +949,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1020,10 +1048,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1041,8 +1069,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3933,6 +3961,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -5134,6 +5190,8 @@ zelfbeschrijvende eenheden te exporteren zonder de rest van een repository.</p>
 <span class="w">  </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tropaar van de zondag, toon 1</span>
 <span class="w">  </span><span class="nt">composer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Traditioneel</span>
 <span class="w">  </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nl</span>
+<span class="nt">zoektekst</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+<span class="w">  </span><span class="no">Terwijl de steen …</span>
 <span class="nn">---</span>
 <span class="p p-Indicator">[:]</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ter{/&amp;/wijl_&amp;_} {\\de} steen ...</span>
 </code></pre></div>
@@ -5141,6 +5199,9 @@ zelfbeschrijvende eenheden te exporteren zonder de rest van een repository.</p>
 <code>identificatie</code>-sectie bevat bibliografische <a class="og-termref" href="/VSA-tooling/terminologie/metadata" title="Metadata: gegevens die als gestructureerde blokparameters of YAML-frontmatter bij VSA-bronmateriaal staan, verwerking of identificatie sturen en zelf niet tot de zichtbare VSA-notatie behoren.">metadata</a> die wordt opgenomen in
 het MusicXML <code>&lt;identification&gt;</code>-blok (zie <a href="../rendering/#musicxml-export">MusicXML-export</a>). De optionele <code>typografie</code>-
 sectie bevat lettertype-instellingen voor export-renderers (zie <a href="../rendering/#typografie">Typografie</a>).</p>
+<p>Canonieke catalogusbronnen hebben bovendien een top-level veld <strong><code>zoektekst</code></strong>:
+de volledige platte gezongen tekst voor editorzoeken. Contract:
+<a href="../../formats/zoektekst/">Zoektekst</a>.</p>
 <p>Toekomstige secties (bijv. <code>liturgie</code>, <code>publicatie</code>) kunnen worden toegevoegd
 zonder de bestaande syntaxis te breken.</p>
 <table>
@@ -5246,6 +5307,11 @@ zonder de bestaande syntaxis te breken.</p>
 <td><code>identificatie</code></td>
 <td><code>tone</code></td>
 <td>liturgische toon, bijv. <code>1</code></td>
+</tr>
+<tr>
+<td><em>(top-level)</em></td>
+<td><code>zoektekst</code></td>
+<td>platte gezongen tekst voor editorzoeken; zie <a href="../../formats/zoektekst/">zoektekst</a></td>
 </tr>
 <tr>
 <td><code>typografie</code></td>
@@ -5795,7 +5861,7 @@ Bb2
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-12
         
       </p>
       

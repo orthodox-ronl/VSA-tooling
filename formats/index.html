@@ -1057,6 +1057,34 @@
   
   
     <li class="md-nav__item">
+      <a href="zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="canonical-checklists/" class="md-nav__link">
         
   
@@ -1131,10 +1159,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
             
   
   
@@ -1152,8 +1180,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3839,6 +3867,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/cli/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/cli/musicxml/" class="md-nav__link">
         
   
@@ -4868,9 +4924,9 @@ specificaties; dit is de navigatiehub.</p>
 <td><strong><code>.mvsa</code></strong></td>
 <td>—</td>
 <td><code>mvsa kuiser</code> / <code>normalize</code></td>
-<td><code>mvsa musicxml</code></td>
+<td><code>mvsa mxl</code></td>
 <td><code>mvsa mscz</code></td>
-<td><code>mvsa audio</code></td>
+<td><code>mvsa mp3</code></td>
 <td>— (niet gepland)</td>
 </tr>
 <tr>
@@ -4906,9 +4962,11 @@ specificaties; dit is de navigatiehub.</p>
 <li><strong>Audio (<code>.mp3</code> / <code>.ogg</code> / <code>.wav</code>):</strong> preview-luisteren; CLI
   <a href="../reference/cli/audio/"><code>vsa audio</code></a> — zie <a href="audio/"><code>.mp3</code> / audio</a>.</li>
 <li><strong><code>.midi</code> / <code>.mid</code>:</strong> <strong>niet gepland</strong> (preview = audio) — zie <a href="midi/"><code>.midi</code></a>.</li>
-<li><strong>Platte gezongen tekst (zoekindex):</strong> <a href="../reference/cli/text/"><code>vsa text</code></a>
-  op <code>.vsa</code> / <code>.mvsa</code> / MusicXML / <code>.mscz</code> (geen aparte matrixkolom; schrijft
-  geen <code>.mvsa</code>-sibling). Alias op MuseScore-bron: <a href="../reference/cli/mscz/"><code>mscz text</code></a>.</li>
+<li><strong>Zoektekst in canonieke <code>.vsa</code> / <code>.mvsa</code>:</strong> veld <code>zoektekst</code> in
+  YAML-frontmatter — <a href="zoektekst/">zoektekst</a>. Extractie / export:
+  <a href="../reference/cli/text/"><code>vsa text</code></a> op <code>.vsa</code> / <code>.mvsa</code> / MusicXML /
+  <code>.mscz</code> (geen aparte matrixkolom; schrijft geen <code>.mvsa</code>-sibling). Alias op
+  MuseScore-bron: <a href="../reference/cli/mscz/"><code>mscz text</code></a>.</li>
 <li>Volledige matrix / keuzes: <a href="../plans/mvsa-conversions/">mvsa-conversies</a>.</li>
 <li><strong>Import</strong> (<code>.mxl</code> / <code>.mscz</code> → <code>.mvsa</code>): <strong>werkbank-bewerkvorm</strong> (niet
   catalogus-klaar); soft-wrap, holds, recite; <code>--pitch vsa</code> zet eindankers —
@@ -5011,9 +5069,11 @@ specificaties; dit is de navigatiehub.</p>
 <p>Na <code>pip install -e .</code> staan <code>vsa</code>, <code>mvsa</code>, <code>mxl</code> en <code>mscz</code> op PATH.</p>
 <h2 id="bestandsnaamgeving-kort">Bestandsnaamgeving (kort)<a class="headerlink" href="#bestandsnaamgeving-kort" title="Permanent link">&para;</a></h2>
 <p>In <code>generated/</code> bij voorkeur <code>stem.brontype.doeltype</code> (laatste = echte
-extensie), bv. <code>alleluia.mvsa.mxl</code>, <code>lied.mvsa.mp3</code>, of voor zoektekst
-<code>lied.mscz.lyrics.txt</code> (via <a href="../reference/cli/text/"><code>vsa text</code></a>).
-CLI-<code>-o</code> mag simpel blijven. Details:
+extensie), bv. <code>alleluia.mvsa.mxl</code>, <code>lied.mvsa.mp3</code>. Optioneel lyrics-product
+uit <code>.mscz</code> / <code>.mxl</code>: <code>lied.mscz.lyrics.txt</code> via
+<a href="../reference/cli/text/"><code>vsa text</code></a> — niet verplicht naast canonieke
+<code>.vsa</code> / <code>.mvsa</code> (daar: <a href="zoektekst/"><code>zoektekst</code></a>). CLI-<code>-o</code> mag simpel
+blijven. Details:
 <a href="canonical-checklists/#bestandsnaamgeving-conventie">canonieke checklists — naamgeving</a>.</p>
 <h2 id="windows-cmd-scripts">Windows <code>.cmd</code>-scripts<a class="headerlink" href="#windows-cmd-scripts" title="Permanent link">&para;</a></h2>
 <p>In de repo-root (via <code>scripts\</code>):</p>
@@ -5081,7 +5141,7 @@ scripts\mscz.cmd -h
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-08
+        Bijgewerkt: 2026-10-12
         
       </p>
       

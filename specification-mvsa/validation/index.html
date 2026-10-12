@@ -949,6 +949,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zoektekst (canonieke .vsa / .mvsa)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1020,10 +1048,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   
@@ -1041,8 +1069,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3025,6 +3053,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#zoektekst-canonieke-catalogusbron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zoektekst (canonieke catalogusbron)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#canonieke-vorm-warning" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3835,6 +3874,34 @@
     
   
     vsa text — platte gezongen tekst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/zoektekst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa zoektekst — platte tekst in YAML-frontmatter
   
 
     
@@ -4828,6 +4895,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#zoektekst-canonieke-catalogusbron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zoektekst (canonieke catalogusbron)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#canonieke-vorm-warning" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4880,7 +4958,7 @@
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 </code></pre></div>
 <p><code>validate</code>: exitcode <code>0</code> = geen errors (warnings mogen). Exitcode <code>1</code> = minstens één error.</p>
 <p><code>musicxml</code>: exporteert SATB MusicXML (<code>.mxl</code> of <code>.musicxml</code>). Faalt als validate
@@ -4973,6 +5051,16 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
     1–999). <code>@mscz-newline</code> met argumenten: <strong>error</strong>. <code>@tekst</code> of
     <code>@mscz-newline</code> zonder volgend LSATB-systeem: <strong>warning</strong>.</li>
 </ol>
+<h2 id="zoektekst-canonieke-catalogusbron">Zoektekst (canonieke catalogusbron)<a class="headerlink" href="#zoektekst-canonieke-catalogusbron" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Canonieke catalogus-<code>.mvsa</code>: YAML-frontmatter met top-level <code>zoektekst</code>,
+    genormaliseerd gelijk aan body-extractie (<code>vsa text</code>, zonder het veld zelf).
+    Contract: <a href="../../formats/zoektekst/">Zoektekst</a>. Afgedwongen met
+    <a href="../../reference/cli/zoektekst/"><code>vsa zoektekst --check</code></a> of
+    <code>mvsa validate --require-zoektekst</code> (niet standaard in elke validate —
+    voorbeelden zonder catalogus-<code>zoektekst</code> blijven groen). Werkbank-import
+    mag het veld nog missen.</li>
+</ol>
 <h2 id="canonieke-vorm-warning">Canonieke vorm (warning)<a class="headerlink" href="#canonieke-vorm-warning" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden:
@@ -5032,7 +5120,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-10
+        Bijgewerkt: 2026-10-12
         
       </p>
       
