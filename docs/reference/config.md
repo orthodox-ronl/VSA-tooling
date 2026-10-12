@@ -54,16 +54,16 @@ VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH = "warning"
 
 ## Commando-ondersteuning
 
-| Commando             | Gebruikt severity-config? | Gebruikt `[audio]`? |
-| -------------------- | ------------------------- | ------------------- |
-| `vsa validate`       | Ja                        | Nee                 |
-| `vsa process`        | Ja                        | Nee                 |
-| `vsa build-markdown` | Ja                        | Nee                 |
-| `vsa audio`          | Nee                       | Ja (`format`)       |
-| `mvsa mp3`         | Nee                       | Ja (`format`)       |
-| `vsa svg`            | Nee                       | Nee                 |
-| `vsa blocks`         | Nee                       | Nee                 |
-| `vsa parse`          | Nee                       | Nee                 |
+| Commando               | Gebruikt severity-config? | Gebruikt `[audio]`?         |
+| ---------------------- | ------------------------- | --------------------------- |
+| `vsa validate`         | Ja                        | Nee                         |
+| `vsa process`          | Ja                        | Nee                         |
+| `vsa build-markdown`   | Ja                        | Nee                         |
+| `vsa audio`            | Nee                       | Ja (`format`)               |
+| `mvsa mp3`/`ogg`/`wav` | Nee                       | Nee (formaat = subcommando) |
+| `vsa svg`              | Nee                       | Nee                         |
+| `vsa blocks`           | Nee                       | Nee                         |
+| `vsa parse`            | Nee                       | Nee                         |
 
 ## Hard blijvende fouten
 

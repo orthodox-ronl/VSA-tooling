@@ -95,11 +95,11 @@ expliciete herschrijf-`pitch` verandert de hoogte-spelling op S/A/T/B.
 octaaf in de marker is een bewuste syntax-uitbreiding later, niet stilzwijgend
 hergebruik van `digit*`.
 
-### Bestandsnaamgeving (conventie, niet afgedwongen)
+### Bestandsnaamgeving (conventie)
 
-- Default CLI-output: eenvoudig (`-o out.mxl`, bron-stem → `.mxl`).
-- Optioneel in `generated/`: bron-extensie meenemen voor herkomst, bv.
-  `naam.mvsa.mxl`, `naam.mscz.mvsa`, `naam.vsa.mp3`.
+- Default CLI-output (zonder `-o`): `stem.brontype.doeltype`, bv.
+  `naam.mvsa.mxl`, `naam.mscz.mxl`, `naam.mvsa.mp3`.
+- Expliciet `-o` mag een korte naam blijven (`-o out.mxl`).
 - Tools kijken naar de **laatste** extensie.
 - Normatieve korte tekst + checklist-context:
   [canonieke checklists — naamgeving](../formats/canonical-checklists.md#bestandsnaamgeving-conventie).
@@ -113,7 +113,7 @@ Elke conversie-entry leest één brontype:
 | Command             | Bron                                  | Acties (richting)                                                                              |
 | ------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol                                      |
-| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, import, normalize                                               |
+| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize                                     |
 | `mxl`               | `.mxl` / `.musicxml`                  | import → mvsa; mscz; **validate** / **normalize** (playback-checklist)                         |
 | `mscz`              | `.mscz`                               | import → mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)                                 |
 | `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte tekst (referentie voor [`zoektekst`](../formats/zoektekst.md); optioneel `.lyrics.txt`) |
@@ -207,12 +207,12 @@ Niet bij `doremi` / `a-g`.
 
 Top-level console-scripts + `scripts\*.cmd`:
 
-| Command             | Bron               | Acties                                            |
-| ------------------- | ------------------ | ------------------------------------------------- |
-| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, mxl, mscz, pdf, mp3, import, normalize  |
-| `mxl`               | `.mxl`/`.musicxml` | import → mvsa; mscz                               |
-| `mscz`              | `.mscz`            | import → mvsa; mxl; **text** (lyrics, geen mvsa)  |
-| `vsa text`          | meerdere           | platte tekst incl. MusicXML / `.mscz`             |
+| Command             | Bron               | Acties                                                     |
+| ------------------- | ------------------ | ---------------------------------------------------------- |
+| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize |
+| `mxl`               | `.mxl`/`.musicxml` | import → mvsa; mscz                                        |
+| `mscz`              | `.mscz`            | import → mvsa; mxl; **text** (lyrics, geen mvsa)           |
+| `vsa text`          | meerdere           | platte tekst incl. MusicXML / `.mscz`                      |
 
 **Criterium (gehaald):** `mvsa -h`, `mxl -h`, `mscz -h` tonen matrix-acties;
 man-pagina’s `docs/reference/cli/{mvsa,mxl,mscz}.md`; oude `vsa mvsa …` blijft

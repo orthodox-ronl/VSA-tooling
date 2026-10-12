@@ -24,12 +24,12 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 
 ## Subcommando's
 
-| Subcommando  | Doel                                                                                          |
-| ------------ | --------------------------------------------------------------------------------------------- |
-| `import`     | Importeer naar `.mvsa`: direct SATB P1–P4 (zelfde pad als `vsa mvsa import`).                 |
-| `mscz`       | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore.                        |
-| `validate`   | Lees-gate: M2/M8/M18 (monofone parts), Coria-importer-tags, meta (source ≠ licentie). Profiel `satb` of `mono`. |
-| `normalize`  | Schrijf playback-MXL: explode + piano + sanitize; met `--apply-timing` ook recite/pauzes.     |
+| Subcommando  | Doel                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `import`     | Importeer naar `.mvsa`: direct SATB P1–P4 (zelfde pad als `vsa mvsa import`).                                              |
+| `mscz`       | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore. Default: `<bronnaam>.mscz` (bijv. `lied.mxl.mscz`). |
+| `validate`   | Lees-gate: M2/M8/M18 (monofone parts), Coria-importer-tags, meta (source ≠ licentie). Profiel `satb` of `mono`.            |
+| `normalize`  | Schrijf playback-MXL: explode + piano + sanitize; met `--apply-timing` ook recite/pauzes.                                  |
 
 **Import-opties** (`--pitch`, `--no-align`, soft-wrap ~80, eindankers bij
 `vsa`, kuiser-normaalvorm): zie [`vsa mvsa import`](mvsa.md#vsa-mvsa-import).

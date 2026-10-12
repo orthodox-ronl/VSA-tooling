@@ -16,7 +16,7 @@ afspeelknop.
 | ------------------------- | ------------------------------------------ |
 | Rol in de conversiematrix | Werkend                                    |
 | Canonieke checklist       | Dun — zie hieronder                        |
-| CLI-command               | `vsa audio` / `mvsa mp3`                   |
+| CLI-command               | `vsa audio` / `mvsa mp3` / `ogg` / `wav`   |
 
 ## Checklist (richting)
 
@@ -31,13 +31,14 @@ afspeelknop.
 
 | Bron                         | Commando                                                              |
 | ---------------------------- | --------------------------------------------------------------------- |
-| ``.mxl`` / ``.musicxml``     | `vsa audio` / `mvsa mp3`                                              |
+| ``.mxl`` / ``.musicxml``     | `vsa audio` / `mvsa mp3` / `ogg` / `wav`                              |
 | ``.vsa``                     | `vsa audio` (via playback MusicXML)                                   |
-| ``.mvsa``                    | `mvsa mp3` (via playback MusicXML)                                    |
-| ``.mscz``                    | `vsa audio` / `mvsa mp3` (via genormaliseerde playback-MXL + piano)   |
+| ``.mvsa``                    | `mvsa mp3` / `ogg` / `wav` (via playback MusicXML)                    |
+| ``.mscz``                    | `vsa audio` / `mvsa mp3` / `ogg` / `wav` (via playback-MXL + piano)   |
 
-Default-formaat: **``.mp3``**. Optioneel ``--format ogg`` of ``wav``, of
-``[audio] format`` in ``vsa.toml``.
+Bij ``mvsa`` is het **subcommando het formaat** (``mp3`` / ``ogg`` / ``wav``).
+Bij ``vsa audio``: ``--format`` of ``[audio] format`` in ``vsa.toml``
+(default **``.mp3``**).
 
 Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). In `.mvsa`
 zet je het afspeeltempo met [`@tempo`](../specification-mvsa/keywords.md)
@@ -50,15 +51,16 @@ buiten die piano zijn in v1 MuseScore-defaults.
 
 ## Bestandsnaamgeving
 
-In ``generated/`` bij voorkeur ``stem.brontype.mp3`` (of ``.ogg`` / ``.wav``).
-CLI-default mag simpel blijven. Zie
+Zonder ``-o``: ``stem.brontype.mp3`` (of ``.ogg`` / ``.wav``), bv.
+``lied.mvsa.mp3``. In ``generated/`` hetzelfde patroon. Expliciet ``-o`` mag
+een korte naam blijven. Zie
 [canonieke checklists — naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ## Ownership
 
 | Laag        | Verantwoordelijkheid                                      |
 | ----------- | --------------------------------------------------------- |
-| VSA-tooling | Artefact genereren (`vsa audio` / `mvsa mp3`)             |
+| VSA-tooling | Artefact genereren (`vsa audio` / `mvsa mp3`/`ogg`/`wav`) |
 | Consumer    | Afspeelknop / ``:::include mp3-player`` (gepland)         |
 | bron        | Exportcontract ``mp3-player`` (nog afronden)              |
 

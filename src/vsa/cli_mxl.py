@@ -124,7 +124,9 @@ def _build_parser() -> argparse.ArgumentParser:
         "-o",
         "--output",
         default=None,
-        help="Uitvoer-.mscz (default: <stem>.mscz).",
+        help=(
+            "Uitvoer-.mscz (default: <bronnaam>.mscz, bijv. lied.mxl.mscz)."
+        ),
     )
     mscz.add_argument(
         "--musescore",
@@ -232,7 +234,9 @@ def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
-    out = Path(ns.output) if ns.output else path.with_suffix(".mscz")
+    from .derived_path import derived_output_path
+
+    out = Path(ns.output) if ns.output else derived_output_path(path, ".mscz")
     if out.suffix.lower() != ".mscz":
         out = out.with_suffix(".mscz")
     musescore = Path(ns.musescore) if ns.musescore else None
