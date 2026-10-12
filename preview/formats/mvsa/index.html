@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-12 22:24 CEST.
+  , gebouwd 2026-10-12 22:33 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4918,8 +4918,10 @@ schrijfvorm</strong> (kuiser-normaalvorm). Soft-wrap zet same-pitch holds als <c
 ook over systeembraken; export en eindanker-check zetten die weer om naar de
 vorige toon (tenzij een beginanker reset) — zie
 <a href="../../specification-mvsa/semantics/#lopende-toon-over-systeembraken">Semantiek — lopende toon over systeembraken</a>.
-Met <code>--pitch vsa</code> plakt de import check-only eindankers (a–g + cijfer) op
-systeemeinden; <code>doremi</code> / <code>a-g</code> doen dat niet. Tutorial:
+Vóór elk LSATB-systeem zet import <code>#maat N</code> (1-based startmaat) voor
+navigatie t.o.v. PDF / MuseScore. Met <code>--pitch vsa</code> plakt de import
+check-only eindankers (a–g + cijfer) op systeemeinden; <code>doremi</code> / <code>a-g</code>
+doen dat niet. Tutorial:
 <a href="../../guides/mvsa-schrijven-101/#7-taak-bladmuziek--mvsa">mvsa schrijven 101 — bladmuziek</a>.</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mvsa validate examples\mvsa
