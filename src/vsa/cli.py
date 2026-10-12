@@ -213,6 +213,42 @@ def _build_parser():
         help="Pad naar MuseScore (alleen bij .mscz; default: auto).",
     )
 
+    zoektekst_cmd = subparsers.add_parser(
+        "zoektekst",
+        help=(
+            "Vul of controleer YAML-zoektekst in canonieke .vsa / .mvsa "
+            "(platte gezongen tekst voor editorzoeken)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Default: schrijf/update zoektekst in-place.\n"
+            "--check = geen schrijven; exit 1 bij ontbrekend/afwijkend veld.\n"
+            "\n"
+            "voorbeelden:\n"
+            "  vsa zoektekst examples\\mvsa\\alleluia-toon-1.mvsa\n"
+            "  vsa zoektekst examples\\mvsa --check\n"
+            "  vsa zoektekst lied.vsa -o generated\\lied.zoektekst.vsa\n"
+            "\n"
+            "Contract: docs/formats/zoektekst.md"
+        ),
+    )
+    zoektekst_cmd.add_argument(
+        "paths",
+        nargs="+",
+        help=".vsa / .mvsa-bestand of map (recursief).",
+    )
+    zoektekst_cmd.add_argument(
+        "--check",
+        action="store_true",
+        help="Alleen controleren (geen schrijven); exit 1 bij problemen.",
+    )
+    zoektekst_cmd.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Schrijf naar dit pad i.p.v. in-place (alleen bij één bronbestand).",
+    )
+
     musicxml = subparsers.add_parser("musicxml")
     musicxml.add_argument(
         "input",
@@ -391,6 +427,14 @@ def _build_parser():
     m_validate.add_argument(
         "path",
         help=".mvsa-bestand of map met .mvsa-bestanden.",
+    )
+    m_validate.add_argument(
+        "--require-zoektekst",
+        action="store_true",
+        help=(
+            "Eis genormaliseerde YAML-zoektekst gelijk aan body "
+            "(catalogusbronnen; zie docs/formats/zoektekst.md)."
+        ),
     )
     m_musicxml = mvsa_sub.add_parser(
         "musicxml",
@@ -904,6 +948,9 @@ def _run(args):
 
     if args.command == "text":
         return _cmd_text(args)
+
+    if args.command == "zoektekst":
+        return _cmd_zoektekst(args)
 
     if args.command == "musicxml":
         return _cmd_musicxml(args, config)
@@ -1532,10 +1579,12 @@ def _cmd_mvsa(args) -> int:
 
 def _cmd_mvsa_validate(args) -> int:
     from .mvsa_validate import (
+        MvsaDiagnostic,
         collect_mvsa_files,
         format_diagnostic,
         validate_mvsa_path,
     )
+    from .zoektekst import check_zoektekst
 
     path = Path(args.path)
     if not path.exists():
@@ -1547,8 +1596,20 @@ def _cmd_mvsa_validate(args) -> int:
         return 1
     errors = 0
     had_messages = False
+    require_zt = bool(getattr(args, "require_zoektekst", False))
     for mvsa_path in files:
-        diags = validate_mvsa_path(mvsa_path)
+        diags = list(validate_mvsa_path(mvsa_path))
+        if require_zt:
+            text = mvsa_path.read_text(encoding="utf-8-sig")
+            for issue in check_zoektekst(text, kind="mvsa", require=True):
+                diags.append(
+                    MvsaDiagnostic(
+                        issue.code,
+                        issue.message,
+                        1,
+                        severity=issue.severity,
+                    )
+                )
         fatal = [d for d in diags if d.severity == "error"]
         for d in diags:
             had_messages = True
@@ -1562,6 +1623,90 @@ def _cmd_mvsa_validate(args) -> int:
         print(f"{errors} mvsa-bestand(en) ongeldig", file=sys.stderr)
         return 1
     if not had_messages:
+        print("OK")
+    return 0
+
+
+def _cmd_zoektekst(args) -> int:
+    from .zoektekst import (
+        apply_zoektekst,
+        check_zoektekst,
+        iter_vsa_mvsa_files,
+        kind_from_path,
+    )
+
+    paths = [Path(p) for p in args.paths]
+    files: list[Path] = []
+    for path in paths:
+        try:
+            files.extend(iter_vsa_mvsa_files(path))
+        except FileNotFoundError:
+            print(f"Pad niet gevonden: {path}", file=sys.stderr)
+            return 1
+        except ValueError as exc:
+            print(f"zoektekst: {exc}", file=sys.stderr)
+            return 1
+
+    # Uniek, stabiele volgorde
+    seen: set[Path] = set()
+    unique: list[Path] = []
+    for f in files:
+        key = f.resolve()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(f)
+    files = unique
+
+    if not files:
+        print("Geen .vsa / .mvsa gevonden.", file=sys.stderr)
+        return 1
+
+    if args.output is not None:
+        if len(files) != 1 or not paths[0].is_file():
+            print(
+                "zoektekst: -o alleen bij precies één bronbestand.",
+                file=sys.stderr,
+            )
+            return 1
+
+    errors = 0
+    changed_n = 0
+    for file_path in files:
+        try:
+            kind = kind_from_path(file_path)
+        except ValueError as exc:
+            print(f"{file_path}: {exc}", file=sys.stderr)
+            errors += 1
+            continue
+        text = file_path.read_text(encoding="utf-8-sig")
+        if args.check:
+            issues = check_zoektekst(text, kind=kind, require=True)
+            if issues:
+                errors += 1
+                for issue in issues:
+                    print(
+                        f"{file_path}: ERROR: {issue.code}: {issue.message}",
+                        file=sys.stderr,
+                    )
+            else:
+                print(f"{file_path}: OK")
+            continue
+
+        result = apply_zoektekst(text, kind=kind)
+        target = Path(args.output) if args.output else file_path
+        if result.changed:
+            changed_n += 1
+            target.write_text(result.text, encoding="utf-8", newline="\n")
+            print(f"{file_path} -> {target}: zoektekst bijgewerkt")
+        else:
+            print(f"{file_path}: geen wijzigingen")
+
+    if args.check:
+        return 1 if errors else 0
+    if errors:
+        return 1
+    if changed_n == 0 and len(files) > 1:
         print("OK")
     return 0
 

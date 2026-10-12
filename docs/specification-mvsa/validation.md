@@ -89,15 +89,25 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
     1–999). `@mscz-newline` met argumenten: **error**. `@tekst` of
     `@mscz-newline` zonder volgend LSATB-systeem: **warning**.
 
+## Zoektekst (canonieke catalogusbron)
+
+11. Canonieke catalogus-`.mvsa`: YAML-frontmatter met top-level `zoektekst`,
+    genormaliseerd gelijk aan body-extractie (`vsa text`, zonder het veld zelf).
+    Contract: [Zoektekst](../formats/zoektekst.md). Afgedwongen met
+    [`vsa zoektekst --check`](../reference/cli/zoektekst.md) of
+    `mvsa validate --require-zoektekst` (niet standaard in elke validate —
+    voorbeelden zonder catalogus-`zoektekst` blijven groen). Werkbank-import
+    mag het veld nog missen.
+
 ## Canonieke vorm (warning)
 
-11. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden:
+12. Ontbrekende woordstreepjes binnen een woord, of streepjes tussen woorden:
     `mvsa kuiser` waarschuwt via Pyphen (alleen Latijnse lettergrepen) wanneer
     de splitsing **exact** overeenkomt (ontbrekend), zonder een volgend
     hoofdletter-woord vast te plakken. Streepje tussen twee hoofdletter-woorden
     zonder Pyphen-breuk: aparte warning. Liturgische / niet-Latijnse splits
     blijven stil.
-12. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
+13. Maatstrepen niet op alle LSATB-regels herhaald terwijl de kuiser ze eenduidig
     had kunnen syncen — of, na `mvsa kuiser`, alsnog inconsistent: error.
 
 ## Buiten v0-validatie / export-beperkingen

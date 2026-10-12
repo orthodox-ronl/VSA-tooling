@@ -15,8 +15,10 @@ hetzelfde blijven.
 | `.mvsa`   | Keyword-regel: `@title "…"`, `@do F4`, `@tempo 72`                            |
 | `.vsa`    | YAML-frontmatter (`muziek:` / `identificatie:`) of blokparameters (`do="F4"`) |
 
-Geen verplichting om YAML in `.mvsa` of `@`-regels in `.vsa` te gebruiken.
-Alleen de **begrippen** en exportgedrag gelijk houden.
+Geen verplichting om YAML in `.mvsa` of `@`-regels in `.vsa` te gebruiken voor
+de velden hieronder — **uitzondering:** canonieke `zoektekst` staat in beide
+formaten in YAML-frontmatter (zie [zoektekst](../formats/zoektekst.md)).
+Verder alleen de **begrippen** en exportgedrag gelijk houden.
 
 ## Gedeelde velden (Nederlands → schrijfwijzen)
 
@@ -41,6 +43,15 @@ onzichtbaar op blad, `.mscz` en PDF).
 
 **Toon:** kerktoon / oktoechos-nummer. Keyword en term: **toon**; in MusicXML
 blijft de veldnaam `tone` (compatibel met bestaande VSA-export).
+
+## Gedeeld: `zoektekst` (YAML in beide formaten)
+
+| Term (NL) | `.mvsa`                         | `.vsa`                    | Doel                                                   |
+| --------- | ------------------------------- | ------------------------- | ------------------------------------------------------ |
+| zoektekst | YAML `zoektekst:` (top-level)   | YAML `zoektekst:` (idem)  | Platte gezongen tekst voor editorzoeken; niet MusicXML |
+
+Volledig contract: [Zoektekst](../formats/zoektekst.md). Geen `@zoektekst`-keyword;
+geen sibling `*.lyrics.txt` verplicht naast de canonieke bron.
 
 ## Alleen in één formaat
 
@@ -70,6 +81,7 @@ expliciet `@tempo 130`. Zie `scripts/README.md`.
 
 ## Zie ook
 
+- [Zoektekst](../formats/zoektekst.md)
 - [Keywords (mvsa)](../specification-mvsa/keywords.md)
 - [VSA-syntax — blokmetadata en YAML](../specification/syntax.md)
 - [Metadatareferentie (VSA)](../reference/metadata.md)

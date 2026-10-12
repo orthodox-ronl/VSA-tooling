@@ -11,12 +11,36 @@ canonieke output schrijven volgen deze regels.
 Een mvsa-bestand is UTF-8-tekst. Lege regels en commentaar zijn toegestaan waar
 hieronder aangegeven.
 
-| Soort regel  | Vorm                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------ |
-| Commentaar   | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
-| Directive    | Regel die begint met `@` (zie [Keywords](keywords.md))                               |
-| Sectiekop    | `@sectie` + spatie + id                                                              |
-| LSATB-inhoud | Begint met een [regelidentifier](#regelidentifier)                                   |
+| Soort regel      | Vorm                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| YAML-frontmatter | Optioneel blok `---` … `---` aan het begin (o.a. `zoektekst`; zie hieronder)         |
+| Commentaar       | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
+| Directive        | Regel die begint met `@` (zie [Keywords](keywords.md))                               |
+| Sectiekop        | `@sectie` + spatie + id                                                              |
+| LSATB-inhoud     | Begint met een [regelidentifier](#regelidentifier)                                   |
+
+### YAML-frontmatter en `zoektekst`
+
+Canonieke catalogus-`.mvsa`-bestanden hebben aan het begin een YAML-kop met
+top-level **`zoektekst`**: de volledige platte gezongen tekst voor editorzoeken
+(Ctrl+Shift+F). Overige partituur-metadata blijft bij voorkeur via `@`-keywords.
+Normatief contract: [Zoektekst](../formats/zoektekst.md).
+
+```yaml
+---
+identificatie:
+  title: 2e Antifoon (zondag)
+zoektekst: >-
+  Eer aan de Vader, de Zoon, en de Heilige Geest. …
+---
+
+@do F4
+@mode major
+```
+
+Parser en validate strippen de YAML-kop (regelnummers blijven kloppen t.o.v.
+het hele bestand). Werkbank-import (`.mscz.mvsa` / banner) mag `zoektekst`
+nog missen tot het stuk catalogusbron wordt.
 
 ## 2. Regelidentifier
 

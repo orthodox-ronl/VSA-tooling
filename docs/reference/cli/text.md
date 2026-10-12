@@ -1,8 +1,13 @@
 # `vsa text` — platte gezongen tekst
 
 Haal de **woorden** uit een bronbestand, zonder notatie (geen EHM/ELM,
-geen stempartijen). Bedoeld voor zoekindex en lyrics-producten — niet voor
-bewerken.
+geen stempartijen). Bedoeld voor zoekindex, lyrics-producten en als
+**referentie** voor het veld [`zoektekst`](../../formats/zoektekst.md) in
+canonieke `.vsa` / `.mvsa` — niet voor bewerken van de notatie.
+
+Op `.vsa` / `.mvsa` is de referentie de **body** (VSA-tekst of L-regels), niet
+het veld `zoektekst` (YAML-frontmatter wordt in beide formaten gestript). Zie
+[zoektekst — tooling](../../formats/zoektekst.md#tooling).
 
 ## Synopsis
 
@@ -50,9 +55,11 @@ MuseScore naar een temp-`.mxl` en leest daaruit. Er ontstaat geen
 | `--musescore PATH`  | MuseScore-executable (alleen bij `.mscz`; default auto). |
 
 Geen stamp-header (`# vsa-source-sha256:`) in deze tooling — dat hoort bij
-consumer lyrics-products. Bestandsnaamgeving (conventie):
-`{stam}.vsa.lyrics.txt` / `{stam}.mvsa.lyrics.txt` / `{stam}.mscz.lyrics.txt`
-— zie [canonieke checklists — naamgeving](../../formats/canonical-checklists.md#bestandsnaamgeving-conventie).
+consumer lyrics-products. Een sibling `*.lyrics.txt` is **niet** verplicht
+naast canonieke `.vsa` / `.mvsa` (daar: [`zoektekst`](../../formats/zoektekst.md)).
+Optioneel lyrics-product (o.a. uit `.mscz` / `.mxl`):
+`{stam}.mscz.lyrics.txt` — zie
+[canonieke checklists — naamgeving](../../formats/canonical-checklists.md#bestandsnaamgeving-conventie).
 
 ## Voorbeelden
 
@@ -68,6 +75,8 @@ Alias voor alleen `.mscz`: [`mscz text`](mscz.md).
 
 ## Zie ook
 
+- [Zoektekst in canonieke bron](../../formats/zoektekst.md)
+- [`vsa zoektekst`](zoektekst.md) — veld vullen/controleren
 - [`mscz`](mscz.md) — MuseScore-bron: import / mxl / text
 - [`syllabify`](syllabify.md) — lettergreepstreepjes in `.vsa`
 - Conversieplan: [mvsa-conversions](../../plans/mvsa-conversions.md)

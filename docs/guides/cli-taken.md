@@ -60,6 +60,19 @@ vsa musicxml mijn-lied.vsa mijn-lied.mxl
 vsa text mijn-lied.mscz.mxl -o generated\mijn-lied.mscz.lyrics.txt
 ```
 
+Platte tekst uit een canonieke `.vsa` / `.mvsa` hoort als veld `zoektekst` in
+de YAML-frontmatter van dat bestand (editorzoeken) — zie
+[zoektekst](../formats/zoektekst.md).
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa zoektekst examples\mvsa\alleluia-toon-1.mvsa
+vsa zoektekst examples\mvsa --check
+```
+
+`vsa text -o …lyrics.txt` blijft nuttig voor export uit `.mscz` / `.mxl` of
+site-build; een sibling `.lyrics.txt` is niet verplicht naast de canonieke bron.
+
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa --pitch vsa

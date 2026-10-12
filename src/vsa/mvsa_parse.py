@@ -196,6 +196,8 @@ class ParsedDocument:
     opmerkingen: str | None = None
     speelplan: list[str] | None = None
     speelplan_line: int | None = None
+    # Optionele YAML-kop (o.a. ``zoektekst``); leeg als geen geldige frontmatter.
+    frontmatter: dict[str, Any] = field(default_factory=dict)
 
 
 def parse_mvsa(text: str) -> ParsedDocument:
@@ -203,7 +205,10 @@ def parse_mvsa(text: str) -> ParsedDocument:
     diagnostics: list[MvsaDiagnostic] = []
     if text.startswith("\ufeff"):
         text = text[1:]
-    cleaned = HTML_COMMENT_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    frontmatter, body, line_base = strip_yaml_frontmatter(text)
+    cleaned = HTML_COMMENT_RE.sub(lambda m: "\n" * m.group(0).count("\n"), body)
     lines = cleaned.splitlines()
 
     sections: list[ParsedSection] = []
@@ -222,7 +227,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
 
     while i < n:
         stripped = lines[i].strip()
-        line_no = i + 1
+        line_no = i + 1 + line_base
 
         if not stripped or stripped.startswith("#"):
             i += 1
@@ -374,12 +379,19 @@ def parse_mvsa(text: str) -> ParsedDocument:
                     MvsaDiagnostic(
                         "MVSA-EHM-L",
                         f"lyrics-regelidentifier mag geen EHM bevatten: {rid.prefix!r}",
-                        i + 1,
+                        i + 1 + line_base,
                     )
                 )
             content = s2[rid.match_end :].lstrip()
             system_lines.append(
-                (i + 1, rid.stem_id, content, rid.ehm, rid.is_lyrics, rid.identity)
+                (
+                    i + 1 + line_base,
+                    rid.stem_id,
+                    content,
+                    rid.ehm,
+                    rid.is_lyrics,
+                    rid.identity,
+                )
             )
             i += 1
 
@@ -498,6 +510,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
         opmerkingen=doc_meta.get("opmerkingen"),
         speelplan=speelplan,
         speelplan_line=speelplan_line,
+        frontmatter=frontmatter,
     )
     from .mvsa_bar_anchors import collect_bar_anchor_diagnostics
     from .mvsa_speelplan import collect_speelplan_diagnostics

@@ -110,14 +110,14 @@ hergebruik van `digit*`.
 
 Elke conversie-entry leest één brontype:
 
-| Command             | Bron                                  | Acties (richting)                                                      |
-| ------------------- | ------------------------------------- | ---------------------------------------------------------------------- |
-| `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol              |
-| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, musicxml, mscz, pdf, audio, import, normalize                |
-| `mxl`               | `.mxl` / `.musicxml`                  | import → mvsa; mscz; **validate** / **normalize** (playback-checklist) |
-| `mscz`              | `.mscz`                               | import → mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)         |
-| `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte gezongen tekst (zoekindex; geen `.mvsa`-sibling)                |
-| `vsa audio`         | `.mxl` / `.vsa` / …                   | preview ``.mp3`` via MuseScore                                         |
+| Command             | Bron                                  | Acties (richting)                                                                              |
+| ------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol                                      |
+| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, musicxml, mscz, pdf, audio, import, normalize                                        |
+| `mxl`               | `.mxl` / `.musicxml`                  | import → mvsa; mscz; **validate** / **normalize** (playback-checklist)                         |
+| `mscz`              | `.mscz`                               | import → mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)                                 |
+| `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte tekst (referentie voor [`zoektekst`](../formats/zoektekst.md); optioneel `.lyrics.txt`) |
+| `vsa audio`         | `.mxl` / `.vsa` / …                   | preview ``.mp3`` via MuseScore                                                                 |
 
 **Transitie:** `vsa mvsa …` blijft de volledige alias van top-level `mvsa`.
 Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
