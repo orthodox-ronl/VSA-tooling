@@ -18,7 +18,7 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 | Meerdere hoogte-markeringen | Werkend               | Parser, validator en SVG-rendering ondersteunen dit.                                                                                                                 |
 | SVG-rendering               | Werkend               | Inclusief multiline/wrapping, spacingbeleid en regressietests.                                                                                                       |
 | MusicXML/MXL-export         | Werkend               | Beschikbaar via `vsa musicxml`; profielen voor playback/engraving.                                                                                                   |
-| Audio-export (preview)      | Werkend               | `vsa audio` / `mvsa audio` → ``.mp3`` via MuseScore; site-knop is consumer.                                                                                          |
+| Audio-export (preview)      | Werkend               | `vsa audio` / `mvsa mp3` → ``.mp3`` via MuseScore; site-knop is consumer.                                                                                            |
 | Markdown VSA-blokken        | Werkend               | `::: vsa-notatie` en alias `::: vsa`; mvsa: `::: mvsa-notatie` / `::: mvsa`.                                                                                         |
 | Hugo build-markdown         | Werkend               | Genereert Markdown en SVG-assets voor Hugo.                                                                                                                          |
 | `:::include`                | Werkend               | Ondersteunt markdown, VSA, assets en exporttypes `svg`, `coria`, `mxl`.                                                                                              |
@@ -27,7 +27,7 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 | Parochie-lokaal model       | Werkend in demo       | `lokaal/`, manifeststructuur en voorbeeldincludes zijn aanwezig.                                                                                                     |
 | Catalogus-resolutie         | Werkend               | `vsa resolve-catalogus` zet `zoek=` om naar `bron:` of `lokaal:`.                                                                                                    |
 | Hugo-demo                   | Werkend als testbed   | Combineert praktijkmateriaal, documentatie, layouts en publicatieketen.                                                                                              |
-| mvsa (draft)                | Werkend conversies    | `mvsa`/`vsa mvsa`: validate, normalize, kuiser, musicxml, mscz, pdf, audio, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md). |
+| mvsa (draft)                | Werkend conversies    | `mvsa`/`vsa mvsa`: validate, normalize, kuiser, mxl, mscz, pdf, mp3, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md).        |
 
 ## Beperkt of kwetsbaar
 

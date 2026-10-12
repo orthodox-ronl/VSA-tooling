@@ -90,6 +90,8 @@ identificatie:
   title: Tropaar van de zondag, toon 1
   composer: Traditioneel
   language: nl
+zoektekst: >-
+  Terwijl de steen …
 ---
 [:] Ter{/&/wijl_&_} {\\de} steen ...
 ```
@@ -98,6 +100,10 @@ De `muziek`-sectie bevat dezelfde parameters als de [bloksyntax](#hugo-markdown-
 `identificatie`-sectie bevat bibliografische [metadata](@) die wordt opgenomen in
 het MusicXML `<identification>`-blok (zie [MusicXML-export](rendering.md#musicxml-export)). De optionele `typografie`-
 sectie bevat lettertype-instellingen voor export-renderers (zie [Typografie](rendering.md#typografie)).
+
+Canonieke catalogusbronnen hebben bovendien een top-level veld **`zoektekst`**:
+de volledige platte gezongen tekst voor editorzoeken. Contract:
+[Zoektekst](../formats/zoektekst.md).
 
 Toekomstige secties (bijv. `liturgie`, `publicatie`) kunnen worden toegevoegd
 zonder de bestaande syntaxis te breken.
@@ -123,6 +129,7 @@ zonder de bestaande syntaxis te breken.
 | `identificatie` | `rights`           | auteursrechtinformatie                                                                                                     |
 | `identificatie` | `language`         | taalcode, bijv. `nl`                                                                                                       |
 | `identificatie` | `tone`             | liturgische toon, bijv. `1`                                                                                                |
+| *(top-level)*   | `zoektekst`        | platte gezongen tekst voor editorzoeken; zie [zoektekst](../formats/zoektekst.md)                                          |
 | `typografie`    | `lyric-font`       | lettertype voor lyrics; default `Source Sans 3`                                                                            |
 | `typografie`    | `lyric-size`       | lettergrootte lyrics in punten; default `13`                                                                               |
 | `typografie`    | `music-font`       | lettertype voor notenkoppen (`<music-font>`, optioneel)                                                                    |

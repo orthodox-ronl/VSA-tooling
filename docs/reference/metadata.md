@@ -40,19 +40,24 @@ identificatie:
   title: Tropaar van de zondag, toon 1
   composer: Traditioneel
   language: nl
+zoektekst: >-
+  Tekst met notatie
 ---
 [:] Tekst {met_} notatie
 ```
 
+Canonieke bronnen: top-level `zoektekst` — zie [Zoektekst](../formats/zoektekst.md).
+
 ## Secties
 
-| Sectie           | Doel                                      |
-| ---------------- | ----------------------------------------- |
-| `muziek`         | Muzikale interpretatie                    |
-| `identificatie`  | Titel, componist, taal en brongegevens    |
-| `typografie`     | Lettertype- en rendererinstellingen       |
-| `liturgie`       | Toekomstige liturgische [metadata](@)     |
-| `publicatie`     | Toekomstige publicatiemetadata            |
+| Sectie          | Doel                                         |
+| --------------- | -------------------------------------------- |
+| `muziek`        | Muzikale interpretatie                       |
+| `identificatie` | Titel, componist, taal en brongegevens       |
+| *(top-level)*   | `zoektekst` — platte tekst voor editorzoeken |
+| `typografie`    | Lettertype- en rendererinstellingen          |
+| `liturgie`      | Toekomstige liturgische [metadata](@)        |
+| `publicatie`    | Toekomstige publicatiemetadata               |
 
 ## Velden in `muziek`
 

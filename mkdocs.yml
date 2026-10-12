@@ -97,6 +97,7 @@ nav:
       - .mscz: formats/mscz.md
       - .mp3 / audio: formats/audio.md
       - .midi / .mid: formats/midi.md
+    - Zoektekst (canonieke .vsa / .mvsa): formats/zoektekst.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
     - Commando's:
@@ -187,6 +188,7 @@ nav:
       - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
       - reference/cli/text.md
+      - reference/cli/zoektekst.md
       - reference/cli/musicxml.md
       - reference/cli/audio.md
       - reference/cli/mvsa.md

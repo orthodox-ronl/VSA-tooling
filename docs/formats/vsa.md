@@ -9,7 +9,8 @@ Tekstbron voor **eenstemmige** [VSA](@)-notatie. Normatieve taal: de
 | --------------------------------------- | ---------------------------------------------------------------------------------- |
 | Syntax, semantiek, validatie            | [Specificaties](../specification/README.md)                                        |
 | Valideren / SVG / MusicXML              | [`vsa`](../reference/cli/index.md), [`vsa musicxml`](../reference/cli/musicxml.md) |
-| Platte gezongen tekst                   | [`vsa text`](../reference/cli/text.md)                                             |
+| Zoektekst in canonieke bron             | [`zoektekst`](zoektekst.md) · CLI [`vsa zoektekst`](../reference/cli/zoektekst.md) |
+| Platte gezongen tekst (extractie)       | [`vsa text`](../reference/cli/text.md)                                             |
 | MusicXML-profielen (Coria vs engraving) | [MusicXML-export](../guides/musicxml-export.md)                                    |
 | Meerstemmig (L + SATB)                  | **niet** `.vsa` — zie [`.mvsa`](mvsa.md)                                           |
 

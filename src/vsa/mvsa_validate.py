@@ -320,8 +320,11 @@ def validate_mvsa_path(path: Path) -> list[MvsaDiagnostic]:
 
 
 def collect_mvsa_files(path: Path) -> list[Path]:
+    """Verzamel ``.mvsa``-paden. Geen binaire bestanden (``.mscz`` e.d.)."""
     if path.is_file():
-        return [path]
+        if path.suffix.lower() == ".mvsa":
+            return [path]
+        return []
     return sorted(path.rglob("*.mvsa"))
 
 
@@ -331,8 +334,11 @@ def collect_mvsa_files(path: Path) -> list[Path]:
 
 
 def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Section]:
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    _frontmatter, body, line_base = strip_yaml_frontmatter(text)
     # Strip HTML comments (may span lines) so nested content is ignored.
-    cleaned = HTML_COMMENT_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    cleaned = HTML_COMMENT_RE.sub(lambda m: "\n" * m.group(0).count("\n"), body)
     lines = cleaned.splitlines()
 
     sections: list[_Section] = []
@@ -345,7 +351,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
 
     while i < n:
         raw = lines[i]
-        line_no = i + 1
+        line_no = i + 1 + line_base
         stripped = raw.strip()
 
         if not stripped or stripped.startswith("#"):
@@ -447,13 +453,13 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                     MvsaDiagnostic(
                         "MVSA-EHM-L",
                         f"lyrics-regelidentifier mag geen EHM bevatten: {rid.prefix!r}",
-                        i + 1,
+                        i + 1 + line_base,
                     )
                 )
             content = s2[rid.match_end :].lstrip()
             system_lines.append(
                 _RawLine(
-                    i + 1,
+                    i + 1 + line_base,
                     rid.stem_id,
                     content,
                     ehm=rid.ehm,

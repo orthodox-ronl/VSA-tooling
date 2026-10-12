@@ -72,8 +72,20 @@ def _syllables_from_lyric_text(raw: str) -> list[tuple[str, str]]:
     return out
 
 
+def _lyric_joined_text(note: ET.Element) -> str:
+    lyrics = _lyric_elements(note)
+    if not lyrics:
+        return ""
+    return " ".join(_text(_child(ly, "text")) for ly in lyrics).strip()
+
+
 def _is_feathered_recite(note: ET.Element) -> bool:
-    """Basispartituur ``||O||`` na MuseScore: breve-kop, long/maxima, of stokloos."""
+    """Basispartituur ``||O||`` na MuseScore: breve-kop, long/maxima, of stokloos.
+
+    Lyric-multi alleen als syllabificatie **meer dan één** lettergreep geeft
+    (zelfde telling als ``expand_recite_notes``). Een spatie alleen (bv.
+    MuseScore-voortzetting ``- len``) is geen recite.
+    """
     nh = _child(note, "notehead")
     if nh is not None and _text(nh).lower() == "breve":
         return True
@@ -83,13 +95,8 @@ def _is_feathered_recite(note: ET.Element) -> bool:
         return True
     stem = _child(note, "stem")
     stem_none = stem is not None and _text(stem) == "none"
-    lyrics = _lyric_elements(note)
-    joined = (
-        " ".join(_text(_child(ly, "text")) for ly in lyrics).strip() if lyrics else ""
-    )
-    multi = bool(joined) and (
-        " " in joined or len(_syllables_from_lyric_text(joined)) > 1
-    )
+    joined = _lyric_joined_text(note)
+    multi = bool(joined) and len(_syllables_from_lyric_text(joined)) > 1
     if stem_none and type_s in {"half", "whole", "breve", "long"}:
         return True
     if multi and type_s in {"half", "whole", "breve", "long", "maxima"}:
@@ -165,8 +172,7 @@ def expand_recite_notes(root: ET.Element) -> int:
                 if not _is_feathered_recite(el):
                     new_children.append(el)
                     continue
-                lyrics = _lyric_elements(el)
-                raw = " ".join(_text(_child(ly, "text")) for ly in lyrics).strip()
+                raw = _lyric_joined_text(el)
                 dur_el = _child(el, "duration")
                 dur = (
                     int(_text(dur_el))
@@ -176,8 +182,11 @@ def expand_recite_notes(root: ET.Element) -> int:
                 n_by_dur = max(1, dur // q)
                 if raw:
                     syllables = _syllables_from_lyric_text(raw)
+                    # Recite ⇒ meerdere kwarten. Eén lettergreep ⇒ geen expansie
+                    # (inconsistent: wel recite-markeren, dan één quarter maken).
                     if len(syllables) <= 1:
-                        syllables = [(raw, "single")]
+                        new_children.append(el)
+                        continue
                 else:
                     syllables = [(None, "single")] * n_by_dur
                 for syl_text, syllabic in syllables:

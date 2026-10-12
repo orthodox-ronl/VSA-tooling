@@ -1,5 +1,5 @@
 """
-Parses optional YAML frontmatter from .vsa files.
+Parses optional YAML frontmatter from ``.vsa`` / ``.mvsa`` files.
 
 A .vsa file may begin with a YAML block delimited by ``---``:
 
@@ -36,6 +36,19 @@ def parse_vsa_frontmatter(text: str) -> tuple[dict, str]:
     """
     meta, body, _offset = parse_vsa_frontmatter_with_body_offset(text)
     return meta, body
+
+
+def strip_yaml_frontmatter(text: str) -> tuple[dict, str, int]:
+    """Strip optionele ``---``-YAML-kop; retourneer ``(meta, body, line_base)``.
+
+    ``line_base`` is het aantal newlines vóór de body, zodat
+    ``body_line_index + 1 + line_base`` het 1-gebaseerde regelnummer in
+    ``text`` is. Zelfde regels als :func:`parse_vsa_frontmatter` (ook voor
+    ``.mvsa``).
+    """
+    meta, body, body_offset = parse_vsa_frontmatter_with_body_offset(text)
+    line_base = text[:body_offset].count("\n")
+    return meta, body, line_base
 
 
 def parse_vsa_frontmatter_with_body_offset(text: str) -> tuple[dict, str, int]:

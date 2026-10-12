@@ -424,6 +424,42 @@ def test_expand_recite_feathered_breve():
     assert all(n.findtext("type") == "quarter" for n in notes)
 
 
+def test_expand_recite_skips_hyphen_continuation_lyric():
+    """MuseScore-voortzetting ``- len`` is geen multi-syllabe-recite (halve noot blijft)."""
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <part-list><score-part id="P1"><part-name>S</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>2</divisions></attributes>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration>
+        <type>half</type>
+        <stem>up</stem>
+        <lyric number="1"><syllabic>single</syllabic><text>stel</text></lyric>
+      </note>
+      <note>
+        <pitch><step>E</step><octave>4</octave></pitch>
+        <duration>4</duration>
+        <type>half</type>
+        <stem>up</stem>
+        <lyric number="1"><syllabic>single</syllabic><text>- len</text></lyric>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    root = ET.fromstring(xml)
+    assert expand_recite_notes(root) == 0
+    notes = root.findall(".//note")
+    assert len(notes) == 2
+    assert [n.findtext("type") for n in notes] == ["half", "half"]
+    assert [n.findtext("duration") for n in notes] == ["4", "4"]
+    assert notes[1].findtext("lyric/text") == "- len"
+
+
 def test_bibliotheek_id_prefers_content_source(tmp_path: Path):
     from vsa.bibliotheek_id import bibliotheek_id_from_path
 

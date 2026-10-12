@@ -681,7 +681,19 @@ def export_mvsa_path(
     hulptekst: bool = False,
     hulptekst_as_parts: bool = False,
 ) -> None:
-    text = path.read_text(encoding="utf-8-sig")
+    path = Path(path)
+    if path.suffix.lower() != ".mvsa":
+        raise MvsaExportError(
+            f"verwacht .mvsa als bron, kreeg {path.suffix or '(geen extensie)'} "
+            f"({path.name}). Voor .mscz/.mxl: gebruik mvsa mxl / mscz mxl."
+        )
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise MvsaExportError(
+            f"kan {path.name} niet als tekst lezen ({exc}). "
+            "Controleer of dit een .mvsa-bestand is."
+        ) from exc
     xml = export_mvsa_to_musicxml(
         text,
         title=path.stem,
@@ -1008,7 +1020,17 @@ def _position_to_notes(
     slots = list(vpos.slots) if vpos.slots else ["-"]
     extra_lyric_layers = list(extra_lyric_layers or [])
 
-    if lpos.recite:
+    syllables = list(lpos.syllables) if lpos.syllables else []
+    has_recite_lyric = any((s or "").strip() for s in syllables)
+    # Import writes lyric-less melisma as empty recite ``()~&~&.…``; that must
+    # export as ordinary melisma (all ELM/slots), not one note per empty syl.
+    empty_recite_melisma = (
+        lpos.recite
+        and not has_recite_lyric
+        and max(len(elms), len(slots)) > 1
+    )
+
+    if lpos.recite and not empty_recite_melisma:
         pitch = _resolve_slot(
             slots[0] if slots else "-",
             resolver,
@@ -1023,7 +1045,8 @@ def _position_to_notes(
             base_dur = elm_to_duration(lpos.elms[0])
         else:
             base_dur = elm_to_duration("~")  # kwart per lettergreep / rantrand
-        syllables = list(lpos.syllables) if lpos.syllables else [""]
+        if not syllables:
+            syllables = [""]
         n = len(syllables)
         out_notes: list[NoteEvent] = []
         for i, syl_text in enumerate(syllables):

@@ -150,7 +150,7 @@ nieuwe `@sectie`) gebruik je `||` of `:||`. Tooling schrijft bij genereren
 bij voorkeur `||`. Zie [Syntax — sectie-einde](syntax.md#einde).
 
 **Wel gebruiken** om delen te benoemen die je apart wilt exporteren
-(`vsa mvsa musicxml … --section id`) of om schetsen in één experiment-bestand
+(`vsa mvsa mxl … --section id`) of om schetsen in één experiment-bestand
 uit elkaar te houden (couplet / refrein / pitch-variant).
 
 **Niet gebruiken** samen met `@speelplan` (dan: `@blok`). Niet als litanie-cue

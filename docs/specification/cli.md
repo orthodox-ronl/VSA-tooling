@@ -545,8 +545,10 @@ exitcode `1`.
 ### Doel
 
 Haal platte gezongen tekst uit `.vsa`, `.mvsa`, MusicXML (`.mxl` /
-`.musicxml` / `.xml`) of `.mscz` — zonder notatie, voor zoekindex of
-lyrics-producten. Schrijft geen `.mvsa`-sibling.
+`.musicxml` / `.xml`) of `.mscz` — zonder notatie, voor zoekindex,
+lyrics-producten, of als referentie voor het veld
+[`zoektekst`](../formats/zoektekst.md). Schrijft geen `.mvsa`-sibling.
+Op `.vsa` / `.mvsa` negeert extractie een bestaand `zoektekst`-veld.
 
 Volledige regel (MusicXML-lyrics, stemkeuze, `-o`): man-pagina
 [reference/cli/text.md](../reference/cli/text.md).
@@ -561,6 +563,23 @@ vsa text lied.mscz -o generated\lied.mscz.lyrics.txt
 
 Alias voor alleen `.mscz`: `mscz text` (zelfde extractie via temp-`.mxl`).
 
+## `vsa zoektekst <pad>…`
+
+### Doel
+
+Vul of controleer YAML-`zoektekst` in `.vsa` / `.mvsa` (editorzoeken).
+Default: in-place schrijven; `--check` alleen controleren.
+
+Man-pagina: [reference/cli/zoektekst.md](../reference/cli/zoektekst.md).
+Contract: [formats/zoektekst.md](../formats/zoektekst.md).
+
+### Gebruik
+
+```cmd
+vsa zoektekst examples\mvsa\alleluia-toon-1.mvsa
+vsa zoektekst examples\mvsa --check
+```
+
 ## `vsa mvsa …`
 
 ### Doel
@@ -574,11 +593,11 @@ Draft-tooling voor meerstemmige `.mvsa`-bestanden (L + SATB). Zie
 ```cmd
 vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
-### Opties (`musicxml`)
+### Opties (`mxl`)
 
 | Optie                | Betekenis                                                          |
 | -------------------- | ------------------------------------------------------------------ |
@@ -589,4 +608,4 @@ vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section sch
 
 - `validate`: bij succes zonder warnings één regel `OK`; anders diagnostiek
   en bij errors exitcode `1`.
-- `musicxml`: `Geschreven: <pad>` of fout op stderr.
+- `mxl`: `Geschreven: <pad>` of fout op stderr.

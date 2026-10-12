@@ -8,7 +8,7 @@ gebruik je [audio (``.mp3``)](audio.md) — dat is geïmplementeerd.
 ## Status
 
 **Niet gepland.** De use case “even horen hoe het stuk klinkt” is afgedekt door
-`vsa audio` / `mvsa audio`. Een aparte `.mid`-CLI staat niet meer op de
+`vsa audio` / `mvsa mp3`. Een aparte `.mid`-CLI staat niet meer op de
 mvsa-backlog ([open-points — Klaar](../specification-mvsa/open-points.md)).
 
 | Onderwerp                 | Stand                                                        |

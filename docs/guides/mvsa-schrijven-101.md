@@ -31,6 +31,10 @@ MusicXML of MuseScore.
 Volledige keyword-lijst: [Keywords (`@…`)](../specification-mvsa/keywords.md).
 Voorbeelden in de repo: [`examples/mvsa/`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa).
 
+**Catalogusbron:** zet bovenaan YAML met `zoektekst` (platte gezongen tekst)
+zodat Ctrl+Shift+F in de editor werkt — contract:
+[Zoektekst](../formats/zoektekst.md).
+
 ---
 
 ## 1. Minimaal bestand
@@ -332,7 +336,9 @@ S: fa so- mi&do&re&mi fa mi ||mi
    (valse `dag-gaan` / `steun-van`, ontbrekende `we-der-ke`, spaties in
    underlay), maar niet alles — bekijk vooral recite `( … )` en
    woordstreepjes. A/T/B volgen L/S op duur; controleer holds (`-`) en
-   `&`-melisma’s tegen de bronpartituur.
+   `&`-melisma’s tegen de bronpartituur (onderstemmen met meer toonwissels
+   dan S in dezelfde tijd blijven als `&`-melisma; L/S krijgen holds;
+   minder noten worden naar duur gepaddet).
 5. `vsa mvsa validate lied.mvsa`
 6. Optioneel opnieuw kuisen: `vsa mvsa kuiser lied.mvsa` (Pyphen-warnings zijn
    advies). Bij complexe MuseScore-lyrics soms opnieuw importeren met
@@ -394,7 +400,7 @@ Voorbeeld met meerdere equivalente schetsen:
 | Stap               | Commando (voorbeeld)                                      |
 | ------------------ | --------------------------------------------------------- |
 | Valideren          | `vsa mvsa validate lied.mvsa`                             |
-| MusicXML           | `vsa mvsa musicxml lied.mvsa -o generated\lied.mxl`       |
+| MusicXML           | `vsa mvsa mxl lied.mvsa -o generated\lied.mxl`       |
 | MuseScore          | `vsa mvsa mscz lied.mvsa -o generated\lied.mscz`          |
 | Eén sectie         | voeg `--section sectie-id` toe                            |
 | Uitlijnen / kuisen | `vsa mvsa kuiser lied.mvsa`                               |
@@ -402,7 +408,7 @@ Voorbeeld met meerdere equivalente schetsen:
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
+vsa mvsa mxl examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
 ```
 
 CLI-detail: [mvsa-referentie](../reference/cli/mvsa.md). Formaten-hub:

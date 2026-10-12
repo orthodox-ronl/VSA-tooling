@@ -11,21 +11,25 @@ Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 `scripts\mvsa.cmd`). Bron-commands voor andere formaten: [`mxl`](mxl.md),
 [`mscz`](mscz.md).
 
+Subcommando’s zijn genoemd naar de **uitvoer** (zoals `mscz` / `pdf`):
+`mxl` en `mp3`. Oude namen `musicxml` en `audio` blijven als alias werken.
+
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
-vsa mvsa [-h] {validate,musicxml,mscz,pdf,audio,import,normalize,kuiser} …
+mvsa [-h] {validate,mxl,mscz,pdf,mp3,import,normalize,kuiser} …
+vsa mvsa [-h] {validate,mxl,mscz,pdf,mp3,import,normalize,kuiser} …
 mvsa validate [-h] path
-mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
-              [--hulptekst-as-parts] [--bibliotheek-id ID] path
+mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
+              [--hulptekst-as-parts] [--bibliotheek-id ID]
+              [--musescore PATH] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
           [--hulptekst] path
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--layout PROFILE] [--bibliotheek-id ID] path
-mvsa audio [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
+mvsa mp3 [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
            [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
 mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
@@ -37,10 +41,10 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
 | Subcommando                          | Doel                                                         |
 | ------------------------------------ | ------------------------------------------------------------ |
 | [`validate`](#vsa-mvsa-validate)     | Structuur + sync-telling van `.mvsa` controleren.            |
-| [`musicxml`](#vsa-mvsa-musicxml)     | Exporteer `.mvsa` naar SATB MusicXML.                        |
+| [`mxl`](#vsa-mvsa-mxl)               | Exporteer `.mvsa` / `.mscz` / `.mxl` naar playback-``.mxl``. |
 | [`mscz`](#vsa-mvsa-mscz)             | Exporteer `.mvsa` naar MuseScore (`.mscz`).                  |
 | [`pdf`](#vsa-mvsa-pdf)               | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).       |
-| [`audio`](#vsa-mvsa-audio)           | Exporteer naar audio (``.mp3``) voor preview-luisteren.      |
+| [`mp3`](#vsa-mvsa-mp3)               | Exporteer naar preview-audio (``.mp3``).                     |
 | [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` → `.mvsa` (**werkbank**).         |
 | [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen).            |
 | [`kuiser`](#vsa-mvsa-kuiser)         | Authoring-kuiser: strepen syncen, woordstreep, align.        |
@@ -51,10 +55,10 @@ Hulp op de commandoregel:
 mvsa -h
 vsa mvsa -h
 mvsa validate -h
-mvsa musicxml -h
+mvsa mxl -h
 mvsa mscz -h
 mvsa pdf -h
-mvsa audio -h
+mvsa mp3 -h
 mvsa import -h
 mvsa normalize -h
 mvsa kuiser -h
@@ -67,7 +71,7 @@ mvsa kuiser -h
 ### Synopsis
 
 ```text
-vsa mvsa validate [-h] path
+vsa mvsa validate [-h] [--require-zoektekst] path
 ```
 
 ### Beschrijving
@@ -84,10 +88,11 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 
 ### Argumenten en opties
 
-| Naam           | Verplicht | Betekenis                                      | Default | Beperkingen   |
-| -------------- | --------- | ---------------------------------------------- | ------- | ------------- |
-| `path`         | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.  | —       | Moet bestaan. |
-| `-h`, `--help` | Nee       | Toon hulp voor dit subcommando.                | —       | —             |
+| Naam                   | Verplicht | Betekenis                                                                        | Default | Beperkingen   |
+| ---------------------- | --------- | -------------------------------------------------------------------------------- | ------- | ------------- |
+| `path`                 | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.                                    | —       | Moet bestaan. |
+| `--require-zoektekst`  | Nee       | Eis YAML-`zoektekst` gelijk aan body (catalogus); zie [zoektekst](zoektekst.md). | Uit     | —             |
+| `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                                  | —       | —             |
 
 ### Output
 
@@ -109,30 +114,44 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 ```cmd
 vsa mvsa validate examples\mvsa
 vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa --require-zoektekst
 ```
+
+Voor alleen vullen/checken van `zoektekst` zonder overige validate:
+[`vsa zoektekst`](zoektekst.md).
 
 ---
 
-## `vsa mvsa musicxml`
+## `vsa mvsa mxl`
 
 ### Synopsis
 
 ```text
-vsa mvsa musicxml [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
-                  [--hulptekst-as-parts] [--bibliotheek-id ID] path
+vsa mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
+                  [--hulptekst-as-parts] [--bibliotheek-id ID]
+                  [--musescore PATH] path
 ```
 
 ### Beschrijving
 
-Exporteert **één** `.mvsa`-bestand naar SATB MusicXML (`.mxl` of
-`.musicxml`/`.xml`). Zonder `--section` gaan alle `@sectie`-blokken achter
-elkaar in één partituur; met `--section` alleen die sectie-id.
+Schrijft een **Coria-playback-``.mxl``** (of `.musicxml`/`.xml`). Bron:
+
+| Bron                          | Gedrag                                                                      |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| `.mvsa`                       | SATB-export (vier parts). Optioneel `--section` / hulptekst-vlaggen.        |
+| `.mscz`                       | MuseScore → playback-normalisatie (zelfde keten als [`mscz mxl`](mscz.md)). |
+| `.mxl` / `.musicxml` / `.xml` | Normaliseer naar playback (SATB-explode, Coria-sanitize).                   |
+
+Bij `.mvsa`: zonder `--section` gaan alle `@sectie`-blokken achter elkaar in
+één partituur; met `--section` alleen die sectie-id.
 
 Kale `-` op een stemregel aan het begin van een nieuw LSATB-systeem houdt de
 lopende toon van het vorige systeem (soft-wrap); een beginanker of expliciete
 `@start`-toewijzing reset die toon. Bij `@speelplan` volgt die keten de
 klinkende vorm. Zie
 [lopende toon over systeembraken](../../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
+Lege recite met ELM-keten (`()~&~&.…`, lyric-loos melisma uit import) wordt
+als gewoon melisma geëxporteerd (alle slots/duur), niet als één noot.
 
 Playback (Coria): standaard vier parts S/A/T/B met **piano** op elke partij
 ([checklist M8](../../formats/canonical-checklists.md#checklist-mxl-coria-playback)).
@@ -157,12 +176,13 @@ VSA).
 
 | Naam                   | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                          |
 | ---------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
-| `path`                 | Ja        | Bron-`.mvsa`-bestand.                                                     | —                                            | Moet een bestaand bestand zijn.      |
+| `path`                 | Ja        | Bron: `.mvsa`, `.mscz` of `.mxl`/`.musicxml`.                             | —                                            | Moet een bestaand bestand zijn.      |
 | `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<stem>.mxl` naast het bronbestand           | Andere extensie → wordt `.mxl`.      |
-| `--section SECTION`    | Nee       | Alleen deze `@sectie`-id exporteren (bijv. `schets-a-bladcijfer`).        | Alle secties                                 | Id moet in het bestand voorkomen.    |
-| `--bibliotheek-id ID`  | Nee       | Zet bibliotheek-id in identification/rights; anders pad-sniff.            | pad-sniff onder `content-source/bibliotheek` | Optioneel.                           |
-| `--hulptekst`          | Nee       | Tweede lyric-laag (number=2) via transliterator.                          | uit                                          | Zie beschrijving hierboven.          |
-| `--hulptekst-as-parts` | Nee       | Coria: extra parts met hulptekst (volume 0).                              | uit                                          | Impliceert `--hulptekst`.            |
+| `--section SECTION`    | Nee       | Alleen bij `.mvsa`: deze `@sectie`-id.                                    | Alle secties                                 | Id moet in het bestand voorkomen.    |
+| `--bibliotheek-id ID`  | Nee       | Alleen bij `.mvsa`: bibliotheek-id in identification/rights.              | pad-sniff onder `content-source/bibliotheek` | Optioneel.                           |
+| `--hulptekst`          | Nee       | Alleen bij `.mvsa`: tweede lyric-laag (number=2).                         | uit                                          | Zie beschrijving hierboven.          |
+| `--hulptekst-as-parts` | Nee       | Alleen bij `.mvsa`: Coria-extra parts met hulptekst (volume 0).           | uit                                          | Impliceert `--hulptekst`.            |
+| `--musescore PATH`     | Nee       | Alleen bij `.mscz`: pad naar MuseScore.                                   | auto-detectie                                | —                                    |
 | `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                           | —                                            | —                                    |
 
 ### Output
@@ -183,19 +203,25 @@ VSA).
 Standaard naast het bronbestand (`….mxl`):
 
 ```cmd
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
 ```
 
 Met expliciet uitvoerpad en één sectie:
 
 ```cmd
-vsa mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
 Coria met keuze tussen lyrics-lagen (trisagion, kerkslavische sectie):
 
 ```cmd
-vsa mvsa musicxml examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
+vsa mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
+```
+
+Vanuit MuseScore-partituur (zelfde resultaat als `mscz mxl`):
+
+```cmd
+vsa mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o generated\bug-cases\cherubijnen.mxl
 ```
 
 Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mscz --hulptekst`):
@@ -244,7 +270,7 @@ de id **expliciet** te geven. Zie
 
 Dit voldoet bij `partituur` aan de [MSCZ-checklist](../../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
 (twee balken, geen S/Soprano-labels). Voor Coria-playback (vier parts)
-blijft [`vsa mvsa musicxml`](#vsa-mvsa-musicxml) het primaire pad.
+blijft [`vsa mvsa mxl`](#vsa-mvsa-mxl) het primaire pad.
 
 Vereist MuseScore 4 (of 3): op `PATH` als `MuseScore4` / `mscore`, of het
 standaard Windows-pad
@@ -343,12 +369,12 @@ vsa mvsa pdf lied.mscz -o lied.pdf
 
 ---
 
-## `vsa mvsa audio`
+## `vsa mvsa mp3`
 
 ### Synopsis
 
 ```text
-vsa mvsa audio [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
+vsa mvsa mp3 [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
                [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
 ```
 
@@ -374,9 +400,9 @@ zet de afspeelknop. Zie [`vsa audio`](audio.md) en [formats/audio.md](../../form
 ### Voorbeelden
 
 ```cmd
-vsa mvsa audio examples\mvsa\test-alleluia-toon-8.mvsa --section schets3-oct-doremi
-vsa mvsa audio lied.mvsa -o generated\lied.mp3
-vsa mvsa audio lied.mxl -o lied.ogg --format ogg
+vsa mvsa mp3 examples\mvsa\test-alleluia-toon-8.mvsa --section schets3-oct-doremi
+vsa mvsa mp3 lied.mvsa -o generated\lied.mp3
+vsa mvsa mp3 lied.mxl -o lied.ogg --format ogg
 ```
 
 ---
@@ -396,7 +422,9 @@ vsa mvsa audio lied.mxl -o lied.ogg --format ogg
        vorm (`hei-li`, spaties *vóór* `-li` bij breedte) moet je nabewerken.
     2. **Lyrics-gaten** — noten zonder bruikbare tekst worden lege recite
        (`()~` / `()_`); multi-lettergreep op één noot wordt recite `( … )`.
-       Dat houdt de sync, maar is geen nette zangstuktekst.
+       Dat houdt de sync, maar is geen nette zangstuktekst. Een lege recite
+       met ELM-keten (`()~&~&.…`) exporteert weer als gewoon melisma (alle
+       slots), niet als één noot.
     3. **Lossy** — MuseScore-layout en partituurdetails vallen weg; succes is
        pitch/duur/lyrics-equivalentie, niet een publicatieklare partituur.
 
@@ -445,7 +473,16 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
   op noot-index of lyrics van A/T/B). Een lange noot die meerdere S-slots
   dekt, wordt gesplitst/gepaddet (`c4&-` + hold `-`); een lyric-loze spacer na
   zo’n noot steelt geen volgende lettergreep. Dat voorkomt verschoven Bb/T/B
-  bij MSCZ-import waar A/T/B weinig of scheve lyrics hebben.
+  bij MSCZ-import waar A/T/B weinig of scheve lyrics hebben. Heeft een
+  onderstem **meer toonwissels** in dezelfde tijd dan S slots (bijv. S één
+  hele noot, T twee kwarten A→B), dan blijven die tonen als `&`-melisma; L/S
+  worden met holds/ELM’s mee uitgebreid zodat de sync-telling klopt (geen
+  stille truncate). Onder een recite-positie blijft één slot (L-recite telt
+  als 1); daar kan een onderstem-toonwissel nog wegvallen. Heeft de onderstem
+  **minder** noten dan S-slots, dan worden hold-slots naar **duur** verdeeld
+  (gestipte + achtste → drie holds op de lange toon, niet herhaling van de
+  korte). MuseScore-lyrics met streepje in de tekst (`- le`) tellen als één
+  lettergreep; de melisma-staart blijft hangen.
 - Same-pitch holds: opeenvolgende dezelfde toonhoogte (ook over maatgrenzen)
   wordt op de stemregels als `-` geschreven.
 - Multi-lettergreep lyrics op één noot (spaties, `-`, of soft hyphen) worden
