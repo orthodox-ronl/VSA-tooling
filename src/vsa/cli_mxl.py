@@ -18,7 +18,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.mxl_command == "import":
         from .cli import main as vsa_main
 
-        forwarded = ["mvsa", "import", ns.path, "--pitch", ns.pitch]
+        forwarded = ["mvsa", "import", ns.path, "--pitch", ns.pitch or "ag-vsa"]
         if ns.output:
             forwarded.extend(["-o", ns.output])
         if ns.do:
@@ -50,8 +50,8 @@ def _build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "subcommando's:\n"
-            "  import PATH --pitch {doremi,a-g,vsa} [-o OUT]\n"
-            "      Importeer naar .mvsa.\n"
+            "  import PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUT]\n"
+            "      Importeer naar .mvsa (default --pitch: ag-vsa).\n"
             "  mscz PATH [-o OUT] [--musescore PATH]\n"
             "      Converteer naar .mscz via MuseScore.\n"
             "  validate PATH [--profile {satb,mono}]\n"
@@ -60,6 +60,7 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Normaliseer naar playback-profiel.\n"
             "\n"
             "voorbeelden:\n"
+            "  mxl import lied.mxl -o lied.mvsa\n"
             "  mxl import lied.mxl --pitch doremi -o lied.mvsa\n"
             "  mxl mscz lied.mxl -o lied.mscz\n"
             "  mxl validate lied.mvsa.mxl --profile satb\n"
@@ -87,9 +88,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     imp.add_argument(
         "--pitch",
-        choices=["doremi", "a-g", "abc", "vsa"],
-        required=True,
-        help="Doel-spelling (a-g = toonnamen met cijfer; abc = alias).",
+        choices=["doremi", "a-g", "abc", "vsa", "ag-vsa"],
+        default="ag-vsa",
+        help=(
+            "Doel-spelling (default: ag-vsa). "
+            "a-g = toonnamen met cijfer; abc = alias."
+        ),
     )
     imp.add_argument(
         "--do",
@@ -124,7 +128,9 @@ def _build_parser() -> argparse.ArgumentParser:
         "-o",
         "--output",
         default=None,
-        help="Uitvoer-.mscz (default: <stem>.mscz).",
+        help=(
+            "Uitvoer-.mscz (default: <bronnaam>.mscz, bijv. lied.mxl.mscz)."
+        ),
     )
     mscz.add_argument(
         "--musescore",
@@ -232,7 +238,9 @@ def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
-    out = Path(ns.output) if ns.output else path.with_suffix(".mscz")
+    from .derived_path import derived_output_path
+
+    out = Path(ns.output) if ns.output else derived_output_path(path, ".mscz")
     if out.suffix.lower() != ".mscz":
         out = out.with_suffix(".mscz")
     musescore = Path(ns.musescore) if ns.musescore else None

@@ -26,7 +26,9 @@ split by a barline between two recites gets a canonical ``)-`` link.
 
 Imported LSATB systems are soft-wrapped to about
 :data:`DEFAULT_SYSTEM_SOFT_WIDTH` characters so the result stays readable
-in an editor (one long measure may exceed the width alone).
+in an editor (one long measure may exceed the width alone). Each system is
+preceded by a ``#maat N`` comment (1-based start measure) for navigation
+against PDF / MuseScore measure numbers.
 
 By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
 (canonieke schrijfvorm / normaalvorm: lone standaard-``~`` op L weggelaten,
@@ -36,6 +38,10 @@ Pass ``align=False`` (CLI ``--no-align``) to skip.
 With ``--pitch vsa``, each stem line gets a check-only absolute pitch
 **eindanker** glued to the last bar of every system (e.g. ``||a4``), so
 later edits can be caught by ``mvsa validate`` (``MVSA-BAR-ANKER``).
+
+Default ``--pitch`` is ``ag-vsa``: first sounding note of each LSATB system
+is absolute a–g, the rest of the system is EHM, and the last bar gets an
+absolute a–g eindanker (same check-only role as ``vsa``).
 """
 
 from __future__ import annotations
@@ -53,8 +59,9 @@ from .music import Duration, Pitch
 from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
 from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_text
 from .mvsa_normalize import (
+    DEFAULT_IMPORT_PITCH,
     OCTAVE_STYLES,
-    PITCH_FORMS,
+    REWRITE_PITCH_FORMS,
     canonicalize_pitch_form,
     format_abc_scientific,
     format_doremi,
@@ -238,7 +245,7 @@ class _Score:
 def import_score_to_mvsa(
     path: Path,
     *,
-    pitch: str = "doremi",
+    pitch: str = DEFAULT_IMPORT_PITCH,
     octave_style: str = "@oct",
     align: bool = True,
     section_id: str = "import",
@@ -256,10 +263,10 @@ def import_score_to_mvsa(
     4. Fallback ``F4`` when no key signature is present.
     """
     pitch = canonicalize_pitch_form(pitch)
-    if pitch not in PITCH_FORMS:
+    if pitch not in REWRITE_PITCH_FORMS:
         raise MvsaImportError(
             f"onbekende --pitch {pitch!r}; kies uit "
-            f"doremi, a-g (of abc), vsa"
+            f"doremi, a-g (of abc), vsa, ag-vsa"
         )
     if octave_style not in OCTAVE_STYLES:
         raise MvsaImportError(
@@ -333,7 +340,7 @@ def import_score_path(
     path: Path,
     out: Path,
     *,
-    pitch: str = "doremi",
+    pitch: str = DEFAULT_IMPORT_PITCH,
     octave_style: str = "@oct",
     align: bool = True,
     section_id: str = "import",
@@ -488,6 +495,7 @@ def score_to_mvsa(
     n_meas = len(score.parts["S"])
     l_segs: list[str] = []
     voice_segs: dict[str, list[str]] = {v: [] for v in "SATB"}
+    voice_positions: dict[str, list[list[_Position]]] = {v: [] for v in "SATB"}
     # Carry last written pitch per stem so same-height holds become ``-``.
     last_pitch: dict[str, Pitch | None] = {v: None for v in "SATB"}
 
@@ -495,6 +503,11 @@ def score_to_mvsa(
         _group_positions(score.parts["S"][mi]) for mi in range(n_meas)
     ]
     _apply_cross_measure_word_links(s_positions_per_meas)
+
+    # Provisional stem spelling for soft-wrap packing. For ag-vsa use abc
+    # (absolute widths) so systems are not packed too tightly before the
+    # per-system absolute first note is applied.
+    pack_pitch = "abc" if pitch_form == "ag-vsa" else pitch_form
 
     for mi in range(n_meas):
         positions = s_positions_per_meas[mi]
@@ -507,9 +520,10 @@ def score_to_mvsa(
         l_segs.append(_format_l_measure(positions))
         voice_by_letter = {"S": positions, **mirrors}
         for letter in "SATB":
-            seg, last_pitch[letter] = _format_voice_measure(
+            voice_positions[letter].append(voice_by_letter[letter])
+            seg, last_pitch[letter], _prev, _abs = _format_voice_measure(
                 voice_by_letter[letter],
-                pitch_form=pitch_form,
+                pitch_form=pack_pitch,
                 do=do_p,
                 intervals=intervals,
                 writing_oct=writing_oct[letter],
@@ -524,6 +538,27 @@ def score_to_mvsa(
         pitch_form=pitch_form,
         score=score,
     )
+
+    if pitch_form == "ag-vsa":
+        voice_segs = {letter: [""] * n_meas for letter in "SATB"}
+        for start, end in ranges:
+            for letter in "SATB":
+                last_p: Pitch | None = None
+                prev_deg: int | None = None
+                abs_first = True
+                for mi in range(start, end):
+                    seg, last_p, prev_deg, abs_first = _format_voice_measure(
+                        voice_positions[letter][mi],
+                        pitch_form="ag-vsa",
+                        do=do_p,
+                        intervals=intervals,
+                        writing_oct=writing_oct[letter],
+                        last_pitch=last_p,
+                        prev_degree=prev_deg,
+                        absolute_first=abs_first,
+                    )
+                    voice_segs[letter][mi] = seg
+
     for si, (start, end) in enumerate(ranges):
         is_last = si == len(ranges) - 1
         chunk_l = l_segs[start:end]
@@ -535,6 +570,8 @@ def score_to_mvsa(
             bars = ["|"] * (n - 1) + ["||"]
         else:
             bars = ["|"] * n
+        # 1-based; matches typical MusicXML / MuseScore / PDF measure numbers.
+        lines.append(f"#maat {start + 1}")
         lines.append(f"L: {_join_measure_segs(chunk_l, bars)}")
         for letter in "SATB":
             voice_bars = _bars_with_system_eindanker(
@@ -569,12 +606,12 @@ def _bars_with_system_eindanker(
     pitch_form: str,
     end_pitch: Pitch | None,
 ) -> list[str]:
-    """Glue absolute pitch onto the last bar when importing as ``vsa``.
+    """Glue absolute pitch onto the last bar for ``vsa`` / ``ag-vsa``.
 
     Lyrics lines keep bare bars; stem lines get e.g. ``||a4`` / ``|f#4`` so
     ``mvsa validate`` can catch pitch drift after edits (``MVSA-BAR-ANKER``).
     """
-    if pitch_form != "vsa" or not bars or end_pitch is None:
+    if pitch_form not in ("vsa", "ag-vsa") or not bars or end_pitch is None:
         return bars
     out = list(bars)
     out[-1] = f"{out[-1]}{format_abc_scientific(end_pitch)}"
@@ -2282,40 +2319,58 @@ def _format_voice_measure(
     intervals: list[int],
     writing_oct: int,
     last_pitch: Pitch | None = None,
-) -> tuple[str, Pitch | None]:
+    prev_degree: int | None = None,
+    absolute_first: bool = False,
+) -> tuple[str, Pitch | None, int | None, bool]:
     """Format one measure of stem tokens; same height as previous → ``-``.
 
-    ``last_pitch`` carries across measures so holds stay readable. Returns
-    ``(segment, new_last_pitch)``.
+    ``last_pitch`` carries across measures so holds stay readable.
+    For ``ag-vsa``, ``prev_degree`` / ``absolute_first`` carry within one
+    LSATB system (absolute a–g on the first sounding note, then EHM).
+
+    Returns ``(segment, new_last_pitch, prev_degree, absolute_first)``.
     """
     tokens: list[str] = []
-    prev_degree: int | None = None
+    # vsa keeps a local prev_degree reset per measure (absolute doremi first).
+    local_prev: int | None = None if pitch_form == "vsa" else prev_degree
     for pos in positions:
         slots: list[str] = []
         for note in pos.notes:
             if note.pitch is None:
                 slots.append("-")
                 continue
-            if last_pitch is not None and note.pitch == last_pitch:
+            if pitch_form == "ag-vsa" and absolute_first:
+                slots.append(format_abc_scientific(note.pitch))
+                deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)
+                local_prev = deg
+                absolute_first = False
+            elif last_pitch is not None and note.pitch == last_pitch:
                 slots.append("-")
             elif pitch_form == "abc":
                 slots.append(format_abc_scientific(note.pitch))
                 deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)
-                prev_degree = deg
+                local_prev = deg
             elif pitch_form == "doremi":
                 slots.append(format_doremi(note.pitch, do, intervals, writing_oct))
                 deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)
-                prev_degree = deg
+                local_prev = deg
+            elif pitch_form == "ag-vsa":
+                if local_prev is None:
+                    slots.append(format_abc_scientific(note.pitch))
+                else:
+                    slots.append(format_ehm(local_prev, note.pitch, do, intervals))
+                deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)
+                local_prev = deg
             else:  # vsa
-                if prev_degree is None:
+                if local_prev is None:
                     slots.append(format_doremi(note.pitch, do, intervals, writing_oct))
                 else:
-                    slots.append(format_ehm(prev_degree, note.pitch, do, intervals))
+                    slots.append(format_ehm(local_prev, note.pitch, do, intervals))
                 deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)
-                prev_degree = deg
+                local_prev = deg
             last_pitch = note.pitch
         tokens.append("&".join(slots))
-    return " ".join(tokens), last_pitch
+    return " ".join(tokens), last_pitch, local_prev, absolute_first
 
 
 def _duration_to_elm(dur: Duration) -> str:

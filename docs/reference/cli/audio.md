@@ -13,8 +13,8 @@ vsa audio [-h] [--config CONFIG] [--format {mp3,ogg,wav}]
           input output
 ```
 
-Alias voor ``.mvsa``-workflows: [`mvsa mp3`](mvsa.md#vsa-mvsa-mp3)
-(``path`` + ``-o``).
+Voor ``.mvsa``-workflows: [`mvsa mp3` / `ogg` / `wav`](mvsa.md#vsa-mvsa-mp3)
+(``path`` + ``-o``; het subcommando is het formaat).
 
 ## Beschrijving
 
@@ -69,5 +69,5 @@ vsa audio generated\lied.mxl generated\lied --format ogg
 ## Zie ook
 
 - [Formaat `.mp3` / audio](../../formats/audio.md)
-- [`mvsa mp3`](mvsa.md#vsa-mvsa-mp3)
+- [`mvsa mp3` / `ogg` / `wav`](mvsa.md#vsa-mvsa-mp3)
 - [`vsa musicxml`](musicxml.md) (playback-``.mxl``)

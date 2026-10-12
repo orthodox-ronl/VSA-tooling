@@ -1,6 +1,7 @@
 """Normalize .mvsa stem pitch spelling (draft-v0).
 
-Rewrites S/A/T/B height tokens to ``doremi``, ``abc``, or ``vsa`` (EHM) while
+Rewrites S/A/T/B height tokens to ``doremi``, ``abc``, ``vsa`` (EHM), or
+``ag-vsa`` (absolute a–g per system, then EHM, absolute eindanker) while
 preserving L-semantics and sticky ``@do`` / ``@mode`` / ``@oct``. Optional
 column alignment via :func:`vsa.mvsa_align.align_mvsa_text`.
 """
@@ -31,7 +32,9 @@ from .pitch_resolver import (
 )
 
 # Canonieke interne waarden (``abc`` = a–g mét wetenschappelijk cijfer).
-PITCH_FORMS = ("preserve", "doremi", "abc", "vsa")
+PITCH_FORMS = ("preserve", "doremi", "abc", "vsa", "ag-vsa")
+# Rewrite targets (not ``preserve``); used by import and CLI without preserve.
+REWRITE_PITCH_FORMS = ("doremi", "abc", "vsa", "ag-vsa")
 # CLI/docs-voorkeur: ``a-g``; ``abc`` blijft alias.
 PITCH_FORM_ALIASES = {"a-g": "abc", "ag": "abc"}
 OCTAVE_STYLES = ("@oct", "marker")
@@ -41,7 +44,7 @@ _DEGREE_LABELS = ("do", "re", "mi", "fa", "so", "la", "si")
 # Default when normalizing an existing ``.mvsa``: keep note spellings as written.
 DEFAULT_MVSA_PITCH = "preserve"
 # Default when importing / converting from a non-``.mvsa`` source.
-DEFAULT_IMPORT_PITCH = "doremi"
+DEFAULT_IMPORT_PITCH = "ag-vsa"
 
 
 class MvsaNormalizeError(Exception):
@@ -57,7 +60,7 @@ def canonicalize_pitch_form(pitch: str) -> str:
 
 def pitch_form_choices(*, include_preserve: bool) -> list[str]:
     """Argparse choices: prefer documenting ``a-g``; keep ``abc`` as alias."""
-    base = ["doremi", "a-g", "abc", "vsa"]
+    base = ["doremi", "a-g", "abc", "vsa", "ag-vsa"]
     if include_preserve:
         return ["preserve", *base]
     return base
@@ -74,7 +77,7 @@ def normalize_mvsa_text(
 
     ``pitch=preserve`` (default for ``.mvsa`` → ``.mvsa``) keeps stem token
     spellings unchanged and only applies optional column alignment.
-    ``doremi`` / ``abc`` (alias ``a-g``) / ``vsa`` rewrite heights.
+    ``doremi`` / ``abc`` (alias ``a-g``) / ``vsa`` / ``ag-vsa`` rewrite heights.
     ``octave_style=@oct`` keeps existing ``@oct`` directives when rewriting.
     ``marker`` is reserved.
     """
@@ -82,7 +85,7 @@ def normalize_mvsa_text(
     if pitch not in PITCH_FORMS:
         raise MvsaNormalizeError(
             f"onbekende --pitch {pitch!r}; kies uit "
-            f"preserve, doremi, a-g (of abc), vsa"
+            f"preserve, doremi, a-g (of abc), vsa, ag-vsa"
         )
     if octave_style not in OCTAVE_STYLES:
         raise MvsaNormalizeError(
@@ -152,7 +155,19 @@ def normalize_mvsa_text(
                                     str(exc),
                                     line=system.line_nos.get(vm, system.start_line),
                                 ) from exc
-                            if raw in ("-", "~"):
+                            # ag-vsa: first sounding of the system is absolute a–g
+                            # (even when the source wrote a hold ``-``).
+                            if (
+                                pitch == "ag-vsa"
+                                and prev_degree[letter] is None
+                                and sounding is not None
+                            ):
+                                slot_out.append(format_abc_scientific(sounding))
+                                deg, _chrom = pitch_to_degree_and_chrom(
+                                    do_p, sounding, intervals
+                                )
+                                prev_degree[letter] = deg
+                            elif raw in ("-", "~"):
                                 slot_out.append("-")
                             else:
                                 slot_out.append(
@@ -180,11 +195,18 @@ def normalize_mvsa_text(
                 bars = _split_bars(system.lines[vm])
                 parts: list[str] = []
                 segs = new_segs[vm]
+                end_pitch = last_pitch[letter]
                 for i, seg in enumerate(segs):
                     parts.append(seg)
                     if i < len(bars.bar_tokens):
                         anchor = ""
-                        if i < len(bars.bar_anchors) and bars.bar_anchors[i]:
+                        if (
+                            pitch == "ag-vsa"
+                            and i == len(segs) - 1
+                            and end_pitch is not None
+                        ):
+                            anchor = format_abc_scientific(end_pitch)
+                        elif i < len(bars.bar_anchors) and bars.bar_anchors[i]:
                             anchor = bars.bar_anchors[i] or ""
                         parts.append(f" {bars.bar_tokens[i]}{anchor}")
                         if i + 1 < len(segs):
@@ -250,6 +272,11 @@ def _format_pitch(
         return format_abc_scientific(pitch)
     if pitch_form == "doremi":
         return format_doremi(pitch, do, intervals, writing_oct)
+    if pitch_form == "ag-vsa":
+        # Absolute a–g on first sounding of the system, then EHM.
+        if prev_degree is None:
+            return format_abc_scientific(pitch)
+        return format_ehm(prev_degree, pitch, do, intervals)
     # vsa: absolute doremi anchor, then EHM
     if prev_degree is None:
         return format_doremi(pitch, do, intervals, writing_oct)

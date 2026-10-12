@@ -87,6 +87,30 @@ def test_parse_l_hyphen_after_recite_is_word_link():
     assert cont[2].elms == ["_", "-", "-", "_"]
 
 
+def test_export_hyphen_after_recite_opens_begin():
+    """Woordstreepje na ``)`` → laatste recite-greep ``begin``, vervolg ``end``.
+
+    Regressie: derde-antifoon ``(… ge)-ko_-men`` — streepje ge↔ko ontbrak in MXL.
+    """
+    text = """\
+@do F4
+@mode major
+L: (wan-neer ge)-ko_-men |
+S: -             a4  -   |
+A: -             f4  -   |
+T: -             -   -   |
+B: -             f3  -   |
+"""
+    for layout in ("playback", "partituur"):
+        xml = export_mvsa_to_musicxml(text, layout=layout)
+        lyrics = _part_lyrics(xml, "P1")
+        assert ("begin", "ge") in lyrics, layout
+        assert ("end", "ko") in lyrics or ("middle", "ko") in lyrics, layout
+        assert ("end", "men") in lyrics, layout
+        # Geen single op de greep die het woordstreepje opent.
+        assert ("single", "ge") not in lyrics, layout
+
+
 def test_parse_l_recite_optional_elm():
     pos = parse_l_positions("(Zoon van God)_")
     assert pos[0].recite is True

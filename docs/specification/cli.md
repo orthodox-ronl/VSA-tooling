@@ -601,7 +601,7 @@ vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a
 
 | Optie                | Betekenis                                                          |
 | -------------------- | ------------------------------------------------------------------ |
-| `-o`, `--output`     | Uitvoerbestand (default: `<stem>.mxl` naast het bronbestand).      |
+| `-o`, `--output`     | Uitvoerbestand (default: `<bronnaam>.mxl`, bijv. `lied.mvsa.mxl`). |
 | `--section SECTION`  | Alleen deze `@sectie`-id exporteren (default: alle secties).       |
 
 ### Output

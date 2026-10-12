@@ -741,20 +741,14 @@ def _add_lyric_layer_to_notes(
             syl_text = syllables[i]
             if not syl_text:
                 continue
-            opens = i + 1 < n and i < len(lpos.links) and lpos.links[i]
-            continues = (i == 0 and lpos.continues_word) or (
-                i > 0 and i - 1 < len(lpos.links) and lpos.links[i - 1]
-            )
-            if continues and opens:
-                syl = "middle"
-            elif continues:
-                syl = "end"
-            elif opens:
-                syl = "begin"
-            else:
-                syl = "single"
             note.lyrics.append(
-                LyricSyllable(text=syl_text, syllabic=syl, number=number)
+                LyricSyllable(
+                    text=syl_text,
+                    syllabic=_syllabic_for_recite_index(
+                        lpos, i, opens_hyphen=opens_hyphen
+                    ),
+                    number=number,
+                )
             )
         return
 
@@ -1002,6 +996,33 @@ def _syllabic_for_position(
     return "single"
 
 
+def _syllabic_for_recite_index(
+    lpos: LPosition,
+    index: int,
+    *,
+    opens_hyphen: bool,
+) -> str:
+    """MusicXML syllabic for one lettergreep inside a recite position.
+
+    ``opens_hyphen`` is True when the *next L-positie* continues the word
+    (woordstreepje na ``)``, bv. ``(… ge)-ko``).
+    """
+    n = len(lpos.syllables) if lpos.syllables else 0
+    opens = (index + 1 < n and index < len(lpos.links) and lpos.links[index]) or (
+        index == n - 1 and opens_hyphen
+    )
+    continues = (index == 0 and lpos.continues_word) or (
+        index > 0 and index - 1 < len(lpos.links) and lpos.links[index - 1]
+    )
+    if continues and opens:
+        return "middle"
+    if continues:
+        return "end"
+    if opens:
+        return "begin"
+    return "single"
+
+
 def _position_to_notes(
     lpos: LPosition,
     vpos: VoicePosition,
@@ -1050,23 +1071,15 @@ def _position_to_notes(
         n = len(syllables)
         out_notes: list[NoteEvent] = []
         for i, syl_text in enumerate(syllables):
-            opens = i + 1 < n and i < len(lpos.links) and lpos.links[i]
-            continues = (i == 0 and lpos.continues_word) or (
-                i > 0 and i - 1 < len(lpos.links) and lpos.links[i - 1]
-            )
-            if continues and opens:
-                syl = "middle"
-            elif continues:
-                syl = "end"
-            elif opens:
-                syl = "begin"
-            else:
-                syl = "single"
             lyrics: list[LyricSyllable] = []
             if syl_text:
                 lyrics.append(
                     LyricSyllable(
-                        text=syl_text, syllabic=syl, number=lyric_number
+                        text=syl_text,
+                        syllabic=_syllabic_for_recite_index(
+                            lpos, i, opens_hyphen=opens_hyphen
+                        ),
+                        number=lyric_number,
                     )
                 )
             out_notes.append(

@@ -11,14 +11,15 @@ Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 `scripts\mvsa.cmd`). Bron-commands voor andere formaten: [`mxl`](mxl.md),
 [`mscz`](mscz.md).
 
-Subcommando’s zijn genoemd naar de **uitvoer** (zoals `mscz` / `pdf`):
-`mxl` en `mp3`. Oude namen `musicxml` en `audio` blijven als alias werken.
+Subcommando’s zijn genoemd naar de **uitvoer** (zoals `mscz` / `pdf` /
+`mp3` / `ogg` / `wav`). Oude namen `musicxml` en `audio` blijven als alias
+werken (`audio` ≡ `mp3`).
 
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,mxl,mscz,pdf,mp3,import,normalize,kuiser} …
-vsa mvsa [-h] {validate,mxl,mscz,pdf,mp3,import,normalize,kuiser} …
+mvsa [-h] {validate,mxl,mscz,pdf,mp3,ogg,wav,import,normalize,kuiser} …
+vsa mvsa [-h] {validate,mxl,mscz,pdf,mp3,ogg,wav,import,normalize,kuiser} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
               [--hulptekst-as-parts] [--bibliotheek-id ID]
@@ -29,25 +30,29 @@ mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--layout PROFILE] [--bibliotheek-id ID] path
-mvsa mp3 [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
-           [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
-mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} …
-mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}] …
-mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}] …
+mvsa mp3 [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+           [--keep-mxl PATH] path
+mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+           [--keep-mxl PATH] path
+mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+           [--keep-mxl PATH] path
+mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
+mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
+mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 ```
 
 ## Subcommando's
 
-| Subcommando                          | Doel                                                         |
-| ------------------------------------ | ------------------------------------------------------------ |
-| [`validate`](#vsa-mvsa-validate)     | Structuur + sync-telling van `.mvsa` controleren.            |
-| [`mxl`](#vsa-mvsa-mxl)               | Exporteer `.mvsa` / `.mscz` / `.mxl` naar playback-``.mxl``. |
-| [`mscz`](#vsa-mvsa-mscz)             | Exporteer `.mvsa` naar MuseScore (`.mscz`).                  |
-| [`pdf`](#vsa-mvsa-pdf)               | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).       |
-| [`mp3`](#vsa-mvsa-mp3)               | Exporteer naar preview-audio (``.mp3``).                     |
-| [`import`](#vsa-mvsa-import)         | Importeer `.mxl` / `.mscz` → `.mvsa` (**werkbank**).         |
-| [`normalize`](#vsa-mvsa-normalize)   | Canoniseer `.mvsa` (default: behoud noteernamen).            |
-| [`kuiser`](#vsa-mvsa-kuiser)         | Authoring-kuiser: strepen syncen, woordstreep, align.        |
+| Subcommando                            | Doel                                                           |
+| -------------------------------------- | -------------------------------------------------------------- |
+| [`validate`](#vsa-mvsa-validate)       | Structuur + sync-telling van `.mvsa` controleren.              |
+| [`mxl`](#vsa-mvsa-mxl)                 | Exporteer `.mvsa` / `.mscz` / `.mxl` naar playback-``.mxl``.   |
+| [`mscz`](#vsa-mvsa-mscz)               | Exporteer `.mvsa` naar MuseScore (`.mscz`).                    |
+| [`pdf`](#vsa-mvsa-pdf)                 | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).         |
+| [`mp3`](#vsa-mvsa-mp3) / `ogg` / `wav` | Exporteer naar preview-audio (``.mp3`` / ``.ogg`` / ``.wav``). |
+| [`import`](#vsa-mvsa-import)           | Importeer `.mxl` / `.mscz` → `.mvsa` (**werkbank**).           |
+| [`normalize`](#vsa-mvsa-normalize)     | Canoniseer `.mvsa` (default: behoud noteernamen).              |
+| [`kuiser`](#vsa-mvsa-kuiser)           | Authoring-kuiser: strepen syncen, woordstreep, align.          |
 
 Hulp op de commandoregel:
 
@@ -59,6 +64,8 @@ mvsa mxl -h
 mvsa mscz -h
 mvsa pdf -h
 mvsa mp3 -h
+mvsa ogg -h
+mvsa wav -h
 mvsa import -h
 mvsa normalize -h
 mvsa kuiser -h
@@ -177,7 +184,7 @@ VSA).
 | Naam                   | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                          |
 | ---------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
 | `path`                 | Ja        | Bron: `.mvsa`, `.mscz` of `.mxl`/`.musicxml`.                             | —                                            | Moet een bestaand bestand zijn.      |
-| `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<stem>.mxl` naast het bronbestand           | Andere extensie → wordt `.mxl`.      |
+| `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<bronnaam>.mxl` (bijv. `lied.mvsa.mxl`)     | Andere extensie → wordt `.mxl`.      |
 | `--section SECTION`    | Nee       | Alleen bij `.mvsa`: deze `@sectie`-id.                                    | Alle secties                                 | Id moet in het bestand voorkomen.    |
 | `--bibliotheek-id ID`  | Nee       | Alleen bij `.mvsa`: bibliotheek-id in identification/rights.              | pad-sniff onder `content-source/bibliotheek` | Optioneel.                           |
 | `--hulptekst`          | Nee       | Alleen bij `.mvsa`: tweede lyric-laag (number=2).                         | uit                                          | Zie beschrijving hierboven.          |
@@ -200,7 +207,7 @@ VSA).
 
 ### Voorbeelden — succes
 
-Standaard naast het bronbestand (`….mxl`):
+Standaard naast het bronbestand (`….mvsa.mxl`):
 
 ```cmd
 vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
@@ -281,16 +288,16 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam                   | Verplicht | Betekenis                                              | Default                             |
-| ---------------------- | --------- | ------------------------------------------------------ | ----------------------------------- |
-| `path`                 | Ja        | Bron-`.mvsa`-bestand.                                  | —                                   |
-| `-o`, `--output`       | Nee       | Uitvoer-`.mscz`.                                       | `<stem>.mscz` naast het bronbestand |
-| `--section SECTION`    | Nee       | Alleen deze `@sectie`-id.                              | Alle secties                        |
-| `--musescore PATH`     | Nee       | Pad naar MuseScore-executable.                         | Auto-detectie                       |
-| `--keep-mxl PATH`      | Nee       | Bewaar ook het tussenliggende `.mxl`.                  | temp (wordt verwijderd)             |
-| `--layout PROFILE`     | Nee       | `partituur` of `plain`.                                | `partituur`                         |
-| `--bibliotheek-id ID`  | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback. | pad-sniff / geen                    |
-| `--hulptekst`          | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»). | uit                                 |
+| Naam                   | Verplicht | Betekenis                                              | Default                                    |
+| ---------------------- | --------- | ------------------------------------------------------ | ------------------------------------------ |
+| `path`                 | Ja        | Bron-`.mvsa`-bestand.                                  | —                                          |
+| `-o`, `--output`       | Nee       | Uitvoer-`.mscz`.                                       | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
+| `--section SECTION`    | Nee       | Alleen deze `@sectie`-id.                              | Alle secties                               |
+| `--musescore PATH`     | Nee       | Pad naar MuseScore-executable.                         | Auto-detectie                              |
+| `--keep-mxl PATH`      | Nee       | Bewaar ook het tussenliggende `.mxl`.                  | temp (wordt verwijderd)                    |
+| `--layout PROFILE`     | Nee       | `partituur` of `plain`.                                | `partituur`                                |
+| `--bibliotheek-id ID`  | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback. | pad-sniff / geen                           |
+| `--hulptekst`          | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»). | uit                                        |
 
 ### Output
 
@@ -347,16 +354,16 @@ dezelfde A4-eis P6).
 
 ### Argumenten en opties
 
-| Naam                   | Verplicht | Betekenis                                      | Default                    |
-| ---------------------- | --------- | ---------------------------------------------- | -------------------------- |
-| `path`                 | Ja        | `.mvsa` of `.mscz`.                            | —                          |
-| `-o`, `--output`       | Nee       | Uitvoer-`.pdf`.                                | `<stem>.pdf` naast bron    |
-| `--section`            | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.          | alle secties               |
-| `--musescore`          | Nee       | MuseScore-executable.                          | auto-detectie              |
-| `--keep-mscz`          | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.    | temp (wordt verwijderd)    |
-| `--keep-mxl`           | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mxl`.     | niet                       |
-| `--layout PROFILE`     | Nee       | Bij `.mvsa`: `partituur` of `plain`.           | `partituur`                |
-| `--bibliotheek-id ID`  | Nee       | Bij `.mvsa` + `partituur`: colofon-id.         | pad-sniff / geen           |
+| Naam                   | Verplicht | Betekenis                                      | Default                                  |
+| ---------------------- | --------- | ---------------------------------------------- | ---------------------------------------- |
+| `path`                 | Ja        | `.mvsa` of `.mscz`.                            | —                                        |
+| `-o`, `--output`       | Nee       | Uitvoer-`.pdf`.                                | `<bronnaam>.pdf` (bijv. `lied.mvsa.pdf`) |
+| `--section`            | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.          | alle secties                             |
+| `--musescore`          | Nee       | MuseScore-executable.                          | auto-detectie                            |
+| `--keep-mscz`          | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.    | temp (wordt verwijderd)                  |
+| `--keep-mxl`           | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mxl`.     | niet                                     |
+| `--layout PROFILE`     | Nee       | Bij `.mvsa`: `partituur` of `plain`.           | `partituur`                              |
+| `--bibliotheek-id ID`  | Nee       | Bij `.mvsa` + `partituur`: colofon-id.         | pad-sniff / geen                         |
 
 ### Voorbeelden
 
@@ -369,40 +376,45 @@ vsa mvsa pdf lied.mscz -o lied.pdf
 
 ---
 
-## `vsa mvsa mp3`
+## `vsa mvsa mp3` / `ogg` / `wav`
 
 ### Synopsis
 
 ```text
-vsa mvsa mp3 [-h] [-o OUTPUT] [--format {mp3,ogg,wav}] [--section SECTION]
-               [--musescore PATH] [--keep-mxl PATH] [--config CONFIG] path
+vsa mvsa mp3 [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+               [--keep-mxl PATH] path
+vsa mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+               [--keep-mxl PATH] path
+vsa mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+               [--keep-mxl PATH] path
 ```
 
 ### Beschrijving
 
-Maakt een **preview-audiobestand** (default ``.mp3``) via MuseScore: eerst
-playback-``.mxl`` (vier parts), daarna audio. Bron mag ``.mvsa``, ``.mxl``,
-``.vsa`` of ``.mscz`` (fallback) zijn. Alleen het artefact; de consumer-site
-zet de afspeelknop. Zie [`vsa audio`](audio.md) en [formats/audio.md](../../formats/audio.md).
+Maakt een **preview-audiobestand** via MuseScore: eerst playback-``.mxl``
+(vier parts), daarna audio. Het **subcommando is het formaat**: `mp3`, `ogg`
+of `wav`. Alias `audio` ≡ `mp3`. Bron mag ``.mvsa``, ``.mxl``, ``.vsa`` of
+``.mscz`` (fallback) zijn. Alleen het artefact; de consumer-site zet de
+afspeelknop. Zie [`vsa audio`](audio.md) en
+[formats/audio.md](../../formats/audio.md).
 
 ### Argumenten en opties
 
-| Naam                     | Verplicht | Betekenis                                         | Default                         |
-| ------------------------ | --------- | ------------------------------------------------- | ------------------------------- |
-| `path`                   | Ja        | ``.mvsa`` / ``.mxl`` / ``.vsa`` / ``.mscz``.      | —                               |
-| `-o`, `--output`         | Nee       | Uitvoer-audio.                                    | ``<stem>.mp3`` naast bron       |
-| `--format`               | Nee       | ``mp3`` / ``ogg`` / ``wav`` zonder extensie.      | ``mp3`` of ``[audio].format``   |
-| `--section`              | Nee       | Alleen bij ``.mvsa``: één ``@sectie``-id.         | alle secties                    |
-| `--musescore`            | Nee       | MuseScore-executable.                             | auto-detectie                   |
-| `--keep-mxl`             | Nee       | Bewaar tussenliggende playback-``.mxl``.          | temp (wordt verwijderd)         |
-| `--config`               | Nee       | Pad naar ``vsa.toml``.                            | auto-detectie                   |
+| Naam             | Verplicht | Betekenis                                    | Default                                            |
+| ---------------- | --------- | -------------------------------------------- | -------------------------------------------------- |
+| `path`           | Ja        | ``.mvsa`` / ``.mxl`` / ``.vsa`` / ``.mscz``. | —                                                  |
+| `-o`, `--output` | Nee       | Uitvoer-audio.                               | ``<bronnaam>.<formaat>`` (bijv. ``lied.mvsa.ogg``) |
+| `--section`      | Nee       | Alleen bij ``.mvsa``: één ``@sectie``-id.    | alle secties                                       |
+| `--musescore`    | Nee       | MuseScore-executable.                        | auto-detectie                                      |
+| `--keep-mxl`     | Nee       | Bewaar tussenliggende playback-``.mxl``.     | temp (wordt verwijderd)                            |
 
 ### Voorbeelden
 
 ```cmd
 vsa mvsa mp3 examples\mvsa\test-alleluia-toon-8.mvsa --section schets3-oct-doremi
 vsa mvsa mp3 lied.mvsa -o generated\lied.mp3
-vsa mvsa mp3 lied.mxl -o lied.ogg --format ogg
+vsa mvsa ogg lied.mvsa
+vsa mvsa wav lied.mxl -o generated\lied.wav
 ```
 
 ---
@@ -440,7 +452,7 @@ vsa mvsa mp3 lied.mxl -o lied.ogg --format ogg
 ### Synopsis
 
 ```text
-vsa mvsa import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa} [--do PITCH]
+vsa mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
                 [--octave-style {@oct,marker}] [--section SECTION]
                 [--musescore PATH] [--no-align] path
 ```
@@ -454,8 +466,9 @@ Importeert een partituur naar `.mvsa`:
 | `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4)                                                                             |
 | `.mscz`                       | MuseScore CLI → temp `.mxl` → **SATB-normalisatie** (zelfde explode als [`mscz mxl`](mscz.md)) → parser |
 
-Stemhoogten worden in de gekozen `--pitch`-vorm geschreven; `@mode` is
-majeur (aanname); `@oct` wordt per stem afgeleid. `@do` volgt deze volgorde:
+Stemhoogten worden in de gekozen `--pitch`-vorm geschreven (default
+**`ag-vsa`**); `@mode` is majeur (aanname); `@oct` wordt per stem afgeleid.
+`@do` volgt deze volgorde:
 
 1. `--do` op de command line (bijv. `F4`);
 2. bij `.mscz`: aantal kruisen/mollen uit MuseScore `KeySig` (`concertKey`);
@@ -469,6 +482,9 @@ Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
 - Soft-wrap: LSATB-systemen van ongeveer 80 tekens
   (`DEFAULT_SYSTEM_SOFT_WIDTH`). Eén maat die alleen al langer is blijft één
   systeem.
+- **Maatnavigatie:** vóór elk LSATB-systeem staat `#maat N` (`N` = 1-based
+  startmaat van dat systeem), zodat je makkelijk heen-en-weer kunt tussen
+  `.mvsa` en maatnummers in PDF / MuseScore.
 - **A/T/B-uitlijning:** onderstemmen volgen de L/S-posities op **duur** (niet
   op noot-index of lyrics van A/T/B). Een lange noot die meerdere S-slots
   dekt, wordt gesplitst/gepaddet (`c4&-` + hold `-`); een lyric-loze spacer na
@@ -518,32 +534,42 @@ Bij complexe MuseScore-lyrics is soms `--no-align` nodig (sla kuiser/align
 over) — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
 `kuiser` zijn advies, geen import-fout.
 
-Bij `--pitch vsa` plakt de import op elke stemregel een **eindanker** met
+**Pitch-vormen bij import**
+
+| `--pitch`  | Stemregels                                                                              | Eindanker per systeem |
+| ---------- | --------------------------------------------------------------------------------------- | --------------------- |
+| `ag-vsa`   | **Default.** Eerste klinkende noot per LSATB-systeem absolute a–g; daarna EHM           | ja (a–g)              |
+| `vsa`      | Eerste toon absoluut als doremi; daarna EHM                                             | ja (a–g)              |
+| `doremi`   | Laddergraden                                                                            | nee                   |
+| `a-g`      | Toonnamen met wetenschappelijk cijfer (`bb4`, …); alias `abc`                           | nee                   |
+
+Bij `ag-vsa` en `vsa` plakt de import op elke stemregel een **eindanker** met
 absolute toonhoogte (a–g met wetenschappelijk cijfer) direct achter de
 **laatste maatstreep** van elk systeem, bijvoorbeeld `|g4` of `||a4`. Dat zijn
 check-only ankers: na wijzigingen in het `.mvsa` vangt `mvsa validate` een
 mismatch op (`MVSA-BAR-ANKER`). Op de lyrics-regel (`L:`) blijven de strepen
-kaal. Bij `--pitch doremi` en `--pitch a-g` komen die eindankers niet.
+kaal.
 
 Syntax van eindankers:
 [specification-mvsa — eindanker](../../specification-mvsa/syntax.md#eindanker-aan-de-maatstreep).
 
 ### Argumenten en opties
 
-| Naam                 | Verplicht | Betekenis                                                         | Default              |
-| -------------------- | --------- | ----------------------------------------------------------------- | -------------------- |
-| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.                                   | —                    |
-| `--pitch`            | Ja        | `doremi`, `a-g` (of alias `abc`), of `vsa`.                       | —                    |
-| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                                                  | `<stem>.import.mvsa` |
-| `--do`               | Nee       | Forceer `@do` (bijv. `F4`). Zonder: KeySig / fifths / fallback.   | afgeleid             |
-| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)                                     | `@oct`               |
-| `--section`          | Nee       | `@sectie`-id in de output                                         | `import`             |
-| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                                       | auto                 |
-| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)                              | uit                  |
+| Naam                 | Verplicht | Betekenis                                                                              | Default              |
+| -------------------- | --------- | -------------------------------------------------------------------------------------- | -------------------- |
+| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.                                                        | —                    |
+| `--pitch`            | Nee       | `ag-vsa` (default), `vsa`, `doremi`, of `a-g` (alias `abc`).                           | `ag-vsa`             |
+| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                                                                       | `<stem>.import.mvsa` |
+| `--do`               | Nee       | Forceer `@do` (bijv. `F4`). Zonder: KeySig / fifths / fallback.                        | afgeleid             |
+| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)                                                          | `@oct`               |
+| `--section`          | Nee       | `@sectie`-id in de output                                                              | `import`             |
+| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                                                            | auto                 |
+| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)                                                   | uit                  |
 
 ### Voorbeelden
 
 ```cmd
+vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa
 vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
 vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4
@@ -558,7 +584,7 @@ vsa mvsa validate lied.mvsa
 ### Synopsis
 
 ```text
-vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa}]
+vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                    [--octave-style {@oct,marker}] [--no-align] path
 ```
 
@@ -574,18 +600,19 @@ kolom- en maatstreep-uitlijning gebeurt standaard. Zo blijf je
 meerdere schetsen met verschillende spellingen in één bestand intact.
 
 Wil je wél herschrijven naar één vorm, geef dan expliciet `--pitch doremi`,
-`a-g` of `vsa`. (`abc` is een alias van `a-g`.)
+`a-g`, `vsa` of `ag-vsa`. (`abc` is een alias van `a-g`.)
 
 **Import uit een ander formaat** (`.mxl` / `.mscz` via `mvsa import` / `mxl
-import`): daar is `--pitch` verplicht of default **`doremi`** — er is dan
-geen “bronnotatie” om te bewaren.
+import`): daar is de default **`ag-vsa`** — er is dan geen “bronnotatie” om
+te bewaren.
 
-| `--pitch`   | Gedrag                                                                |
-| ----------- | --------------------------------------------------------------------- |
-| `preserve`  | **Default** voor `.mvsa` → `.mvsa`: stemtokens ongewijzigd; wel align |
-| `doremi`    | Laddergraden t.o.v. `@do` / `@oct`                                    |
-| `a-g`       | Toonnamen met wetenschappelijk cijfer (`bb4`, `c5`, …); alias: `abc`  |
-| `vsa`       | Eerste toon absoluut (doremi), daarna EHM (`/`, `\2`, …)              |
+| `--pitch`   | Gedrag                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| `preserve`  | **Default** voor `.mvsa` → `.mvsa`: stemtokens ongewijzigd; wel align                           |
+| `doremi`    | Laddergraden t.o.v. `@do` / `@oct`                                                              |
+| `a-g`       | Toonnamen met wetenschappelijk cijfer (`bb4`, `c5`, …); alias: `abc`                            |
+| `vsa`       | Eerste toon absoluut (doremi), daarna EHM (`/`, `\2`, …)                                        |
+| `ag-vsa`    | Per LSATB-systeem: eerste noot absolute a–g, daarna EHM; a–g-eindanker op de laatste maatstreep |
 
 Kolom- en maatstreep-uitlijning gebeurt standaard (zelfde regels als
 `scripts/align_mvsa_columns.py`); zet `--no-align` om dat over te slaan.
@@ -597,7 +624,7 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 | Naam                    | Verplicht | Betekenis                                                            | Default                         |
 | ----------------------- | --------- | -------------------------------------------------------------------- | ------------------------------- |
 | `path`                  | Ja        | Bron-`.mvsa`-bestand.                                                | —                               |
-| `--pitch`               | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` om te herschrijven | `preserve` bij `.mvsa`-bron     |
+| `--pitch`               | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` / `ag-vsa`         | `preserve` bij `.mvsa`-bron     |
 | `-o`, `--output`        | Nee       | Uitvoerpad.                                                          | `<stem>.normalized.mvsa`        |
 | `--octave-style`        | Nee       | `@oct` (canoniek) of `marker` (nog niet klaar)                       | `@oct`                          |
 | `--no-align`            | Nee       | Geen kolomuitlijning.                                                | uit (wel alignen)               |
@@ -629,7 +656,7 @@ vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 ### Synopsis
 
 ```text
-vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa}]
+vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                 [--octave-style {@oct,marker}] [--no-align] path [path …]
 ```
 

@@ -24,7 +24,8 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 
 **Import:** de MusicXML-bron wordt direct geparst als vier parts (P1–P4 =
 S/A/T/B). Soft-wrap ~80 tekens, same-pitch holds als `-`, multi-lettergreep
-lyrics als recite. Kies `--pitch doremi`, `a-g` (alias `abc`), of `vsa`
+lyrics als recite. Default `--pitch ag-vsa`; of kies `doremi`, `a-g` (alias
+`abc`), of `vsa`
 (EHM + absolute eindankers op systeemeinden).
 
 Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
@@ -44,9 +45,9 @@ Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
 ## Typische commando’s
 
 ```cmd
-mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
-mxl import generated\alleluia.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
-mvsa validate generated\from-mxl.vsa.mvsa
+mxl import generated\alleluia.mxl -o generated\from-mxl.mvsa
+mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.doremi.mvsa
+mvsa validate generated\from-mxl.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
 vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
 ```

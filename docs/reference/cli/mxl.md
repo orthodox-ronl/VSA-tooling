@@ -15,7 +15,7 @@ output begint met dezelfde waarschuwingsbanner als `mvsa import`.
 
 ```text
 mxl [-h] {import,mscz,validate,normalize} …
-mxl import [-h] [-o OUTPUT] --pitch {doremi,a-g,vsa}
+mxl import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
            [--octave-style {@oct,marker}] [--section SECTION] [--no-align] path
 mxl mscz [-h] [-o OUTPUT] [--musescore PATH] path
 mxl validate [-h] [--profile {satb,mono}] path
@@ -24,23 +24,25 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 
 ## Subcommando's
 
-| Subcommando  | Doel                                                                                          |
-| ------------ | --------------------------------------------------------------------------------------------- |
-| `import`     | Importeer naar `.mvsa`: direct SATB P1–P4 (zelfde pad als `vsa mvsa import`).                 |
-| `mscz`       | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore.                        |
-| `validate`   | Lees-gate: M2/M8/M18 (monofone parts), Coria-importer-tags, meta (source ≠ licentie). Profiel `satb` of `mono`. |
-| `normalize`  | Schrijf playback-MXL: explode + piano + sanitize; met `--apply-timing` ook recite/pauzes.     |
+| Subcommando  | Doel                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `import`     | Importeer naar `.mvsa`: direct SATB P1–P4 (zelfde pad als `vsa mvsa import`).                                              |
+| `mscz`       | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore. Default: `<bronnaam>.mscz` (bijv. `lied.mxl.mscz`). |
+| `validate`   | Lees-gate: M2/M8/M18 (monofone parts), Coria-importer-tags, meta (source ≠ licentie). Profiel `satb` of `mono`.            |
+| `normalize`  | Schrijf playback-MXL: explode + piano + sanitize; met `--apply-timing` ook recite/pauzes.                                  |
 
-**Import-opties** (`--pitch`, `--no-align`, soft-wrap ~80, eindankers bij
-`vsa`, kuiser-normaalvorm): zie [`vsa mvsa import`](mvsa.md#vsa-mvsa-import).
-Bij complexe lyrics soms `--no-align`; sync-telling blijft leidend.
+**Import-opties** (`--pitch` default `ag-vsa`, `--no-align`, soft-wrap ~80,
+eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zie
+[`vsa mvsa import`](mvsa.md#vsa-mvsa-import). Bij complexe lyrics soms
+`--no-align`; sync-telling blijft leidend.
 
 ## Voorbeelden
 
 ```cmd
+mxl import generated\alleluia-schets2.mxl -o generated\from-mxl.mvsa
 mxl import generated\alleluia-schets2.mxl --pitch doremi -o generated\from-mxl.mvsa
 mxl import generated\alleluia-schets2.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
-vsa mvsa validate generated\from-mxl.vsa.mvsa
+vsa mvsa validate generated\from-mxl.mvsa
 mxl mscz generated\alleluia-schets2.mxl -o generated\from-mxl.mscz
 mxl validate content-source\bibliotheek\…\lied.mscz.mxl --profile satb
 mxl normalize raw.mxl -o out.mxl --apply-timing
