@@ -949,34 +949,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../formats/zoektekst/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Zoektekst (canonieke .vsa / .mvsa)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../formats/canonical-checklists/" class="md-nav__link">
         
   
@@ -1048,10 +1020,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_5" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
             
   
   
@@ -1069,8 +1041,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1472,34 +1444,6 @@
     
   
     mvsa schrijven 101
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/metadata-brug/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Metadata-brug (.vsa ↔ .mvsa)
   
 
     
@@ -3223,6 +3167,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../uitvoeraanwijzingen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uitvoeraanwijzingen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../open-points/" class="md-nav__link">
         
   
@@ -3940,62 +3912,6 @@
     
   
     vsa syllabify — lettergreepstreepjes in VSA-tekst
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/cli/text/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    vsa text — platte gezongen tekst
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/cli/zoektekst/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    vsa zoektekst — platte tekst in YAML-frontmatter
   
 
     
@@ -4844,62 +4760,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../plans/kerkslavisch-transliteratie/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    kerkslavische hulptekst
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../plans/hulptekst-reviewcorpus/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    hulptekst-reviewcorpus (expert)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -5465,8 +5325,8 @@ dezelfde quoted-stringvorm; <code>@tempo</code> is een BPM-getal zonder aanhalin
 </tr>
 <tr>
 <td><code>@tempo</code></td>
-<td><code>@tempo 72</code></td>
-<td><code>sound tempo</code> (onzichtbaar)</td>
+<td><code>@tempo 72</code> of <code>@tempo 72 "Andante"</code></td>
+<td><code>sound tempo</code> + optioneel <code>&lt;words&gt;</code></td>
 <td>(via MusicXML)</td>
 </tr>
 <tr>
@@ -5478,19 +5338,23 @@ dezelfde quoted-stringvorm; <code>@tempo</code> is een BPM-getal zonder aanhalin
 </tbody>
 </table>
 <p><strong><code>@tempo</code>.</strong> Aantal <strong>slagen per minuut</strong> (BPM) voor beluisteren en oefenen.
-Vorm: <code>@tempo</code> + spatie + geheel getal <strong>1–999</strong> (geen aanhalingstekens),
-bijvoorbeeld <code>@tempo 72</code>. Laatste waarde in het bestand wint. <strong>Default</strong> als
-je <code>@tempo</code> weglaat: <strong>130</strong> (zelfde default als eenstemmige VSA).</p>
-<p>Bij export naar MusicXML (playback/Coria én partituur) komt op de <strong>eerste
-maat</strong> van de bovenste part <code>&lt;sound tempo="…"/&gt;</code> (kwartnoot = BPM) plus een
-metronoommarkering met <code>print-object="no"</code>. Het tempo stuurt afspelen
-(audio/Coria); op het blad, in <code>.mscz</code> en in de PDF blijft de metronoom
-<strong>onzichtbaar</strong>. MSCZ-nabewerking zet MuseScore-<code>Tempo</code> bovendien op
-<code>visible=0</code> voor het geval de import de markering toch zichtbaar maakt.</p>
+Vorm: <code>@tempo</code> + spatie + geheel getal <strong>1–999</strong>, optioneel gevolgd door een
+quoted tempo-woord, bijvoorbeeld <code>@tempo 72</code> of <code>@tempo 72 "Andante"</code>.
+Laatste waarde vóór een systeem wint voor die plek; het <strong>eerste</strong> <code>@tempo</code>
+in het bestand is het document-starttempo. <strong>Default</strong> als je <code>@tempo</code>
+weglaat: <strong>130</strong> (zelfde default als eenstemmige VSA).</p>
+<p>Bij export naar MusicXML (playback/Coria én partituur) komt op de maat
+<code>&lt;sound tempo="…"/&gt;</code> (kwartnoot = BPM) plus een metronoommarkering met
+<code>print-object="no"</code>. Het getal stuurt afspelen (audio/Coria); de metronoom
+blijft op het blad / in <code>.mscz</code> / PDF <strong>onzichtbaar</strong>. Het optionele woord
+wordt wél als zichtbare <code>&lt;words&gt;</code> gezet. MSCZ-nabewerking zet MuseScore-
+<code>Tempo</code> op <code>visible=0</code> voor het geval de import de metronoom toch toont.</p>
+<p>Lokale tempo-woorden op de L-regel (<code>[rit]</code>, <code>[atempo]</code>) horen bij
+<a href="../uitvoeraanwijzingen/">uitvoeraanwijzingen</a>, niet bij <code>@tempo</code>.</p>
 <div class="highlight"><pre><span></span><code>@tempo 72
+@tempo 72 "Andante"
 </code></pre></div>
-<p><strong>Niet gebruiken</strong> voor tekstuele tempo-aanduidingen (“langzaam”, “Andante”) —
-alleen een BPM-getal. Niet midden in een LSATB-systeem.</p>
+<p>Niet midden in een LSATB-systeem.</p>
 <p><strong><code>@toon</code>.</strong> Kerktoon / oktoechos-nummer van het zangstuk (catalogus en
 MusicXML). Vorm: quoted string, bv. <code>@toon "8"</code>. Gaat mee als
 <code>&lt;miscellaneous-field name="tone"&gt;</code> in <code>&lt;identification&gt;</code> (zelfde veldnaam
@@ -5718,7 +5582,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-12
+        Bijgewerkt: 2026-10-14
         
       </p>
       
