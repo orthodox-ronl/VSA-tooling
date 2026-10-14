@@ -34,7 +34,7 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 | [Speelplan](speelplan.md)                     | `@blok` / `@speelplan`: bladvorm vs klinkende vorm                     |
 | [Validatie](validation.md)                    | Geldigheidsregels (draft)                                              |
 | [Voorbeelden](examples.md)                    | Pointers naar `examples/mvsa/`                                         |
-| [Uitvoeraanwijzingen](uitvoeraanwijzingen.md) | `[…]` op L; cesuur/dynamiek/adem/ferm actief; rest roadmap             |
+| [Uitvoeraanwijzingen](uitvoeraanwijzingen.md) | `[…]` op L; fase 1–5 actief (t/m cresc/dim en tempo-woorden)           |
 | [Open punten](open-points.md)                 | Centrale backlog (nu + later)                                          |
 | [Versionering](versioning.md)                 | Draft-versiebeleid                                                     |
 
