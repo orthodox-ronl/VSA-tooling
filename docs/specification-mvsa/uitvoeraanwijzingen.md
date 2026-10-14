@@ -1,13 +1,13 @@
-# Uitvoeraanwijzingen op de lyrics-regel (ontwerp)
+# Uitvoeraanwijzingen op de lyrics-regel
 
-**Status:** ontwerp + **fase 1–3 actief** (`[//]`; dynamiek `ppp`–`fff`;
-`[adem]` / `[ferm]`). Overige tokens staan in de roadmap en worden in code
-**pas geactiveerd in hun fase** (zie §7).
+**Status:** **fase 1–5 actief** in code en export: cesuur `[//]`; dynamiek
+`ppp`–`fff`; `[adem]` / `[ferm]`; `[cresc]`/`[/cresc]` en `[dim]`/`[/dim]`;
+`[rit]` / `[atempo]`; plus `@tempo` (optioneel tempo-woord). Fase 6
+(import-roundtrip) staat nog open — zie §7.
 
 **Doel:** een **generiek** mechanisme voor uitvoeraanwijzingen op de
-mvsa-lyrics-regel (`L:` / `L1:` / …), met gesloten `[token]`-syntax. Eerste
-concrete case: cesuur `[//]`. Daarna: dynamiek, adem, fermata, cresc/dim; nog: lokale
-tempo-woorden — zonder de L↔SATB-sync te breken.
+mvsa-lyrics-regel (`L:` / `L1:` / …), met gesloten `[token]`-syntax —
+zonder de L↔SATB-sync te breken.
 
 Gerelateerd:
 

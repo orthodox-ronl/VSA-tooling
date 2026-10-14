@@ -280,8 +280,9 @@ Buiten een recite-groep begint een nieuw L-stuk na:
 `&` binnen een brok scheidt **slots** (melisma), geen nieuwe L-stukken.
 Leestekens (`,` `.` `;` …) zijn **geen** L-stuk, ook niet met spaties eromheen.
 Hetzelfde geldt voor **uitvoeraanwijzingen** (gesloten `[token]` op `L:`).
-Actief: cesuur `[//]`, adem `[adem]`, fermata `[ferm]` (ná het L-stuk) en
-dynamiek `[p]`/`[mf]`/… (vóór het L-stuk); die tellen niet mee in de sync —
+Actief o.a.: cesuur `[//]`, adem `[adem]`, fermata `[ferm]` (ná het L-stuk);
+dynamiek `[p]`/`[mf]`/…, start cresc/dim, `[rit]`/`[atempo]` (vóór het
+L-stuk); stop `[/cresc]`/`[/dim]` (ná). Die tellen niet mee in de sync —
 zie [uitvoeraanwijzingen](uitvoeraanwijzingen.md). De dubbele maatstreep blijft
 de beurt-/sectiegrens en is geen L-aanwijzing.
 

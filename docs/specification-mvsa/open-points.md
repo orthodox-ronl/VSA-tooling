@@ -36,7 +36,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 | Overlays t.o.v. S                       | A/T/B als afwijking van de sopraan                                             | Later                                                                          |
 | Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                       | Later                                                                          |
 | Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                                   | Alleen als corpuswerk het vraagt                                               |
-| Meer uitvoeraanwijzingen                | Cresc/dim, tempo — registry in ontwerp                                         | Faseringen 4–5; [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §3 en §7      |
+| Uitvoeraanwijzingen: import-roundtrip   | Marks 1–5 actief in export; MSCZ/MXL → canonieke `[token]` nog open            | Fase 6; [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §6 / §7               |
 | Oefenpauze na dubbele maatstreep        | Lengte / lyric `[PAUZE]` / zichtbaarheid partituur — los van L-`[//]`          | Apart van uitvoeraanwijzingen; zie ontwerp §2                                  |
 
 ### Markdown-pipeline en fences
