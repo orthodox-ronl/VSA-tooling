@@ -97,6 +97,10 @@ def normalize_mvsa_text(
             "octave-style 'marker' is nog niet geïmplementeerd; gebruik @oct"
         )
 
+    from .mvsa_marks import canonicalize_mark_source
+
+    text = canonicalize_mark_source(text)
+
     doc = parse_mvsa(text)
     errors = [d for d in doc.diagnostics if d.severity == "error"]
     if errors:

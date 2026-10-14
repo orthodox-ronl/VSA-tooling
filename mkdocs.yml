@@ -97,7 +97,6 @@ nav:
       - .mscz: formats/mscz.md
       - .mp3 / audio: formats/audio.md
       - .midi / .mid: formats/midi.md
-    - Zoektekst (canonieke .vsa / .mvsa): formats/zoektekst.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
     - Commando's:
@@ -114,7 +113,6 @@ nav:
     - Consumer-site — waar hoort wat: manuals/consumer-site.md
     - "Releases: taggen en pinnen": manuals/releases.md
     - mvsa schrijven 101: guides/mvsa-schrijven-101.md
-    - Metadata-brug (.vsa ↔ .mvsa): guides/metadata-brug.md
     - Gebruikershandleiding: guides/user-guide.md
     - CLI-taken: guides/cli-taken.md
     - Validatie: guides/validation.md
@@ -164,6 +162,7 @@ nav:
     - Speelplan: specification-mvsa/speelplan.md
     - Validatie: specification-mvsa/validation.md
     - Voorbeelden: specification-mvsa/examples.md
+    - Uitvoeraanwijzingen: specification-mvsa/uitvoeraanwijzingen.md
     - Open punten: specification-mvsa/open-points.md
     - Versionering: specification-mvsa/versioning.md
   - Referentie:
@@ -187,8 +186,6 @@ nav:
       - reference/cli/pdf.md
       - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
-      - reference/cli/text.md
-      - reference/cli/zoektekst.md
       - reference/cli/musicxml.md
       - reference/cli/audio.md
       - reference/cli/mvsa.md
@@ -215,8 +212,6 @@ nav:
     - mvsa v0 — meerstemmige invoer: plans/mvsa-v0-syntax.md
     - mvsa-conversies (mxl/mscz/normalize): plans/mvsa-conversions.md
     - plans/vsa-polyphony-proposal.md
-    - kerkslavische hulptekst: plans/kerkslavisch-transliteratie.md
-    - hulptekst-reviewcorpus (expert): plans/hulptekst-reviewcorpus.md
 
 extra_css:
   - stylesheets/extra.css

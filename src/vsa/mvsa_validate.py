@@ -15,8 +15,8 @@ SECTIE_ID_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
 # Speelblok-id: cijfers of sectie-vorm (zie speelplan.md).
 BLOK_ID_RE = re.compile(r"^(?:[1-9][0-9]*|[a-z][a-z0-9_-]*)$")
 DO_RE = re.compile(r"^[A-Ga-g](#|b)?[0-9]$")
-# Document-tempo: geheel getal BPM (1–999), bv. ``@tempo 72``.
-TEMPO_RE = re.compile(r"^[1-9]\d{0,2}$")
+# Document-tempo: BPM 1–999, optioneel woord: ``@tempo 72`` of ``@tempo 72 "Andante"``.
+TEMPO_RE = re.compile(r'^([1-9]\d{0,2})(?:\s+"([^"]*)")?$')
 OCT_ASSIGN_RE = re.compile(r"^([A-Za-z0-9_-]+)=(-?\d+)$")
 # Per lyrics-laag: ``Lap=nl``, ``Lus=noot``, ``L'=ksl`` (``L'`` ≡ ``L1``).
 TAAL_ASSIGN_RE = re.compile(
@@ -550,6 +550,22 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
 # ---------------------------------------------------------------------------
 
 
+def parse_tempo_argument(rest: str) -> tuple[int, str | None] | None:
+    """Parse ``@tempo``: BPM (1–999), optioneel quoted tempo-woord.
+
+    Returns ``(bpm, label_or_none)`` or ``None`` if *rest* is ongeldig.
+    Lege ``""`` telt als geen label.
+    """
+    m = TEMPO_RE.fullmatch(rest.strip())
+    if not m:
+        return None
+    bpm = int(m.group(1))
+    label = m.group(2)
+    if label is not None and not label.strip():
+        label = None
+    return bpm, label
+
+
 def parse_tekst_argument(rest: str) -> str | None:
     """Parse ``@tekst`` argument: a double-quoted string.
 
@@ -687,12 +703,13 @@ def _validate_directive_value(
                 )
             )
     elif name == "tempo":
-        if not rest or not TEMPO_RE.fullmatch(rest):
+        if parse_tempo_argument(rest) is None:
             diagnostics.append(
                 MvsaDiagnostic(
                     "MVSA-TEMPO",
                     f"ongeldige @tempo-waarde {rest!r} "
-                    f"(verwacht BPM als geheel getal 1–999, bv. @tempo 72)",
+                    f'(verwacht BPM 1–999, optioneel woord, bv. @tempo 72 '
+                    f'of @tempo 72 "Andante")',
                     line_no,
                 )
             )
@@ -860,6 +877,7 @@ def _validate_section(section: _Section, diagnostics: list[MvsaDiagnostic]) -> N
             )
         _validate_system_sync(system, diagnostics)
         _validate_system_height_tokens(system, diagnostics)
+        _validate_system_l_marks(system, diagnostics)
         # Intermediate systems must not end section; last must — checked at parse
         if system is not section.systems[-1] and system.ends_section:
             diagnostics.append(
@@ -958,6 +976,108 @@ def _validate_system_height_tokens(
                             rl.line_no,
                         )
                     )
+
+
+def _validate_system_l_marks(
+    system: _System, diagnostics: list[MvsaDiagnostic]
+) -> None:
+    """Controleer ``[…]``-uitvoeraanwijzingen op lyrics-regels (incl. wedges)."""
+    from .mvsa_marks import lookup_mark, read_bracket_token
+
+    for marker, rl in system.lines.items():
+        if not (rl.is_lyrics or is_lyrics_stem(marker)):
+            continue
+        split = _split_bars(rl.content)
+        wedge_stack: list[str] = []
+        for mi, seg in enumerate(split.segments):
+            seen_position = False
+            pending_before: str | None = None
+            i = 0
+            n = len(seg)
+            while i < n:
+                if seg[i].isspace() or seg[i] in ",;:!?":
+                    i += 1
+                    continue
+                if seg[i] == "[":
+                    raw, j, err = read_bracket_token(seg, i)
+                    if err == "unclosed":
+                        diagnostics.append(
+                            MvsaDiagnostic(
+                                "MVSA-MARK",
+                                f"{marker}: maat {mi + 1}: `[` zonder sluitende `]`",
+                                rl.line_no,
+                            )
+                        )
+                        return
+                    assert raw is not None
+                    spec = lookup_mark(raw)
+                    if spec is None:
+                        diagnostics.append(
+                            MvsaDiagnostic(
+                                "MVSA-MARK",
+                                f"{marker}: maat {mi + 1}: onbekende "
+                                f"uitvoeraanwijzing [{raw}]",
+                                rl.line_no,
+                            )
+                        )
+                    elif spec.attach == "after" and not seen_position:
+                        diagnostics.append(
+                            MvsaDiagnostic(
+                                "MVSA-MARK",
+                                f"{marker}: maat {mi + 1}: [{raw}] zonder "
+                                f"voorafgaande lettergreep",
+                                rl.line_no,
+                            )
+                        )
+                    elif spec.attach == "before":
+                        pending_before = raw
+                    if spec is not None and spec.span_role == "start":
+                        if wedge_stack:
+                            diagnostics.append(
+                                MvsaDiagnostic(
+                                    "MVSA-MARK",
+                                    f"{marker}: maat {mi + 1}: geneste "
+                                    f"[{raw}] niet toegestaan",
+                                    rl.line_no,
+                                )
+                            )
+                        else:
+                            wedge_stack.append(spec.kind)
+                    elif spec is not None and spec.span_role == "stop":
+                        if not wedge_stack or wedge_stack[-1] != spec.kind:
+                            diagnostics.append(
+                                MvsaDiagnostic(
+                                    "MVSA-MARK",
+                                    f"{marker}: maat {mi + 1}: [{raw}] zonder "
+                                    f"passende start",
+                                    rl.line_no,
+                                )
+                            )
+                        else:
+                            wedge_stack.pop()
+                    i = j
+                    continue
+                if seg[i] == "(" or seg[i].isalpha() or seg[i] in "_~.-=":
+                    seen_position = True
+                    pending_before = None
+                i += 1
+            if pending_before is not None:
+                diagnostics.append(
+                    MvsaDiagnostic(
+                        "MVSA-MARK",
+                        f"{marker}: maat {mi + 1}: [{pending_before}] zonder "
+                        f"volgende lettergreep",
+                        rl.line_no,
+                    )
+                )
+        if wedge_stack:
+            diagnostics.append(
+                MvsaDiagnostic(
+                    "MVSA-MARK",
+                    f"{marker}: open [{wedge_stack[-1]}] zonder stop",
+                    rl.line_no,
+                )
+            )
 
 
 # ---------------------------------------------------------------------------

@@ -449,16 +449,22 @@ def apply_playback_accidentals(root: ET.Element) -> int:
 
 
 def finalize_coria_musicxml(xml: str, *, apply_timing: bool = True) -> str:
-    """Coria-klare MusicXML: geen DOCTYPE, timing optioneel, sanitize, accidentals."""
+    """Coria-klare MusicXML: geen DOCTYPE, timing optioneel, sanitize, accidentals.
+
+    Cesuur-kwart-rusten draaien **altijd** vóór sanitize (die ``<notations>``
+    stript). ``[PAUZE]``-maten alleen bij ``apply_timing=True`` (MVSA-export
+    zet die al zelf).
+    """
     cleaned = strip_doctype(xml)
     # ET wil geen XML-declaratie-problemen; strip eventuele losse declaratie ok.
     root = ET.fromstring(cleaned)
-    if apply_timing:
-        parts = _music_parts(root)
-        if parts:
-            div = _divisions_of(root)
+    parts = _music_parts(root)
+    if parts:
+        div = _divisions_of(root)
+        if apply_timing:
             insert_pause_measures(parts, whole_dur=4 * div)
-            insert_caesura_quarter_rests(parts, quarter=div)
+        insert_caesura_quarter_rests(parts, quarter=div)
+        if apply_timing:
             _renumber_measures(root)
     sanitize_coria_importer(root)
     apply_playback_accidentals(root)

@@ -16,10 +16,12 @@ Repo-breed kompas (niet alleen mvsa): repo-bestand
 
 ## Nu (eerstvolgende tooling)
 
-*(leeg — `zoektekst` vullen/checken: [`vsa zoektekst`](../reference/cli/zoektekst.md))*
+| Punt                                      | Toelichting                                                                                         | Richting                                                                 |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Uitvoeraanwijzingen op `L:` (fase 6)      | t/m tempo-woorden actief; volgende: import-roundtrip + liturgische voorbeelden                      | [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §3 / §7                 |
 
-Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / mp3):
-`examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa mp3`).
+Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
+`examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa audio`).
 
 ---
 
@@ -34,6 +36,8 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 | Overlays t.o.v. S                       | A/T/B als afwijking van de sopraan                                             | Later                                                                          |
 | Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                       | Later                                                                          |
 | Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                                   | Alleen als corpuswerk het vraagt                                               |
+| Meer uitvoeraanwijzingen                | Cresc/dim, tempo — registry in ontwerp                                         | Faseringen 4–5; [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §3 en §7      |
+| Oefenpauze na dubbele maatstreep        | Lengte / lyric `[PAUZE]` / zichtbaarheid partituur — los van L-`[//]`          | Apart van uitvoeraanwijzingen; zie ontwerp §2                                  |
 
 ### Markdown-pipeline en fences
 
@@ -43,11 +47,10 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 
 ### Tooling / conversies
 
-| Punt                              | Toelichting                                                                                                                                | Richting                                                                                                                   |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| Exports / gebruik                 | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages)       |
-| Hulptekst / parallelle lyrics     | **MVP export klaar** (lyric 2, `@taal`, Coria-parts, vrije ids); transliterator-kwaliteit + checklist M-items nog open                     | [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md); [reviewcorpus](../plans/hulptekst-reviewcorpus.md) |
-| TEv2 docs-opschonen               | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                               |
+| Punt                 | Toelichting                                                                                                                                | Richting                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Exports / gebruik    | Gebruikseisen-dragers → welke exportvormen (web, print, …) voor litanie-/samenstellingsdocumenten                                          | [gebruikseisen-dragers](../plans/gebruikseisen-dragers.md); repo-backlog `docs/status-en-roadmap.md` (niet op Pages) |
+| TEv2 docs-opschonen  | TermRefs / glossaries van de grond af opschonen en bijwerken                                                                               | Apart traject; geen ad-hoc fixes in mvsa-PRs                                                                         |
 
 ---
 
@@ -59,7 +62,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 | Conversieslices                       | normalize, mscz-export, import, bron-commands — zie conversions-plan                                                                                                                                                                                   |
 | Kuiser-tool                           | `mvsa kuiser`: L-ELM `-`→`~`; ambiguë-`-`-warnings; semantische woordstreepjes (Pyphen, exact); maatstrepen syncen; align; `--check`. Bewust later: conflicterende gedeeltelijke strepen raden; marker-octaaf → `@oct`                                 |
 | `mvsa pdf`                            | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                                                                                                                                                                        |
-| `vsa`/`mvsa mp3`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                                                                                                                                                                            |
+| `vsa`/`mvsa audio`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                                                                                                                                                                            |
 | Los MIDI-bestand                      | **Niet gepland** — preview-luisteren dekt de use case; zie [formats/midi.md](../formats/midi.md)                                                                                                                                                       |
 | Speelplan volta + D.S. al Fine / Coda | Partituur-nav: volta, D.S./D.C. al Fine, D.S./D.C. al Coda; MXL expansie; tests                                                                                                                                                                        |
 | `::: mvsa-notatie` / `::: mvsa`       | Markdown-fences + aliases `::: vsa` / `::: mvsa`; validate; build → Coria/MXL; `:::include *.mvsa`                                                                                                                                                     |

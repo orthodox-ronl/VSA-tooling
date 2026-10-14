@@ -351,37 +351,42 @@ dezelfde quoted-stringvorm; `@tempo` is een BPM-getal zonder aanhalingstekens.
 
 ### Actief (gaan mee naar MusicXML / MuseScore)
 
-| Keyword         | Voorbeeld                            | MusicXML                      | MuseScore-meta |
-| --------------- | ------------------------------------ | ----------------------------- | -------------- |
-| `@title`        | `@title "(1a) Vredeslitanie"`        | `<work-title>`                | titel          |
-| `@ondertitel`   | `@ondertitel "Litanie van de vrede"` | `<movement-title>`            | `subtitle`     |
-| `@composer`     | `@composer "Archimandriet Feofan"`   | `<creator type="composer">`   | `composer`     |
-| `@tekstdichter` | `@tekstdichter "…"`                  | `<creator type="lyricist">`   | `lyricist`     |
-| `@arrangeur`    | `@arrangeur "bew. Hemelum"`          | `<creator type="arranger">`   | `arranger`     |
-| `@vertaler`     | `@vertaler "NL: …"`                  | `<creator type="translator">` | `translator`   |
-| `@bron`         | `@bron "Liturgikon, p.147-149"`      | `<source>` (+ MSCZ-colofon)   | `source`       |
-| `@copyright`    | `@copyright "CC BY-SA 4.0 — …"`      | `<rights>` (+ footer/colofon) | `copyright`    |
-| `@tempo`        | `@tempo 72`                          | `sound tempo` (onzichtbaar)   | (via MusicXML) |
-| `@toon`         | `@toon "8"`                          | `miscellaneous-field` `tone`  | (via MusicXML) |
+| Keyword         | Voorbeeld                            | MusicXML                            | MuseScore-meta |
+| --------------- | ------------------------------------ | ----------------------------------- | -------------- |
+| `@title`        | `@title "(1a) Vredeslitanie"`        | `<work-title>`                      | titel          |
+| `@ondertitel`   | `@ondertitel "Litanie van de vrede"` | `<movement-title>`                  | `subtitle`     |
+| `@composer`     | `@composer "Archimandriet Feofan"`   | `<creator type="composer">`         | `composer`     |
+| `@tekstdichter` | `@tekstdichter "…"`                  | `<creator type="lyricist">`         | `lyricist`     |
+| `@arrangeur`    | `@arrangeur "bew. Hemelum"`          | `<creator type="arranger">`         | `arranger`     |
+| `@vertaler`     | `@vertaler "NL: …"`                  | `<creator type="translator">`       | `translator`   |
+| `@bron`         | `@bron "Liturgikon, p.147-149"`      | `<source>` (+ MSCZ-colofon)         | `source`       |
+| `@copyright`    | `@copyright "CC BY-SA 4.0 — …"`      | `<rights>` (+ footer/colofon)       | `copyright`    |
+| `@tempo`        | `@tempo 72` of `@tempo 72 "Andante"` | `sound tempo` + optioneel `<words>` | (via MusicXML) |
+| `@toon`         | `@toon "8"`                          | `miscellaneous-field` `tone`        | (via MusicXML) |
 
 **`@tempo`.** Aantal **slagen per minuut** (BPM) voor beluisteren en oefenen.
-Vorm: `@tempo` + spatie + geheel getal **1–999** (geen aanhalingstekens),
-bijvoorbeeld `@tempo 72`. Laatste waarde in het bestand wint. **Default** als
-je `@tempo` weglaat: **130** (zelfde default als eenstemmige VSA).
+Vorm: `@tempo` + spatie + geheel getal **1–999**, optioneel gevolgd door een
+quoted tempo-woord, bijvoorbeeld `@tempo 72` of `@tempo 72 "Andante"`.
+Laatste waarde vóór een systeem wint voor die plek; het **eerste** `@tempo`
+in het bestand is het document-starttempo. **Default** als je `@tempo`
+weglaat: **130** (zelfde default als eenstemmige VSA).
 
-Bij export naar MusicXML (playback/Coria én partituur) komt op de **eerste
-maat** van de bovenste part `<sound tempo="…"/>` (kwartnoot = BPM) plus een
-metronoommarkering met `print-object="no"`. Het tempo stuurt afspelen
-(audio/Coria); op het blad, in `.mscz` en in de PDF blijft de metronoom
-**onzichtbaar**. MSCZ-nabewerking zet MuseScore-`Tempo` bovendien op
-`visible=0` voor het geval de import de markering toch zichtbaar maakt.
+Bij export naar MusicXML (playback/Coria én partituur) komt op de maat
+`<sound tempo="…"/>` (kwartnoot = BPM) plus een metronoommarkering met
+`print-object="no"`. Het getal stuurt afspelen (audio/Coria); de metronoom
+blijft op het blad / in `.mscz` / PDF **onzichtbaar**. Het optionele woord
+wordt wél als zichtbare `<words>` gezet. MSCZ-nabewerking zet MuseScore-
+`Tempo` op `visible=0` voor het geval de import de metronoom toch toont.
+
+Lokale tempo-woorden op de L-regel (`[rit]`, `[atempo]`) horen bij
+[uitvoeraanwijzingen](uitvoeraanwijzingen.md), niet bij `@tempo`.
 
 ```text
 @tempo 72
+@tempo 72 "Andante"
 ```
 
-**Niet gebruiken** voor tekstuele tempo-aanduidingen (“langzaam”, “Andante”) —
-alleen een BPM-getal. Niet midden in een LSATB-systeem.
+Niet midden in een LSATB-systeem.
 
 **`@toon`.** Kerktoon / oktoechos-nummer van het zangstuk (catalogus en
 MusicXML). Vorm: quoted string, bv. `@toon "8"`. Gaat mee als
