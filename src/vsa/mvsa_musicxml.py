@@ -100,6 +100,13 @@ class NoteEvent:
     slur_stop: bool = False  # melisma-boog eind
     tie_start: bool = False  # same-pitch hold-keten (I2)
     tie_stop: bool = False
+    caesura: bool = False  # L-mark [//] → <caesura/>
+    breath: bool = False  # L-mark [adem] → <breath-mark/>
+    fermata: bool = False  # L-mark [ferm] → <fermata/>
+    dynamics: str | None = None  # L-mark [mf] e.d. → <dynamics><mf/>
+    wedge_start: str | None = None  # crescendo | diminuendo
+    wedge_stop: bool = False
+    direction_words: str | None = None  # L-mark [rit]/[atempo] → <words>
 
 
 # Partituur-print: recite met ≥6 lettergrepen → 1-(n-2)-1 (randnoten + ||O||).
@@ -466,6 +473,8 @@ def export_mvsa_to_musicxml(
     measure_new_system: list[bool] = []
     # BPM per maatindex; None = geen tempo-wissel (vorige blijft).
     measure_tempos: list[int | None] = []
+    # Tempo-woord bij @tempo … "…" (zelfde indices als measure_tempos).
+    measure_tempo_labels: list[str | None] = []
     # Speelblok-id → (eerste_maatindex, laatste_maatindex) in bladvorm.
     blok_measure_range: dict[str, tuple[int, int]] = {}
     score_started = False
@@ -502,10 +511,16 @@ def export_mvsa_to_musicxml(
                     measure_tempos.append(
                         int(sys_tempo) if sys_tempo is not None else None
                     )
+                    measure_tempo_labels.append(
+                        getattr(system, "tempo_label", None)
+                        if sys_tempo is not None
+                        else None
+                    )
                 else:
                     measure_staff_texts.append([])
                     measure_new_system.append(False)
                     measure_tempos.append(None)
+                    measure_tempo_labels.append(None)
             if system.measures:
                 score_started = True
         if (
@@ -575,6 +590,7 @@ def export_mvsa_to_musicxml(
             measure_staff_texts,
             measure_left_styles,
             measure_tempos,
+            measure_tempo_labels,
         )
 
     from .bibliotheek_id import resolve_bibliotheek_id
@@ -613,6 +629,7 @@ def export_mvsa_to_musicxml(
             measure_repeat_times=repeat_times,
             measure_nav_marks=nav_marks,
             measure_tempos=measure_tempos,
+            measure_tempo_labels=measure_tempo_labels,
             meta=meta,
         )
 
@@ -661,6 +678,7 @@ def export_mvsa_to_musicxml(
         measure_cue_gap=measure_cue_gap,
         measure_pauze=measure_pauze,
         measure_tempos=measure_tempos,
+        measure_tempo_labels=measure_tempo_labels,
         meta=meta,
         parts=playback_parts,
         extra_parts=extra_parts,
@@ -906,6 +924,11 @@ def _system_to_events(
                     lyric_number=primary_number,
                     extra_lyric_layers=extra_layers,
                 )
+                _apply_l_marks_to_notes(
+                    notes,
+                    lpos,
+                    include_directions=(layout == "playback" or key == "S"),
+                )
                 if hulptekst:
                     _apply_hulptekst_to_notes(notes, direction=hulp_direction)
                 measure_events[key].extend(notes)
@@ -1021,6 +1044,39 @@ def _syllabic_for_recite_index(
     if opens:
         return "begin"
     return "single"
+
+
+def _apply_l_marks_to_notes(
+    notes: list[NoteEvent],
+    lpos: LPosition,
+    *,
+    include_directions: bool = True,
+) -> None:
+    """Hang L-uitvoeraanwijzingen aan de juiste noot (na collapse)."""
+    from .mvsa_marks import tempo_words_display, wedge_musicxml_type
+
+    if not notes:
+        return
+    for mark in lpos.marks_before:
+        if mark.kind.startswith("dyn_") and include_directions:
+            notes[0].dynamics = mark.raw
+        elif mark.span_role == "start" and include_directions:
+            wtype = wedge_musicxml_type(mark.kind)
+            if wtype:
+                notes[0].wedge_start = wtype
+        elif include_directions:
+            words = tempo_words_display(mark.kind)
+            if words:
+                notes[0].direction_words = words
+    for mark in lpos.marks_after:
+        if mark.kind == "caesura":
+            notes[-1].caesura = True
+        elif mark.kind == "breath":
+            notes[-1].breath = True
+        elif mark.kind == "fermata":
+            notes[-1].fermata = True
+        elif mark.span_role == "stop" and include_directions:
+            notes[-1].wedge_stop = True
 
 
 def _position_to_notes(
@@ -1886,12 +1942,21 @@ def _parse_tempo_bpm(meta: dict[str, str | None] | None) -> int:
     return bpm
 
 
-def _emit_tempo_direction(out: list[str], bpm: int) -> None:
+def _emit_tempo_direction(
+    out: list[str], bpm: int, label: str | None = None
+) -> None:
     """Playback-``sound tempo`` (kwart = BPM); metronoom onzichtbaar op blad/PDF.
 
-    ``print-object="no"`` houdt de markering weg uit MuseScore-partituur en
+    ``print-object="no"`` houdt de metronoom weg uit MuseScore-partituur en
     PDF; afspelen (audio/Coria) gebruikt nog steeds ``sound tempo``.
+    Optioneel tempo-woord (``@tempo 72 "Andante"``) is wél zichtbaar.
     """
+    if label:
+        out.append('<direction placement="above">')
+        out.append("<direction-type>")
+        out.append(f"<words>{escape(label)}</words>")
+        out.append("</direction-type>")
+        out.append("</direction>")
     out.append('<direction placement="above" print-object="no">')
     out.append("<direction-type>")
     out.append('<metronome parentheses="no">')
@@ -1909,6 +1974,7 @@ def _insert_playback_pauze_measures(
     measure_staff_texts: list[list[str]],
     measure_left_styles: list[str | None] | None = None,
     measure_tempos: list[int | None] | None = None,
+    measure_tempo_labels: list[str | None] | None = None,
 ) -> list[bool]:
     """``[PAUZE]``-maten voor Coria: na sectie-einde én vóór mid-flow ``@tekst``.
 
@@ -1933,6 +1999,9 @@ def _insert_playback_pauze_measures(
     if measure_tempos is not None:
         while len(measure_tempos) < n:
             measure_tempos.append(None)
+    if measure_tempo_labels is not None:
+        while len(measure_tempo_labels) < n:
+            measure_tempo_labels.append(None)
     for measures in voice_measures.values():
         while len(measures) < n:
             measures.append([])
@@ -1962,6 +2031,8 @@ def _insert_playback_pauze_measures(
             measure_left_styles.insert(i + 1, None)
         if measure_tempos is not None:
             measure_tempos.insert(i + 1, None)
+        if measure_tempo_labels is not None:
+            measure_tempo_labels.insert(i + 1, None)
         pauze.insert(i + 1, True)
     return pauze
 
@@ -2074,6 +2145,7 @@ def _emit_score_playback(
     measure_cue_gap: list[bool] | None = None,
     measure_pauze: list[bool] | None = None,
     measure_tempos: list[int | None] | None = None,
+    measure_tempo_labels: list[str | None] | None = None,
     meta: dict[str, str | None] | None = None,
     parts: list[dict] | None = None,
     extra_parts: list[dict] | None = None,
@@ -2088,6 +2160,7 @@ def _emit_score_playback(
     cue_gaps = list(measure_cue_gap or [])
     pauzes = list(measure_pauze or [])
     tempos = list(measure_tempos or [])
+    tempo_labels = list(measure_tempo_labels or [])
     while len(left_styles) < n_measures:
         left_styles.append(None)
     while len(staff_texts) < n_measures:
@@ -2100,6 +2173,8 @@ def _emit_score_playback(
         pauzes.append(False)
     while len(tempos) < n_measures:
         tempos.append(None)
+    while len(tempo_labels) < n_measures:
+        tempo_labels.append(None)
 
     emit_parts: list[dict] = list(parts) if parts is not None else list(PARTS)
     if extra_parts:
@@ -2150,7 +2225,7 @@ def _emit_score_playback(
                 out.append("</attributes>")
             # Tempo alleen op de bovenste part (wijzigt afspeelsnelheid).
             if part_idx == 0 and tempos[mi] is not None:
-                _emit_tempo_direction(out, tempos[mi])
+                _emit_tempo_direction(out, tempos[mi], tempo_labels[mi])
             # Staff-tekst alleen op de bovenste balk (Soprano).
             if part["voice"] == "S":
                 if new_systems[mi]:
@@ -2200,6 +2275,7 @@ def _emit_score_partituur(
     measure_repeat_times: list[int | None] | None = None,
     measure_nav_marks: list[list[str]] | None = None,
     measure_tempos: list[int | None] | None = None,
+    measure_tempo_labels: list[str | None] | None = None,
     meta: dict[str, str | None] | None = None,
 ) -> str:
     """Twee balken SA/TB: voice 1 (S/T) stok omhoog, voice 2 (A/B) stok omlaag."""
@@ -2217,6 +2293,7 @@ def _emit_score_partituur(
     rep_times = list(measure_repeat_times or [])
     navs = list(measure_nav_marks or [])
     tempos = list(measure_tempos or [])
+    tempo_labels = list(measure_tempo_labels or [])
     while len(left_styles) < n_measures:
         left_styles.append(None)
     while len(staff_texts) < n_measures:
@@ -2237,6 +2314,8 @@ def _emit_score_partituur(
         navs.append([])
     while len(tempos) < n_measures:
         tempos.append(None)
+    while len(tempo_labels) < n_measures:
+        tempo_labels.append(None)
     if tempos and tempos[0] is None:
         tempos[0] = _parse_tempo_bpm(meta)
 
@@ -2287,7 +2366,7 @@ def _emit_score_partituur(
                 )
                 out.append("</attributes>")
             if top_staff and tempos[mi] is not None:
-                _emit_tempo_direction(out, tempos[mi])
+                _emit_tempo_direction(out, tempos[mi], tempo_labels[mi])
             if top_staff:
                 if new_systems[mi]:
                     out.append('<print new-system="yes"/>')
@@ -2413,6 +2492,29 @@ def _emit_single_note(
                 f"<syllabic>{escape(ly.syllabic)}</syllabic>"
                 f"<text>{escape(display_lyric_text(ly.text))}</text>{extend_xml}</lyric>"
             )
+    if not chord and ev.direction_words:
+        out.append('<direction placement="above">')
+        out.append("<direction-type>")
+        out.append(f"<words>{escape(ev.direction_words)}</words>")
+        out.append("</direction-type>")
+        out.append("</direction>")
+    if not chord and ev.dynamics:
+        from .mvsa_marks import DYNAMICS_RAWS
+
+        dyn = ev.dynamics if ev.dynamics in DYNAMICS_RAWS else None
+        if dyn:
+            # MusicXML: direction vóór de noot; elementnaam = p/pp/mf/…
+            out.append('<direction placement="below">')
+            out.append("<direction-type>")
+            out.append(f"<dynamics><{dyn}/></dynamics>")
+            out.append("</direction-type>")
+            out.append("</direction>")
+    if not chord and ev.wedge_start:
+        out.append('<direction placement="below">')
+        out.append("<direction-type>")
+        out.append(f'<wedge type="{escape(ev.wedge_start)}" number="1"/>')
+        out.append("</direction-type>")
+        out.append("</direction>")
     out.append("<note>")
     if chord:
         out.append("<chord/>")
@@ -2443,9 +2545,14 @@ def _emit_single_note(
         out.append(f"<stem>{stem}</stem>")
     if lyric_xml:
         out.append(lyric_xml)
-    needs_notations = (
-        not chord
-        and (ev.slur_start or ev.slur_stop or ev.tie_start or ev.tie_stop)
+    needs_notations = not chord and (
+        ev.slur_start
+        or ev.slur_stop
+        or ev.tie_start
+        or ev.tie_stop
+        or ev.caesura
+        or ev.breath
+        or ev.fermata
     )
     if needs_notations:
         out.append("<notations>")
@@ -2460,8 +2567,23 @@ def _emit_single_note(
             out.append('<tied type="start"/>')
         if ev.tie_stop:
             out.append('<tied type="stop"/>')
+        arts: list[str] = []
+        if ev.caesura:
+            arts.append("<caesura/>")
+        if ev.breath:
+            arts.append("<breath-mark/>")
+        if arts:
+            out.append("<articulations>" + "".join(arts) + "</articulations>")
+        if ev.fermata:
+            out.append('<fermata type="upright"/>')
         out.append("</notations>")
     out.append("</note>")
+    if not chord and ev.wedge_stop:
+        out.append('<direction placement="below">')
+        out.append("<direction-type>")
+        out.append('<wedge type="stop" number="1"/>')
+        out.append("</direction-type>")
+        out.append("</direction>")
 
 
 def _key_alter(step: str, fifths: int) -> float:

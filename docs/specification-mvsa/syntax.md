@@ -11,36 +11,12 @@ canonieke output schrijven volgen deze regels.
 Een mvsa-bestand is UTF-8-tekst. Lege regels en commentaar zijn toegestaan waar
 hieronder aangegeven.
 
-| Soort regel      | Vorm                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------ |
-| YAML-frontmatter | Optioneel blok `---` … `---` aan het begin (o.a. `zoektekst`; zie hieronder)         |
-| Commentaar       | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
-| Directive        | Regel die begint met `@` (zie [Keywords](keywords.md))                               |
-| Sectiekop        | `@sectie` + spatie + id                                                              |
-| LSATB-inhoud     | Begint met een [regelidentifier](#regelidentifier)                                   |
-
-### YAML-frontmatter en `zoektekst`
-
-Canonieke catalogus-`.mvsa`-bestanden hebben aan het begin een YAML-kop met
-top-level **`zoektekst`**: de volledige platte gezongen tekst voor editorzoeken
-(Ctrl+Shift+F). Overige partituur-metadata blijft bij voorkeur via `@`-keywords.
-Normatief contract: [Zoektekst](../formats/zoektekst.md).
-
-```yaml
----
-identificatie:
-  title: 2e Antifoon (zondag)
-zoektekst: >-
-  Eer aan de Vader, de Zoon, en de Heilige Geest. …
----
-
-@do F4
-@mode major
-```
-
-Parser en validate strippen de YAML-kop (regelnummers blijven kloppen t.o.v.
-het hele bestand). Werkbank-import (`.mscz.mvsa` / banner) mag `zoektekst`
-nog missen tot het stuk catalogusbron wordt.
+| Soort regel  | Vorm                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------ |
+| Commentaar   | Regel die (na optionele spaties) begint met `#`, of een HTML-commentaar `<!-- … -->` |
+| Directive    | Regel die begint met `@` (zie [Keywords](keywords.md))                               |
+| Sectiekop    | `@sectie` + spatie + id                                                              |
+| LSATB-inhoud | Begint met een [regelidentifier](#regelidentifier)                                   |
 
 ## 2. Regelidentifier
 
@@ -81,9 +57,8 @@ de identifier zet alleen de default/start. Zie
 [Semantiek — absolute en relatieve hoogte](semantics.md#absolute-en-relatieve-hoogte).
 
 Gangbare stem-id’s in SATB-export: `S`, `A`, `T`, `B` (eventueel `S1`, …).
-Andere stem-id’s (`cantus:`, `Sop:`) zijn syntactisch toegestaan. **Playback /
-Coria** exporteert die ids als part-namen; **partituur / MSCZ** verwacht voorlopig
-nog de SATB-letters.
+Andere stem-id’s (`cantus:`) zijn syntactisch toegestaan; MusicXML/MSCZ-export
+verwacht voorlopig de SATB-letters.
 
 Het laatste teken van de stemidentifier mag geen `_` of `-` zijn, zodat `S-:`
 eenduidig “stem `S` + EHM `-`” is (niet stem-id `S-`). Ongeldig: `S_:`.
@@ -158,12 +133,10 @@ breder is dan de lettergreep tot aan de volgende anker-kolom, komt er ruimte
 *vóór* het streepje (`le -lu`), zodat stemtokens met spaties gescheiden blijven
 en de ankers (eerste letters / eerste noottekens) toch onder elkaar staan.
 Vermijd `le-  lu` (streepje direct gevolgd door spaties): die vorm leest de
-parser als ELM `-` op “le”, niet als woordstreepje. Canoniek laat je lone
-standaard-lengte op L **weg** (impliciete `~`); schrijf `~` wél naast `&`
-in melisma (`ziel~&~`) en na recite-`)` bij niet-breve duur. Een
-woordstreepje staat **direct vóór** de volgende lettergreep — met eventuele
-spaties *ervóór* als de stemregels meer breedte nodig hebben
-(`hei_&_&_  -li`, niet `hei_&_&_-li`).
+parser als ELM `-` op “le”, niet als woordstreepje. Canoniek schrijf je
+standaard-lengte op L als `~`, en een woordstreepje **direct vóór** de
+volgende lettergreep — met eventuele spaties *ervóór* als de stemregels
+meer breedte nodig hebben (`hei_&_&_  -li`, niet `hei_&_&_-li`).
 
 ```text
 L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&-&-&_         i_  a__  ||
@@ -231,13 +204,6 @@ opnieuw (dat doet wel een EHM in de
 Op **lyrics-regels** horen geen eindankers; daar blijft de kale streep. Voor
 sync van maatstrepen telt alleen het **bar-token** (zonder anker): `L` met `|`
 en `S` met `|mi` zijn synchroon.
-
-**Import-gebruik:** `vsa mvsa import` (default `--pitch ag-vsa`) en
-`--pitch vsa` plakken zulke check-only eindankers (absolute a–g + cijfer)
-aan de laatste maatstreep van elk LSATB-systeem op de stemregels; de
-`L:`-regel blijft zonder ankers. Bij `ag-vsa` is bovendien de eerste
-klinkende noot van elk systeem absolute a–g (daarna EHM). Zie
-[`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
 
 ## 5. Sectie
 
@@ -313,6 +279,11 @@ Buiten een recite-groep begint een nieuw L-stuk na:
 
 `&` binnen een brok scheidt **slots** (melisma), geen nieuwe L-stukken.
 Leestekens (`,` `.` `;` …) zijn **geen** L-stuk, ook niet met spaties eromheen.
+Hetzelfde geldt voor **uitvoeraanwijzingen** (gesloten `[token]` op `L:`).
+Actief: cesuur `[//]`, adem `[adem]`, fermata `[ferm]` (ná het L-stuk) en
+dynamiek `[p]`/`[mf]`/… (vóór het L-stuk); die tellen niet mee in de sync —
+zie [uitvoeraanwijzingen](uitvoeraanwijzingen.md). De dubbele maatstreep blijft
+de beurt-/sectiegrens en is geen L-aanwijzing.
 
 **Uitzondering — recite:** alles tussen `(` en `)` is **één** L-stuk / lengte-positie,
 ongeacht spaties en streepjes erin. Zie [Reciteertoon](#reciteertoon).
@@ -477,10 +448,7 @@ Op een stemregel staan alleen **hoogte-stukken**, gescheiden door spaties:
   toonnamen `c`…`b`, `Bb`, `fis`, …;
 - octaaf: suffix `-` / `+` / `-1` / `+2` / … of wetenschappelijk cijfer op
   toonnamen (`g3`, `bb4`);
-- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots);
-- kale `-` / `~` als hoogte: **zelfde toon** als de lopende toon van die stem
-  (ook over een systeembreuk heen, tenzij een beginanker reset — zie
-  [Semantiek — lopende toon over systeembraken](semantics.md#lopende-toon-over-systeembraken)).
+- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots).
 
 Of de regel **standaard** relatief of absoluut is, volgt uit de
 [regelidentifier](#regelidentifier): met EHM (`S-:`) relatief + beginanker;

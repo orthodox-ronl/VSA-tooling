@@ -10,6 +10,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any
 
+from .mvsa_marks import Mark, lookup_mark, read_bracket_token
 from .mvsa_validate import (
     ALLOWED_DIRECTIVES,
     ALLOWED_MODES,
@@ -24,7 +25,6 @@ from .mvsa_validate import (
     STICKY_DIRECTIVES,
     STRING_META_DIRECTIVES,
     TAAL_ASSIGN_RE,
-    TEMPO_RE,
     MvsaDiagnostic,
     _BarSplit,
     _ELMS,
@@ -37,6 +37,7 @@ from .mvsa_validate import (
     normalize_lyric_taal_key,
     parse_regelidentifier,
     parse_tekst_argument,
+    parse_tempo_argument,
     resolve_stem_map_key,
     split_directive_assignments,
     stem_id_base,
@@ -117,6 +118,9 @@ class LPosition:
     continues_word: bool = False
     # True if that continuation was a hard ``=`` (not soft ``-``)
     continues_word_hard: bool = False
+    # Uitvoeraanwijzingen (tellen niet mee voor sync); zie mvsa_marks / ontwerpdocs.
+    marks_before: list[Mark] = field(default_factory=list)
+    marks_after: list[Mark] = field(default_factory=list)
 
 
 def _is_woordstreepje(c: str) -> bool:
@@ -165,6 +169,8 @@ class ParsedSystem:
     mscz_newline: bool = False
     # ``@tempo`` direct vóór dit systeem (BPM); None = geen tempo-wissel hier.
     tempo: int | None = None
+    # Optioneel tempo-woord bij ``@tempo 72 "Andante"``.
+    tempo_label: str | None = None
 
 
 @dataclass
@@ -217,7 +223,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
     pending_sectie: tuple[str, int, str] | None = None
     pending_staff_texts: list[tuple[str, int]] = []  # (text, line_no)
     pending_mscz_newline: list[int] = []  # line numbers
-    pending_tempo: tuple[int, int] | None = None  # (bpm, line_no)
+    pending_tempo: tuple[int, str | None, int] | None = None  # bpm, label, line
     doc_meta: dict[str, str] = {}
     speelplan: list[str] | None = None
     speelplan_line: int | None = None
@@ -326,11 +332,13 @@ def parse_mvsa(text: str) -> ParsedDocument:
                     if not rest:
                         pending_mscz_newline.append(line_no)
                 elif name == "tempo":
-                    if rest and TEMPO_RE.fullmatch(rest):
-                        pending_tempo = (int(rest), line_no)
+                    parsed_tempo = parse_tempo_argument(rest)
+                    if parsed_tempo is not None:
+                        bpm, tlabel = parsed_tempo
+                        pending_tempo = (bpm, tlabel, line_no)
                         # Document-tempo = eerste @tempo (starttempo voor meta).
                         if "tempo" not in doc_meta:
-                            doc_meta["tempo"] = rest
+                            doc_meta["tempo"] = str(bpm)
                 elif name in STRING_META_DIRECTIVES:
                     value = parse_tekst_argument(rest)
                     if value is not None:
@@ -427,6 +435,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
             staff_texts=[t for t, _ in pending_staff_texts],
             mscz_newline=bool(pending_mscz_newline),
             tempo=pending_tempo[0] if pending_tempo is not None else None,
+            tempo_label=pending_tempo[1] if pending_tempo is not None else None,
         )
         pending_staff_texts.clear()
         pending_mscz_newline.clear()
@@ -484,7 +493,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
             MvsaDiagnostic(
                 "MVSA-TEMPO",
                 "@tempo zonder volgend LSATB-systeem",
-                pending_tempo[1],
+                pending_tempo[2],
                 severity="warning",
             )
         )
@@ -821,6 +830,53 @@ def _looks_like_pitch_prefix(s: str) -> bool:
     return False
 
 
+def _consume_known_mark(
+    s: str, i: int
+) -> tuple[Mark | None, int, bool]:
+    """Als ``s[i]`` een bekende ``[token]`` is: ``(mark, new_i, True)``.
+
+    Onbekend/unclosed: ``(None, new_i, True)`` zodat de aanroeper kan skippen
+    (validate meldt de fout). Geen ``[``: ``(None, i, False)``.
+    """
+    if i >= len(s) or s[i] != "[":
+        return None, i, False
+    raw, j, err = read_bracket_token(s, i)
+    if err or raw is None:
+        return None, j, True
+    spec = lookup_mark(raw)
+    if spec is None:
+        return None, j, True
+    return (
+        Mark(kind=spec.kind, raw=spec.raw, span_role=spec.span_role),
+        j,
+        True,
+    )
+
+
+def _append_trailing_marks(
+    s: str,
+    i: int,
+    positions: list[LPosition],
+    pending_before: list[Mark],
+) -> int:
+    """Lees marks na een L-positie: after → vorige positie; before → volgende."""
+    n = len(s)
+    while i < n:
+        while i < n and s[i].isspace():
+            i += 1
+        mark, j, consumed = _consume_known_mark(s, i)
+        if not consumed:
+            break
+        if mark is not None:
+            spec = lookup_mark(mark.raw)
+            if spec is not None and spec.attach == "after" and positions:
+                positions[-1].marks_after.append(mark)
+            elif spec is not None and spec.attach == "before":
+                pending_before.append(mark)
+        i = j
+    return i
+
+
 def parse_l_positions(measure: str) -> list[LPosition]:
     """Parse L measure into positions with syllables + ELMs.
 
@@ -828,11 +884,15 @@ def parse_l_positions(measure: str) -> list[LPosition]:
     haakjes scheiden spaties woorden en ``-`` lettergrepen. Zonder ELM na
     ``)`` is de duur de recite-standaard (export: breve). ``~`` op L is alleen
     nog ELM-duur, nooit recite-marker.
+
+    Bekende uitvoeraanwijzingen ``[…]`` (zie ``mvsa_marks``) plakken aan een
+    L-positie en tellen niet mee voor sync.
     """
     s = measure.strip()
     if not s:
         return []
     positions: list[LPosition] = []
+    pending_before: list[Mark] = []
     i = 0
     n = len(s)
 
@@ -851,6 +911,19 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                 i += 1
                 continue
 
+        mark, j, consumed = _consume_known_mark(s, i)
+        if consumed:
+            if mark is not None:
+                spec = lookup_mark(mark.raw)
+                assert spec is not None
+                if spec.attach == "before":
+                    pending_before.append(mark)
+                elif positions:
+                    positions[-1].marks_after.append(mark)
+                # else: orphan after-mark — validate meldt
+            i = j
+            continue
+
         if s[i] == "(":
             close = s.find(")", i + 1)
             if close < 0:
@@ -860,6 +933,8 @@ def parse_l_positions(measure: str) -> list[LPosition]:
             syllables, links, hard_links = _parse_recite_interior(interior)
             # After ')': duration ELMs only — bare '-' is woordstreepje, not ELM.
             elm_list, i = _read_elms(s, i, allow_bare_dash=False)
+            before = pending_before
+            pending_before = []
             positions.append(
                 LPosition(
                     recite=True,
@@ -868,8 +943,10 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                     links=links,
                     hard_links=hard_links,
                     continues_word=False,
+                    marks_before=before,
                 )
             )
+            i = _append_trailing_marks(s, i, positions, pending_before)
             continue
 
         # Stray woordstreepje (not before a letter): skip
@@ -897,6 +974,8 @@ def parse_l_positions(measure: str) -> list[LPosition]:
         pending_link: bool | None = None
         pending_hard: bool = False
         used_leading = False
+        before = pending_before
+        pending_before = []
 
         while True:
             if i >= n:
@@ -953,8 +1032,11 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                         hard_links=hard_links,
                         continues_word=continues_word,
                         continues_word_hard=continues_word_hard,
+                        marks_before=before,
                     )
                 )
+                before = []
+                i = _append_trailing_marks(s, i, positions, pending_before)
                 syllables = []
                 links = []
                 hard_links = []
@@ -977,8 +1059,10 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                     hard_links=hard_links,
                     continues_word=continues_word,
                     continues_word_hard=continues_word_hard,
+                    marks_before=before,
                 )
             )
+            i = _append_trailing_marks(s, i, positions, pending_before)
         elif i == progress_at:
             # Onverwacht teken (geen ELM, geen lettergreep): voorkom oneindige lus.
             i += 1

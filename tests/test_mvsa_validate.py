@@ -272,6 +272,17 @@ B: do ||
 """
     assert validate_mvsa_text(ok) == []
 
+    ok_label = """\
+@tempo 72 "Andante"
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    assert validate_mvsa_text(ok_label) == []
+
     bad = """\
 @tempo langzaam
 @sectie demo

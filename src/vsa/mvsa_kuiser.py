@@ -410,6 +410,10 @@ def _omit_implicit_lone_tildes(content: str) -> str:
         if s[i].isspace() or s[i] in ",;:!?":
             i += 1
             continue
+        if s[i] == "[":
+            close = s.find("]", i + 1)
+            i = (close + 1) if close >= 0 else n
+            continue
         if s[i] == ".":
             is_elm_dot = any(
                 s.startswith(e, i) and e in (".", "..", "_.", "-.", "~.")
@@ -492,6 +496,10 @@ def _bare_elm_dash_indices(s: str) -> list[int]:
             continue
         if s[i].isspace() or s[i] in ",;:!?":
             i += 1
+            continue
+        if s[i] == "[":
+            close = s.find("]", i + 1)
+            i = (close + 1) if close >= 0 else n
             continue
         if s[i] == ".":
             is_elm_dot = any(

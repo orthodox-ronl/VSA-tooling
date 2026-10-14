@@ -6,27 +6,13 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 
 ## Wat hoort hier
 
-| Onderwerp                | Waar                                                                                                              |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Export vanuit `.vsa`     | [`vsa musicxml`](../reference/cli/musicxml.md), [MusicXML-export](../guides/musicxml-export.md)                   |
-| Export vanuit `.mvsa`    | [`mvsa mxl`](../reference/cli/mvsa.md#vsa-mvsa-mxl)                                                               |
-| Export vanuit `.mscz`    | [`mvsa mxl`](../reference/cli/mvsa.md#vsa-mvsa-mxl) / [`mscz mxl`](../reference/cli/mscz.md)                      |
-| Import → `.mvsa`         | [`mxl import`](../reference/cli/mxl.md) (= [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import); SATB P1–P4) |
-| → `.mscz`                | [`mxl mscz`](../reference/cli/mxl.md)                                                                             |
-| Platte gezongen tekst    | [`vsa text`](../reference/cli/text.md) (ook op `{stam}.mscz.mxl`)                                                 |
-| Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                                             |
-
-!!! warning "Import = werkbank"
-    `mxl import` is een **bewerkvorm** voor de werkbank (woordstreepjes, lege
-    recite, lossy). De output begint met dezelfde waarschuwingsbanner als
-    `mvsa import`. Zie
-    [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
-
-**Import:** de MusicXML-bron wordt direct geparst als vier parts (P1–P4 =
-S/A/T/B). Soft-wrap ~80 tekens, same-pitch holds als `-`, multi-lettergreep
-lyrics als recite. Default `--pitch ag-vsa`; of kies `doremi`, `a-g` (alias
-`abc`), of `vsa`
-(EHM + absolute eindankers op systeemeinden).
+| Onderwerp                | Waar                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| Export vanuit `.vsa`     | [`vsa musicxml`](../reference/cli/musicxml.md), [MusicXML-export](../guides/musicxml-export.md) |
+| Export vanuit `.mvsa`    | [`mvsa musicxml`](../reference/cli/mvsa.md#vsa-mvsa-musicxml)                                   |
+| Import → `.mvsa`         | [`mxl import`](../reference/cli/mxl.md)                                                         |
+| → `.mscz`                | [`mxl mscz`](../reference/cli/mxl.md)                                                           |
+| Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                           |
 
 Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
 **onze** export-/importprofielen.
@@ -38,18 +24,26 @@ Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
 **geen** print-recite-collapse (M10). Same-pitch **melisma** samentrekken
 (M5a): één lettergreep op dezelfde toon → **één** noot (gestipte ELM’s zoals
 `_.` blijven intact; Coria stript ties). Semantiek deelt de kern met MSCZ;
-layout divergeert (partituur-MusicXML = I1 tie-keten zonder gestipte
-collapse-sommen; **MSCZ-postprocess** maakt daarna compacte gestipte noten).
+layout divergeert (partituur = twee balken, I1 tie-keten zonder gestipte
+collapse-sommen).
 Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
+
+**Uitvoeraanwijzingen uit `.mvsa`:** zie
+[uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md).
+Cesuur `[//]` → `<caesura/>` (Coria: kwart-rust vóór sanitize). Dynamiek
+`[p]`/`[mf]`/… → `<dynamics>` (playback alle parts; partituur sopraan).
+`[adem]` / `[ferm]` → breath-mark / fermata op het blad; Coria stript
+`<notations>` (geen aparte speelduur). Crescendo/diminuendo
+`[cresc]…[/cresc]` / `[dim]…[/dim]` → `<wedge>` (playback alle parts;
+partituur sopraan; alias `[decresc]` → `[dim]` bij normalize).
+`[rit]` / `[atempo]` → zichtbare `<words>`; `@tempo` → `sound tempo`
+(optioneel tempo-woord zichtbaar).
 
 ## Typische commando’s
 
 ```cmd
-mxl import generated\alleluia.mxl -o generated\from-mxl.mvsa
-mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.doremi.mvsa
-mvsa validate generated\from-mxl.mvsa
+mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
-vsa text generated\alleluia.mxl -o generated\alleluia.lyrics.txt
 ```
 
 Via repo-script: `scripts\mxl.cmd …`
@@ -58,4 +52,3 @@ Via repo-script: `scripts\mxl.cmd …`
 
 - [Formaten & CLI — overzicht](index.md)
 - [`.mvsa`](mvsa.md) · [`.mscz`](mscz.md) · [`.vsa`](vsa.md)
-- Platte tekst: [`vsa text`](../reference/cli/text.md)

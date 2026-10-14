@@ -1160,6 +1160,27 @@ B: do ||
     assert playback.count("<per-minute>72</per-minute>") == 1
 
 
+def test_tempo_with_optional_label_words():
+    text = """\
+@tempo 72 "Andante"
+@do F4
+@mode major
+@sectie demo
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+"""
+    doc = parse_mvsa(text)
+    assert doc.tempo == 72
+    assert doc.sections[0].systems[0].tempo == 72
+    assert doc.sections[0].systems[0].tempo_label == "Andante"
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert 'sound tempo="72"' in xml
+    assert "<words>Andante</words>" in xml
+
+
 def test_tempo_before_system_last_pending_wins_and_default_130():
     """Meerdere ``@tempo`` vóór hetzelfde systeem: laatste pending wint.
 
