@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-14 23:20 CEST.
+  , gebouwd 2026-10-14 23:26 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5292,10 +5292,28 @@ Stemregels moeten daar <strong>slot voor slot</strong> op aansluiten.</p>
 </tr>
 <tr>
 <td><code>[p]</code> / <code>[mf]</code> / …</td>
-<td>dynamiek vóór lettergreep (<code>ppp</code>–<code>fff</code>); zie <a href="../../specification-mvsa/uitvoeraanwijzingen/">uitvoeraanwijzingen</a></td>
+<td>dynamiek vóór lettergreep (<code>ppp</code>–<code>fff</code>)</td>
+</tr>
+<tr>
+<td><code>[cresc]…[/cresc]</code></td>
+<td>crescendo-traject (start vóór, stop ná lettergreep)</td>
+</tr>
+<tr>
+<td><code>[dim]…[/dim]</code></td>
+<td>diminuendo (alias <code>[decresc]</code> → <code>[dim]</code> bij normalize)</td>
+</tr>
+<tr>
+<td><code>[rit]</code> / <code>[atempo]</code></td>
+<td>ritardando / a tempo (vóór lettergreep; zichtbare woorden)</td>
 </tr>
 </tbody>
 </table>
+<p>Sectie- of systeemtempo zet je met <code>@tempo 72</code> of <code>@tempo 72 "Andante"</code>
+(boven het systeem, niet op de L-regel) — zie
+<a href="../../specification-mvsa/keywords/#document-metadata-titel-personen-bron-tempo">keywords — tempo</a>.
+Volledige registry en MuseScore/Coria-gedrag:
+<a href="../../specification-mvsa/uitvoeraanwijzingen/">uitvoeraanwijzingen</a>.
+Oefenstuk: <code>examples/mvsa/uitvoeraanwijzingen-demo.mvsa</code>.</p>
 <h3 id="sync-l-stemmen">Sync L ↔ stemmen<a class="headerlink" href="#sync-l-stemmen" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Tel op de L-regel de <strong>slots</strong> (lettergrepen + melisma-<code>&amp;</code>-stukken).</li>
