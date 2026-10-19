@@ -490,3 +490,66 @@ def test_export_respects_explicit_bibliotheek_id():
         bibliotheek_id="custom/id/here",
     )
     assert "Bibliotheek-id: custom/id/here" in xml
+
+
+_M20_BAD_NOTE_ORDER = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P1">
+      <part-name>Soprano</part-name>
+      <score-instrument id="P1-I1">
+        <instrument-name>Piano</instrument-name>
+        <instrument-sound>keyboard.piano.grand</instrument-sound>
+      </score-instrument>
+      <midi-device id="P1-I1" port="1"/>
+      <midi-instrument id="P1-I1">
+        <midi-channel>1</midi-channel>
+        <midi-program>1</midi-program>
+        <volume>78.7402</volume>
+        <pan>0</pan>
+      </midi-instrument>
+    </score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>2</divisions>
+        <key><fifths>1</fifths></key>
+        <time><senza-misura/></time>
+        <clef><sign>G</sign><line>2</line></clef>
+      </attributes>
+      <note>
+        <pitch><step>D</step><alter>1</alter><octave>4</octave></pitch>
+        <duration>6</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <accidental>sharp</accidental>
+        <dot/>
+        <lyric number="1"><syllabic>begin</syllabic><text>Moe</text></lyric>
+        <staff>1</staff>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+
+
+def test_checklist_m20_flags_lyric_before_staff_and_dot_after_accidental() -> None:
+    findings = validate_playback_musicxml(_M20_BAD_NOTE_ORDER, profile="mono")
+    m20 = [f for f in findings if f.code == "M20"]
+    assert any("lyric" in f.message and "staff" in f.message for f in m20)
+    assert any("dot" in f.message and "accidental" in f.message for f in m20)
+
+
+def test_normalize_fixes_m20_note_child_order() -> None:
+    from vsa.musicxml_coria_timing import local as _local
+
+    out = normalize_playback_musicxml(_M20_BAD_NOTE_ORDER, apply_timing=False)
+    findings = validate_playback_musicxml(out, profile="mono")
+    assert not any(f.code == "M20" for f in findings)
+    root = ET.fromstring(out)
+    note = next(el for el in root.iter() if _local(el.tag) == "note")
+    tags = [_local(c.tag) for c in note]
+    assert tags.index("dot") < tags.index("accidental")
+    assert tags.index("staff") < tags.index("lyric")

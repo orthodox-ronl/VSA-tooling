@@ -156,6 +156,50 @@ def validate_playback_musicxml(
             findings.extend(_check_monophonic_parts(body_parts))
 
     findings.extend(_check_identification(root))
+    findings.extend(_check_note_child_order(root))
+    return findings
+
+
+def _check_note_child_order(root: ET.Element) -> list[ChecklistFinding]:
+    """M20: Coria-kritische volgorde binnen ``<note>``.
+
+    Live Coria (o.a. onder-uwe-hoede): ``lyric`` vóór ``staff``, of ``dot``
+    ná ``accidental`` → translation failed. Normalize herschikt; validate
+    faalt vóór publicatie.
+    """
+    findings: list[ChecklistFinding] = []
+    seen: set[str] = set()
+
+    def _once(kind: str, message: str) -> None:
+        if kind in seen:
+            return
+        seen.add(kind)
+        findings.append(ChecklistFinding("M20", message))
+
+    for el in root.iter():
+        if local(el.tag) != "note":
+            continue
+        tags = [local(c.tag) for c in el]
+        if (
+            "lyric" in tags
+            and "staff" in tags
+            and tags.index("lyric") < tags.index("staff")
+        ):
+            _once(
+                "lyric-before-staff",
+                "note: <lyric> mag niet vóór <staff> "
+                "(Coria: translation failed); normalize herschikt",
+            )
+        if (
+            "dot" in tags
+            and "accidental" in tags
+            and tags.index("dot") > tags.index("accidental")
+        ):
+            _once(
+                "dot-after-accidental",
+                "note: <dot> mag niet ná <accidental> "
+                "(Coria: translation failed); normalize herschikt",
+            )
     return findings
 
 

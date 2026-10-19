@@ -64,6 +64,9 @@ def hyphenate_dutch_word(word: str) -> str:
 
     Bestaande zachte ``-`` blijven leidend (geen her-hyphenatie). Hard ``=``
     splitst het woord in delen die elk apart gehypheneerd worden.
+
+    Leidende/sluitende leestekens (``,`` ``.`` enz.) horen niet in de
+    Pyphen-kern: anders wordt ``Geest,`` ten onrechte ``Gees-t,``.
     """
     if not word:
         return word
@@ -76,7 +79,11 @@ def hyphenate_dutch_word(word: str) -> str:
         return word
     if not any(ch.isalpha() for ch in word):
         return word
-    return _dutch_dic().inserted(word)
+    m = _WORD_CORE_RE.match(word)
+    prefix, core, suffix = (m.group(1), m.group(2), m.group(3)) if m else ("", word, "")
+    if not core or not any(ch.isalpha() for ch in core):
+        return word
+    return f"{prefix}{_dutch_dic().inserted(core)}{suffix}"
 
 
 def dutch_hyphen_positions(word: str) -> list[int]:

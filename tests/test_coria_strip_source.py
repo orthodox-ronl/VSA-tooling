@@ -6,6 +6,8 @@ from xml.etree import ElementTree as ET
 
 from vsa.musicxml_coria_timing import (
     CORIA_FORBIDDEN_TAGS,
+    _insert_accidental,
+    canonicalize_note_children,
     finalize_coria_musicxml,
     reorder_identification_encoding_before_misc,
     sanitize_coria_importer,
@@ -183,3 +185,31 @@ def test_finalize_misc_before_encoding_passes_checklist_mono() -> None:
     meta = [f for f in findings if f.code == "META"]
     assert not any("miscellaneous" in f.message and "vóór" in f.message for f in meta)
     assert not any(f.code == "M4" and "notehead" in f.message for f in findings)
+
+
+def test_canonicalize_note_children_lyric_before_staff() -> None:
+    note = ET.fromstring(
+        "<note>"
+        "<pitch><step>C</step><octave>4</octave></pitch>"
+        "<duration>2</duration><voice>1</voice><type>quarter</type>"
+        "<lyric number='1'><syllabic>single</syllabic><text>La</text></lyric>"
+        "<staff>1</staff>"
+        "</note>"
+    )
+    assert canonicalize_note_children(note) is True
+    tags = [_local(c.tag) for c in note]
+    assert tags.index("staff") < tags.index("lyric")
+    assert canonicalize_note_children(note) is False
+
+
+def test_insert_accidental_after_dot_not_between_type_and_dot() -> None:
+    note = ET.fromstring(
+        "<note>"
+        "<pitch><step>D</step><alter>1</alter><octave>4</octave></pitch>"
+        "<duration>6</duration><voice>1</voice><type>half</type>"
+        "<dot/>"
+        "</note>"
+    )
+    _insert_accidental(note, "sharp")
+    tags = [_local(c.tag) for c in note]
+    assert tags.index("type") < tags.index("dot") < tags.index("accidental")
