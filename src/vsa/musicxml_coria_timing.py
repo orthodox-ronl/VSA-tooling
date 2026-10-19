@@ -224,6 +224,32 @@ CORIA_FORBIDDEN_TAGS = frozenset(
         "tie",
     }
 )
+# MusicXML note-child order (kern). Coria faalt o.a. op lyric vóór staff en
+# accidental vóór dot (live play_from_url, okt 2026 / onder-uwe-hoede).
+_NOTE_CHILD_ORDER = (
+    "grace",
+    "cue",
+    "chord",
+    "pitch",
+    "rest",
+    "unpitched",
+    "duration",
+    "tie",
+    "instrument",
+    "voice",
+    "type",
+    "dot",
+    "accidental",
+    "time-modification",
+    "stem",
+    "notehead",
+    "staff",
+    "beam",
+    "notations",
+    "lyric",
+    "play",
+)
+_NOTE_CHILD_MULTI = frozenset({"dot", "beam", "notations", "lyric", "tie"})
 _STEPS = "CDEFGAB"
 _SHARP_ORDER = "FCGDAEB"
 _FLAT_ORDER = "BEADGCF"
@@ -314,6 +340,51 @@ def reorder_identification_encoding_before_misc(ident: ET.Element) -> bool:
     return True
 
 
+def canonicalize_note_children(note: ET.Element) -> bool:
+    """Herschik kind-elementen van ``<note>`` naar MusicXML-/Coria-volgorde.
+
+    Returns True als de volgorde is gewijzigd. Meervoudige tags (``dot``,
+    ``lyric``, …) behouden hun onderlinge volgorde.
+    """
+    kids = list(note)
+    if not kids:
+        return False
+    buckets: dict[str, list[ET.Element]] = {tag: [] for tag in _NOTE_CHILD_ORDER}
+    unknown: list[ET.Element] = []
+    for child in kids:
+        tag = local(child.tag)
+        if tag in buckets:
+            if tag in _NOTE_CHILD_MULTI or not buckets[tag]:
+                buckets[tag].append(child)
+            else:
+                # Tweede singleton: bewaar als unknown (zeldzaam).
+                unknown.append(child)
+        else:
+            unknown.append(child)
+    new: list[ET.Element] = []
+    for tag in _NOTE_CHILD_ORDER:
+        new.extend(buckets[tag])
+    new.extend(unknown)
+    old_tags = tuple(local(c.tag) for c in kids)
+    new_tags = tuple(local(c.tag) for c in new)
+    if old_tags == new_tags:
+        return False
+    for child in kids:
+        note.remove(child)
+    for child in new:
+        note.append(child)
+    return True
+
+
+def canonicalize_all_notes(root: ET.Element) -> int:
+    """Canoniseer alle ``<note>``-kinderen; return aantal gewijzigde noten."""
+    n = 0
+    for el in root.iter():
+        if local(el.tag) == "note" and canonicalize_note_children(el):
+            n += 1
+    return n
+
+
 def sanitize_coria_importer(root: ET.Element) -> None:
     """Strip visuele MusicXML die Coria's vertaler laat crashen (VSA-demo-port)."""
     root.set("version", "3.1")
@@ -350,6 +421,7 @@ def sanitize_coria_importer(root: ET.Element) -> None:
             if ctag != "lyric":
                 continue
             # Lyric ``<extend/>`` behouden (checklist M5); demo stripte die voor NWC.
+        canonicalize_note_children(el)
     plist = _child(root, "part-list")
     if plist is not None:
         for el in list(plist):
@@ -403,11 +475,28 @@ def _note_sounding_alter(note: ET.Element) -> int | None:
 
 
 def _insert_accidental(note: ET.Element, name: str) -> None:
+    """Insert ``<accidental>`` after ``<dot>``s (or after ``<type>``).
+
+    Never between ``<type>`` and ``<dot>`` — Coria translation failed.
+    """
     acc = ET.Element("accidental")
     acc.text = name
-    type_el = _child(note, "type")
-    if type_el is not None:
-        note.insert(list(note).index(type_el) + 1, acc)
+    kids = list(note)
+    last_dot: ET.Element | None = None
+    type_el: ET.Element | None = None
+    for child in kids:
+        tag = local(child.tag)
+        if tag == "dot":
+            last_dot = child
+        elif tag == "type":
+            type_el = child
+        elif tag == "accidental":
+            note.remove(child)
+    kids = list(note)
+    if last_dot is not None:
+        note.insert(kids.index(last_dot) + 1, acc)
+    elif type_el is not None:
+        note.insert(kids.index(type_el) + 1, acc)
     else:
         note.append(acc)
 
@@ -468,4 +557,6 @@ def finalize_coria_musicxml(xml: str, *, apply_timing: bool = True) -> str:
             _renumber_measures(root)
     sanitize_coria_importer(root)
     apply_playback_accidentals(root)
+    # Accidentals opnieuw geplaatst → note-kindvolgorde opnieuw canoniek (M20).
+    canonicalize_all_notes(root)
     return _serialize(root)

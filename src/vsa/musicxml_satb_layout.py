@@ -319,7 +319,13 @@ def _ensure_monophonic_attributes(attrs: ET.Element) -> None:
 
 
 def _normalize_playback_note(note: ET.Element) -> None:
-    """Zet ``<voice>1</voice>`` en ``<staff>1</staff>``; verwijder ``<chord/>``."""
+    """Zet ``<voice>1</voice>`` en ``<staff>1</staff>``; verwijder ``<chord/>``.
+
+    Staff/voice worden niet achteraan geplakt (dat zette ``<staff>`` ná
+    ``<lyric>`` → Coria translation failed). Daarna canonieke kindvolgorde.
+    """
+    from .musicxml_coria_timing import canonicalize_note_children
+
     for ch in list(note):
         if local(ch.tag) == "chord":
             note.remove(ch)
@@ -332,11 +338,14 @@ def _normalize_playback_note(note: ET.Element) -> None:
         elif tag == "staff":
             staff_el = ch
     if voice_el is None:
-        voice_el = ET.SubElement(note, "voice")
+        voice_el = ET.Element("voice")
+        note.append(voice_el)
     voice_el.text = "1"
     if staff_el is None:
-        staff_el = ET.SubElement(note, "staff")
+        staff_el = ET.Element("staff")
+        note.append(staff_el)
     staff_el.text = "1"
+    canonicalize_note_children(note)
 
 
 def _set_element_staff(el: ET.Element, staff: str) -> None:

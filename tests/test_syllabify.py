@@ -24,6 +24,14 @@ def test_hyphenate_dutch_examples() -> None:
     assert hyphenate_dutch_word("al-len") == "al-len"
 
 
+def test_hyphenate_strips_trailing_punctuation() -> None:
+    """Leestekens mogen Pyphen niet in de kern lokken (Coria/recite-expansie)."""
+    assert hyphenate_dutch_word("Geest,") == "Geest,"
+    assert hyphenate_dutch_word("Geest.") == "Geest."
+    assert hyphenate_dutch_word("komst,") == "komst,"
+    assert hyphenate_dutch_word("Heilige!") == "Hei-li-ge!"
+
+
 def test_hard_hyphen_equals_preserved_through_syllabify() -> None:
     assert hyphenate_dutch_word("mede=eeuwige") == "me-de=eeu-wi-ge"
     assert unsyllabify_plain_text("me-de=eeu-wi-ge") == "mede=eeuwige"
