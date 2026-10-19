@@ -92,6 +92,49 @@ B: b2           d3&-&-    g3   ||
     assert "heiligeSterke" not in text
 
 
+def test_mvsa_word_continues_across_mscz_newline() -> None:
+    """``@mscz-newline`` + leidend ``-``: één woord, geen spatie/newline ertussen."""
+    src = """\
+@do F4
+@mode major
+
+L: Che-ru ||
+S: do re ||
+A: do re ||
+T: do re ||
+B: do re ||
+
+@mscz-newline
+L: -bij-nen ||
+S: mi fa ||
+A: mi fa ||
+T: mi fa ||
+B: mi fa ||
+"""
+    text = plain_text_from_mvsa(src)
+    assert "Cherubijnen" in text
+    assert "Cheru bijnen" not in text
+    assert "Cheru\nbijnen" not in text
+    assert "Cheru\n bijnen" not in text
+
+
+def test_mvsa_word_continues_within_system_unchanged() -> None:
+    """Binnen één systeem blijft ``Che-ru | -bij-nen`` één woord."""
+    src = """\
+@do F4
+@mode major
+
+L: Che-ru | -bij-nen ||
+S: do re | mi fa ||
+A: do re | mi fa ||
+T: do re | mi fa ||
+B: do re | mi fa ||
+"""
+    text = plain_text_from_mvsa(src)
+    assert "Cherubijnen" in text
+    assert "Cheru bijnen" not in text
+
+
 def test_vsa_bare_ehm_not_in_plain_text() -> None:
     src = """\
 ---
@@ -277,6 +320,60 @@ _MUSICXML_SYLLABICS = """\
 def test_musicxml_joins_syllabics_across_measures() -> None:
     text = plain_text_from_musicxml(_MUSICXML_SYLLABICS)
     assert text == "Heilige God Heerlijk"
+
+
+def test_musicxml_filters_pause_lyric() -> None:
+    """Coria ``[PAUZE]`` hoort niet in platte zoek-/lyrics-tekst."""
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <part-list>
+    <score-part id="P1"><part-name>S</part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <lyric number="1">
+          <syllabic>single</syllabic>
+          <text>Heilige</text>
+        </lyric>
+      </note>
+    </measure>
+    <measure number="2">
+      <note>
+        <rest/>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        <lyric number="1">
+          <syllabic>single</syllabic>
+          <text>[PAUZE]</text>
+        </lyric>
+      </note>
+    </measure>
+    <measure number="3">
+      <note>
+        <pitch><step>G</step><octave>4</octave></pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <lyric number="1">
+          <syllabic>single</syllabic>
+          <text>God</text>
+        </lyric>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    text = plain_text_from_musicxml(xml)
+    assert text == "Heilige God"
+    assert "[PAUZE]" not in text
+    assert "PAUZE" not in text
 
 
 def test_musicxml_does_not_duplicate_satb_lyrics() -> None:

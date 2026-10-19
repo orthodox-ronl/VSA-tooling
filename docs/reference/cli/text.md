@@ -17,12 +17,12 @@ vsa text [-h] [-o OUTPUT] [--musescore PATH] path
 
 ## Bronnen
 
-| Extensie                         | Gedrag                                                                 |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `.vsa`                           | Directe extractie uit VSA-body.                                        |
-| `.mvsa`                          | Directe extractie uit L-regel(s).                                      |
-| `.mxl` / `.musicxml` / `.xml`    | Lyrics uit MusicXML (geen MuseScore nodig).                            |
-| `.mscz`                          | Via tijdelijke MuseScore-`.mxl`; schrijft **geen** `.mvsa`-sibling.    |
+| Extensie                         | Gedrag                                                                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.vsa`                           | Directe extractie uit VSA-body.                                                                                                                  |
+| `.mvsa`                          | Directe extractie uit L-regel(s). Systeembreuk (`@mscz-newline`) is geen woordbreuk: leidend `-`/`=` plakt door (ook over sectiegrenzen).        |
+| `.mxl` / `.musicxml` / `.xml`    | Lyrics uit MusicXML (geen MuseScore nodig).                                                                                                      |
+| `.mscz`                          | Via tijdelijke MuseScore-`.mxl`; schrijft **geen** `.mvsa`-sibling.                                                                              |
 
 Bestandsnamen zoals `{stam}.mscz.mxl` horen bij `.mxl` (laatste suffix).
 
@@ -36,6 +36,7 @@ Bestandsnamen zoals `{stam}.mscz.mxl` horen bij `.mxl` (laatste suffix).
 4. Lettergrepen (`single` / `begin` / `middle` / `end`) worden tot woorden
    samengevoegd; zachte streepjes verdwijnen, hard `=` wordt `-` (zelfde
    als bij `.vsa` / `.mvsa`).
+5. Coria-oefenlyric `[PAUZE]` wordt genegeerd (geen zoek-/lyrics-woord).
 
 Lege of lyric-loze scores geven een **lege string** (exitcode 0), net als
 `vsa text` op een bron zonder gezongen tekst.

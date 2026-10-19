@@ -7,8 +7,9 @@ import tempfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+from .musicxml_coria_timing import PAUSE_LYRIC
 from .musicxml_satb_layout import local
-from .mvsa_parse import LPosition, parse_mvsa
+from .mvsa_parse import LPosition, ParsedSection, parse_mvsa
 from .mvsa_validate import is_lyrics_stem
 from .syllabify import HARD_HYPHEN, dehyphenate_dutch_word, strip_soft_hyphens
 from .vsa_stanzas import VsaNote, extract_stanza_notes
@@ -49,10 +50,16 @@ def _piece_for_plain(text: str) -> str:
     )
 
 
+def _is_non_word_lyric(text: str) -> bool:
+    """Coria-/oefen-lyrics die niet in zoek- of platte tekst horen."""
+    return text.strip() == PAUSE_LYRIC
+
+
 def _events_to_plain(events: list[tuple[str, str]]) -> str:
     """Voeg (lyric, syllabic)-events samen tot leesbare woorden.
 
     ``syllabic`` volgt MusicXML: ``single`` / ``begin`` / ``middle`` / ``end``.
+    Negeert niet-woord-lyrics zoals ``[PAUZE]``.
     """
     words: list[str] = []
     buf: list[str] = []
@@ -64,7 +71,7 @@ def _events_to_plain(events: list[tuple[str, str]]) -> str:
         buf.clear()
 
     for lyric, syllabic in events:
-        if not lyric:
+        if not lyric or _is_non_word_lyric(lyric):
             continue
         syl = syllabic or "single"
         if syl == "single":
@@ -124,14 +131,46 @@ def _append_lpos(parts: list[str], lpos: LPosition, *, open_word: bool) -> bool:
     return False
 
 
+def _first_lyrics_lpos(section: ParsedSection) -> LPosition | None:
+    """Eerste L-positie in documentvolgorde (voor woordvoortzetting over grenzen)."""
+    for system in section.systems:
+        for measure in system.measures:
+            for marker in system.markers:
+                if not is_lyrics_stem(marker):
+                    continue
+                positions = measure.lyrics.get(marker) or []
+                if positions:
+                    return positions[0]
+    return None
+
+
 def plain_text_from_mvsa(source: str) -> str:
-    """Gezongen tekst uit een .mvsa-bron (alle L-stems, documentvolgorde)."""
+    """Gezongen tekst uit een .mvsa-bron (alle L-stems, documentvolgorde).
+
+    Woordvoortzetting (leidend ``-``/``=`` / ``continues_word``) plakt over
+    systemen én sectiegrenzen heen: ``@mscz-newline`` is geen woordbreuk.
+    Geen newline midden in een voortgezet woord. Secties zonder voortzetting
+    worden met newline gescheiden.
+    """
     doc = parse_mvsa(source)
     chunks: list[str] = []
+    parts: list[str] = []
+    open_word = False
+
+    def flush_parts() -> None:
+        nonlocal parts, open_word
+        if parts:
+            chunks.append(
+                " ".join(dehyphenate_dutch_word(p) for p in parts)
+            )
+        parts = []
+        open_word = False
+
     for section in doc.sections:
+        first = _first_lyrics_lpos(section)
+        if parts and not (first is not None and first.continues_word):
+            flush_parts()
         for system in section.systems:
-            parts: list[str] = []
-            open_word = False
             for measure in system.measures:
                 for marker in system.markers:
                     if not is_lyrics_stem(marker):
@@ -141,10 +180,7 @@ def plain_text_from_mvsa(source: str) -> str:
                         open_word = _append_lpos(
                             parts, lpos, open_word=open_word
                         )
-            if parts:
-                chunks.append(
-                    " ".join(dehyphenate_dutch_word(p) for p in parts)
-                )
+    flush_parts()
     return "\n".join(chunks).strip()
 
 
