@@ -5419,12 +5419,12 @@ tokens pas geaccepteerd vanaf hun <strong>fase</strong> (onbekend tot die tijd).
 </thead>
 <tbody>
 <tr>
-<td><code>[//]</code></td>
+<td><code>[//]</code> of <code>[//</code>+ELM<code>]</code></td>
 <td><code>caesura</code></td>
-<td>Liturgische cesuur / onderbreking</td>
-<td><code>&lt;articulations&gt;&lt;caesura/&gt;&lt;/articulations&gt;</code> op laatste noot</td>
-<td>Standaard caesura</td>
-<td><strong>ja (transform):</strong> kwart-rust alle parts, geen lyric</td>
+<td>Liturgische cesuur; optionele <strong>pauze-duur</strong> in ELM-stijl</td>
+<td><code>&lt;caesura/&gt;</code> of <code>&lt;caesura elm="…"/&gt;</code> op laatste noot</td>
+<td>Standaard caesura (glyph)</td>
+<td><strong>ja (transform):</strong> rust alle parts, duur uit ELM (default <code>~</code> = kwart), geen lyric</td>
 <td>1</td>
 </tr>
 <tr>
@@ -5690,10 +5690,57 @@ S: do   re mi_-sol     | do   re mi__      | do re  mi__    sol&amp;la&amp;si   
 L: (Eén is heilig),[//] |
 S: do                   |
 </code></pre></div>
+<p><strong>Pauze-duur (Coria / audio):</strong> na <code>//</code> mag een gewone ELM staan. Die stuurt
+alleen de <strong>ingevoegde rust</strong> bij playback; op het blad blijft één
+cesuurteken. Zonder ELM geldt default <code>~</code> (kwart), hetzelfde als VSA.</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Coria-rust</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[//]</code></td>
+<td>kwart (<code>~</code>)</td>
+</tr>
+<tr>
+<td><code>[//.]</code></td>
+<td>achtste</td>
+</tr>
+<tr>
+<td><code>[//..]</code></td>
+<td>zestiende</td>
+</tr>
+<tr>
+<td><code>[//_]</code></td>
+<td>half</td>
+</tr>
+<tr>
+<td><code>[//_.]</code></td>
+<td>gepunteerde half</td>
+</tr>
+<tr>
+<td><code>[//__]</code></td>
+<td>heel</td>
+</tr>
+<tr>
+<td><code>[//-.]</code> / <code>[//~.]</code></td>
+<td>gepunteerde kwart</td>
+</tr>
+</tbody>
+</table>
+<p><code>[//~]</code> en <code>[//-]</code> zijn geldig (ook kwart); <code>normalize</code> herschrijft ze naar
+<code>[//]</code>. Ongeldige tekens na <code>//</code> (bijv. <code>[//@]</code>) → validate-fout.</p>
+<div class="highlight"><pre><span></span><code>L: stil_[//_] dan_ verder_ |
+S: do    -     re   mi_    |
+</code></pre></div>
 <p>Ongeldig:</p>
 <div class="highlight"><pre><span></span><code>L: [//] Eén is heilig |     # after zonder vorige L-stuk
 S: [//] do re mi |          # niet op stemregel
 L: (Eén is[//] heilig) |    # niet binnen recite-haakjes
+L: a_[//@] |                # geen geldige ELM-duur
 </code></pre></div>
 <h3 id="dynamiek-fase-2">Dynamiek (fase 2)<a class="headerlink" href="#dynamiek-fase-2" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>L: [mf]Heer_ is groot_ |
@@ -5773,7 +5820,7 @@ S: …        |
 </tr>
 <tr>
 <td><strong>1</strong></td>
-<td>Kern + <code>[//]</code> — <strong>klaar</strong> (registry, parser <code>marks_*</code>, validate, kuiser-skip, export <code>&lt;caesura/&gt;</code>, Coria-kwart-rust vóór sanitize)</td>
+<td>Kern + <code>[//]</code> — <strong>klaar</strong> (registry, parser <code>marks_*</code>, validate, kuiser-skip, export <code>&lt;caesura/&gt;</code>, Coria-rust; ELM-duur op <code>[//</code>+ELM<code>]</code>)</td>
 <td>validation / formats / guides</td>
 </tr>
 <tr>
@@ -5849,7 +5896,7 @@ S: …        |
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-14
+        Bijgewerkt: 2026-10-19
         
       </p>
       
