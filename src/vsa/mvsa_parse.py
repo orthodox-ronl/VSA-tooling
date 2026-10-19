@@ -10,7 +10,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any
 
-from .mvsa_marks import Mark, lookup_mark, read_bracket_token
+from .mvsa_marks import Mark, lookup_mark, mark_from_raw, read_bracket_token
 from .mvsa_validate import (
     ALLOWED_DIRECTIVES,
     ALLOWED_MODES,
@@ -843,14 +843,10 @@ def _consume_known_mark(
     raw, j, err = read_bracket_token(s, i)
     if err or raw is None:
         return None, j, True
-    spec = lookup_mark(raw)
-    if spec is None:
+    mark = mark_from_raw(raw)
+    if mark is None:
         return None, j, True
-    return (
-        Mark(kind=spec.kind, raw=spec.raw, span_role=spec.span_role),
-        j,
-        True,
-    )
+    return mark, j, True
 
 
 def _append_trailing_marks(

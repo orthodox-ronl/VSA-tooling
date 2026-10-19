@@ -37,6 +37,20 @@ def test_parse_caesura_after_syllable():
     assert len(pos[1].marks_after) == 1
     assert pos[1].marks_after[0].kind == "caesura"
     assert pos[1].marks_after[0].raw == "//"
+    assert pos[1].marks_after[0].duration_elm is None
+
+
+def test_parse_caesura_with_elm_duration():
+    pos = parse_l_positions("a_[//_]")
+    assert pos[0].marks_after[0].kind == "caesura"
+    assert pos[0].marks_after[0].raw == "//_"
+    assert pos[0].marks_after[0].duration_elm == "_"
+
+    pos2 = parse_l_positions("a_[//.]")
+    assert pos2[0].marks_after[0].duration_elm == "."
+
+    pos3 = parse_l_positions("a_[//_.]")
+    assert pos3[0].marks_after[0].duration_elm == "_."
 
 
 def test_parse_caesura_after_punct_and_melisma():
@@ -84,6 +98,27 @@ def test_validate_unknown_mark():
     errs = [d for d in validate_mvsa_text(text) if d.code == "MVSA-MARK"]
     assert errs
     assert "xyz" in errs[0].message
+
+
+def test_validate_unknown_caesura_elm():
+    text = _doc("a_[//@] ||", "do ||")
+    errs = [d for d in validate_mvsa_text(text) if d.code == "MVSA-MARK"]
+    assert errs
+    assert "//@" in errs[0].message
+
+
+def test_validate_ok_caesura_with_elm():
+    text = _doc("a_[//_] ||", "do ||")
+    errs = [d for d in validate_mvsa_text(text) if d.severity == "error"]
+    assert errs == []
+
+
+def test_normalize_caesura_default_elm_alias():
+    text = _doc("a_[//~] b_[//-] ||", "do re ||")
+    out = normalize_mvsa_text(text, align=False)
+    assert "[//]" in out
+    assert "[//~]" not in out
+    assert "[//-]" not in out
 
 
 def test_validate_orphan_caesura():
@@ -171,11 +206,35 @@ def test_export_caesura_in_partituur():
     assert re.search(r"<text>a</text>", xml)
 
 
+def test_export_caesura_elm_attr_partituur():
+    text = _doc("a_[//_] ||", "do ||")
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert 'elm="_"' in xml
+    assert "<caesura" in xml
+
+
 def test_export_playback_caesura_becomes_rest():
     text = _doc("a_[//] b_ ||", "do re ||")
     xml = export_mvsa_to_musicxml(text, layout="playback")
     assert "<rest" in xml
     assert xml.count("<rest") >= 4
+
+
+def test_export_playback_caesura_half_rest():
+    """``[//_]`` → Coria-halve rust (duration 8 @ divisions=4)."""
+    text = _doc("a_[//_] b_ ||", "do re ||")
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    assert re.search(r"<rest/>\s*<duration>8</duration>", xml) or re.search(
+        r"<rest\s*/>\s*<duration>8</duration>", xml
+    )
+    assert "<type>half</type>" in xml
+
+
+def test_export_playback_caesura_eighth_rest():
+    text = _doc("a_[//.] b_ ||", "do re ||")
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    assert re.search(r"<duration>2</duration>", xml)
+    assert "<type>eighth</type>" in xml
 
 
 def _dynamics_count(xml: str, name: str) -> int:

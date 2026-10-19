@@ -62,3 +62,31 @@ def test_apply_coria_timing_caesura_adds_quarter_rest():
     out = apply_coria_timing(xml)
     assert "<rest" in out
     assert out.count("<type>quarter</type>") >= 3  # 2 notes + 1 rest
+
+
+def test_apply_coria_timing_caesura_elm_half_rest():
+    xml = """\
+<?xml version="1.0"?>
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P1"><part-name>Soprano</part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>4</divisions></attributes>
+      <note>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <notations><articulations><caesura elm="_"/></articulations></notations>
+      </note>
+      <note>
+        <pitch><step>D</step><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    out = apply_coria_timing(xml)
+    assert "<type>half</type>" in out
+    assert "<duration>8</duration>" in out

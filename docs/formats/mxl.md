@@ -30,7 +30,8 @@ Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
 
 **Uitvoeraanwijzingen uit `.mvsa`:** zie
 [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md).
-Cesuur `[//]` → `<caesura/>` (Coria: kwart-rust vóór sanitize). Dynamiek
+Cesuur `[//]` of `[//`+ELM`]` → `<caesura/>` / `<caesura elm="…"/>`
+(Coria: rust met die ELM-duur, default kwart, vóór sanitize). Dynamiek
 `[p]`/`[mf]`/… → `<dynamics>` (playback alle parts; partituur sopraan).
 `[adem]` / `[ferm]` → breath-mark / fermata op het blad; Coria stript
 `<notations>` (geen aparte speelduur). Crescendo/diminuendo

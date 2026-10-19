@@ -60,25 +60,55 @@ def insert_pause_measures(parts: list[ET.Element], whole_dur: int) -> int:
 
 
 def insert_caesura_quarter_rests(parts: list[ET.Element], quarter: int) -> int:
-    """Gebogen cesuur: 1 kwart rust op hetzelfde moment in alle parts, geen lyric."""
+    """Cesuur → rust (duur uit ``<caesura elm="…"/>``, default kwart).
+
+    *quarter* is divisions per kwartnoot (meestal 4); gebruikt als fallback
+    wanneer het ELM-attribuut ontbreekt.
+    """
+    from .mvsa_marks import caesura_rest_duration
+
     if not parts:
         return 0
     n = 0
     n_meas = len(_children(parts[0], "measure"))
+    default_dur = caesura_rest_duration(None)
     for mi in range(n_meas):
         group = [_children(p, "measure")[mi] for p in parts]
-        cuts: set[int] = set()
+        # t_cut → (divisions, note_type, dots)
+        cuts: dict[int, tuple[int, str, int]] = {}
         for m in group:
             t = 0
             for note in _children(m, "note"):
                 if _is_chord(note):
                     continue
                 t += _note_duration(note)
-                if _note_has_caesura(note):
-                    cuts.add(t)
+                elm = _note_caesura_elm(note)
+                if elm is False:
+                    continue
+                if elm is None:
+                    dur = default_dur
+                    # Schaal als divisions ≠ 4 (zelden).
+                    divs = (
+                        dur.divisions_value
+                        if quarter == 4
+                        else max(1, dur.divisions_value * quarter // 4)
+                    )
+                else:
+                    dur = caesura_rest_duration(elm)
+                    divs = (
+                        dur.divisions_value
+                        if quarter == 4
+                        else max(1, dur.divisions_value * quarter // 4)
+                    )
+                prev = cuts.get(t)
+                if prev is None or divs > prev[0]:
+                    cuts[t] = (divs, dur.note_type, dur.dots)
         for t_cut in sorted(cuts, reverse=True):
+            divs, type_name, dots = cuts[t_cut]
             for m in group:
-                if _insert_rest_after_time(m, t_cut, quarter):
+                if _insert_rest_after_time(
+                    m, t_cut, divs, type_name=type_name, dots=dots
+                ):
                     n += 1
     return n
 
@@ -114,7 +144,16 @@ def _note_duration(note: ET.Element) -> int:
 
 
 def _note_has_caesura(note: ET.Element) -> bool:
-    return any(local(el.tag) == "caesura" for el in note.iter())
+    return _note_caesura_elm(note) is not False
+
+
+def _note_caesura_elm(note: ET.Element) -> str | None | bool:
+    """ELM uit ``<caesura elm="…"/>``, ``None`` = default, ``False`` = geen cesuur."""
+    for el in note.iter():
+        if local(el.tag) == "caesura":
+            elm = (el.get("elm") or "").strip()
+            return elm if elm else None
+    return False
 
 
 def _has_double_bar(measure: ET.Element) -> bool:
@@ -153,13 +192,19 @@ def _divisions_of(root: ET.Element) -> int:
 
 
 def _make_rest_note(
-    duration: int, *, type_name: str, lyric: str | None = None
+    duration: int,
+    *,
+    type_name: str,
+    lyric: str | None = None,
+    dots: int = 0,
 ) -> ET.Element:
     note = ET.Element("note")
     ET.SubElement(note, "rest")
     ET.SubElement(note, "duration").text = str(duration)
     ET.SubElement(note, "voice").text = "1"
     ET.SubElement(note, "type").text = type_name
+    for _ in range(dots):
+        ET.SubElement(note, "dot")
     if lyric:
         ly = ET.SubElement(note, "lyric", number="1")
         ET.SubElement(ly, "syllabic").text = "single"
@@ -179,14 +224,23 @@ def _make_pause_measure(
     return measure
 
 
-def _insert_rest_after_time(measure: ET.Element, t_cut: int, duration: int) -> bool:
+def _insert_rest_after_time(
+    measure: ET.Element,
+    t_cut: int,
+    duration: int,
+    *,
+    type_name: str = "quarter",
+    dots: int = 0,
+) -> bool:
     t = 0
     for el in list(measure):
         if local(el.tag) != "note" or _is_chord(el):
             continue
         t += _note_duration(el)
         if t == t_cut:
-            rest = _make_rest_note(duration, type_name="quarter")
+            rest = _make_rest_note(
+                duration, type_name=type_name, dots=dots
+            )
             measure.insert(list(measure).index(el) + 1, rest)
             return True
     return False

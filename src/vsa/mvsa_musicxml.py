@@ -101,6 +101,8 @@ class NoteEvent:
     tie_start: bool = False  # same-pitch hold-keten (I2)
     tie_stop: bool = False
     caesura: bool = False  # L-mark [//] → <caesura/>
+    # Optionele ELM-duur voor Coria-rust (None = standaard ``~`` / kwart).
+    caesura_elm: str | None = None
     breath: bool = False  # L-mark [adem] → <breath-mark/>
     fermata: bool = False  # L-mark [ferm] → <fermata/>
     dynamics: str | None = None  # L-mark [mf] e.d. → <dynamics><mf/>
@@ -1071,6 +1073,7 @@ def _apply_l_marks_to_notes(
     for mark in lpos.marks_after:
         if mark.kind == "caesura":
             notes[-1].caesura = True
+            notes[-1].caesura_elm = mark.duration_elm
         elif mark.kind == "breath":
             notes[-1].breath = True
         elif mark.kind == "fermata":
@@ -2569,7 +2572,12 @@ def _emit_single_note(
             out.append('<tied type="stop"/>')
         arts: list[str] = []
         if ev.caesura:
-            arts.append("<caesura/>")
+            # Optionele ELM-duur als attribuut voor Coria-rust-transform
+            # (MuseScore negeert onbekende attrs op <caesura/>).
+            if ev.caesura_elm:
+                arts.append(f'<caesura elm="{escape(ev.caesura_elm)}"/>')
+            else:
+                arts.append("<caesura/>")
         if ev.breath:
             arts.append("<breath-mark/>")
         if arts:

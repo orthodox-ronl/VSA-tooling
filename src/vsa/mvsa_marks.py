@@ -8,8 +8,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from .duration_model import UnknownELM, elm_to_duration
+
 Attach = Literal["before", "after"]
 SpanRole = Literal["none", "start", "stop"]
+
+# Standaard Coria-pauze na ``[//]`` (kwart), zelfde ELM als VSA ``~``.
+DEFAULT_CAESURA_ELM = "~"
+
+# ELM's die als cesuur-duur mogen (zelfde set als duration_model default).
+CAESURA_DURATION_ELMS = frozenset(
+    {"~", "-", "-.", "~.", "_", "_.", "__", ".", ".."}
+)
 
 
 @dataclass(frozen=True)
@@ -25,6 +35,8 @@ class Mark:
     kind: str
     raw: str
     span_role: SpanRole = "none"
+    # Cesuur: optionele ELM-duur voor Coria-rust; None = DEFAULT_CAESURA_ELM.
+    duration_elm: str | None = None
 
 
 # Alleen actieve tokens; rest = onbekend tot hun fase.
@@ -70,8 +82,54 @@ TEMPO_WORDS_DISPLAY = {
 }
 
 
+def parse_caesura_duration_elm(raw: str) -> str | None:
+    """Als *raw* een cesuur-token is: ELM-duur (``None`` = standaard kwart).
+
+    ``[//]`` → ``None``; ``[//_]`` → ``"_"``; ongeldig → raise via caller
+    (deze functie retourneert alleen voor geldige tokens; gebruik
+    :func:`lookup_mark` voor acceptatie).
+    """
+    if raw == "//":
+        return None
+    if raw.startswith("//") and raw[2:] in CAESURA_DURATION_ELMS:
+        return raw[2:]
+    return None
+
+
 def lookup_mark(raw: str) -> MarkSpec | None:
-    return ACTIVE_MARKS.get(raw)
+    hit = ACTIVE_MARKS.get(raw)
+    if hit is not None:
+        return hit
+    if raw.startswith("//") and raw[2:] in CAESURA_DURATION_ELMS:
+        return MarkSpec(raw=raw, kind="caesura", attach="after")
+    return None
+
+
+def mark_from_raw(raw: str) -> Mark | None:
+    """Bouw een :class:`Mark` uit bracket-inhoud, of ``None`` als onbekend."""
+    spec = lookup_mark(raw)
+    if spec is None:
+        return None
+    duration_elm: str | None = None
+    if spec.kind == "caesura":
+        duration_elm = parse_caesura_duration_elm(raw)
+        if raw != "//" and duration_elm is None:
+            return None
+    return Mark(
+        kind=spec.kind,
+        raw=spec.raw,
+        span_role=spec.span_role,
+        duration_elm=duration_elm,
+    )
+
+
+def caesura_rest_duration(duration_elm: str | None):
+    """MusicXML-:class:`~vsa.music.Duration` voor Coria-cesuur-rust."""
+    elm = duration_elm if duration_elm is not None else DEFAULT_CAESURA_ELM
+    try:
+        return elm_to_duration(elm)
+    except UnknownELM:
+        return elm_to_duration(DEFAULT_CAESURA_ELM)
 
 
 def wedge_musicxml_type(kind: str) -> str | None:
@@ -83,11 +141,14 @@ def tempo_words_display(kind: str) -> str | None:
 
 
 def canonicalize_mark_source(text: str) -> str:
-    """Alias-schrijfwijzen → canoniek (``[decresc]`` → ``[dim]``)."""
-    return (
+    """Alias-schrijfwijzen → canoniek (``[decresc]`` → ``[dim]``; ``[//~]`` → ``[//]``)."""
+    out = (
         text.replace("[decresc]", "[dim]")
         .replace("[/decresc]", "[/dim]")
+        .replace("[//~]", "[//]")
+        .replace("[//-]", "[//]")
     )
+    return out
 
 
 def read_bracket_token(s: str, i: int) -> tuple[str | None, int, str | None]:

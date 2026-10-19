@@ -109,20 +109,20 @@ Complete lijst (wel/niet gebruiken, vorm, onbekende keywords):
 De `L:`-regel is de **telling**: lettergrepen, ELM-duur, recite en melisma.
 Stemregels moeten daar **slot voor slot** op aansluiten.
 
-| Op de L-regel               | Betekenis                                                                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Hei` / `li-ge`             | lettergreep; `-` = zacht woordstreepje (lettergreep)                                                                                       |
-| `mede=eeuwige`              | hard streepje: bron `=`, weergave/zoektekst als `-`                                                                                        |
-| `_` `__` `~` `.` …          | ELM (duur) direct na lettergreep of na `)`                                                                                                 |
-| `( … )`                     | recite-groep (meerdere lettergrepen, één toonhoogte)                                                                                       |
-| `&`                         | melisma: extra toon op dezelfde lettergreep                                                                                                |
-| `\|` / `\|\|` / `\|:` …     | maatstreep (zelfde vorm op alle stemregels)                                                                                                |
-| `[//]`                      | cesuur ná lettergreep (geen extra sync-positie)                                                                                            |
-| `[adem]` / `[ferm]`         | ademteken / fermata ná lettergreep                                                                                                         |
-| `[p]` / `[mf]` / …          | dynamiek vóór lettergreep (`ppp`–`fff`)                                                                                                    |
-| `[cresc]…[/cresc]`          | crescendo-traject (start vóór, stop ná lettergreep)                                                                                        |
-| `[dim]…[/dim]`              | diminuendo (alias `[decresc]` → `[dim]` bij normalize)                                                                                     |
-| `[rit]` / `[atempo]`        | ritardando / a tempo (vóór lettergreep; zichtbare woorden)                                                                                 |
+| Op de L-regel                | Betekenis                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Hei` / `li-ge`              | lettergreep; `-` = zacht woordstreepje (lettergreep)                                                                                       |
+| `mede=eeuwige`               | hard streepje: bron `=`, weergave/zoektekst als `-`                                                                                        |
+| `_` `__` `~` `.` …           | ELM (duur) direct na lettergreep of na `)`                                                                                                 |
+| `( … )`                      | recite-groep (meerdere lettergrepen, één toonhoogte)                                                                                       |
+| `&`                          | melisma: extra toon op dezelfde lettergreep                                                                                                |
+| `\|` / `\|\|` / `\|:` …      | maatstreep (zelfde vorm op alle stemregels)                                                                                                |
+| `[//]` / `[//_]` / `[//.]` … | cesuur ná lettergreep; optionele ELM = Coria-pauze (default kwart)                                                                         |
+| `[adem]` / `[ferm]`          | ademteken / fermata ná lettergreep                                                                                                         |
+| `[p]` / `[mf]` / …           | dynamiek vóór lettergreep (`ppp`–`fff`)                                                                                                    |
+| `[cresc]…[/cresc]`           | crescendo-traject (start vóór, stop ná lettergreep)                                                                                        |
+| `[dim]…[/dim]`               | diminuendo (alias `[decresc]` → `[dim]` bij normalize)                                                                                     |
+| `[rit]` / `[atempo]`         | ritardando / a tempo (vóór lettergreep; zichtbare woorden)                                                                                 |
 
 Sectie- of systeemtempo zet je met `@tempo 72` of `@tempo 72 "Andante"`
 (boven het systeem, niet op de L-regel) — zie
