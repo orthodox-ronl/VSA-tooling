@@ -66,13 +66,13 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
    [Syntax — eindanker](syntax.md#eindanker-aan-de-maatstreep). Ongeldige anker-
    tekst of mismatch met de berekende lopende toon: **error** (`MVSA-BAR-ANKER`).
    Een kale streep is geen anker. Lyrics-regels met een anker-suffix: error.
-8b. Uitvoeraanwijzingen op `L:` (`[…]`): alleen actieve tokens (`[//]`,
-   `[adem]`, `[ferm]`, dynamiek `ppp`–`fff`, `[cresc]`/`[/cresc]`,
-   `[dim]`/`[/dim]`, `[rit]`, `[atempo]`). Onbekend token, ontbrekende `]`,
-   after-mark zonder voorafgaande lettergreep, before-mark zonder volgende
-   lettergreep, of wees-/geneste cresc/dim-span: **error** (`MVSA-MARK`).
-   Marks tellen niet mee in de sync (punt 6). Zie
-   [uitvoeraanwijzingen](uitvoeraanwijzingen.md).
+8b. Uitvoeraanwijzingen op `L:` (`[…]`): alleen actieve tokens (`[//]` of
+   `[//`+geldige ELM`]`, `[adem]`, `[ferm]`, dynamiek `ppp`–`fff`,
+   `[cresc]`/`[/cresc]`, `[dim]`/`[/dim]`, `[rit]`, `[atempo]`). Onbekend
+   token (incl. ongeldige cesuur-ELM), ontbrekende `]`, after-mark zonder
+   voorafgaande lettergreep, before-mark zonder volgende lettergreep, of
+   wees-/geneste cresc/dim-span: **error** (`MVSA-MARK`). Marks tellen niet
+   mee in de sync (punt 6). Zie [uitvoeraanwijzingen](uitvoeraanwijzingen.md).
 
 ## Directives / keywords
 

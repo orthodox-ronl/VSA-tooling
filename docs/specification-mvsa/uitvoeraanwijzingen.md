@@ -164,11 +164,11 @@ tokens pas geaccepteerd vanaf hun **fase** (onbekend tot die tijd).
 
 ### 3.1 Puntmarkeringen — `attach=after`
 
-| Token     | kind       | Betekenis                         | MusicXML (partituur)                                        | MuseScore              | Coria-playback                                              | Fase |
-| --------- | ---------- | --------------------------------- | ----------------------------------------------------------- | ---------------------- | ----------------------------------------------------------- | ---- |
-| `[//]`    | `caesura`  | Liturgische cesuur / onderbreking | `<articulations><caesura/></articulations>` op laatste noot | Standaard caesura      | **ja (transform):** kwart-rust alle parts, geen lyric       | 1    |
-| `[adem]`  | `breath`   | Ademteken (korter dan cesuur)     | `<articulations><breath-mark/></articulations>`             | Breath mark (komma)    | **nee** in v1; latere korte-rust-transform optioneel        | 3    |
-| `[ferm]`  | `fermata`  | Fermate op die positie            | `<fermata type="upright"/>` in `<notations>`                | Fermata boven noot     | **nee** in v1; MuseScore-audio mag wel verlengen            | 3    |
+| Token                  | kind       | Betekenis                                                 | MusicXML (partituur)                                        | MuseScore                 | Coria-playback                                                                      | Fase |
+| ---------------------- | ---------- | --------------------------------------------------------- | ----------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------- | ---- |
+| `[//]` of `[//`+ELM`]` | `caesura`  | Liturgische cesuur; optionele **pauze-duur** in ELM-stijl | `<caesura/>` of `<caesura elm="…"/>` op laatste noot        | Standaard caesura (glyph) | **ja (transform):** rust alle parts, duur uit ELM (default `~` = kwart), geen lyric | 1    |
+| `[adem]`               | `breath`   | Ademteken (korter dan cesuur)                             | `<articulations><breath-mark/></articulations>`             | Breath mark (komma)       | **nee** in v1; latere korte-rust-transform optioneel                                | 3    |
+| `[ferm]`               | `fermata`  | Fermate op die positie                                    | `<fermata type="upright"/>` in `<notations>`                | Fermata boven noot        | **nee** in v1; MuseScore-audio mag wel verlengen                                    | 3    |
 
 ### 3.2 Dynamiek — `attach=before`
 
@@ -246,12 +246,35 @@ L: (Eén is heilig),[//] |
 S: do                   |
 ```
 
+**Pauze-duur (Coria / audio):** na `//` mag een gewone ELM staan. Die stuurt
+alleen de **ingevoegde rust** bij playback; op het blad blijft één
+cesuurteken. Zonder ELM geldt default `~` (kwart), hetzelfde als VSA.
+
+| Token               | Coria-rust                         |
+| ------------------- | ---------------------------------- |
+| `[//]`              | kwart (`~`)                        |
+| `[//.]`             | achtste                            |
+| `[//..]`            | zestiende                          |
+| `[//_]`             | half                               |
+| `[//_.]`            | gepunteerde half                   |
+| `[//__]`            | heel                               |
+| `[//-.]` / `[//~.]` | gepunteerde kwart                  |
+
+`[//~]` en `[//-]` zijn geldig (ook kwart); `normalize` herschrijft ze naar
+`[//]`. Ongeldige tekens na `//` (bijv. `[//@]`) → validate-fout.
+
+```text
+L: stil_[//_] dan_ verder_ |
+S: do    -     re   mi_    |
+```
+
 Ongeldig:
 
 ```text
 L: [//] Eén is heilig |     # after zonder vorige L-stuk
 S: [//] do re mi |          # niet op stemregel
 L: (Eén is[//] heilig) |    # niet binnen recite-haakjes
+L: a_[//@] |                # geen geldige ELM-duur
 ```
 
 ### Dynamiek (fase 2)
@@ -315,7 +338,7 @@ S: …        |
 | Fase  | Inhoud                                                                                                                                              | Docs sync                                          |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | **0** | Ontwerp (docs) — **klaar**                                                                                                                          | deze pagina + pointers                             |
-| **1** | Kern + `[//]` — **klaar** (registry, parser `marks_*`, validate, kuiser-skip, export `<caesura/>`, Coria-kwart-rust vóór sanitize)                  | validation / formats / guides                      |
+| **1** | Kern + `[//]` — **klaar** (registry, parser `marks_*`, validate, kuiser-skip, export `<caesura/>`, Coria-rust; ELM-duur op `[//`+ELM`]`)            | validation / formats / guides                      |
 | **2** | Dynamiek `ppp`–`fff` — **klaar** (vóór lettergreep; MusicXML `<dynamics>`; partituur sopraan; playback alle parts)                                  | registry-status; voorbeelden                       |
 | **3** | `[adem]` + `[ferm]` — **klaar** (partituur `<breath-mark/>` / `<fermata/>`; Coria stript notations)                                                 | idem                                               |
 | **4** | `[cresc]`/`[/cresc]` + `[dim]`/`[/dim]` — **klaar** (span-IR; `<wedge>`; partituur sopraan; playback alle parts; alias `[decresc]`→`[dim]`)         | idem                                               |
