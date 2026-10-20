@@ -67,6 +67,29 @@ def test_export_alleluia_section_to_mscz(tmp_path: Path):
     assert "lastSystemFillLimit>0<" in compact
 
 
+def test_fix_ds_al_fine_play_until(tmp_path: Path):
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        "<Marker><text><b>Fine</b></text><label>fine</label></Marker>"
+        "<Jump><text><b>D.S. al Fine</b></text>"
+        "<jumpTo>segno</jumpTo>"
+        "<playUntil>end</playUntil>"
+        "<continueAt></continueAt></Jump>"
+        "</Score></museScore>"
+    )
+    path = tmp_path / "nav.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("t.mscx", mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert "<playUntil>fine</playUntil>" in out
+    assert "<playUntil>end</playUntil>" not in out
+
+
 def test_apply_partituur_style_on_minimal_mscz(tmp_path: Path):
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 

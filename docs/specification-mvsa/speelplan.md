@@ -95,7 +95,10 @@ In een speelblok dat in `@speelplan` voorkomt zijn **`|:`** en **`:|`**
 bladherhaling.
 
 Buiten een speelplan-bestand (geen `@speelplan`) blijven `|:` / `:|` / `:||`
-gewoon toegestaan.
+gewoon toegestaan. Bladnavigatie zonder speelplan (Segno / Fine / D.S. / Coda
+op de L-regel) is gepland als uitvoeraanwijzingen **fase 7** — zie
+[uitvoeraanwijzingen.md §3.5](uitvoeraanwijzingen.md); die L-tokens zijn
+**niet** te combineren met `@speelplan`.
 
 Toegestaan in speelblokken: `|` (frase); `||` mag maar is geen eis tussen
 blokken (zie hierboven).

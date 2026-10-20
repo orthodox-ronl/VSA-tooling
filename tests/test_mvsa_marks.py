@@ -328,3 +328,96 @@ def test_export_rit_playback_all_parts():
     text = _doc("[rit]a_ ||", "do ||")
     xml = export_mvsa_to_musicxml(text, layout="playback")
     assert xml.count("<words>rit.</words>") == 4
+
+
+def test_parse_jump_marks():
+    pos = parse_l_positions("[segno]a_ b_[fine]")
+    assert pos[0].marks_before[0].kind == "segno"
+    assert pos[1].marks_after[0].kind == "fine"
+
+    pos2 = parse_l_positions("[Segno]mid_ [DSalFine]")
+    assert pos2[0].marks_before[0].kind == "segno"
+    assert pos2[0].marks_before[0].raw == "segno"
+    assert pos2[0].marks_after[0].kind == "ds_al_fine"
+    assert pos2[0].marks_after[0].raw == "dsalfine"
+
+
+def test_normalize_jump_camelcase_aliases():
+    text = _doc("[Segno]a_ b_[DSalFine] ||", "do re ||")
+    out = normalize_mvsa_text(text, align=False)
+    assert "[segno]" in out
+    assert "[dsalfine]" in out
+    assert "[Segno]" not in out
+    assert "[DSalFine]" not in out
+
+
+def test_validate_ok_jump_marks():
+    text = _doc("[segno]a_ b_[fine] ||", "do re ||")
+    errs = [d for d in validate_mvsa_text(text) if d.severity == "error"]
+    assert errs == []
+
+
+def test_validate_jump_forbidden_with_speelplan():
+    text = """\
+@do F4
+@mode major
+@speelplan 1, 2
+@blok 1
+L: [segno]a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+@blok 2
+L: b_[dsalfine] ||
+S: re ||
+A: re ||
+T: re ||
+B: re ||
+"""
+    errs = [
+        d for d in validate_mvsa_text(text) if d.code == "MVSA-SPEELPLAN-JUMP-MARK"
+    ]
+    assert errs
+    assert "speelplan" in errs[0].message.lower()
+
+
+def test_export_jump_marks_partituur():
+    text = _doc(
+        "[segno]a_ | b_[tocoda] | c_[dsalcoda] | [coda]d_ ||",
+        "do | re | mi | fa ||",
+    )
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert "<segno/>" in xml
+    assert ">To Coda</words>" in xml
+    assert ">D.S. al Coda</words>" in xml
+    assert "<coda/>" in xml
+    assert 'dalsegno="segno"' in xml
+    assert 'tocoda="coda"' in xml
+    # Alleen op sopraan (één part met directions).
+    assert xml.count("<segno/>") == 1
+
+
+def test_export_jump_marks_absent_in_playback():
+    text = _doc("[segno]a_ b_[dsalfine] ||", "do re ||")
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    assert "<segno/>" not in xml
+    assert "D.S. al Fine" not in xml
+    assert 'dalsegno="' not in xml
+
+
+def test_export_ds_al_fine_l_marks():
+    text = _doc("[segno]a_ | b_[fine] | c_[dsalfine] ||", "do | re | mi ||")
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    assert "<segno/>" in xml
+    assert ">Fine</words>" in xml
+    assert ">D.S. al Fine</words>" in xml
+    measures = re.findall(r"<measure\b[^>]*>([\s\S]*?)</measure>", xml)
+    # P1: 3 maten; segno begin m1, Fine eind m2, D.S. eind m3.
+    assert len(measures) >= 3
+    assert "<segno/>" in measures[0]
+    assert measures[0].find("<segno/>") < measures[0].find("<note")
+    assert ">Fine</words>" in measures[1]
+    assert measures[1].find("<note") < measures[1].find(">Fine</words>")
+    assert ">D.S. al Fine</words>" in measures[2]
+    assert measures[2].find("<note") < measures[2].find(">D.S. al Fine</words>")

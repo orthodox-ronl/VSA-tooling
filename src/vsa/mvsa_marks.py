@@ -66,9 +66,44 @@ ACTIVE_MARKS: dict[str, MarkSpec] = {
     "f": MarkSpec(raw="f", kind="dyn_f", attach="before"),
     "ff": MarkSpec(raw="ff", kind="dyn_ff", attach="before"),
     "fff": MarkSpec(raw="fff", kind="dyn_fff", attach="before"),
+    # Fase 7 — sprongtekens (Segno / Fine / D.S. / Coda); zie uitvoeraanwijzingen §3.5.
+    "segno": MarkSpec(raw="segno", kind="segno", attach="before"),
+    "coda": MarkSpec(raw="coda", kind="coda", attach="before"),
+    "fine": MarkSpec(raw="fine", kind="fine", attach="after"),
+    "tocoda": MarkSpec(raw="tocoda", kind="tocoda", attach="after"),
+    "dsalfine": MarkSpec(raw="dsalfine", kind="ds_al_fine", attach="after"),
+    "dcalfine": MarkSpec(raw="dcalfine", kind="dc_al_fine", attach="after"),
+    "dsalcoda": MarkSpec(raw="dsalcoda", kind="ds_al_coda", attach="after"),
+    "dcalcoda": MarkSpec(raw="dcalcoda", kind="dc_al_coda", attach="after"),
 }
 
 DYNAMICS_RAWS = frozenset({"ppp", "pp", "p", "mp", "mf", "f", "ff", "fff"})
+
+# kind → MusicXML/MSCZ nav-mark id (zelfde ids als speelplan ``_emit_nav_marks``).
+JUMP_KIND_TO_NAV: dict[str, str] = {
+    "segno": "segno",
+    "coda": "coda",
+    "fine": "fine",
+    "tocoda": "to_coda",
+    "ds_al_fine": "ds_al_fine",
+    "dc_al_fine": "dc_al_fine",
+    "ds_al_coda": "ds_al_coda",
+    "dc_al_coda": "dc_al_coda",
+}
+
+JUMP_KINDS = frozenset(JUMP_KIND_TO_NAV)
+
+# CamelCase-aliassen → canonieke kleine-letter tokens (normalize).
+_JUMP_CANONICALIZE: tuple[tuple[str, str], ...] = (
+    ("[Segno]", "[segno]"),
+    ("[Coda]", "[coda]"),
+    ("[Fine]", "[fine]"),
+    ("[ToCoda]", "[tocoda]"),
+    ("[DSalFine]", "[dsalfine]"),
+    ("[DCalFine]", "[dcalfine]"),
+    ("[DSalCoda]", "[dsalcoda]"),
+    ("[DCalCoda]", "[dcalcoda]"),
+)
 
 _WEDGE_MUSICXML = {
     "cresc": "crescendo",
@@ -100,6 +135,12 @@ def lookup_mark(raw: str) -> MarkSpec | None:
     hit = ACTIVE_MARKS.get(raw)
     if hit is not None:
         return hit
+    # Sprong-aliassen: ``[Segno]`` / ``[DSalFine]`` e.d. (vóór of zonder normalize).
+    lowered = raw.lower()
+    if lowered != raw:
+        jump = ACTIVE_MARKS.get(lowered)
+        if jump is not None and jump.kind in JUMP_KINDS:
+            return jump
     if raw.startswith("//") and raw[2:] in CAESURA_DURATION_ELMS:
         return MarkSpec(raw=raw, kind="caesura", attach="after")
     return None
@@ -148,7 +189,14 @@ def canonicalize_mark_source(text: str) -> str:
         .replace("[//~]", "[//]")
         .replace("[//-]", "[//]")
     )
+    for alias, canon in _JUMP_CANONICALIZE:
+        out = out.replace(alias, canon)
     return out
+
+
+def nav_mark_for_jump_kind(kind: str) -> str | None:
+    """MusicXML-nav-id voor een sprong-kind, of ``None``."""
+    return JUMP_KIND_TO_NAV.get(kind)
 
 
 def read_bracket_token(s: str, i: int) -> tuple[str | None, int, str | None]:

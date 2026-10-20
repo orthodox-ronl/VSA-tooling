@@ -16,9 +16,9 @@ Repo-breed kompas (niet alleen mvsa): repo-bestand
 
 ## Nu (eerstvolgende tooling)
 
-| Punt                                      | Toelichting                                                                                         | Richting                                                                 |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Uitvoeraanwijzingen op `L:` (fase 6)      | t/m tempo-woorden actief; volgende: import-roundtrip + liturgische voorbeelden                      | [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §3 / §7                 |
+| Punt                                         | Toelichting                                                                                                    | Richting                                                                 |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Uitvoeraanwijzingen op `L:` (fase 6)         | Marks 1–5 + 7 in export; volgende: import-roundtrip + liturgische voorbeelden                                  | [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §3 / §7                 |
 
 Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
 `examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa audio`).
@@ -36,7 +36,7 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 | Overlays t.o.v. S                       | A/T/B als afwijking van de sopraan                                             | Later                                                                          |
 | Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                       | Later                                                                          |
 | Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                                   | Alleen als corpuswerk het vraagt                                               |
-| Uitvoeraanwijzingen: import-roundtrip   | Marks 1–5 actief in export; MSCZ/MXL → canonieke `[token]` nog open            | Fase 6; [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §6 / §7               |
+| Uitvoeraanwijzingen: import-roundtrip   | Marks 1–5 + 7 in export; MSCZ/MXL → canonieke `[token]` nog open (incl. sprongen) | Fase 6; [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §6 / §7            |
 | Oefenpauze na dubbele maatstreep        | Lengte / lyric `[PAUZE]` / zichtbaarheid partituur — los van L-`[//]`          | Apart van uitvoeraanwijzingen; zie ontwerp §2                                  |
 
 ### Markdown-pipeline en fences

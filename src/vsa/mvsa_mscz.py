@@ -110,7 +110,12 @@ def export_mvsa_to_mscz(
             raise MvsaMsczError(f"MusicXML-tussenbestand mislukt: {exc}") from exc
 
         try:
-            convert_with_musescore(mxl_path, out, musescore=musescore)
+            convert_with_musescore(
+                mxl_path,
+                out,
+                musescore=musescore,
+                musicxml_infer_text_type=True,
+            )
         except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
             raise MvsaMsczError(str(exc)) from exc
 

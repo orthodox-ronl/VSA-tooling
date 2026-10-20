@@ -1,9 +1,10 @@
 # Uitvoeraanwijzingen op de lyrics-regel
 
-**Status:** **fase 1–5 actief** in code en export: cesuur `[//]`; dynamiek
+**Status:** **fase 1–5 en 7 actief** in code en export: cesuur `[//]`; dynamiek
 `ppp`–`fff`; `[adem]` / `[ferm]`; `[cresc]`/`[/cresc]` en `[dim]`/`[/dim]`;
-`[rit]` / `[atempo]`; plus `@tempo` (optioneel tempo-woord). Fase 6
-(import-roundtrip) staat nog open — zie §7.
+`[rit]` / `[atempo]`; plus `@tempo`; sprongtekens `[segno]` / `[fine]` /
+`[dsalfine]` / `[coda]` / … (§3.5). Fase 6 (import-roundtrip) staat nog open
+— zie §7.
 
 **Doel:** een **generiek** mechanisme voor uitvoeraanwijzingen op de
 mvsa-lyrics-regel (`L:` / `L1:` / …), met gesloten `[token]`-syntax —
@@ -13,6 +14,7 @@ Gerelateerd:
 
 - Lyrics-regels: [syntax.md § Lyrics](syntax.md#6-lyrics-regel-l)
 - Dubbele maatstreep / sectie-einde: [syntax.md § Einde](syntax.md#einde)
+- Speelplan-navigatie (andere laag): [speelplan.md](speelplan.md)
 - Cues: [`@tekst` in keywords.md](keywords.md#tekst)
 - Open backlog: [open-points.md](open-points.md)
 - VSA control-tokens (andere laag):
@@ -208,16 +210,82 @@ verboden; wees-start/stop → fout. Alias `[decresc]` = `[dim]` (normalize →
 `@tempo` staat in [keywords.md](keywords.md). CLI `--tempo` op `audio`
 blijft een render-override en is iets anders.
 
-### 3.5 Bewust níet in deze registry
+### 3.5 Sprongtekens (Segno / Fine / D.S. / Coda) — fase 7
+
+**Doel:** op het **blad** dezelfde navigatie zetten als MuseScore-palet
+«Repeats & jumps», zonder `@speelplan`. Handig wanneer de bladvorm
+expliciet is (bijv. `|:` … `:|` plus D.S. al Fine) en geen enkel
+speelplan-patroon past — zie [speelplan.md](speelplan.md) «Bewust later».
+
+**Twee lagen — niet mixen**
+
+| Situatie                         | Navigatie op het blad                                      |
+| -------------------------------- | ---------------------------------------------------------- |
+| Bestand **met** `@speelplan`     | Alleen uit het speelplan (volta / herhaling / D.S. / Coda) |
+| Bestand **zonder** `@speelplan` | L-sprongtokens (+ optioneel ` | :` / `: | ` als maatstreep) |
+
+In een bestand met `@speelplan` zijn L-sprongtokens **verboden**
+(validate-fout): anders twee canonieke bronnen voor dezelfde sprongen.
+`|:` / `:|` in speelplan-blokken blijven eveneens verboden
+([speelplan.md](speelplan.md)).
+
+**Canonieke tokens** (kleine letters). `normalize` accepteert CamelCase-
+aliassen (`[Segno]` → `[segno]`, `[DSalFine]` → `[dsalfine]`, …).
+
+#### Begin van een speelstuk / maat — `attach=before`
+
+| Token     | kind    | Bladtekst / teken     | MusicXML (partituur)                                      | MuseScore              | Coria-playback                                          | Fase |
+| --------- | ------- | --------------------- | --------------------------------------------------------- | ---------------------- | ------------------------------------------------------- | ---- |
+| `[segno]` | `segno` | Segno-teken           | `<direction>…<segno/>…` + `<sound segno="segno"/>`        | Marker Segno (links)   | **nee** in v1 (geen sprong; speel door in bronvolgorde) | 7    |
+| `[coda]`  | `coda`  | Coda-teken            | `<direction>…<coda/>…` + `<sound coda="coda"/>`           | Marker Coda (links)    | **nee** in v1                                           | 7    |
+
+Plaatsing: typisch op de **eerste** L-positie van de maat waarnaar
+terug- of doorgesprongen wordt. Export ankers het teken aan het **begin**
+van die maat (zoals speelplan-Segno/Coda).
+
+#### Einde van een speelstuk / maat — `attach=after`
+
+| Token         | kind         | Bladtekst        | MusicXML (partituur)                                                         | MuseScore                 | Coria-playback                                      | Fase |
+| ------------- | ------------ | ---------------- | ---------------------------------------------------------------------------- | ------------------------- | --------------------------------------------------- | ---- |
+| `[fine]`      | `fine`       | Fine             | `<words>Fine</words>` + `<sound fine="yes"/>`                                | Marker Fine (rechts)      | **nee** in v1                                       | 7    |
+| `[tocoda]`    | `tocoda`     | To Coda          | `<words>To Coda</words>` + `<sound tocoda="coda"/>`                          | Marker To Coda (rechts)   | **nee** in v1                                       | 7    |
+| `[dsalfine]`  | `ds_al_fine` | D.S. al Fine     | `<words>D.S. al Fine</words>` + `<sound dalsegno="segno"/>`                  | Jump D.S. al Fine         | **nee** in v1                                       | 7    |
+| `[dcalfine]`  | `dc_al_fine` | D.C. al Fine     | `<words>D.C. al Fine</words>` + `<sound dacapo="yes"/>`                      | Jump D.C. al Fine         | **nee** in v1                                       | 7    |
+| `[dsalcoda]`  | `ds_al_coda` | D.S. al Coda     | `<words>D.S. al Coda</words>` + `<sound dalsegno="segno"/>`                  | Jump D.S. al Coda         | **nee** in v1                                       | 7    |
+| `[dcalcoda]`  | `dc_al_coda` | D.C. al Coda     | `<words>D.C. al Coda</words>` + `<sound dacapo="yes"/>`                      | Jump D.C. al Coda         | **nee** in v1                                       | 7    |
+
+Plaatsing: typisch na de **laatste** L-positie van de maat. Export ankers
+rechts in die maat (zelfde conventie als speelplan-Fine / D.S.).
+
+**Semantiek (blad + MuseScore-audio):** dezelfde labels als speelplan-
+navigatie (`segno` ↔ D.S., `fine` ↔ Fine, `coda` ↔ To Coda / Coda). Eén
+`[segno]` en één `[fine]` (of één coda-paar) per stuk is de normale vorm;
+meerdere segno’s / coda’s met genummerde labels zijn **bewust later**.
+
+**Coria / `layout=playback`:** schrijft de **bronvolgorde** uit; volgt geen
+D.S./Fine/Coda. Wie een vaste klinkende vorm voor Coria wil zonder
+handmatige herhaling in de bron, gebruikt `@speelplan` (expansie).
+
+**Niet in v1 van fase 7**
+
+| Idee                         | Waarom niet nu                                      |
+| ---------------------------- | --------------------------------------------------- |
+| `[varsegno]` / `[varcoda]`   | Zeldzaam; geen corpus-nut                           |
+| `[dacoda]` / genummerde coda | MuseScore-varianten; pas bij eenduidige behoefte    |
+| Sprongen in Coria-playback   | Zelfde keuze als speelplan-MXL: geen jump-engine    |
+
+### 3.6 Bewust níet in deze registry
 
 | Idee                                        | Waarom niet                                                      |
 | ------------------------------------------- | ---------------------------------------------------------------- |
 | Dubbele maatstreep als `[…]`-token          | Blijft maatstreep / beurtgrens (§2); Coria-`[PAUZE]` hoort daar  |
+| `\|:` / `:\|` als `[…]`-token               | Blijft maatstreepsyntax; combineer met §3.5 zonder `@speelplan`  |
 | `[*]` / `[/]`                               | VSA control-tokens (andere laag)                                 |
 | Los Unicode-cesuurteken als primaire syntax | Vervangen door `[//]` (bewuste type-drempel)                     |
 | Vier MuseScore-cesuur-glyphs als tokens     | Eén `caesura`; glyph-parameter alleen later als nodig            |
 | Vrije `[tekst]`                             | Gebruik `@tekst`                                                 |
 | Sectie-tempo alleen op L                    | Sectie-tempo = `@tempo`                                          |
+| Navigatie dubbel via L én `@speelplan`      | Verboden; zie §3.5                                               |
 
 ---
 
@@ -319,6 +387,40 @@ L: A_ -men_ |
 S: …        |
 ```
 
+### Sprongtekens (fase 7)
+
+Trisagion-achtige bladvorm **zonder** `@speelplan`: herhaling + Segno + Fine
++ D.S. al Fine. (Token-spelling hier canoniek; typ `[Segno]` mag na normalize.)
+
+```text
+L: |: O   Hei_-li-ge  God_ | (hei-li-ge) Ster_-ke_ |
+S: |: …                    | …                     |
+
+L: [segno] (hei-li-ge On)-sterf'-lij-ke_ | ont-ferm U o-ver ons [//] [fine] :|
+S:         …                             | …                                :|
+
+L: (Eer aan de Va-der …) Geest_ | (nu en al-tijd …) A_-men_ |
+S: …                            | …                         |
+
+L: (hei-li-ge On)-sterf'-lij-ke_ | ont-ferm U o-ver ons [//] [dsalfine] |
+S: …                             | …                                    |
+```
+
+Coda-vorm (schets):
+
+```text
+L: [segno] mid_ [tocoda] | bridge_ [dsalcoda] | [coda] slot_ ||
+S:         …             | …                  |       …      ||
+```
+
+Ongeldig:
+
+```text
+@speelplan 1, 2, 1, 3
+@blok 1
+L: [segno] a_ |    # L-sprong + speelplan → fout
+```
+
 ---
 
 ## 6. Validate / normalize / kuiser / import (per actieve fase)
@@ -344,6 +446,7 @@ S: …        |
 | **4** | `[cresc]`/`[/cresc]` + `[dim]`/`[/dim]` — **klaar** (span-IR; `<wedge>`; partituur sopraan; playback alle parts; alias `[decresc]`→`[dim]`)         | idem                                               |
 | **5** | `@tempo` (+ optioneel woord) + `[rit]`/`[atempo]` — **klaar** (`sound tempo`; L-woorden zichtbaar; geen geleidelijke rit-envelope)                  | keywords.md                                        |
 | **6** | Import-roundtrip actieve marks; liturgische voorbeelden; glossary-PR op `bron` indien normatief                                                     | checklist/voorbeelden                              |
+| **7** | Sprongtekens §3.5 — **klaar** (registry; partituur Marker/Jump via nav-marks; speelplan-mutex; Coria/playback zonder sprongen)                       | deze §3.5; speelplan.md pointer                    |
 
 ---
 
@@ -355,3 +458,4 @@ S: …        |
 - Adem → korte Coria-rust-transform.
 - Verfijning oefenpauze na dubbele maatstreep (apart van dit mechanisme).
 - Org-glossary-entries.
+- Fase 7: genummerde segno/coda-labels; Coria die jumps volgt (niet gepland).

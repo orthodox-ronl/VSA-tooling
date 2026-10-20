@@ -401,4 +401,34 @@ def collect_speelplan_diagnostics(doc: ParsedDocument) -> list[MvsaDiagnostic]:
                             )
                         )
 
+    # L-sprongtekens + @speelplan = twee navigatiebronnen → fout.
+    from .mvsa_marks import JUMP_KINDS, lookup_mark, read_bracket_token
+    from .mvsa_validate import is_lyrics_stem
+
+    for s in doc.sections:
+        for system in s.systems:
+            line_nos = getattr(system, "line_nos", None) or {}
+            for marker, content in system.lines.items():
+                if not is_lyrics_stem(marker):
+                    continue
+                i = 0
+                while i < len(content):
+                    if content[i] != "[":
+                        i += 1
+                        continue
+                    raw, j, err = read_bracket_token(content, i)
+                    if err or raw is None:
+                        break
+                    spec = lookup_mark(raw)
+                    if spec is not None and spec.kind in JUMP_KINDS:
+                        diags.append(
+                            MvsaDiagnostic(
+                                "MVSA-SPEELPLAN-JUMP-MARK",
+                                f"{marker}: L-sprong [{spec.raw}] mag niet samen "
+                                "met @speelplan (navigatie komt uit het speelplan)",
+                                line_nos.get(marker, system.start_line),
+                            )
+                        )
+                    i = j
+
     return diags
