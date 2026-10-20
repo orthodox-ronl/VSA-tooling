@@ -3126,10 +3126,49 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#35-bewust-niet-in-deze-registry" class="md-nav__link">
+  <a href="#35-sprongtekens-segno-fine-ds-coda-fase-7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3.5 Bewust níet in deze registry
+        3.5 Sprongtekens (Segno / Fine / D.S. / Coda) — fase 7
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.5 Sprongtekens (Segno / Fine / D.S. / Coda) — fase 7">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#begin-van-een-speelstuk-maat-attachbefore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Begin van een speelstuk / maat — attach=before
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#einde-van-een-speelstuk-maat-attachafter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Einde van een speelstuk / maat — attach=after
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-bewust-niet-in-deze-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Bewust níet in deze registry
       
     </span>
   </a>
@@ -3213,6 +3252,17 @@
     <span class="md-ellipsis">
       
         Beurtgrens (bestaand — geen L-token)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprongtekens-fase-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprongtekens (fase 7)
       
     </span>
   </a>
@@ -5000,10 +5050,49 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#35-bewust-niet-in-deze-registry" class="md-nav__link">
+  <a href="#35-sprongtekens-segno-fine-ds-coda-fase-7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3.5 Bewust níet in deze registry
+        3.5 Sprongtekens (Segno / Fine / D.S. / Coda) — fase 7
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.5 Sprongtekens (Segno / Fine / D.S. / Coda) — fase 7">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#begin-van-een-speelstuk-maat-attachbefore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Begin van een speelstuk / maat — attach=before
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#einde-van-een-speelstuk-maat-attachafter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Einde van een speelstuk / maat — attach=after
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-bewust-niet-in-deze-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Bewust níet in deze registry
       
     </span>
   </a>
@@ -5093,6 +5182,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#sprongtekens-fase-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprongtekens (fase 7)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5157,10 +5257,11 @@
 
 
 <h1 id="uitvoeraanwijzingen-op-de-lyrics-regel">Uitvoeraanwijzingen op de lyrics-regel<a class="headerlink" href="#uitvoeraanwijzingen-op-de-lyrics-regel" title="Permanent link">&para;</a></h1>
-<p><strong>Status:</strong> <strong>fase 1–5 actief</strong> in code en export: cesuur <code>[//]</code>; dynamiek
+<p><strong>Status:</strong> <strong>fase 1–5 en 7 actief</strong> in code en export: cesuur <code>[//]</code>; dynamiek
 <code>ppp</code>–<code>fff</code>; <code>[adem]</code> / <code>[ferm]</code>; <code>[cresc]</code>/<code>[/cresc]</code> en <code>[dim]</code>/<code>[/dim]</code>;
-<code>[rit]</code> / <code>[atempo]</code>; plus <code>@tempo</code> (optioneel tempo-woord). Fase 6
-(import-roundtrip) staat nog open — zie §7.</p>
+<code>[rit]</code> / <code>[atempo]</code>; plus <code>@tempo</code>; sprongtekens <code>[segno]</code> / <code>[fine]</code> /
+<code>[dsalfine]</code> / <code>[coda]</code> / … (§3.5). Fase 6 (import-roundtrip) staat nog open
+— zie §7.</p>
 <p><strong>Doel:</strong> een <strong>generiek</strong> mechanisme voor uitvoeraanwijzingen op de
 mvsa-lyrics-regel (<code>L:</code> / <code>L1:</code> / …), met gesloten <code>[token]</code>-syntax —
 zonder de L↔SATB-sync te breken.</p>
@@ -5168,6 +5269,7 @@ zonder de L↔SATB-sync te breken.</p>
 <ul>
 <li>Lyrics-regels: <a href="../syntax/#6-lyrics-regel-l">syntax.md § Lyrics</a></li>
 <li>Dubbele maatstreep / sectie-einde: <a href="../syntax/#einde">syntax.md § Einde</a></li>
+<li>Speelplan-navigatie (andere laag): <a href="../speelplan/">speelplan.md</a></li>
 <li>Cues: <a href="../keywords/#tekst"><code>@tekst</code> in keywords.md</a></li>
 <li>Open backlog: <a href="../open-points/">open-points.md</a></li>
 <li>VSA control-tokens (andere laag):
@@ -5610,7 +5712,176 @@ verboden; wees-start/stop → fout. Alias <code>[decresc]</code> = <code>[dim]</
 </table>
 <p><code>@tempo</code> staat in <a href="../keywords/">keywords.md</a>. CLI <code>--tempo</code> op <code>audio</code>
 blijft een render-override en is iets anders.</p>
-<h3 id="35-bewust-niet-in-deze-registry">3.5 Bewust níet in deze registry<a class="headerlink" href="#35-bewust-niet-in-deze-registry" title="Permanent link">&para;</a></h3>
+<h3 id="35-sprongtekens-segno-fine-ds-coda-fase-7">3.5 Sprongtekens (Segno / Fine / D.S. / Coda) — fase 7<a class="headerlink" href="#35-sprongtekens-segno-fine-ds-coda-fase-7" title="Permanent link">&para;</a></h3>
+<p><strong>Doel:</strong> op het <strong>blad</strong> dezelfde navigatie zetten als MuseScore-palet
+«Repeats &amp; jumps», zonder <code>@speelplan</code>. Handig wanneer de bladvorm
+expliciet is (bijv. <code>|:</code> … <code>:|</code> plus D.S. al Fine) en geen enkel
+speelplan-patroon past — zie <a href="../speelplan/">speelplan.md</a> «Bewust later».</p>
+<p><strong>Twee lagen — niet mixen</strong></p>
+<table>
+<thead>
+<tr>
+<th>Situatie</th>
+<th>Navigatie op het blad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bestand <strong>met</strong> <code>@speelplan</code></td>
+<td>Alleen uit het speelplan (volta / herhaling / D.S. / Coda)</td>
+</tr>
+<tr>
+<td>Bestand <strong>zonder</strong> <code>@speelplan</code></td>
+<td>L-sprongtokens (+ optioneel <code>| :</code> / <code>: |</code> als maatstreep)</td>
+</tr>
+</tbody>
+</table>
+<p>In een bestand met <code>@speelplan</code> zijn L-sprongtokens <strong>verboden</strong>
+(validate-fout): anders twee canonieke bronnen voor dezelfde sprongen.
+<code>|:</code> / <code>:|</code> in speelplan-blokken blijven eveneens verboden
+(<a href="../speelplan/">speelplan.md</a>).</p>
+<p><strong>Canonieke tokens</strong> (kleine letters). <code>normalize</code> accepteert CamelCase-
+aliassen (<code>[Segno]</code> → <code>[segno]</code>, <code>[DSalFine]</code> → <code>[dsalfine]</code>, …).</p>
+<h4 id="begin-van-een-speelstuk-maat-attachbefore">Begin van een speelstuk / maat — <code>attach=before</code><a class="headerlink" href="#begin-van-een-speelstuk-maat-attachbefore" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>kind</th>
+<th>Bladtekst / teken</th>
+<th>MusicXML (partituur)</th>
+<th>MuseScore</th>
+<th>Coria-playback</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[segno]</code></td>
+<td><code>segno</code></td>
+<td>Segno-teken</td>
+<td><code>&lt;direction&gt;…&lt;segno/&gt;…</code> + <code>&lt;sound segno="segno"/&gt;</code></td>
+<td>Marker Segno (links)</td>
+<td><strong>nee</strong> in v1 (geen sprong; speel door in bronvolgorde)</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>[coda]</code></td>
+<td><code>coda</code></td>
+<td>Coda-teken</td>
+<td><code>&lt;direction&gt;…&lt;coda/&gt;…</code> + <code>&lt;sound coda="coda"/&gt;</code></td>
+<td>Marker Coda (links)</td>
+<td><strong>nee</strong> in v1</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<p>Plaatsing: typisch op de <strong>eerste</strong> L-positie van de maat waarnaar
+terug- of doorgesprongen wordt. Export ankers het teken aan het <strong>begin</strong>
+van die maat (zoals speelplan-Segno/Coda).</p>
+<h4 id="einde-van-een-speelstuk-maat-attachafter">Einde van een speelstuk / maat — <code>attach=after</code><a class="headerlink" href="#einde-van-een-speelstuk-maat-attachafter" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>kind</th>
+<th>Bladtekst</th>
+<th>MusicXML (partituur)</th>
+<th>MuseScore</th>
+<th>Coria-playback</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[fine]</code></td>
+<td><code>fine</code></td>
+<td>Fine</td>
+<td><code>&lt;words&gt;Fine&lt;/words&gt;</code> + <code>&lt;sound fine="yes"/&gt;</code></td>
+<td>Marker Fine (rechts)</td>
+<td><strong>nee</strong> in v1</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>[tocoda]</code></td>
+<td><code>tocoda</code></td>
+<td>To Coda</td>
+<td><code>&lt;words&gt;To Coda&lt;/words&gt;</code> + <code>&lt;sound tocoda="coda"/&gt;</code></td>
+<td>Marker To Coda (rechts)</td>
+<td><strong>nee</strong> in v1</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>[dsalfine]</code></td>
+<td><code>ds_al_fine</code></td>
+<td>D.S. al Fine</td>
+<td><code>&lt;words&gt;D.S. al Fine&lt;/words&gt;</code> + <code>&lt;sound dalsegno="segno"/&gt;</code></td>
+<td>Jump D.S. al Fine</td>
+<td><strong>nee</strong> in v1</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>[dcalfine]</code></td>
+<td><code>dc_al_fine</code></td>
+<td>D.C. al Fine</td>
+<td><code>&lt;words&gt;D.C. al Fine&lt;/words&gt;</code> + <code>&lt;sound dacapo="yes"/&gt;</code></td>
+<td>Jump D.C. al Fine</td>
+<td><strong>nee</strong> in v1</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>[dsalcoda]</code></td>
+<td><code>ds_al_coda</code></td>
+<td>D.S. al Coda</td>
+<td><code>&lt;words&gt;D.S. al Coda&lt;/words&gt;</code> + <code>&lt;sound dalsegno="segno"/&gt;</code></td>
+<td>Jump D.S. al Coda</td>
+<td><strong>nee</strong> in v1</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>[dcalcoda]</code></td>
+<td><code>dc_al_coda</code></td>
+<td>D.C. al Coda</td>
+<td><code>&lt;words&gt;D.C. al Coda&lt;/words&gt;</code> + <code>&lt;sound dacapo="yes"/&gt;</code></td>
+<td>Jump D.C. al Coda</td>
+<td><strong>nee</strong> in v1</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<p>Plaatsing: typisch na de <strong>laatste</strong> L-positie van de maat. Export ankers
+rechts in die maat (zelfde conventie als speelplan-Fine / D.S.).</p>
+<p><strong>Semantiek (blad + MuseScore-audio):</strong> dezelfde labels als speelplan-
+navigatie (<code>segno</code> ↔ D.S., <code>fine</code> ↔ Fine, <code>coda</code> ↔ To Coda / Coda). Eén
+<code>[segno]</code> en één <code>[fine]</code> (of één coda-paar) per stuk is de normale vorm;
+meerdere segno’s / coda’s met genummerde labels zijn <strong>bewust later</strong>.</p>
+<p><strong>Coria / <code>layout=playback</code>:</strong> schrijft de <strong>bronvolgorde</strong> uit; volgt geen
+D.S./Fine/Coda. Wie een vaste klinkende vorm voor Coria wil zonder
+handmatige herhaling in de bron, gebruikt <code>@speelplan</code> (expansie).</p>
+<p><strong>Niet in v1 van fase 7</strong></p>
+<table>
+<thead>
+<tr>
+<th>Idee</th>
+<th>Waarom niet nu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[varsegno]</code> / <code>[varcoda]</code></td>
+<td>Zeldzaam; geen corpus-nut</td>
+</tr>
+<tr>
+<td><code>[dacoda]</code> / genummerde coda</td>
+<td>MuseScore-varianten; pas bij eenduidige behoefte</td>
+</tr>
+<tr>
+<td>Sprongen in Coria-playback</td>
+<td>Zelfde keuze als speelplan-MXL: geen jump-engine</td>
+</tr>
+</tbody>
+</table>
+<h3 id="36-bewust-niet-in-deze-registry">3.6 Bewust níet in deze registry<a class="headerlink" href="#36-bewust-niet-in-deze-registry" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -5622,6 +5893,10 @@ blijft een render-override en is iets anders.</p>
 <tr>
 <td>Dubbele maatstreep als <code>[…]</code>-token</td>
 <td>Blijft maatstreep / beurtgrens (§2); Coria-<code>[PAUZE]</code> hoort daar</td>
+</tr>
+<tr>
+<td><code>\|:</code> / <code>:\|</code> als <code>[…]</code>-token</td>
+<td>Blijft maatstreepsyntax; combineer met §3.5 zonder <code>@speelplan</code></td>
 </tr>
 <tr>
 <td><code>[*]</code> / <code>[/]</code></td>
@@ -5642,6 +5917,10 @@ blijft een render-override en is iets anders.</p>
 <tr>
 <td>Sectie-tempo alleen op L</td>
 <td>Sectie-tempo = <code>@tempo</code></td>
+</tr>
+<tr>
+<td>Navigatie dubbel via L én <code>@speelplan</code></td>
+<td>Verboden; zie §3.5</td>
 </tr>
 </tbody>
 </table>
@@ -5770,6 +6049,30 @@ S: …                    ||
 L: A_ -men_ |
 S: …        |
 </code></pre></div>
+<h3 id="sprongtekens-fase-7">Sprongtekens (fase 7)<a class="headerlink" href="#sprongtekens-fase-7" title="Permanent link">&para;</a></h3>
+<p>Trisagion-achtige bladvorm <strong>zonder</strong> <code>@speelplan</code>: herhaling + Segno + Fine
++ D.S. al Fine. (Token-spelling hier canoniek; typ <code>[Segno]</code> mag na normalize.)</p>
+<div class="highlight"><pre><span></span><code>L: |: O   Hei_-li-ge  God_ | (hei-li-ge) Ster_-ke_ |
+S: |: …                    | …                     |
+
+L: [segno] (hei-li-ge On)-sterf'-lij-ke_ | ont-ferm U o-ver ons [//] [fine] :|
+S:         …                             | …                                :|
+
+L: (Eer aan de Va-der …) Geest_ | (nu en al-tijd …) A_-men_ |
+S: …                            | …                         |
+
+L: (hei-li-ge On)-sterf'-lij-ke_ | ont-ferm U o-ver ons [//] [dsalfine] |
+S: …                             | …                                    |
+</code></pre></div>
+<p>Coda-vorm (schets):</p>
+<div class="highlight"><pre><span></span><code>L: [segno] mid_ [tocoda] | bridge_ [dsalcoda] | [coda] slot_ ||
+S:         …             | …                  |       …      ||
+</code></pre></div>
+<p>Ongeldig:</p>
+<div class="highlight"><pre><span></span><code>@speelplan 1, 2, 1, 3
+@blok 1
+L: [segno] a_ |    # L-sprong + speelplan → fout
+</code></pre></div>
 <hr />
 <h2 id="6-validate-normalize-kuiser-import-per-actieve-fase">6. Validate / normalize / kuiser / import (per actieve fase)<a class="headerlink" href="#6-validate-normalize-kuiser-import-per-actieve-fase" title="Permanent link">&para;</a></h2>
 <table>
@@ -5848,6 +6151,11 @@ S: …        |
 <td>Import-roundtrip actieve marks; liturgische voorbeelden; glossary-PR op <code>bron</code> indien normatief</td>
 <td>checklist/voorbeelden</td>
 </tr>
+<tr>
+<td><strong>7</strong></td>
+<td>Sprongtekens §3.5 — <strong>klaar</strong> (registry; partituur Marker/Jump via nav-marks; speelplan-mutex; Coria/playback zonder sprongen)</td>
+<td>deze §3.5; speelplan.md pointer</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -5859,6 +6167,7 @@ S: …        |
 <li>Adem → korte Coria-rust-transform.</li>
 <li>Verfijning oefenpauze na dubbele maatstreep (apart van dit mechanisme).</li>
 <li>Org-glossary-entries.</li>
+<li>Fase 7: genummerde segno/coda-labels; Coria die jumps volgt (niet gepland).</li>
 </ul>
 
 
@@ -5896,7 +6205,7 @@ S: …        |
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-19
+        Bijgewerkt: 2026-10-20
         
       </p>
       
