@@ -1488,6 +1488,25 @@ def test_speelplan_partituur_volta_ab_ac():
     assert ">c</text>" in xml
 
 
+def _measure_bodies(xml: str, part_id: str = "P1") -> list[str]:
+    """Maatlichamen (binnenste XML) van één part, in documentvolgorde."""
+    marker = f'<part id="{part_id}">'
+    body = xml.split(marker, 1)[1].split("</part>", 1)[0]
+    return re.findall(r"<measure\b[^>]*>([\s\S]*?)</measure>", body)
+
+
+def _assert_nav_anchor(measure_xml: str, token: str, *, after_notes: bool) -> None:
+    """``token`` staat vóór of ná de eerste ``<note`` in deze maat."""
+    note_pos = measure_xml.find("<note")
+    token_pos = measure_xml.find(token)
+    assert token_pos >= 0, f"{token!r} ontbreekt in maat"
+    assert note_pos >= 0, "maat zonder <note>"
+    if after_notes:
+        assert token_pos > note_pos, f"{token!r} hoort ná noten (eind maat)"
+    else:
+        assert token_pos < note_pos, f"{token!r} hoort vóór noten (begin maat)"
+
+
 def test_speelplan_partituur_ds_al_fine_trisagion_shape():
     """``A B C D B C`` → segno op B, Fine op C, D.S. al Fine na D."""
     text = """\
@@ -1531,6 +1550,14 @@ B: fa ||
     assert 'dalsegno="segno"' in xml
     # Compact: 4 blokken × 1 maat × 2 parts, geen expansie.
     assert xml.count("<measure ") == 8
+    # Blokvolgorde: nls-1, nls-2, ksl, doxologie → maten 1..4 op P1.
+    measures = _measure_bodies(xml)
+    assert len(measures) == 4
+    _assert_nav_anchor(measures[1], "<segno/>", after_notes=False)
+    _assert_nav_anchor(measures[2], ">Fine</words>", after_notes=True)
+    _assert_nav_anchor(measures[3], ">D.S. al Fine</words>", after_notes=True)
+    assert 'justify="right"' in measures[2]
+    assert 'justify="right"' in measures[3]
 
 
 def test_speelplan_partituur_ds_al_coda():
@@ -1580,6 +1607,13 @@ B: fa ||
     assert ">Fine</words>" not in xml
     # Compact: 4 blokken × 1 maat × 2 parts, geen expansie.
     assert xml.count("<measure ") == 8
+    # Blokken 1..4: Segno+To Coda@2, D.S.@3, Coda@4.
+    measures = _measure_bodies(xml)
+    assert len(measures) == 4
+    _assert_nav_anchor(measures[1], "<segno/>", after_notes=False)
+    _assert_nav_anchor(measures[1], ">To Coda</words>", after_notes=True)
+    _assert_nav_anchor(measures[2], ">D.S. al Coda</words>", after_notes=True)
+    _assert_nav_anchor(measures[3], "<coda/>", after_notes=False)
 
 
 def test_speelplan_partituur_dc_al_coda():

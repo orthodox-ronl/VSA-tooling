@@ -1596,6 +1596,27 @@ def _apply_ds_al_coda(
     nav_marks[rc[0]].append("coda")
 
 
+# MuseScore-conventie: Segno/Coda begin maat; Fine/To Coda/D.S.|D.C. eind maat.
+_NAV_START_MARKS = frozenset({"segno", "coda"})
+_NAV_END_MARKS = frozenset(
+    {
+        "fine",
+        "to_coda",
+        "ds_al_fine",
+        "dc_al_fine",
+        "ds_al_coda",
+        "dc_al_coda",
+    }
+)
+
+
+def _split_nav_marks(marks: list[str]) -> tuple[list[str], list[str]]:
+    """Splits navigatiemarkeringen in begin- vs eind-van-maat."""
+    start = [m for m in marks if m in _NAV_START_MARKS]
+    end = [m for m in marks if m in _NAV_END_MARKS]
+    return start, end
+
+
 def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
     """MusicXML-directions voor segno / Fine / Coda / D.S.|D.C. jumps."""
     for mark in marks:
@@ -1609,7 +1630,9 @@ def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
         elif mark == "fine":
             out.append(
                 '<direction placement="above">'
-                '<direction-type><words font-weight="bold">Fine</words>'
+                '<direction-type>'
+                '<words font-weight="bold" justify="right" halign="right">'
+                "Fine</words>"
                 "</direction-type>"
                 '<sound fine="yes"/>'
                 "</direction>"
@@ -1617,7 +1640,9 @@ def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
         elif mark == "ds_al_fine":
             out.append(
                 '<direction placement="above">'
-                '<direction-type><words font-weight="bold">D.S. al Fine</words>'
+                '<direction-type>'
+                '<words font-weight="bold" justify="right" halign="right">'
+                "D.S. al Fine</words>"
                 "</direction-type>"
                 '<sound dalsegno="segno"/>'
                 "</direction>"
@@ -1625,7 +1650,9 @@ def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
         elif mark == "dc_al_fine":
             out.append(
                 '<direction placement="above">'
-                '<direction-type><words font-weight="bold">D.C. al Fine</words>'
+                '<direction-type>'
+                '<words font-weight="bold" justify="right" halign="right">'
+                "D.C. al Fine</words>"
                 "</direction-type>"
                 '<sound dacapo="yes"/>'
                 "</direction>"
@@ -1633,7 +1660,9 @@ def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
         elif mark == "to_coda":
             out.append(
                 '<direction placement="above">'
-                '<direction-type><words font-weight="bold">To Coda</words>'
+                '<direction-type>'
+                '<words font-weight="bold" justify="right" halign="right">'
+                "To Coda</words>"
                 "</direction-type>"
                 '<sound tocoda="coda"/>'
                 "</direction>"
@@ -1648,7 +1677,9 @@ def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
         elif mark == "ds_al_coda":
             out.append(
                 '<direction placement="above">'
-                '<direction-type><words font-weight="bold">D.S. al Coda</words>'
+                '<direction-type>'
+                '<words font-weight="bold" justify="right" halign="right">'
+                "D.S. al Coda</words>"
                 "</direction-type>"
                 '<sound dalsegno="segno"/>'
                 "</direction>"
@@ -1656,7 +1687,9 @@ def _emit_nav_marks(out: list[str], marks: list[str]) -> None:
         elif mark == "dc_al_coda":
             out.append(
                 '<direction placement="above">'
-                '<direction-type><words font-weight="bold">D.C. al Coda</words>'
+                '<direction-type>'
+                '<words font-weight="bold" justify="right" halign="right">'
+                "D.C. al Coda</words>"
                 "</direction-type>"
                 '<sound dacapo="yes"/>'
                 "</direction>"
@@ -2370,11 +2403,15 @@ def _emit_score_partituur(
                 out.append("</attributes>")
             if top_staff and tempos[mi] is not None:
                 _emit_tempo_direction(out, tempos[mi], tempo_labels[mi])
+            nav_start: list[str] = []
+            nav_end: list[str] = []
+            if top_staff and navs[mi]:
+                nav_start, nav_end = _split_nav_marks(navs[mi])
             if top_staff:
                 if new_systems[mi]:
                     out.append('<print new-system="yes"/>')
-                if navs[mi]:
-                    _emit_nav_marks(out, navs[mi])
+                if nav_start:
+                    _emit_nav_marks(out, nav_start)
                 if staff_texts[mi]:
                     _emit_staff_text_directions(out, staff_texts[mi])
             if cue_gaps[mi]:
@@ -2392,6 +2429,8 @@ def _emit_score_partituur(
                     fifths=fifths,
                     with_lyrics=with_lyrics,
                 )
+            if top_staff and nav_end:
+                _emit_nav_marks(out, nav_end)
             _emit_measure_barlines(
                 out,
                 mi,

@@ -55,19 +55,28 @@ def convert_with_musescore(
     dest: Path,
     *,
     musescore: Path | None = None,
+    musicxml_infer_text_type: bool = False,
 ) -> Path:
     """Convert ``source`` to ``dest`` via MuseScore CLI (``-f -o``).
 
     Typical: ``.mxl`` / ``.musicxml`` → ``.mscz``, or ``.mscz`` → ``.pdf``.
+
+    *musicxml_infer_text_type*: zet MuseScore ``--musicxml-infer-text-type`` aan
+    (alleen zinvol bij MusicXML→MSCZ). Dan worden Fine / D.S. / Segno echte
+    Marker/Jump met rechtsuitlijning i.p.v. losse StaffText.
     """
     exe = require_musescore(override=musescore)
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists():
         dest.unlink()
+    cmd = [str(exe), "-f"]
+    if musicxml_infer_text_type:
+        cmd.append("--musicxml-infer-text-type")
+    cmd.extend(["-o", str(dest), str(source)])
     try:
         proc = subprocess.run(
-            [str(exe), "-f", "-o", str(dest), str(source)],
+            cmd,
             check=False,
             capture_output=True,
             text=True,

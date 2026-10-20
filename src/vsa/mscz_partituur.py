@@ -167,6 +167,7 @@ def apply_partituur_mscz_conventions(
 
     mscx = _clear_instrument_names(mscx)
     mscx = _hide_tempo_marks(mscx)
+    mscx = _fix_ds_al_fine_play_until(mscx)
     mscx = _ensure_style_overrides(mscx)
     if system_texts:
         mscx = _promote_tekst_staff_texts(mscx, system_texts)
@@ -205,6 +206,29 @@ def apply_partituur_mscz_conventions(
             zout.writestr(n, data)
         zout.writestr(mscx_name, mscx.encode("utf-8"))
     tmp.replace(path)
+
+
+def _fix_ds_al_fine_play_until(mscx: str) -> str:
+    """Zet ``playUntil`` van D.S./D.C. al Fine op ``fine`` i.p.v. ``end``.
+
+    MuseScore ``--musicxml-infer-text-type`` kan ``playUntil>end`` zetten terwijl
+    er wél een Fine-marker is; dan stopt playback niet op Fine.
+    """
+    if "<label>fine</label>" not in mscx and ">Fine</" not in mscx:
+        return mscx
+
+    def _fix_jump(m: re.Match[str]) -> str:
+        body = m.group(1)
+        plain = re.sub(r"<[^>]+>", "", body)
+        if "al Fine" not in plain and "al fine" not in plain.lower():
+            return m.group(0)
+        body2 = body.replace(
+            "<playUntil>end</playUntil>",
+            "<playUntil>fine</playUntil>",
+        )
+        return f"<Jump>{body2}</Jump>"
+
+    return re.sub(r"<Jump>(.*?)</Jump>", _fix_jump, mscx, flags=re.DOTALL)
 
 
 def _hide_tempo_marks(mscx: str) -> str:

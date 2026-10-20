@@ -253,7 +253,12 @@ def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
             xml = read_musicxml_file(path)
             partituur = ensure_partituur_musicxml(xml)
             write_musicxml_output(tmp_mxl, partituur)
-            convert_with_musescore(tmp_mxl, out, musescore=musescore)
+            convert_with_musescore(
+                tmp_mxl,
+                out,
+                musescore=musescore,
+                musicxml_infer_text_type=True,
+            )
             apply_partituur_mscz_conventions(out)
         except (MuseScoreNotFoundError, MuseScoreConvertError, MsczPartituurError) as exc:
             print(f"{path}: ERROR: {exc}", file=sys.stderr)
