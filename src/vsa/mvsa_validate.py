@@ -305,6 +305,7 @@ def validate_mvsa_text(text: str, *, source: str = "<mvsa>") -> list[MvsaDiagnos
         "MVSA-SPEELPLAN-UNKNOWN-ID",
         "MVSA-SPEELPLAN-ANON",
         "MVSA-SPEELPLAN-REPEAT-BAR",
+        "MVSA-SPEELPLAN-JUMP-MARK",
         "MVSA-SPEELPLAN-UNUSED",
         "MVSA-BLOK-EMPTY",
     )

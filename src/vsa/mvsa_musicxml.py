@@ -109,6 +109,8 @@ class NoteEvent:
     wedge_start: str | None = None  # crescendo | diminuendo
     wedge_stop: bool = False
     direction_words: str | None = None  # L-mark [rit]/[atempo] → <words>
+    # L-sprongtekens → maat-nav (alleen partituur; ids als speelplan ``_emit_nav_marks``).
+    nav_marks: list[str] = field(default_factory=list)
 
 
 # Partituur-print: recite met ≥6 lettergrepen → 1-(n-2)-1 (randnoten + ||O||).
@@ -561,6 +563,8 @@ def export_mvsa_to_musicxml(
         _apply_ds_al_fine(nav.ds, blok_measure_range, nav_marks)
     elif nav is not None and nav.kind == "ds_al_coda" and nav.coda is not None:
         _apply_ds_al_coda(nav.coda, blok_measure_range, nav_marks)
+    if layout == "partituur":
+        _collect_l_jump_nav_marks(voice_measures.get("S", []), nav_marks)
     # expand / identity: geen extra tekens; expand schrijft het plan uit via
     # sections_for_layout.
     # Wrap lange ``@tekst`` (``...`` → nieuwe regel) vóór breedte-schatting.
@@ -930,6 +934,7 @@ def _system_to_events(
                     notes,
                     lpos,
                     include_directions=(layout == "playback" or key == "S"),
+                    include_jump_nav=(layout == "partituur" and key == "S"),
                 )
                 if hulptekst:
                     _apply_hulptekst_to_notes(notes, direction=hulp_direction)
@@ -1053,13 +1058,24 @@ def _apply_l_marks_to_notes(
     lpos: LPosition,
     *,
     include_directions: bool = True,
+    include_jump_nav: bool = False,
 ) -> None:
     """Hang L-uitvoeraanwijzingen aan de juiste noot (na collapse)."""
-    from .mvsa_marks import tempo_words_display, wedge_musicxml_type
+    from .mvsa_marks import (
+        JUMP_KINDS,
+        nav_mark_for_jump_kind,
+        tempo_words_display,
+        wedge_musicxml_type,
+    )
 
     if not notes:
         return
     for mark in lpos.marks_before:
+        if include_jump_nav and mark.kind in JUMP_KINDS:
+            nav = nav_mark_for_jump_kind(mark.kind)
+            if nav:
+                notes[0].nav_marks.append(nav)
+            continue
         if mark.kind.startswith("dyn_") and include_directions:
             notes[0].dynamics = mark.raw
         elif mark.span_role == "start" and include_directions:
@@ -1071,6 +1087,11 @@ def _apply_l_marks_to_notes(
             if words:
                 notes[0].direction_words = words
     for mark in lpos.marks_after:
+        if include_jump_nav and mark.kind in JUMP_KINDS:
+            nav = nav_mark_for_jump_kind(mark.kind)
+            if nav:
+                notes[-1].nav_marks.append(nav)
+            continue
         if mark.kind == "caesura":
             notes[-1].caesura = True
             notes[-1].caesura_elm = mark.duration_elm
@@ -1080,6 +1101,20 @@ def _apply_l_marks_to_notes(
             notes[-1].fermata = True
         elif mark.span_role == "stop" and include_directions:
             notes[-1].wedge_stop = True
+
+
+def _collect_l_jump_nav_marks(
+    soprano_measures: list[list[NoteEvent]],
+    nav_marks: list[list[str]],
+) -> None:
+    """Voeg L-sprongtekens van de sopraan toe aan maat-nav (partituur)."""
+    for mi, notes in enumerate(soprano_measures):
+        if mi >= len(nav_marks):
+            break
+        for note in notes:
+            for mark in note.nav_marks:
+                if mark not in nav_marks[mi]:
+                    nav_marks[mi].append(mark)
 
 
 def _position_to_notes(
