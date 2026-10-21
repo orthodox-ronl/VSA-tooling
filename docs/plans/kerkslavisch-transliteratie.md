@@ -325,3 +325,4 @@ huidige schema.
 4. [mvsa-v0-syntax §11](mvsa-v0-syntax.md#11-blokhergebruik-en-parallelle-l-schets)
    en validation «buiten v0» voor parallelle lyric-nummers.
 5. Bouwen volgens §6 fase 1; markering §7 pas in fase 3 hard nodig.
+

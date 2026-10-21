@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spike: Score-IR → OSMD</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 1rem 1.25rem 2rem;
+      max-width: 960px;
+      background: #fff;
+      color: #111;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 0.35rem; }
+    p.note { color: #444; margin: 0 0 1rem; line-height: 1.4; }
+    #status { margin: 0 0 0.75rem; font-size: 0.95rem; }
+    #osmd {
+      width: 100%;
+      min-height: 200px;
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      background: #fff;
+    }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Spike: Score-IR → MusicXML → OSMD</h1>
+  <p class="note">
+    OpenSheetMusicDisplay tekent
+    <code>score.musicxml</code>, gegenereerd uit
+    <code>score.score-ir.json</code>
+    (<code>.mvsa</code> → Score-IR → partituur-MusicXML).
+    Doel: bewijs dat Score-IR genoeg is voor schermtekening (brug naar CoriB).
+  </p>
+  <p id="status">Laden…</p>
+  <div id="osmd"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.3/build/opensheetmusicdisplay.min.js"></script>
+  <script>
+    (async function () {
+      var status = document.getElementById("status");
+      try {
+        var meta = await fetch("score.score-ir.json").then(function (r) {
+          if (!r.ok) throw new Error("score.score-ir.json HTTP " + r.status);
+          return r.json();
+        });
+        var osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmd", {
+          autoResize: true,
+          backend: "svg",
+          drawTitle: true,
+          drawSubtitle: false,
+          drawComposer: false,
+          drawLyricist: false,
+          drawingParameters: "default"
+        });
+        await osmd.load("score.musicxml");
+        osmd.render();
+        var title = (meta.meta && meta.meta.title) ? meta.meta.title : "(zonder titel)";
+        var n = (meta.measures && meta.measures.length) ? meta.measures.length : "?";
+        status.textContent =
+          "Gerenderd via Score-IR (“" + title + ”, " + n +
+          " maten). Zoek cues zoals “P: Gezegend…” / “P: Laat ons…”.";
+      } catch (err) {
+        status.textContent = "Fout: " + (err && err.message ? err.message : err);
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -36,12 +36,29 @@ De consumer **kiest**; de tool **handhaaft**. Zie
 | Profiel     | CLI                            | Wat je krijgt                                                                 |
 | ----------- | ------------------------------ | ----------------------------------------------------------------------------- |
 | `partituur` | `--layout partituur` (default) | Canonieke koorprint: [MSCZ-leesbaarheid](mscz-leesbaarheid.md) + checklist    |
+| `muziek`    | `--layout muziek`              | Leesbaarheid zonder titel/footer/colofon — [koormap-SVG](mvsa-svg.md)         |
 | `plain`     | `--layout plain`               | Geen Style-/colofon-/recite-nabewerking; alleen MuseScore-output van de MXL   |
 
 ```cmd
 mvsa mscz lied.mvsa -o generated\lied.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa mscz lied.mvsa -o generated\lied.plain.mscz --layout plain
+mvsa mscz lied.mvsa -o generated\lied.mscz --min-system-distance 10 --max-system-distance 18
+mvsa mscz lied.mvsa -o generated\lied.mscz --lyrics-font-size 14 --cue-font-size 11
 ```
+
+**Systeemafstand:** bij `partituur` / `muziek` kun je de vaste Style-waarden
+(default 8 / 14) overschrijven met `--min-system-distance` en
+`--max-system-distance` (spatium). Niet bij `--layout plain`.
+
+**Fonts:** `--lyrics-font` / `--lyrics-font-size` (zangtekst; default Source
+Sans 3 / 13 pt) en `--cue-font` / `--cue-font-size` (cues/`@tekst`; default
+zelfde font / 12 pt). Fontnaam moet op de machine in MuseScore beschikbaar
+zijn. Niet bij `--layout plain`.
+
+**Maat-spreiding:** `--measure-spacing` (MuseScore Style `measureSpacing`,
+default `1.2`; hoger = meer ruimte tussen noten in de maat). Dit is geen
+volledige “centreer in brede cue-maat”; die breedte komt uit MusicXML
+`width` bij cues — dat is een apart onderwerp.
 
 **Bibliotheek-id:** consumer bepaalt de waarde; geef die met
 `--bibliotheek-id` (colofon bij `partituur`). Pad-afleiding is alleen een

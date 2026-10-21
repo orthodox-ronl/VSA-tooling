@@ -379,10 +379,14 @@ def _build_parser():
             "      Valideer .mvsa (bestand of map).\n"
             "  mxl PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar SATB MusicXML (.mxl/.musicxml).\n"
+            "  score-ir PATH [-o OUTPUT] [--section SECTION]\n"
+            "      Exporteer naar Score-IR JSON (partituur; koormap/CoriB).\n"
             "  mscz PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar MuseScore (.mscz) via .mxl.\n"
             "  pdf PATH [-o OUTPUT] [--section SECTION]\n"
             "      Exporteer naar print-PDF via MuseScore.\n"
+            "  svg PATH [-o OUTPUT] [--section SECTION]\n"
+            "      Exporteer naar muziek-only SVG (koormap; MuseScore-brug).\n"
             "  mp3|ogg|wav PATH [-o OUTPUT]\n"
             "      Exporteer naar preview-audio (.mp3 / .ogg / .wav) via MuseScore.\n"
             "  import PATH [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]\n"
@@ -408,15 +412,17 @@ def _build_parser():
             "Top-level alias: mvsa …  (ook: mxl … / mscz … voor andere bronnen).\n"
             "\n"
             "Hulp: vsa mvsa validate -h | vsa mvsa mxl -h | "
-            "vsa mvsa mscz -h | vsa mvsa pdf -h | vsa mvsa mp3 -h | "
+            "vsa mvsa mscz -h | vsa mvsa pdf -h | vsa mvsa svg -h | "
+            "vsa mvsa mp3 -h | "
             "vsa mvsa ogg -h | vsa mvsa wav -h | "
+            "vsa mvsa score-ir -h | "
             "vsa mvsa import -h | vsa mvsa normalize -h | vsa mvsa kuiser -h"
         ),
     )
     mvsa_sub = mvsa.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,mxl,mscz,pdf,mp3,ogg,wav,import,normalize,kuiser}",
+        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,kuiser}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -568,8 +574,9 @@ def _build_parser():
         metavar="PROFILE",
         default=None,
         help=(
-            "MSCZ-layoutprofiel: partituur (default; A4/leesbaarheid/colofon) "
-            "of plain (geen nabewerking). Zie docs/formats/mscz-leesbaarheid.md."
+            "MSCZ-layoutprofiel: partituur (default; A4/leesbaarheid/colofon), "
+            "muziek (zelfde zonder titel/colofon; koormap-SVG), of plain "
+            "(geen nabewerking). Zie docs/formats/mscz-leesbaarheid.md."
         ),
     )
     m_mscz.add_argument(
@@ -590,6 +597,7 @@ def _build_parser():
             "nl→Cyrillisch."
         ),
     )
+    _add_partituur_style_args(m_mscz)
     m_pdf = mvsa_sub.add_parser(
         "pdf",
         help="Exporteer .mvsa (of .mscz) naar print-PDF voor zangers.",
@@ -660,6 +668,83 @@ def _build_parser():
         dest="bibliotheek_id",
         help="Bij .mvsa + layout partituur: expliciete bibliotheek-id voor colofon.",
     )
+    _add_partituur_style_args(m_pdf)
+    m_svg = mvsa_sub.add_parser(
+        "svg",
+        help="Exporteer .mvsa of .mscz naar partituur-SVG (koormap).",
+        description=(
+            "Bron .mvsa: muziek-only SVG via MuseScore (geen titel/colofon), "
+            "daarna viewBox-trim. Bron .mscz: alleen MuseScore → SVG (+ trim); "
+            "Style/fonts in het .mscz blijven behouden. Vereist MuseScore 4."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa svg examples\\mvsa\\1a-vredeslitanie.mvsa\n"
+            "  vsa mvsa svg lied.mvsa -o generated\\lied.mvsa.svg\n"
+            "  vsa mvsa svg lied.mvsa --lyrics-font-size 14 --cue-font-size 11\n"
+            "  vsa mvsa svg generated\\lied.mscz -o generated\\lied.svg\n"
+            "  vsa mvsa svg lied.mvsa --section schets1 --keep-mscz generated\\lied.mscz"
+        ),
+    )
+    m_svg.add_argument(
+        "path",
+        help=".mvsa- of .mscz-bestand.",
+    )
+    m_svg.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help=(
+            "Uitvoer-.svg (default: sibling lied.mvsa.svg)."
+        ),
+    )
+    m_svg.add_argument(
+        "--section",
+        metavar="SECTION",
+        default=None,
+        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+    )
+    m_svg.add_argument(
+        "--musescore",
+        metavar="PATH",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto-detectie).",
+    )
+    m_svg.add_argument(
+        "--keep-mscz",
+        metavar="PATH",
+        default=None,
+        help="Bij .mvsa: bewaar ook het tussenliggende .mscz (layout muziek).",
+    )
+    m_svg.add_argument(
+        "--keep-mxl",
+        metavar="PATH",
+        default=None,
+        help="Bij .mvsa: bewaar ook het tussenliggende partituur-.mxl.",
+    )
+    m_svg.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        dest="bibliotheek_id",
+        help="Alleen bij .mvsa; genegeerd voor layout muziek (geen colofon).",
+    )
+    m_svg.add_argument(
+        "--no-trim",
+        action="store_true",
+        help="Laat MuseScore-A4-SVG ongewijzigd (geen viewBox-trim).",
+    )
+    m_svg.add_argument(
+        "--transparent",
+        action="store_true",
+        help=(
+            "Geen witte achtergrond na trim (transparant). "
+            "Default: witte rechthoek achter de notatie."
+        ),
+    )
+    _add_partituur_style_args(m_svg)
     _add_mvsa_audio_format_parsers(mvsa_sub)
     m_import = mvsa_sub.add_parser(
         "import",
@@ -784,6 +869,58 @@ def _build_parser():
         "--no-align",
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
+    )
+    m_score_ir = mvsa_sub.add_parser(
+        "score-ir",
+        aliases=["ir"],
+        help="Exporteer .mvsa naar Score-IR JSON (partituur-profiel).",
+        description=(
+            "Schrijf Score-IR (format score-ir, profile partituur): "
+            "maatgerichte JSON met SA/TB-voices, lyrics en @tekst-cues. "
+            "Contract: docs/plans/partituur-ir.md. Alias: ir."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa score-ir examples\\mvsa\\1a-vredeslitanie.mvsa\n"
+            "  vsa mvsa score-ir lied.mvsa -o generated\\lied.score-ir.json\n"
+            "  vsa mvsa ir lied.mvsa --section schets1 -o out.json\n"
+            "  vsa mvsa score-ir lied.mvsa --musicxml generated\\lied.from-ir.musicxml"
+        ),
+    )
+    m_score_ir.add_argument(
+        "path",
+        help=".mvsa-bestand.",
+    )
+    m_score_ir.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help=(
+            "Uitvoerbestand (.json). Default: sibling "
+            "lied.mvsa.score-ir.json."
+        ),
+    )
+    m_score_ir.add_argument(
+        "--section",
+        metavar="SECTION",
+        default=None,
+        help="Alleen deze @sectie-id exporteren.",
+    )
+    m_score_ir.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        help="Optionele bibliotheek-id in meta.bibliotheekId.",
+    )
+    m_score_ir.add_argument(
+        "--musicxml",
+        metavar="PATH",
+        default=None,
+        help=(
+            "Schrijf ook partituur-MusicXML uit Score-IR (OSMD-brug)."
+        ),
     )
     m_kuiser = mvsa_sub.add_parser(
         "kuiser",
@@ -1511,6 +1648,98 @@ def _cmd_template(args) -> int:
     return 1
 
 
+def _add_partituur_style_args(parser: argparse.ArgumentParser) -> None:
+    """Shared MuseScore Style overrides (systeemafstand + fonts; partituur/muziek)."""
+    parser.add_argument(
+        "--min-system-distance",
+        type=float,
+        metavar="SP",
+        default=None,
+        dest="min_system_distance",
+        help=(
+            "Minimale afstand tussen systemen (MuseScore Style, spatium-eenheden). "
+            "Default bij partituur/muziek: 8. Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
+        "--max-system-distance",
+        type=float,
+        metavar="SP",
+        default=None,
+        dest="max_system_distance",
+        help=(
+            "Maximale afstand tussen systemen (MuseScore Style, spatium-eenheden). "
+            "Default bij partituur/muziek: 14. Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
+        "--lyrics-font",
+        metavar="FACE",
+        default=None,
+        dest="lyrics_font",
+        help=(
+            "Lettertype voor zangtekst (lyrics). Default: Source Sans 3. "
+            "Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
+        "--lyrics-font-size",
+        type=float,
+        metavar="PT",
+        default=None,
+        dest="lyrics_font_size",
+        help="Puntgrootte voor zangtekst. Default: 13. Niet bij --layout plain.",
+    )
+    parser.add_argument(
+        "--cue-font",
+        metavar="FACE",
+        default=None,
+        dest="cue_font",
+        help=(
+            "Lettertype voor cues (@tekst / SystemText). Default: Source Sans 3. "
+            "Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
+        "--cue-font-size",
+        type=float,
+        metavar="PT",
+        default=None,
+        dest="cue_font_size",
+        help="Puntgrootte voor cues. Default: 12. Niet bij --layout plain.",
+    )
+    parser.add_argument(
+        "--measure-spacing",
+        type=float,
+        metavar="F",
+        default=None,
+        dest="measure_spacing",
+        help=(
+            "Horizontale maat-afstand (MuseScore Style measureSpacing). "
+            "Default: 1.2. Hoger = meer spreiding. Niet bij --layout plain. "
+            "Lost geen cue-brede maten op (aparte maat-width)."
+        ),
+    )
+
+
+def _partituur_style_kwargs(args) -> dict:
+    """Keyword args for export_mvsa_to_mscz/pdf/svg Style overrides."""
+    return {
+        "min_system_distance": getattr(args, "min_system_distance", None),
+        "max_system_distance": getattr(args, "max_system_distance", None),
+        "lyrics_font": getattr(args, "lyrics_font", None),
+        "lyrics_font_size": getattr(args, "lyrics_font_size", None),
+        "cue_font": getattr(args, "cue_font", None),
+        "cue_font_size": getattr(args, "cue_font_size", None),
+        "measure_spacing": getattr(args, "measure_spacing", None),
+    }
+
+
+def _has_partituur_style_cli(args) -> bool:
+    kw = _partituur_style_kwargs(args)
+    return any(v is not None for v in kw.values())
+
+
 def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
     """Register ``mp3`` / ``ogg`` / ``wav`` (uitvoer = subcommando-naam)."""
     from .audio_export import AUDIO_FORMATS
@@ -1591,22 +1820,28 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_mscz(args)
     if getattr(args, "mvsa_command", None) == "pdf":
         return _cmd_mvsa_pdf(args)
+    if getattr(args, "mvsa_command", None) == "svg":
+        return _cmd_mvsa_svg(args)
     if getattr(args, "mvsa_command", None) in (*AUDIO_FORMATS, "audio"):
         return _cmd_mvsa_audio(args)
     if getattr(args, "mvsa_command", None) == "import":
         return _cmd_mvsa_import(args)
     if getattr(args, "mvsa_command", None) == "normalize":
         return _cmd_mvsa_normalize(args)
+    if getattr(args, "mvsa_command", None) in ("score-ir", "ir"):
+        return _cmd_mvsa_score_ir(args)
     if getattr(args, "mvsa_command", None) == "kuiser":
         return _cmd_mvsa_kuiser(args)
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
         "Gebruik: vsa mvsa "
-        "{validate,mxl,mscz,pdf,mp3,ogg,wav,import,normalize,kuiser} …\n"
+        "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,kuiser} …\n"
         "  vsa mvsa validate PATH\n"
         "  vsa mvsa mxl PATH [-o OUTPUT] [--section SECTION]\n"
+        "  vsa mvsa score-ir PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa pdf PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
+        "  vsa mvsa svg PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
         "  vsa mvsa mp3|ogg|wav PATH [-o OUTPUT]\n"
         "  vsa mvsa import PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
         "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
@@ -1751,6 +1986,60 @@ def _cmd_zoektekst(args) -> int:
     return 0
 
 
+def _cmd_mvsa_score_ir(args) -> int:
+    from .mvsa_musicxml import MvsaExportError
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+    from .score_ir import export_mvsa_path_to_score_ir
+    from .score_ir_musicxml import (
+        ScoreIrMusicxmlError,
+        export_score_ir_path_to_musicxml,
+    )
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    if path.suffix.lower() != ".mvsa":
+        print(
+            f"mvsa score-ir verwacht .mvsa, kreeg: {path.name}",
+            file=sys.stderr,
+        )
+        return 1
+    out = (
+        Path(args.output)
+        if args.output
+        else derived_output_path(path, ".score-ir.json")
+    )
+    try:
+        export_mvsa_path_to_score_ir(
+            path,
+            out,
+            section_id=args.section,
+            bibliotheek_id=getattr(args, "bibliotheek_id", None),
+        )
+        mxl_out = getattr(args, "musicxml", None)
+        if mxl_out:
+            mxl_path = Path(mxl_out)
+            if mxl_path.suffix.lower() not in {".musicxml", ".xml", ".mxl"}:
+                mxl_path = mxl_path.with_suffix(".musicxml")
+            export_score_ir_path_to_musicxml(out, mxl_path)
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaExportError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    except ScoreIrMusicxmlError as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
+    if getattr(args, "musicxml", None):
+        print(f"MusicXML: {Path(args.musicxml)}")
+    return 0
+
+
 def _cmd_mvsa_musicxml(args) -> int:
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .musicxml_package import musicxml_output_suffix
@@ -1872,6 +2161,7 @@ def _cmd_mvsa_mscz(args) -> int:
             layout=getattr(args, "layout", None),
             bibliotheek_id=getattr(args, "bibliotheek_id", None),
             hulptekst=bool(getattr(args, "hulptekst", False)),
+            **_partituur_style_kwargs(args),
         )
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
@@ -1918,10 +2208,12 @@ def _cmd_mvsa_pdf(args) -> int:
                 or args.keep_mxl
                 or args.layout
                 or args.bibliotheek_id
+                or _has_partituur_style_cli(args)
             ):
                 print(
                     "mvsa pdf: --section/--keep-mscz/--keep-mxl/--layout/"
-                    "--bibliotheek-id gelden alleen bij .mvsa",
+                    "--bibliotheek-id en Style-opties (systeemafstand/fonts) "
+                    "gelden alleen bij .mvsa",
                     file=sys.stderr,
                 )
                 return 1
@@ -1938,6 +2230,7 @@ def _cmd_mvsa_pdf(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=args.layout,
                 bibliotheek_id=args.bibliotheek_id,
+                **_partituur_style_kwargs(args),
             )
         else:
             print(
@@ -1961,6 +2254,87 @@ def _cmd_mvsa_pdf(args) -> int:
         print(f"MSCZ: {args.keep_mscz}")
     if args.keep_mxl:
         print(f"MXL: {args.keep_mxl}")
+    return 0
+
+
+def _cmd_mvsa_svg(args) -> int:
+    from .mvsa_mscz import MvsaMsczError, export_mscz_to_svg, export_mvsa_to_svg
+    from .mvsa_musicxml import MvsaExportError
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    path = Path(args.path)
+    if not path.is_file():
+        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+        return 1
+    out = (
+        Path(args.output)
+        if args.output
+        else derived_output_path(path, ".svg")
+    )
+    musescore = Path(args.musescore) if args.musescore else None
+    keep_mscz = Path(args.keep_mscz) if args.keep_mscz else None
+    keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
+    trim = not bool(getattr(args, "no_trim", False))
+    white_background = not bool(getattr(args, "transparent", False))
+    suffix = path.suffix.lower()
+    try:
+        if suffix == ".mscz":
+            if (
+                args.section
+                or args.keep_mscz
+                or args.keep_mxl
+                or args.bibliotheek_id
+                or _has_partituur_style_cli(args)
+            ):
+                print(
+                    "mvsa svg: --section/--keep-mscz/--keep-mxl/"
+                    "--bibliotheek-id en Style-opties (systeemafstand/fonts) "
+                    "gelden alleen bij .mvsa (bij .mscz staat Style al in het bestand)",
+                    file=sys.stderr,
+                )
+                return 1
+            export_mscz_to_svg(
+                path,
+                out,
+                musescore=musescore,
+                trim=trim,
+                white_background=white_background,
+            )
+        elif suffix == ".mvsa":
+            export_mvsa_to_svg(
+                path,
+                out,
+                section_id=args.section,
+                musescore=musescore,
+                keep_mscz=keep_mscz,
+                keep_mxl=keep_mxl,
+                bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                trim=trim,
+                white_background=white_background,
+                **_partituur_style_kwargs(args),
+            )
+        else:
+            print(
+                f"mvsa svg verwacht .mvsa of .mscz, kreeg: {path.name}",
+                file=sys.stderr,
+            )
+            return 1
+    except MvsaValidationError as exc:
+        for d in exc.diagnostics:
+            print(format_diagnostic(d, path), file=sys.stderr)
+        return 1
+    except MvsaExportError as exc:
+        loc = f"{path}:{exc.line}: " if exc.line else f"{path}: "
+        print(f"{loc}ERROR: {exc}", file=sys.stderr)
+        return 1
+    except MvsaMsczError as exc:
+        print(f"{path}: ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"Geschreven: {out}")
+    if keep_mscz is not None:
+        print(f"MSCZ: {keep_mscz}")
+    if keep_mxl is not None:
+        print(f"MXL: {keep_mxl}")
     return 0
 
 

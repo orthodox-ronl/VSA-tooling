@@ -1,0 +1,208 @@
+{
+  "format": "score-ir",
+  "version": "0.1",
+  "profile": "partituur",
+  "meta": {
+    "title": "(1a) Vredeslitanie — IR-mini",
+    "note": "Handvoorbeeld bij docs/plans/partituur-ir.md. Canonieke export: vsa mvsa score-ir."
+  },
+  "pitchContext": {
+    "do": "F4",
+    "mode": "major",
+    "octaves": { "S": 0, "A": 0, "T": -1, "B": -1 }
+  },
+  "measures": [
+    {
+      "id": "m1",
+      "bar": { "right": "single" },
+      "cues": [
+        {
+          "kind": "tekst",
+          "text": "P: Gezegend ... der eeuwen",
+          "anchor": "measure-start"
+        }
+      ],
+      "lyrics": [
+        {
+          "syllables": [
+            { "text": "A", "syllabic": "begin" },
+            { "text": "men", "syllabic": "end" }
+          ],
+          "layers": { "1": ["A", "men"] }
+        }
+      ],
+      "voices": {
+        "S": [
+          {
+            "pitch": { "step": "A", "octave": 4 },
+            "duration": { "elm": "_" },
+            "lyricIndex": 0,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "_" }
+          }
+        ],
+        "A": [
+          {
+            "pitch": { "step": "F", "octave": 4 },
+            "duration": { "elm": "_" },
+            "lyricIndex": 0,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "_" }
+          }
+        ],
+        "T": [
+          {
+            "pitch": { "step": "C", "octave": 4 },
+            "duration": { "elm": "_" },
+            "lyricIndex": 0,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "_" }
+          }
+        ],
+        "B": [
+          {
+            "pitch": { "step": "F", "octave": 3 },
+            "duration": { "elm": "_" },
+            "lyricIndex": 0,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "_" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "m2",
+      "bar": { "right": "single" },
+      "cues": [
+        {
+          "kind": "tekst",
+          "text": "P: Laat ons de Heer in vrede bidden",
+          "anchor": "measure-start"
+        }
+      ],
+      "lyrics": [
+        {
+          "syllables": [{ "text": "Heer", "syllabic": "single" }],
+          "layers": { "1": ["Heer"] }
+        },
+        {
+          "syllables": [
+            { "text": "ont", "syllabic": "begin" },
+            { "text": "ferm", "syllabic": "end" }
+          ],
+          "layers": { "1": ["ont", "ferm"] }
+        },
+        {
+          "syllables": [{ "text": "U", "syllabic": "single" }],
+          "layers": { "1": ["U"] }
+        }
+      ],
+      "voices": {
+        "S": [
+          {
+            "pitch": { "step": "A", "octave": 4 },
+            "duration": { "elm": "~" },
+            "lyricIndex": 0
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" },
+            "lyricIndex": 1,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "__" },
+            "lyricIndex": 2,
+            "melisma": { "extend": true }
+          }
+        ],
+        "A": [
+          {
+            "pitch": { "step": "F", "octave": 4 },
+            "duration": { "elm": "~" },
+            "lyricIndex": 0
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" },
+            "lyricIndex": 1,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "__" },
+            "lyricIndex": 2,
+            "melisma": { "extend": true }
+          }
+        ],
+        "T": [
+          {
+            "pitch": { "step": "C", "octave": 4 },
+            "duration": { "elm": "~" },
+            "lyricIndex": 0
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" },
+            "lyricIndex": 1,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "__" },
+            "lyricIndex": 2,
+            "melisma": { "extend": true }
+          }
+        ],
+        "B": [
+          {
+            "pitch": { "step": "F", "octave": 3 },
+            "duration": { "elm": "~" },
+            "lyricIndex": 0
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" },
+            "lyricIndex": 1,
+            "melisma": { "extend": true }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "~" }
+          },
+          {
+            "pitch": "hold",
+            "duration": { "elm": "__" },
+            "lyricIndex": 2,
+            "melisma": { "extend": true }
+          }
+        ]
+      }
+    }
+  ]
+}

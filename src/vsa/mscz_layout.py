@@ -12,9 +12,9 @@ from typing import Literal
 
 from .mscz_partituur import MsczPartituurError, apply_partituur_mscz_conventions
 
-MsczLayoutName = Literal["partituur", "plain"]
+MsczLayoutName = Literal["partituur", "plain", "muziek"]
 
-MSCZ_LAYOUT_PROFILES: tuple[str, ...] = ("partituur", "plain")
+MSCZ_LAYOUT_PROFILES: tuple[str, ...] = ("partituur", "plain", "muziek")
 DEFAULT_MSCZ_LAYOUT: MsczLayoutName = "partituur"
 
 # Korte omschrijvingen voor CLI-help / docs (één zin per profiel).
@@ -26,6 +26,10 @@ MSCZ_LAYOUT_DESCRIPTIONS: dict[str, str] = {
     "plain": (
         "Alleen MuseScore-conversie van de partituur-MXL; geen Style-/colofon-/"
         "recite-nabewerking door VSA-tooling."
+    ),
+    "muziek": (
+        "Partituur-leesbaarheid zonder titel, footer of colofon — voor "
+        "koormap-SVG / shortcode muziek (inhoudsbreedte na SVG-trim)."
     ),
 }
 
@@ -61,11 +65,13 @@ def apply_mscz_layout_profile(
     tekstdichter: str | None = None,
     arrangeur: str | None = None,
     vertaler: str | None = None,
+    style_overrides: dict[str, str] | None = None,
 ) -> str:
     """Apply the named layout to ``path`` (.mscz). Returns the profile id used.
 
     ``plain`` leaves the MuseScore file unchanged. ``partituur`` runs
-    :func:`apply_partituur_mscz_conventions`.
+    :func:`apply_partituur_mscz_conventions`. ``muziek`` is the same without
+    title / footer / colofon (koormap embed).
     """
     profile = normalize_mscz_layout(layout)
     if profile == "plain":
@@ -82,6 +88,8 @@ def apply_mscz_layout_profile(
         tekstdichter=tekstdichter,
         arrangeur=arrangeur,
         vertaler=vertaler,
+        music_only=(profile == "muziek"),
+        style_overrides=style_overrides,
     )
     return profile
 

@@ -121,6 +121,126 @@ def test_apply_partituur_style_on_minimal_mscz(tmp_path: Path):
     assert "<tempo>2.1667</tempo>" in out
 
 
+def test_system_distance_style_override(tmp_path: Path):
+    from vsa.mscz_partituur import (
+        MsczPartituurError,
+        apply_partituur_mscz_conventions,
+        build_system_distance_style_overrides,
+    )
+
+    overrides = build_system_distance_style_overrides(
+        min_system_distance=10,
+        max_system_distance=18.5,
+    )
+    assert overrides == {
+        "minSystemDistance": "10",
+        "maxSystemDistance": "18.5",
+    }
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style>"
+        "<minSystemDistance>8</minSystemDistance>"
+        "</Style><Part></Part></Score></museScore>"
+    )
+    path = tmp_path / "dist.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("dist.mscx", mscx)
+    apply_partituur_mscz_conventions(path, style_overrides=overrides)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("dist.mscx").decode("utf-8")
+    assert "<minSystemDistance>10</minSystemDistance>" in out
+    assert "<maxSystemDistance>18.5</maxSystemDistance>" in out
+
+    with pytest.raises(MsczPartituurError, match="kleiner"):
+        build_system_distance_style_overrides(
+            min_system_distance=20,
+            max_system_distance=10,
+        )
+    with pytest.raises(MsczPartituurError, match="> 0"):
+        build_system_distance_style_overrides(min_system_distance=0)
+
+
+def test_system_distance_rejected_with_plain_layout():
+    with pytest.raises(MvsaMsczError, match="plain"):
+        export_mvsa_to_mscz(
+            Path("unused.mvsa"),
+            Path("out.mscz"),
+            layout="plain",
+            min_system_distance=12,
+        )
+
+
+def test_measure_spacing_style_override(tmp_path: Path):
+    from vsa.mscz_partituur import (
+        MsczPartituurError,
+        apply_partituur_mscz_conventions,
+        build_partituur_style_overrides,
+    )
+
+    overrides = build_partituur_style_overrides(measure_spacing=1.8)
+    assert overrides == {"measureSpacing": "1.8"}
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style>"
+        "<measureSpacing>1.2</measureSpacing>"
+        "</Style><Part></Part></Score></museScore>"
+    )
+    path = tmp_path / "sp.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("sp.mscx", mscx)
+    apply_partituur_mscz_conventions(path, style_overrides=overrides)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("sp.mscx").decode("utf-8")
+    assert "<measureSpacing>1.8</measureSpacing>" in out
+    with pytest.raises(MsczPartituurError, match="> 0"):
+        build_partituur_style_overrides(measure_spacing=0)
+
+
+def test_lyrics_and_cue_font_style_overrides(tmp_path: Path):
+    from vsa.mscz_partituur import (
+        MsczPartituurError,
+        apply_partituur_mscz_conventions,
+        build_partituur_style_overrides,
+    )
+
+    overrides = build_partituur_style_overrides(
+        lyrics_font="DejaVu Sans",
+        lyrics_font_size=15,
+        cue_font="Georgia",
+        cue_font_size=11,
+    )
+    assert overrides["lyricsOddFontFace"] == "DejaVu Sans"
+    assert overrides["lyricsEvenFontSize"] == "15"
+    assert overrides["systemTextFontFace"] == "Georgia"
+    assert overrides["staffTextFontSize"] == "11"
+
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style><Part></Part></Score></museScore>"
+    )
+    path = tmp_path / "fonts.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("fonts.mscx", mscx)
+    apply_partituur_mscz_conventions(path, style_overrides=overrides)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("fonts.mscx").decode("utf-8")
+    assert "<lyricsOddFontFace>DejaVu Sans</lyricsOddFontFace>" in out
+    assert "<systemTextFontFace>Georgia</systemTextFontFace>" in out
+    assert "<staffTextFontSize>11</staffTextFontSize>" in out
+
+    with pytest.raises(MsczPartituurError, match="leeg"):
+        build_partituur_style_overrides(lyrics_font="  ")
+    with pytest.raises(MsczPartituurError, match="> 0"):
+        build_partituur_style_overrides(cue_font_size=0)
+    with pytest.raises(MvsaMsczError, match="plain"):
+        export_mvsa_to_mscz(
+            Path("unused.mvsa"),
+            Path("out.mscz"),
+            layout="plain",
+            lyrics_font="Arial",
+        )
+
+
 def test_promote_tekst_staff_text_to_system_text(tmp_path: Path):
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 
