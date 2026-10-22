@@ -179,6 +179,7 @@ nav:
     - Fixtures-catalogus: reference/fixtures-catalogus.md
     - CLI:
       - Overzicht: reference/cli/index.md
+      - Invoer bestand of map: reference/cli/input-pad.md
       - reference/cli/validate.md
       - reference/cli/parse.md
       - reference/cli/blocks.md

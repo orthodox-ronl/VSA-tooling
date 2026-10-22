@@ -24,7 +24,7 @@ Voor afspelen/oefenen gebruik je in plaats daarvan
 
 | Commando                                                   | Wanneer                                                                          |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [`vsa svg`](../reference/cli/svg.md)                       | Eén los `.vsa`-bestand snel als afbeelding bekijken.                             |
+| [`vsa svg`](../reference/cli/svg.md)                       | `.vsa` (bestand of map) snel als SVG bekijken.                                   |
 | [`vsa process`](../reference/cli/process.md)               | SVG's uit [VSA-blokken](@) in Markdown, zonder de Markdown te herschrijven.      |
 | [`vsa build-markdown`](../reference/cli/build-markdown.md) | Hugo-[publicatie](@): Markdown **en** SVG-assets in één stap (inline rendering). |
 

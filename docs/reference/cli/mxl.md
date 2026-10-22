@@ -11,6 +11,10 @@ SATB-parser, soft-wrap, holds, recite en `--pitch`-gedrag).
 **Werkbank-bewerkvorm** — niet ongewijzigd als catalogusbron gebruiken. De
 output begint met dezelfde waarschuwingsbanner als `mvsa import`.
 
+**Invoer:** `path` mag één bronbestand **of** een map zijn (recursief). Bij
+meerdere bronnen: sibling- of in-place-output per bestand; `-o` alleen bij
+precies één bron. Zie [Invoer bestand of map](input-pad.md).
+
 ## Synopsis
 
 ```text
@@ -24,12 +28,12 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 
 ## Subcommando's
 
-| Subcommando  | Doel                                                                                                                       |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `import`     | Importeer naar `.mvsa`: direct SATB P1–P4 (zelfde pad als `vsa mvsa import`).                                              |
-| `mscz`       | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore. Default: `<bronnaam>.mscz` (bijv. `lied.mxl.mscz`). |
+| Subcommando  | Doel                                                                                                                                     |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `import`     | Importeer naar `.mvsa`: direct SATB P1–P4 (zelfde pad als `vsa mvsa import`).                                                            |
+| `mscz`       | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore. Default: `<bronnaam>.mscz` (bijv. `lied.mxl.mscz`).               |
 | `validate`   | Lees-gate: M2/M8/M18 (monofone parts), M20 (note-kindvolgorde), Coria-importer-tags, meta (source ≠ licentie). Profiel `satb` of `mono`. |
-| `normalize`  | Schrijf playback-MXL: explode + piano + sanitize (incl. canonieke note-volgorde M20); met `--apply-timing` ook recite/pauzes.             |
+| `normalize`  | Schrijf playback-MXL: explode + piano + sanitize (incl. canonieke note-volgorde M20); met `--apply-timing` ook recite/pauzes.            |
 
 **Import-opties** (`--pitch` default `ag-vsa`, `--no-align`, soft-wrap ~80,
 eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zie
@@ -56,6 +60,7 @@ scripts\mxl.cmd -h
 
 ## Zie ook
 
+- [Invoer bestand of map](input-pad.md)
 - [`mvsa`](mvsa.md) — bron `.mvsa`
 - [`mscz`](mscz.md) — bron `.mscz` (`mscz mxl` gebruikt dezelfde normalize-keten)
 - [`vsa musicxml`](musicxml.md) — eenstemmig `.vsa` → MusicXML

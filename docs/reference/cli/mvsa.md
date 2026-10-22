@@ -15,6 +15,12 @@ Subcommando’s zijn genoemd naar de **uitvoer** (zoals `mscz` / `pdf` /
 `mp3` / `ogg` / `wav`). Oude namen `musicxml` en `audio` blijven als alias
 werken (`audio` ≡ `mp3`).
 
+**Invoer:** bij de meeste subcommando’s mag `path` één bronbestand **of**
+een map zijn (recursief alle passende extensies). Bij meerdere bronnen
+komt de uitvoer als sibling naast elk bronbestand; `-o` en vergelijkbare
+enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
+één bronbestand. Overzicht: [Invoer bestand of map](input-pad.md).
+
 ## Synopsis
 
 ```text
@@ -205,16 +211,16 @@ VSA).
 
 ### Argumenten en opties
 
-| Naam                   | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                          |
-| ---------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
-| `path`                 | Ja        | Bron: `.mvsa`, `.mscz` of `.mxl`/`.musicxml`.                             | —                                            | Moet een bestaand bestand zijn.      |
-| `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<bronnaam>.mxl` (bijv. `lied.mvsa.mxl`)     | Andere extensie → wordt `.mxl`.      |
-| `--section SECTION`    | Nee       | Alleen bij `.mvsa`: deze `@sectie`-id.                                    | Alle secties                                 | Id moet in het bestand voorkomen.    |
-| `--bibliotheek-id ID`  | Nee       | Alleen bij `.mvsa`: bibliotheek-id in identification/rights.              | pad-sniff onder `content-source/bibliotheek` | Optioneel.                           |
-| `--hulptekst`          | Nee       | Alleen bij `.mvsa`: tweede lyric-laag (number=2).                         | uit                                          | Zie beschrijving hierboven.          |
-| `--hulptekst-as-parts` | Nee       | Alleen bij `.mvsa`: Coria-extra parts met hulptekst (volume 0).           | uit                                          | Impliceert `--hulptekst`.            |
-| `--musescore PATH`     | Nee       | Alleen bij `.mscz`: pad naar MuseScore.                                   | auto-detectie                                | —                                    |
-| `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                           | —                                            | —                                    |
+| Naam                   | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                           |
+| ---------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------- |
+| `path`                 | Ja        | Bron: `.mvsa`, `.mscz` of `.mxl`/`.musicxml`, of map met zulke bestanden. | —                                            | Moet bestaan.                         |
+| `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<bronnaam>.mxl` (bijv. `lied.mvsa.mxl`)     | Alleen bij één bron; anders → `.mxl`. |
+| `--section SECTION`    | Nee       | Alleen bij `.mvsa`: deze `@sectie`-id.                                    | Alle secties                                 | Id moet in het bestand voorkomen.     |
+| `--bibliotheek-id ID`  | Nee       | Alleen bij `.mvsa`: bibliotheek-id in identification/rights.              | pad-sniff onder `content-source/bibliotheek` | Optioneel.                            |
+| `--hulptekst`          | Nee       | Alleen bij `.mvsa`: tweede lyric-laag (number=2).                         | uit                                          | Zie beschrijving hierboven.           |
+| `--hulptekst-as-parts` | Nee       | Alleen bij `.mvsa`: Coria-extra parts met hulptekst (volume 0).           | uit                                          | Impliceert `--hulptekst`.             |
+| `--musescore PATH`     | Nee       | Alleen bij `.mscz`: pad naar MuseScore.                                   | auto-detectie                                | —                                     |
+| `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                           | —                                            | —                                     |
 
 ### Output
 
@@ -288,13 +294,13 @@ vsa mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
 
 ### Argumenten
 
-| Argument / optie       | Betekenis                                                                 |
-| ---------------------- | ------------------------------------------------------------------------- |
-| `path`                 | Bron-``.mvsa``.                                                           |
-| `-o` / `--output`      | Uitvoer-``.json``. Default: sibling ``lied.mvsa.score-ir.json``.          |
-| `--section SECTION`    | Alleen deze ``@sectie``-id.                                               |
-| `--bibliotheek-id ID`  | Zet ``meta.bibliotheekId``.                                               |
-| `--musicxml PATH`      | Extra: partituur-``.musicxml`` gegenereerd uit de Score-IR.               |
+| Argument / optie       | Betekenis                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| `path`                 | Bron-``.mvsa`` of map met ``.mvsa``-bestanden.                                        |
+| `-o` / `--output`      | Uitvoer-``.json``. Default: sibling ``lied.mvsa.score-ir.json``. Alleen bij één bron. |
+| `--section SECTION`    | Alleen deze ``@sectie``-id.                                                           |
+| `--bibliotheek-id ID`  | Zet ``meta.bibliotheekId``.                                                           |
+| `--musicxml PATH`      | Extra: partituur-``.musicxml`` gegenereerd uit de Score-IR.                           |
 
 ### Voorbeelden
 
@@ -366,8 +372,8 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 | Naam                         | Verplicht | Betekenis                                                                                                   | Default                                    |
 | ---------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `path`                       | Ja        | Bron-`.mvsa`-bestand.                                                                                       | —                                          |
-| `-o`, `--output`             | Nee       | Uitvoer-`.mscz`.                                                                                            | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
+| `path`                       | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                                                          | —                                          |
+| `-o`, `--output`             | Nee       | Uitvoer-`.mscz` (alleen bij precies één bronbestand).                                                       | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
 | `--section SECTION`          | Nee       | Alleen deze `@sectie`-id.                                                                                   | Alle secties                               |
 | `--musescore PATH`           | Nee       | Pad naar MuseScore-executable.                                                                              | Auto-detectie                              |
 | `--keep-mxl PATH`            | Nee       | Bewaar ook het tussenliggende `.mxl`.                                                                       | temp (wordt verwijderd)                    |
@@ -460,8 +466,8 @@ dezelfde A4-eis P6).
 
 | Naam                         | Verplicht | Betekenis                                                                      | Default                                  |
 | ---------------------------- | --------- | ------------------------------------------------------------------------------ | ---------------------------------------- |
-| `path`                       | Ja        | `.mvsa` of `.mscz`.                                                            | —                                        |
-| `-o`, `--output`             | Nee       | Uitvoer-`.pdf`.                                                                | `<bronnaam>.pdf` (bijv. `lied.mvsa.pdf`) |
+| `path`                       | Ja        | `.mvsa` of `.mscz`, of map met zulke bestanden.                                | —                                        |
+| `-o`, `--output`             | Nee       | Uitvoer-`.pdf` (alleen bij precies één bronbestand).                           | `<bronnaam>.pdf` (bijv. `lied.mvsa.pdf`) |
 | `--section`                  | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.                                          | alle secties                             |
 | `--musescore`                | Nee       | MuseScore-executable.                                                          | auto-detectie                            |
 | `--keep-mscz`                | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.                                    | temp (wordt verwijderd)                  |
@@ -534,8 +540,8 @@ om naar SVG.
 
 | Naam                         | Betekenis                                                                                 |
 | ---------------------------- | ----------------------------------------------------------------------------------------- |
-| `path`                       | Bron-``.mvsa`` of ``.mscz``.                                                              |
-| `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg`` / ``.svg``.                          |
+| `path`                       | Bron-``.mvsa`` of ``.mscz``, of map met zulke bestanden.                                  |
+| `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg``. Alleen bij één bron.                |
 | `--section`                  | Alleen bij ``.mvsa``: deze ``@sectie``-id.                                                |
 | `--musescore`                | MuseScore-executable.                                                                     |
 | `--keep-mscz`                | Alleen bij ``.mvsa``: bewaar tussenliggende ``.mscz``.                                    |
@@ -601,13 +607,13 @@ afspeelknop. Zie [`vsa audio`](audio.md) en
 
 ### Argumenten en opties
 
-| Naam             | Verplicht | Betekenis                                    | Default                                            |
-| ---------------- | --------- | -------------------------------------------- | -------------------------------------------------- |
-| `path`           | Ja        | ``.mvsa`` / ``.mxl`` / ``.vsa`` / ``.mscz``. | —                                                  |
-| `-o`, `--output` | Nee       | Uitvoer-audio.                               | ``<bronnaam>.<formaat>`` (bijv. ``lied.mvsa.ogg``) |
-| `--section`      | Nee       | Alleen bij ``.mvsa``: één ``@sectie``-id.    | alle secties                                       |
-| `--musescore`    | Nee       | MuseScore-executable.                        | auto-detectie                                      |
-| `--keep-mxl`     | Nee       | Bewaar tussenliggende playback-``.mxl``.     | temp (wordt verwijderd)                            |
+| Naam             | Verplicht | Betekenis                                            | Default                                            |
+| ---------------- | --------- | ---------------------------------------------------- | -------------------------------------------------- |
+| `path`           | Ja        | ``.mvsa`` / ``.mxl`` / ``.vsa`` / ``.mscz``, of map. | —                                                  |
+| `-o`, `--output` | Nee       | Uitvoer-audio (alleen bij precies één bron).         | ``<bronnaam>.<formaat>`` (bijv. ``lied.mvsa.ogg``) |
+| `--section`      | Nee       | Alleen bij ``.mvsa``: één ``@sectie``-id.            | alle secties                                       |
+| `--musescore`    | Nee       | MuseScore-executable.                                | auto-detectie                                      |
+| `--keep-mxl`     | Nee       | Bewaar tussenliggende playback-``.mxl``.             | temp (wordt verwijderd)                            |
 
 ### Voorbeelden
 
@@ -758,9 +764,9 @@ Syntax van eindankers:
 
 | Naam                 | Verplicht | Betekenis                                                                              | Default              |
 | -------------------- | --------- | -------------------------------------------------------------------------------------- | -------------------- |
-| `path`               | Ja        | `.mxl`, `.musicxml` of `.mscz`.                                                        | —                    |
+| `path`               | Ja        | `.mxl` / `.musicxml` / `.xml` / `.mscz`, of map met zulke bestanden.                   | —                    |
 | `--pitch`            | Nee       | `ag-vsa` (default), `vsa`, `doremi`, of `a-g` (alias `abc`).                           | `ag-vsa`             |
-| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa`.                                                                       | `<stem>.import.mvsa` |
+| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa` (alleen bij precies één bronbestand).                                  | `<stem>.import.mvsa` |
 | `--do`               | Nee       | Forceer `@do` (bijv. `F4`). Zonder: KeySig / fifths / fallback.                        | afgeleid             |
 | `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)                                                          | `@oct`               |
 | `--section`          | Nee       | `@sectie`-id in de output                                                              | `import`             |
@@ -824,9 +830,9 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 | Naam                    | Verplicht | Betekenis                                                            | Default                         |
 | ----------------------- | --------- | -------------------------------------------------------------------- | ------------------------------- |
-| `path`                  | Ja        | Bron-`.mvsa`-bestand.                                                | —                               |
+| `path`                  | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                   | —                               |
 | `--pitch`               | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` / `ag-vsa`         | `preserve` bij `.mvsa`-bron     |
-| `-o`, `--output`        | Nee       | Uitvoerpad.                                                          | `<stem>.normalized.mvsa`        |
+| `-o`, `--output`        | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                     | `<stem>.normalized.mvsa`        |
 | `--octave-style`        | Nee       | `@oct` (canoniek) of `marker` (nog niet klaar)                       | `@oct`                          |
 | `--no-align`            | Nee       | Geen kolomuitlijning.                                                | uit (wel alignen)               |
 
@@ -924,6 +930,7 @@ vsa mvsa kuiser lied.mvsa --pitch a-g
 
 - Draft-spec: [specification-mvsa](../../specification-mvsa/README.md)
 - Conversieplan: [mvsa-conversions](../../plans/mvsa-conversions.md)
+- Invoer bestand of map: [input-pad.md](input-pad.md)
 - Voorbeelden: [examples/mvsa](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)
 - Eenstemmig: [`vsa validate`](validate.md), [`vsa musicxml`](musicxml.md)
 - Platte gezongen tekst: [`vsa text`](text.md) (ook op `.mvsa` / MusicXML / `.mscz`)

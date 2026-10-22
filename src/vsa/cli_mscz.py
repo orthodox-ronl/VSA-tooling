@@ -10,6 +10,11 @@ import argparse
 import sys
 from pathlib import Path
 
+from .derived_path import derived_output_path
+from .input_paths import InputPathError, collect_cli_sources
+
+_MSCZ_SUFFIXES = (".mscz",)
+
 
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
@@ -40,6 +45,25 @@ def main(argv: list[str] | None = None) -> int:
     return 1
 
 
+def _collect(path: str | Path) -> list[Path] | None:
+    try:
+        return collect_cli_sources(path, suffixes=_MSCZ_SUFFIXES)
+    except InputPathError as exc:
+        print(str(exc), file=sys.stderr)
+        return None
+
+
+def _reject_multi_output(files: list[Path], output: str | None) -> bool:
+    if len(files) > 1 and output:
+        print(
+            "-o/--output is alleen toegestaan bij precies één bronbestand "
+            "(bij een map: sibling-output per bron).",
+            file=sys.stderr,
+        )
+        return True
+    return False
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mscz",
@@ -56,6 +80,9 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Exporteer naar .mxl via MuseScore.\n"
             "  text PATH [-o OUT] [--musescore PATH]\n"
             "      Platte gezongen tekst (via temp-.mxl; geen .mvsa).\n"
+            "\n"
+            "PATH = één .mscz of map (recursief). "
+            "-o alleen bij precies één bron.\n"
             "\n"
             "voorbeelden:\n"
             "  mscz import lied.mscz -o lied.mvsa\n"
@@ -77,12 +104,18 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Importeer .mscz naar .mvsa.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    imp.add_argument("path", help=".mscz bronbestand.")
+    imp.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief; zelfde batch als mvsa import).",
+    )
     imp.add_argument(
         "-o",
         "--output",
         default=None,
-        help="Uitvoer-.mvsa (default: <stem>.import.mvsa).",
+        help=(
+            "Uitvoer-.mvsa (default: <stem>.import.mvsa per bron). "
+            "Alleen bij precies één bronbestand."
+        ),
     )
     imp.add_argument(
         "--pitch",
@@ -126,13 +159,17 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Exporteer .mscz naar .mxl via MuseScore.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    mxl.add_argument("path", help=".mscz bronbestand.")
+    mxl.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+    )
     mxl.add_argument(
         "-o",
         "--output",
         default=None,
         help=(
-            "Uitvoer-.mxl (default: <bronnaam>.mxl, bijv. lied.mscz.mxl)."
+            "Uitvoer-.mxl (default: sibling <bronnaam>.mxl). "
+            "Alleen bij precies één bronbestand."
         ),
     )
     mxl.add_argument(
@@ -148,15 +185,22 @@ def _build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Zelfde extractie als ``vsa text`` op MusicXML: eerste part met\n"
             "lyric number 1, lettergrepen samengevoegd tot woorden.\n"
-            "Schrijft geen import-sibling (.mvsa)."
+            "Schrijft geen import-sibling (.mvsa).\n"
+            "Bij een map: één run per .mscz; -o alleen bij één bronbestand."
         ),
     )
-    text.add_argument("path", help=".mscz bronbestand.")
+    text.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+    )
     text.add_argument(
         "-o",
         "--output",
         default=None,
-        help="Schrijf platte tekst naar dit bestand i.p.v. stdout.",
+        help=(
+            "Schrijf platte tekst naar dit bestand i.p.v. stdout. "
+            "Alleen bij precies één bronbestand."
+        ),
     )
     text.add_argument(
         "--musescore",
@@ -170,43 +214,51 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .musicxml_playback_normalize import export_mscz_to_playback_mxl
 
-    path = Path(ns.path)
-    if not path.is_file():
-        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+    files = _collect(ns.path)
+    if files is None:
         return 1
-    if path.suffix.lower() != ".mscz":
-        print(f"Verwacht .mscz als bron; kreeg {path.suffix!r}", file=sys.stderr)
+    if _reject_multi_output(files, ns.output):
         return 1
-    from .derived_path import derived_output_path
-
-    out = Path(ns.output) if ns.output else derived_output_path(path, ".mxl")
     musescore = Path(ns.musescore) if ns.musescore else None
-    try:
-        export_mscz_to_playback_mxl(path, out, musescore=musescore)
-    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-        print(f"{path}: ERROR: {exc}", file=sys.stderr)
-        return 1
-    except Exception as exc:
-        print(f"{path}: ERROR: {exc}", file=sys.stderr)
-        return 1
-    print(f"Geschreven: {out}")
-    return 0
+    exit_code = 0
+    for path in files:
+        out = Path(ns.output) if ns.output else derived_output_path(path, ".mxl")
+        try:
+            export_mscz_to_playback_mxl(path, out, musescore=musescore)
+        except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {out}")
+    return exit_code
 
 
 def _cmd_mscz_text(ns: argparse.Namespace) -> int:
-    """Forward naar ``vsa text`` (zelfde API; geen .mvsa)."""
+    """Forward naar ``vsa text`` per bronbestand (geen .mvsa)."""
     from .cli import main as vsa_main
 
-    path = Path(ns.path)
-    if path.suffix.lower() != ".mscz":
-        print(f"Verwacht .mscz als bron; kreeg {path.suffix!r}", file=sys.stderr)
+    files = _collect(ns.path)
+    if files is None:
         return 1
-    forwarded = ["text", ns.path]
-    if ns.output:
-        forwarded.extend(["-o", ns.output])
-    if ns.musescore:
-        forwarded.extend(["--musescore", ns.musescore])
-    return vsa_main(forwarded)
+    if _reject_multi_output(files, ns.output):
+        return 1
+    exit_code = 0
+    for path in files:
+        forwarded = ["text", str(path)]
+        if ns.output:
+            forwarded.extend(["-o", ns.output])
+        if ns.musescore:
+            forwarded.extend(["--musescore", ns.musescore])
+        if len(files) > 1:
+            print(f"=== {path} ===", flush=True)
+        rc = vsa_main(forwarded)
+        if rc != 0:
+            exit_code = rc
+    return exit_code
 
 
 if __name__ == "__main__":
