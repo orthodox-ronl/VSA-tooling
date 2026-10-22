@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-20 23:02 CEST.
+  , gebouwd 2026-10-22 13:38 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -820,6 +820,62 @@
     
   
     .mvsa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../score-ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Score-IR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mvsa-svg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa-SVG (koormap)
   
 
     
@@ -3614,6 +3670,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/input-pad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoer bestand of map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/validate/" class="md-nav__link">
         
   
@@ -3705,7 +3789,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -4983,7 +5067,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>L2</td>
-<td>Standaard gecentreerd op de nootkop; Source Sans 3, 13 pt (Style).</td>
+<td>Standaard gecentreerd op de nootkop; Source Sans 3, 13 pt (Style). Override: <code>--lyrics-font</code> / <code>--lyrics-font-size</code> op <code>mvsa mscz</code>/<code>pdf</code>/<code>svg</code>. Cues (<code>@tekst</code>): <code>--cue-font</code> / <code>--cue-font-size</code> (default 12 pt).</td>
 </tr>
 <tr>
 <td>L3</td>
@@ -5160,7 +5244,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 <tbody>
 <tr>
 <td>P1</td>
-<td>Papier A4 staand; marges 15 mm. (Canoniek ook: checklist <a href="../canonical-checklists/#checklist-pdf-afgeleide-van-mscz">PDF P6</a>.)</td>
+<td>Papier A4 staand; default-marges 15 mm. Override boven/onder: <code>--page-margin-top</code> / <code>--page-margin-bottom</code> (mm) op <code>mvsa mscz</code>/<code>pdf</code>/<code>svg</code>. (Canoniek ook: checklist <a href="../canonical-checklists/#checklist-pdf-afgeleide-van-mscz">PDF P6</a>.)</td>
 </tr>
 <tr>
 <td>P2</td>
@@ -5168,7 +5252,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>P3</td>
-<td>Verticaal: pagina niet vullen; <code>minSystemDistance</code>/<code>maxSystemDistance</code> vast (niet “spread”).</td>
+<td>Verticaal: pagina niet vullen; default <code>minSystemDistance</code>/<code>maxSystemDistance</code> 8/14 (niet “spread”). Override: <code>--min-system-distance</code> / <code>--max-system-distance</code>, of <code>--compact</code> (baseline 2/2 + lyric 0.1 + marge 5 mm; andere Style-opties winnen). Balken: <code>--staff-distance</code>. Op <code>mvsa mscz</code>/<code>pdf</code>/<code>svg</code>.</td>
 </tr>
 <tr>
 <td>P4</td>
@@ -5284,7 +5368,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-09
+        Bijgewerkt: 2026-10-22
         
       </p>
       
