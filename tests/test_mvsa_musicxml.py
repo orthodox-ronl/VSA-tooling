@@ -1486,6 +1486,11 @@ def test_speelplan_partituur_volta_ab_ac():
     assert ">a</text>" in xml
     assert ">b</text>" in xml
     assert ">c</text>" in xml
+    # Volta alleen op SA (P1); anders dubbele haken onder de lyrics (TB).
+    p1 = xml.split('<part id="P1">', 1)[1].split("</part>", 1)[0]
+    p2 = xml.split('<part id="P2">', 1)[1].split("</part>", 1)[0]
+    assert "<ending " in p1
+    assert "<ending " not in p2
 
 
 def _measure_bodies(xml: str, part_id: str = "P1") -> list[str]:

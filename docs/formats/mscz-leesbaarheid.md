@@ -120,7 +120,7 @@ lettergreep een klinkende noot. Same-pitch **melisma** wél samentrekken
 
 ## C — Cues, gaps, HBox, accolade
 
-Contract: checklist MSCZ **S14–S19**. MuseScore-gedrag dat we vermijden:
+Contract: checklist MSCZ **S14–S20**. MuseScore-gedrag dat we vermijden:
 
 | Foutbeeld                                    | Oorzaak (typisch)                                      | Canonieke vorm                                                 |
 | -------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |

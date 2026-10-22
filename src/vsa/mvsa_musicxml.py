@@ -2466,14 +2466,16 @@ def _emit_score_partituur(
                 )
             if top_staff and nav_end:
                 _emit_nav_marks(out, nav_end)
+            # Volta-<ending> alleen op SA (bovenste balk); anders tekent MuseScore
+            # een tweede set haken boven TB, onder de lyrics tussen de balken.
             _emit_measure_barlines(
                 out,
                 mi,
                 n_measures,
                 styles,
                 left_style=left_styles[mi],
-                ending_start=end_starts[mi],
-                ending_stop=end_stops[mi],
+                ending_start=end_starts[mi] if top_staff else None,
+                ending_stop=end_stops[mi] if top_staff else None,
                 repeat_times=rep_times[mi],
             )
             out.append("</measure>")
