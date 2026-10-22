@@ -829,6 +829,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../formats/score-ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Score-IR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../formats/mvsa-svg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa-SVG (koormap)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../formats/mxl/" class="md-nav__link">
         
   
@@ -3581,6 +3637,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../input-pad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoer bestand of map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../validate/" class="md-nav__link">
         
   
@@ -3672,7 +3756,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -4932,6 +5016,10 @@ afspeelknop.</p>
 </code></pre></div>
 <p>Voor <code>.mvsa</code>-workflows: <a href="../mvsa/#vsa-mvsa-mp3"><code>mvsa mp3</code> / <code>ogg</code> / <code>wav</code></a>
 (<code>path</code> + <code>-o</code>; het subcommando is het formaat).</p>
+<p><strong>Invoer:</strong> <code>input</code> mag één bronbestand <strong>of</strong> een map zijn (recursief). Bij
+meerdere bronnen is <code>output</code> een <strong>uitvoermap</strong>; bestandsnamen volgen
+<code>&lt;bronnaam&gt;.&lt;formaat&gt;</code> (bijv. <code>lied.mvsa.mp3</code>). <code>--keep-mxl</code> alleen bij
+precies één bron. Zie <a href="../input-pad/">Invoer bestand of map</a>.</p>
 <h2 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h2>
 <p><code>vsa audio</code> leest <code>input</code> en schrijft <code>output</code>:</p>
 <table>
@@ -4958,6 +5046,10 @@ afspeelknop.</p>
 <td><code>.mscz</code></td>
 <td>Fallback: MuseScore → <code>.mxl</code>, dan → audio</td>
 </tr>
+<tr>
+<td>map</td>
+<td>Alle passende bestanden eronder; <code>output</code> = uitvoermap</td>
+</tr>
 </tbody>
 </table>
 <p>Zonder expliciete extensie op <code>output</code> geldt <code>--format</code> (default <code>mp3</code>,
@@ -4977,13 +5069,13 @@ of <code>[audio].format</code> in <code>vsa.toml</code>).</p>
 <tr>
 <td><code>input</code></td>
 <td>Ja</td>
-<td>Bronbestand (<code>.mxl</code> / <code>.musicxml</code> / <code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>)</td>
+<td>Bronbestand of map (<code>.mxl</code> / <code>.musicxml</code> / <code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>)</td>
 <td>—</td>
 </tr>
 <tr>
 <td><code>output</code></td>
 <td>Ja</td>
-<td>Doelbestand (<code>.mp3</code> / <code>.ogg</code> / <code>.wav</code>)</td>
+<td>Doelbestand (<code>.mp3</code> / <code>.ogg</code> / <code>.wav</code>), of uitvoermap bij meerdere bronnen</td>
 <td>—</td>
 </tr>
 <tr>
@@ -5007,7 +5099,7 @@ of <code>[audio].format</code> in <code>vsa.toml</code>).</p>
 <tr>
 <td><code>--keep-mxl PATH</code></td>
 <td>Nee</td>
-<td>Bewaar tussenliggende playback-<code>.mxl</code></td>
+<td>Bewaar tussenliggende playback-<code>.mxl</code> (alleen bij één bron)</td>
 <td>— (tijdelijk bestand)</td>
 </tr>
 <tr>
@@ -5056,6 +5148,7 @@ vsa audio generated\lied.mxl generated\lied --format ogg
 </code></pre></div>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
+<li><a href="../input-pad/">Invoer bestand of map</a></li>
 <li><a href="../../../formats/audio/">Formaat <code>.mp3</code> / audio</a></li>
 <li><a href="../mvsa/#vsa-mvsa-mp3"><code>mvsa mp3</code> / <code>ogg</code> / <code>wav</code></a></li>
 <li><a href="../musicxml/"><code>vsa musicxml</code></a> (playback-<code>.mxl</code>)</li>
@@ -5096,7 +5189,7 @@ vsa audio generated\lied.mxl generated\lied --format ogg
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-12
+        Bijgewerkt: 2026-10-22
         
       </p>
       

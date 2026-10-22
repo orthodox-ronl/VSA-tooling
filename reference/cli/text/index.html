@@ -823,6 +823,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../formats/score-ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Score-IR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../formats/mvsa-svg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa-SVG (koormap)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../formats/mxl/" class="md-nav__link">
         
   
@@ -3442,6 +3498,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../input-pad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoer bestand of map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../validate/" class="md-nav__link">
         
   
@@ -3533,7 +3617,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -4674,6 +4758,10 @@ het veld <code>zoektekst</code> (YAML-frontmatter wordt in beide formaten gestri
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>vsa text [-h] [-o OUTPUT] [--musescore PATH] path
 </code></pre></div>
+<p><strong>Invoer:</strong> <code>path</code> mag één bronbestand <strong>of</strong> een map zijn (recursief alle
+passende extensies). Bij meerdere bronnen: tekst naar stdout met
+<code>=== &lt;pad&gt; ===</code>-koppen; <code>-o</code> alleen bij precies één bron. Zie
+<a href="../input-pad/">Invoer bestand of map</a>.</p>
 <h2 id="bronnen">Bronnen<a class="headerlink" href="#bronnen" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -4732,7 +4820,7 @@ MuseScore naar een temp-<code>.mxl</code> en leest daaruit. Er ontstaat geen
 <tbody>
 <tr>
 <td><code>-o</code>, <code>--output</code></td>
-<td>Schrijf naar bestand i.p.v. stdout (<code>Geschreven: …</code>).</td>
+<td>Schrijf naar bestand i.p.v. stdout (<code>Geschreven: …</code>). Alleen bij één bron.</td>
 </tr>
 <tr>
 <td><code>--musescore PATH</code></td>
@@ -4756,6 +4844,7 @@ vsa text lied.mscz -o generated\lied.lyrics.txt
 <p>Alias voor alleen <code>.mscz</code>: <a href="../mscz/"><code>mscz text</code></a>.</p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
+<li><a href="../input-pad/">Invoer bestand of map</a></li>
 <li><a href="../../../formats/zoektekst/">Zoektekst in canonieke bron</a></li>
 <li><a href="../zoektekst/"><code>vsa zoektekst</code></a> — veld vullen/controleren</li>
 <li><a href="../mscz/"><code>mscz</code></a> — MuseScore-bron: import / mxl / text</li>
@@ -4798,7 +4887,7 @@ vsa text lied.mscz -o generated\lied.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-19
+        Bijgewerkt: 2026-10-22
         
       </p>
       

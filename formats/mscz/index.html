@@ -835,6 +835,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../score-ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Score-IR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mvsa-svg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa-SVG (koormap)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../mxl/" class="md-nav__link">
         
   
@@ -3548,6 +3604,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/input-pad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoer bestand of map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/validate/" class="md-nav__link">
         
   
@@ -3639,7 +3723,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -4801,6 +4885,11 @@ De consumer <strong>kiest</strong>; de tool <strong>handhaaft</strong>. Zie
 <td>Canonieke koorprint: <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a> + checklist</td>
 </tr>
 <tr>
+<td><code>muziek</code></td>
+<td><code>--layout muziek</code></td>
+<td>Leesbaarheid zonder titel/footer/colofon — <a href="../mvsa-svg/">koormap-SVG</a></td>
+</tr>
+<tr>
 <td><code>plain</code></td>
 <td><code>--layout plain</code></td>
 <td>Geen Style-/colofon-/recite-nabewerking; alleen MuseScore-output van de MXL</td>
@@ -4809,7 +4898,43 @@ De consumer <strong>kiest</strong>; de tool <strong>handhaaft</strong>. Zie
 </table>
 <div class="highlight"><pre><span></span><code>mvsa mscz lied.mvsa -o generated\lied.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa mscz lied.mvsa -o generated\lied.plain.mscz --layout plain
+mvsa mscz lied.mvsa -o generated\lied.mscz --min-system-distance 10 --max-system-distance 18
+mvsa mscz lied.mvsa -o generated\lied.mscz --compact
+mvsa mscz lied.mvsa -o generated\lied.mscz --staff-distance 4.5
+mvsa mscz lied.mvsa -o generated\lied.mscz --page-margin-top 5 --page-margin-bottom 5
+mvsa mscz lied.mvsa -o generated\lied.mscz --lyrics-font-size 14 --cue-font-size 11
 </code></pre></div>
+<p><strong>Systeemafstand:</strong> bij <code>partituur</code> / <code>muziek</code> kun je de vaste Style-waarden
+(default 8 / 14) overschrijven met <code>--min-system-distance</code> en
+<code>--max-system-distance</code> (spatium). Niet bij <code>--layout plain</code>.</p>
+<p><strong><code>--compact</code>:</strong> dichtste Style-baseline (pdf/svg/mscz): systeemafstand
+min=max <strong>2</strong> spatium (MuseScore mag lokaal meer voor cues), lyric-clearance
+<strong>0.1</strong> (SA/TB dichter), boven-/ondermarge <strong>5</strong> mm. Style wordt ook naar
+<code>score_style.mss</code> gesynchroniseerd (MuseScore 4). <strong>Andere Style-opties
+winnen van <code>--compact</code></strong> (per sleutel). Voorbeeld: meer lucht tussen
+systemen met behoud van de rest van compact:</p>
+<div class="highlight"><pre><span></span><code>mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
+</code></pre></div>
+<p>Niet bij <code>--layout plain</code>.</p>
+<p><strong>Stafafstand:</strong> <code>--staff-distance</code> (spatium) zet de afstand tussen de
+notenbalken <em>binnen</em> één systeem (<code>staffDistance</code> én accolade-afstand voor
+SA/TB). Geen vaste Style-default in de export (MuseScore + lyrics bepalen
+anders de ruimte). Lyrics tussen de balken blijven een harde ondergrens.
+Niet bij <code>--layout plain</code>.</p>
+<p><strong>Pagina-marges:</strong> default 15 mm rondom. Alleen boven/onder overschrijven met
+<code>--page-margin-top</code> / <code>--page-margin-bottom</code> (millimeters; <code>0</code> toegestaan).
+Linker- en rechtermarge blijven 15 mm. Niet bij <code>--layout plain</code>.</p>
+<p>Alle Style-CLI-opties (incl. <code>--compact</code>) worden in het <code>.mscz</code> naar zowel
+de score-<code>.mscx</code> als <code>score_style.mss</code> geschreven — MuseScore 4 leest layout
+vooral uit die <code>.mss</code>.</p>
+<p><strong>Fonts:</strong> <code>--lyrics-font</code> / <code>--lyrics-font-size</code> (zangtekst; default Source
+Sans 3 / 13 pt) en <code>--cue-font</code> / <code>--cue-font-size</code> (cues/<code>@tekst</code>; default
+zelfde font / 12 pt). Fontnaam moet op de machine in MuseScore beschikbaar
+zijn. Niet bij <code>--layout plain</code>.</p>
+<p><strong>Maat-spreiding:</strong> <code>--measure-spacing</code> (MuseScore Style <code>measureSpacing</code>,
+default <code>1.2</code>; hoger = meer ruimte tussen noten in de maat). Dit is geen
+volledige “centreer in brede cue-maat”; die breedte komt uit MusicXML
+<code>width</code> bij cues — dat is een apart onderwerp.</p>
 <p><strong>Bibliotheek-id:</strong> consumer bepaalt de waarde; geef die met
 <code>--bibliotheek-id</code> (colofon bij <code>partituur</code>). Pad-afleiding is alleen een
 fallback.</p>
@@ -4874,7 +4999,7 @@ Via repo-script: <code>scripts\mscz.cmd …</code></p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-12
+        Bijgewerkt: 2026-10-22
         
       </p>
       

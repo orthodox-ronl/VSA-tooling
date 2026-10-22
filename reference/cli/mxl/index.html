@@ -829,6 +829,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../formats/score-ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Score-IR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../formats/mvsa-svg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa-SVG (koormap)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../formats/mxl/" class="md-nav__link">
         
   
@@ -3548,6 +3604,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../input-pad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoer bestand of map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../validate/" class="md-nav__link">
         
   
@@ -3639,7 +3723,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -4831,6 +4915,9 @@ Playback-checklist:
 SATB-parser, soft-wrap, holds, recite en <code>--pitch</code>-gedrag).
 <strong>Werkbank-bewerkvorm</strong> — niet ongewijzigd als catalogusbron gebruiken. De
 output begint met dezelfde waarschuwingsbanner als <code>mvsa import</code>.</p>
+<p><strong>Invoer:</strong> <code>path</code> mag één bronbestand <strong>of</strong> een map zijn (recursief). Bij
+meerdere bronnen: sibling- of in-place-output per bestand; <code>-o</code> alleen bij
+precies één bron. Zie <a href="../input-pad/">Invoer bestand of map</a>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mxl [-h] {import,mscz,validate,normalize} …
 mxl import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
@@ -4884,6 +4971,7 @@ mxl normalize raw.mxl -o out.mxl --apply-timing
 </code></pre></div>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
+<li><a href="../input-pad/">Invoer bestand of map</a></li>
 <li><a href="../mvsa/"><code>mvsa</code></a> — bron <code>.mvsa</code></li>
 <li><a href="../mscz/"><code>mscz</code></a> — bron <code>.mscz</code> (<code>mscz mxl</code> gebruikt dezelfde normalize-keten)</li>
 <li><a href="../musicxml/"><code>vsa musicxml</code></a> — eenstemmig <code>.vsa</code> → MusicXML</li>
@@ -4926,7 +5014,7 @@ mxl normalize raw.mxl -o out.mxl --apply-timing
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-19
+        Bijgewerkt: 2026-10-22
         
       </p>
       

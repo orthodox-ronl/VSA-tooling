@@ -27,7 +27,7 @@
     
     
       
-        <title>vsa svg — één vsa-bestand naar SVG renderen - VSA-tooling — documentatie</title>
+        <title>vsa svg — .vsa naar SVG renderen - VSA-tooling — documentatie</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#vsa-svg-een-vsa-bestand-naar-svg-renderen" class="md-skip">
+        <a href="#vsa-svg-vsa-naar-svg-renderen" class="md-skip">
           Ga naar inhoud
         </a>
       
@@ -129,7 +129,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              vsa svg — één vsa-bestand naar SVG renderen
+              vsa svg — .vsa naar SVG renderen
             
           </span>
         </div>
@@ -809,6 +809,62 @@
     
   
     .mvsa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../formats/score-ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Score-IR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../formats/mvsa-svg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa-SVG (koormap)
   
 
     
@@ -3457,6 +3513,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../input-pad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoer bestand of map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../validate/" class="md-nav__link">
         
   
@@ -3557,7 +3641,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -3575,7 +3659,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -4818,22 +4902,25 @@
   
 
 
-<h1 id="vsa-svg-een-vsa-bestand-naar-svg-renderen"><code>vsa svg</code> — één vsa-bestand naar SVG renderen<a class="headerlink" href="#vsa-svg-een-vsa-bestand-naar-svg-renderen" title="Permanent link">&para;</a></h1>
+<h1 id="vsa-svg-vsa-naar-svg-renderen"><code>vsa svg</code> — .vsa naar SVG renderen<a class="headerlink" href="#vsa-svg-vsa-naar-svg-renderen" title="Permanent link">&para;</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Waartoe</p>
-<p>Eén <code>.vsa</code>-bestand snel als SVG-afbeelding bekijken (scherm of afdruk).
-Geen Markdown-pipeline — daarvoor <a href="../process/"><code>vsa process</code></a> of
+<p>Eén of meer <code>.vsa</code>-bestanden snel als SVG-afbeelding bekijken (scherm of
+afdruk). Geen Markdown-pipeline — daarvoor <a href="../process/"><code>vsa process</code></a> of
 <a href="../build-markdown/"><code>vsa build-markdown</code></a>.</p>
 </div>
-<p>Render één <a class="og-termref" href="/bron/terms/vsa-bestand" title="vsa-bestand: Een bestand met de extensie <code>.vsa</code> waarvan de inhoud uitsluitend syntactisch geldige Vsa-notatie bevat — d.w.z. door de Vsa-tooling foutloos wordt geparseerd en gevalideerd.">vsa-bestand</a> naar één SVG-afbeelding.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>vsa svg [-h] [--config CONFIG] [--max-line-width MAX_LINE_WIDTH] input output
 </code></pre></div>
+<p><strong>Invoer:</strong> <code>input</code> mag één <code>.vsa</code> <strong>of</strong> een map zijn (recursief). Bij
+meerdere bronnen is <code>output</code> een <strong>uitvoermap</strong>; bestandsnamen volgen
+<code>&lt;bronnaam&gt;.svg</code> (bijv. <code>lied.vsa.svg</code>). Zie
+<a href="../input-pad/">Invoer bestand of map</a>.</p>
 <h2 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h2>
-<p><code>vsa svg</code> leest één <code>.vsa</code>-bestand, lost <code>@include-vsa</code> op indien aanwezig,
-parset de <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> en rendert het resultaat naar een SVG-bestand. Dit
-commando verwerkt <strong>geen</strong> Markdownblokken — voor Markdown met <a class="og-termref" href="/VSA-tooling/terminologie/vsa-blokken" title="VSA-blok: een tekstfragment in een Markdownbestand dat begint met <code>::: vsa-notatie</code> en eindigt met <code>:::</code>, beide aan het begin van een regel, met daartussen VSA-notatie; typisch ontdekt en verwerkt door de Vsa-toolset (o.a. <code>vsa blocks</code>, <code>vsa validate</code>, <code>vsa process</code>).">VSA-blokken</a>
-gebruik je <a href="../process/"><code>vsa process</code></a> of <a href="../build-markdown/"><code>vsa build-markdown</code></a>.</p>
+<p><code>vsa svg</code> leest <code>.vsa</code>, lost <code>@include-vsa</code> op indien aanwezig, parset de
+<a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> en rendert naar SVG. Dit commando verwerkt <strong>geen</strong>
+Markdownblokken — voor Markdown met <a class="og-termref" href="/VSA-tooling/terminologie/vsa-blokken" title="VSA-blok: een tekstfragment in een Markdownbestand dat begint met <code>::: vsa-notatie</code> en eindigt met <code>:::</code>, beide aan het begin van een regel, met daartussen VSA-notatie; typisch ontdekt en verwerkt door de Vsa-toolset (o.a. <code>vsa blocks</code>, <code>vsa validate</code>, <code>vsa process</code>).">VSA-blokken</a> gebruik je
+<a href="../process/"><code>vsa process</code></a> of <a href="../build-markdown/"><code>vsa build-markdown</code></a>.</p>
 <p><code>vsa svg</code> valideert de invoer niet expliciet vooraf; een parsefout leidt tot
 een foutmelding en exitcode <code>1</code>. Draai bij twijfel eerst
 <a href="../validate/"><code>vsa validate</code></a>.</p>
@@ -4852,16 +4939,16 @@ een foutmelding en exitcode <code>1</code>. Draai bij twijfel eerst
 <tr>
 <td><code>input</code></td>
 <td>Ja</td>
-<td>VSA-bronbestand dat gelezen wordt.</td>
+<td><code>.vsa</code>-bestand of map met <code>.vsa</code>-bestanden.</td>
 <td>—</td>
 <td>Moet bestaan.</td>
 </tr>
 <tr>
 <td><code>output</code></td>
 <td>Ja</td>
-<td>SVG-bestand dat wordt aangemaakt of overschreven.</td>
+<td>SVG-bestand, of uitvoermap bij meerdere bronnen.</td>
 <td>—</td>
-<td>Bovenliggende map moet bestaan.</td>
+<td>Bij één bron: map moet bestaan.</td>
 </tr>
 <tr>
 <td><code>--config CONFIG</code></td>
@@ -4888,8 +4975,8 @@ een foutmelding en exitcode <code>1</code>. Draai bij twijfel eerst
 </table>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>stdout</strong>: <code>SVG geschreven naar: &lt;output&gt;</code> bij succes.</li>
-<li><strong>Bestand</strong>: <code>output</code> wordt aangemaakt (of overschreven als het al bestaat).</li>
+<li><strong>stdout</strong>: <code>SVG geschreven naar: &lt;pad&gt;</code> per geschreven bestand.</li>
+<li><strong>Bestand</strong>: <code>output</code> (één bron) of bestanden in de uitvoermap (meerdere).</li>
 <li>Geen Markdown wordt gelezen of geschreven.</li>
 </ul>
 <h2 id="exit-status">Exit status<a class="headerlink" href="#exit-status" title="Permanent link">&para;</a></h2>
@@ -4907,7 +4994,7 @@ een foutmelding en exitcode <code>1</code>. Draai bij twijfel eerst
 </tr>
 <tr>
 <td><code>1</code></td>
-<td>Bestand niet gevonden, of parsefout.</td>
+<td>Pad ontbreekt, lege map, of parsefout.</td>
 </tr>
 </tbody>
 </table>
@@ -4926,6 +5013,9 @@ Bekijk het resultaat direct:</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>SVG geschreven naar: tmp\demo-smal.svg
 </code></pre></div>
+<p>Map → meerdere SVG’s:</p>
+<div class="highlight"><pre><span></span><code>vsa svg examples\minimal tmp\svg-batch
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Validatie vs. SVG</p>
 <p><code>examples\minimal\050_svg_demo.vsa</code> faalt op <code>vsa validate</code> (semantische
@@ -4936,10 +5026,7 @@ zeker wilt zijn van <a class="og-termref" href="/VSA-tooling/terminologie/geldig
 <h2 id="voorbeelden-falen">Voorbeelden — falen<a class="headerlink" href="#voorbeelden-falen" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>vsa svg pad\dat\niet\bestaat.vsa tmp\demo.svg
 </code></pre></div>
-<p>Verwachte output (stderr):</p>
-<div class="highlight"><pre><span></span><code>[Errno 2] No such file or directory: 'pad\\dat\\niet\\bestaat.vsa'
-</code></pre></div>
-<p>Exitcode: <code>1</code>.</p>
+<p>Verwachte richting (stderr): pad niet gevonden; exitcode <code>1</code>.</p>
 <p>Fix: controleer het invoerpad, bijvoorbeeld met <code>dir</code>.</p>
 <p>Parsefout (onafgesloten <a class="og-termref" href="/VSA-tooling/terminologie/vsa-scope" title="VSA-scope: een tekstfragment dat met <code>{</code> begint, met <code>}</code> eindigt, geen whitespace binnen de accolades bevat en door de Parser kan worden opgesplitst in optionele Hoogte-modifier, verplicht zangelement en optionele Lengte-modifier.">scope</a>) — voorbeeldinvoer met <code>{tekst</code> zonder <code>}</code>:</p>
 <div class="highlight"><pre><span></span><code>vsa svg kapot.vsa tmp\out.svg
@@ -4949,6 +5036,7 @@ zeker wilt zijn van <a class="og-termref" href="/VSA-tooling/terminologie/geldig
 regel/kolom; herstel de <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a>; daarna opnieuw <code>vsa svg</code>.</p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
+<li><a href="../input-pad/">Invoer bestand of map</a></li>
 <li><a href="../validate/"><code>vsa validate</code></a> — controleer <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> vóór het renderen.</li>
 <li><a href="../process/"><code>vsa process</code></a> — SVG's genereren uit meerdere Markdownbestanden.</li>
 <li><a href="../build-markdown/"><code>vsa build-markdown</code></a> — SVG's + Hugo-Markdown in één stap.</li>
@@ -4991,7 +5079,7 @@ regel/kolom; herstel de <a class="og-termref" href="/bron/terms/vsa-notatie" tit
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-19
+        Bijgewerkt: 2026-10-22
         
       </p>
       

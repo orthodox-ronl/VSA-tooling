@@ -16,7 +16,7 @@
         <link rel="prev" href="../fixtures-catalogus/">
       
       
-        <link rel="next" href="validate/">
+        <link rel="next" href="input-pad/">
       
       
         
@@ -829,6 +829,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../formats/score-ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Score-IR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../formats/mvsa-svg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvsa-SVG (koormap)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../formats/mxl/" class="md-nav__link">
         
   
@@ -1123,6 +1179,17 @@
     <span class="md-ellipsis">
       
         Werkmap-conventie
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#invoer-bestand-of-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoer: bestand of map
       
     </span>
   </a>
@@ -3635,6 +3702,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#invoer-bestand-of-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoer: bestand of map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#algemene-syntax" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3715,6 +3793,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="input-pad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoer bestand of map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -3818,7 +3924,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — één vsa-bestand naar SVG renderen
+    vsa svg — .vsa naar SVG renderen
   
 
     
@@ -4852,6 +4958,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#invoer-bestand-of-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoer: bestand of map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#algemene-syntax" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4966,6 +5083,11 @@ repository-root als werkmap:</p>
 </code></pre></div>
 <p>Paden in commando's zijn relatief aan die map, tenzij je een absoluut pad
 opgeeft.</p>
+<h2 id="invoer-bestand-of-map">Invoer: bestand of map<a class="headerlink" href="#invoer-bestand-of-map" title="Permanent link">&para;</a></h2>
+<p>Waar een commando bronbestanden leest, is de afspraak: <strong>één bestand</strong> of
+<strong>een map</strong> (recursief alle passende extensies). Gedeelde helper:
+<code>vsa.input_paths.collect_input_files</code>. Inventaris (welke commando’s dit al
+doen): <a href="input-pad/">input-pad</a>.</p>
 <h2 id="algemene-syntax">Algemene syntax<a class="headerlink" href="#algemene-syntax" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>vsa [--config CONFIG] [--version] &lt;subcommando&gt; …
 </code></pre></div>
@@ -5185,7 +5307,7 @@ voor het volledige overzicht.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-12
+        Bijgewerkt: 2026-10-22
         
       </p>
       
