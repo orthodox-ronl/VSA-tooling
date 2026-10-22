@@ -158,7 +158,7 @@ VoiceEvent
 
 Handvoorbeeld (illustratief):
 
-[`examples/mvsa/partituur-ir-mini.example.json`](../../examples/mvsa/partituur-ir-mini.example.json)
+[`examples/mvsa/partituur-ir-mini.example.json`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/partituur-ir-mini.example.json)
 
 CLI-export (zelfde keten als partituur-MusicXML-events):
 

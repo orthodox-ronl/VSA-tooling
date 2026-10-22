@@ -35,7 +35,9 @@ def test_mvsa_mxl_rejects_unknown_suffix_clearly(capsys, tmp_path: Path) -> None
     err = capsys.readouterr().err
     assert code == 1
     assert "utf-8" not in err.lower()
-    assert "verwacht .mvsa, .mscz of .mxl" in err
+    assert "Verwacht bestand met extensie" in err
+    assert ".mvsa" in err
+    assert "lied.pdf" in err
 
 
 def test_mvsa_validate_mscz_no_utf8_crash(capsys, tmp_path: Path) -> None:
@@ -55,4 +57,6 @@ def test_mvsa_mscz_rejects_mscz_source(capsys, tmp_path: Path) -> None:
     err = capsys.readouterr().err
     assert code == 1
     assert "utf-8" not in err.lower()
-    assert "verwacht .mvsa" in err
+    assert "Verwacht bestand met extensie" in err
+    assert ".mvsa" in err
+    assert "lied.mscz" in err
