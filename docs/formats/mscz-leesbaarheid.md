@@ -142,14 +142,14 @@ Contract: checklist MSCZ **S14–S19**. MuseScore-gedrag dat we vermijden:
 
 ## P — Pagina / systeem (A4)
 
-| #   | Regel                                                                                                                                                                                        |
-| --  | ----------------------------------------------------------------------                                                                                                                       |
-| P1  | Papier A4 staand; marges 15 mm. (Canoniek ook: checklist [PDF P6](canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).)                                                                |
-| P2  | Geen inspring eerste systeem.                                                                                                                                                                |
-| P3  | Verticaal: pagina niet vullen; default `minSystemDistance`/`maxSystemDistance` 8/14 (niet “spread”). Override: `--min-system-distance` / `--max-system-distance` op `mvsa mscz`/`pdf`/`svg`. |
-| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                                                                                     |
-| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                                                                                 |
-| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                                                                                    |
+| #   | Regel                                                                                                                                                                                                                                                                                                         |
+| --  | ----------------------------------------------------------------------                                                                                                                                                                                                                                        |
+| P1  | Papier A4 staand; default-marges 15 mm. Override boven/onder: `--page-margin-top` / `--page-margin-bottom` (mm) op `mvsa mscz`/`pdf`/`svg`. (Canoniek ook: checklist [PDF P6](canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).)                                                                     |
+| P2  | Geen inspring eerste systeem.                                                                                                                                                                                                                                                                                 |
+| P3  | Verticaal: pagina niet vullen; default `minSystemDistance`/`maxSystemDistance` 8/14 (niet “spread”). Override: `--min-system-distance` / `--max-system-distance`, of `--compact` (baseline 2/2 + lyric 0.1 + marge 5 mm; andere Style-opties winnen). Balken: `--staff-distance`. Op `mvsa mscz`/`pdf`/`svg`. |
+| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                                                                                                                                                                                                      |
+| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                                                                                                                                                                                                  |
+| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                                                                                                                                                                                                     |
 
 ---
 

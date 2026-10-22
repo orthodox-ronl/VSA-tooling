@@ -24,10 +24,10 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | mvsa → SATB MusicXML (draft)                         | [`vsa mvsa mxl <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#vsa-mvsa-mxl)                                                                  |
 | mvsa → Score-IR JSON (partituur; scherm/CoriB)       | [`vsa mvsa score-ir <pad> [-o …]`](../reference/cli/mvsa.md#vsa-mvsa-score-ir)                                                                      |
 | Score-IR → MusicXML (OSMD-brug)                      | [`vsa mvsa score-ir … --musicxml …`](../reference/cli/mvsa.md#vsa-mvsa-score-ir)                                                                    |
-| mvsa/mscz → partituur-SVG (koormap; MuseScore-brug)  | [`vsa mvsa svg <pad> [-o …]`](../reference/cli/mvsa.md#vsa-mvsa-svg)                                                                                |
+| mvsa/mscz → partituur-SVG (koormap; MuseScore-brug)  | [`vsa mvsa svg <pad> [-o …]`](../reference/cli/mvsa.md#vsa-mvsa-svg) (dicht: `--compact`)                                                           |
 | mvsa → Coria met hulptekst-keuze                     | [`vsa mvsa mxl … --hulptekst-as-parts`](../reference/cli/mvsa.md#vsa-mvsa-mxl) + [`@taal`](../specification-mvsa/keywords.md#taal)                  |
 | mvsa → blad met tweede tekstregel                    | [`vsa mvsa mscz … --hulptekst`](../reference/cli/mvsa.md#vsa-mvsa-mscz)                                                                             |
-| mvsa → MuseScore / print-PDF (draft)                 | [`vsa mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) / [`pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf)                                          |
+| mvsa → MuseScore / print-PDF (draft)                 | [`vsa mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) / [`pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (dicht: `--compact`)                     |
 | mvsa → preview-audio (draft)                         | [`vsa mvsa mp3`/`ogg`/`wav`](../reference/cli/mvsa.md#vsa-mvsa-mp3) (of top-level [`vsa audio`](../reference/cli/audio.md))                         |
 | MusicXML / MuseScore → `.mvsa` (**werkbank**-import) | [`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) / [`mxl import`](../reference/cli/mxl.md) / [`mscz import`](../reference/cli/mscz.md) |
 | Import + ankers (navigatie / foutzoeken)             | `vsa mvsa import …` (default `ag-vsa`) daarna [`validate`](../reference/cli/mvsa.md#vsa-mvsa-validate)                                              |

@@ -57,6 +57,12 @@ def export_mvsa_to_mscz(
     hulptekst: bool = False,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
+    staff_distance: float | None = None,
+    page_margin_top_mm: float | None = None,
+    page_margin_bottom_mm: float | None = None,
+    lyrics_min_top_distance: float | None = None,
+    lyrics_min_bottom_distance: float | None = None,
+    lyrics_min_distance: float | None = None,
     lyrics_font: str | None = None,
     lyrics_font_size: float | None = None,
     cue_font: str | None = None,
@@ -69,8 +75,8 @@ def export_mvsa_to_mscz(
     Post-process follows *layout* (default ``partituur``). *bibliotheek_id*
     is preferred over path sniffing for the colofon (``partituur`` only).
     *hulptekst*: tweede lyric-laag in het tussen-MXL (blad «tweede couplet»).
-    Style-overrides (systeemafstand, fonts, measureSpacing): not valid with
-    layout ``plain``.
+    Style-overrides (systeem-/stafafstand, pagina-marges, lyric-clearance,
+    fonts, measureSpacing): not valid with layout ``plain``.
 
     Returns ``out``.
     """
@@ -90,6 +96,12 @@ def export_mvsa_to_mscz(
         style_overrides = build_partituur_style_overrides(
             min_system_distance=min_system_distance,
             max_system_distance=max_system_distance,
+            staff_distance=staff_distance,
+            page_margin_top_mm=page_margin_top_mm,
+            page_margin_bottom_mm=page_margin_bottom_mm,
+            lyrics_min_top_distance=lyrics_min_top_distance,
+            lyrics_min_bottom_distance=lyrics_min_bottom_distance,
+            lyrics_min_distance=lyrics_min_distance,
             lyrics_font=lyrics_font,
             lyrics_font_size=lyrics_font_size,
             cue_font=cue_font,
@@ -100,8 +112,9 @@ def export_mvsa_to_mscz(
         raise MvsaMsczError(str(exc)) from exc
     if style_overrides and profile == "plain":
         raise MvsaMsczError(
-            "Style-opties (systeemafstand / fonts / measure-spacing) gelden "
-            "niet bij --layout plain (geen Style-nabewerking)"
+            "Style-opties (systeem-/stafafstand / pagina-marges / fonts / "
+            "measure-spacing) gelden niet bij --layout plain "
+            "(geen Style-nabewerking)"
         )
 
     try:
@@ -210,6 +223,12 @@ def export_mvsa_to_pdf(
     bibliotheek_id: str | None = None,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
+    staff_distance: float | None = None,
+    page_margin_top_mm: float | None = None,
+    page_margin_bottom_mm: float | None = None,
+    lyrics_min_top_distance: float | None = None,
+    lyrics_min_bottom_distance: float | None = None,
+    lyrics_min_distance: float | None = None,
     lyrics_font: str | None = None,
     lyrics_font_size: float | None = None,
     cue_font: str | None = None,
@@ -249,6 +268,12 @@ def export_mvsa_to_pdf(
             bibliotheek_id=bibliotheek_id,
             min_system_distance=min_system_distance,
             max_system_distance=max_system_distance,
+            staff_distance=staff_distance,
+            page_margin_top_mm=page_margin_top_mm,
+            page_margin_bottom_mm=page_margin_bottom_mm,
+            lyrics_min_top_distance=lyrics_min_top_distance,
+            lyrics_min_bottom_distance=lyrics_min_bottom_distance,
+            lyrics_min_distance=lyrics_min_distance,
             lyrics_font=lyrics_font,
             lyrics_font_size=lyrics_font_size,
             cue_font=cue_font,
@@ -311,6 +336,12 @@ def export_mvsa_to_svg(
     white_background: bool = True,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
+    staff_distance: float | None = None,
+    page_margin_top_mm: float | None = None,
+    page_margin_bottom_mm: float | None = None,
+    lyrics_min_top_distance: float | None = None,
+    lyrics_min_bottom_distance: float | None = None,
+    lyrics_min_distance: float | None = None,
     lyrics_font: str | None = None,
     lyrics_font_size: float | None = None,
     cue_font: str | None = None,
@@ -350,6 +381,12 @@ def export_mvsa_to_svg(
             bibliotheek_id=bibliotheek_id,
             min_system_distance=min_system_distance,
             max_system_distance=max_system_distance,
+            staff_distance=staff_distance,
+            page_margin_top_mm=page_margin_top_mm,
+            page_margin_bottom_mm=page_margin_bottom_mm,
+            lyrics_min_top_distance=lyrics_min_top_distance,
+            lyrics_min_bottom_distance=lyrics_min_bottom_distance,
+            lyrics_min_distance=lyrics_min_distance,
             lyrics_font=lyrics_font,
             lyrics_font_size=lyrics_font_size,
             cue_font=cue_font,

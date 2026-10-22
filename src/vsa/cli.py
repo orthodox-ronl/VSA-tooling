@@ -1651,6 +1651,15 @@ def _cmd_template(args) -> int:
 def _add_partituur_style_args(parser: argparse.ArgumentParser) -> None:
     """Shared MuseScore Style overrides (systeemafstand + fonts; partituur/muziek)."""
     parser.add_argument(
+        "--compact",
+        action="store_true",
+        help=(
+            "Dichtste Style-baseline: systeemafstand min=max 2 spatium, "
+            "lyric-clearance 0.1 (SA/TB), boven-/ondermarge 5 mm. Andere "
+            "Style-opties winnen van deze preset. Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
         "--min-system-distance",
         type=float,
         metavar="SP",
@@ -1670,6 +1679,40 @@ def _add_partituur_style_args(parser: argparse.ArgumentParser) -> None:
         help=(
             "Maximale afstand tussen systemen (MuseScore Style, spatium-eenheden). "
             "Default bij partituur/muziek: 14. Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
+        "--staff-distance",
+        type=float,
+        metavar="SP",
+        default=None,
+        dest="staff_distance",
+        help=(
+            "Afstand tussen notenbalken binnen één systeem (MuseScore Style "
+            "staffDistance + accolade, spatium). Geen vaste default in Style "
+            "(MuseScore + lyrics). Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
+        "--page-margin-top",
+        type=float,
+        metavar="MM",
+        default=None,
+        dest="page_margin_top",
+        help=(
+            "Bovenmarge van de pagina in millimeters (MuseScore Style). "
+            "Default bij partituur/muziek: 15. Niet bij --layout plain."
+        ),
+    )
+    parser.add_argument(
+        "--page-margin-bottom",
+        type=float,
+        metavar="MM",
+        default=None,
+        dest="page_margin_bottom",
+        help=(
+            "Ondermarge van de pagina in millimeters (MuseScore Style). "
+            "Default bij partituur/muziek: 15. Niet bij --layout plain."
         ),
     )
     parser.add_argument(
@@ -1724,18 +1767,31 @@ def _add_partituur_style_args(parser: argparse.ArgumentParser) -> None:
 
 def _partituur_style_kwargs(args) -> dict:
     """Keyword args for export_mvsa_to_mscz/pdf/svg Style overrides."""
-    return {
+    from .mscz_partituur import apply_compact_style_preset
+
+    kw = {
         "min_system_distance": getattr(args, "min_system_distance", None),
         "max_system_distance": getattr(args, "max_system_distance", None),
+        "staff_distance": getattr(args, "staff_distance", None),
+        "page_margin_top_mm": getattr(args, "page_margin_top", None),
+        "page_margin_bottom_mm": getattr(args, "page_margin_bottom", None),
+        "lyrics_min_top_distance": None,
+        "lyrics_min_bottom_distance": None,
+        "lyrics_min_distance": None,
         "lyrics_font": getattr(args, "lyrics_font", None),
         "lyrics_font_size": getattr(args, "lyrics_font_size", None),
         "cue_font": getattr(args, "cue_font", None),
         "cue_font_size": getattr(args, "cue_font_size", None),
         "measure_spacing": getattr(args, "measure_spacing", None),
     }
+    if getattr(args, "compact", False):
+        kw = apply_compact_style_preset(kw)
+    return kw
 
 
 def _has_partituur_style_cli(args) -> bool:
+    if getattr(args, "compact", False):
+        return True
     kw = _partituur_style_kwargs(args)
     return any(v is not None for v in kw.values())
 
@@ -2212,7 +2268,7 @@ def _cmd_mvsa_pdf(args) -> int:
             ):
                 print(
                     "mvsa pdf: --section/--keep-mscz/--keep-mxl/--layout/"
-                    "--bibliotheek-id en Style-opties (systeemafstand/fonts) "
+                    "--bibliotheek-id en Style-opties (systeem-/stafafstand/marges/fonts) "
                     "gelden alleen bij .mvsa",
                     file=sys.stderr,
                 )
@@ -2288,7 +2344,7 @@ def _cmd_mvsa_svg(args) -> int:
             ):
                 print(
                     "mvsa svg: --section/--keep-mscz/--keep-mxl/"
-                    "--bibliotheek-id en Style-opties (systeemafstand/fonts) "
+                    "--bibliotheek-id en Style-opties (systeem-/stafafstand/marges/fonts) "
                     "gelden alleen bij .mvsa (bij .mscz staat Style al in het bestand)",
                     file=sys.stderr,
                 )

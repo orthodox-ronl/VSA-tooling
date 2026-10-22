@@ -21,10 +21,19 @@ vsa mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.sv
 Default na trim: **witte** achtergrond. ``--transparent`` laat de achtergrond
 leeg (handig op gekleurde pagina’s).
 
-Bij bron `.mvsa`: optioneel systeemafstand, fonts en
+Bij bron `.mvsa`: optioneel ``--compact`` (dichtste Style-baseline; andere
+Style-opties winnen), systeemafstand, stafafstand (``--staff-distance``),
+pagina-marges (``--page-margin-top`` / ``--page-margin-bottom``), fonts en
 ``--measure-spacing`` — zelfde Style-opties als bij
-[`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz). Bij bron `.mscz`
-staan die waarden al in het bestand; Style-CLI-opties gelden dan niet.
+[`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) / [`.mscz`](mscz.md).
+Bij bron `.mscz` staan die waarden al in het bestand; Style-CLI-opties
+gelden dan niet.
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
+```
 
 **Brug:** MuseScore tekent de SVG. Een gedeelde browser-renderer (OSMD /
 Score-IR) voor koormap én CoriB komt later; dit product dekt nu de koormap-behoefte.

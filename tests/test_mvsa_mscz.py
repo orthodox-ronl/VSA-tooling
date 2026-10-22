@@ -170,6 +170,189 @@ def test_system_distance_rejected_with_plain_layout():
         )
 
 
+def test_compact_style_preset():
+    from vsa.mscz_partituur import (
+        COMPACT_LYRICS_MIN_BOTTOM_DISTANCE,
+        COMPACT_LYRICS_MIN_DISTANCE,
+        COMPACT_LYRICS_MIN_TOP_DISTANCE,
+        COMPACT_MAX_SYSTEM_DISTANCE,
+        COMPACT_MIN_SYSTEM_DISTANCE,
+        COMPACT_PAGE_MARGIN_BOTTOM_MM,
+        COMPACT_PAGE_MARGIN_TOP_MM,
+        apply_compact_style_preset,
+        build_partituur_style_overrides,
+    )
+
+    filled = apply_compact_style_preset(
+        {
+            "min_system_distance": None,
+            "max_system_distance": None,
+            "page_margin_top_mm": None,
+            "page_margin_bottom_mm": None,
+            "lyrics_min_top_distance": None,
+            "lyrics_min_bottom_distance": None,
+            "lyrics_min_distance": None,
+            "lyrics_font": None,
+        }
+    )
+    assert filled["min_system_distance"] == COMPACT_MIN_SYSTEM_DISTANCE
+    assert filled["max_system_distance"] == COMPACT_MAX_SYSTEM_DISTANCE
+    assert filled["page_margin_top_mm"] == COMPACT_PAGE_MARGIN_TOP_MM
+    assert filled["page_margin_bottom_mm"] == COMPACT_PAGE_MARGIN_BOTTOM_MM
+    assert filled["lyrics_min_top_distance"] == COMPACT_LYRICS_MIN_TOP_DISTANCE
+    assert filled["lyrics_min_bottom_distance"] == COMPACT_LYRICS_MIN_BOTTOM_DISTANCE
+    assert filled["lyrics_min_distance"] == COMPACT_LYRICS_MIN_DISTANCE
+
+    # Expliciete waarden winnen; ontbrekende max volgt min (niet compact 2)
+    partial = apply_compact_style_preset(
+        {
+            "min_system_distance": 5.0,
+            "max_system_distance": None,
+            "page_margin_top_mm": 8.0,
+            "page_margin_bottom_mm": None,
+            "lyrics_min_top_distance": 0.5,
+        }
+    )
+    assert partial["min_system_distance"] == 5.0
+    assert partial["max_system_distance"] == 5.0
+    assert partial["page_margin_top_mm"] == 8.0
+    assert partial["page_margin_bottom_mm"] == COMPACT_PAGE_MARGIN_BOTTOM_MM
+    assert partial["lyrics_min_top_distance"] == 0.5
+    assert partial["lyrics_min_bottom_distance"] == COMPACT_LYRICS_MIN_BOTTOM_DISTANCE
+
+    # Alleen max hoger → meer lucht; min blijft compact tenzij max < min
+    airier = apply_compact_style_preset(
+        {"min_system_distance": None, "max_system_distance": 6.0}
+    )
+    assert airier["min_system_distance"] == COMPACT_MIN_SYSTEM_DISTANCE
+    assert airier["max_system_distance"] == 6.0
+
+    overrides = build_partituur_style_overrides(
+        **{
+            k: filled[k]
+            for k in (
+                "min_system_distance",
+                "max_system_distance",
+                "page_margin_top_mm",
+                "page_margin_bottom_mm",
+                "lyrics_min_top_distance",
+                "lyrics_min_bottom_distance",
+                "lyrics_min_distance",
+            )
+        }
+    )
+    assert overrides["minSystemDistance"] == "2"
+    assert overrides["maxSystemDistance"] == "2"
+    assert overrides["lyricsMinTopDistance"] == "0.1"
+    assert overrides["lyricsMinBottomDistance"] == "0.1"
+    assert "pageOddTopMargin" in overrides
+
+
+def test_style_overrides_synced_to_score_style_mss(tmp_path: Path):
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style>"
+        "<minSystemDistance>8</minSystemDistance>"
+        "</Style><Part></Part></Score></museScore>"
+    )
+    mss = (
+        '<?xml version="1.0"?>'
+        '<museScore version="4.70"><Style>'
+        "<minSystemDistance>8.5</minSystemDistance>"
+        "<lyricsMinTopDistance>1</lyricsMinTopDistance>"
+        "</Style></museScore>"
+    )
+    path = tmp_path / "sync.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("sync.mscx", mscx)
+        zf.writestr("score_style.mss", mss)
+    apply_partituur_mscz_conventions(
+        path,
+        style_overrides={
+            "minSystemDistance": "2",
+            "maxSystemDistance": "2",
+            "lyricsMinTopDistance": "0.1",
+        },
+    )
+    with zipfile.ZipFile(path) as zf:
+        out_mss = zf.read("score_style.mss").decode("utf-8")
+        out_mscx = zf.read("sync.mscx").decode("utf-8")
+    assert "<minSystemDistance>2</minSystemDistance>" in out_mscx
+    assert "<minSystemDistance>2</minSystemDistance>" in out_mss
+    assert "<lyricsMinTopDistance>0.1</lyricsMinTopDistance>" in out_mss
+
+
+def test_staff_distance_style_override(tmp_path: Path):
+    from vsa.mscz_partituur import (
+        MsczPartituurError,
+        apply_partituur_mscz_conventions,
+        build_partituur_style_overrides,
+    )
+
+    overrides = build_partituur_style_overrides(staff_distance=4.5)
+    assert overrides == {
+        "staffDistance": "4.5",
+        "akkoladeDistance": "4.5",
+        "maxAkkoladeDistance": "4.5",
+    }
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style>"
+        "<staffDistance>7</staffDistance>"
+        "</Style><Part></Part></Score></museScore>"
+    )
+    path = tmp_path / "staff.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("staff.mscx", mscx)
+    apply_partituur_mscz_conventions(path, style_overrides=overrides)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("staff.mscx").decode("utf-8")
+    assert "<staffDistance>4.5</staffDistance>" in out
+    assert "<akkoladeDistance>4.5</akkoladeDistance>" in out
+    assert "<maxAkkoladeDistance>4.5</maxAkkoladeDistance>" in out
+
+    with pytest.raises(MsczPartituurError, match="> 0"):
+        build_partituur_style_overrides(staff_distance=0)
+
+
+def test_page_margin_style_override(tmp_path: Path):
+    from vsa.mscz_partituur import (
+        MsczPartituurError,
+        apply_partituur_mscz_conventions,
+        build_partituur_style_overrides,
+    )
+
+    # 5 mm → inches ≈ 0.19685; 0 mm allowed
+    overrides = build_partituur_style_overrides(
+        page_margin_top_mm=5,
+        page_margin_bottom_mm=0,
+    )
+    assert overrides["pageOddTopMargin"] == "0.19685"
+    assert overrides["pageEvenTopMargin"] == "0.19685"
+    assert overrides["pageOddBottomMargin"] == "0"
+    assert overrides["pageEvenBottomMargin"] == "0"
+
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style>"
+        "<pageOddTopMargin>0.590551</pageOddTopMargin>"
+        "</Style><Part></Part></Score></museScore>"
+    )
+    path = tmp_path / "margins.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("margins.mscx", mscx)
+    apply_partituur_mscz_conventions(path, style_overrides=overrides)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("margins.mscx").decode("utf-8")
+    assert "<pageOddTopMargin>0.19685</pageOddTopMargin>" in out
+    assert "<pageOddBottomMargin>0</pageOddBottomMargin>" in out
+
+    with pytest.raises(MsczPartituurError, match=">= 0"):
+        build_partituur_style_overrides(page_margin_top_mm=-1)
+
+
 def test_measure_spacing_style_override(tmp_path: Path):
     from vsa.mscz_partituur import (
         MsczPartituurError,

@@ -28,18 +28,26 @@ mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
               [--musicxml PATH] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
-          [--hulptekst] [--min-system-distance SP] [--max-system-distance SP]
+          [--hulptekst] [--compact]
+          [--min-system-distance SP] [--max-system-distance SP]
+          [--staff-distance SP]
+          [--page-margin-top MM] [--page-margin-bottom MM]
           [--lyrics-font FACE] [--lyrics-font-size PT]
           [--cue-font FACE] [--cue-font-size PT] path
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
-         [--layout PROFILE] [--bibliotheek-id ID]
+         [--layout PROFILE] [--bibliotheek-id ID] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
+         [--staff-distance SP]
+         [--page-margin-top MM] [--page-margin-bottom MM]
          [--lyrics-font FACE] [--lyrics-font-size PT]
          [--cue-font FACE] [--cue-font-size PT] path
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim] [--transparent]
+         [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
+         [--staff-distance SP]
+         [--page-margin-top MM] [--page-margin-bottom MM]
          [--lyrics-font FACE] [--lyrics-font-size PT]
          [--cue-font FACE] [--cue-font-size PT] path   # path: .mvsa of .mscz
 mvsa mp3 [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
@@ -313,10 +321,11 @@ vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partitu
 ```text
 vsa mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
               [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
-              [--hulptekst] [--min-system-distance SP]
-              [--max-system-distance SP] [--lyrics-font FACE]
-              [--lyrics-font-size PT] [--cue-font FACE]
-              [--cue-font-size PT] path
+              [--hulptekst] [--compact] [--min-system-distance SP]
+              [--max-system-distance SP] [--staff-distance SP]
+              [--page-margin-top MM] [--page-margin-bottom MM]
+              [--lyrics-font FACE] [--lyrics-font-size PT]
+              [--cue-font FACE] [--cue-font-size PT] path
 ```
 
 ### Beschrijving
@@ -355,23 +364,27 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam                         | Verplicht | Betekenis                                                                  | Default                                    |
-| ---------------------------- | --------- | -------------------------------------------------------------------------- | ------------------------------------------ |
-| `path`                       | Ja        | Bron-`.mvsa`-bestand.                                                      | —                                          |
-| `-o`, `--output`             | Nee       | Uitvoer-`.mscz`.                                                           | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
-| `--section SECTION`          | Nee       | Alleen deze `@sectie`-id.                                                  | Alle secties                               |
-| `--musescore PATH`           | Nee       | Pad naar MuseScore-executable.                                             | Auto-detectie                              |
-| `--keep-mxl PATH`            | Nee       | Bewaar ook het tussenliggende `.mxl`.                                      | temp (wordt verwijderd)                    |
-| `--layout PROFILE`           | Nee       | `partituur`, `muziek` of `plain`.                                          | `partituur`                                |
-| `--bibliotheek-id ID`        | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback.                     | pad-sniff / geen                           |
-| `--hulptekst`                | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»).                     | uit                                        |
-| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.            | `8`                                        |
-| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.            | `14`                                       |
-| `--lyrics-font FACE`         | Nee       | Lettertype zangtekst; niet bij `plain`.                                    | `Source Sans 3`                            |
-| `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst; niet bij `plain`.                                   | `13`                                       |
-| `--cue-font FACE`            | Nee       | Lettertype cues (`@tekst`); niet bij `plain`.                              | `Source Sans 3`                            |
-| `--cue-font-size PT`         | Nee       | Puntgrootte cues; niet bij `plain`.                                        | `12`                                       |
-| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                      | `1.2`                                      |
+| Naam                         | Verplicht | Betekenis                                                                                                   | Default                                    |
+| ---------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `path`                       | Ja        | Bron-`.mvsa`-bestand.                                                                                       | —                                          |
+| `-o`, `--output`             | Nee       | Uitvoer-`.mscz`.                                                                                            | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
+| `--section SECTION`          | Nee       | Alleen deze `@sectie`-id.                                                                                   | Alle secties                               |
+| `--musescore PATH`           | Nee       | Pad naar MuseScore-executable.                                                                              | Auto-detectie                              |
+| `--keep-mxl PATH`            | Nee       | Bewaar ook het tussenliggende `.mxl`.                                                                       | temp (wordt verwijderd)                    |
+| `--layout PROFILE`           | Nee       | `partituur`, `muziek` of `plain`.                                                                           | `partituur`                                |
+| `--bibliotheek-id ID`        | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback.                                                      | pad-sniff / geen                           |
+| `--hulptekst`                | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»).                                                      | uit                                        |
+| `--compact`                  | Nee       | Dichtste Style-baseline (systeem 2/2, lyric 0.1, marge 5 mm); andere Style-opties winnen; niet bij `plain`. | uit                                        |
+| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `8` (bij `--compact`: `2`)                 |
+| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `14` (bij `--compact`: `2`)                |
+| `--staff-distance SP`        | Nee       | Afstand tussen balken in één systeem (+ accolade); niet bij `plain`.                                        | MuseScore + lyrics                         |
+| `--page-margin-top MM`       | Nee       | Bovenmarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
+| `--page-margin-bottom MM`    | Nee       | Ondermarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
+| `--lyrics-font FACE`         | Nee       | Lettertype zangtekst; niet bij `plain`.                                                                     | `Source Sans 3`                            |
+| `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst; niet bij `plain`.                                                                    | `13`                                       |
+| `--cue-font FACE`            | Nee       | Lettertype cues (`@tekst`); niet bij `plain`.                                                               | `Source Sans 3`                            |
+| `--cue-font-size PT`         | Nee       | Puntgrootte cues; niet bij `plain`.                                                                         | `12`                                       |
+| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                                                       | `1.2`                                      |
 
 ### Output
 
@@ -394,9 +407,17 @@ vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\lied.mxl
 vsa mvsa mscz lied.mvsa -o out.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
 vsa mvsa mscz lied.mvsa -o raw.mscz --layout plain
 vsa mvsa mscz lied.mvsa -o out.mscz --min-system-distance 10 --max-system-distance 18
+vsa mvsa mscz lied.mvsa -o out.mscz --compact
+vsa mvsa mscz lied.mvsa -o out.mscz --compact --min-system-distance 4 --max-system-distance 4
+vsa mvsa mscz lied.mvsa -o out.mscz --staff-distance 4.5
+vsa mvsa mscz lied.mvsa -o out.mscz --page-margin-top 5 --page-margin-bottom 5
 vsa mvsa mscz lied.mvsa -o out.mscz --lyrics-font-size 14 --cue-font-size 11
 vsa mvsa mscz lied.mvsa -o out.mscz --measure-spacing 1.8
 ```
+
+Style-overrides (incl. `--compact`) worden naar `.mscx` **én** `score_style.mss`
+geschreven (MuseScore 4). Details: [`.mscz`](../../formats/mscz.md).
+
 
 ---
 
@@ -407,8 +428,10 @@ vsa mvsa mscz lied.mvsa -o out.mscz --measure-spacing 1.8
 ```text
 vsa mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH]
-             [--layout PROFILE] [--bibliotheek-id ID]
+             [--layout PROFILE] [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
+             [--staff-distance SP]
+             [--page-margin-top MM] [--page-margin-bottom MM]
              [--lyrics-font FACE] [--lyrics-font-size PT]
              [--cue-font FACE] [--cue-font-size PT] path
 ```
@@ -422,9 +445,9 @@ Maakt een **print-PDF** van de partituur (voor zangers), via MuseScore CLI.
 | `.mvsa` | Keten: partituur-`.mxl` → `.mscz` (`--layout`) → `.pdf`                  |
 | `.mscz` | Alleen MuseScore-conversie naar `.pdf` (geen her-export uit `.mvsa`)     |
 
-`--layout` / `--bibliotheek-id` / Style-opties (systeemafstand, fonts)
-gelden alleen bij bron `.mvsa` (zelfde betekenis als bij
-[`mscz`](#vsa-mvsa-mscz)).
+`--layout` / `--bibliotheek-id` / Style-opties (`--compact`, systeem-/stafafstand,
+pagina-marges, fonts) gelden alleen bij bron `.mvsa` (zelfde betekenis als bij
+[`mscz`](#vsa-mvsa-mscz); andere Style-vlaggen winnen van `--compact`).
 
 **Canoniek:** A4 staand (checklist
 [PDF P6](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz));
@@ -435,23 +458,27 @@ dezelfde A4-eis P6).
 
 ### Argumenten en opties
 
-| Naam                         | Verplicht | Betekenis                                              | Default                                  |
-| ---------------------------- | --------- | ------------------------------------------------------ | ---------------------------------------- |
-| `path`                       | Ja        | `.mvsa` of `.mscz`.                                    | —                                        |
-| `-o`, `--output`             | Nee       | Uitvoer-`.pdf`.                                        | `<bronnaam>.pdf` (bijv. `lied.mvsa.pdf`) |
-| `--section`                  | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.                  | alle secties                             |
-| `--musescore`                | Nee       | MuseScore-executable.                                  | auto-detectie                            |
-| `--keep-mscz`                | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.            | temp (wordt verwijderd)                  |
-| `--keep-mxl`                 | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mxl`.             | niet                                     |
-| `--layout PROFILE`           | Nee       | Bij `.mvsa`: `partituur` of `plain`.                   | `partituur`                              |
-| `--bibliotheek-id ID`        | Nee       | Bij `.mvsa` + `partituur`: colofon-id.                 | pad-sniff / geen                         |
-| `--min-system-distance SP`   | Nee       | Bij `.mvsa`: min. systeemafstand (zie `mscz`).         | `8`                                      |
-| `--max-system-distance SP`   | Nee       | Bij `.mvsa`: max. systeemafstand (zie `mscz`).         | `14`                                     |
-| `--lyrics-font FACE`         | Nee       | Bij `.mvsa`: lettertype zangtekst (zie `mscz`).        | `Source Sans 3`                          |
-| `--lyrics-font-size PT`      | Nee       | Bij `.mvsa`: puntgrootte zangtekst (zie `mscz`).       | `13`                                     |
-| `--cue-font FACE`            | Nee       | Bij `.mvsa`: lettertype cues (zie `mscz`).             | `Source Sans 3`                          |
-| `--cue-font-size PT`         | Nee       | Bij `.mvsa`: puntgrootte cues (zie `mscz`).            | `12`                                     |
-| `--measure-spacing F`        | Nee       | Bij `.mvsa`: maat-spreiding (zie `mscz`).              | `1.2`                                    |
+| Naam                         | Verplicht | Betekenis                                                                      | Default                                  |
+| ---------------------------- | --------- | ------------------------------------------------------------------------------ | ---------------------------------------- |
+| `path`                       | Ja        | `.mvsa` of `.mscz`.                                                            | —                                        |
+| `-o`, `--output`             | Nee       | Uitvoer-`.pdf`.                                                                | `<bronnaam>.pdf` (bijv. `lied.mvsa.pdf`) |
+| `--section`                  | Nee       | Alleen bij `.mvsa`: één `@sectie`-id.                                          | alle secties                             |
+| `--musescore`                | Nee       | MuseScore-executable.                                                          | auto-detectie                            |
+| `--keep-mscz`                | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mscz`.                                    | temp (wordt verwijderd)                  |
+| `--keep-mxl`                 | Nee       | Bij `.mvsa`: bewaar tussenliggende `.mxl`.                                     | niet                                     |
+| `--layout PROFILE`           | Nee       | Bij `.mvsa`: `partituur` of `plain`.                                           | `partituur`                              |
+| `--bibliotheek-id ID`        | Nee       | Bij `.mvsa` + `partituur`: colofon-id.                                         | pad-sniff / geen                         |
+| `--compact`                  | Nee       | Bij `.mvsa`: dichtste Style-baseline; andere Style-opties winnen (zie `mscz`). | uit                                      |
+| `--min-system-distance SP`   | Nee       | Bij `.mvsa`: min. systeemafstand (zie `mscz`).                                 | `8`                                      |
+| `--max-system-distance SP`   | Nee       | Bij `.mvsa`: max. systeemafstand (zie `mscz`).                                 | `14`                                     |
+| `--staff-distance SP`        | Nee       | Bij `.mvsa`: stafafstand in één systeem (zie `mscz`).                          | MuseScore + lyrics                       |
+| `--page-margin-top MM`       | Nee       | Bij `.mvsa`: bovenmarge in mm (zie `mscz`).                                    | `15`                                     |
+| `--page-margin-bottom MM`    | Nee       | Bij `.mvsa`: ondermarge in mm (zie `mscz`).                                    | `15`                                     |
+| `--lyrics-font FACE`         | Nee       | Bij `.mvsa`: lettertype zangtekst (zie `mscz`).                                | `Source Sans 3`                          |
+| `--lyrics-font-size PT`      | Nee       | Bij `.mvsa`: puntgrootte zangtekst (zie `mscz`).                               | `13`                                     |
+| `--cue-font FACE`            | Nee       | Bij `.mvsa`: lettertype cues (zie `mscz`).                                     | `Source Sans 3`                          |
+| `--cue-font-size PT`         | Nee       | Bij `.mvsa`: puntgrootte cues (zie `mscz`).                                    | `12`                                     |
+| `--measure-spacing F`        | Nee       | Bij `.mvsa`: maat-spreiding (zie `mscz`).                                      | `1.2`                                    |
 
 ### Voorbeelden
 
@@ -459,6 +486,9 @@ dezelfde A4-eis P6).
 vsa mvsa pdf examples\mvsa\alleluia-toon-1.mvsa
 vsa mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
 vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
+vsa mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
+vsa mvsa pdf lied.mvsa --compact
+vsa mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
 vsa mvsa pdf lied.mscz -o lied.pdf
 ```
 
@@ -476,8 +506,10 @@ schermrenderer. Formaatpagina: [mvsa-svg](../../formats/mvsa-svg.md).
 ```text
 vsa mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim]
-             [--transparent] [--bibliotheek-id ID]
+             [--transparent] [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
+             [--staff-distance SP]
+             [--page-margin-top MM] [--page-margin-bottom MM]
              [--lyrics-font FACE] [--lyrics-font-size PT]
              [--cue-font FACE] [--cue-font-size PT] path
 ```
@@ -493,29 +525,35 @@ Eén SVG-pagina. Langere stukken die MuseScore over meerdere pagina’s splitst:
 gebruik `--section` (alleen bij `.mvsa`) of verkort het stuk. Na trim:
 **witte achtergrond** (default); ``--transparent`` voor geen achtergrondvlak.
 
-Style-opties (systeemafstand, lyrics-/cue-font) gelden **alleen bij** `.mvsa`.
-Heb je al een `.mscz` met die fonts: zet die rechtstreeks om naar SVG.
+Style-opties (`--compact`, systeem-/stafafstand, pagina-marges,
+lyrics-/cue-font) gelden **alleen bij** `.mvsa`; andere Style-vlaggen winnen
+van `--compact`. Heb je al een `.mscz` met die fonts: zet die rechtstreeks
+om naar SVG.
 
 ### Argumenten
 
-| Naam                         | Betekenis                                                         |
-| ---------------------------- | ----------------------------------------------------------------- |
-| `path`                       | Bron-``.mvsa`` of ``.mscz``.                                      |
-| `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg`` / ``.svg``.  |
-| `--section`                  | Alleen bij ``.mvsa``: deze ``@sectie``-id.                        |
-| `--musescore`                | MuseScore-executable.                                             |
-| `--keep-mscz`                | Alleen bij ``.mvsa``: bewaar tussenliggende ``.mscz``.            |
-| `--keep-mxl`                 | Alleen bij ``.mvsa``: bewaar tussenliggende partituur-``.mxl``.   |
-| `--no-trim`                  | Laat volle A4-SVG van MuseScore staan.                            |
-| `--transparent`              | Geen witte achtergrond na trim (default is wit).                  |
-| `--bibliotheek-id`           | Alleen bij ``.mvsa``; genegeerd voor layout ``muziek``.           |
-| `--min-system-distance SP`   | Alleen bij ``.mvsa``: min. systeemafstand (default ``8``).        |
-| `--max-system-distance SP`   | Alleen bij ``.mvsa``: max. systeemafstand (default ``14``).       |
-| `--lyrics-font FACE`         | Alleen bij ``.mvsa``: lettertype zangtekst.                       |
-| `--lyrics-font-size PT`      | Alleen bij ``.mvsa``: puntgrootte zangtekst (default ``13``).     |
-| `--cue-font FACE`            | Alleen bij ``.mvsa``: lettertype cues/`@tekst`.                   |
-| `--cue-font-size PT`         | Alleen bij ``.mvsa``: puntgrootte cues (default ``12``).          |
-| `--measure-spacing F`        | Alleen bij ``.mvsa``: maat-spreiding (default ``1.2``).           |
+| Naam                         | Betekenis                                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------------- |
+| `path`                       | Bron-``.mvsa`` of ``.mscz``.                                                              |
+| `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg`` / ``.svg``.                          |
+| `--section`                  | Alleen bij ``.mvsa``: deze ``@sectie``-id.                                                |
+| `--musescore`                | MuseScore-executable.                                                                     |
+| `--keep-mscz`                | Alleen bij ``.mvsa``: bewaar tussenliggende ``.mscz``.                                    |
+| `--keep-mxl`                 | Alleen bij ``.mvsa``: bewaar tussenliggende partituur-``.mxl``.                           |
+| `--no-trim`                  | Laat volle A4-SVG van MuseScore staan.                                                    |
+| `--transparent`              | Geen witte achtergrond na trim (default is wit).                                          |
+| `--bibliotheek-id`           | Alleen bij ``.mvsa``; genegeerd voor layout ``muziek``.                                   |
+| `--compact`                  | Alleen bij ``.mvsa``: dichtste Style-baseline; andere Style-opties winnen (zie ``mscz``). |
+| `--min-system-distance SP`   | Alleen bij ``.mvsa``: min. systeemafstand (default ``8``).                                |
+| `--max-system-distance SP`   | Alleen bij ``.mvsa``: max. systeemafstand (default ``14``).                               |
+| `--staff-distance SP`        | Alleen bij ``.mvsa``: stafafstand in één systeem (+ accolade).                            |
+| `--page-margin-top MM`       | Alleen bij ``.mvsa``: bovenmarge in mm (default ``15``).                                  |
+| `--page-margin-bottom MM`    | Alleen bij ``.mvsa``: ondermarge in mm (default ``15``).                                  |
+| `--lyrics-font FACE`         | Alleen bij ``.mvsa``: lettertype zangtekst.                                               |
+| `--lyrics-font-size PT`      | Alleen bij ``.mvsa``: puntgrootte zangtekst (default ``13``).                             |
+| `--cue-font FACE`            | Alleen bij ``.mvsa``: lettertype cues/`@tekst`.                                           |
+| `--cue-font-size PT`         | Alleen bij ``.mvsa``: puntgrootte cues (default ``12``).                                  |
+| `--measure-spacing F`        | Alleen bij ``.mvsa``: maat-spreiding (default ``1.2``).                                   |
 
 ### Voorbeelden
 
@@ -525,6 +563,8 @@ vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa
 vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.svg
 vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --lyrics-font-size 14 --cue-font-size 11
 vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --measure-spacing 1.8
+vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
+vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
 vsa mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 ```
 
