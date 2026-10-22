@@ -187,15 +187,16 @@ def apply_zoektekst(source: str, *, kind: SourceKind) -> ZoektekstApplyResult:
 
 def iter_vsa_mvsa_files(path: Path) -> list[Path]:
     """Bestand of map → gesorteerde ``.vsa`` / ``.mvsa``-paden."""
-    if not path.exists():
-        raise FileNotFoundError(str(path))
-    if path.is_file():
-        kind_from_path(path)  # validate suffix
-        return [path]
-    files = sorted(
-        {
-            *path.rglob("*.vsa"),
-            *path.rglob("*.mvsa"),
-        }
-    )
-    return [p for p in files if p.is_file()]
+    from .input_paths import InputPathError, collect_input_files
+
+    path = Path(path)
+    try:
+        return collect_input_files(path, suffixes=(".vsa", ".mvsa"))
+    except InputPathError as exc:
+        if not path.exists():
+            raise FileNotFoundError(str(path)) from exc
+        if path.is_file():
+            raise ValueError(
+                f"verwacht .vsa of .mvsa; kreeg {path.suffix!r}"
+            ) from exc
+        raise ValueError(str(exc)) from exc

@@ -80,13 +80,13 @@ lettergreep een klinkende noot. Same-pitch **melisma** wél samentrekken
 
 ## L — Lyrics algemeen
 
-| #   | Regel                                                                                                                                                                        |
-| --  | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| L1  | Eén lyric-laag onder de bovenste balk (tussen SA en TB).                                                                                                                     |
-| L2  | Standaard gecentreerd op de nootkop; Source Sans 3, 13 pt (Style).                                                                                                           |
-| L3  | Hyphen (`Va-der`) ≠ melisma.                                                                                                                                                 |
-| L4  | Melisma: tekst op eerste noot; **lyric-extender** + **melisma-slur** (S2/S4). Geen extender onder recite (R4).                                                               |
-| L5  | Maatbreedte volgt tekst; laatste systeem vol (`lastSystemFillLimit=0`).                                                                                                      |
+| #   | Regel                                                                                                                                                                                                              |
+| --  | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------                                       |
+| L1  | Eén lyric-laag onder de bovenste balk (tussen SA en TB).                                                                                                                                                           |
+| L2  | Standaard gecentreerd op de nootkop; Source Sans 3, 13 pt (Style). Override: `--lyrics-font` / `--lyrics-font-size` op `mvsa mscz`/`pdf`/`svg`. Cues (`@tekst`): `--cue-font` / `--cue-font-size` (default 12 pt). |
+| L3  | Hyphen (`Va-der`) ≠ melisma.                                                                                                                                                                                       |
+| L4  | Melisma: tekst op eerste noot; **lyric-extender** + **melisma-slur** (S2/S4). Geen extender onder recite (R4).                                                                                                     |
+| L5  | Maatbreedte volgt tekst; laatste systeem vol (`lastSystemFillLimit=0`).                                                                                                                                            |
 
 ---
 
@@ -142,14 +142,14 @@ Contract: checklist MSCZ **S14–S19**. MuseScore-gedrag dat we vermijden:
 
 ## P — Pagina / systeem (A4)
 
-| #   | Regel                                                                                                                         |
-| --  | ----------------------------------------------------------------------                                                        |
-| P1  | Papier A4 staand; marges 15 mm. (Canoniek ook: checklist [PDF P6](canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).) |
-| P2  | Geen inspring eerste systeem.                                                                                                 |
-| P3  | Verticaal: pagina niet vullen; `minSystemDistance`/`maxSystemDistance` vast (niet “spread”).                                  |
-| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                      |
-| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                  |
-| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                     |
+| #   | Regel                                                                                                                                                                                                                                                                                                         |
+| --  | ----------------------------------------------------------------------                                                                                                                                                                                                                                        |
+| P1  | Papier A4 staand; default-marges 15 mm. Override boven/onder: `--page-margin-top` / `--page-margin-bottom` (mm) op `mvsa mscz`/`pdf`/`svg`. (Canoniek ook: checklist [PDF P6](canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).)                                                                     |
+| P2  | Geen inspring eerste systeem.                                                                                                                                                                                                                                                                                 |
+| P3  | Verticaal: pagina niet vullen; default `minSystemDistance`/`maxSystemDistance` 8/14 (niet “spread”). Override: `--min-system-distance` / `--max-system-distance`, of `--compact` (baseline 2/2 + lyric 0.1 + marge 5 mm; andere Style-opties winnen). Balken: `--staff-distance`. Op `mvsa mscz`/`pdf`/`svg`. |
+| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                                                                                                                                                                                                      |
+| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                                                                                                                                                                                                  |
+| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                                                                                                                                                                                                     |
 
 ---
 

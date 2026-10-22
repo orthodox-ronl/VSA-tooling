@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 import zipfile
+from collections.abc import Mapping
 from fractions import Fraction
 from pathlib import Path
 
@@ -121,6 +122,196 @@ class MsczPartituurError(Exception):
     """MSCZ partituur post-process failed."""
 
 
+def _format_style_number(value: float) -> str:
+    """MuseScore Style number as compact decimal string (``8`` or ``8.5``)."""
+    if not (value == value) or value in (float("inf"), float("-inf")):  # NaN/inf
+        raise MsczPartituurError(f"ongeldige Style-waarde: {value!r}")
+    if value == int(value):
+        return str(int(value))
+    text = f"{value:.6f}".rstrip("0").rstrip(".")
+    return text or "0"
+
+
+def _require_positive_style_number(name: str, value: float) -> str:
+    if value <= 0:
+        raise MsczPartituurError(f"{name} moet > 0 zijn, kreeg: {value}")
+    return _format_style_number(value)
+
+
+def _require_nonnegative_mm(name: str, value: float) -> str:
+    """Page margin in mm → MuseScore Style inches string (``0`` allowed)."""
+    if value != value or value in (float("inf"), float("-inf")):  # NaN/inf
+        raise MsczPartituurError(f"{name}: ongeldige waarde {value!r}")
+    if value < 0:
+        raise MsczPartituurError(f"{name} moet >= 0 mm zijn, kreeg: {value}")
+    inches = value / 25.4
+    return _format_style_number(inches)
+
+
+def _require_font_face(name: str, value: str) -> str:
+    face = str(value).strip()
+    if not face:
+        raise MsczPartituurError(f"{name} mag niet leeg zijn")
+    return face
+
+
+# ``--compact`` preset (spikes compact-layout + lyric-clearance):
+# lage vaste systeemafstand (MuseScore mag lokaal uitdijen voor cues);
+# strakke lyric-clearance tussen SA/TB; kleinere boven-/ondermarge.
+COMPACT_MIN_SYSTEM_DISTANCE = 2.0
+COMPACT_MAX_SYSTEM_DISTANCE = 2.0
+COMPACT_PAGE_MARGIN_TOP_MM = 5.0
+COMPACT_PAGE_MARGIN_BOTTOM_MM = 5.0
+COMPACT_LYRICS_MIN_TOP_DISTANCE = 0.1
+COMPACT_LYRICS_MIN_BOTTOM_DISTANCE = 0.1
+COMPACT_LYRICS_MIN_DISTANCE = 0.1
+
+
+def apply_compact_style_preset(kwargs: dict) -> dict:
+    """Fill unset Style kwargs from the ``--compact`` preset.
+
+    ``--compact`` is the densest baseline. Explicit CLI/API values always win
+    (per key). For systeemafstand: if only min or only max is given, the other
+    side is filled from compact, then raised/lowered so max >= min (the
+    explicit side keeps its value).
+    """
+    explicit_min = kwargs.get("min_system_distance") is not None
+    explicit_max = kwargs.get("max_system_distance") is not None
+    out = dict(kwargs)
+    if out.get("min_system_distance") is None:
+        out["min_system_distance"] = COMPACT_MIN_SYSTEM_DISTANCE
+    if out.get("max_system_distance") is None:
+        out["max_system_distance"] = COMPACT_MAX_SYSTEM_DISTANCE
+    min_v = float(out["min_system_distance"])
+    max_v = float(out["max_system_distance"])
+    if max_v < min_v:
+        if explicit_min and not explicit_max:
+            out["max_system_distance"] = min_v
+        elif explicit_max and not explicit_min:
+            out["min_system_distance"] = max_v
+        # both explicit and inconsistent → build_partituur_style_overrides raises
+    if out.get("page_margin_top_mm") is None:
+        out["page_margin_top_mm"] = COMPACT_PAGE_MARGIN_TOP_MM
+    if out.get("page_margin_bottom_mm") is None:
+        out["page_margin_bottom_mm"] = COMPACT_PAGE_MARGIN_BOTTOM_MM
+    if out.get("lyrics_min_top_distance") is None:
+        out["lyrics_min_top_distance"] = COMPACT_LYRICS_MIN_TOP_DISTANCE
+    if out.get("lyrics_min_bottom_distance") is None:
+        out["lyrics_min_bottom_distance"] = COMPACT_LYRICS_MIN_BOTTOM_DISTANCE
+    if out.get("lyrics_min_distance") is None:
+        out["lyrics_min_distance"] = COMPACT_LYRICS_MIN_DISTANCE
+    return out
+
+
+def build_partituur_style_overrides(
+    *,
+    min_system_distance: float | None = None,
+    max_system_distance: float | None = None,
+    staff_distance: float | None = None,
+    page_margin_top_mm: float | None = None,
+    page_margin_bottom_mm: float | None = None,
+    lyrics_min_top_distance: float | None = None,
+    lyrics_min_bottom_distance: float | None = None,
+    lyrics_min_distance: float | None = None,
+    lyrics_font: str | None = None,
+    lyrics_font_size: float | None = None,
+    cue_font: str | None = None,
+    cue_font_size: float | None = None,
+    measure_spacing: float | None = None,
+) -> dict[str, str]:
+    """CLI/API MuseScore-Style overrides for partituur/muziek layout.
+
+    Systeemafstand (default 8/14), stafafstand binnen een systeem
+    (``staffDistance`` + accolade), pagina-marges boven/onder (default 15 mm),
+    lyric-clearances, lyrics-font (default Source Sans 3 / 13 pt), cue-font
+    voor ``@tekst`` / SystemText + StaffText (default zelfde font / 12 pt), en
+    ``measureSpacing`` (default 1.2). Raises :class:`MsczPartituurError` on
+    invalid values.
+    """
+    overrides: dict[str, str] = {}
+    if min_system_distance is not None:
+        overrides["minSystemDistance"] = _require_positive_style_number(
+            "--min-system-distance", min_system_distance
+        )
+    if max_system_distance is not None:
+        overrides["maxSystemDistance"] = _require_positive_style_number(
+            "--max-system-distance", max_system_distance
+        )
+    if min_system_distance is not None or max_system_distance is not None:
+        min_v = float(
+            overrides.get("minSystemDistance", _STYLE_OVERRIDES["minSystemDistance"])
+        )
+        max_v = float(
+            overrides.get("maxSystemDistance", _STYLE_OVERRIDES["maxSystemDistance"])
+        )
+        if max_v < min_v:
+            raise MsczPartituurError(
+                f"max-system-distance ({max_v}) mag niet kleiner zijn dan "
+                f"min-system-distance ({min_v})"
+            )
+    if staff_distance is not None:
+        staff = _require_positive_style_number("--staff-distance", staff_distance)
+        # SA/TB zit in één accolade: zet ook akkolade-afstand gelijk.
+        overrides["staffDistance"] = staff
+        overrides["akkoladeDistance"] = staff
+        overrides["maxAkkoladeDistance"] = staff
+    if page_margin_top_mm is not None:
+        top = _require_nonnegative_mm("--page-margin-top", page_margin_top_mm)
+        overrides["pageOddTopMargin"] = top
+        overrides["pageEvenTopMargin"] = top
+    if page_margin_bottom_mm is not None:
+        bottom = _require_nonnegative_mm(
+            "--page-margin-bottom", page_margin_bottom_mm
+        )
+        overrides["pageOddBottomMargin"] = bottom
+        overrides["pageEvenBottomMargin"] = bottom
+    if lyrics_min_top_distance is not None:
+        overrides["lyricsMinTopDistance"] = _require_positive_style_number(
+            "lyricsMinTopDistance", lyrics_min_top_distance
+        )
+    if lyrics_min_bottom_distance is not None:
+        overrides["lyricsMinBottomDistance"] = _require_positive_style_number(
+            "lyricsMinBottomDistance", lyrics_min_bottom_distance
+        )
+    if lyrics_min_distance is not None:
+        overrides["lyricsMinDistance"] = _require_positive_style_number(
+            "lyricsMinDistance", lyrics_min_distance
+        )
+    if lyrics_font is not None:
+        face = _require_font_face("--lyrics-font", lyrics_font)
+        overrides["lyricsOddFontFace"] = face
+        overrides["lyricsEvenFontFace"] = face
+    if lyrics_font_size is not None:
+        size = _require_positive_style_number("--lyrics-font-size", lyrics_font_size)
+        overrides["lyricsOddFontSize"] = size
+        overrides["lyricsEvenFontSize"] = size
+    if cue_font is not None:
+        face = _require_font_face("--cue-font", cue_font)
+        overrides["staffTextFontFace"] = face
+        overrides["systemTextFontFace"] = face
+    if cue_font_size is not None:
+        size = _require_positive_style_number("--cue-font-size", cue_font_size)
+        overrides["staffTextFontSize"] = size
+        overrides["systemTextFontSize"] = size
+    if measure_spacing is not None:
+        overrides["measureSpacing"] = _require_positive_style_number(
+            "--measure-spacing", measure_spacing
+        )
+    return overrides
+
+
+def build_system_distance_style_overrides(
+    *,
+    min_system_distance: float | None = None,
+    max_system_distance: float | None = None,
+) -> dict[str, str]:
+    """Alleen systeemafstand; zie :func:`build_partituur_style_overrides`."""
+    return build_partituur_style_overrides(
+        min_system_distance=min_system_distance,
+        max_system_distance=max_system_distance,
+    )
+
+
 def apply_partituur_mscz_conventions(
     path: Path,
     *,
@@ -135,6 +326,8 @@ def apply_partituur_mscz_conventions(
     tekstdichter: str | None = None,
     arrangeur: str | None = None,
     vertaler: str | None = None,
+    music_only: bool = False,
+    style_overrides: Mapping[str, str] | None = None,
 ) -> None:
     """In-place: empty instrument names + leesbaarheid-Style + colofon.
 
@@ -151,6 +344,12 @@ def apply_partituur_mscz_conventions(
     *bron* (``@bron``) → meta ``source`` én regel in het colofon. MuseScore
     toont meta ``source`` niet in de kop; daarom geen lyricist-workaround meer.
     *tekstdichter* blijft optioneel als echte lyricist-tekst in de kop.
+
+    *music_only*: partituur-leesbaarheid zonder titel, lyricist, footer of
+    colofon (koormap-SVG / shortcode ``muziek``).
+
+    *style_overrides*: optionele MuseScore-Style-sleutels die
+    ``_STYLE_OVERRIDES`` overschrijven (bijv. systeemafstand).
     """
     path = Path(path)
     if not path.is_file() or path.suffix.lower() != ".mscz":
@@ -168,7 +367,18 @@ def apply_partituur_mscz_conventions(
     mscx = _clear_instrument_names(mscx)
     mscx = _hide_tempo_marks(mscx)
     mscx = _fix_ds_al_fine_play_until(mscx)
-    mscx = _ensure_style_overrides(mscx)
+    merged_style = dict(_STYLE_OVERRIDES)
+    if style_overrides:
+        merged_style.update({str(k): str(v) for k, v in style_overrides.items()})
+    mscx = _ensure_style_overrides(mscx, style_overrides)
+    # MS4 leest layout-Style vooral uit score_style.mss — sync dezelfde sleutels.
+    mss_name = next(
+        (n for n in other if n.lower().endswith(".mss") or n.endswith("score_style.mss")),
+        None,
+    )
+    if mss_name is not None:
+        mss = other[mss_name].decode("utf-8")
+        other[mss_name] = _ensure_style_overrides(mss, merged_style).encode("utf-8")
     if system_texts:
         mscx = _promote_tekst_staff_texts(mscx, system_texts)
         mscx = _wrap_system_text_ellipsis(mscx, system_texts)
@@ -180,25 +390,30 @@ def apply_partituur_mscz_conventions(
     mscx = _collapse_same_pitch_tie_runs(mscx)
     # Recite-print (S8/R3): ||O||-kop + onhoorbare spacers; maatlengte herstellen.
     mscx = _apply_recite_print_conventions(mscx)
-    if title:
-        mscx = _ensure_score_title(mscx, title)
-    sheet_lyricist = (tekstdichter or "").strip() or None
-    for meta_name, value in (
-        ("composer", composer),
-        ("source", bron),
-        ("subtitle", ondertitel),
-        ("lyricist", sheet_lyricist),
-        ("arranger", arrangeur),
-        ("translator", vertaler),
-    ):
-        if value:
-            mscx = _set_meta(mscx, meta_name, value)
-    if sheet_lyricist:
-        mscx = _ensure_header_text(mscx, style="lyricist", text=sheet_lyricist)
-    short, full = _format_copyright_notices(copyright, bibliotheek_id, bron=bron)
-    mscx = _set_meta(mscx, "copyright", short)
-    mscx = _set_footer_style(mscx, short)
-    mscx = _insert_colophon_after_staff1(mscx, full)
+    if music_only:
+        mscx = _strip_header_footer_colophon_for_muziek(mscx)
+    else:
+        if title:
+            mscx = _ensure_score_title(mscx, title)
+        sheet_lyricist = (tekstdichter or "").strip() or None
+        for meta_name, value in (
+            ("composer", composer),
+            ("source", bron),
+            ("subtitle", ondertitel),
+            ("lyricist", sheet_lyricist),
+            ("arranger", arrangeur),
+            ("translator", vertaler),
+        ):
+            if value:
+                mscx = _set_meta(mscx, meta_name, value)
+        if sheet_lyricist:
+            mscx = _ensure_header_text(mscx, style="lyricist", text=sheet_lyricist)
+        short, full = _format_copyright_notices(
+            copyright, bibliotheek_id, bron=bron
+        )
+        mscx = _set_meta(mscx, "copyright", short)
+        mscx = _set_footer_style(mscx, short)
+        mscx = _insert_colophon_after_staff1(mscx, full)
 
     tmp = path.with_suffix(path.suffix + ".tmp")
     with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zout:
@@ -206,6 +421,53 @@ def apply_partituur_mscz_conventions(
             zout.writestr(n, data)
         zout.writestr(mscx_name, mscx.encode("utf-8"))
     tmp.replace(path)
+
+
+# MuseScore 4 zet vaak ``<eid>`` vóór ``<style>`` — niet alleen ``Text>style``.
+_MUZIEK_HEADER_VBOX_RE = re.compile(
+    r"<VBox\b[^>]*>"
+    r"(?:(?!</VBox>).)*?"
+    r"<style>\s*(?:title|subtitle|composer|lyricist)\s*</style>"
+    r"(?:(?!</VBox>).)*?"
+    r"</VBox>\s*",
+    re.IGNORECASE | re.DOTALL,
+)
+_MUZIEK_HEADER_TEXT_RE = re.compile(
+    r"<Text\b[^>]*>"
+    r"(?:(?!</Text>).)*?"
+    r"<style>\s*(?:title|subtitle|composer|lyricist)\s*</style>"
+    r"(?:(?!</Text>).)*?"
+    r"</Text>\s*",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _strip_header_footer_colophon_for_muziek(mscx: str) -> str:
+    """Remove title/composer/colofon/footer for music-only SVG/print embed."""
+    # Hele kop-VBox (titel + componist e.d.) weg — MuseScore 4-import.
+    mscx = _MUZIEK_HEADER_VBOX_RE.sub("", mscx)
+    # Losse header-Text mocht er nog iets buiten die VBox staan.
+    mscx = _MUZIEK_HEADER_TEXT_RE.sub("", mscx)
+    mscx = _COLOPHON_VBOX_RE.sub("", mscx)
+    for meta in ("workTitle", "movementTitle", "composer", "lyricist", "subtitle"):
+        pat = re.compile(rf"<metaTag name=\"{meta}\">.*?</metaTag>\s*", re.DOTALL)
+        mscx = pat.sub("", mscx)
+    for key in ("oddFooterC", "evenFooterC"):
+        pat = re.compile(rf"<{key}>.*?</{key}>", re.DOTALL)
+        mscx = pat.sub(f"<{key}></{key}>", mscx)
+    for key, val in (
+        ("showFooter", "0"),
+        ("footerFirstPage", "0"),
+        ("showHeader", "0"),
+        ("headerFirstPage", "0"),
+    ):
+        pat = re.compile(rf"<{key}>.*?</{key}>", re.DOTALL)
+        tag = f"<{key}>{val}</{key}>"
+        if pat.search(mscx):
+            mscx = pat.sub(tag, mscx)
+        elif "<Style>" in mscx:
+            mscx = mscx.replace("<Style>", f"<Style>{tag}", 1)
+    return mscx
 
 
 def _fix_ds_al_fine_play_until(mscx: str) -> str:
@@ -1144,16 +1406,22 @@ def _strip_trailing_hboxes(mscx: str) -> str:
     return re.sub(r"<Staff\b[^>]*>.*?</Staff>", fix_staff, mscx, flags=re.S)
 
 
-def _ensure_style_overrides(mscx: str) -> str:
+def _ensure_style_overrides(
+    mscx: str,
+    extra: Mapping[str, str] | None = None,
+) -> str:
+    style = dict(_STYLE_OVERRIDES)
+    if extra:
+        style.update({str(k): str(v) for k, v in extra.items()})
     if "<Style>" not in mscx:
         insert = "<Style>" + "".join(
-            f"<{k}>{v}</{k}>" for k, v in _STYLE_OVERRIDES.items()
+            f"<{k}>{v}</{k}>" for k, v in style.items()
         ) + "</Style>"
         if "<Part " in mscx or "<Part>" in mscx:
             return mscx.replace("<Part", insert + "<Part", 1)
         return mscx
 
-    for key, val in _STYLE_OVERRIDES.items():
+    for key, val in style.items():
         pat = re.compile(rf"<{key}>.*?</{key}>", re.DOTALL)
         if pat.search(mscx):
             mscx = pat.sub(f"<{key}>{val}</{key}>", mscx)

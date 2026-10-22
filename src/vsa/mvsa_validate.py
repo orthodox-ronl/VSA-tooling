@@ -321,12 +321,21 @@ def validate_mvsa_path(path: Path) -> list[MvsaDiagnostic]:
 
 
 def collect_mvsa_files(path: Path) -> list[Path]:
-    """Verzamel ``.mvsa``-paden. Geen binaire bestanden (``.mscz`` e.d.)."""
-    if path.is_file():
-        if path.suffix.lower() == ".mvsa":
-            return [path]
+    """Verzamel ``.mvsa``-paden. Geen binaire bestanden (``.mscz`` e.d.).
+
+    Verkeerde bestands-extensie of ontbrekend pad → lege lijst (callers
+    checken ``exists()`` / tonen «geen .mvsa»). Map-scan via
+    ``collect_input_files``.
+    """
+    from .input_paths import InputPathError, collect_input_files
+
+    path = Path(path)
+    if path.is_file() and path.suffix.lower() != ".mvsa":
         return []
-    return sorted(path.rglob("*.mvsa"))
+    try:
+        return collect_input_files(path, suffixes=(".mvsa",))
+    except InputPathError:
+        return []
 
 
 # ---------------------------------------------------------------------------

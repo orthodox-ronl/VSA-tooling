@@ -16,6 +16,8 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 | Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                                  |
 | Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap; same-pitch recite; kuiser) |
 | CLI                                 | [`mvsa`](../reference/cli/mvsa.md) (`≡ vsa mvsa`)                                                |
+| Score-IR (scherm-JSON)              | [`score-ir`](score-ir.md) · [`mvsa score-ir`](../reference/cli/mvsa.md#vsa-mvsa-score-ir)        |
+| Muziek-only SVG (koormap)           | [`mvsa-svg`](mvsa-svg.md) · [`mvsa svg`](../reference/cli/mvsa.md#vsa-mvsa-svg)                  |
 | Platte gezongen tekst (extractie)   | [`vsa text`](../reference/cli/text.md)                                                           |
 
 !!! warning "Import = werkbank"

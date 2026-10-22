@@ -15,6 +15,11 @@ het veld `zoektekst` (YAML-frontmatter wordt in beide formaten gestript). Zie
 vsa text [-h] [-o OUTPUT] [--musescore PATH] path
 ```
 
+**Invoer:** `path` mag één bronbestand **of** een map zijn (recursief alle
+passende extensies). Bij meerdere bronnen: tekst naar stdout met
+`=== <pad> ===`-koppen; `-o` alleen bij precies één bron. Zie
+[Invoer bestand of map](input-pad.md).
+
 ## Bronnen
 
 | Extensie                         | Gedrag                                                                                                                                           |
@@ -50,10 +55,10 @@ MuseScore naar een temp-`.mxl` en leest daaruit. Er ontstaat geen
 
 ## Opties
 
-| Optie               | Betekenis                                                |
-| ------------------- | -------------------------------------------------------- |
-| `-o`, `--output`    | Schrijf naar bestand i.p.v. stdout (`Geschreven: …`).    |
-| `--musescore PATH`  | MuseScore-executable (alleen bij `.mscz`; default auto). |
+| Optie               | Betekenis                                                                      |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `-o`, `--output`    | Schrijf naar bestand i.p.v. stdout (`Geschreven: …`). Alleen bij één bron.     |
+| `--musescore PATH`  | MuseScore-executable (alleen bij `.mscz`; default auto).                       |
 
 Geen stamp-header (`# vsa-source-sha256:`) in deze tooling — dat hoort bij
 consumer lyrics-products. Een sibling `*.lyrics.txt` is **niet** verplicht
@@ -76,6 +81,7 @@ Alias voor alleen `.mscz`: [`mscz text`](mscz.md).
 
 ## Zie ook
 
+- [Invoer bestand of map](input-pad.md)
 - [Zoektekst in canonieke bron](../../formats/zoektekst.md)
 - [`vsa zoektekst`](zoektekst.md) — veld vullen/controleren
 - [`mscz`](mscz.md) — MuseScore-bron: import / mxl / text

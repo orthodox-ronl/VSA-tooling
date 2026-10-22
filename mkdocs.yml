@@ -93,6 +93,8 @@ nav:
     - Bestandsformaten:
       - .vsa: formats/vsa.md
       - .mvsa: formats/mvsa.md
+      - Score-IR: formats/score-ir.md
+      - mvsa-SVG (koormap): formats/mvsa-svg.md
       - .mxl / .musicxml: formats/mxl.md
       - .mscz: formats/mscz.md
       - .mp3 / audio: formats/audio.md
@@ -177,6 +179,7 @@ nav:
     - Fixtures-catalogus: reference/fixtures-catalogus.md
     - CLI:
       - Overzicht: reference/cli/index.md
+      - Invoer bestand of map: reference/cli/input-pad.md
       - reference/cli/validate.md
       - reference/cli/parse.md
       - reference/cli/blocks.md

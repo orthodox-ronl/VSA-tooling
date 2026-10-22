@@ -127,7 +127,7 @@ def test_mxl_mscz_default_out_appends_brontype(
         lambda root, path: path,
     )
 
-    def fake_convert(src_path, out, musescore=None):  # noqa: ANN001
+    def fake_convert(src_path, out, musescore=None, **_kwargs):  # noqa: ANN001
         captured["out"] = out
         out.write_bytes(b"PK")
 

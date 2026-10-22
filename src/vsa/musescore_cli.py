@@ -70,6 +70,10 @@ def convert_with_musescore(
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists():
         dest.unlink()
+    # MuseScore SVG: wis eventuele oude pagina-bestanden (stem-1.svg, …).
+    if dest.suffix.lower() == ".svg":
+        for stale in dest.parent.glob(f"{dest.stem}-*.svg"):
+            stale.unlink(missing_ok=True)
     cmd = [str(exe), "-f"]
     if musicxml_infer_text_type:
         cmd.append("--musicxml-infer-text-type")
@@ -83,10 +87,41 @@ def convert_with_musescore(
         )
     except OSError as exc:
         raise MuseScoreConvertError(f"MuseScore starten mislukt: {exc}") from exc
-    if proc.returncode != 0 or not dest.is_file():
+    if proc.returncode != 0:
+        detail = (proc.stderr or proc.stdout or "").strip()
+        msg = f"MuseScore schreef geen {dest} (exit {proc.returncode})"
+        if detail:
+            msg = f"{msg}: {detail[:500]}"
+        raise MuseScoreConvertError(msg)
+    if dest.suffix.lower() == ".svg" and not dest.is_file():
+        _resolve_musescore_svg_pages(dest)
+    if not dest.is_file():
         detail = (proc.stderr or proc.stdout or "").strip()
         msg = f"MuseScore schreef geen {dest} (exit {proc.returncode})"
         if detail:
             msg = f"{msg}: {detail[:500]}"
         raise MuseScoreConvertError(msg)
     return dest
+
+
+def _resolve_musescore_svg_pages(dest: Path) -> None:
+    """MuseScore writes ``name-1.svg`` (etc.); fold into requested ``name.svg``.
+
+    Multiple pages are rejected — use ``--section`` for a single-page SVG.
+    """
+    pages = sorted(
+        dest.parent.glob(f"{dest.stem}-*.svg"),
+        key=lambda p: p.name,
+    )
+    if not pages:
+        return
+    if len(pages) > 1:
+        names = ", ".join(p.name for p in pages)
+        for p in pages:
+            p.unlink(missing_ok=True)
+        raise MuseScoreConvertError(
+            f"MuseScore schreef {len(pages)} SVG-pagina's ({names}); "
+            "koormap-SVG ondersteunt één pagina — gebruik --section of "
+            "verkort het stuk"
+        )
+    pages[0].replace(dest)

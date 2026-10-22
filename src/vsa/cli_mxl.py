@@ -10,6 +10,11 @@ import argparse
 import sys
 from pathlib import Path
 
+from .derived_path import derived_output_path
+from .input_paths import InputPathError, collect_cli_sources
+
+_MXL_SUFFIXES = (".mxl", ".musicxml", ".xml")
+
 
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
@@ -40,6 +45,25 @@ def main(argv: list[str] | None = None) -> int:
     return 1
 
 
+def _collect(path: str | Path) -> list[Path] | None:
+    try:
+        return collect_cli_sources(path, suffixes=_MXL_SUFFIXES)
+    except InputPathError as exc:
+        print(str(exc), file=sys.stderr)
+        return None
+
+
+def _reject_multi_output(files: list[Path], output: str | None) -> bool:
+    if len(files) > 1 and output:
+        print(
+            "-o/--output is alleen toegestaan bij precies één bronbestand "
+            "(bij een map: sibling- of in-place-output per bron).",
+            file=sys.stderr,
+        )
+        return True
+    return False
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mxl",
@@ -58,6 +82,9 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Checklist Coria/playback (M2/M8/importer/meta).\n"
             "  normalize PATH [-o OUT] [--apply-timing]\n"
             "      Normaliseer naar playback-profiel.\n"
+            "\n"
+            "PATH = één bronbestand of map (recursief). "
+            "-o alleen bij precies één bron.\n"
             "\n"
             "voorbeelden:\n"
             "  mxl import lied.mxl -o lied.mvsa\n"
@@ -79,12 +106,21 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Importeer .mxl/.musicxml naar .mvsa.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    imp.add_argument("path", help=".mxl, .musicxml of .xml bronbestand.")
+    imp.add_argument(
+        "path",
+        help=(
+            ".mxl/.musicxml/.xml-bestand, of map met zulke bestanden "
+            "(recursief; zelfde batch als mvsa import)."
+        ),
+    )
     imp.add_argument(
         "-o",
         "--output",
         default=None,
-        help="Uitvoer-.mvsa (default: <stem>.import.mvsa).",
+        help=(
+            "Uitvoer-.mvsa (default: <stem>.import.mvsa per bron). "
+            "Alleen bij precies één bronbestand."
+        ),
     )
     imp.add_argument(
         "--pitch",
@@ -123,13 +159,17 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Converteer .mxl naar .mscz via MuseScore.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    mscz.add_argument("path", help=".mxl / .musicxml bronbestand.")
+    mscz.add_argument(
+        "path",
+        help=".mxl/.musicxml/.xml-bestand, of map met zulke bestanden (recursief).",
+    )
     mscz.add_argument(
         "-o",
         "--output",
         default=None,
         help=(
-            "Uitvoer-.mscz (default: <bronnaam>.mscz, bijv. lied.mxl.mscz)."
+            "Uitvoer-.mscz (default: sibling <bronnaam>.mscz). "
+            "Alleen bij precies één bronbestand."
         ),
     )
     mscz.add_argument(
@@ -143,7 +183,10 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Controleer Coria/playback-checklist (niet-muterend).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    validate.add_argument("path", help=".mxl / .musicxml / .xml bestand.")
+    validate.add_argument(
+        "path",
+        help=".mxl/.musicxml/.xml-bestand, of map met zulke bestanden (recursief).",
+    )
     validate.add_argument(
         "--profile",
         choices=["satb", "mono"],
@@ -156,12 +199,18 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Normaliseer naar Coria/playback-profiel.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    normalize.add_argument("path", help=".mxl / .musicxml / .xml bronbestand.")
+    normalize.add_argument(
+        "path",
+        help=".mxl/.musicxml/.xml-bestand, of map met zulke bestanden (recursief).",
+    )
     normalize.add_argument(
         "-o",
         "--output",
         default=None,
-        help="Uitvoer (default: overschrijf bron).",
+        help=(
+            "Uitvoer (default: overschrijf elke bron). "
+            "Alleen bij precies één bronbestand."
+        ),
     )
     normalize.add_argument(
         "--apply-timing",
@@ -177,45 +226,45 @@ def _build_parser() -> argparse.ArgumentParser:
 def _cmd_mxl_validate(ns: argparse.Namespace) -> int:
     from .musicxml_playback_checklist import validate_playback_mxl_path
 
-    path = Path(ns.path)
-    if not path.is_file():
-        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+    files = _collect(ns.path)
+    if files is None:
         return 1
-    findings = validate_playback_mxl_path(path, profile=ns.profile)
-    if not findings:
-        print(f"OK ({ns.profile}): {path}")
-        return 0
-    for f in findings:
-        print(f"{path}: {f.code}: {f.message}", file=sys.stderr)
-    print(f"{len(findings)} checklist-fout(en)", file=sys.stderr)
-    return 1
+    exit_code = 0
+    for path in files:
+        findings = validate_playback_mxl_path(path, profile=ns.profile)
+        if not findings:
+            print(f"OK ({ns.profile}): {path}")
+            continue
+        for f in findings:
+            print(f"{path}: {f.code}: {f.message}", file=sys.stderr)
+        print(f"{path}: {len(findings)} checklist-fout(en)", file=sys.stderr)
+        exit_code = 1
+    return exit_code
 
 
 def _cmd_mxl_normalize(ns: argparse.Namespace) -> int:
     from .musicxml_playback_normalize import normalize_playback_mxl_path
 
-    path = Path(ns.path)
-    if not path.is_file():
-        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+    files = _collect(ns.path)
+    if files is None:
         return 1
-    if path.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
-        print(
-            f"Verwacht .mxl/.musicxml/.xml; kreeg {path.suffix!r}",
-            file=sys.stderr,
-        )
+    if _reject_multi_output(files, ns.output):
         return 1
-    out = Path(ns.output) if ns.output else path
-    try:
-        dest = normalize_playback_mxl_path(
-            path,
-            out,
-            apply_timing=bool(ns.apply_timing),
-        )
-    except Exception as exc:
-        print(f"{path}: ERROR: {exc}", file=sys.stderr)
-        return 1
-    print(f"Geschreven: {dest}")
-    return 0
+    exit_code = 0
+    for path in files:
+        out = Path(ns.output) if ns.output else path
+        try:
+            dest = normalize_playback_mxl_path(
+                path,
+                out,
+                apply_timing=bool(ns.apply_timing),
+            )
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {dest}")
+    return exit_code
 
 
 def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
@@ -228,48 +277,45 @@ def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
     from .mvsa_import import read_musicxml_file
 
-    path = Path(ns.path)
-    if not path.is_file():
-        print(f"Bestand niet gevonden: {path}", file=sys.stderr)
+    files = _collect(ns.path)
+    if files is None:
         return 1
-    if path.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
-        print(
-            f"Verwacht .mxl/.musicxml/.xml als bron; kreeg {path.suffix!r}",
-            file=sys.stderr,
-        )
+    if _reject_multi_output(files, ns.output):
         return 1
-    from .derived_path import derived_output_path
-
-    out = Path(ns.output) if ns.output else derived_output_path(path, ".mscz")
-    if out.suffix.lower() != ".mscz":
-        out = out.with_suffix(".mscz")
     musescore = Path(ns.musescore) if ns.musescore else None
+    exit_code = 0
+    for path in files:
+        out = Path(ns.output) if ns.output else derived_output_path(path, ".mscz")
+        if out.suffix.lower() != ".mscz":
+            out = out.with_suffix(".mscz")
 
-    fd, tmp_name = tempfile.mkstemp(suffix=".mxl", prefix="mxl-partituur-")
-    os.close(fd)
-    tmp_mxl = Path(tmp_name)
-    try:
+        fd, tmp_name = tempfile.mkstemp(suffix=".mxl", prefix="mxl-partituur-")
+        os.close(fd)
+        tmp_mxl = Path(tmp_name)
         try:
-            xml = read_musicxml_file(path)
-            partituur = ensure_partituur_musicxml(xml)
-            write_musicxml_output(tmp_mxl, partituur)
-            convert_with_musescore(
-                tmp_mxl,
-                out,
-                musescore=musescore,
-                musicxml_infer_text_type=True,
-            )
-            apply_partituur_mscz_conventions(out)
-        except (MuseScoreNotFoundError, MuseScoreConvertError, MsczPartituurError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
-            return 1
-        except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
-            return 1
-    finally:
-        tmp_mxl.unlink(missing_ok=True)
-    print(f"Geschreven: {out}")
-    return 0
+            try:
+                xml = read_musicxml_file(path)
+                partituur = ensure_partituur_musicxml(xml)
+                write_musicxml_output(tmp_mxl, partituur)
+                convert_with_musescore(
+                    tmp_mxl,
+                    out,
+                    musescore=musescore,
+                    musicxml_infer_text_type=True,
+                )
+                apply_partituur_mscz_conventions(out)
+            except (MuseScoreNotFoundError, MuseScoreConvertError, MsczPartituurError) as exc:
+                print(f"{path}: ERROR: {exc}", file=sys.stderr)
+                exit_code = 1
+                continue
+            except Exception as exc:
+                print(f"{path}: ERROR: {exc}", file=sys.stderr)
+                exit_code = 1
+                continue
+        finally:
+            tmp_mxl.unlink(missing_ok=True)
+        print(f"Geschreven: {out}")
+    return exit_code
 
 
 if __name__ == "__main__":

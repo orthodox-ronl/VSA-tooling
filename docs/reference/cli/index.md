@@ -19,6 +19,13 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 Paden in commando's zijn relatief aan die map, tenzij je een absoluut pad
 opgeeft.
 
+## Invoer: bestand of map
+
+Waar een commando bronbestanden leest, is de afspraak: **één bestand** of
+**een map** (recursief alle passende extensies). Gedeelde helper:
+`vsa.input_paths.collect_input_files`. Inventaris (welke commando’s dit al
+doen): [input-pad](input-pad.md).
+
 ## Algemene syntax
 
 ```text

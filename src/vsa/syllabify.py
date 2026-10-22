@@ -155,14 +155,17 @@ def transform_vsa_source(text: str, *, unsyllabify: bool = False) -> SyllabifyRe
 
 def iter_vsa_files(path: Path) -> list[Path]:
     """Geef `.vsa`-bestanden: één bestand, of recursief in een map."""
+    from .input_paths import InputPathError, collect_input_files
+
     path = Path(path)
-    if path.is_file():
-        if path.suffix.lower() != _VSA_SUFFIX:
-            raise ValueError(f"verwacht een .vsa-bestand, kreeg: {path}")
-        return [path]
-    if path.is_dir():
-        return sorted(p for p in path.rglob(f"*{_VSA_SUFFIX}") if p.is_file())
-    raise FileNotFoundError(str(path))
+    try:
+        return collect_input_files(path, suffixes=(_VSA_SUFFIX,))
+    except InputPathError as exc:
+        if not path.exists():
+            raise FileNotFoundError(str(path)) from exc
+        if path.is_file():
+            raise ValueError(f"verwacht een .vsa-bestand, kreeg: {path}") from exc
+        raise ValueError(str(exc)) from exc
 
 
 def normalize_output_extension(extension: str) -> str:

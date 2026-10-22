@@ -12,6 +12,10 @@ output begint met dezelfde waarschuwingsbanner als `mvsa import`.
 Alias voor platte tekst: [`vsa text`](text.md) (zelfde extractie; ook
 `.mxl` / `.vsa` / `.mvsa`).
 
+**Invoer:** `path` mag één `.mscz` **of** een map zijn (recursief). Bij
+meerdere bronnen: sibling-output per bestand; `-o` alleen bij precies één
+bron. Zie [Invoer bestand of map](input-pad.md).
+
 ## Synopsis
 
 ```text
@@ -59,6 +63,7 @@ scripts\mscz.cmd -h
 
 ## Zie ook
 
+- [Invoer bestand of map](input-pad.md)
 - [`text`](text.md) — platte tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz`
 - [`mvsa`](mvsa.md) — bron `.mvsa`
 - [`mxl`](mxl.md) — bron `.mxl`

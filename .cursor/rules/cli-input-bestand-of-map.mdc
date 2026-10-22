@@ -1,0 +1,12 @@
+# CLI-invoer: bestand of map
+
+**Norm:** `docs/reference/cli/input-pad.md`
+
+Bij **nieuwe of gewijzigde** CLI-handlers met een bron-``path`` / ``input``:
+
+1. Gebruik ``vsa.input_paths.collect_input_files`` (geen ad-hoc ``rglob``).
+2. Helptekst: «bestand of map» + welke extensies.
+3. Man-pagina synchroon (``docs/reference/cli/…``).
+
+Uitzondering alleen als de man-pagina expliciet «alleen één bestand» zegt
+(én dat in dezelfde wijziging is vastgelegd).
