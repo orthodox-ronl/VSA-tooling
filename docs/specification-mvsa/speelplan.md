@@ -196,6 +196,7 @@ L:  Al-&-&-&.&.&-  … ||
 ```
 
 - Blad (MSCZ): `|:` 1 `|1,2.` 2 `:|` `3.` 3.
+  (volta-haken alleen boven de SA-balk — checklist S20).
 - Coria (MXL): 1+2+1+2+1+3 achter elkaar.
 
 Trisagion-vorm (`nls-1, nls-2, ksl, doxologie, nls-2, ksl`): Segno bij

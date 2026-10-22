@@ -115,7 +115,7 @@ renderers; de corpus-CLI is tropaar-toon-4 totdat hun `pitches_status` geen
 Voor litanie/LSATB-export (`mvsa mscz`) gelden aparte normaalvorm-regels:
 geen mid-systeem-HBox, geen spacermaat met balklijnen, leidende `|:` zonder
 lege maat, `@tekst` als SystemText. Zie
-[canonieke checklists — MSCZ S14–S19](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
+[canonieke checklists — MSCZ S14–S20](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
 en [MSCZ-leesbaarheid — cues](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade).
 Template-HBox aan **systeemeinde** (cycle-tekst e.d.) blijft een apart patroon
 en hoort niet mid-systeem.
