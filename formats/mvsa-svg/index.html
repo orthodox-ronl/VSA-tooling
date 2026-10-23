@@ -3642,7 +3642,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4685,7 +4685,8 @@
 <p>Afgeleide <strong>partituur-SVG</strong>, inhoudshoogte na trim. Bron <code>.mvsa</code>: muziek-only
 (geen titel/colofon). Bron <code>.mscz</code>: MuseScore tekent wat er al in het bestand
 staat (inclusief Style/fonts). Bedoeld voor koormap-pagina’s
-(bibliotheek-shortcode <code>muziek</code> later).</p>
+(bibliotheek-shortcode <code>muziek</code> later). Past het stuk op één MuseScore-pagina,
+dan één <code>.svg</code>; anders een <strong>bladreeks</strong> (<code>stem-1.svg</code>, <code>stem-2.svg</code>, …).</p>
 <table>
 <thead>
 <tr>
@@ -4696,7 +4697,7 @@ staat (inclusief Style/fonts). Bedoeld voor koormap-pagina’s
 <tbody>
 <tr>
 <td>CLI</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-svg"><code>vsa mvsa svg</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a></td>
 </tr>
 <tr>
 <td>MSCZ-layout <code>muziek</code></td>
@@ -4709,9 +4710,9 @@ staat (inclusief Style/fonts). Bedoeld voor koormap-pagina’s
 </tbody>
 </table>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.svg
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek-tr.svg --transparent
-vsa mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.svg
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek-tr.svg --transparent
+mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 </code></pre></div>
 <p>Default na trim: <strong>witte</strong> achtergrond. <code>--transparent</code> laat de achtergrond
 leeg (handig op gekleurde pagina’s).</p>
@@ -4719,15 +4720,19 @@ leeg (handig op gekleurde pagina’s).</p>
 Style-opties winnen), systeemafstand, stafafstand (<code>--staff-distance</code>),
 pagina-marges (<code>--page-margin-top</code> / <code>--page-margin-bottom</code>), fonts en
 <code>--measure-spacing</code> — zelfde Style-opties als bij
-<a href="../../reference/cli/mvsa/#vsa-mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../mscz/"><code>.mscz</code></a>.
+<a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../mscz/"><code>.mscz</code></a>.
 Bij bron <code>.mscz</code> staan die waarden al in het bestand; Style-CLI-opties
 gelden dan niet.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
 </code></pre></div>
-<p><strong>Brug:</strong> MuseScore tekent de SVG. Een gedeelde browser-renderer (OSMD /
-Score-IR) voor koormap én CoriB komt later; dit product dekt nu de koormap-behoefte.</p>
+<p><strong>Brug:</strong> MuseScore tekent de SVG. Afspraak over kale scherm- vs blad-SVG,
+catalogus-PDF vs koormap-pagina-PDF, en latere tall scherm-SVG / Score-IR:
+<a href="../../plans/kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a>.
+Een gedeelde browser-renderer (OSMD / Score-IR) voor koormap én CoriB blijft
+het beoogde schermpad (plan §4); dit MuseScore-product dekt nu de
+koormap-brug.</p>
 
 
 
@@ -4764,7 +4769,7 @@ Score-IR) voor koormap én CoriB komt later; dit product dekt nu de koormap-beho
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

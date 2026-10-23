@@ -3717,7 +3717,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4838,8 +4838,8 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/blocks/"><code>vsa blocks &lt;bestand.md&gt;</code></a></td>
 </tr>
 <tr>
-<td>Eén SVG maken</td>
-<td><a href="../../reference/cli/svg/"><code>vsa svg &lt;input.vsa&gt; &lt;output.svg&gt;</code></a></td>
+<td>Eén SVG maken (muziek-only; default sibling <code>.vsa.svg</code>)</td>
+<td><a href="../../reference/cli/svg/"><code>vsa svg &lt;input.vsa&gt; [-o …]</code></a></td>
 </tr>
 <tr>
 <td>Markdownbestanden verwerken naar SVG</td>
@@ -4871,47 +4871,55 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 </tr>
 <tr>
 <td>mvsa valideren (draft)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-validate"><code>vsa mvsa validate &lt;pad&gt;</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-validate"><code>mvsa validate &lt;pad&gt;</code></a></td>
 </tr>
 <tr>
 <td>mvsa → SATB MusicXML (draft)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mxl"><code>vsa mvsa mxl &lt;pad&gt; [-o …] [--section …]</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mxl"><code>mvsa mxl &lt;pad&gt; [-o …] [--section …]</code></a></td>
 </tr>
 <tr>
 <td>mvsa → Score-IR JSON (partituur; scherm/CoriB)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-score-ir"><code>vsa mvsa score-ir &lt;pad&gt; [-o …]</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir &lt;pad&gt; [-o …]</code></a></td>
 </tr>
 <tr>
-<td>Score-IR → MusicXML (OSMD-brug)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-score-ir"><code>vsa mvsa score-ir … --musicxml …</code></a></td>
+<td>Score-IR + MusicXML-siblings (OSMD-brug)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir &lt;pad&gt; --musicxml</code></a> (siblings <code>.score-ir.json</code> + <code>.from-ir.musicxml</code>)</td>
 </tr>
 <tr>
 <td>mvsa/mscz → partituur-SVG (koormap; MuseScore-brug)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-svg"><code>vsa mvsa svg &lt;pad&gt; [-o …]</code></a> (dicht: <code>--compact</code>)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg &lt;pad&gt; [-o …]</code></a> (dicht: <code>--compact</code>)</td>
 </tr>
 <tr>
 <td>mvsa → Coria met hulptekst-keuze</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mxl"><code>vsa mvsa mxl … --hulptekst-as-parts</code></a> + <a href="../../specification-mvsa/keywords/#taal"><code>@taal</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mxl"><code>mvsa mxl … --hulptekst-as-parts</code></a> + <a href="../../specification-mvsa/keywords/#taal"><code>@taal</code></a></td>
 </tr>
 <tr>
 <td>mvsa → blad met tweede tekstregel</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mscz"><code>vsa mvsa mscz … --hulptekst</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz … --hulptekst</code></a></td>
 </tr>
 <tr>
 <td>mvsa → MuseScore / print-PDF (draft)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mscz"><code>vsa mvsa mscz</code></a> / <a href="../../reference/cli/mvsa/#vsa-mvsa-pdf"><code>pdf</code></a> (dicht: <code>--compact</code>)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../../reference/cli/mvsa/#mvsa-pdf"><code>pdf</code></a> (dicht: <code>--compact</code>)</td>
 </tr>
 <tr>
 <td>mvsa → preview-audio (draft)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mp3"><code>vsa mvsa mp3</code>/<code>ogg</code>/<code>wav</code></a> (of top-level <a href="../../reference/cli/audio/"><code>vsa audio</code></a>)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mp3"><code>mvsa mp3</code>/<code>ogg</code>/<code>wav</code></a> (of top-level <a href="../../reference/cli/audio/"><code>vsa audio</code></a>)</td>
 </tr>
 <tr>
-<td>MusicXML / MuseScore → <code>.mvsa</code> (<strong>werkbank</strong>-import)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> / <a href="../../reference/cli/mxl/"><code>mxl import</code></a> / <a href="../../reference/cli/mscz/"><code>mscz import</code></a></td>
+<td>MusicXML / MuseScore → <code>.mvsa</code> (<strong>werkbank</strong>)</td>
+<td><a href="../../reference/cli/mxl/"><code>mxl mvsa</code></a> / <a href="../../reference/cli/mscz/"><code>mscz mvsa</code></a></td>
 </tr>
 <tr>
-<td>Import + ankers (navigatie / foutzoeken)</td>
-<td><code>vsa mvsa import …</code> (default <code>ag-vsa</code>) daarna <a href="../../reference/cli/mvsa/#vsa-mvsa-validate"><code>validate</code></a></td>
+<td>Score ↔ <code>.mvsa</code> controleren (t.o.v. verse import)</td>
+<td><a href="../../reference/cli/mscz/#mscz-compare"><code>mscz compare</code></a></td>
+</tr>
+<tr>
+<td>Score → mvsa + ankers (navigatie / foutzoeken)</td>
+<td><code>mxl mvsa …</code> / <code>mscz mvsa …</code> (default <code>ag-vsa</code>) daarna <a href="../../reference/cli/mvsa/#mvsa-validate"><code>validate</code></a></td>
+</tr>
+<tr>
+<td><code>.mvsa</code> naar andere tonica (toonsoort)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-transpose"><code>mvsa transpose &lt;pad&gt; --to F4</code></a></td>
 </tr>
 <tr>
 <td><code>.mvsa</code> leren schrijven</td>
@@ -4960,8 +4968,13 @@ vsa zoektekst examples\mvsa --check
 <p><code>vsa text -o …lyrics.txt</code> blijft nuttig voor export uit <code>.mscz</code> / <code>.mxl</code> of
 site-build; een sibling <code>.lyrics.txt</code> is niet verplicht naast de canonieke bron.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
-vsa mvsa validate generated\alleluia.import.mvsa
+mxl mvsa generated\alleluia.mxl -o generated\alleluia.mxl.mvsa
+mvsa validate generated\alleluia.mxl.mvsa
+</code></pre></div>
+<p>Andere tonica (modus blijft gelijk), sibling-uitvoer of <code>-o</code>:</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
+mvsa validate examples\bug-cases\alleluia-9b-toon-3-vokn.transposed.mvsa
 </code></pre></div>
 <h2 id="bronnen">Bronnen<a class="headerlink" href="#bronnen" title="Permanent link">&para;</a></h2>
 <p>Gebaseerd op:</p>
@@ -5007,7 +5020,7 @@ vsa mvsa validate generated\alleluia.import.mvsa
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

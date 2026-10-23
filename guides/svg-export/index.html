@@ -3778,7 +3778,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -5005,16 +5005,18 @@ hieronder).</p>
 <div class="highlight"><pre><span></span><code>[:] {/Hei_}{/lig_} is de Heer. [//:]
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa generated\vsa\svg-phrase-kort.svg
+vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa -o generated\vsa\svg-phrase-kort.svg
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>SVG geschreven naar: generated\vsa\svg-phrase-kort.svg
 </code></pre></div>
+<p>Zonder <code>-o</code> schrijft het commando een sibling <code>….vsa.svg</code> naast de bron
+(zelfde naamgeving als bibliotheek-producten / <a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a>).</p>
 <p><img alt="Korte VSA-frase als SVG" src="../assets/walkthroughs/svg-phrase-kort.svg" /></p>
 <h3 id="langere-frase-regelbreedte">Langere frase + regelbreedte<a class="headerlink" href="#langere-frase-regelbreedte" title="Permanent link">&para;</a></h3>
 <p>Zelfde start, langere tekst
 (<code>examples\docs-walkthroughs\svg-phrase-lang.vsa</code>), met smallere
 <code>--max-line-width</code> zodat de <a class="og-termref" href="/VSA-tooling/terminologie/renderer" title="Renderer: een component die een gevalideerde AST / Syntactische Boom of daarvan afgeleid layoutmodel omzet naar concrete uitvoer, zoals SVG, JSON, Markdown, Hugo-output of MusicXML, zonder de AST semantisch te wijzigen.">renderer</a> afbreekt:</p>
-<div class="highlight"><pre><span></span><code>vsa svg examples\docs-walkthroughs\svg-phrase-lang.vsa generated\vsa\svg-phrase-lang.svg --max-line-width 400
+<div class="highlight"><pre><span></span><code>vsa svg examples\docs-walkthroughs\svg-phrase-lang.vsa -o generated\vsa\svg-phrase-lang.svg --max-line-width 400
 </code></pre></div>
 <p><img alt="Langere VSA-frase, afgebroken SVG" src="../assets/walkthroughs/svg-phrase-lang.svg" /></p>
 <p>SVG's uit een map met Markdown, zonder Hugo-Markdown te genereren
@@ -5189,7 +5191,7 @@ en het <code>derived/</code>-concept daar voor build-output dat nooit in git kom
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

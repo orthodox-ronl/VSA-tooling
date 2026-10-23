@@ -3723,7 +3723,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4907,21 +4907,21 @@
 
 <h1 id="mxl-conversies-met-musicxml-als-bron"><code>mxl</code> — conversies met MusicXML als bron<a class="headerlink" href="#mxl-conversies-met-musicxml-als-bron" title="Permanent link">&para;</a></h1>
 <p>Top-level CLI voor bronbestanden <code>.mxl</code> / <code>.musicxml</code> / <code>.xml</code>.
+Conventie: <strong><code>mxl {doeltype}</code></strong> (bronextensie → doelextensie).
 Zie het conversieplan:
 <a href="../../../plans/mvsa-conversions/">mvsa-conversions</a>.
 Playback-checklist:
 <a href="../../../formats/canonical-checklists/#checklist-mxl-coria--playback">canonical-checklists — MXL</a>.</p>
-<p>Alias voor import: <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> (zelfde
-SATB-parser, soft-wrap, holds, recite en <code>--pitch</code>-gedrag).
-<strong>Werkbank-bewerkvorm</strong> — niet ongewijzigd als catalogusbron gebruiken. De
-output begint met dezelfde waarschuwingsbanner als <code>mvsa import</code>.</p>
+<p><strong><code>mxl mvsa</code></strong> maakt een <strong>werkbank-bewerkvorm</strong> — niet ongewijzigd als
+catalogusbron gebruiken. De output begint met een ASCII-waarschuwingsbanner.
+Details: <a href="../../../formats/mvsa/#score-naar-mvsa"><code>.mvsa</code> — score naar mvsa</a>.</p>
 <p><strong>Invoer:</strong> <code>path</code> mag één bronbestand <strong>of</strong> een map zijn (recursief). Bij
 meerdere bronnen: sibling- of in-place-output per bestand; <code>-o</code> alleen bij
 precies één bron. Zie <a href="../input-pad/">Invoer bestand of map</a>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mxl [-h] {import,mscz,validate,normalize} …
-mxl import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
-           [--octave-style {@oct,marker}] [--section SECTION] [--no-align] path
+<div class="highlight"><pre><span></span><code>mxl [-h] {mvsa,mscz,validate,normalize} …
+mxl mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
+         [--octave-style {@oct,marker}] [--section SECTION] [--no-align] path
 mxl mscz [-h] [-o OUTPUT] [--musescore PATH] path
 mxl validate [-h] [--profile {satb,mono}] path
 mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
@@ -4936,8 +4936,8 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 </thead>
 <tbody>
 <tr>
-<td><code>import</code></td>
-<td>Importeer naar <code>.mvsa</code>: direct SATB P1–P4 (zelfde pad als <code>vsa mvsa import</code>).</td>
+<td><code>mvsa</code></td>
+<td>Naar <code>.mvsa</code>: direct SATB P1–P4. Default: <code>&lt;bronnaam&gt;.mvsa</code> (bijv. <code>lied.mxl.mvsa</code>).</td>
 </tr>
 <tr>
 <td><code>mscz</code></td>
@@ -4953,15 +4953,16 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 </tr>
 </tbody>
 </table>
-<p><strong>Import-opties</strong> (<code>--pitch</code> default <code>ag-vsa</code>, <code>--no-align</code>, soft-wrap ~80,
+<p><strong><code>mvsa</code>-opties</strong> (<code>--pitch</code> default <code>ag-vsa</code>, <code>--no-align</code>, soft-wrap ~80,
 eindankers bij <code>ag-vsa</code>/<code>vsa</code>, kuiser-normaalvorm): zie
-<a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. Bij complexe lyrics soms
-<code>--no-align</code>; sync-telling blijft leidend.</p>
+<a href="../../../formats/mvsa/#score-naar-mvsa">score naar mvsa</a>. Bij complexe lyrics
+soms <code>--no-align</code>; sync-telling blijft leidend. Default <code>--section schets</code>.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mxl import generated\alleluia-schets2.mxl -o generated\from-mxl.mvsa
-mxl import generated\alleluia-schets2.mxl --pitch doremi -o generated\from-mxl.mvsa
-mxl import generated\alleluia-schets2.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
-vsa mvsa validate generated\from-mxl.mvsa
+<div class="highlight"><pre><span></span><code>mxl mvsa generated\alleluia-schets2.mxl
+mxl mvsa generated\alleluia-schets2.mxl -o generated\from-mxl.mvsa
+mxl mvsa generated\alleluia-schets2.mxl --pitch doremi -o generated\from-mxl.mvsa
+mxl mvsa generated\alleluia-schets2.mxl --pitch vsa -o generated\from-mxl.vsa.mvsa
+mvsa validate generated\from-mxl.mvsa
 mxl mscz generated\alleluia-schets2.mxl -o generated\from-mxl.mscz
 mxl validate content-source\bibliotheek\…\lied.mscz.mxl --profile satb
 mxl normalize raw.mxl -o out.mxl --apply-timing
@@ -4973,7 +4974,7 @@ mxl normalize raw.mxl -o out.mxl --apply-timing
 <ul>
 <li><a href="../input-pad/">Invoer bestand of map</a></li>
 <li><a href="../mvsa/"><code>mvsa</code></a> — bron <code>.mvsa</code></li>
-<li><a href="../mscz/"><code>mscz</code></a> — bron <code>.mscz</code> (<code>mscz mxl</code> gebruikt dezelfde normalize-keten)</li>
+<li><a href="../mscz/"><code>mscz</code></a> — bron <code>.mscz</code> (<code>mscz mvsa</code> / <code>mscz mxl</code>)</li>
 <li><a href="../musicxml/"><code>vsa musicxml</code></a> — eenstemmig <code>.vsa</code> → MusicXML</li>
 <li><a href="../text/"><code>vsa text</code></a> — platte gezongen tekst uit <code>.mxl</code> / <code>.musicxml</code> (zoekindex)</li>
 <li><a href="../audio/"><code>vsa audio</code></a> — <code>.mscz</code> → mp3 via genormaliseerde playback-MXL</li>
@@ -5014,7 +5015,7 @@ mxl normalize raw.mxl -o out.mxl --apply-timing
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

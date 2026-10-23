@@ -3617,7 +3617,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4806,10 +4806,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#7-volgende-stappen" class="md-nav__link">
+  <a href="#7-scherm-en-corib-brug" class="md-nav__link">
     <span class="md-ellipsis">
       
-        7. Volgende stappen
+        7. Scherm- en CoriB-brug
       
     </span>
   </a>
@@ -4817,10 +4817,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#8-open-punten" class="md-nav__link">
+  <a href="#8-volgende-stappen" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. Open punten
+        8. Volgende stappen
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-open-punten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Open punten
       
     </span>
   </a>
@@ -4863,7 +4874,7 @@
 <tbody>
 <tr>
 <td><strong>Status</strong></td>
-<td>werkplan; <strong>niet normatief</strong>; stap 1–5 gedaan (IR, OSMD-via-IR, score-ir, koormap-SVG)</td>
+<td>werkplan; <strong>niet normatief</strong>; stap 1–5 + schermbrug-contract (§7) gedaan; CoriB-MVP en site-embed nog open</td>
 </tr>
 <tr>
 <td><strong>Doel</strong></td>
@@ -4879,7 +4890,7 @@
 </tr>
 </tbody>
 </table>
-<p>Contract + <a href="../../reference/cli/mvsa/#vsa-mvsa-score-ir"><code>vsa mvsa score-ir</code></a>. Schema-validator en schermrenderer: later.</p>
+<p>Contract + <a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir</code></a>. Schema-validator en schermrenderer: later.</p>
 <hr />
 <h2 id="0-wat-is-ir-kort">0. Wat is IR? (kort)<a class="headerlink" href="#0-wat-is-ir-kort" title="Permanent link">&para;</a></h2>
 <p><strong>IR</strong> = <em>intermediate representation</em> = <strong>tussenmodel</strong>.</p>
@@ -4921,7 +4932,8 @@
 <ul>
 <li>Geen complete MusicXML-vervanging.</li>
 <li>Geen VSA-glyph-laag op lyrics (later).</li>
-<li>Geen speelplan-navigatie als verplicht veld (mag later).</li>
+<li>Speelplan-navigatie is optioneel per maat (<code>ending</code> / <code>repeatTimes</code> /
+  <code>navigation</code>); aanwezig wanneer bladvorm dat vraagt.</li>
 <li>Geen audio-instrumentatie als kern (CoriB mag defaults kiezen).</li>
 <li>Geen implementatie van exporter of renderer in dit document.</li>
 </ul>
@@ -5015,10 +5027,16 @@
 <div class="highlight"><pre><span></span><code>Measure
   id: string                    # stabiel binnen document, bv. "m1"
   bar: { left?, right }         # single | light-light | light-heavy | repeat-…
+  ending?: { start?, stop? }    # volta-nummers (MusicXML ``&lt;ending&gt;``)
+  repeatTimes?: number          # alleen bij herhaal &gt; 2×
+  navigation?: [ string, … ]    # segno | fine | to_coda | coda | ds_al_* | dc_al_*
   cues: [ Cue, … ]              # @tekst die bij déze maat hoort (vaak 0 of 1)
   lyrics: [ LyricPos, … ]       # gedeelde L-lijn voor partituur
   voices: { S, A, T, B }        # elk: [ VoiceEvent, … ] synchroon in de maat
 </code></pre></div>
+<p>Speelplan-bladvorm (volta / herhaal / D.S. / coda) volgt
+<code>docs/specification-mvsa/speelplan.md</code> en dezelfde helpers als partituur-MusicXML;
+from-ir emitteert de navigatiemarkeringen voor OSMD.</p>
 <p><strong>Sync-regel:</strong> binnen één maat is het aantal <em>lengte-posities</em> op <code>lyrics</code> gelijk aan het aantal events per stem die meezingen (holds/melisma zoals in <code>.mvsa</code> / huidige export). Exacte telling volgt de bestaande L↔SATB-validator; IR exporteert al-uitgelijnde events.</p>
 <h3 id="42-cue-tekst">4.2 Cue (<code>@tekst</code>)<a class="headerlink" href="#42-cue-tekst" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>Cue
@@ -5083,9 +5101,10 @@
 <p><a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/partituur-ir-mini.example.json"><code>examples/mvsa/partituur-ir-mini.example.json</code></a></p>
 <p>CLI-export (zelfde keten als partituur-MusicXML-events):</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
 </code></pre></div>
-<p>Default sibling-naam: <code>lied.mvsa.score-ir.json</code>. Module: <code>vsa.score_ir</code>.</p>
+<p>Default siblings: <code>lied.mvsa.score-ir.json</code>; met <code>--musicxml</code> ook
+<code>lied.mvsa.from-ir.musicxml</code>. Module: <code>vsa.score_ir</code>.</p>
 <hr />
 <h2 id="6-relatie-tot-bestaande-exports">6. Relatie tot bestaande exports<a class="headerlink" href="#6-relatie-tot-bestaande-exports" title="Permanent link">&para;</a></h2>
 <table>
@@ -5106,7 +5125,7 @@ vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-v
 </tr>
 <tr>
 <td><code>.mvsa</code> → Score-IR</td>
-<td><strong><code>vsa mvsa score-ir</code></strong> (v0.1 partituur); input voor SVG/CoriB</td>
+<td><strong><code>mvsa score-ir</code></strong> (v0.1 partituur); input voor SVG/CoriB</td>
 </tr>
 <tr>
 <td>Coria-playback-<code>.mxl</code></td>
@@ -5116,17 +5135,86 @@ vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-v
 </table>
 <p>Hulptekst: in IR als lyric-laag <code>"2"</code> (later); <strong>niet</strong> als nep-extra-stemparts.</p>
 <hr />
-<h2 id="7-volgende-stappen">7. Volgende stappen<a class="headerlink" href="#7-volgende-stappen" title="Permanent link">&para;</a></h2>
+<h2 id="7-scherm-en-corib-brug">7. Scherm- en CoriB-brug<a class="headerlink" href="#7-scherm-en-corib-brug" title="Permanent link">&para;</a></h2>
+<p>Gedeelde <strong>productieschermketen</strong> (geen MuseScore als schermmotor):</p>
+<div class="highlight"><pre><span></span><code>.mvsa  →  Score-IR (JSON)  →  MusicXML (uit IR)  →  OSMD (tekenen)
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Consument</th>
+<th>Wat laden</th>
+<th>Tekenen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Koormap / shortcode <code>muziek</code></td>
+<td>Score-IR <strong>of</strong> MusicXML die uit die Score-IR komt (<code>--musicxml</code>)</td>
+<td>OSMD op die MusicXML</td>
+</tr>
+<tr>
+<td>CoriB (later, MVP)</td>
+<td>Zelfde Score-IR als broncontract; tekenen via dezelfde OSMD-brug</td>
+<td>Highlight/mute op voices; geen tweede model</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Versiepoort:</strong> weiger onbekende <code>format</code> / major van <code>version</code> (nu
+<code>format: "score-ir"</code>, <code>version: "0.1"</code>). Zie §4.</p>
+<p><strong>Sibling-artifacts</strong> (canonieke namen naast <code>lied.mvsa</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Bestand</th>
+<th>Rol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lied.mvsa.score-ir.json</code></td>
+<td>Score-IR v0.1</td>
+</tr>
+<tr>
+<td><code>lied.mvsa.from-ir.musicxml</code></td>
+<td>Partituur-MusicXML <strong>uit</strong> die Score-IR</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa score-ir lied.mvsa --musicxml
+mvsa score-ir map-met-mvsa --musicxml
+</code></pre></div>
+<p><strong>Bewijs (spike, geen product-UI):</strong> <code>examples/spikes/partituur-browser/</code>
+(OSMD in de browser); optioneel headless SVG:
+<code>examples/spikes/partituur-osmd-svg/</code>.</p>
+<p><strong>Non-goals van deze brug:</strong></p>
+<ul>
+<li>Geen MuseScore-paginamodel op de site; geen tall MuseScore-scherm-SVG als
+  hoofdpad (<a href="../kale-muziek-svg-en-uitgaven/">kale-muziek §4</a>).</li>
+<li>Geen tweede tekenmodel naast OSMD-uit-IR voor CoriB.</li>
+<li>Geen CoriB-product-UI in VSA-tooling; alleen dit consumptiecontract.</li>
+<li>Print/blad blijft MuseScore (<code>mvsa svg</code> bladreeks, MSCZ, pagina-pdf).</li>
+</ul>
+<p><strong>Klaar genoeg voor CoriB later:</strong> Score-IR v0.1 + MusicXML-uit-IR + OSMD is
+het afgesproken aansluitpunt; CoriB bouwt speler/oefenen daarop, niet op
+catalogus-MXL of MuseScore-SVG.</p>
+<hr />
+<h2 id="8-volgende-stappen">8. Volgende stappen<a class="headerlink" href="#8-volgende-stappen" title="Permanent link">&para;</a></h2>
 <ol>
 <li>~~IR-contract + voorbeeld~~</li>
 <li>~~Spike: partituur-MXL in de browser + cues~~ (<code>examples/spikes/partituur-browser/</code>)</li>
-<li>~~Exporter <code>.mvsa</code> → Score-IR v0.1~~ (<code>vsa mvsa score-ir</code>, tests)</li>
-<li>~~Koormap-SVG (MuseScore-brug)~~ — <a href="../../reference/cli/mvsa/#vsa-mvsa-svg"><code>vsa mvsa svg</code></a> / <a href="../../formats/mvsa-svg/">mvsa-svg</a></li>
+<li>~~Exporter <code>.mvsa</code> → Score-IR v0.1~~ (<code>mvsa score-ir</code>, tests)</li>
+<li>~~Koormap-SVG (MuseScore-brug)~~ — <a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a> / <a href="../../formats/mvsa-svg/">mvsa-svg</a></li>
 <li>~~Score-IR → MusicXML → OSMD~~ — <code>vsa.score_ir_musicxml</code>, spike <code>examples/spikes/partituur-browser/</code>, CLI <code>--musicxml</code></li>
-<li>CoriB-MVP (speler op Score-IR / OSMD-brug) — later</li>
+<li>~~Scherm-/CoriB-brugcontract~~ (§7; richting Score-IR/OSMD vast in
+   <a href="../kale-muziek-svg-en-uitgaven/">kale-muziek §4</a>)</li>
+<li><strong>Productiescherm</strong> — shortcode <code>muziek</code> / koormap-embed op Score-IR →
+   OSMD (nog open; sluit kale-muziek §4)</li>
+<li>CoriB-MVP (speler op §7-brug) — later</li>
 </ol>
 <hr />
-<h2 id="8-open-punten">8. Open punten<a class="headerlink" href="#8-open-punten" title="Permanent link">&para;</a></h2>
+<h2 id="9-open-punten">9. Open punten<a class="headerlink" href="#9-open-punten" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Duurencoding: <strong>ELM-tokens</strong> gekozen in v0.1 (<code>duration.elm</code>).</li>
 <li>Recite-print-collapse in IR of alleen in print-profiel?</li>
@@ -5169,7 +5257,7 @@ vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-v
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

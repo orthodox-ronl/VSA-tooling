@@ -3756,7 +3756,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4914,8 +4914,9 @@ Werkplan-restpunten syntax (geschiedenis):
 </tr>
 </tbody>
 </table>
-<p>Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
-<code>examples/mvsa/make.cmd</code> (PDF via <code>mvsa pdf</code>; audio via <code>mvsa audio</code>).</p>
+<p>Lokaal bouwen van voorbeelden (validate / normalize / transpose / kuiser /
+mxl / mscz / pdf / audio): <code>examples/mvsa/make.cmd</code> (PDF via <code>mvsa pdf</code>;
+audio via <code>mvsa audio</code>).</p>
 <hr />
 <h2 id="backlog-bewust-later">Backlog (bewust later)<a class="headerlink" href="#backlog-bewust-later" title="Permanent link">&para;</a></h2>
 <h3 id="syntax-en-semantiek">Syntax en semantiek<a class="headerlink" href="#syntax-en-semantiek" title="Permanent link">&para;</a></h3>
@@ -5015,12 +5016,20 @@ Werkplan-restpunten syntax (geschiedenis):
 </thead>
 <tbody>
 <tr>
+<td>Stemrust <code>r</code>/<code>R</code></td>
+<td>Norm + validate/export/import/transpose; MusicXML-rest → <code>r</code> (niet <code>-</code>); opeenvolgende rusten mogen bij export samentrekken</td>
+</tr>
+<tr>
 <td>Parser / CLI</td>
-<td>Top-level <code>mvsa</code> / <code>mxl</code> / <code>mscz</code> + <code>vsa mvsa …</code> (conversions stap 5)</td>
+<td>Top-level <code>mvsa</code> / <code>mxl</code> / <code>mscz</code> + <code>mvsa …</code> (conversions stap 5)</td>
 </tr>
 <tr>
 <td>Conversieslices</td>
-<td>normalize, mscz-export, import, bron-commands — zie conversions-plan</td>
+<td>normalize, transpose, mscz-export, <code>mxl</code>/<code>mscz mvsa</code>, bron-commands — zie conversions-plan</td>
+</tr>
+<tr>
+<td>Transpose</td>
+<td><code>mvsa transpose --to …</code>: andere tonica; <code>@mode</code> blijft; default <code>ag-vsa</code> — <a href="../../reference/cli/mvsa/#mvsa-transpose"><code>mvsa.md#transpose</code></a></td>
 </tr>
 <tr>
 <td>Kuiser-tool</td>
@@ -5115,7 +5124,7 @@ Werkplan-restpunten syntax (geschiedenis):
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-20
+        Bijgewerkt: 2026-10-23
         
       </p>
       

@@ -3642,7 +3642,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4682,8 +4682,32 @@
 
 
 <h1 id="score-ir-score-irjson-schermtussenmodel-draft">Score-IR (<code>.score-ir.json</code>) — schermtussenmodel (draft)<a class="headerlink" href="#score-ir-score-irjson-schermtussenmodel-draft" title="Permanent link">&para;</a></h1>
-<p>JSON-tussenmodel tussen <code>.mvsa</code> en schermweergave (koormap-SVG, CoriB).
-Geen MuseScore-bestand; geen A4/colofon.</p>
+<p>JSON-tussenmodel tussen <code>.mvsa</code> en schermweergave (koormap / shortcode
+<code>muziek</code>, later CoriB). Geen MuseScore-bestand; geen A4/colofon.</p>
+<p><strong>Productieschermpad:</strong> Score-IR → MusicXML (uit IR) → OSMD. Print/blad blijft
+MuseScore. Brugcontract: <a href="../../plans/partituur-ir/">partituur-ir §7</a>.</p>
+<p><strong>Sibling-artifacts</strong> (naast <code>lied.mvsa</code>, zelfde naamgeving als andere
+<code>mvsa</code>-exports):</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Defaultnaam</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Score-IR JSON</td>
+<td><code>lied.mvsa.score-ir.json</code></td>
+</tr>
+<tr>
+<td>MusicXML uit IR (OSMD)</td>
+<td><code>lied.mvsa.from-ir.musicxml</code></td>
+</tr>
+</tbody>
+</table>
+<p>Schrijf beide met <code>mvsa score-ir … --musicxml</code> (zonder pad; werkt ook
+op een map).</p>
 <table>
 <thead>
 <tr>
@@ -4697,8 +4721,12 @@ Geen MuseScore-bestand; geen A4/colofon.</p>
 <td><a href="../../plans/partituur-ir/">partituur-ir</a></td>
 </tr>
 <tr>
+<td>Scherm- / CoriB-brug</td>
+<td><a href="../../plans/partituur-ir/">partituur-ir §7</a></td>
+</tr>
+<tr>
 <td>CLI</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-score-ir"><code>vsa mvsa score-ir</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir</code></a></td>
 </tr>
 <tr>
 <td>Score-IR → MusicXML (OSMD)</td>
@@ -4711,8 +4739,9 @@ Geen MuseScore-bestand; geen A4/colofon.</p>
 </tbody>
 </table>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a.score-ir.json --musicxml generated\score-ir\1a.from-ir.musicxml
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa --musicxml
+mvsa score-ir examples\mvsa --musicxml
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a.score-ir.json --musicxml generated\score-ir\1a.from-ir.musicxml
 </code></pre></div>
 
 
@@ -4750,7 +4779,7 @@ vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a.s
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-21
+        Bijgewerkt: 2026-10-23
         
       </p>
       

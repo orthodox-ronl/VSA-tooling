@@ -3712,7 +3712,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4811,11 +4811,11 @@
 </tr>
 <tr>
 <td>Export vanuit <code>.mvsa</code></td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-musicxml"><code>mvsa musicxml</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-musicxml"><code>mvsa musicxml</code></a></td>
 </tr>
 <tr>
 <td>Import → <code>.mvsa</code></td>
-<td><a href="../../reference/cli/mxl/"><code>mxl import</code></a></td>
+<td><a href="../../reference/cli/mxl/"><code>mxl mvsa</code></a></td>
 </tr>
 <tr>
 <td>→ <code>.mscz</code></td>
@@ -4851,7 +4851,7 @@ partituur sopraan; alias <code>[decresc]</code> → <code>[dim]</code> bij norma
 <code>[rit]</code> / <code>[atempo]</code> → zichtbare <code>&lt;words&gt;</code>; <code>@tempo</code> → <code>sound tempo</code>
 (optioneel tempo-woord zichtbaar).</p>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mxl import generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
+<div class="highlight"><pre><span></span><code>mxl mvsa generated\alleluia.mxl --pitch doremi -o generated\from-mxl.mvsa
 mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
 </code></pre></div>
 <p>Via repo-script: <code>scripts\mxl.cmd …</code></p>
@@ -4896,7 +4896,7 @@ mxl mscz generated\alleluia.mxl -o generated\from-mxl.mscz
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-19
+        Bijgewerkt: 2026-10-23
         
       </p>
       

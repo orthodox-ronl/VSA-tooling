@@ -3855,7 +3855,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -5145,6 +5145,11 @@ een bestand van toonsoort/grondtoon wisselt vóór een nieuw systeem.</p>
 <p><strong>Niet gebruiken</strong> om per noot te “tunen”: dat doe je met laddergraden of
 toonnamen op de stemregels. <code>@do</code> is document-/sectie-context, geen lokale
 correctie.</p>
+<p><strong>Hele bestand naar een andere tonica</strong> (bijv. Es → F): niet alleen <code>@do</code>
+handmatig wijzigen — absolute stemtonen moeten mee. Gebruik
+<a href="../../reference/cli/mvsa/#mvsa-transpose"><code>mvsa transpose --to …</code></a>
+(<a href="../../guides/mvsa-schrijven-101/#toonsoort-verzetten-transpose">tutorial</a>).
+<code>@mode</code> blijft daarbij gelijk.</p>
 <p><strong>Default</strong> als je <code>@do</code> weglaat: <code>F4</code>.</p>
 <div class="highlight"><pre><span></span><code>@do F4
 </code></pre></div>
@@ -5206,7 +5211,7 @@ fence-<code>:::</code> is de <strong>laatste maatstreep</strong> van het vorige 
 nieuwe <code>@sectie</code>) gebruik je <code>||</code> of <code>:||</code>. Tooling schrijft bij genereren
 bij voorkeur <code>||</code>. Zie <a href="../syntax/#einde">Syntax — sectie-einde</a>.</p>
 <p><strong>Wel gebruiken</strong> om delen te benoemen die je apart wilt exporteren
-(<code>vsa mvsa mxl … --section id</code>) of om schetsen in één experiment-bestand
+(<code>mvsa mxl … --section id</code>) of om schetsen in één experiment-bestand
 uit elkaar te houden (couplet / refrein / pitch-variant).</p>
 <p><strong>Niet gebruiken</strong> samen met <code>@speelplan</code> (dan: <code>@blok</code>). Niet als litanie-cue
 (dat is <code>@tekst</code>). Niet om meerdere speelplannen in één file te nesten — één
@@ -5300,7 +5305,9 @@ Op het <strong>playback/MXL</strong>-pad (Coria): vóór
 elke mid-flow <code>@tekst</code> (niet de eerste maat van het stuk) komt dezelfde
 <code>[PAUZE]</code>-maat als na <code>||</code> — whole-rest met lyric <code>[PAUZE]</code>, cue erboven.
 Staat er al een sectie-eindestreep (<code>||</code> / <code>:||</code>) vóór die cue, dan geen
-tweede pauze. Herhaalstrepen (<code>:|</code>) blijven intact.</p>
+tweede pauze. Herhaalstrepen (<code>:|</code>) blijven intact. Stemrust <code>r</code>/<code>R</code> binnen
+een frase (lege recite + rusten) is iets anders; zie
+<a href="../semantics/#rusten-op-de-stemregel">Rusten op de stemregel</a>.</p>
 <p>Lange cues met <code>...</code> worden op <strong>twee regels</strong> gezet: de tweede regel begint bij <code>...</code>. Is de cue breder dan de maat, dan krijgt die maat minstens die breedte (MusicXML <code>width</code> / MuseScore-maat).</p>
 <div class="highlight"><pre><span></span><code>@mscz-newline
 @tekst "P: Laat ons de Heer in vrede bidden"
@@ -5626,7 +5633,7 @@ Zonder commentaar is <code>@---</code> overbodig naast een lege regel.</p>
 <h2 id="onbekende-keywords">Onbekende keywords<a class="headerlink" href="#onbekende-keywords" title="Permanent link">&para;</a></h2>
 <p>Alles wat de vorm van een keyword heeft maar <strong>niet</strong> in de lijst hierboven
 staat (bijv. <code>@voices</code>) mag je zetten om te experimenteren.
-<code>vsa mvsa validate</code> geeft een <strong>warning</strong> (<code>MVSA-DIRECTIVE</code>), geen error:
+<code>mvsa validate</code> geeft een <strong>warning</strong> (<code>MVSA-DIRECTIVE</code>), geen error:
 export en verdere verwerking gaan door. Ongeldige keyword-vormen (bijv.
 <code>@1foo</code>) geven eveneens een <strong>warning</strong>. Zodra een keyword officieel wordt,
 komt het op deze pagina met vaste argumenten en gedrag.</p>
@@ -5666,7 +5673,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

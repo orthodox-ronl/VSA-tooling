@@ -3734,7 +3734,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4867,7 +4867,7 @@ specificaties; dit is de navigatiehub.</p>
 <tr>
 <td><strong><code>.mvsa</code></strong></td>
 <td>—</td>
-<td><code>mvsa kuiser</code> / <code>normalize</code></td>
+<td><code>kuiser</code> / <code>normalize</code> / <code>transpose</code></td>
 <td><code>mvsa mxl</code> · <code>score-ir</code></td>
 <td><code>mvsa mscz</code></td>
 <td><code>mvsa mp3</code>/<code>ogg</code>/<code>wav</code></td>
@@ -4876,7 +4876,7 @@ specificaties; dit is de navigatiehub.</p>
 <tr>
 <td><strong><code>.mxl</code></strong></td>
 <td>—</td>
-<td><code>mxl import</code></td>
+<td><code>mxl mvsa</code></td>
 <td>(checklist)</td>
 <td><code>mxl mscz</code></td>
 <td><code>vsa audio</code></td>
@@ -4885,7 +4885,7 @@ specificaties; dit is de navigatiehub.</p>
 <tr>
 <td><strong><code>.mscz</code></strong></td>
 <td>—</td>
-<td><code>mscz import</code></td>
+<td><code>mscz mvsa</code></td>
 <td><code>mscz mxl</code></td>
 <td>(checklist)</td>
 <td><code>vsa audio</code> (fallback)</td>
@@ -4912,10 +4912,10 @@ specificaties; dit is de navigatiehub.</p>
   <code>.mscz</code> (geen aparte matrixkolom; schrijft geen <code>.mvsa</code>-sibling). Alias op
   MuseScore-bron: <a href="../reference/cli/mscz/"><code>mscz text</code></a>.</li>
 <li>Volledige matrix / keuzes: <a href="../plans/mvsa-conversions/">mvsa-conversies</a>.</li>
-<li><strong>Import</strong> (<code>.mxl</code> / <code>.mscz</code> → <code>.mvsa</code>): <strong>werkbank-bewerkvorm</strong> (niet
+<li><strong>Score → <code>.mvsa</code></strong> (<code>.mxl</code> / <code>.mscz</code>): <strong>werkbank-bewerkvorm</strong> (niet
   catalogus-klaar); soft-wrap, holds, recite; default <code>--pitch ag-vsa</code> (a–g
   per systeem + EHM + eindankers) — zie
-  <a href="../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a>.</li>
+  <a href="../reference/cli/mxl/"><code>mxl mvsa</code></a> / <a href="../reference/cli/mscz/"><code>mscz mvsa</code></a>.</li>
 <li>Normaalvorm-checklists MXL / MSCZ / PDF: <a href="canonical-checklists/">canonieke checklists</a>
   (MXL = vier parts; MSCZ = twee balken SA/TB zonder stem-labels).
   Leesbaarheid partituur: <a href="mscz-leesbaarheid/">MSCZ-leesbaarheid</a>.</li>
@@ -4947,13 +4947,19 @@ specificaties; dit is de navigatiehub.</p>
 <td><a href="score-ir/">Score-IR</a></td>
 <td>Scherm-JSON uit <code>.mvsa</code> (draft)</td>
 <td><a href="../plans/partituur-ir/">partituur-ir</a></td>
-<td><a href="../reference/cli/mvsa/#vsa-mvsa-score-ir"><code>mvsa score-ir</code></a></td>
+<td><a href="../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir</code></a></td>
+</tr>
+<tr>
+<td><a href="vsa-svg/">vsa-SVG</a></td>
+<td>Muziek-only SVG uit <code>.vsa</code> (scherm)</td>
+<td>Native VSA-renderer; sibling <code>.vsa.svg</code></td>
+<td><a href="../reference/cli/svg/"><code>vsa svg</code></a></td>
 </tr>
 <tr>
 <td><a href="mvsa-svg/">mvsa-SVG</a></td>
 <td>Muziek-only partituur-SVG (koormap)</td>
 <td>MuseScore-brug; layout <code>muziek</code>; Style o.a. <code>--compact</code></td>
-<td><a href="../reference/cli/mvsa/#vsa-mvsa-svg"><code>mvsa svg</code></a></td>
+<td><a href="../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a></td>
 </tr>
 <tr>
 <td><a href="mxl/"><code>.mxl</code> / <code>.musicxml</code></a></td>
@@ -5007,7 +5013,7 @@ specificaties; dit is de navigatiehub.</p>
 <td><a href="../reference/cli/audio/"><code>audio</code></a></td>
 </tr>
 <tr>
-<td><code>mvsa</code> ≡ <code>vsa mvsa</code></td>
+<td><code>mvsa</code></td>
 <td><code>.mvsa</code></td>
 <td><a href="../reference/cli/mvsa/"><code>mvsa</code></a></td>
 </tr>
@@ -5099,7 +5105,7 @@ scripts\mscz.cmd -h
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

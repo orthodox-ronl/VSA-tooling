@@ -3723,7 +3723,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4828,11 +4828,11 @@ voor de <strong>partituur-workflow</strong>; Coria gebruikt <code>.mxl</code>.</
 <tbody>
 <tr>
 <td>Export vanuit <code>.mvsa</code></td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-mscz"><code>mvsa mscz</code></a> (partituur-mxl → MuseScore)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> (partituur-mxl → MuseScore)</td>
 </tr>
 <tr>
 <td>Print-PDF (zangers)</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-pdf"><code>mvsa pdf</code></a> (via MuseScore; ook vanaf <code>.mscz</code>)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> (via MuseScore; ook vanaf <code>.mscz</code>)</td>
 </tr>
 <tr>
 <td>Layoutprofiel</td>
@@ -4840,7 +4840,7 @@ voor de <strong>partituur-workflow</strong>; Coria gebruikt <code>.mxl</code>.</
 </tr>
 <tr>
 <td>Import → <code>.mvsa</code></td>
-<td><a href="../../reference/cli/mscz/"><code>mscz import</code></a> (<strong>werkbank</strong>-bewerkvorm; SATB-explode; soft-wrap; default <code>ag-vsa</code> = ankers)</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz mvsa</code></a> (<strong>werkbank</strong>-bewerkvorm; SATB-explode; soft-wrap; default <code>ag-vsa</code> = ankers)</td>
 </tr>
 <tr>
 <td>→ <code>.mxl</code></td>
@@ -4849,6 +4849,10 @@ voor de <strong>partituur-workflow</strong>; Coria gebruikt <code>.mxl</code>.</
 <tr>
 <td>Platte gezongen tekst</td>
 <td><a href="../../reference/cli/mscz/"><code>mscz text</code></a> / <a href="../../reference/cli/text/"><code>vsa text</code></a></td>
+</tr>
+<tr>
+<td>Score ↔ <code>.mvsa</code></td>
+<td><a href="../../reference/cli/mscz/#mscz-compare"><code>mscz compare</code></a> (t.o.v. verse import; lyrics, toonhoogte, duur-info, import-gaten)</td>
 </tr>
 <tr>
 <td>Template-/corpus-MSCZ</td>
@@ -4940,15 +4944,15 @@ volledige “centreer in brede cue-maat”; die breedte komt uit MusicXML
 fallback.</p>
 <div class="admonition warning">
 <p class="admonition-title">Import = werkbank</p>
-<p><code>mscz import</code> is een <strong>bewerkvorm</strong> voor de werkbank-fase, geen
+<p><code>mscz mvsa</code> is een <strong>bewerkvorm</strong> voor de werkbank-fase, geen
 catalogus-klaar product. De output begint met dezelfde
-waarschuwingsbanner als <code>mvsa import</code>. Onderstemmen A/T/B worden op duur
+waarschuwingsbanner. Onderstemmen A/T/B worden op duur
 tegen S uitgelijnd; zie
-<a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a>.</p>
+<a href="../mvsa/#score-naar-mvsa">score naar mvsa</a>.</p>
 </div>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
-<p><div class="highlight"><pre><span></span><code>mscz import generated\alleluia.mscz -o generated\from-mscz.mvsa
-mscz import generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
+<p><div class="highlight"><pre><span></span><code>mscz mvsa generated\alleluia.mscz
+mscz mvsa generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
 mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
@@ -4961,6 +4965,7 @@ Via repo-script: <code>scripts\mscz.cmd …</code></p>
 <li><a href="../">Formaten &amp; CLI — overzicht</a></li>
 <li><a href="../mxl/"><code>.mxl</code></a> · <a href="../mvsa/"><code>.mvsa</code></a></li>
 <li>Platte tekst: <a href="../../reference/cli/text/"><code>vsa text</code></a> / <a href="../../reference/cli/mscz/"><code>mscz text</code></a></li>
+<li>Score ↔ <code>.mvsa</code>: <a href="../../reference/cli/mscz/#mscz-compare"><code>mscz compare</code></a></li>
 <li><a href="../../plans/mvsa-conversions/">mvsa-conversies</a></li>
 </ul>
 
@@ -4999,7 +5004,7 @@ Via repo-script: <code>scripts\mscz.cmd …</code></p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

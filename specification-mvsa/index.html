@@ -3706,7 +3706,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4788,7 +4788,7 @@
 
 <h1 id="specificatie-mvsa-draft">Specificatie mvsa (draft)<a class="headerlink" href="#specificatie-mvsa-draft" title="Permanent link">&para;</a></h1>
 <p><strong>Status:</strong> draft v0 (<code>validate</code> + MusicXML + MSCZ + import + <code>normalize</code> +
-<code>kuiser</code> + <code>pdf</code> + <code>audio</code>).</p>
+<code>transpose</code> + <code>kuiser</code> + <code>pdf</code> + <code>audio</code>).</p>
 <p>Deze map is de specificatie van <strong>mvsa</strong>: meerstemmige invoer als
 tekstbestanden (typisch <code>.mvsa</code>) met lyrics-regels en stemregels, bedoeld voor
 VSCode en tooling.</p>
@@ -4884,11 +4884,11 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.</p>
 <li>Overlays van A/T/B t.o.v. S;</li>
 <li>Pagina-layout (MuseScore-“systemen” op een blad);</li>
 <li>Parallelle <code>L1</code> als tweede lyric-nummer
-  (MSCZ/import/normalize: <a href="../plans/mvsa-conversions/">mvsa-conversions</a>);</li>
+  (MSCZ / <code>mxl mvsa</code> / normalize: <a href="../plans/mvsa-conversions/">mvsa-conversions</a>);</li>
 <li>Los MIDI-bestand (preview = <a href="../formats/audio/">audio</a>).</li>
 </ul>
-<p>Wel beschikbaar: <code>vsa mvsa validate</code>, <code>musicxml</code>, <code>mscz</code>, <code>pdf</code>, <code>audio</code>,
-<code>import</code>, <code>normalize</code>, <code>kuiser</code>.
+<p>Wel beschikbaar: <code>mvsa validate</code>, <code>musicxml</code>, <code>mscz</code>, <code>pdf</code>, <code>audio</code>,
+<code>normalize</code>, <code>transpose</code>, <code>kuiser</code>; score → <code>.mvsa</code>: <code>mxl mvsa</code> / <code>mscz mvsa</code>.
 Navigatiehub: <a href="../formats/">Formaten &amp; CLI</a>.</p>
 
 
@@ -4926,7 +4926,7 @@ Navigatiehub: <a href="../formats/">Formaten &amp; CLI</a>.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-14
+        Bijgewerkt: 2026-10-23
         
       </p>
       

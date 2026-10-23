@@ -3617,7 +3617,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -5345,8 +5345,8 @@ Coria-MXL of print-MSCZ genereert.</p>
 </ol>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\bibliotheek
 python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
-vsa mvsa validate content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa
-vsa mvsa mxl content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa --hulptekst-as-parts -o generated\coria\&lt;representatie-id&gt;.mxl --bibliotheek-id &lt;zangstuk&gt;/&lt;variant&gt;/&lt;uitvoeringsvorm&gt;
+mvsa validate content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa
+mvsa mxl content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa --hulptekst-as-parts -o generated\coria\&lt;representatie-id&gt;.mxl --bibliotheek-id &lt;zangstuk&gt;/&lt;variant&gt;/&lt;uitvoeringsvorm&gt;
 </code></pre></div>
 <p>Vervang paden door jullie echte mapconventie. In het <code>.mvsa</code>: <code>@taal</code> zetten
    waar nl en ksl door elkaar lopen; optioneel <code>@taal Lap=aap Lus=noot</code> voor
@@ -5354,7 +5354,7 @@ vsa mvsa mxl content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uit
 <ol>
 <li><strong>Print voor zangers</strong> (tweede tekstregel op het blad):</li>
 </ol>
-<div class="highlight"><pre><span></span><code>vsa mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
+<div class="highlight"><pre><span></span><code>mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
 </code></pre></div>
 <ol>
 <li><strong>Wat de bibliotheek zelf beslist:</strong> welke representatie een Coria-MXL krijgt,
@@ -5421,7 +5421,7 @@ huidige schema.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-21
+        Bijgewerkt: 2026-10-23
         
       </p>
       

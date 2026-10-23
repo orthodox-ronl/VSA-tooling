@@ -1278,6 +1278,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Subcommando&#39;s">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mscz-compare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mscz compare
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3723,7 +3740,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4074,6 +4091,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Subcommando&#39;s">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mscz-compare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mscz compare
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4856,6 +4890,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Subcommando&#39;s">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mscz-compare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mscz compare
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4907,24 +4958,27 @@
 
 <h1 id="mscz-conversies-met-musescore-als-bron"><code>mscz</code> — conversies met MuseScore als bron<a class="headerlink" href="#mscz-conversies-met-musescore-als-bron" title="Permanent link">&para;</a></h1>
 <p>Top-level CLI voor bronbestanden <code>.mscz</code>.
+Conventie: <strong><code>mscz {doeltype}</code></strong> (bronextensie → doelextensie).
 Zie het conversieplan:
 <a href="../../../plans/mvsa-conversions/">mvsa-conversions</a>.</p>
-<p>Alias voor import: <a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a> (zelfde
-MSCZ→mxl→mvsa-keten). <strong>Werkbank-bewerkvorm</strong> — niet ongewijzigd als
+<p><strong><code>mscz mvsa</code></strong> maakt een <strong>werkbank-bewerkvorm</strong> — niet ongewijzigd als
 catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout). De
-output begint met dezelfde waarschuwingsbanner als <code>mvsa import</code>.</p>
+output begint met een ASCII-waarschuwingsbanner. Details:
+<a href="../../../formats/mvsa/#score-naar-mvsa"><code>.mvsa</code> — score naar mvsa</a>.</p>
 <p>Alias voor platte tekst: <a href="../text/"><code>vsa text</code></a> (zelfde extractie; ook
 <code>.mxl</code> / <code>.vsa</code> / <code>.mvsa</code>).</p>
 <p><strong>Invoer:</strong> <code>path</code> mag één <code>.mscz</code> <strong>of</strong> een map zijn (recursief). Bij
 meerdere bronnen: sibling-output per bestand; <code>-o</code> alleen bij precies één
 bron. Zie <a href="../input-pad/">Invoer bestand of map</a>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mscz [-h] {import,mxl,text} …
-mscz import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
-            [--octave-style {@oct,marker}] [--section SECTION]
-            [--musescore PATH] [--no-align] path
+<div class="highlight"><pre><span></span><code>mscz [-h] {mvsa,mxl,text,compare} …
+mscz mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
+          [--octave-style {@oct,marker}] [--section SECTION]
+          [--musescore PATH] [--no-align] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
 mscz text [-h] [-o OUTPUT] [--musescore PATH] path
+mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
+             score mvsa
 </code></pre></div>
 <h2 id="subcommandos">Subcommando's<a class="headerlink" href="#subcommandos" title="Permanent link">&para;</a></h2>
 <table>
@@ -4936,8 +4990,8 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 </thead>
 <tbody>
 <tr>
-<td><code>import</code></td>
-<td>Importeer naar <code>.mvsa</code> (MuseScore → temp <code>.mxl</code> → SATB-explode → parser).</td>
+<td><code>mvsa</code></td>
+<td>Naar <code>.mvsa</code> (MuseScore → temp <code>.mxl</code> → SATB-explode → parser). Default: <code>&lt;bronnaam&gt;.mvsa</code> (bijv. <code>lied.mscz.mvsa</code>).</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -4947,23 +5001,50 @@ mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 <td><code>text</code></td>
 <td>Platte gezongen tekst via temp-<code>.mxl</code> (geen <code>.mvsa</code>; zie <a href="../text/"><code>vsa text</code></a>).</td>
 </tr>
+<tr>
+<td><code>compare</code></td>
+<td>Controleer of een <code>.mvsa</code> nog overeenkomt met verse <code>mscz</code>/<code>mxl mvsa</code>-import (lyrics, toonhoogte, duur-info, import-gaten).</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Import-opties</strong> (<code>--pitch</code> default <code>ag-vsa</code>, <code>--do</code>, <code>--no-align</code>, soft-wrap,
-eindankers bij <code>ag-vsa</code>/<code>vsa</code>, kuiser-normaalvorm): zelfde keten als
-<a href="../mvsa/#vsa-mvsa-import"><code>vsa mvsa import</code></a>. <code>@do</code> komt uit de MuseScore-
-voortekening (<code>KeySig</code> / <code>concertKey</code>) tenzij je <code>--do</code> meegeeft. De
-MSCZ-stap gebruikt dezelfde SATB-explode als <code>mscz mxl</code>. A/T/B volgen L/S
-op <strong>duur</strong> (lange noten worden gesplitst/gepaddet), zodat ontbrekende of
-scheve lyrics op de onderstemmen de posities niet verschuiven.</p>
+<p><strong><code>mvsa</code>-opties</strong> (<code>--pitch</code> default <code>ag-vsa</code>, <code>--do</code>, <code>--no-align</code>, soft-wrap,
+eindankers bij <code>ag-vsa</code>/<code>vsa</code>, kuiser-normaalvorm): zie
+<a href="../../../formats/mvsa/#score-naar-mvsa">score naar mvsa</a>. <code>@do</code> komt uit de
+MuseScore-voortekening (<code>KeySig</code> / <code>concertKey</code>) tenzij je <code>--do</code> meegeeft.
+De MSCZ-stap gebruikt dezelfde SATB-explode als <code>mscz mxl</code>. Default
+<code>--section schets</code>.</p>
+<h3 id="mscz-compare"><code>mscz compare</code><a class="headerlink" href="#mscz-compare" title="Permanent link">&para;</a></h3>
+<p>Controleert of een <strong><code>.mvsa</code></strong> (vaak <code>lied.mscz.mvsa</code>) nog overeenkomt met
+wat <strong><code>mscz mvsa</code> / <code>mxl mvsa</code> nu</strong> uit de score zou maken. Zo vermijd je
+vals alarm door ruwe MusicXML-lettergrepen of asymmetrische duur-export.</p>
+<p>Rapport:</p>
+<ol>
+<li><strong>Lyrics</strong> — platte tekst van een verse referentie-import versus de
+   gegeven <code>.mvsa</code> (inhoud; rand-leestekens genegeerd).</li>
+<li><strong>Melodie — toonhoogte</strong> — per stem S/A/T/B (beide kanten via dezelfde
+   <code>.mvsa</code>→MusicXML-export). Bepaalt samen met lyrics de exitcode.</li>
+<li><strong>Melodie — duur</strong> — pitch+duur (standaard informatief; met
+   <code>--strict-duration</code> ook in de exitcode).</li>
+<li><strong>Import-gaten</strong> — <code>@tempo</code>, <code>@tekst</code>, <code>@speelplan</code>/<code>@blok</code>, <code>@composer</code>,
+   <code>@title</code>, … in de score maar niet in dit <code>.mvsa</code>.</li>
+</ol>
+<p><strong>Argumenten:</strong> <code>score</code> (<code>.mscz</code>, of <code>.mxl</code> / <code>.musicxml</code> / <code>.xml</code>) en
+<code>mvsa</code>. Optioneel <code>--musescore</code> (bij <code>.mscz</code>), <code>--pitch</code> (referentie-import;
+default zoals <code>mscz mvsa</code>), <code>--strict-duration</code>.</p>
+<p>Coria-playback-<code>.mxl</code> met <code>[PAUZE]</code>: waarschuwing; pauzematen worden voor
+de vergelijking weggelaten. Liever <code>.mscz</code> als score.</p>
+<p><strong>Exitcode:</strong> <code>0</code> als lyrics-inhoud én toonhoogte kloppen; <code>1</code> bij verschil
+of fout. Import-gaten veranderen de exitcode niet.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mscz import generated\alleluia-schets2.mscz -o generated\from-mscz.mvsa
-mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
-mscz import generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
-mscz import generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
-vsa mvsa validate generated\from-mscz.mvsa
+<div class="highlight"><pre><span></span><code>mscz mvsa generated\alleluia-schets2.mscz
+mscz mvsa generated\alleluia-schets2.mscz -o generated\from-mscz.mvsa
+mscz mvsa generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
+mscz mvsa generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
+mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
+mscz compare generated\alleluia-schets2.mscz generated\alleluia-schets2.mscz.mvsa
+mscz compare generated\from-mscz.mxl generated\from-mscz.mvsa
 </code></pre></div>
 <p>Via repo-script:</p>
 <div class="highlight"><pre><span></span><code>scripts\mscz.cmd -h
@@ -4973,8 +5054,9 @@ mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
 <li><a href="../input-pad/">Invoer bestand of map</a></li>
 <li><a href="../text/"><code>text</code></a> — platte tekst uit <code>.vsa</code> / <code>.mvsa</code> / MusicXML / <code>.mscz</code></li>
 <li><a href="../mvsa/"><code>mvsa</code></a> — bron <code>.mvsa</code></li>
-<li><a href="../mxl/"><code>mxl</code></a> — bron <code>.mxl</code></li>
-<li>MSCZ-export vanuit mvsa: <a href="../mvsa/#vsa-mvsa-mscz"><code>vsa mvsa mscz</code></a></li>
+<li><a href="../mxl/"><code>mxl</code></a> — bron <code>.mxl</code> (<code>mxl mvsa</code> voor MusicXML → <code>.mvsa</code>)</li>
+<li>MSCZ-export vanuit mvsa: <a href="../mvsa/#mvsa-mscz"><code>mvsa mscz</code></a></li>
+<li>Formaat: <a href="../../../formats/mscz/"><code>.mscz</code></a> · <a href="../../../formats/mvsa/#score-naar-mvsa">score naar mvsa</a></li>
 </ul>
 
 
@@ -5012,7 +5094,7 @@ mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       
