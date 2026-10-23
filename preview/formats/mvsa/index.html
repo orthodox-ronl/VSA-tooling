@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-22 15:35 CEST.
+  , gebouwd 2026-10-23 11:10 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4835,6 +4835,10 @@
 <td><a href="../../plans/mvsa-conversions/">mvsa-conversies</a></td>
 </tr>
 <tr>
+<td>Toonsoort / tonica verzetten</td>
+<td><a href="../../reference/cli/mvsa/#vsa-mvsa-transpose"><code>mvsa transpose</code></a></td>
+</tr>
+<tr>
 <td>Import uit <code>.mxl</code> / <code>.mscz</code></td>
 <td><a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a> (soft-wrap; same-pitch recite; kuiser)</td>
 </tr>
@@ -4882,6 +4886,7 @@ mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
+mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
 mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
 mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
 mvsa validate generated\alleluia.import.mvsa
@@ -4929,7 +4934,7 @@ vsa text examples\mvsa\alleluia-toon-8.mvsa
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-21
+        Bijgewerkt: 2026-10-23
         
       </p>
       

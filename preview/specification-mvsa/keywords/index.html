@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-22 15:35 CEST.
+  , gebouwd 2026-10-23 11:10 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5150,6 +5150,11 @@ een bestand van toonsoort/grondtoon wisselt vóór een nieuw systeem.</p>
 <p><strong>Niet gebruiken</strong> om per noot te “tunen”: dat doe je met laddergraden of
 toonnamen op de stemregels. <code>@do</code> is document-/sectie-context, geen lokale
 correctie.</p>
+<p><strong>Hele bestand naar een andere tonica</strong> (bijv. Es → F): niet alleen <code>@do</code>
+handmatig wijzigen — absolute stemtonen moeten mee. Gebruik
+<a href="../../reference/cli/mvsa/#vsa-mvsa-transpose"><code>vsa mvsa transpose --to …</code></a>
+(<a href="../../guides/mvsa-schrijven-101/#toonsoort-verzetten-transpose">tutorial</a>).
+<code>@mode</code> blijft daarbij gelijk.</p>
 <p><strong>Default</strong> als je <code>@do</code> weglaat: <code>F4</code>.</p>
 <div class="highlight"><pre><span></span><code>@do F4
 </code></pre></div>
@@ -5671,7 +5676,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-22
+        Bijgewerkt: 2026-10-23
         
       </p>
       

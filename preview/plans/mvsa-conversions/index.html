@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-22 15:35 CEST.
+  , gebouwd 2026-10-23 11:10 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1494,6 +1494,17 @@
     <span class="md-ellipsis">
       
         Stap 2 — normalize (diagonaal .mvsa → .mvsa) ✅
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stap-2b-transpose-andere-tonica-zelfde-modus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stap 2b — transpose (andere tonica, zelfde modus) ✅
       
     </span>
   </a>
@@ -4972,6 +4983,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#stap-2b-transpose-andere-tonica-zelfde-modus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stap 2b — transpose (andere tonica, zelfde modus) ✅
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#stap-3-mscz-export-uit-mvsa" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5219,6 +5241,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#stap-2b-transpose-andere-tonica-zelfde-modus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stap 2b — transpose (andere tonica, zelfde modus) ✅
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#stap-3-mscz-export-uit-mvsa" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5363,7 +5396,7 @@ canonieke vorm brengen (zelfde formaat).</p>
 <tr>
 <td><strong><code>.mvsa</code></strong></td>
 <td>—</td>
-<td><strong><code>normalize</code></strong></td>
+<td><strong><code>normalize</code></strong> / <strong><code>kuiser</code></strong> / <strong><code>transpose</code></strong></td>
 <td><code>mvsa mxl</code> · <code>score-ir</code> · <code>svg</code> (koormap)</td>
 <td><strong><code>mscz</code></strong> via mxl→MuseScore</td>
 <td><code>mvsa mp3</code></td>
@@ -5434,7 +5467,8 @@ canonieke vorm brengen (zelfde formaat).</p>
 <li><strong><code>.mvsa</code> → <code>.mvsa</code>:</strong> default <strong>behoud noteernamen</strong> (<code>preserve</code>); optioneel
   herschrijven naar <code>doremi</code> / <code>a-g</code> (alias <code>abc</code>) / <code>vsa</code> / <code>ag-vsa</code>; octaafstijl
   (<code>@oct</code> vs. later marker); kolom- + maatstreep-uitlijning (kuiser /
-  <code>align_mvsa_columns</code>).</li>
+  <code>align_mvsa_columns</code>). <strong>Tonica verzetten:</strong> <code>mvsa transpose --to …</code>
+  (andere <code>@do</code>; <code>@mode</code> blijft; default <code>--pitch ag-vsa</code>).</li>
 <li><strong><code>.vsa</code> → <code>.vsa</code>:</strong> alleen waar tooling al een canonieke schrijfvorm afdwingt
   of gaat afdwingen; geen scope-creep hier.</li>
 <li><strong><code>.mxl</code> → <code>.mxl</code> / <code>.mscz</code> → <code>.mscz</code>:</strong> normaliseer naar de
@@ -5576,7 +5610,7 @@ hergebruik van <code>digit*</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize, transpose, kuiser</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -5655,6 +5689,18 @@ verwijzen ernaar; diagonaal is expliciet in de matrix.</p>
 <code>schets2-oct-doremi</code>: <code>normalize --pitch a-g</code> → validate OK → MusicXML-pitches
 identiek; ook <code>doremi → abc → doremi</code>, <code>--pitch vsa</code> en <code>--pitch ag-vsa</code>
 pitch-equivalent (<code>tests/test_mvsa_normalize.py</code>).</p>
+<h3 id="stap-2b-transpose-andere-tonica-zelfde-modus">Stap 2b — <code>transpose</code> (andere tonica, zelfde modus) ✅<a class="headerlink" href="#stap-2b-transpose-andere-tonica-zelfde-modus" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>vsa mvsa transpose PATH --to TONIC [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
+</code></pre></div>
+<ul>
+<li>Verschuift alle <code>@do</code>-regels en klinkende stemtonen naar <code>--to</code> (vorm als
+  <code>@do</code>: <code>F4</code> of <code>F</code> zonder octaafcijfer).</li>
+<li><code>@mode</code> blijft gelijk (majeur → majeur).</li>
+<li>Default <code>--pitch ag-vsa</code>; default-uitvoer sibling <code>&lt;stem&gt;.transposed.mvsa</code>.</li>
+<li>Man-pagina: <a href="../../reference/cli/mvsa/#vsa-mvsa-transpose"><code>mvsa transpose</code></a>.</li>
+</ul>
+<p><strong>Criterium (gehaald):</strong> <code>alleluia-9b-toon-3-vokn.mvsa</code> (Eb → F): validate OK;
+MusicXML-MIDI overal +2 (<code>tests/test_mvsa_transpose.py</code>).</p>
 <h3 id="stap-3-mscz-export-uit-mvsa">Stap 3 — MSCZ-export uit mvsa ✅<a class="headerlink" href="#stap-3-mscz-export-uit-mvsa" title="Permanent link">&para;</a></h3>
 <p>Keten: <code>.mvsa</code> → <strong>partituur</strong>-<code>.mxl</code> (SA/TB, lege part-namen) → MuseScore CLI
 → <code>.mscz</code> → stem-indicaties uit.</p>
@@ -5704,7 +5750,7 @@ mismatch na edits). Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 <tr>
 <td><code>mvsa</code> / <code>vsa mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize, transpose, kuiser</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
@@ -5784,7 +5830,7 @@ werken.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-21
+        Bijgewerkt: 2026-10-23
         
       </p>
       
