@@ -79,7 +79,7 @@ echo %ERRORLEVEL%
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                           |
 | [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3 (`mvsa`).        |
 | [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: `mxl mvsa`; `mxl mscz`; validate/normalize.                              |
-| [`mscz`](mscz.md)                                | Bron `.mscz`: `mscz mvsa`; `mscz mxl`; text (lyrics).                                             |
+| [`mscz`](mscz.md)                                | Bron `.mscz`: `mscz mvsa`; `mscz mxl`; text (lyrics); `compare` (score ↔ `.mvsa`).               |
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze

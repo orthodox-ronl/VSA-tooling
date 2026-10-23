@@ -118,7 +118,7 @@ Elke conversie-entry leest één brontype:
 | `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol                                      |
 | `mvsa`          | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser                          |
 | `mxl`               | `.mxl` / `.musicxml`                  | mvsa; mscz; **validate** / **normalize** (playback-checklist)                                  |
-| `mscz`              | `.mscz`                               | mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)                                          |
+| `mscz`              | `.mscz`                               | mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl); **compare** (t.o.v. verse import)         |
 | `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte tekst (referentie voor [`zoektekst`](../formats/zoektekst.md); optioneel `.lyrics.txt`) |
 | `vsa audio`         | `.mxl` / `.vsa` / …                   | preview ``.mp3`` via MuseScore                                                                 |
 
@@ -232,7 +232,7 @@ Top-level console-scripts + `scripts\*.cmd`:
 | ------------------- | ------------------ | ----------------------------------------------------------------------------- |
 | `mvsa`          | `.mvsa`            | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser         |
 | `mxl`               | `.mxl`/`.musicxml` | mvsa; mscz; validate; normalize                                               |
-| `mscz`              | `.mscz`            | mvsa; mxl; **text** (lyrics, geen mvsa)                                       |
+| `mscz`              | `.mscz`            | mvsa; mxl; **text** (lyrics, geen mvsa); **compare**                          |
 | `vsa text`          | meerdere           | platte tekst incl. MusicXML / `.mscz`                                         |
 
 **Criterium (gehaald):** `mvsa -h`, `mxl -h`, `mscz -h` tonen matrix-acties;

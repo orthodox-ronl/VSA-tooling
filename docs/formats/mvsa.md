@@ -47,6 +47,10 @@ MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
 Man-pagina’s: [`mxl mvsa`](../reference/cli/mxl.md) ·
 [`mscz mvsa`](../reference/cli/mscz.md).
 
+Na import: controleer lyrics/melodie en wat niet meekwam met
+[`mscz compare`](../reference/cli/mscz.md#mscz-compare)
+(score ↔ `.mvsa`).
+
 ## Canonieke maatnummers
 
 Elke **koormaat** heeft in alle vormen waar een maatnummer zichtbaar is

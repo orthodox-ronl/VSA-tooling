@@ -37,8 +37,9 @@ def test_mscz_help_lists_matrix_actions(capsys):
     assert exc.value.code == 0
     out = capsys.readouterr().out
     assert "mvsa" in out
-    assert "{mvsa,mxl,text}" in out
+    assert "{mvsa,mxl,text,compare}" in out
     assert "mxl" in out
+    assert "compare" in out
 
 
 def test_mvsa_validate_alias_works():

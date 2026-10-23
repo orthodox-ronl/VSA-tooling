@@ -13,6 +13,7 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 | Import → `.mvsa`      | [`mscz mvsa`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; default `ag-vsa` = ankers)    |
 | → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                                                     |
 | Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)                                           |
+| Score ↔ `.mvsa`       | [`mscz compare`](../reference/cli/mscz.md#mscz-compare) (t.o.v. verse import; lyrics, toonhoogte, duur-info, import-gaten) |
 | Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                                                                  |
 
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
@@ -120,4 +121,5 @@ Vereist MuseScore 4 (of 3) lokaal, tenzij je alleen `.mxl` gebruikt.
 - [Formaten & CLI — overzicht](index.md)
 - [`.mxl`](mxl.md) · [`.mvsa`](mvsa.md)
 - Platte tekst: [`vsa text`](../reference/cli/text.md) / [`mscz text`](../reference/cli/mscz.md)
+- Score ↔ `.mvsa`: [`mscz compare`](../reference/cli/mscz.md#mscz-compare)
 - [mvsa-conversies](../plans/mvsa-conversions.md)

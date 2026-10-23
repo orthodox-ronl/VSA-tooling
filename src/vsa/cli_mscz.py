@@ -1,6 +1,7 @@
 """Top-level ``mscz`` CLI (bron: ``.mscz``).
 
-Acties: mvsa (score → werkbank); mxl (via MuseScore); text (lyrics via temp-mxl).
+Acties: mvsa (score → werkbank); mxl (via MuseScore); text (lyrics via
+temp-mxl); compare (score ↔ ``.mvsa``).
 Conventie: ``mscz {doeltype}`` — zie docs/plans/mvsa-conversions.md.
 """
 
@@ -27,6 +28,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_mscz_to_mxl(ns)
     if ns.mscz_command == "text":
         return _cmd_mscz_text(ns)
+    if ns.mscz_command == "compare":
+        return _cmd_mscz_compare(ns)
     parser.print_help()
     return 1
 
@@ -66,15 +69,21 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Exporteer naar .mxl via MuseScore.\n"
             "  text PATH [-o OUT] [--musescore PATH]\n"
             "      Platte gezongen tekst (via temp-.mxl; geen .mvsa).\n"
+            "  compare SCORE MVSA [--musescore PATH] [--pitch …]\n"
+            "      [--strict-duration]\n"
+            "      Vergelijk .mvsa met verse import van de score "
+            "(+ import-gaten).\n"
             "\n"
             "PATH = één .mscz of map (recursief). "
             "-o alleen bij precies één bron.\n"
+            "compare: SCORE = .mscz of MusicXML; MVSA = .mvsa-bestand.\n"
             "\n"
             "voorbeelden:\n"
             "  mscz mvsa lied.mscz\n"
             "  mscz mvsa lied.mscz -o lied.mvsa --pitch doremi\n"
             "  mscz mxl lied.mscz -o lied.mxl\n"
             "  mscz text lied.mscz -o lied.lyrics.txt\n"
+            "  mscz compare lied.mscz lied.mscz.mvsa\n"
             "\n"
             "Alias text: vsa text … (ook .mxl / .vsa / .mvsa)."
         ),
@@ -82,7 +91,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mscz_command",
         required=True,
-        metavar="{mvsa,mxl,text}",
+        metavar="{mvsa,mxl,text,compare}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -153,7 +162,83 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+
+    compare = sub.add_parser(
+        "compare",
+        help=(
+            "Vergelijk .mvsa met verse import van .mscz/MusicXML "
+            "(lyrics, toonhoogte, duur, import-gaten)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Controleert of het .mvsa nog overeenkomt met wat mscz mvsa /\n"
+            "mxl mvsa nu uit de score zou maken. Rapporteert:\n"
+            "  1) lyrics (inhoud; leestekens genegeerd)\n"
+            "  2) toonhoogte per stem S/A/T/B\n"
+            "  3) duur (informatief; met --strict-duration in exitcode)\n"
+            "  4) import-gaten (@tempo, @tekst, @speelplan, @composer, …)\n"
+            "\n"
+            "Exitcode 0 als lyrics-inhoud én toonhoogte kloppen; 1 bij\n"
+            "verschil of fout. Coria-.mxl met [PAUZE]: waarschuwing + strip.\n"
+            "\n"
+            "SCORE mag .mscz, .mxl, .musicxml of .xml zijn.\n"
+            "\n"
+            "voorbeelden:\n"
+            "  mscz compare lied.mscz lied.mscz.mvsa\n"
+            "  mscz compare lied.mscz.mxl lied.mscz.mvsa\n"
+            "  mscz compare lied.mscz lied.mscz.mvsa --strict-duration\n"
+        ),
+    )
+    compare.add_argument(
+        "score",
+        help=".mscz- of MusicXML-bestand (bronpartituur).",
+    )
+    compare.add_argument(
+        "mvsa",
+        help=".mvsa-bestand om mee te vergelijken (bijv. import-sibling).",
+    )
+    compare.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore-executable (alleen bij .mscz; default: auto).",
+    )
+    compare.add_argument(
+        "--pitch",
+        default=None,
+        metavar="FORM",
+        help=(
+            "Pitch-vorm voor de verse referentie-import "
+            "(default: zelfde als mscz mvsa, ag-vsa)."
+        ),
+    )
+    compare.add_argument(
+        "--strict-duration",
+        action="store_true",
+        help="Laat duurverschillen de exitcode 1 maken (standaard alleen info).",
+    )
     return parser
+
+
+def _cmd_mscz_compare(ns: argparse.Namespace) -> int:
+    from .mscz_compare import MsczCompareError, compare_score_to_mvsa, format_report
+
+    musescore = Path(ns.musescore) if ns.musescore else None
+    try:
+        report = compare_score_to_mvsa(
+            Path(ns.score),
+            Path(ns.mvsa),
+            musescore=musescore,
+            pitch=ns.pitch,
+            strict_duration=bool(ns.strict_duration),
+        )
+    except MsczCompareError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    sys.stdout.write(format_report(report))
+    return 0 if report.musical_ok else 1
 
 
 def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:

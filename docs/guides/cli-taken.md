@@ -30,6 +30,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | mvsa → MuseScore / print-PDF (draft)                    | [`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) / [`pdf`](../reference/cli/mvsa.md#mvsa-pdf) (dicht: `--compact`)                     |
 | mvsa → preview-audio (draft)                            | [`mvsa mp3`/`ogg`/`wav`](../reference/cli/mvsa.md#mvsa-mp3) (of top-level [`vsa audio`](../reference/cli/audio.md))                         |
 | MusicXML / MuseScore → `.mvsa` (**werkbank**)           | [`mxl mvsa`](../reference/cli/mxl.md) / [`mscz mvsa`](../reference/cli/mscz.md)                                                                     |
+| Score ↔ `.mvsa` controleren (t.o.v. verse import)         | [`mscz compare`](../reference/cli/mscz.md#mscz-compare)                                                                                          |
 | Score → mvsa + ankers (navigatie / foutzoeken)          | `mxl mvsa …` / `mscz mvsa …` (default `ag-vsa`) daarna [`validate`](../reference/cli/mvsa.md#mvsa-validate)                                     |
 | `.mvsa` naar andere tonica (toonsoort)                  | [`mvsa transpose <pad> --to F4`](../reference/cli/mvsa.md#mvsa-transpose)                                                                   |
 | `.mvsa` leren schrijven                                 | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                         |

@@ -320,7 +320,12 @@ S: fa so- mi&do&re&mi fa mi ||mi
 3. Zet bovenaan `@do` / `@mode` / `@oct` goed (`mxl`/`mscz mvsa` vult dit grotendeels in).
 4. Controleer L-tekst (de conversie kan lelijk syllabificeren) en sync.
 5. `mvsa validate lied.mvsa`
-6. Optioneel opnieuw kuisen: `mvsa kuiser lied.mvsa`
+6. Optioneel: controleer of de `.mvsa` nog bij de score past
+   ([`mscz compare`](../reference/cli/mscz.md#mscz-compare)):
+   ```cmd
+   mscz compare bron.mscz lied.mvsa
+   ```
+7. Optioneel opnieuw kuisen: `mvsa kuiser lied.mvsa`
 
 Referentie-voorbeeld (bladcijfers):
 [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa).
