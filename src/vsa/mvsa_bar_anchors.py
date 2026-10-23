@@ -26,7 +26,7 @@ from .pitch_resolver import (
 
 def collect_bar_anchor_diagnostics(doc: ParsedDocument) -> list[MvsaDiagnostic]:
     out: list[MvsaDiagnostic] = []
-    # Documentvolgorde: lopende toon loopt door over systeembraken (zelfde
+    # Documentvolgorde: lopende toon loopt door over systeemovergangen (zelfde
     # soft-wrap-``-`` als export), tenzij een beginanker reset.
     pitch_carry: dict[str, Pitch] = {}
     for section in doc.sections:

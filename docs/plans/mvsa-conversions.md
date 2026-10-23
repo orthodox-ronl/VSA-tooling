@@ -206,7 +206,7 @@ vsa mvsa import PATH [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}] --octave-style @
 - Soft-wrap ~80 tekens per LSATB-systeem; één te lange maat blijft één systeem.
 - Same-pitch holds (ook over maat- en **systeem**grenzen) → `-` op stemregels;
   export/validatie dragen de lopende toon over (beginanker reset) — zie
-  [semantics — systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
+  [semantics — systeemovergangen](../specification-mvsa/semantics.md#lopende-toon-over-systeemovergangen).
 - Multi-lettergreep lyrics op één noot → recite `( … )`; lone extender →
   lege recite `()~`; trailing `.` gestript.
 - Default `--pitch ag-vsa`: per systeem eerste noot absolute a–g, daarna EHM,

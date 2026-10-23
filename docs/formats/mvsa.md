@@ -31,9 +31,9 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 `.mscz` eerst via MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
 [`mscz mxl`](../reference/cli/mscz.md). Default output is de **canonieke
 schrijfvorm** (kuiser-normaalvorm). Soft-wrap zet same-pitch holds als `-`
-ook over systeembraken; export en eindanker-check zetten die weer om naar de
+ook over systeemovergangen; export en eindanker-check zetten die weer om naar de
 vorige toon (tenzij een beginanker reset) — zie
-[Semantiek — lopende toon over systeembraken](../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
+[Semantiek — lopende toon over systeemovergangen](../specification-mvsa/semantics.md#lopende-toon-over-systeemovergangen).
 Vóór elk LSATB-systeem zet import `#maat N` (1-based startmaat) voor
 navigatie t.o.v. PDF / MuseScore. Default `--pitch ag-vsa`: eerste noot per
 systeem absolute a–g, daarna EHM, plus check-only a–g-eindankers op

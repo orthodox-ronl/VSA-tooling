@@ -117,9 +117,9 @@ vereisen een cijfer (`so-2`).
 `@start S=-` en `S-:` betekenen voor stem `S` hetzelfde beginanker; de
 identifier-vorm is de voorkeur als de EHM bij die stemregel hoort.
 
-### Lopende toon over systeembraken
+### Lopende toon over systeemovergangen
 
-De **lopende toon** van elke stem loopt door over LSATB-systeembraken (lege
+De **lopende toon** van elke stem loopt door over LSATB-systeemovergangen (lege
 regel tussen systemen), in de volgorde waarin export of validatie de systemen
 afloopt:
 

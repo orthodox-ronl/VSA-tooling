@@ -17,7 +17,7 @@
 - Testfixtures hersteld: `test-alleluia-toon-8.mvsa` en
   `test-kleine-intocht-zondag-hemelum.mvsa` (multi-`@sectie` voor roundtrips;
   ≠ catalogus-voorbeelden). `test-trisagion-…` blijft weg (geen testgebruik)
-- MVSA→MusicXML: soft-wrap-`-` over systeembraken houdt de lopende toon
+- MVSA→MusicXML: soft-wrap-`-` over systeemovergangen houdt de lopende toon
   (beginanker/`@start` reset); zelfde carry in eindanker-check en normalize
 
 ## 0.2.0 - MVSA-authoring, export en preview-audio

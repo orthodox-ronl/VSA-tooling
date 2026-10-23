@@ -189,7 +189,7 @@ Kale `-` op een stemregel aan het begin van een nieuw LSATB-systeem houdt de
 lopende toon van het vorige systeem (soft-wrap); een beginanker of expliciete
 `@start`-toewijzing reset die toon. Bij `@speelplan` volgt die keten de
 klinkende vorm. Zie
-[lopende toon over systeembraken](../../specification-mvsa/semantics.md#lopende-toon-over-systeembraken).
+[lopende toon over systeemovergangen](../../specification-mvsa/semantics.md#lopende-toon-over-systeemovergangen).
 Lege recite met ELM-keten (`()~&~&.…`, lyric-loos melisma uit import) wordt
 als gewoon melisma geëxporteerd (alle slots/duur), niet als één noot.
 
