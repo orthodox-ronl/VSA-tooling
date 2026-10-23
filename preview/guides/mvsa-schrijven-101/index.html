@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-23 11:52 CEST.
+  , gebouwd 2026-10-23 23:03 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3905,7 +3905,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -5192,7 +5192,7 @@ werkends wilt opschrijven en valideren.
 <p><strong>Antwoord in het kort:</strong> een <code>.mvsa</code>-bestand is een tekstpartituur: eerst
 lyrics (<code>L:</code>), daaronder stemhoogten (<code>S:</code> / <code>A:</code> / <code>T:</code> / <code>B:</code>), met optionele
 <code>@</code>-regels voor toonsoort en schrijfoctaaf. Je houdt L en stemmen <strong>synchroon</strong>
-op lettergrepen/slots; daarna <code>vsa mvsa validate</code> en eventueel export naar
+op lettergrepen/slots; daarna <code>mvsa validate</code> en eventueel export naar
 MusicXML of MuseScore.</p>
 <h2 id="leeswijzer">Leeswijzer<a class="headerlink" href="#leeswijzer" title="Permanent link">&para;</a></h2>
 <table>
@@ -5265,7 +5265,7 @@ Zet <strong>geen lege regel</strong> tussen <code>L:</code> en de stemmen — ee
 het systeem. Tussen twee systemen: een <strong>lege regel</strong> (voorkeur), of
 een <code>@-</code> directive, zoals <code>@---</code> met commentaar.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa validate examples\mvsa
+mvsa validate examples\mvsa
 </code></pre></div>
 <hr />
 <h2 id="2-woorden-die-je-het-meest-nodig-hebt">2. <code>@</code>-woorden die je het meest nodig hebt<a class="headerlink" href="#2-woorden-die-je-het-meest-nodig-hebt" title="Permanent link">&para;</a></h2>
@@ -5429,7 +5429,7 @@ Oefenstuk: <code>examples/mvsa/uitvoeraanwijzingen-demo.mvsa</code>.</p>
 <li>Tel op de L-regel de <strong>slots</strong> (lettergrepen + melisma-<code>&amp;</code>-stukken).</li>
 <li>Zet op elke stemregel <strong>evenveel</strong> hoogte-stukken (gescheiden door spaties).</li>
 <li>Zet op elke regel dezelfde maatstrepen op dezelfde plekken.</li>
-<li>Spaties mogen kolommen uitlijnen; <code>vsa mvsa kuiser</code> (of <code>normalize</code>) helpt
+<li>Spaties mogen kolommen uitlijnen; <code>mvsa kuiser</code> (of <code>normalize</code>) helpt
    bij uitlijning en eenduidige maatstrepen.</li>
 </ol>
 <p>??? example "Recite + melisma (schets)"
@@ -5440,14 +5440,14 @@ S: Bb                c  a&amp;f&amp;g&amp;a   Bb a  ||
 recite-groep; daarna `c`, dan een melisma `a&amp;f&amp;g&amp;a`, enz.
 </code></pre>
 <p>Handige check:</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa validate pad\naar\lied.mvsa
+<div class="highlight"><pre><span></span><code>mvsa validate pad\naar\lied.mvsa
 </code></pre></div>
 <p>Uitlijnen en kuiser-toleranties (in-place; behoud spelling):</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa kuiser pad\naar\lied.mvsa
+<div class="highlight"><pre><span></span><code>mvsa kuiser pad\naar\lied.mvsa
 </code></pre></div>
 <p>Alleen kolomuitlijning / pitch-herschrijf (schrijft default
 <code>&lt;stem&gt;.normalized.mvsa</code>):</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa normalize pad\naar\lied.mvsa -o pad\naar\lied.mvsa
+<div class="highlight"><pre><span></span><code>mvsa normalize pad\naar\lied.mvsa -o pad\naar\lied.mvsa
 </code></pre></div>
 <hr />
 <h2 id="4-stemregels-vsa-doremi-of-ag">4. Stemregels: vsa, doremi of a–g<a class="headerlink" href="#4-stemregels-vsa-doremi-of-ag" title="Permanent link">&para;</a></h2>
@@ -5480,7 +5480,8 @@ elkaar (per frase één stijl is leesbaarder).</p>
 </tbody>
 </table>
 <h3 id="cli-namen-pitch">CLI-namen (<code>--pitch</code>)<a class="headerlink" href="#cli-namen-pitch" title="Permanent link">&para;</a></h3>
-<p>Bij <code>import</code> / <code>normalize</code> / <code>transpose</code> kies je een <strong>doelspelling</strong>:</p>
+<p>Bij <code>mxl mvsa</code> / <code>mscz mvsa</code> / <code>normalize</code> / <code>transpose</code> kies je een
+<strong>doelspelling</strong>:</p>
 <table>
 <thead>
 <tr>
@@ -5503,7 +5504,7 @@ elkaar (per frase één stijl is leesbaarder).</p>
 </tr>
 <tr>
 <td><code>ag-vsa</code></td>
-<td>absolute a–g + EHM + eindanker (default bij import/transpose)</td>
+<td>absolute a–g + EHM + eindanker (default bij score→mvsa / transpose)</td>
 </tr>
 <tr>
 <td><code>preserve</code></td>
@@ -5512,8 +5513,8 @@ elkaar (per frase één stijl is leesbaarder).</p>
 </tbody>
 </table>
 <p><code>abc</code> blijft een <strong>alias</strong> van <code>a-g</code> (oude scripts).</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa import lied.mxl -o lied.mvsa --pitch doremi
-vsa mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
+<div class="highlight"><pre><span></span><code>mxl mvsa lied.mxl -o lied.mvsa --pitch doremi
+mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
 </code></pre></div>
 <p>Alleen de <strong>spelling</strong> wijzigen (zelfde toonsoort) is <code>normalize</code>. De
 <strong>tonica</strong> verzetten (Es → F) is <a href="#toonsoort-verzetten-transpose"><code>transpose</code></a>.</p>
@@ -5527,12 +5528,12 @@ vsa mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
 <p><code>S-:</code> zet de lopende toon op “zelfde toon als schrijf-do-anker <code>-</code>”; daarna
 EHM’s. Zie <a href="../../specification-mvsa/semantics/#absolute-en-relatieve-hoogte">Semantiek — absolute en relatieve hoogte</a>.</p>
 <p>??? tip "Welke stijl kiezen?"
-| Situatie                         | Suggestie                                      |
-| -------------------------------- | ---------------------------------------------- |
-| Overname van MuseScore / MXL     | import <code>--pitch doremi</code> of <code>a-g</code> (cijfers)     |
-| Liturgische ladder / toon        | doremi + <code>@oct</code>                                |
-| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM     |
-| Lange stapsgewijze frase         | EHM na één absoluut anker                      |</p>
+| Situatie                         | Suggestie                                              |
+| -------------------------------- | ------------------------------------------------------ |
+| Overname van MuseScore / MXL     | <code>mxl mvsa</code> / <code>mscz mvsa</code> met <code>--pitch doremi</code> of <code>a-g</code> |
+| Liturgische ladder / toon        | doremi + <code>@oct</code>                                        |
+| Snelle schets, bekende melodie   | a–g zonder cijfer (do-octaaf) of mix + EHM             |
+| Lange stapsgewijze frase         | EHM na één absoluut anker                              |</p>
 <hr />
 <h2 id="5-octaven-oct-do-octaaf-en-cijfers">5. Octaven: <code>@oct</code>, do-octaaf en cijfers<a class="headerlink" href="#5-octaven-oct-do-octaaf-en-cijfers" title="Permanent link">&para;</a></h2>
 <h3 id="schrijfoctaaf-oct">Schrijfoctaaf (<code>@oct</code>)<a class="headerlink" href="#schrijfoctaaf-oct" title="Permanent link">&para;</a></h3>
@@ -5655,13 +5656,17 @@ faalt validate.</p>
 <li>Exporteer of bewaar als <code>.mxl</code> / <code>.mscz</code>.</li>
 <li>Importeer naar <code>.mvsa</code> met een pitch-vorm:
    <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa import bron.mxl -o lied.mvsa --pitch doremi
+mxl mvsa bron.mxl -o lied.mvsa --pitch doremi
 </code></pre></div>
    Of <code>--pitch a-g</code> als je bladcijfers wilt (<code>bb4</code>, <code>c5</code>).</li>
-<li>Zet bovenaan <code>@do</code> / <code>@mode</code> / <code>@oct</code> goed (import vult dit grotendeels in).</li>
-<li>Controleer L-tekst (import kan lelijk syllabificeren) en sync.</li>
-<li><code>vsa mvsa validate lied.mvsa</code></li>
-<li>Optioneel opnieuw kuisen: <code>vsa mvsa kuiser lied.mvsa</code></li>
+<li>Zet bovenaan <code>@do</code> / <code>@mode</code> / <code>@oct</code> goed (<code>mxl</code>/<code>mscz mvsa</code> vult dit grotendeels in).</li>
+<li>Controleer L-tekst (de conversie kan lelijk syllabificeren) en sync.</li>
+<li><code>mvsa validate lied.mvsa</code></li>
+<li>Optioneel: controleer of de <code>.mvsa</code> nog bij de score past
+   (<a href="../../reference/cli/mscz/#mscz-compare"><code>mscz compare</code></a>):
+   <div class="highlight"><pre><span></span><code>mscz compare bron.mscz lied.mvsa
+</code></pre></div></li>
+<li>Optioneel opnieuw kuisen: <code>mvsa kuiser lied.mvsa</code></li>
 </ol>
 <p>Referentie-voorbeeld (bladcijfers):
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa"><code>kleine-intocht-zondag-hemelum.mvsa</code></a>.</p>
@@ -5682,7 +5687,7 @@ mineur.</p>
 absolute toonnamen hebben (<code>Bb</code>, <code>||Eb</code>, …): die moeten mee. Gebruik
 daarom het CLI-commando:</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
+mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
 </code></pre></div>
 <p>Default-uitvoer: sibling <code>&lt;naam&gt;.transposed.mvsa</code>. Met <code>-o</code> kies je zelf
 het pad (alleen bij precies één bronbestand). Een map mag ook: elk
@@ -5714,9 +5719,9 @@ het pad (alleen bij precies één bronbestand). Een map mag ook: elk
 </tbody>
 </table>
 <p>Daarna valideren:</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa validate examples\bug-cases\alleluia-9b-toon-3-vokn.transposed.mvsa
+<div class="highlight"><pre><span></span><code>mvsa validate examples\bug-cases\alleluia-9b-toon-3-vokn.transposed.mvsa
 </code></pre></div>
-<p>Man-pagina: <a href="../../reference/cli/mvsa/#vsa-mvsa-transpose"><code>vsa mvsa transpose</code></a>.</p>
+<p>Man-pagina: <a href="../../reference/cli/mvsa/#mvsa-transpose"><code>mvsa transpose</code></a>.</p>
 <hr />
 <h2 id="8-taak-vsa-meerstemmig-maken">8. Taak: VSA meerstemmig maken<a class="headerlink" href="#8-taak-vsa-meerstemmig-maken" title="Permanent link">&para;</a></h2>
 <p><strong>Doel:</strong> een eenstemmige <code>.vsa</code>-melodie uitzetten naar L + SATB.</p>
@@ -5727,13 +5732,13 @@ het pad (alleen bij precies één bronbestand). Een map mag ook: elk
 <li>Vul A/T/B in (harmonie). Gebruik <code>@oct</code> zodat bas/tenor comfortabel typen.</li>
 <li>Houd maatstrepen en slot-telling gelijk aan L.</li>
 <li>Valideer; exporteer een sectie om te beluisteren:
-   <div class="highlight"><pre><span></span><code>vsa mvsa mscz lied.mvsa -o generated\lied.mscz --section mijn-sectie
+   <div class="highlight"><pre><span></span><code>mvsa mscz lied.mvsa -o generated\lied.mscz --section mijn-sectie
 </code></pre></div></li>
 </ol>
 <p>Pitch-equivalentie tussen stijlen kun je afdwingen door te normaliseren en te
 vergelijken (MusicXML-pitches moeten gelijk blijven):</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch doremi -o generated\a.doremi.mvsa
-vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a.ag.mvsa
+<div class="highlight"><pre><span></span><code>mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch doremi -o generated\a.doremi.mvsa
+mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a.ag.mvsa
 </code></pre></div>
 <p>Voorbeeld met meerdere equivalente schetsen:
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/alleluia-toon-8.mvsa"><code>alleluia-toon-8.mvsa</code></a>.</p>
@@ -5749,15 +5754,15 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 <tbody>
 <tr>
 <td>Valideren</td>
-<td><code>vsa mvsa validate lied.mvsa</code></td>
+<td><code>mvsa validate lied.mvsa</code></td>
 </tr>
 <tr>
 <td>MusicXML</td>
-<td><code>vsa mvsa musicxml lied.mvsa -o generated\lied.mxl</code></td>
+<td><code>mvsa musicxml lied.mvsa -o generated\lied.mxl</code></td>
 </tr>
 <tr>
 <td>MuseScore</td>
-<td><code>vsa mvsa mscz lied.mvsa -o generated\lied.mscz</code></td>
+<td><code>mvsa mscz lied.mvsa -o generated\lied.mscz</code></td>
 </tr>
 <tr>
 <td>Eén sectie</td>
@@ -5765,17 +5770,17 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 </tr>
 <tr>
 <td>Uitlijnen / kuisen</td>
-<td><code>vsa mvsa kuiser lied.mvsa</code></td>
+<td><code>mvsa kuiser lied.mvsa</code></td>
 </tr>
 <tr>
 <td>Andere tonica</td>
-<td><code>vsa mvsa transpose lied.mvsa --to F4</code></td>
+<td><code>mvsa transpose lied.mvsa --to F4</code></td>
 </tr>
 </tbody>
 </table>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
+mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
 </code></pre></div>
 <p>CLI-detail: <a href="../../reference/cli/mvsa/">mvsa-referentie</a>. Formaten-hub:
 <a href="../../formats/">Formaten &amp; CLI</a>.</p>
@@ -5851,10 +5856,10 @@ vsa mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o
 </tr>
 <tr>
 <td><a href="../../plans/mvsa-conversions/">mvsa-conversies</a></td>
-<td>import / normalize / transpose</td>
+<td><code>mxl</code>/<code>mscz mvsa</code> · normalize · transpose</td>
 </tr>
 <tr>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-transpose"><code>mvsa transpose</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-transpose"><code>mvsa transpose</code></a></td>
 <td>andere tonica</td>
 </tr>
 <tr>

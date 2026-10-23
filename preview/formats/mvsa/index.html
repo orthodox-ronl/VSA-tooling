@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-23 11:52 CEST.
+  , gebouwd 2026-10-23 23:03 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -876,6 +876,28 @@
     <span class="md-ellipsis">
       
         Wat hoort hier
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#score-naar-mvsa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Score naar mvsa
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#canonieke-maatnummers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canonieke maatnummers
       
     </span>
   </a>
@@ -3717,7 +3739,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4751,6 +4773,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#score-naar-mvsa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Score naar mvsa
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#canonieke-maatnummers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canonieke maatnummers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#typische-commandos" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4836,23 +4880,23 @@
 </tr>
 <tr>
 <td>Toonsoort / tonica verzetten</td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-transpose"><code>mvsa transpose</code></a></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-transpose"><code>mvsa transpose</code></a></td>
 </tr>
 <tr>
-<td>Import uit <code>.mxl</code> / <code>.mscz</code></td>
-<td><a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a> (soft-wrap; same-pitch recite; kuiser)</td>
+<td>Score → <code>.mvsa</code> (werkbank)</td>
+<td><a href="../../reference/cli/mxl/"><code>mxl mvsa</code></a> / <a href="../../reference/cli/mscz/"><code>mscz mvsa</code></a> — <a href="#score-naar-mvsa">Score naar mvsa</a></td>
 </tr>
 <tr>
-<td>CLI</td>
-<td><a href="../../reference/cli/mvsa/"><code>mvsa</code></a> (<code>≡ vsa mvsa</code>)</td>
+<td>CLI (bron <code>.mvsa</code>)</td>
+<td><a href="../../reference/cli/mvsa/"><code>mvsa</code></a> ()</td>
 </tr>
 <tr>
 <td>Score-IR (scherm-JSON)</td>
-<td><a href="../score-ir/"><code>score-ir</code></a> · <a href="../../reference/cli/mvsa/#vsa-mvsa-score-ir"><code>mvsa score-ir</code></a></td>
+<td><a href="../score-ir/"><code>score-ir</code></a> · <a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir</code></a></td>
 </tr>
 <tr>
 <td>Muziek-only SVG (koormap)</td>
-<td><a href="../mvsa-svg/"><code>mvsa-svg</code></a> · <a href="../../reference/cli/mvsa/#vsa-mvsa-svg"><code>mvsa svg</code></a></td>
+<td><a href="../mvsa-svg/"><code>mvsa-svg</code></a> · <a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a></td>
 </tr>
 <tr>
 <td>Platte gezongen tekst (extractie)</td>
@@ -4860,26 +4904,82 @@
 </tr>
 </tbody>
 </table>
+<h2 id="score-naar-mvsa">Score naar mvsa<a class="headerlink" href="#score-naar-mvsa" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
-<p class="admonition-title">Import = werkbank</p>
-<p>Score→<code>.mvsa</code> is een <strong>bewerkvorm</strong> voor de werkbank-fase (woordstreepjes,
-lege recite, lossy layout). Niet ongewijzigd als catalogusbron gebruiken.
-De import zet bovenaan een ASCII-waarschuwingsbanner met checklist.
-Zie <a href="../../reference/cli/mvsa/#vsa-mvsa-import"><code>mvsa import</code></a>.</p>
+<p class="admonition-title">Alleen voor de werkbank-fase</p>
+<p><code>mxl mvsa</code> / <code>mscz mvsa</code> zijn bedoeld als <strong>bewerk-/startvorm</strong> — van
+MuseScore/MusicXML naar bewerkbare <code>.mvsa</code>, daarna handmatig afmaken.
+Niet als kant-en-klare catalogusbron. Elk bestand krijgt na
+<code># Imported: …</code> een ASCII-waarschuwingsbanner met checklist.</p>
 </div>
-<p><strong>Import (kort):</strong> <code>.mxl</code> gaat rechtstreeks naar de SATB-parser (P1–P4);
-<code>.mscz</code> eerst via MuseScore naar temp-<code>.mxl</code> en dezelfde SATB-explode als
-<a href="../../reference/cli/mscz/"><code>mscz mxl</code></a>. Default output is de <strong>canonieke
-schrijfvorm</strong> (kuiser-normaalvorm). Soft-wrap zet same-pitch holds als <code>-</code>
-ook over systeemovergangen; export en eindanker-check zetten die weer om naar de
-vorige toon (tenzij een beginanker reset) — zie
-<a href="../../specification-mvsa/semantics/#lopende-toon-over-systeemovergangen">Semantiek — lopende toon over systeemovergangen</a>.
-Vóór elk LSATB-systeem zet import <code>#maat N</code> (1-based startmaat) voor
-navigatie t.o.v. PDF / MuseScore. Default <code>--pitch ag-vsa</code>: eerste noot per
-systeem absolute a–g, daarna EHM, plus check-only a–g-eindankers op
-systeemeinden. Hetzelfde eindanker-gedrag bij <code>--pitch vsa</code>; <code>doremi</code> /
-<code>a-g</code> zetten geen eindankers. Tutorial:
+<p><strong>CLI (conventie bron → doel):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Bron</th>
+<th>Commando</th>
+<th>Default-uitvoer (zonder <code>-o</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.mxl</code> / <code>.musicxml</code> / <code>.xml</code></td>
+<td><code>mxl mvsa</code></td>
+<td><code>&lt;bronnaam&gt;.mvsa</code> (bijv. <code>lied.mxl.mvsa</code>)</td>
+</tr>
+<tr>
+<td><code>.mscz</code></td>
+<td><code>mscz mvsa</code></td>
+<td><code>&lt;bronnaam&gt;.mvsa</code> (bijv. <code>lied.mscz.mvsa</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><code>.mxl</code> gaat rechtstreeks naar de SATB-parser (P1–P4); <code>.mscz</code> eerst via
+MuseScore naar temp-<code>.mxl</code> en dezelfde SATB-explode als
+<a href="../../reference/cli/mscz/"><code>mscz mxl</code></a>. Default: <strong>canonieke schrijfvorm</strong>
+(kuiser-normaalvorm), <code>--pitch ag-vsa</code>, <code>--section schets</code>. Soft-wrap,
+<code>#maat N</code>, eindankers: zie hieronder en
+<a href="#canonieke-maatnummers">Canonieke maatnummers</a>. Tutorial:
 <a href="../../guides/mvsa-schrijven-101/#7-taak-bladmuziek--mvsa">mvsa schrijven 101 — bladmuziek</a>.</p>
+<p>Man-pagina’s: <a href="../../reference/cli/mxl/"><code>mxl mvsa</code></a> ·
+<a href="../../reference/cli/mscz/"><code>mscz mvsa</code></a>.</p>
+<p>Na import: controleer lyrics/melodie en wat niet meekwam met
+<a href="../../reference/cli/mscz/#mscz-compare"><code>mscz compare</code></a>
+(score ↔ <code>.mvsa</code>).</p>
+<h2 id="canonieke-maatnummers">Canonieke maatnummers<a class="headerlink" href="#canonieke-maatnummers" title="Permanent link">&para;</a></h2>
+<p>Elke <strong>koormaat</strong> heeft in alle vormen waar een maatnummer zichtbaar is
+(MuseScore/<code>.mscz</code>, MusicXML <code>@number</code>, import-commentaar <code>#maat N</code>,
+partituur-PDF) <strong>hetzelfde nummer</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Regel</th>
+<th>Toelichting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bron</td>
+<td>Het maatnummer is dat van de MuseScore-partituur / MusicXML <code>measure@number</code> van de koormaat.</td>
+</tr>
+<tr>
+<td><code>#maat N</code></td>
+<td><code>N</code> = dat canonieke nummer van de eerste koormaat in het LSATB-systeem (niet de 1-based index in een genormaliseerde lijst met extra maten).</td>
+</tr>
+<tr>
+<td>Pauzematen</td>
+<td>Coria-oefenmaten met lyric <code>[PAUZE]</code> (na dubbele streep) krijgen een afgeleid nummer <code>Np</code> (bijv. <code>6p</code>) en <strong>verschuiven</strong> de nummers van volgende koormaten <strong>niet</strong>.</td>
+</tr>
+<tr>
+<td>Score → mvsa</td>
+<td><code>mscz mvsa</code> / <code>mxl mvsa</code> voegen geen <code>[PAUZE]</code>-maten toe (die horen bij playback-<code>.mxl</code>, niet bij de authoring-schets).</td>
+</tr>
+<tr>
+<td>Systeemovergangen</td>
+<td>Soft-wrap-grenzen in <code>.mvsa</code> mogen afwijken van MuseScore-systeemovergangen; alleen het <strong>nummer per maat</strong> is gedeeld, niet de regelsprong.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mvsa validate examples\mvsa
 mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
@@ -4887,9 +4987,10 @@ mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
 mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
-mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
-mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
-mvsa validate generated\alleluia.import.mvsa
+mxl mvsa generated\alleluia.mxl
+mxl mvsa generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
+mscz mvsa generated\alleluia.mscz -o generated\from-mscz.mvsa
+mvsa validate generated\alleluia.mxl.mvsa
 vsa text examples\mvsa\alleluia-toon-8.mvsa
 </code></pre></div>
 <p>Via repo-script: <code>scripts\mvsa.cmd …</code></p>

@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-23 11:52 CEST.
+  , gebouwd 2026-10-23 23:03 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2941,6 +2941,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#rusten-op-de-stemregel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rusten op de stemregel
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3834,7 +3845,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -4879,6 +4890,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#rusten-op-de-stemregel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rusten op de stemregel
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5064,6 +5086,49 @@ T: … d4&amp;-&amp;- …
 (partituur) trekt tooling opeenvolgende melisma-noten op dezelfde hoogte samen
 tot <strong>één noot</strong> waarvan de duur de som is van de slot-duren. Playback-<code>.mxl</code>
 houdt de slots apart (Coria).</p>
+<h3 id="rusten-op-de-stemregel">Rusten op de stemregel<a class="headerlink" href="#rusten-op-de-stemregel" title="Permanent link">&para;</a></h3>
+<p>Een stem-slot <code>r</code> of <code>R</code> is een <strong>rust</strong>: er klinkt geen toon; de duur is die
+van het bijbehorende L-slot (ELM). Het slot telt wél mee in de
+<code>&amp;</code>-sync tussen L en de stemmen.</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Betekenis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-</code></td>
+<td>aanhouden (zelfde toon als het vorige klinkende slot)</td>
+</tr>
+<tr>
+<td><code>r</code>/<code>R</code></td>
+<td>rust (geen toon; export als MusicXML/MSCZ-rest)</td>
+</tr>
+</tbody>
+</table>
+<p><code>r</code> werkt de <strong>lopende toon</strong> van die stem niet bij: de volgende EHM (<code>/</code> of
+<code>\</code>) telt t.o.v. de laatste <strong>klinkende</strong> toon vóór de rust(en).</p>
+<p><strong>Sommige stemmen zwijgen, andere zingen door</strong> (bijv. S/A rust, T/B melisma):</p>
+<div class="highlight"><pre><span></span><code>L: U,~&amp;.&amp;~&amp;~ |
+S: f#4&amp;r&amp;r&amp;r |
+A: d#4&amp;r&amp;r&amp;r |
+T: b3&amp;c4&amp;b3&amp;a3 |
+B: b2&amp;c3&amp;b2&amp;a2 |
+</code></pre></div>
+<p><strong>Alle stemmen zwijgen binnen de muzikale zin</strong> — lege recite op L plus rusten
+op elke stem (niet verwarren met lyric <code>[PAUZE]</code>, die hoort bij
+sectie-/oefenpauzes):</p>
+<div class="highlight"><pre><span></span><code>L: Amen__ | ().&amp;.&amp;~&amp;~ | Heer__ |
+S: g4     | r&amp;r&amp;r&amp;r   | g4     |
+A: e4     | r&amp;r&amp;r&amp;r   | e4     |
+T: b3     | r&amp;r&amp;r&amp;r   | b3     |
+B: e3     | r&amp;r&amp;r&amp;r   | e3     |
+</code></pre></div>
+<p>Syntaxis: <a href="../syntax/#7-stemregel">Stemregel</a>. Validate, export en import
+ondersteunen <code>r</code>/<code>R</code>. Opeenvolgende rustslots mogen bij MusicXML-export tot
+één rust met de somduur samentrekken (zelfde mechanisme als same-pitch).</p>
 <h2 id="reciteertoon">Reciteertoon<a class="headerlink" href="#reciteertoon" title="Permanent link">&para;</a></h2>
 <p>Een L-stuk tussen <code>( … )</code> is een recite-run: meerdere lettergrepen (en
 eventueel meerdere woorden), <strong>één</strong> hoogte-stuk per stem. Optionele ELM
@@ -5239,7 +5304,13 @@ schrijf-do (zoals binnen één systeem vóór de eerste absolute toon).</p>
   berekende lopende toon van de stem na de maat.</li>
 <li><strong>Absoluut</strong> (<code>|mi</code>, <code>||fa</code>, <code>|g4</code>, …): verwachte toon absoluut t.o.v. het
   schrijf-do / wetenschappelijk octaaf.</li>
+<li><strong>Geen rust als eindanker:</strong> <code>r</code>/<code>R</code> is een stem-slot, geen check-anker.</li>
 </ul>
+<p><strong>Berekende toon voor de check:</strong> de laatste <strong>klinkende</strong> slot-toon in de
+maat (stemrust <code>r</code>/<code>R</code> telt niet mee en wist die toon niet). Over
+systeemgrenzen heen geldt de soft-wrap-carry (zelfde als leading <code>-</code>). Alleen
+als er in dit systeem én via carry nog nooit een klinkende toon was: error
+«geen berekende toon».</p>
 <p>Bij mismatch: error. Bij match: de lopende toon blijft ongewijzigd (geen reset).</p>
 <h2 id="pitfalls-rond">Pitfalls rond <code>~</code><a class="headerlink" href="#pitfalls-rond" title="Permanent link">&para;</a></h2>
 <p>Het teken <code>~</code> is op de L-regel <strong>alleen</strong> ELM (duur). Recite markeer je met

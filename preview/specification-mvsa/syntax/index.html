@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-23 11:52 CEST.
+  , gebouwd 2026-10-23 23:03 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4017,7 +4017,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -5605,7 +5605,7 @@ tekens breed is, staat er ruimte vóór het woordstreepje (<code>le  -lu</code>)
 eráchter.</p>
 <p><strong>Validatie</strong> eist deze kolommen <strong>niet</strong>: alleen de positietelling telt
 (<a href="../semantics/#sync-contract-lengte-posities">Semantiek</a>). Losse invoer mag
-rompiger zijn; de kuiser mag normaliseren (<code>vsa mvsa kuiser</code>). Gegenereerde
+rompiger zijn; de kuiser mag normaliseren (<code>mvsa kuiser</code>). Gegenereerde
 output en de voorbeelden in <code>examples/mvsa</code> volgen wél deze layout. Hulpje:
 <code>python scripts/align_mvsa_columns.py examples/mvsa</code> (alleen kolommen; de
 volledige kuiser-pipeline is <code>mvsa kuiser</code>).</p>
@@ -5956,7 +5956,8 @@ voor duur <code>_</code>, <code>~</code>, <code>.</code>, <code>-.</code>, …</
 bij de tekst van die lettergreep (<code>Komt_,</code>, <code>ia,</code>, <code>tus_,</code>). Binnen <code>(…)</code> horen
 komma’s bij de lettergreep vóór de <code>)</code>.</p>
 <h2 id="7-stemregel">7. Stemregel<a class="headerlink" href="#7-stemregel" title="Permanent link">&para;</a></h2>
-<p>Op een stemregel staan alleen <strong>hoogte-stukken</strong>, gescheiden door spaties:</p>
+<p>Op een stemregel staan alleen <strong>hoogte-stukken</strong> (of een rust-slot), gescheiden
+door spaties:</p>
 <ul>
 <li>relatief (EHM): <code>/</code>, <code>\</code>, <code>-</code>, <code>/3</code>, <code>#\</code>, … — <strong>unidirectioneel</strong>
   (alleen <code>/…</code> of alleen <code>\…</code>, eventueel met cijfer). Mixen zoals <code>\/</code> of
@@ -5965,13 +5966,19 @@ komma’s bij de lettergreep vóór de <code>)</code>.</p>
   toonnamen <code>c</code>…<code>b</code>, <code>Bb</code>, <code>fis</code>, …;</li>
 <li>octaaf: suffix <code>-</code> / <code>+</code> / <code>-1</code> / <code>+2</code> / … of wetenschappelijk cijfer op
   toonnamen (<code>g3</code>, <code>bb4</code>);</li>
-<li>melisma: <code>a4&amp;b4&amp;c5</code> of <code>d4&amp;-&amp;-</code> (aanhouden / zelfde toon in volgende slots).</li>
+<li>melisma: <code>a4&amp;b4&amp;c5</code> of <code>d4&amp;-&amp;-</code> (aanhouden / zelfde toon in volgende slots);</li>
+<li><strong>rust:</strong> <code>r</code> of <code>R</code> — één slot zonder klinkende toon (duur via de L-ELM van
+  dat slot). Mag alleen staan, of in een melisma: <code>f#4&amp;r&amp;r&amp;r</code>. Niet hetzelfde
+  als <code>-</code> (aanhouden). Semantiek:
+  <a href="../semantics/#rusten-op-de-stemregel">Rusten op de stemregel</a>.</li>
 </ul>
 <p>Of de regel <strong>standaard</strong> relatief of absoluut is, volgt uit de
 <a href="#regelidentifier">regelidentifier</a>: met EHM (<code>S-:</code>) relatief + beginanker;
 zonder EHM (<code>S:</code>) absoluut. Mix van EHM-stappen en laddergraden (ankers) op
 dezelfde regel blijft toegestaan.</p>
 <p>Geen lyrics en geen <code>_</code> / <code>.&amp;.</code> op de stemregel — die horen in L.</p>
+<p><code>r</code> / <code>R</code> is <strong>geen</strong> laddergraad: <code>re</code> blijft «re»; alleen het losse token
+<code>r</code> of <code>R</code> is rust.</p>
 <p><code>so</code> = <code>sol</code>; <code>si</code> = <code>ti</code>. Namen zijn hoofdletterongevoelig waar dat geen
 toonnaam-conflicten geeft (<code>Bb</code> vs <code>b</code>).</p>
 <h3 id="kruis-en-mol">Kruis en mol<a class="headerlink" href="#kruis-en-mol" title="Permanent link">&para;</a></h3>
@@ -6167,7 +6174,7 @@ dezelfde kolom; zie
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-14
+        Bijgewerkt: 2026-10-23
         
       </p>
       

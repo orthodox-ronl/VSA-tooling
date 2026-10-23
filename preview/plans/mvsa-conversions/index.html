@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-23 11:52 CEST.
+  , gebouwd 2026-10-23 23:03 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3863,7 +3863,7 @@
   <span class="md-ellipsis">
     
   
-    vsa svg — .vsa naar SVG renderen
+    vsa svg — .vsa naar muziek-only SVG
   
 
     
@@ -5405,7 +5405,7 @@ canonieke vorm brengen (zelfde formaat).</p>
 <tr>
 <td><strong><code>.mxl</code> / <code>.musicxml</code></strong></td>
 <td>—</td>
-<td><strong><code>import</code></strong></td>
+<td><strong><code>mxl mvsa</code></strong></td>
 <td><strong>normalize</strong> → <a href="../../formats/canonical-checklists/#checklist-mxl-coria-playback">checklist MXL</a></td>
 <td>MuseScore / <code>mxl mscz</code></td>
 <td><code>vsa audio</code></td>
@@ -5414,7 +5414,7 @@ canonieke vorm brengen (zelfde formaat).</p>
 <tr>
 <td><strong><code>.mscz</code></strong></td>
 <td>—</td>
-<td><strong><code>import</code></strong> (via mxl)</td>
+<td><strong><code>mscz mvsa</code></strong> (via mxl)</td>
 <td><code>mscz mxl</code></td>
 <td><strong>normalize</strong> → <a href="../../formats/canonical-checklists/#checklist-mscz-partituur-musescore">checklist MSCZ</a></td>
 <td><code>vsa audio</code> (fallback)</td>
@@ -5608,19 +5608,19 @@ hergebruik van <code>digit*</code>.</p>
 <td>validate, musicxml, svg, …; later <code>normalize</code> waar zinvol</td>
 </tr>
 <tr>
-<td><code>mvsa</code> / <code>vsa mvsa</code></td>
+<td><code>mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize, transpose, kuiser</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
 <td><code>.mxl</code> / <code>.musicxml</code></td>
-<td>import → mvsa; mscz; <strong>validate</strong> / <strong>normalize</strong> (playback-checklist)</td>
+<td>mvsa; mscz; <strong>validate</strong> / <strong>normalize</strong> (playback-checklist)</td>
 </tr>
 <tr>
 <td><code>mscz</code></td>
 <td><code>.mscz</code></td>
-<td>import → mvsa; mxl (MuseScore); <strong>text</strong> (lyrics via temp-mxl)</td>
+<td>mvsa; mxl (MuseScore); <strong>text</strong> (lyrics via temp-mxl); <strong>compare</strong> (t.o.v. verse import)</td>
 </tr>
 <tr>
 <td><code>vsa text</code></td>
@@ -5634,7 +5634,7 @@ hergebruik van <code>digit*</code>.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Transitie:</strong> <code>vsa mvsa …</code> blijft de volledige alias van top-level <code>mvsa</code>.
+<p><strong>Commando:</strong> top-level <code>mvsa</code> (bron <code>.mvsa</code>).
 Windows: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>, <code>scripts\mscz.cmd</code>.</p>
 <hr />
 <h2 id="4-trade-offs-kort">4. Trade-offs (kort)<a class="headerlink" href="#4-trade-offs-kort" title="Permanent link">&para;</a></h2>
@@ -5674,7 +5674,7 @@ Windows: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>, <code>scri
 <p><strong>Criterium:</strong> dit plan staat in MkDocs; <code>specification-mvsa</code> en <code>open-points</code>
 verwijzen ernaar; diagonaal is expliciet in de matrix.</p>
 <h3 id="stap-2-normalize-diagonaal-mvsa-mvsa">Stap 2 — <code>normalize</code> (diagonaal <code>.mvsa</code> → <code>.mvsa</code>) ✅<a class="headerlink" href="#stap-2-normalize-diagonaal-mvsa-mvsa" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa,ag-vsa}] --octave-style @oct
+<div class="highlight"><pre><span></span><code>mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa,ag-vsa}] --octave-style @oct
 </code></pre></div>
 <ul>
 <li><strong>Default <code>--pitch preserve</code>:</strong> noteernamen op S/A/T/B blijven zoals in de
@@ -5690,21 +5690,21 @@ verwijzen ernaar; diagonaal is expliciet in de matrix.</p>
 identiek; ook <code>doremi → abc → doremi</code>, <code>--pitch vsa</code> en <code>--pitch ag-vsa</code>
 pitch-equivalent (<code>tests/test_mvsa_normalize.py</code>).</p>
 <h3 id="stap-2b-transpose-andere-tonica-zelfde-modus">Stap 2b — <code>transpose</code> (andere tonica, zelfde modus) ✅<a class="headerlink" href="#stap-2b-transpose-andere-tonica-zelfde-modus" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa transpose PATH --to TONIC [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
+<div class="highlight"><pre><span></span><code>mvsa transpose PATH --to TONIC [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
 </code></pre></div>
 <ul>
 <li>Verschuift alle <code>@do</code>-regels en klinkende stemtonen naar <code>--to</code> (vorm als
   <code>@do</code>: <code>F4</code> of <code>F</code> zonder octaafcijfer).</li>
 <li><code>@mode</code> blijft gelijk (majeur → majeur).</li>
 <li>Default <code>--pitch ag-vsa</code>; default-uitvoer sibling <code>&lt;stem&gt;.transposed.mvsa</code>.</li>
-<li>Man-pagina: <a href="../../reference/cli/mvsa/#vsa-mvsa-transpose"><code>mvsa transpose</code></a>.</li>
+<li>Man-pagina: <a href="../../reference/cli/mvsa/#mvsa-transpose"><code>mvsa transpose</code></a>.</li>
 </ul>
 <p><strong>Criterium (gehaald):</strong> <code>alleluia-9b-toon-3-vokn.mvsa</code> (Eb → F): validate OK;
 MusicXML-MIDI overal +2 (<code>tests/test_mvsa_transpose.py</code>).</p>
 <h3 id="stap-3-mscz-export-uit-mvsa">Stap 3 — MSCZ-export uit mvsa ✅<a class="headerlink" href="#stap-3-mscz-export-uit-mvsa" title="Permanent link">&para;</a></h3>
 <p>Keten: <code>.mvsa</code> → <strong>partituur</strong>-<code>.mxl</code> (SA/TB, lege part-namen) → MuseScore CLI
 → <code>.mscz</code> → stem-indicaties uit.</p>
-<div class="highlight"><pre><span></span><code>vsa mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
+<div class="highlight"><pre><span></span><code>mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
 </code></pre></div>
 <ul>
 <li>Module: <code>vsa.mvsa_mscz</code> + <code>vsa.mscz_partituur</code> + <code>vsa.musescore_cli</code>.</li>
@@ -5713,7 +5713,8 @@ MusicXML-MIDI overal +2 (<code>tests/test_mvsa_transpose.py</code>).</p>
 <p><strong>Criterium (gehaald):</strong> met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
 (<code>tests/test_mvsa_mscz.py</code>; skip als MuseScore ontbreekt).</p>
 <h3 id="stap-4-import-score-mvsa">Stap 4 — Import (score → mvsa) ✅<a class="headerlink" href="#stap-4-import-score-mvsa" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa mvsa import PATH [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}] --octave-style @oct
+<div class="highlight"><pre><span></span><code>mxl mvsa PATH [-o OUT] …
+mscz mvsa PATH [-o OUT] …
 </code></pre></div>
 <ul>
 <li>Bron: <code>.mxl</code> / <code>.musicxml</code> direct (SATB P1–P4); <code>.mscz</code> via MuseScore →
@@ -5726,8 +5727,9 @@ MusicXML-MIDI overal +2 (<code>tests/test_mvsa_transpose.py</code>).</p>
   lege recite <code>()~</code>; trailing <code>.</code> gestript.</li>
 <li>Default <code>--pitch ag-vsa</code>: per systeem eerste noot absolute a–g, daarna EHM,
   a–g-eindanker; daarna <strong>kuiser-normaalvorm</strong> (canonieke <code>~</code> op L, bars sync,
-  kolommen); <code>--no-align</code> slaat die stap over.</li>
-<li>Top-level <code>mxl import</code> / <code>mscz import</code> = alias van <code>vsa mvsa import</code>.</li>
+  kolommen). Faalt kuiser op validatie: alsnog kolom-/maatstreep-align.
+  <code>--no-align</code> slaat kuiser over maar blijft slots en maatstrepen uitlijnen.</li>
+<li>Score → <code>.mvsa</code>: alleen <code>mxl mvsa</code> / <code>mscz mvsa</code> (geen <code>mvsa import</code>; bron = eerste token).</li>
 <li><code>abc</code> blijft alias van <code>a-g</code>. Pyphen-warnings via <code>kuiser</code> zijn advies.</li>
 </ul>
 <p><strong>Criterium (gehaald):</strong> roundtrip <code>mvsa → mxl → mvsa</code> pitch-equivalent op
@@ -5748,19 +5750,19 @@ mismatch na edits). Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>mvsa</code> / <code>vsa mvsa</code></td>
+<td><code>mvsa</code></td>
 <td><code>.mvsa</code></td>
-<td>validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize, transpose, kuiser</td>
+<td>validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser</td>
 </tr>
 <tr>
 <td><code>mxl</code></td>
 <td><code>.mxl</code>/<code>.musicxml</code></td>
-<td>import → mvsa; mscz</td>
+<td>mvsa; mscz; validate; normalize</td>
 </tr>
 <tr>
 <td><code>mscz</code></td>
 <td><code>.mscz</code></td>
-<td>import → mvsa; mxl; <strong>text</strong> (lyrics, geen mvsa)</td>
+<td>mvsa; mxl; <strong>text</strong> (lyrics, geen mvsa); <strong>compare</strong></td>
 </tr>
 <tr>
 <td><code>vsa text</code></td>
@@ -5770,8 +5772,7 @@ mismatch na edits). Niet bij <code>doremi</code> / <code>a-g</code>.</p>
 </tbody>
 </table>
 <p><strong>Criterium (gehaald):</strong> <code>mvsa -h</code>, <code>mxl -h</code>, <code>mscz -h</code> tonen matrix-acties;
-man-pagina’s <code>docs/reference/cli/{mvsa,mxl,mscz}.md</code>; oude <code>vsa mvsa …</code> blijft
-werken.</p>
+man-pagina’s <code>docs/reference/cli/{mvsa,mxl,mscz}.md</code>.</p>
 <hr />
 <h2 id="6-bewust-later-buiten-slice">6. Bewust later / buiten slice<a class="headerlink" href="#6-bewust-later-buiten-slice" title="Permanent link">&para;</a></h2>
 <ul>
@@ -5790,7 +5791,7 @@ werken.</p>
 <li>Roundtrips waar haalbaar; anders pitch/duur-equivalentie.</li>
 <li><code>.mxl</code> blijft playback-vriendelijk (bestaande profielen / pitfalls).</li>
 <li><code>.mscz</code> bruikbaar in partituur-workflow.</li>
-<li><code>examples/mvsa/</code> blijft <code>vsa mvsa validate</code>-groen; nieuwe fixtures in
+<li><code>examples/mvsa/</code> blijft <code>mvsa validate</code>-groen; nieuwe fixtures in
   <code>generated/</code>.</li>
 <li>Geen scope-creep op blokhergebruik.</li>
 </ul>
