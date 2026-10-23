@@ -36,7 +36,9 @@ index. Soft-wrap system boundaries are **systeemovergangen** in the
 By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
 (canonieke schrijfvorm / normaalvorm: lone standaard-``~`` op L weggelaten,
 ``~`` wél bij ``&``-melisma en na ``)``; maatstrepen sync, kolomuitlijning).
-Pass ``align=False`` (CLI ``--no-align``) to skip.
+If kuiser fails validation, import still applies
+:func:`vsa.mvsa_align.align_mvsa_text`. ``align=False`` (CLI ``--no-align``)
+skips kuiser but still column-aligns slots and maatstrepen.
 
 With ``--pitch vsa``, each stem line gets a check-only absolute pitch
 **eindanker** glued to the last bar of every system (e.g. ``||a4``), so
@@ -60,6 +62,7 @@ from xml.etree import ElementTree as ET
 
 from .music import Duration, Pitch
 from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
+from .mvsa_align import align_mvsa_text
 from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_text
 from .mvsa_normalize import (
     DEFAULT_IMPORT_PITCH,
@@ -337,10 +340,13 @@ def import_score_to_mvsa(
                 text = kuiser_mvsa_text(
                     text, pitch="preserve", octave_style=octave_style, align=True
                 ).text
-            except (MvsaKuiserError, MvsaValidationError) as exc:
-                raise MvsaImportError(
-                    f"import-normaalvorm (kuiser) mislukt: {exc}"
-                ) from exc
+            except (MvsaKuiserError, MvsaValidationError):
+                # Kuiser kan falen op overige validatie; kolommen + maatstrepen
+                # wél canonieke uitlijnen zodat de werkbank leesbaar blijft.
+                text = align_mvsa_text(text)
+        else:
+            # Ook zonder kuiser: slots en maatstrepen onder elkaar.
+            text = align_mvsa_text(text)
         return text
     finally:
         if tmp_mxl is not None:

@@ -731,11 +731,18 @@ def _validate_voice_height_tokens(
                 )
 
 
+def is_rest_slot(token: str) -> bool:
+    """True if ``token`` is a stem rest (``r`` / ``R``)."""
+    return token.strip().lower() == "r"
+
+
 def is_valid_height_slot(token: str) -> bool:
-    """True if ``token`` is a stem height slot (EHM, absolute, hold), not an L-ELM."""
+    """True if ``token`` is a stem height slot (EHM, absolute, hold, rest)."""
     tok = token.strip()
     if not tok:
         return False
+    if is_rest_slot(tok):
+        return True
     if tok in ("-", "~"):
         return True
     if tok in _STEM_DURATION_ELMS:

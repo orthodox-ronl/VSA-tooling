@@ -212,7 +212,8 @@ mscz mvsa PATH [-o OUT] …
   lege recite `()~`; trailing `.` gestript.
 - Default `--pitch ag-vsa`: per systeem eerste noot absolute a–g, daarna EHM,
   a–g-eindanker; daarna **kuiser-normaalvorm** (canonieke `~` op L, bars sync,
-  kolommen); `--no-align` slaat die stap over.
+  kolommen). Faalt kuiser op validatie: alsnog kolom-/maatstreep-align.
+  `--no-align` slaat kuiser over maar blijft slots en maatstrepen uitlijnen.
 - Score → `.mvsa`: alleen `mxl mvsa` / `mscz mvsa` (geen `mvsa import`; bron = eerste token).
 - `abc` blijft alias van `a-g`. Pyphen-warnings via `kuiser` zijn advies.
 

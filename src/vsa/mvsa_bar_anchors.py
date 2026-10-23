@@ -1,4 +1,12 @@
-"""Check-only eindankers glued to mvsa bar tokens (draft-v0)."""
+"""Check-only eindankers glued to mvsa bar tokens (draft-v0).
+
+Berekende lopende toon voor de check:
+
+- begint bij pitch-carry van het vorige LSATB-systeem (soft-wrap);
+- stemrust ``r``/``R`` wijzigt die toon niet;
+- een mislukte slot-resolve wist een eerdere goede toon niet;
+- eindanker mag geen rust zijn (wel een geldig hoogte-slot voor noten).
+"""
 
 from __future__ import annotations
 
@@ -14,14 +22,24 @@ from .mvsa_parse import (
     ParsedDocument,
     ParsedSystem,
     StickyContext,
+    is_rest_slot,
     is_valid_height_slot,
 )
 from .mvsa_validate import MvsaDiagnostic, is_lyrics_stem
 from .pitch_resolver import (
     _SCALE_INTERVALS,
+    PitchResolver,
     degree_to_pitch,
     pitch_marker_degree,
 )
+
+
+def is_valid_bar_anchor(token: str) -> bool:
+    """True if ``token`` may appear as check-only eindanker (not a rest)."""
+    tok = token.strip()
+    if not tok or is_rest_slot(tok):
+        return False
+    return is_valid_height_slot(tok)
 
 
 def collect_bar_anchor_diagnostics(doc: ParsedDocument) -> list[MvsaDiagnostic]:
@@ -65,21 +83,24 @@ def _check_system_bar_anchors(
             continue
 
         letter = marker[0]
+        carried = prev_carry.get(letter)
         resolver = seed_voice_resolver(
             ctx,
             marker,
             line_ehm=line_ehms.get(marker),
-            carried=prev_carry.get(letter),
+            carried=carried,
         )
 
-        last_pitch: Pitch | None = None
+        # Soft-wrap / vorig systeem: start met meegenomen lopende toon, zodat
+        # een maat van alleen rusten of holds de eindanker-check niet leeg maakt.
+        last_pitch: Pitch | None = carried
         dead = False
         for mi, bundle in enumerate(system.measures):
             if not dead:
                 for vpos in bundle.voices.get(marker, []):
                     for slot in vpos.slots:
                         try:
-                            last_pitch = _resolve_slot(
+                            resolved = _resolve_slot(
                                 slot,
                                 resolver,
                                 ctx,
@@ -87,10 +108,13 @@ def _check_system_bar_anchors(
                                 last_pitch=last_pitch,
                             )
                         except Exception:
-                            # Shape errors already reported as MVSA-HOOGTE
-                            last_pitch = None
+                            # Shape errors already reported as MVSA-HOOGTE.
+                            # Bewaar de laatste goede toon voor ankers in deze maat.
                             dead = True
                             break
+                        # Stemrust → None: lopende toon behouden.
+                        if resolved is not None:
+                            last_pitch = resolved
                     if dead:
                         break
 
@@ -98,7 +122,7 @@ def _check_system_bar_anchors(
             if not anchor:
                 continue
             line_no = system.line_nos.get(marker, system.start_line)
-            if not is_valid_height_slot(anchor):
+            if not is_valid_bar_anchor(anchor):
                 diags.append(
                     MvsaDiagnostic(
                         "MVSA-BAR-ANKER",
@@ -108,7 +132,8 @@ def _check_system_bar_anchors(
                     )
                 )
                 continue
-            if last_pitch is None:
+            sounding = _effective_sounding_pitch(last_pitch, resolver)
+            if sounding is None:
                 diags.append(
                     MvsaDiagnostic(
                         "MVSA-BAR-ANKER",
@@ -129,24 +154,41 @@ def _check_system_bar_anchors(
                     )
                 )
                 continue
-            if not _pitches_equal(last_pitch, expected):
+            if not _pitches_equal(sounding, expected):
                 diags.append(
                     MvsaDiagnostic(
                         "MVSA-BAR-ANKER",
                         f"{marker}: eindanker {anchor!r} na maat {mi + 1}: "
-                        f"berekend {_fmt_pitch(last_pitch)}, "
+                        f"berekend {_fmt_pitch(sounding)}, "
                         f"verwacht {_fmt_pitch(expected)}",
                         line_no,
                     )
                 )
         if not dead:
-            new_carry[letter] = resolver.current_pitch
+            # Liever expliciete lopende toon dan kale schrijf-do-default.
+            new_carry[letter] = (
+                last_pitch
+                if last_pitch is not None
+                else resolver.current_pitch
+            )
     return diags, new_carry
+
+
+def _effective_sounding_pitch(
+    last_pitch: Pitch | None, resolver: PitchResolver
+) -> Pitch | None:
+    """Pitch for eindanker compare: slot-cursor, else resolver's last sounding."""
+    if last_pitch is not None:
+        return last_pitch
+    sounding = getattr(resolver, "_last_sounding", None)
+    return sounding if isinstance(sounding, Pitch) else None
 
 
 def _expected_pitch_for_anchor(anchor: str, ctx: StickyContext, letter: str) -> Pitch:
     """Expected pitch for a check-only bar anchor (does not mutate voice state)."""
     tok = anchor.strip()
+    if is_rest_slot(tok):
+        raise ValueError("eindanker mag geen rust zijn")
     if HEIGHT_EHM_RE.fullmatch(tok) or tok in ("-", "~"):
         # VSA-style height-marker body relative to schrijf-do (@do + @oct).
         do_p = writing_do_pitch(ctx, letter)
@@ -158,7 +200,10 @@ def _expected_pitch_for_anchor(anchor: str, ctx: StickyContext, letter: str) -> 
     # Absolute ladder / scientific: resolve on a throwaway writing-do resolver.
     r = seed_voice_resolver(ctx, letter)
     r.apply_start_marker([])
-    return _resolve_slot(tok, r, ctx, letter, last_pitch=None)
+    pitch = _resolve_slot(tok, r, ctx, letter, last_pitch=None)
+    if pitch is None:
+        raise ValueError(f"eindanker {tok!r} levert geen toon")
+    return pitch
 
 
 def _pitches_equal(a: Pitch, b: Pitch) -> bool:

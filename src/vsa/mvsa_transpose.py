@@ -273,6 +273,8 @@ def transpose_mvsa_text(
                                     new_do, sounding, intervals
                                 )
                                 prev_degree[letter] = deg
+                            elif raw.lower() == "r":
+                                slot_out.append(raw.strip())
                             elif raw in ("-", "~"):
                                 slot_out.append("-")
                             else:
@@ -290,8 +292,11 @@ def transpose_mvsa_text(
                                     new_do, sounding, intervals
                                 )
                                 prev_degree[letter] = deg
-                            last_old[letter] = sounding_old
-                            last_new[letter] = sounding
+                            # Rust werkt de lopende toon niet bij.
+                            if sounding_old is not None:
+                                last_old[letter] = sounding_old
+                            if sounding is not None:
+                                last_new[letter] = sounding
                         tokens.append("&".join(slot_out))
                     new_segs[vm].append(" ".join(tokens))
 

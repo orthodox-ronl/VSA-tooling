@@ -202,6 +202,13 @@ Vorm en disambiguatie:
   berekende lopende toon van de stem na de maat.
 - **Absoluut** (`|mi`, `||fa`, `|g4`, …): verwachte toon absoluut t.o.v. het
   schrijf-do / wetenschappelijk octaaf.
+- **Geen rust als eindanker:** `r`/`R` is een stem-slot, geen check-anker.
+
+**Berekende toon voor de check:** de laatste **klinkende** slot-toon in de
+maat (stemrust `r`/`R` telt niet mee en wist die toon niet). Over
+systeemgrenzen heen geldt de soft-wrap-carry (zelfde als leading `-`). Alleen
+als er in dit systeem én via carry nog nooit een klinkende toon was: error
+«geen berekende toon».
 
 Bij mismatch: error. Bij match: de lopende toon blijft ongewijzigd (geen reset).
 

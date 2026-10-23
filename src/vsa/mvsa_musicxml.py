@@ -88,7 +88,7 @@ class LyricSyllable:
 
 @dataclass
 class NoteEvent:
-    pitch: Pitch
+    pitch: Pitch | None  # None = stemrust (``r`` / ``R``)
     duration: Duration
     lyrics: list[LyricSyllable] = field(default_factory=list)
     recite: bool = False
@@ -1201,6 +1201,7 @@ def _position_to_notes(
     notes: list[NoteEvent] = []
     last_pitch: Pitch | None = None
     primary_syl = _syllabic_for_position(lpos, opens_hyphen=opens_hyphen)
+    has_rest = any(s.strip().lower() == "r" for s in slots)
 
     for si, (elm, slot) in enumerate(zip(elms, slots)):
         pitch = _resolve_slot(
@@ -1212,7 +1213,8 @@ def _position_to_notes(
             line=line,
             marker=marker,
         )
-        last_pitch = pitch
+        if pitch is not None:
+            last_pitch = pitch
         dur = elm_to_duration(elm)
         lyrics: list[LyricSyllable] = []
         if si == 0 and lpos.syllables:
@@ -1225,7 +1227,7 @@ def _position_to_notes(
                         text=lpos.syllables[0],
                         syllabic=syl,
                         number=lyric_number,
-                        extend=n > 1,
+                        extend=n > 1 and not has_rest,
                     )
                 )
             else:
@@ -1236,7 +1238,7 @@ def _position_to_notes(
                         text=text,
                         syllabic=syl,
                         number=lyric_number,
-                        extend=n > 1,
+                        extend=n > 1 and not has_rest,
                     )
                 )
         notes.append(
@@ -1244,8 +1246,9 @@ def _position_to_notes(
                 pitch=pitch,
                 duration=dur,
                 lyrics=lyrics,
-                slur_start=(n > 1 and si == 0),
-                slur_stop=(n > 1 and si == n - 1),
+                # Geen slur over rusten (melisma met ``r``).
+                slur_start=(n > 1 and si == 0 and not has_rest),
+                slur_stop=(n > 1 and si == n - 1 and not has_rest),
             )
         )
     for num, plpos in extra_lyric_layers:
@@ -1261,7 +1264,9 @@ def _position_to_notes(
     )
 
 
-def _pitch_equal(a: Pitch, b: Pitch) -> bool:
+def _pitch_equal(a: Pitch | None, b: Pitch | None) -> bool:
+    if a is None or b is None:
+        return a is None and b is None
     return a.step == b.step and a.octave == b.octave and a.alter == b.alter
 
 
@@ -1455,9 +1460,12 @@ def _collapse_same_pitch_melisma(
         ]
 
     use_slur = any(
-        not _pitch_equal(packed[i].pitch, packed[i + 1].pitch)
+        packed[i].pitch is not None
+        and packed[i + 1].pitch is not None
+        and not _pitch_equal(packed[i].pitch, packed[i + 1].pitch)
         for i in range(n - 1)
     )
+    n_sounding = sum(1 for note in packed if note.pitch is not None)
     out: list[NoteEvent] = []
     for i, note in enumerate(packed):
         lyrics = list(note.lyrics)
@@ -1465,9 +1473,18 @@ def _collapse_same_pitch_melisma(
             lyrics = [
                 LyricSyllable(
                     text=ly.text,
-                    syllabic="begin" if ly.syllabic == "single" else ly.syllabic,
+                    syllabic=(
+                        "begin"
+                        if n_sounding > 1 and ly.syllabic == "single"
+                        else (
+                            "single"
+                            if n_sounding <= 1 and ly.syllabic == "begin"
+                            else ly.syllabic
+                        )
+                    ),
                     number=ly.number,
-                    extend=True,
+                    # Geen extender over rustslots.
+                    extend=n_sounding > 1,
                 )
                 for ly in lyrics
             ]
@@ -1831,8 +1848,11 @@ def _resolve_slot(
     last_pitch: Pitch | None = None,
     line: int = 0,
     marker: str = "",
-) -> Pitch:
+) -> Pitch | None:
+    """Resolve a stem slot to a pitch, or ``None`` for rest (``r`` / ``R``)."""
     tok = token.strip()
+    if tok.lower() == "r":
+        return None
     if tok in ("-", "~"):
         if last_pitch is not None:
             return last_pitch
@@ -2557,10 +2577,14 @@ def _emit_single_note(
 ) -> None:
     p = ev.pitch
     d = ev.duration
-    alt = f"<alter>{int(p.alter)}</alter>" if p.alter else ""
+    is_rest = p is None
+    alt = ""
     accidental = ""
-    if p.alter in ALTER_ACCIDENTAL and p.alter != _key_alter(p.step, fifths):
-        accidental = f"<accidental>{ALTER_ACCIDENTAL[p.alter]}</accidental>"
+    if not is_rest:
+        assert p is not None
+        alt = f"<alter>{int(p.alter)}</alter>" if p.alter else ""
+        if p.alter in ALTER_ACCIDENTAL and p.alter != _key_alter(p.step, fifths):
+            accidental = f"<accidental>{ALTER_ACCIDENTAL[p.alter]}</accidental>"
     dots = "".join("<dot/>" for _ in range(d.dots))
     lyric_xml = ""
     if with_lyrics:
@@ -2597,9 +2621,13 @@ def _emit_single_note(
     out.append("<note>")
     if chord:
         out.append("<chord/>")
-    out.append(
-        f"<pitch><step>{p.step}</step>{alt}<octave>{p.octave}</octave></pitch>"
-    )
+    if is_rest:
+        out.append("<rest/>")
+    else:
+        assert p is not None
+        out.append(
+            f"<pitch><step>{p.step}</step>{alt}<octave>{p.octave}</octave></pitch>"
+        )
     divs = (
         ev.duration_divisions
         if ev.duration_divisions is not None
@@ -2612,7 +2640,9 @@ def _emit_single_note(
         out.append('<tie type="stop"/>')
     out.append(f"<voice>{voice}</voice>")
     out.append(f"<type>{d.note_type}</type>{dots}{accidental}")
-    if ev.spacer:
+    if is_rest:
+        pass  # rust: geen stem/notehead
+    elif ev.spacer:
         # Onzichtbare kop, wél lyrics (``print-object=no`` op <note> verbergt
         # lyrics in MuseScore-PDF — zie templates: visible=0 + play=0 in MSCZ).
         out.append("<stem>none</stem>")
