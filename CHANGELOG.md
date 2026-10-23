@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Docs/CLI-voorbeelden: overal `mvsa …` i.p.v. `vsa mvsa …` (bron = command);
+  nested `vsa mvsa` verwijderd — alleen top-level `mvsa`
+- CLI: score → `.mvsa` is `mxl mvsa` / `mscz mvsa` (conventie bron→doel); `import` verwijderd uit `mvsa`/`mxl`/`mscz`
+- Canonieke maatnummers: MusicXML/MuseScore-`@number` blijft leidend;
+  Coria-`[PAUZE]` krijgt `Np` zonder hernummering; import-`#maat N` gebruikt
+  dat nummer (MSCZ-import zonder pauzematen in de schets)
 - CLI: `mvsa musicxml` → `mvsa mxl`, `mvsa audio` → `mvsa mp3` (aliases
   `musicxml` / `audio` blijven werken); documentatie bijgewerkt
 - `mvsa mxl` accepteert `.mscz` / `.mxl` (geen UTF-8-crash op binaire bronnen);
@@ -13,17 +19,17 @@
 - MVSA L-normaalvorm: lone standaard-`~` weglaten; `~` blijft bij `&`-melisma
   en na recite-`)` (kuiser + import)
 - MVSA-import: ASCII-waarschuwingsbanner na `# Imported:` (schets/checklist;
-  alle entrypoints `mvsa`/`mxl`/`mscz import`)
+  entrypoints `mxl mvsa` / `mscz mvsa`)
 - Testfixtures hersteld: `test-alleluia-toon-8.mvsa` en
   `test-kleine-intocht-zondag-hemelum.mvsa` (multi-`@sectie` voor roundtrips;
   ≠ catalogus-voorbeelden). `test-trisagion-…` blijft weg (geen testgebruik)
-- MVSA→MusicXML: soft-wrap-`-` over systeembraken houdt de lopende toon
+- MVSA→MusicXML: soft-wrap-`-` over systeemovergangen houdt de lopende toon
   (beginanker/`@start` reset); zelfde carry in eindanker-check en normalize
 
 ## 0.2.0 - MVSA-authoring, export en preview-audio
 
 - MVSA: parser, validatie, normalize/align, **`mvsa kuiser`** (canonieke authoring-vorm)
-- Export: MusicXML, MSCZ, PDF, preview-**audio** (`vsa audio` / `vsa mvsa mp3` via MuseScore)
+- Export: MusicXML, MSCZ, PDF, preview-**audio** (`vsa audio` / `mvsa mp3` via MuseScore)
 - Speelplan / layout voor partituur-navigatie
 - Align bewaart leidende `|:` (repeat-start) op alle stokken
 - Consumer-pin: tag `0.2.0` i.p.v. alleen `@main`

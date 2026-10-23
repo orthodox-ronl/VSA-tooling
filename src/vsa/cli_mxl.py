@@ -1,7 +1,7 @@
 """Top-level ``mxl`` CLI (bron: ``.mxl`` / ``.musicxml``).
 
-Acties: import -> mvsa; mscz (via MuseScore); validate / normalize (playback).
-Zie docs/plans/mvsa-conversions.md en docs/formats/canonical-checklists.md.
+Acties: mvsa (score → werkbank); mscz (via MuseScore); validate / normalize.
+Conventie: ``mxl {doeltype}`` — zie docs/plans/mvsa-conversions.md.
 """
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .cli_score_to_mvsa import add_score_to_mvsa_arguments, run_score_to_mvsa
 from .derived_path import derived_output_path
 from .input_paths import InputPathError, collect_cli_sources
 
@@ -20,21 +21,8 @@ def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     parser = _build_parser()
     ns = parser.parse_args(args)
-    if ns.mxl_command == "import":
-        from .cli import main as vsa_main
-
-        forwarded = ["mvsa", "import", ns.path, "--pitch", ns.pitch or "ag-vsa"]
-        if ns.output:
-            forwarded.extend(["-o", ns.output])
-        if ns.do:
-            forwarded.extend(["--do", ns.do])
-        if ns.octave_style:
-            forwarded.extend(["--octave-style", ns.octave_style])
-        if ns.section:
-            forwarded.extend(["--section", ns.section])
-        if ns.no_align:
-            forwarded.append("--no-align")
-        return vsa_main(forwarded)
+    if ns.mxl_command == "mvsa":
+        return run_score_to_mvsa(ns, suffixes=_MXL_SUFFIXES)
     if ns.mxl_command == "mscz":
         return _cmd_mxl_to_mscz(ns)
     if ns.mxl_command == "validate":
@@ -74,12 +62,12 @@ def _build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "subcommando's:\n"
-            "  import PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUT]\n"
-            "      Importeer naar .mvsa (default --pitch: ag-vsa).\n"
+            "  mvsa PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUT]\n"
+            "      Naar .mvsa (werkbank-schets; default --pitch: ag-vsa).\n"
             "  mscz PATH [-o OUT] [--musescore PATH]\n"
             "      Converteer naar .mscz via MuseScore.\n"
             "  validate PATH [--profile {satb,mono}]\n"
-            "      Checklist Coria/playback (M2/M8/importer/meta).\n"
+            "      Checklist Coria/playback (M2/M8/Coria-tags/meta).\n"
             "  normalize PATH [-o OUT] [--apply-timing]\n"
             "      Normaliseer naar playback-profiel.\n"
             "\n"
@@ -87,72 +75,31 @@ def _build_parser() -> argparse.ArgumentParser:
             "-o alleen bij precies één bron.\n"
             "\n"
             "voorbeelden:\n"
-            "  mxl import lied.mxl -o lied.mvsa\n"
-            "  mxl import lied.mxl --pitch doremi -o lied.mvsa\n"
+            "  mxl mvsa lied.mxl\n"
+            "  mxl mvsa lied.mxl -o lied.mvsa --pitch doremi\n"
             "  mxl mscz lied.mxl -o lied.mscz\n"
             "  mxl validate lied.mvsa.mxl --profile satb\n"
             "  mxl normalize raw.mxl -o out.mxl --apply-timing\n"
-            "\n"
-            "Alias: vsa mvsa import … (zelfde import-pad)."
         ),
     )
     sub = parser.add_subparsers(
         dest="mxl_command",
         required=True,
-        metavar="{import,mscz,validate,normalize}",
+        metavar="{mvsa,mscz,validate,normalize}",
     )
-    imp = sub.add_parser(
-        "import",
-        help="Importeer .mxl/.musicxml naar .mvsa.",
+    to_mvsa = sub.add_parser(
+        "mvsa",
+        help="Converteer .mxl/.musicxml naar .mvsa (werkbank).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    imp.add_argument(
+    to_mvsa.add_argument(
         "path",
         help=(
             ".mxl/.musicxml/.xml-bestand, of map met zulke bestanden "
-            "(recursief; zelfde batch als mvsa import)."
+            "(recursief)."
         ),
     )
-    imp.add_argument(
-        "-o",
-        "--output",
-        default=None,
-        help=(
-            "Uitvoer-.mvsa (default: <stem>.import.mvsa per bron). "
-            "Alleen bij precies één bronbestand."
-        ),
-    )
-    imp.add_argument(
-        "--pitch",
-        choices=["doremi", "a-g", "abc", "vsa", "ag-vsa"],
-        default="ag-vsa",
-        help=(
-            "Doel-spelling (default: ag-vsa). "
-            "a-g = toonnamen met cijfer; abc = alias."
-        ),
-    )
-    imp.add_argument(
-        "--do",
-        metavar="PITCH",
-        default=None,
-        help="Forceer @do (bijv. F4). Zonder: uit MusicXML-fifths.",
-    )
-    imp.add_argument(
-        "--octave-style",
-        choices=["@oct", "marker"],
-        default="@oct",
-        help="Schrijfoctaaf-stijl (default: @oct).",
-    )
-    imp.add_argument(
-        "--section",
-        default="import",
-        help="Id voor @sectie in de output (default: import).",
-    )
-    imp.add_argument(
-        "--no-align",
-        action="store_true",
-        help="Sla canonieke kolomuitlijning over.",
-    )
+    add_score_to_mvsa_arguments(to_mvsa)
 
     mscz = sub.add_parser(
         "mscz",

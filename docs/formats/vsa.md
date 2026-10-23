@@ -8,7 +8,8 @@ Tekstbron voor **eenstemmige** [VSA](@)-notatie. Normatieve taal: de
 | Onderwerp                               | Waar                                                                               |
 | --------------------------------------- | ---------------------------------------------------------------------------------- |
 | Syntax, semantiek, validatie            | [Specificaties](../specification/README.md)                                        |
-| Valideren / SVG / MusicXML              | [`vsa`](../reference/cli/index.md), [`vsa musicxml`](../reference/cli/musicxml.md) |
+| Valideren / MusicXML                    | [`vsa`](../reference/cli/index.md), [`vsa musicxml`](../reference/cli/musicxml.md) |
+| Muziek-only SVG (scherm / koormap)      | [`vsa-svg`](vsa-svg.md) · [`vsa svg`](../reference/cli/svg.md)                     |
 | Zoektekst in canonieke bron             | [`zoektekst`](zoektekst.md) · CLI [`vsa zoektekst`](../reference/cli/zoektekst.md) |
 | Platte gezongen tekst (extractie)       | [`vsa text`](../reference/cli/text.md)                                             |
 | MusicXML-profielen (Coria vs engraving) | [MusicXML-export](../guides/musicxml-export.md)                                    |
@@ -18,6 +19,7 @@ Tekstbron voor **eenstemmige** [VSA](@)-notatie. Normatieve taal: de
 
 ```cmd
 vsa validate examples\minimal\050_svg_demo.vsa
+vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa
 vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie.mxl
 vsa text examples\minimal\001_plain_text.vsa
 ```

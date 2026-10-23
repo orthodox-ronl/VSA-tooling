@@ -46,12 +46,15 @@ Eén geldige frase bekijken (`examples\docs-walkthroughs\svg-phrase-kort.vsa`):
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa generated\vsa\svg-phrase-kort.svg
+vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa -o generated\vsa\svg-phrase-kort.svg
 ```
 
 ```text
 SVG geschreven naar: generated\vsa\svg-phrase-kort.svg
 ```
+
+Zonder `-o` schrijft het commando een sibling ``….vsa.svg`` naast de bron
+(zelfde naamgeving als bibliotheek-producten / [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)).
 
 ![Korte VSA-frase als SVG](assets/walkthroughs/svg-phrase-kort.svg)
 
@@ -62,7 +65,7 @@ Zelfde start, langere tekst
 `--max-line-width` zodat de [renderer](@) afbreekt:
 
 ```cmd
-vsa svg examples\docs-walkthroughs\svg-phrase-lang.vsa generated\vsa\svg-phrase-lang.svg --max-line-width 400
+vsa svg examples\docs-walkthroughs\svg-phrase-lang.vsa -o generated\vsa\svg-phrase-lang.svg --max-line-width 400
 ```
 
 ![Langere VSA-frase, afgebroken SVG](assets/walkthroughs/svg-phrase-lang.svg)

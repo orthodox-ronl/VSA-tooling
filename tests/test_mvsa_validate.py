@@ -765,3 +765,19 @@ B: re ||
 """
     diags = validate_mvsa_text(text)
     assert any(d.code == "MVSA-SPEELPLAN-ANON" for d in diags)
+
+
+def test_validate_stem_rest_r_ok():
+    """Stemrust ``r``/``R`` is een geldig hoogte-slot (niet hold ``-``)."""
+    text = """\
+@do G4
+@mode major
+
+@sectie demo
+L: U,~&~&~&~ ||
+S: f#4&r&r&r ||
+A: d#4&R&r&r ||
+T: b3&c4&b3&a3 ||
+B: b2&c3&b2&a2 ||
+"""
+    assert validate_mvsa_text(text) == []

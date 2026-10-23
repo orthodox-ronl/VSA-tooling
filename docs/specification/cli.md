@@ -580,7 +580,7 @@ vsa zoektekst examples\mvsa\alleluia-toon-1.mvsa
 vsa zoektekst examples\mvsa --check
 ```
 
-## `vsa mvsa …`
+## `mvsa …`
 
 ### Doel
 
@@ -591,10 +591,10 @@ Draft-tooling voor meerstemmige `.mvsa`-bestanden (L + SATB). Zie
 ### Gebruik
 
 ```cmd
-vsa mvsa validate examples\mvsa
-vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
-vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+mvsa validate examples\mvsa
+mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
+mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
 ### Opties (`mxl`)

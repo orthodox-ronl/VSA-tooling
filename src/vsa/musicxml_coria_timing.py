@@ -33,7 +33,8 @@ def apply_coria_timing(xml: str) -> str:
     div = _divisions_of(root)
     insert_pause_measures(parts, whole_dur=4 * div)
     insert_caesura_quarter_rests(parts, quarter=div)
-    _renumber_measures(root)
+    # Geen hernummering: koormaten houden MuseScore/MusicXML-@number;
+    # pauzematen blijven ``Np`` (zie ``insert_pause_measures``).
     return _serialize(root)
 
 
@@ -247,9 +248,14 @@ def _insert_rest_after_time(
 
 
 def _renumber_measures(root: ET.Element) -> None:
-    for part in _music_parts(root):
-        for i, measure in enumerate(_children(part, "measure"), start=1):
-            measure.set("number", str(i))
+    """Deprecated no-op: sequential 1..n brak maatnummer-consistentie.
+
+    Koormaten behouden hun MusicXML/MuseScore-``@number``; ingevoegde
+    ``[PAUZE]``-maten gebruiken al ``Np`` (bijv. ``6p``) en mogen de
+    nummering van volgende koormaten niet verschuiven. Zie contract
+    *Canonieke maatnummers* in ``docs/formats/mvsa.md``.
+    """
+    _ = root  # API-compat; bewust geen hernummering.
 
 
 def _serialize(root: ET.Element) -> str:
@@ -607,8 +613,7 @@ def finalize_coria_musicxml(xml: str, *, apply_timing: bool = True) -> str:
         if apply_timing:
             insert_pause_measures(parts, whole_dur=4 * div)
         insert_caesura_quarter_rests(parts, quarter=div)
-        if apply_timing:
-            _renumber_measures(root)
+        # Geen sequential hernummering na pauzes (canonieke maatnummers).
     sanitize_coria_importer(root)
     apply_playback_accidentals(root)
     # Accidentals opnieuw geplaatst → note-kindvolgorde opnieuw canoniek (M20).

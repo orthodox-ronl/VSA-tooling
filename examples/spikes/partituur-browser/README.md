@@ -19,7 +19,7 @@ Geen CoriB-product — bewijs voor het schermpad
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-browser\score.score-ir.json --musicxml examples\spikes\partituur-browser\score.musicxml
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-browser\score.score-ir.json --musicxml examples\spikes\partituur-browser\score.musicxml
 ```
 
 ## Lokaal openen
@@ -43,11 +43,15 @@ Open: <http://127.0.0.1:8765/>
 
 ## Relatie tot product
 
+Productieschermrichting: Score-IR → MusicXML → OSMD (print blijft MuseScore).
+Deze map is het browser-bewijs; site-embed en CoriB-UI komen later.
+
 | Pad                                                            | Rol                                              |
 | -------------------------------------------------------------- | ------------------------------------------------ |
-| [`mvsa svg`](../../../docs/reference/cli/mvsa.md#vsa-mvsa-svg) | Koormap-SVG via MuseScore (brug)                 |
+| [`mvsa svg`](../../../docs/reference/cli/mvsa.md#mvsa-svg) | Blad-/print-SVG via MuseScore (geen schermmotor) |
 | Score-IR + deze spike                                          | Schermketen zonder MuseScore (OSMD)              |
-| CoriB                                                          | Later: speler op dezelfde Score-IR → tekenbrug   |
+| [`partituur-osmd-svg`](../partituur-osmd-svg/)                 | Zelfde MusicXML → **SVG-bestand** (headless)     |
+| CoriB                                                          | Later: speler op dezelfde Score-IR → OSMD-brug   |
 
-Contract: [partituur-ir.md](../../../docs/plans/partituur-ir.md).
+Contract: [partituur-ir.md](../../../docs/plans/partituur-ir.md) §7.
 Module: `vsa.score_ir_musicxml`.

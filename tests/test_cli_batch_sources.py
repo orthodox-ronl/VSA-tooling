@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from vsa.cli import main
+from vsa.cli_mvsa import main as mvsa_main
 from vsa.cli_mscz import main as mscz_main
 from vsa.cli_mxl import main as mxl_main
 
@@ -56,7 +57,7 @@ def test_mvsa_normalize_directory(tmp_path: Path, monkeypatch, capsys):
     d.mkdir()
     _minimal_mvsa(d / "one.mvsa", "One")
     _minimal_mvsa(d / "two.mvsa", "Two")
-    rc = main(["mvsa", "normalize", str(d)])
+    rc = mvsa_main(["normalize", str(d)])
     assert rc == 0
     assert (d / "one.normalized.mvsa").is_file()
     assert (d / "two.normalized.mvsa").is_file()
@@ -70,7 +71,7 @@ def test_mvsa_normalize_dir_rejects_output_flag(tmp_path: Path, monkeypatch, cap
     d.mkdir()
     _minimal_mvsa(d / "one.mvsa", "One")
     _minimal_mvsa(d / "two.mvsa", "Two")
-    rc = main(["mvsa", "normalize", str(d), "-o", str(tmp_path / "out.mvsa")])
+    rc = mvsa_main(["normalize", str(d), "-o", str(tmp_path / "out.mvsa")])
     assert rc == 1
     err = capsys.readouterr().err
     assert "-o/--output" in err
@@ -80,7 +81,7 @@ def test_mvsa_svg_dir_rejected_wrong_empty(tmp_path: Path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     d = tmp_path / "empty"
     d.mkdir()
-    rc = main(["mvsa", "svg", str(d)])
+    rc = mvsa_main(["svg", str(d)])
     assert rc == 1
     assert "Geen passende" in capsys.readouterr().err
 
@@ -189,25 +190,99 @@ def test_vsa_audio_dir_rejects_keep_mxl(tmp_path: Path, monkeypatch, capsys):
     assert "--keep-mxl" in capsys.readouterr().err
 
 
-def test_vsa_svg_directory(tmp_path: Path, monkeypatch, capsys):
+def test_vsa_svg_directory_siblings(tmp_path: Path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     d = tmp_path / "batch"
     d.mkdir()
     _minimal_vsa(d / "one.vsa", "Amen")
     _minimal_vsa(d / "two.vsa", "Heer")
-    out_dir = tmp_path / "svg-out"
-    rc = main(["svg", str(d), str(out_dir)])
+    rc = main(["svg", str(d)])
     assert rc == 0
-    assert (out_dir / "one.vsa.svg").is_file()
-    assert (out_dir / "two.vsa.svg").is_file()
+    assert (d / "one.vsa.svg").is_file()
+    assert (d / "two.vsa.svg").is_file()
     out = capsys.readouterr().out
     assert out.count("SVG geschreven naar:") == 2
+
+
+def test_vsa_svg_default_sibling(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    src = tmp_path / "lied.vsa"
+    _minimal_vsa(src, "Amen")
+    rc = main(["svg", str(src)])
+    assert rc == 0
+    assert (tmp_path / "lied.vsa.svg").is_file()
+    assert "lied.vsa.svg" in capsys.readouterr().out
+
+
+def test_vsa_svg_output_flag(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    src = tmp_path / "lied.vsa"
+    _minimal_vsa(src, "Amen")
+    dest = tmp_path / "out" / "custom.svg"
+    rc = main(["svg", str(src), "-o", str(dest)])
+    assert rc == 0
+    assert dest.is_file()
+
+
+def test_vsa_svg_dir_rejects_output(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    d = tmp_path / "batch"
+    d.mkdir()
+    _minimal_vsa(d / "one.vsa", "Amen")
+    _minimal_vsa(d / "two.vsa", "Heer")
+    rc = main(["svg", str(d), "-o", str(tmp_path / "out.svg")])
+    assert rc == 1
+    assert "-o/--output" in capsys.readouterr().err
 
 
 def test_vsa_svg_empty_dir(tmp_path: Path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     d = tmp_path / "empty"
     d.mkdir()
-    rc = main(["svg", str(d), str(tmp_path / "out")])
+    rc = main(["svg", str(d)])
     assert rc == 1
     assert "Geen passende" in capsys.readouterr().err
+
+
+def test_mvsa_score_ir_musicxml_sibling_flag(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    src = tmp_path / "lied.mvsa"
+    _minimal_mvsa(src, "Lied")
+    rc = mvsa_main(["score-ir", str(src), "--musicxml"])
+    assert rc == 0
+    assert (tmp_path / "lied.mvsa.score-ir.json").is_file()
+    assert (tmp_path / "lied.mvsa.from-ir.musicxml").is_file()
+    out = capsys.readouterr().out
+    assert "MusicXML:" in out
+
+
+def test_mvsa_score_ir_musicxml_siblings_on_dir(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    d = tmp_path / "batch"
+    d.mkdir()
+    _minimal_mvsa(d / "one.mvsa", "One")
+    _minimal_mvsa(d / "two.mvsa", "Two")
+    rc = mvsa_main(["score-ir", str(d), "--musicxml"])
+    assert rc == 0
+    assert (d / "one.mvsa.score-ir.json").is_file()
+    assert (d / "one.mvsa.from-ir.musicxml").is_file()
+    assert (d / "two.mvsa.score-ir.json").is_file()
+    assert (d / "two.mvsa.from-ir.musicxml").is_file()
+
+
+def test_mvsa_score_ir_musicxml_path_rejects_dir(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    d = tmp_path / "batch"
+    d.mkdir()
+    _minimal_mvsa(d / "one.mvsa", "One")
+    _minimal_mvsa(d / "two.mvsa", "Two")
+    rc = mvsa_main(
+        [
+            "score-ir",
+            str(d),
+            "--musicxml",
+            str(tmp_path / "out.musicxml"),
+        ]
+    )
+    assert rc == 1
+    assert "--musicxml" in capsys.readouterr().err

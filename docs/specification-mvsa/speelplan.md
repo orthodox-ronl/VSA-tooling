@@ -114,7 +114,7 @@ blokken (zie hierboven).
 4. **Lopende toon / soft-wrap-`-`:** volgt de exportvolgorde van die layout
    (playback = klinkende keten na expansie; partituur = bladvorm). Zelfde
    regels als
-   [Semantiek — lopende toon over systeembraken](semantics.md#lopende-toon-over-systeembraken).
+   [Semantiek — lopende toon over systeemovergangen](semantics.md#lopende-toon-over-systeemovergangen).
 
 ## Validatie (fase 1)
 

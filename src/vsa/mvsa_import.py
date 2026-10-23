@@ -27,13 +27,18 @@ split by a barline between two recites gets a canonical ``)-`` link.
 Imported LSATB systems are soft-wrapped to about
 :data:`DEFAULT_SYSTEM_SOFT_WIDTH` characters so the result stays readable
 in an editor (one long measure may exceed the width alone). Each system is
-preceded by a ``#maat N`` comment (1-based start measure) for navigation
-against PDF / MuseScore measure numbers.
+preceded by a ``#maat N`` comment where ``N`` is the **canonical measure
+number** (MusicXML ``@number`` / MuseScore) of the first choir measure in
+that system — same ``N`` as in PDF / MuseScore, not a renumbered list
+index. Soft-wrap system boundaries are **systeemovergangen** in the
+``.mvsa`` text; they need not match MuseScore page layout.
 
 By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
 (canonieke schrijfvorm / normaalvorm: lone standaard-``~`` op L weggelaten,
 ``~`` wél bij ``&``-melisma en na ``)``; maatstrepen sync, kolomuitlijning).
-Pass ``align=False`` (CLI ``--no-align``) to skip.
+If kuiser fails validation, import still applies
+:func:`vsa.mvsa_align.align_mvsa_text`. ``align=False`` (CLI ``--no-align``)
+skips kuiser but still column-aligns slots and maatstrepen.
 
 With ``--pitch vsa``, each stem line gets a check-only absolute pitch
 **eindanker** glued to the last bar of every system (e.g. ``||a4``), so
@@ -57,6 +62,7 @@ from xml.etree import ElementTree as ET
 
 from .music import Duration, Pitch
 from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError, convert_with_musescore
+from .mvsa_align import align_mvsa_text
 from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_text
 from .mvsa_normalize import (
     DEFAULT_IMPORT_PITCH,
@@ -78,7 +84,7 @@ _PART_VOICE = {"P1": "S", "P2": "A", "P3": "T", "P4": "B"}
 # Soft wrap for imported LSATB systems (full line incl. ``L: `` prefix).
 DEFAULT_SYSTEM_SOFT_WIDTH = 80
 
-# Shown after ``# Imported: …`` on every import output (mvsa/mxl/mscz import).
+# Shown after ``# Imported: …`` on every score→mvsa output (mxl/mscz mvsa).
 IMPORT_SKETCH_WARNING_BANNER = """\
 #  ##########################################################################  #
 #  #                                                                        #  #
@@ -240,6 +246,9 @@ class _Score:
     mode: str
     # voice letter -> list of measures; each measure = list of notes
     parts: dict[str, list[list[_Note]]]
+    # MusicXML ``measure@number`` per index (Soprano/P1); may be ``Np`` for
+    # Coria pause bars. Import normally skips those (no apply_timing).
+    measure_numbers: list[str] = field(default_factory=list)
 
 
 def import_score_to_mvsa(
@@ -248,7 +257,7 @@ def import_score_to_mvsa(
     pitch: str = DEFAULT_IMPORT_PITCH,
     octave_style: str = "@oct",
     align: bool = True,
-    section_id: str = "import",
+    section_id: str = "schets",
     musescore: Path | None = None,
     system_soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
     do: str | None = None,
@@ -299,9 +308,14 @@ def import_score_to_mvsa(
                 raise MvsaImportError(str(exc)) from exc
             xml = read_musicxml_file(tmp_mxl)
             # MuseScore partituur is often SA/TB; explode to P1–P4 like mscz mxl.
+            # Geen apply_timing: Coria-``[PAUZE]``-maten horen niet in de
+            # authoring-``.mvsa`` (die verschuiven maatnummers). Wél recite
+            # uitvouwen (veervormige ``||O||`` uit de partituur).
             from .musicxml_playback_normalize import normalize_playback_musicxml
 
-            xml = normalize_playback_musicxml(xml, apply_timing=True)
+            xml = normalize_playback_musicxml(
+                xml, apply_timing=False, expand_recite=True
+            )
         elif suffix in {".mxl", ".musicxml", ".xml"}:
             xml = read_musicxml_file(path)
         else:
@@ -326,10 +340,13 @@ def import_score_to_mvsa(
                 text = kuiser_mvsa_text(
                     text, pitch="preserve", octave_style=octave_style, align=True
                 ).text
-            except (MvsaKuiserError, MvsaValidationError) as exc:
-                raise MvsaImportError(
-                    f"import-normaalvorm (kuiser) mislukt: {exc}"
-                ) from exc
+            except (MvsaKuiserError, MvsaValidationError):
+                # Kuiser kan falen op overige validatie; kolommen + maatstrepen
+                # wél canonieke uitlijnen zodat de werkbank leesbaar blijft.
+                text = align_mvsa_text(text)
+        else:
+            # Ook zonder kuiser: slots en maatstrepen onder elkaar.
+            text = align_mvsa_text(text)
         return text
     finally:
         if tmp_mxl is not None:
@@ -343,7 +360,7 @@ def import_score_path(
     pitch: str = DEFAULT_IMPORT_PITCH,
     octave_style: str = "@oct",
     align: bool = True,
-    section_id: str = "import",
+    section_id: str = "schets",
     musescore: Path | None = None,
     system_soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
     do: str | None = None,
@@ -397,6 +414,7 @@ def parse_musicxml_satb(xml: str) -> _Score:
         title = work_title.text.strip()
 
     parts: dict[str, list[list[_Note]]] = {}
+    measure_numbers: list[str] = []
     do_str = "F4"
     mode = "major"
     for part_el in _findall(root, "part"):
@@ -406,7 +424,10 @@ def parse_musicxml_satb(xml: str) -> _Score:
             # Try part-abbreviation via part-list
             continue
         measures: list[list[_Note]] = []
-        for meas in _findall(part_el, "measure"):
+        part_numbers: list[str] = []
+        for mi, meas in enumerate(_findall(part_el, "measure"), start=1):
+            raw_num = (meas.get("number") or "").strip() or str(mi)
+            part_numbers.append(raw_num)
             attrs = _find(meas, "attributes")
             if attrs is not None:
                 fifths_el = _find(attrs, "key", "fifths")
@@ -417,13 +438,29 @@ def parse_musicxml_satb(xml: str) -> _Score:
                         pass
             notes: list[_Note] = []
             for note_el in _findall(meas, "note"):
-                if _find(note_el, "rest") is not None:
-                    # Skip filler rests (empty measures from export)
-                    continue
                 if _find(note_el, "chord") is not None:
                     # Chord tone shares onset with previous note; not a new slot.
                     continue
                 if _find(note_el, "grace") is not None:
+                    continue
+                type_s = _find_text(note_el, "type") or "quarter"
+                dots = len(_findall(note_el, "dot"))
+                dur = Duration(note_type=type_s, dots=dots)
+                lyrics: list[_Lyric] = []
+                for ly in _findall(note_el, "lyric"):
+                    text = _find_text(ly, "text") or ""
+                    syllabic = _find_text(ly, "syllabic") or "single"
+                    lyrics.append(_Lyric(text=text, syllabic=syllabic))
+                if _find(note_el, "rest") is not None:
+                    # Stemrust → ``r`` (niet skippen; niet als hold ``-``).
+                    notes.append(
+                        _Note(
+                            pitch=None,
+                            duration=dur,
+                            lyrics=lyrics,
+                            is_breve=(type_s == "breve"),
+                        )
+                    )
                     continue
                 pitch_el = _find(note_el, "pitch")
                 if pitch_el is None:
@@ -433,14 +470,6 @@ def parse_musicxml_satb(xml: str) -> _Score:
                 alter_s = _find_text(pitch_el, "alter")
                 alter = float(alter_s) if alter_s else 0.0
                 pitch = Pitch(step=step, octave=int(oct_s), alter=alter)
-                type_s = _find_text(note_el, "type") or "quarter"
-                dots = len(_findall(note_el, "dot"))
-                dur = Duration(note_type=type_s, dots=dots)
-                lyrics: list[_Lyric] = []
-                for ly in _findall(note_el, "lyric"):
-                    text = _find_text(ly, "text") or ""
-                    syllabic = _find_text(ly, "syllabic") or "single"
-                    lyrics.append(_Lyric(text=text, syllabic=syllabic))
                 notes.append(
                     _Note(
                         pitch=pitch,
@@ -451,6 +480,8 @@ def parse_musicxml_satb(xml: str) -> _Score:
                 )
             measures.append(notes)
         parts[voice] = measures
+        if voice == "S":
+            measure_numbers = part_numbers
 
     if "S" not in parts:
         raise MvsaImportError("geen sopraan-part (P1) in MusicXML")
@@ -465,15 +496,25 @@ def parse_musicxml_satb(xml: str) -> _Score:
             measures.append([])
         if len(measures) > n:
             parts[letter] = measures[:n]
+    while len(measure_numbers) < n:
+        measure_numbers.append(str(len(measure_numbers) + 1))
+    if len(measure_numbers) > n:
+        measure_numbers = measure_numbers[:n]
 
-    return _Score(title=title, do=do_str, mode=mode, parts=parts)
+    return _Score(
+        title=title,
+        do=do_str,
+        mode=mode,
+        parts=parts,
+        measure_numbers=measure_numbers,
+    )
 
 
 def score_to_mvsa(
     score: _Score,
     *,
     pitch_form: str,
-    section_id: str = "import",
+    section_id: str = "schets",
     system_soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
 ) -> str:
     do_p = parse_pitch_string(score.do)
@@ -570,8 +611,7 @@ def score_to_mvsa(
             bars = ["|"] * (n - 1) + ["||"]
         else:
             bars = ["|"] * n
-        # 1-based; matches typical MusicXML / MuseScore / PDF measure numbers.
-        lines.append(f"#maat {start + 1}")
+        lines.append(f"#maat {_maat_label_for_system(score, start, end)}")
         lines.append(f"L: {_join_measure_segs(chunk_l, bars)}")
         for letter in "SATB":
             voice_bars = _bars_with_system_eindanker(
@@ -586,6 +626,27 @@ def score_to_mvsa(
             lines.append("")
     lines.append("")
     return "\n".join(lines)
+
+
+def _maat_label_for_system(score: _Score, start: int, end: int) -> int:
+    """Canonical measure number for ``#maat`` at system start.
+
+    Prefers the first integer-only MusicXML ``@number`` in ``[start, end)``
+    (choir measure). Pause markers like ``6p`` are skipped; if a system
+    somehow contains only those, the leading digits are used. Fallback:
+    1-based list index.
+    """
+    nums = score.measure_numbers
+    for mi in range(start, end):
+        raw = (nums[mi] if mi < len(nums) else "").strip()
+        if raw.isdigit():
+            return int(raw)
+    for mi in range(start, end):
+        raw = (nums[mi] if mi < len(nums) else "").strip()
+        m = re.match(r"^(\d+)", raw)
+        if m:
+            return int(m.group(1))
+    return start + 1
 
 
 def _last_sounding_in_range(
@@ -2337,7 +2398,7 @@ def _format_voice_measure(
         slots: list[str] = []
         for note in pos.notes:
             if note.pitch is None:
-                slots.append("-")
+                slots.append("r")
                 continue
             if pitch_form == "ag-vsa" and absolute_first:
                 slots.append(format_abc_scientific(note.pitch))

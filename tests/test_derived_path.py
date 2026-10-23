@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from vsa.cli import main as vsa_main
+from vsa.cli_mvsa import main as mvsa_main
 from vsa.derived_path import derived_output_path
 
 
@@ -40,7 +40,7 @@ def test_mvsa_mscz_default_out_appends_brontype(
         out.write_bytes(b"PK")
 
     monkeypatch.setattr("vsa.mvsa_mscz.export_mvsa_to_mscz", fake_export)
-    assert vsa_main(["mvsa", "mscz", str(src)]) == 0
+    assert mvsa_main(["mscz", str(src)]) == 0
     assert captured["out"] == tmp_path / "lied.mvsa.mscz"
     assert captured["out"].is_file()
 
@@ -57,7 +57,7 @@ def test_mvsa_mxl_default_out_appends_brontype(
         out.write_text("<score-partwise/>", encoding="utf-8")
 
     monkeypatch.setattr("vsa.mvsa_musicxml.export_mvsa_path", fake_export)
-    assert vsa_main(["mvsa", "mxl", str(src)]) == 0
+    assert mvsa_main(["mxl", str(src)]) == 0
     assert captured["out"] == tmp_path / "lied.mvsa.mxl"
 
 
@@ -82,6 +82,27 @@ def test_mscz_mxl_default_out_appends_brontype(
     assert captured["out"] == tmp_path / "lied.mscz.mxl"
 
 
+def test_mxl_mvsa_default_out_appends_brontype(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from vsa.cli_mxl import main as mxl_main
+
+    src = tmp_path / "lied.mxl"
+    src.write_text(
+        '<?xml version="1.0"?><score-partwise version="3.1"/>',
+        encoding="utf-8",
+    )
+    captured: dict[str, Path] = {}
+
+    def fake_import(path, out, **kwargs):  # noqa: ANN001
+        captured["out"] = out
+        out.write_text("@title \"t\"\n\n@sectie schets\nL a\nS do\n", encoding="utf-8")
+
+    monkeypatch.setattr("vsa.mvsa_import.import_score_path", fake_import)
+    assert mxl_main(["mvsa", str(src)]) == 0
+    assert captured["out"] == tmp_path / "lied.mxl.mvsa"
+
+
 @pytest.mark.parametrize("fmt", ["mp3", "ogg", "wav"])
 def test_mvsa_audio_subcommand_sets_format(
     fmt: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -97,7 +118,7 @@ def test_mvsa_audio_subcommand_sets_format(
         return out
 
     monkeypatch.setattr("vsa.audio_export.export_to_audio", fake_export)
-    assert vsa_main(["mvsa", fmt, str(src)]) == 0
+    assert mvsa_main([fmt, str(src)]) == 0
     assert captured["format_name"] == fmt
     assert captured["out"] == tmp_path / f"lied.mvsa.{fmt}"
 

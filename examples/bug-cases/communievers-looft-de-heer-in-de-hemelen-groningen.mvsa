@@ -1,0 +1,68 @@
+---
+zoektekst: >-
+  Looft de Heer in de Hemelen Looft de Heer in de Hemelen looft Hem in de Hoge looft Hem in
+  de Hoge looft Hem in de Hoge Alleluja, alleluja, alleluja, Alleluja, alleluja, alleluja,
+  alleluja, alleluja, alleluja, alleluja, alleluja
+---
+
+# Communievers - Looft de Heer in de hemelen
+
+@title "Communievers (25)"
+@composer     "Traditioneel"
+@bron "koormap Groningen"
+@copyright "CC BY-SA 4.0"
+
+@do F4
+@mode major
+@tempo 180
+@oct S=0 A=0 T=-1 B=-1 b2=-2
+
+#maat 1
+L:   Looft_. de Heer_&_.&~&~&~&_&_  in de He_.-me-len__ |
+S:   a       -       /&\&\&\&/&/&/  \  -    \  -  /     |a
+A:   f       -       -&-&\&/&\&/&\  /  -    \  -  /     |f 
+T:   c       -      /&\&\&\&/2&-&-  -  -    -  -  -     |c
+B:   f       -    \4&/4&\3&/&\&/3&/ \  -    \3 -  /3    |f
+#B2: f       -    \4&/4&\3&/&\&\4&/ \  -    /4 -  /3    |f
+
+#maat 2
+L:   Looft_. de Heer_&_.&~&~&~&~&~&_   in de He_.-me-len__ |
+S:   g       -       /&\&~&~&~&~&~&~   -  -    -  -  -     |g
+A:   e-      -       /&/&\&\&/&/&\2&/  \  -    /  -  \     |e-
+T:   c       -     -&-&#\&/&#\&/&~&#\  /  -    #\ -  /     |c
+B:   c-      -     /3&\&\&\&/&/&\2&/   \  /2   /2 -  \4    |c-
+#B2: c-      -     /3&\&\&\&/&/&\2&/   \  /2   /2 -  \4    |c-
+
+#maat 3
+L:   looft_ Hem_ in de Ho__-ge__ | looft_ Hem_ in de Ho_-ge~&~   | looft_ Hem_ in de Ho__-ge__ | 
+S:   a      /    \  -  \    /    | -      -    \  /  /     -&-   | \      /    \  -  \    /    |a  
+A:   f      /    \  -  \    /    | +-     -    \2 /2 -     -&-   | -      \    /  -  \    /    |f
+T:   c      -    -  -  -    -    | /      -    \2 /  /     -&-   | \      -    -  -  -    -    |c
+B:   f      \    /  -  \3   /3   | \2     -    /3 \  \4    -&/2  | /2     /    \  -  \3   /3   |f
+#B2: f      \    /2 -  /2   /3   | \2     -    /3 \  \4    -&/2  | /2     /    \  -  \3   \4   |f
+
+@mscz-newline
+
+#maat 8
+L:   Al_-le_-lu_-ja_, | al_.&~&~ -le-lu-ja, | al_&~ -le-lu__-ja,__ |
+S:   a    -   -   /   |    \&\&\  /  /  -   |   /&\  -   \    /    |a 
+A:   f    -   -   -   |    -&\&/  \  /  -   |   \&/  -   \    /    |f
+T:   c    -   -   /   |    \&\&\  /2 -  -   |   -&-  -   -    -    |c
+B:   f    -   -   \4  |   /4&\3&/  \ /3 -   |   \&/  -   \3   /3   |f
+#B2: f+   -   -   \4  |   /4&\3&/  \ /3 -   |   /&\  -   \3   /3   |f+
+
+#maat 11
+L:   Al_-le_-lu_-ja_, | al_.&~&~ -le -lu-ja, | al_&~ -le-lu__-ja,__ |
+S:   g    -   -   /   |    \&-&-   -  -  -   |   -&-   -   -    -    |g 
+A:   e-   -   -   /   |    /&\&\   /  /  \2  |   -&-   -   /    \    |e-
+T:   c    -   -   -   |   -&+\&/  +\  /  -   |  +\&/   -  +\    /    |c
+B:   c-   -   -   /3  |    \&\&\   /  /  \2  |   /&\   /2  /2   \4   |c-
+#B2: c-   -   -   /3  |    \&\&\   /  /  \2  |   /&\   /2  /2   \4   |c-
+
+#maat 14
+L:   al_&_&~ -le-lu__-ja,__ | al_-le_-lu-ja, al~&~-le_-lu-ja, | al-le-lu-ja, al-le-lu__-ja__ |
+S:     a&/&\  -   \    /    |  -  -   -  -     \&/  /   -  -  |  \  -  /  -   \  -  \   /    |a
+A:     f&/&\  -   \    /    | +-  -   -  -    \2&/2 -   -  -  |  -  -  \  -   /  -  \   /    |f
+T:     c&-&-  -   -    -    |  /  -   -  -    \2&/  /   -  -  |  \  -  -  -   -  -  -   -    |c
+B:     f&\&/  -   \3   /3   | \2  -   -  -    /3&\  \4  -  /2 | /2  -  /  -   \  -  \3  /3   |f
+#B2:   f&\&/  /2  /2   /3   | \2  -   -  -    /3&\  \4  -  /2 | /2  -  /  -   \  -  \3  \4   |f

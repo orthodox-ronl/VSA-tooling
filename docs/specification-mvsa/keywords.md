@@ -56,6 +56,12 @@ een bestand van toonsoort/grondtoon wisselt vóór een nieuw systeem.
 toonnamen op de stemregels. `@do` is document-/sectie-context, geen lokale
 correctie.
 
+**Hele bestand naar een andere tonica** (bijv. Es → F): niet alleen `@do`
+handmatig wijzigen — absolute stemtonen moeten mee. Gebruik
+[`mvsa transpose --to …`](../reference/cli/mvsa.md#mvsa-transpose)
+([tutorial](../guides/mvsa-schrijven-101.md#toonsoort-verzetten-transpose)).
+`@mode` blijft daarbij gelijk.
+
 **Default** als je `@do` weglaat: `F4`.
 
 ```text
@@ -150,7 +156,7 @@ nieuwe `@sectie`) gebruik je `||` of `:||`. Tooling schrijft bij genereren
 bij voorkeur `||`. Zie [Syntax — sectie-einde](syntax.md#einde).
 
 **Wel gebruiken** om delen te benoemen die je apart wilt exporteren
-(`vsa mvsa mxl … --section id`) of om schetsen in één experiment-bestand
+(`mvsa mxl … --section id`) of om schetsen in één experiment-bestand
 uit elkaar te houden (couplet / refrein / pitch-variant).
 
 **Niet gebruiken** samen met `@speelplan` (dan: `@blok`). Niet als litanie-cue
@@ -283,7 +289,9 @@ Op het **playback/MXL**-pad (Coria): vóór
 elke mid-flow `@tekst` (niet de eerste maat van het stuk) komt dezelfde
 `[PAUZE]`-maat als na `||` — whole-rest met lyric `[PAUZE]`, cue erboven.
 Staat er al een sectie-eindestreep (`||` / `:||`) vóór die cue, dan geen
-tweede pauze. Herhaalstrepen (`:|`) blijven intact.
+tweede pauze. Herhaalstrepen (`:|`) blijven intact. Stemrust `r`/`R` binnen
+een frase (lege recite + rusten) is iets anders; zie
+[Rusten op de stemregel](semantics.md#rusten-op-de-stemregel).
 
 Lange cues met `...` worden op **twee regels** gezet: de tweede regel begint bij `...`. Is de cue breder dan de maat, dan krijgt die maat minstens die breedte (MusicXML `width` / MuseScore-maat).
 
@@ -561,7 +569,7 @@ Zonder commentaar is `@---` overbodig naast een lege regel.
 
 Alles wat de vorm van een keyword heeft maar **niet** in de lijst hierboven
 staat (bijv. `@voices`) mag je zetten om te experimenteren.
-`vsa mvsa validate` geeft een **warning** (`MVSA-DIRECTIVE`), geen error:
+`mvsa validate` geeft een **warning** (`MVSA-DIRECTIVE`), geen error:
 export en verdere verwerking gaan door. Ongeldige keyword-vormen (bijv.
 `@1foo`) geven eveneens een **warning**. Zodra een keyword officieel wordt,
 komt het op deze pagina met vaste argumenten en gedrag.

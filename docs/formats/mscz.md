@@ -7,12 +7,13 @@ voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 
 | Onderwerp             | Waar                                                                                                                       |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#vsa-mvsa-mscz) (partituur-mxl → MuseScore)                                          |
-| Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#vsa-mvsa-pdf) (via MuseScore; ook vanaf `.mscz`)                                     |
+| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) (partituur-mxl → MuseScore)                                          |
+| Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#mvsa-pdf) (via MuseScore; ook vanaf `.mscz`)                                     |
 | Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak                                       |
-| Import → `.mvsa`      | [`mscz import`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; default `ag-vsa` = ankers)    |
+| Import → `.mvsa`      | [`mscz mvsa`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; default `ag-vsa` = ankers)    |
 | → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                                                     |
 | Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)                                           |
+| Score ↔ `.mvsa`       | [`mscz compare`](../reference/cli/mscz.md#mscz-compare) (t.o.v. verse import; lyrics, toonhoogte, duur-info, import-gaten) |
 | Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                                                                  |
 
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
@@ -95,17 +96,17 @@ volledige “centreer in brede cue-maat”; die breedte komt uit MusicXML
 fallback.
 
 !!! warning "Import = werkbank"
-    `mscz import` is een **bewerkvorm** voor de werkbank-fase, geen
+    `mscz mvsa` is een **bewerkvorm** voor de werkbank-fase, geen
     catalogus-klaar product. De output begint met dezelfde
-    waarschuwingsbanner als `mvsa import`. Onderstemmen A/T/B worden op duur
+    waarschuwingsbanner. Onderstemmen A/T/B worden op duur
     tegen S uitgelijnd; zie
-    [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
+    [score naar mvsa](mvsa.md#score-naar-mvsa).
 
 ## Typische commando’s
 
 ```cmd
-mscz import generated\alleluia.mscz -o generated\from-mscz.mvsa
-mscz import generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
+mscz mvsa generated\alleluia.mscz
+mscz mvsa generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
 mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
@@ -120,4 +121,5 @@ Vereist MuseScore 4 (of 3) lokaal, tenzij je alleen `.mxl` gebruikt.
 - [Formaten & CLI — overzicht](index.md)
 - [`.mxl`](mxl.md) · [`.mvsa`](mvsa.md)
 - Platte tekst: [`vsa text`](../reference/cli/text.md) / [`mscz text`](../reference/cli/mscz.md)
+- Score ↔ `.mvsa`: [`mscz compare`](../reference/cli/mscz.md#mscz-compare)
 - [mvsa-conversies](../plans/mvsa-conversions.md)

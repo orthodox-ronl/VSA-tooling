@@ -423,12 +423,13 @@ L: [segno] a_ |    # L-sprong + speelplan → fout
 
 ---
 
-## 6. Validate / normalize / kuiser / import (per actieve fase)
+## 6. Validate / normalize / transpose / kuiser / import (per actieve fase)
 
 | Pad             | Gedrag wanneer het token actief is                                                         |
 | --------------- | ------------------------------------------------------------------------------------------ |
 | **validate**    | Onbekend `[…]` → fout; verkeerde attach/wees-span → fout; `[` op stemregel → fout          |
 | **normalize**   | Canonieke tokenvorm; alias `[decresc]` → `[dim]`; marks blijven geplakt                    |
+| **transpose**   | L-regel (inclusief marks) ongewijzigd; alleen `@do` + stemhoogten verschuiven              |
 | **kuiser**      | Raakt marks niet aan (geen strip, geen verplaatsing)                                       |
 | **import**      | Roundtrip naar canonieke `[token]` op de juiste L-positie (fase 6 voor alle actieve marks) |
 | **L↔SATB-sync** | Marks tellen niet mee                                                                      |
@@ -446,7 +447,7 @@ L: [segno] a_ |    # L-sprong + speelplan → fout
 | **4** | `[cresc]`/`[/cresc]` + `[dim]`/`[/dim]` — **klaar** (span-IR; `<wedge>`; partituur sopraan; playback alle parts; alias `[decresc]`→`[dim]`)         | idem                                               |
 | **5** | `@tempo` (+ optioneel woord) + `[rit]`/`[atempo]` — **klaar** (`sound tempo`; L-woorden zichtbaar; geen geleidelijke rit-envelope)                  | keywords.md                                        |
 | **6** | Import-roundtrip actieve marks; liturgische voorbeelden; glossary-PR op `bron` indien normatief                                                     | checklist/voorbeelden                              |
-| **7** | Sprongtekens §3.5 — **klaar** (registry; partituur Marker/Jump via nav-marks; speelplan-mutex; Coria/playback zonder sprongen)                       | deze §3.5; speelplan.md pointer                    |
+| **7** | Sprongtekens §3.5 — **klaar** (registry; partituur Marker/Jump via nav-marks; speelplan-mutex; Coria/playback zonder sprongen)                      | deze §3.5; speelplan.md pointer                    |
 
 ---
 

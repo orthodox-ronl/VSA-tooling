@@ -1,0 +1,13 @@
+{
+  "name": "partituur-osmd-svg-spike",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Spike: MusicXML → SVG via OSMD in headless Chromium (geen MuseScore, geen vsa-CLI).",
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "puppeteer": "^24.2.0"
+  }
+}

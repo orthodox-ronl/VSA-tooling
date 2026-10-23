@@ -13,7 +13,7 @@ vsa audio [-h] [--config CONFIG] [--format {mp3,ogg,wav}]
           input output
 ```
 
-Voor ``.mvsa``-workflows: [`mvsa mp3` / `ogg` / `wav`](mvsa.md#vsa-mvsa-mp3)
+Voor ``.mvsa``-workflows: [`mvsa mp3` / `ogg` / `wav`](mvsa.md#mvsa-mp3)
 (``path`` + ``-o``; het subcommando is het formaat).
 
 **Invoer:** `input` mag één bronbestand **of** een map zijn (recursief). Bij
@@ -76,5 +76,5 @@ vsa audio generated\lied.mxl generated\lied --format ogg
 
 - [Invoer bestand of map](input-pad.md)
 - [Formaat `.mp3` / audio](../../formats/audio.md)
-- [`mvsa mp3` / `ogg` / `wav`](mvsa.md#vsa-mvsa-mp3)
+- [`mvsa mp3` / `ogg` / `wav`](mvsa.md#mvsa-mp3)
 - [`vsa musicxml`](musicxml.md) (playback-``.mxl``)

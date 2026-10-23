@@ -34,6 +34,11 @@ def test_apply_coria_timing_inserts_pauze_and_moves_cue():
     assert "[PAUZE]" in out
     assert out.index("P: volgende") < out.index("[PAUZE]")
     assert out.count("<measure ") == 3
+    # Canonieke maatnummers: koormaten 1 en 2 blijven; pauze = 2p (niet 1,2,3).
+    assert 'number="1"' in out
+    assert 'number="2p"' in out
+    assert 'number="2"' in out
+    assert 'number="3"' not in out
 
 
 def test_apply_coria_timing_caesura_adds_quarter_rest():

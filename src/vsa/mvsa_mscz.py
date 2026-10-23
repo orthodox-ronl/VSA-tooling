@@ -295,8 +295,13 @@ def export_mscz_to_svg(
     musescore: Path | None = None,
     trim: bool = True,
     white_background: bool = True,
-) -> Path:
-    """Convert ``.mscz`` to MuseScore SVG; optionally trim to content height."""
+) -> list[Path]:
+    """Convert ``.mscz`` to MuseScore SVG; optionally trim to content height.
+
+    One MuseScore-page → ``out``. Several pages → bladreeks
+    ``out.stem-1.svg`` … ``out.stem-N.svg`` (``out`` itself is then absent).
+    """
+    from .musescore_cli import list_musescore_svg_pages
     from .svg_trim import SvgTrimError, trim_musescore_svg
 
     mscz = Path(mscz)
@@ -308,19 +313,27 @@ def export_mscz_to_svg(
     if mscz.suffix.lower() != ".mscz":
         raise MvsaMsczError(f"SVG-export verwacht .mscz, kreeg: {mscz.name}")
     try:
-        convert_with_musescore(mscz, out, musescore=musescore)
+        first = convert_with_musescore(mscz, out, musescore=musescore)
     except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
         raise MvsaMsczError(str(exc)) from exc
+    pages = list_musescore_svg_pages(out)
+    if out.is_file() and not pages:
+        written = [out]
+    elif pages:
+        written = pages
+    else:
+        written = [first]
     if trim:
-        try:
-            trimmed = trim_musescore_svg(
-                out.read_text(encoding="utf-8"),
-                white_background=white_background,
-            )
-        except SvgTrimError as exc:
-            raise MvsaMsczError(str(exc)) from exc
-        out.write_text(trimmed, encoding="utf-8", newline="\n")
-    return out
+        for path in written:
+            try:
+                trimmed = trim_musescore_svg(
+                    path.read_text(encoding="utf-8"),
+                    white_background=white_background,
+                )
+            except SvgTrimError as exc:
+                raise MvsaMsczError(str(exc)) from exc
+            path.write_text(trimmed, encoding="utf-8", newline="\n")
+    return written
 
 
 def export_mvsa_to_svg(
@@ -347,11 +360,12 @@ def export_mvsa_to_svg(
     cue_font: str | None = None,
     cue_font_size: float | None = None,
     measure_spacing: float | None = None,
-) -> Path:
+) -> list[Path]:
     """Export ``.mvsa`` to music-only koormap SVG (layout ``muziek``).
 
     Chain: partituur-MXL → MSCZ (geen titel/colofon) → MuseScore SVG → trim.
     Default: witte achtergrond na trim; ``white_background=False`` = transparant.
+    Return: één pad, of een bladreeks bij meerdere MuseScore-pagina’s.
     """
     path = Path(path)
     out = Path(out)
@@ -393,7 +407,7 @@ def export_mvsa_to_svg(
             cue_font_size=cue_font_size,
             measure_spacing=measure_spacing,
         )
-        export_mscz_to_svg(
+        return export_mscz_to_svg(
             mscz_path,
             out,
             musescore=musescore,
@@ -403,8 +417,6 @@ def export_mvsa_to_svg(
     finally:
         if tmp_mscz is not None:
             tmp_mscz.unlink(missing_ok=True)
-
-    return out
 
 
 

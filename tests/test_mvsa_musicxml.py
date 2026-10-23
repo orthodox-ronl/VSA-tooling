@@ -171,6 +171,42 @@ def test_resolve_hold_dash():
     assert held == first
 
 
+def test_resolve_rest_r_returns_none():
+    ctx = StickyContext(do="G4", mode="major")
+    resolver = PitchResolver.from_metadata({"do": "G4", "mode": "major"})
+    first = _resolve_slot("f#4", resolver, ctx, "S")
+    assert first is not None
+    assert _resolve_slot("r", resolver, ctx, "S", last_pitch=first) is None
+    assert _resolve_slot("R", resolver, ctx, "S", last_pitch=first) is None
+    # Lopende toon blijft staan voor volgende hold.
+    held = _resolve_slot("-", resolver, ctx, "S", last_pitch=first)
+    assert held == first
+
+
+def test_export_stem_rest_emits_musicxml_rest():
+    text = """\
+@do G4
+@mode major
+
+@sectie demo
+L: U,~&~&~&~ ||
+S: f#4&r&r&r ||
+A: d#4&r&r&r ||
+T: b3&c4&b3&a3 ||
+B: b2&c3&b2&a2 ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="playback")
+    p1 = xml.split('<part id="P1">')[1].split("</part>")[0]
+    # S (P1): klinkende noot + rust(en). Rusten mogen samentrekken.
+    assert "<rest" in p1
+    assert "<step>F</step>" in p1
+    assert "<extend" not in p1
+    assert "<slur " not in p1
+    # T (P3): alleen klinkende noten.
+    p3 = xml.split('<part id="P3">')[1].split("</part>")[0]
+    assert "<rest" not in p3
+
+
 def test_absolute_note_syncs_ehm_cursor():
     """After ``a``, EHM ``/`` ``\\`` steps from la (A), not from stale do (F)."""
     ctx = StickyContext(do="F4", mode="major")

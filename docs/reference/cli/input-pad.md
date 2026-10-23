@@ -40,7 +40,7 @@ toegestaan bij precies één bronbestand.
 | `audio`               | Ja    | zelfde bronnen; bij map is `output` een uitvoermap         |
 | `template validate`   | Ja    | `template.yaml` in map                                     |
 
-### `vsa mvsa` / `mvsa` (stap 2: exports via helper)
+### `mvsa` (stap 2: exports via helper)
 
 | Commando          | Map? | Extensies                                                |
 | ----------------- | ---- | -------------------------------------------------------- |
@@ -51,19 +51,19 @@ toegestaan bij precies één bronbestand.
 | `svg`             | Ja   | `.mvsa` / `.mscz`                                        |
 | `mp3`/`ogg`/`wav` | Ja   | `.mvsa` / `.mxl` / `.musicxml` / `.vsa` / `.mscz`        |
 | `score-ir`        | Ja   | `.mvsa`                                                  |
-| `import`          | Ja   | `.mxl` / `.musicxml` / `.xml` / `.mscz`                  |
 | `normalize`       | Ja   | `.mvsa`                                                  |
+| `transpose`       | Ja   | `.mvsa`                                                  |
 | `kuiser`          | Ja   | `.mvsa` (via ``collect_cli_sources``)                    |
 
 ### `mxl` / `mscz` (top-level aliases)
 
 | Commando        | Map? | Extensies / opmerking                                       |
 | --------------- | ---- | ----------------------------------------------------------- |
-| `mxl import`    | Ja   | via ``mvsa import`` (``.mxl`` / ``.musicxml`` / ``.xml``)   |
+| `mxl mvsa`      | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml`` → ``.mvsa``             |
 | `mxl mscz`      | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml``                         |
 | `mxl validate`  | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml``                         |
 | `mxl normalize` | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml`` (default: in-place)     |
-| `mscz import`   | Ja   | via ``mvsa import`` (``.mscz``)                             |
+| `mscz mvsa`     | Ja   | ``.mscz`` → ``.mvsa``                                       |
 | `mscz mxl`      | Ja   | ``.mscz``                                                   |
 | `mscz text`     | Ja   | ``.mscz`` (per bestand → ``vsa text``; ``-o`` alleen bij 1) |
 
