@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 from pathlib import Path
+
+_SVG_PAGE_INDEX_RE = re.compile(r"-(\d+)\.svg$", re.IGNORECASE)
 
 MUSESCORE_CANDIDATES = (
     Path(r"C:\Program Files\MuseScore 4\bin\MuseScore4.exe"),
@@ -94,7 +97,9 @@ def convert_with_musescore(
             msg = f"{msg}: {detail[:500]}"
         raise MuseScoreConvertError(msg)
     if dest.suffix.lower() == ".svg" and not dest.is_file():
-        _resolve_musescore_svg_pages(dest)
+        pages = _resolve_musescore_svg_pages(dest)
+        if pages:
+            return pages[0]
     if not dest.is_file():
         detail = (proc.stderr or proc.stdout or "").strip()
         msg = f"MuseScore schreef geen {dest} (exit {proc.returncode})"
@@ -104,24 +109,31 @@ def convert_with_musescore(
     return dest
 
 
-def _resolve_musescore_svg_pages(dest: Path) -> None:
-    """MuseScore writes ``name-1.svg`` (etc.); fold into requested ``name.svg``.
+def _svg_page_index(path: Path) -> int:
+    match = _SVG_PAGE_INDEX_RE.search(path.name)
+    return int(match.group(1)) if match else 0
 
-    Multiple pages are rejected — use ``--section`` for a single-page SVG.
-    """
-    pages = sorted(
+
+def list_musescore_svg_pages(dest: Path) -> list[Path]:
+    """Return MuseScore page SVGs for ``dest`` stem (``stem-1.svg``, …)."""
+    dest = Path(dest)
+    return sorted(
         dest.parent.glob(f"{dest.stem}-*.svg"),
-        key=lambda p: p.name,
+        key=_svg_page_index,
     )
+
+
+def _resolve_musescore_svg_pages(dest: Path) -> list[Path]:
+    """Fold MuseScore ``name-1.svg`` into ``name.svg``, or keep a bladreeks.
+
+    One page → rename to the requested ``dest``. Several pages → leave
+    ``dest.stem-1.svg`` … ``dest.stem-N.svg`` (print blad-SVG’s; see
+    ``docs/plans/kale-muziek-svg-en-uitgaven.md``).
+    """
+    pages = list_musescore_svg_pages(dest)
     if not pages:
-        return
-    if len(pages) > 1:
-        names = ", ".join(p.name for p in pages)
-        for p in pages:
-            p.unlink(missing_ok=True)
-        raise MuseScoreConvertError(
-            f"MuseScore schreef {len(pages)} SVG-pagina's ({names}); "
-            "koormap-SVG ondersteunt één pagina — gebruik --section of "
-            "verkort het stuk"
-        )
-    pages[0].replace(dest)
+        return []
+    if len(pages) == 1:
+        pages[0].replace(dest)
+        return [dest]
+    return pages

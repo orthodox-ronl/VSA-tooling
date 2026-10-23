@@ -483,7 +483,7 @@ def export_mvsa_to_musicxml(
     blok_measure_range: dict[str, tuple[int, int]] = {}
     score_started = False
     systems_flat: list = []
-    # Lopende toon per stem over mvsa-systeembraken (exportvolgorde =
+    # Lopende toon per stem over mvsa-systeemovergangen (exportvolgorde =
     # sections_for_layout: playback = speelplan-expansie, partituur = blad).
     pitch_carry: dict[str, Pitch] = {}
     for section in sections:
@@ -2003,14 +2003,61 @@ def _prepare_partituur_tekst_frames(
                 bar_styles[i - 1] = "light-light"
 
 
-def _emit_staff_text_directions(out: list[str], texts: list[str]) -> None:
-    """Staff-tekst boven de balk; newlines in ``words`` voor wrap bij ``...``."""
+def osmd_width_factor_for_cues(texts: list[str]) -> float | None:
+    """OSMD ``osmdWidthFactor`` zodat lange ``@tekst``-cues in de maat passen.
+
+    OSMD negeert MusicXML ``width``; wel ``osmdWidthFactor`` op ``<measure>``.
+    """
+    if not texts:
+        return None
+    lines: list[str] = []
+    for t in texts:
+        lines.extend(str(t).splitlines() or [str(t)])
+    max_len = max((len(line) for line in lines), default=0)
+    if max_len < 8:
+        return None
+    # Lichte verbreding: OSMD past de factor echt toe (1.8.9+). Te hoog
+    # (bijv. 2.5) → één maat per regel en cues die links van de sleutel
+    # buiten het SVG vallen. Doel: iets ruimer, niet een hele regel.
+    factor = max(1.05, min(1.28, 1.0 + (max_len - 8) / 80.0))
+    if len(lines) >= 2:
+        factor = max(factor, 1.1)
+    return round(factor, 2)
+
+
+def _emit_staff_text_directions(
+    out: list[str],
+    texts: list[str],
+    *,
+    osmd: bool = False,
+    system_start: bool = False,
+    osmd_cue_font: str | None = None,
+    osmd_cue_font_size: str | None = None,
+) -> None:
+    """Staff-tekst boven de balk; newlines in ``words`` voor wrap bij ``...``.
+
+    ``osmd=True``: ``default-x`` vanaf maatbegin (tenths) richting eerste noot —
+    geen ``relative-x`` (die hing cues links naast de sleutel); font zoals
+    MuseScore-partituur (Source Sans 3 / 12).
+    """
     for text in texts:
         out.append('<direction placement="above">')
         out.append("<direction-type>")
         # Escape per regel; behoud echte newlines in de XML-tekstnode.
         escaped = escape(text)
-        out.append(f'<words justify="left" default-x="0">{escaped}</words>')
+        if osmd:
+            # Tenths vanaf maatbegin / systeembegin: voorbij sleutel of maatstreep.
+            dx = "110" if system_start else "28"
+            face = osmd_cue_font or "Source Sans 3"
+            size = osmd_cue_font_size or "12"
+            out.append(
+                f'<words font-family="{escape(face)}" font-size="{escape(size)}" '
+                f'justify="left" default-x="{dx}" default-y="50">{escaped}</words>'
+            )
+        else:
+            out.append(
+                f'<words justify="left" default-x="0">{escaped}</words>'
+            )
         out.append("</direction-type>")
         out.append("</direction>")
 
@@ -2034,13 +2081,20 @@ def _parse_tempo_bpm(meta: dict[str, str | None] | None) -> int:
 
 
 def _emit_tempo_direction(
-    out: list[str], bpm: int, label: str | None = None
+    out: list[str],
+    bpm: int,
+    label: str | None = None,
+    *,
+    sound_only: bool = False,
 ) -> None:
     """Playback-``sound tempo`` (kwart = BPM); metronoom onzichtbaar op blad/PDF.
 
     ``print-object="no"`` houdt de metronoom weg uit MuseScore-partituur en
     PDF; afspelen (audio/Coria) gebruikt nog steeds ``sound tempo``.
     Optioneel tempo-woord (``@tempo 72 "Andante"``) is wél zichtbaar.
+
+    ``sound_only=True`` (Score-IR → OSMD): geen metronoom-element — OSMD
+    negeert ``print-object="no"`` en tekent anders ♩=BPM over de cues.
     """
     if label:
         out.append('<direction placement="above">')
@@ -2048,6 +2102,9 @@ def _emit_tempo_direction(
         out.append(f"<words>{escape(label)}</words>")
         out.append("</direction-type>")
         out.append("</direction>")
+    if sound_only:
+        out.append(f'<sound tempo="{bpm}"/>')
+        return
     out.append('<direction placement="above" print-object="no">')
     out.append("<direction-type>")
     out.append('<metronome parentheses="no">')
@@ -2368,8 +2425,17 @@ def _emit_score_partituur(
     measure_tempos: list[int | None] | None = None,
     measure_tempo_labels: list[str | None] | None = None,
     meta: dict[str, str | None] | None = None,
+    staff_text_osmd: bool = False,
+    tempo_sound_only: bool = False,
+    osmd_cue_font: str | None = None,
+    osmd_cue_font_size: str | None = None,
+    measure_osmd_width_factors: list[float | None] | None = None,
 ) -> str:
-    """Twee balken SA/TB: voice 1 (S/T) stok omhoog, voice 2 (A/B) stok omlaag."""
+    """Twee balken SA/TB: voice 1 (S/T) stok omhoog, voice 2 (A/B) stok omlaag.
+
+    ``staff_text_osmd`` / ``tempo_sound_only``: Score-IR → OSMD-brug (geen
+    metronoom-glyph; cues met ``default-x`` richting eerste noot).
+    """
     do_p = parse_pitch_string(context.do)
     fifths = key_fifths(do_p, context.mode)
     n_measures = max((len(ms) for ms in voice_measures.values()), default=0)
@@ -2379,6 +2445,7 @@ def _emit_score_partituur(
     new_systems = list(measure_new_system or [])
     cue_gaps = list(measure_cue_gap or [])
     widths = list(measure_widths or [])
+    osmd_factors = list(measure_osmd_width_factors or [])
     end_starts = list(measure_ending_start or [])
     end_stops = list(measure_ending_stop or [])
     rep_times = list(measure_repeat_times or [])
@@ -2395,6 +2462,8 @@ def _emit_score_partituur(
         cue_gaps.append(False)
     while len(widths) < n_measures:
         widths.append(None)
+    while len(osmd_factors) < n_measures:
+        osmd_factors.append(None)
     while len(end_starts) < n_measures:
         end_starts.append(None)
     while len(end_stops) < n_measures:
@@ -2445,7 +2514,12 @@ def _emit_score_partituur(
             upper = upper_ms[mi]
             lower = lower_ms[mi]
             wattr = f' width="{widths[mi]}"' if widths[mi] else ""
-            out.append(f'<measure number="{mi + 1}"{wattr}>')
+            fattr = (
+                f' osmdWidthFactor="{osmd_factors[mi]}"'
+                if osmd_factors[mi]
+                else ""
+            )
+            out.append(f'<measure number="{mi + 1}"{wattr}{fattr}>')
             if mi == 0:
                 clef_sign, clef_line = part["clef"]
                 out.append("<attributes>")
@@ -2457,7 +2531,12 @@ def _emit_score_partituur(
                 )
                 out.append("</attributes>")
             if top_staff and tempos[mi] is not None:
-                _emit_tempo_direction(out, tempos[mi], tempo_labels[mi])
+                _emit_tempo_direction(
+                    out,
+                    tempos[mi],
+                    tempo_labels[mi],
+                    sound_only=tempo_sound_only,
+                )
             nav_start: list[str] = []
             nav_end: list[str] = []
             if top_staff and navs[mi]:
@@ -2468,7 +2547,15 @@ def _emit_score_partituur(
                 if nav_start:
                     _emit_nav_marks(out, nav_start)
                 if staff_texts[mi]:
-                    _emit_staff_text_directions(out, staff_texts[mi])
+                    system_start = mi == 0 or bool(new_systems[mi])
+                    _emit_staff_text_directions(
+                        out,
+                        staff_texts[mi],
+                        osmd=staff_text_osmd,
+                        system_start=system_start,
+                        osmd_cue_font=osmd_cue_font,
+                        osmd_cue_font_size=osmd_cue_font_size,
+                    )
             if cue_gaps[mi]:
                 _emit_cue_gap_rest(out, voice=1)
             elif not upper and not lower:

@@ -9,12 +9,71 @@ from unittest.mock import patch
 
 import pytest
 
-from vsa.musescore_cli import MuseScoreNotFoundError, find_musescore
+from vsa.musescore_cli import (
+    MuseScoreNotFoundError,
+    _resolve_musescore_svg_pages,
+    find_musescore,
+)
 from vsa.mvsa_mscz import MvsaMsczError, export_mvsa_to_svg
 
 ROOT = Path(__file__).resolve().parents[1]
 VREDE = ROOT / "examples" / "mvsa" / "1a-vredeslitanie.mvsa"
 MUSESCORE = find_musescore()
+
+
+def test_resolve_single_svg_page_folds_to_dest(tmp_path: Path) -> None:
+    dest = tmp_path / "lied.svg"
+    page = tmp_path / "lied-1.svg"
+    page.write_text("<svg/>", encoding="utf-8")
+    assert _resolve_musescore_svg_pages(dest) == [dest]
+    assert dest.is_file()
+    assert not page.exists()
+
+
+def test_resolve_multi_svg_pages_keeps_bladreeks(tmp_path: Path) -> None:
+    dest = tmp_path / "lied.svg"
+    p1 = tmp_path / "lied-1.svg"
+    p2 = tmp_path / "lied-2.svg"
+    p1.write_text("<svg>1</svg>", encoding="utf-8")
+    p2.write_text("<svg>2</svg>", encoding="utf-8")
+    pages = _resolve_musescore_svg_pages(dest)
+    assert pages == [p1, p2]
+    assert not dest.exists()
+    assert p1.is_file() and p2.is_file()
+
+
+def test_export_mscz_to_svg_trims_bladreeks(tmp_path: Path) -> None:
+    from vsa.mvsa_mscz import export_mscz_to_svg
+
+    mscz = tmp_path / "lied.mscz"
+    mscz.write_bytes(b"PK\x03\x04fake")
+    out = tmp_path / "lied.svg"
+    page_svg = (
+        '<?xml version="1.0"?>\n'
+        '<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" '
+        'viewBox="0 0 100 200">'
+        '<path fill="#ffffff" d="M0,0 L100,0 L100,200 L0,200 z"/>'
+        '<path fill="#000000" d="M10,10 L20,10 L20,20 L10,20 z"/>'
+        "</svg>\n"
+    )
+
+    def _fake_convert(_src, dest, **_kwargs):
+        dest = Path(dest)
+        p1 = dest.parent / f"{dest.stem}-1.svg"
+        p2 = dest.parent / f"{dest.stem}-2.svg"
+        p1.write_text(page_svg, encoding="utf-8")
+        p2.write_text(page_svg, encoding="utf-8")
+        return p1
+
+    with patch("vsa.mvsa_mscz.convert_with_musescore", side_effect=_fake_convert):
+        written = export_mscz_to_svg(mscz, out, trim=True)
+    assert [p.name for p in written] == ["lied-1.svg", "lied-2.svg"]
+    assert not out.exists()
+    for path in written:
+        text = path.read_text(encoding="utf-8")
+        height = re.search(r'\bheight="([^"]+)"', text)
+        assert height is not None
+        assert "297" not in height.group(1)
 
 
 def test_export_svg_without_musescore_raises(tmp_path: Path) -> None:

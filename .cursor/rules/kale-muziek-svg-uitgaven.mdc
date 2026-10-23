@@ -1,0 +1,49 @@
+---
+description: >-
+  Afspraak kale scherm-/blad-SVG; catalogus-PDF ≠ koormap-bouwsteen;
+  herinner open fase 3 (Score-IR/OSMD productiescherm) bij relevant werk.
+globs:
+  - src/vsa/musescore_cli.py
+  - src/vsa/mvsa_mscz.py
+  - docs/formats/mvsa-svg.md
+  - docs/formats/mscz.md
+  - docs/formats/score-ir.md
+  - docs/plans/kale-muziek-svg-en-uitgaven.md
+  - docs/plans/partituur-ir.md
+  - docs/reference/cli/mvsa.md
+alwaysApply: false
+---
+
+# Kale muziek-SVG en uitgaven
+
+Afspraak: `docs/plans/kale-muziek-svg-en-uitgaven.md`.
+
+## Kern
+
+- **Kale muziek** = SVG zonder titel/componist/copyright/catalogus-chrome
+  (layout ``muziek``).
+- **Scherm** vs **blad**: productieschermrichting = Score-IR → MusicXML →
+  OSMD; print = blad-SVG-fragmenten ≤ één A4-blad (MuseScore).
+- **Catalogus-PDF** ≠ bouwsteen voor koormap-`index.pagina.pdf` — die PDF
+  komt uit Markdown-layout + kale blad-SVG’s.
+
+## Gefaseerd (niet alles tegelijk)
+
+| Fase | Onderwerp                                      | Status                          |
+| ---- | ---------------------------------------------- | ------------------------------- |
+| 1    | Multi-page MuseScore-SVG als bladreeks         | gedaan                          |
+| 2    | bibliotheek `pagina-pdf` op blad-SVG’s         | gedaan                          |
+| 3    | Score-IR/OSMD productiescherm (site-embed)     | in gang — richting vast, §4     |
+
+## Herinnering (verplicht bij relevant werk)
+
+Als je werkt aan `mvsa svg`, multi-page SVG, trim/pagina’s, Score-IR/OSMD,
+shortcode `muziek`, of `pagina-pdf`:
+
+1. Lees of §4 van het plan nog **open** is (productie-embed Score-IR/OSMD).
+2. Zo ja: **noem dat expliciet** in je antwoord (één zin + link naar het
+   plan), tenzij de gebruiker die fase nu bewust oppakt.
+3. Fase 1/2 niet stil overslaan naar fase 3 zonder dat de gebruiker dat vraagt.
+4. Tall MuseScore-scherm-SVG is **geen** hoofdpad; CoriB-brug: `partituur-ir` §7.
+
+Zie ook `docs/plans/partituur-ir.md` §7–§8.
