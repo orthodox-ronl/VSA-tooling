@@ -34,6 +34,46 @@ T: … d4&-&- …
 tot **één noot** waarvan de duur de som is van de slot-duren. Playback-``.mxl``
 houdt de slots apart (Coria).
 
+### Rusten op de stemregel
+
+Een stem-slot `r` of `R` is een **rust**: er klinkt geen toon; de duur is die
+van het bijbehorende L-slot (ELM). Het slot telt wél mee in de
+`&`-sync tussen L en de stemmen.
+
+| Token   | Betekenis                                             |
+| ------- | ----------------------------------------------------- |
+| `-`     | aanhouden (zelfde toon als het vorige klinkende slot) |
+| `r`/`R` | rust (geen toon; export als MusicXML/MSCZ-rest)       |
+
+`r` werkt de **lopende toon** van die stem niet bij: de volgende EHM (`/` of
+`\`) telt t.o.v. de laatste **klinkende** toon vóór de rust(en).
+
+**Sommige stemmen zwijgen, andere zingen door** (bijv. S/A rust, T/B melisma):
+
+```text
+L: U,~&.&~&~ |
+S: f#4&r&r&r |
+A: d#4&r&r&r |
+T: b3&c4&b3&a3 |
+B: b2&c3&b2&a2 |
+```
+
+**Alle stemmen zwijgen binnen de muzikale zin** — lege recite op L plus rusten
+op elke stem (niet verwarren met lyric `[PAUZE]`, die hoort bij
+sectie-/oefenpauzes):
+
+```text
+L: Amen__ | ().&.&~&~ | Heer__ |
+S: g4     | r&r&r&r   | g4     |
+A: e4     | r&r&r&r   | e4     |
+T: b3     | r&r&r&r   | b3     |
+B: e3     | r&r&r&r   | e3     |
+```
+
+Syntaxis: [Stemregel](syntax.md#7-stemregel). Validate, export en import
+ondersteunen `r`/`R`. Opeenvolgende rustslots mogen bij MusicXML-export tot
+één rust met de somduur samentrekken (zelfde mechanisme als same-pitch).
+
 ## Reciteertoon
 
 Een L-stuk tussen `( … )` is een recite-run: meerdere lettergrepen (en

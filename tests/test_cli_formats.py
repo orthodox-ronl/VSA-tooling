@@ -17,7 +17,7 @@ def test_mvsa_help_lists_subcommands(capsys):
     assert "validate" in out
     assert "normalize" in out
     assert "kuiser" in out
-    assert "import" in out
+    assert "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser}" in out
     assert "pdf" in out
 
 
@@ -26,7 +26,8 @@ def test_mxl_help_lists_matrix_actions(capsys):
         mxl_main(["-h"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
-    assert "import" in out
+    assert "mvsa" in out
+    assert "{mvsa,mscz,validate,normalize}" in out
     assert "mscz" in out
 
 
@@ -35,7 +36,8 @@ def test_mscz_help_lists_matrix_actions(capsys):
         mscz_main(["-h"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
-    assert "import" in out
+    assert "mvsa" in out
+    assert "{mvsa,mxl,text}" in out
     assert "mxl" in out
 
 

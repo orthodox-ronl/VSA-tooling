@@ -1,4 +1,4 @@
-# `vsa mvsa` / `mvsa` — meerstemmige .mvsa (draft)
+# `mvsa` — meerstemmige .mvsa (draft)
 
 Draft-tooling voor **mvsa**: meerstemmige tekstbronnen (`.mvsa`) met
 lyrics-regels en stemregels. Normatieve draft-spec:
@@ -7,9 +7,8 @@ lyrics-regels en stemregels. Normatieve draft-spec:
 Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
 [`vsa musicxml`](musicxml.md) voor eenstemmige `.vsa`.
 
-**Top-level alias:** `mvsa …` is gelijk aan `vsa mvsa …` (console-script of
-`scripts\mvsa.cmd`). Bron-commands voor andere formaten: [`mxl`](mxl.md),
-[`mscz`](mscz.md).
+**Commando:** `mvsa …` (console-script of `scripts\mvsa.cmd`).
+Bron-commands voor andere formaten: [`mxl`](mxl.md), [`mscz`](mscz.md).
 
 Subcommando’s zijn genoemd naar de **uitvoer** (zoals `mscz` / `pdf` /
 `mp3` / `ogg` / `wav`). Oude namen `musicxml` en `audio` blijven als alias
@@ -24,8 +23,7 @@ enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser} …
-vsa mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser} …
+mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
               [--hulptekst-as-parts] [--bibliotheek-id ID]
@@ -62,7 +60,6 @@ mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
 mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
-mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 mvsa transpose [-h] --to TONIC [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
 mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
@@ -72,23 +69,21 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 
 | Subcommando                            | Doel                                                            |
 | -------------------------------------- | --------------------------------------------------------------- |
-| [`validate`](#vsa-mvsa-validate)       | Structuur + sync-telling van `.mvsa` controleren.               |
-| [`mxl`](#vsa-mvsa-mxl)                 | Exporteer `.mvsa` / `.mscz` / `.mxl` naar playback-``.mxl``.    |
-| [`score-ir`](#vsa-mvsa-score-ir)       | Exporteer `.mvsa` naar Score-IR JSON (partituur; scherm/CoriB). |
-| [`mscz`](#vsa-mvsa-mscz)               | Exporteer `.mvsa` naar MuseScore (`.mscz`).                     |
-| [`pdf`](#vsa-mvsa-pdf)                 | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).          |
-| [`svg`](#vsa-mvsa-svg)                 | Exporteer `.mvsa` naar muziek-only partituur-SVG (koormap).     |
-| [`mp3`](#vsa-mvsa-mp3) / `ogg` / `wav` | Exporteer naar preview-audio (``.mp3`` / ``.ogg`` / ``.wav``).  |
-| [`import`](#vsa-mvsa-import)           | Importeer `.mxl` / `.mscz` → `.mvsa` (**werkbank**).            |
-| [`normalize`](#vsa-mvsa-normalize)     | Canoniseer `.mvsa` (default: behoud noteernamen).               |
-| [`transpose`](#vsa-mvsa-transpose)     | Transponeer naar een andere tonica (`@do`); `@mode` blijft.     |
-| [`kuiser`](#vsa-mvsa-kuiser)           | Authoring-kuiser: strepen syncen, woordstreep, align.           |
+| [`validate`](#mvsa-validate)       | Structuur + sync-telling van `.mvsa` controleren.               |
+| [`mxl`](#mvsa-mxl)                 | Exporteer `.mvsa` / `.mscz` / `.mxl` naar playback-``.mxl``.    |
+| [`score-ir`](#mvsa-score-ir)       | Exporteer `.mvsa` naar Score-IR JSON (partituur; scherm/CoriB). |
+| [`mscz`](#mvsa-mscz)               | Exporteer `.mvsa` naar MuseScore (`.mscz`).                     |
+| [`pdf`](#mvsa-pdf)                 | Exporteer `.mvsa` of `.mscz` naar print-PDF (zangers).          |
+| [`svg`](#mvsa-svg)                 | Exporteer `.mvsa` naar muziek-only partituur-SVG (koormap).     |
+| [`mp3`](#mvsa-mp3) / `ogg` / `wav` | Exporteer naar preview-audio (``.mp3`` / ``.ogg`` / ``.wav``).  |
+| [`normalize`](#mvsa-normalize)     | Canoniseer `.mvsa` (default: behoud noteernamen).               |
+| [`transpose`](#mvsa-transpose)     | Transponeer naar een andere tonica (`@do`); `@mode` blijft.     |
+| [`kuiser`](#mvsa-kuiser)           | Authoring-kuiser: strepen syncen, woordstreep, align.           |
 
 Hulp op de commandoregel:
 
 ```cmd
 mvsa -h
-vsa mvsa -h
 mvsa validate -h
 mvsa mxl -h
 mvsa score-ir -h
@@ -98,7 +93,6 @@ mvsa svg -h
 mvsa mp3 -h
 mvsa ogg -h
 mvsa wav -h
-mvsa import -h
 mvsa normalize -h
 mvsa transpose -h
 mvsa kuiser -h
@@ -106,12 +100,12 @@ mvsa kuiser -h
 
 ---
 
-## `vsa mvsa validate`
+## `mvsa validate`
 
 ### Synopsis
 
 ```text
-vsa mvsa validate [-h] [--require-zoektekst] path
+mvsa validate [-h] [--require-zoektekst] path
 ```
 
 ### Beschrijving
@@ -152,9 +146,9 @@ tussen lyrics-regels en stemregels. Draft-validatie: zie
 ### Voorbeelden
 
 ```cmd
-vsa mvsa validate examples\mvsa
-vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa validate examples\mvsa\alleluia-toon-8.mvsa --require-zoektekst
+mvsa validate examples\mvsa
+mvsa validate examples\mvsa\alleluia-toon-8.mvsa
+mvsa validate examples\mvsa\alleluia-toon-8.mvsa --require-zoektekst
 ```
 
 Voor alleen vullen/checken van `zoektekst` zonder overige validate:
@@ -162,12 +156,12 @@ Voor alleen vullen/checken van `zoektekst` zonder overige validate:
 
 ---
 
-## `vsa mvsa mxl`
+## `mvsa mxl`
 
 ### Synopsis
 
 ```text
-vsa mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
+mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
                   [--hulptekst-as-parts] [--bibliotheek-id ID]
                   [--musescore PATH] path
 ```
@@ -243,41 +237,41 @@ VSA).
 Standaard naast het bronbestand (`….mvsa.mxl`):
 
 ```cmd
-vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
+mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa
 ```
 
 Met expliciet uitvoerpad en één sectie:
 
 ```cmd
-vsa mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
 Coria met keuze tussen lyrics-lagen (trisagion, kerkslavische sectie):
 
 ```cmd
-vsa mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
+mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
 ```
 
 Vanuit MuseScore-partituur (zelfde resultaat als `mscz mxl`):
 
 ```cmd
-vsa mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o generated\bug-cases\cherubijnen.mxl
+mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o generated\bug-cases\cherubijnen.mxl
 ```
 
 Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mscz --hulptekst`):
 
 ```cmd
-vsa mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --hulptekst -o generated\hulptekst-ksl.mscz
+mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --hulptekst -o generated\hulptekst-ksl.mscz
 ```
 
 ### Voorbeelden — falen
 
 Onbekende sectie-id of sync-fout in het `.mvsa`-bestand levert exitcode `1`
-en diagnostiek op stderr. Controleer eerst met `vsa mvsa validate`.
+en diagnostiek op stderr. Controleer eerst met `mvsa validate`.
 
 ---
 
-## `vsa mvsa score-ir`
+## `mvsa score-ir`
 
 Exporteer `.mvsa` naar **Score-IR** JSON (`format: score-ir`, `profile: partituur`):
 maten met SA/TB-voices, lyrics en `@tekst`-cues. Bedoeld voor gedeelde
@@ -293,7 +287,7 @@ bron. Spike: `examples/spikes/partituur-browser/`. Brugcontract:
 ### Synopsis
 
 ```text
-vsa mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
+mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
                   [--musicxml [PATH]] path
 ```
 
@@ -311,11 +305,11 @@ vsa mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa --musicxml
-vsa mvsa score-ir examples\mvsa --musicxml
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-browser\score.score-ir.json --musicxml examples\spikes\partituur-browser\score.musicxml
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa --musicxml
+mvsa score-ir examples\mvsa --musicxml
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-browser\score.score-ir.json --musicxml examples\spikes\partituur-browser\score.musicxml
 ```
 
 ### Exit status
@@ -327,12 +321,12 @@ vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partitu
 
 ---
 
-## `vsa mvsa mscz`
+## `mvsa mscz`
 
 ### Synopsis
 
 ```text
-vsa mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
               [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
               [--hulptekst] [--compact] [--min-system-distance SP]
               [--max-system-distance SP] [--staff-distance SP]
@@ -355,7 +349,7 @@ Layoutprofielen (na MuseScore-conversie):
 | Profiel      | Gedrag                                                                                                              |
 | ------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `partituur`  | **Default.** A4, leesbaarheid, lege partijnamen, colofon — [MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md). |
-| `muziek`     | Zelfde leesbaarheid **zonder** titel/footer/colofon — voor [`mvsa svg`](#vsa-mvsa-svg) / koormap-embed.             |
+| `muziek`     | Zelfde leesbaarheid **zonder** titel/footer/colofon — voor [`mvsa svg`](#mvsa-svg) / koormap-embed.             |
 | `plain`      | Geen nabewerking door VSA-tooling (ruwe MuseScore-output van de partituur-MXL).                                     |
 
 `--bibliotheek-id` zet de id in het colofon (**alleen** bij `partituur`).
@@ -366,7 +360,7 @@ de id **expliciet** te geven. Zie
 
 Dit voldoet bij `partituur` aan de [MSCZ-checklist](../../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
 (twee balken, geen S/Soprano-labels). Voor Coria-playback (vier parts)
-blijft [`vsa mvsa mxl`](#vsa-mvsa-mxl) het primaire pad.
+blijft [`mvsa mxl`](#mvsa-mxl) het primaire pad.
 
 Vereist MuseScore 4 (of 3): op `PATH` als `MuseScore4` / `mscore`, of het
 standaard Windows-pad
@@ -414,18 +408,18 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 ### Voorbeelden
 
 ```cmd
-vsa mvsa mscz examples\mvsa\alleluia-toon-8.canonieke.mvsa
-vsa mvsa mscz lied.mvsa -o generated\lied.mscz --section schets2-oct-doremi
-vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\lied.mxl
-vsa mvsa mscz lied.mvsa -o out.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
-vsa mvsa mscz lied.mvsa -o raw.mscz --layout plain
-vsa mvsa mscz lied.mvsa -o out.mscz --min-system-distance 10 --max-system-distance 18
-vsa mvsa mscz lied.mvsa -o out.mscz --compact
-vsa mvsa mscz lied.mvsa -o out.mscz --compact --min-system-distance 4 --max-system-distance 4
-vsa mvsa mscz lied.mvsa -o out.mscz --staff-distance 4.5
-vsa mvsa mscz lied.mvsa -o out.mscz --page-margin-top 5 --page-margin-bottom 5
-vsa mvsa mscz lied.mvsa -o out.mscz --lyrics-font-size 14 --cue-font-size 11
-vsa mvsa mscz lied.mvsa -o out.mscz --measure-spacing 1.8
+mvsa mscz examples\mvsa\alleluia-toon-8.canonieke.mvsa
+mvsa mscz lied.mvsa -o generated\lied.mscz --section schets2-oct-doremi
+mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\lied.mxl
+mvsa mscz lied.mvsa -o out.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
+mvsa mscz lied.mvsa -o raw.mscz --layout plain
+mvsa mscz lied.mvsa -o out.mscz --min-system-distance 10 --max-system-distance 18
+mvsa mscz lied.mvsa -o out.mscz --compact
+mvsa mscz lied.mvsa -o out.mscz --compact --min-system-distance 4 --max-system-distance 4
+mvsa mscz lied.mvsa -o out.mscz --staff-distance 4.5
+mvsa mscz lied.mvsa -o out.mscz --page-margin-top 5 --page-margin-bottom 5
+mvsa mscz lied.mvsa -o out.mscz --lyrics-font-size 14 --cue-font-size 11
+mvsa mscz lied.mvsa -o out.mscz --measure-spacing 1.8
 ```
 
 Style-overrides (incl. `--compact`) worden naar `.mscx` **én** `score_style.mss`
@@ -434,12 +428,12 @@ geschreven (MuseScore 4). Details: [`.mscz`](../../formats/mscz.md).
 
 ---
 
-## `vsa mvsa pdf`
+## `mvsa pdf`
 
 ### Synopsis
 
 ```text
-vsa mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH]
              [--layout PROFILE] [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
@@ -460,7 +454,7 @@ Maakt een **print-PDF** van de partituur (voor zangers), via MuseScore CLI.
 
 `--layout` / `--bibliotheek-id` / Style-opties (`--compact`, systeem-/stafafstand,
 pagina-marges, fonts) gelden alleen bij bron `.mvsa` (zelfde betekenis als bij
-[`mscz`](#vsa-mvsa-mscz); andere Style-vlaggen winnen van `--compact`).
+[`mscz`](#mvsa-mscz); andere Style-vlaggen winnen van `--compact`).
 
 **Canoniek:** A4 staand (checklist
 [PDF P6](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz));
@@ -496,18 +490,18 @@ dezelfde A4-eis P6).
 ### Voorbeelden
 
 ```cmd
-vsa mvsa pdf examples\mvsa\alleluia-toon-1.mvsa
-vsa mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
-vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
-vsa mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
-vsa mvsa pdf lied.mvsa --compact
-vsa mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
-vsa mvsa pdf lied.mscz -o lied.pdf
+mvsa pdf examples\mvsa\alleluia-toon-1.mvsa
+mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
+mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
+mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
+mvsa pdf lied.mvsa --compact
+mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa pdf lied.mscz -o lied.pdf
 ```
 
 ---
 
-## `vsa mvsa svg`
+## `mvsa svg`
 
 Exporteer `.mvsa` of `.mscz` naar partituur-SVG voor koormap-pagina’s
 (shortcode `muziek` later in bibliotheek). SVG-hoogte ≈ inhoud
@@ -517,7 +511,7 @@ schermrenderer. Formaatpagina: [mvsa-svg](../../formats/mvsa-svg.md).
 ### Synopsis
 
 ```text
-vsa mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim]
              [--transparent] [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
@@ -576,13 +570,13 @@ om naar SVG.
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.svg
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --lyrics-font-size 14 --cue-font-size 11
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --measure-spacing 1.8
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
-vsa mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
-vsa mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.svg
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --lyrics-font-size 14 --cue-font-size 11
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --measure-spacing 1.8
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 ```
 
 ### Exit status
@@ -594,16 +588,16 @@ vsa mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.sv
 
 ---
 
-## `vsa mvsa mp3` / `ogg` / `wav`
+## `mvsa mp3` / `ogg` / `wav`
 
 ### Synopsis
 
 ```text
-vsa mvsa mp3 [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+mvsa mp3 [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
                [--keep-mxl PATH] path
-vsa mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
                [--keep-mxl PATH] path
-vsa mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
+mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
                [--keep-mxl PATH] path
 ```
 
@@ -629,180 +623,24 @@ afspeelknop. Zie [`vsa audio`](audio.md) en
 ### Voorbeelden
 
 ```cmd
-vsa mvsa mp3 examples\mvsa\test-alleluia-toon-8.mvsa --section schets3-oct-doremi
-vsa mvsa mp3 lied.mvsa -o generated\lied.mp3
-vsa mvsa ogg lied.mvsa
-vsa mvsa wav lied.mxl -o generated\lied.wav
+mvsa mp3 examples\mvsa\test-alleluia-toon-8.mvsa --section schets3-oct-doremi
+mvsa mp3 lied.mvsa -o generated\lied.mp3
+mvsa ogg lied.mvsa
+mvsa wav lied.mxl -o generated\lied.wav
 ```
 
 ---
 
-## `vsa mvsa import`
-
-!!! warning "Alleen voor de werkbank-fase"
-    De importer (`mvsa import` / `mxl import` / `mscz import`) is bedoeld als
-    **bewerk-/startvorm** in de werkbank — om van MuseScore/MusicXML naar
-    bewerkbare `.mvsa` te komen en die handmatig af te maken. Niet als
-    kant-en-klare catalogusbron.
-
-    Belangrijkste redenen:
-
-    1. **Lettergreepstreepjes** — MuseScore-lyrics zetten streepjes tussen
-       lettergrepen van één woord vaak verkeerd of inconsistente; de canonieke
-       vorm (`hei-li`, spaties *vóór* `-li` bij breedte) moet je nabewerken.
-    2. **Lyrics-gaten** — noten zonder bruikbare tekst worden lege recite
-       (`()~` / `()_`); multi-lettergreep op één noot wordt recite `( … )`.
-       Dat houdt de sync, maar is geen nette zangstuktekst. Een lege recite
-       met ELM-keten (`()~&~&.…`) exporteert weer als gewoon melisma (alle
-       slots), niet als één noot.
-    3. **Lossy** — MuseScore-layout en partituurdetails vallen weg; succes is
-       pitch/duur/lyrics-equivalentie, niet een publicatieklare partituur.
-
-    Na import: controleren, kuisen, valideren — pas daarna (in de bibliotheek)
-    accepteren naar de catalogus.
-
-    Elk importbestand krijgt na `# Imported: …` een ASCII-**waarschuwingsbanner**
-    (zelfde tekst via `mvsa import` / `mxl import` / `mscz import`) met een
-    checklist: woordstreepjes, recite-grenzen, A/T/B-uitlijning, ritme/maten,
-    metadata. Die banner is geen catalogus-label — hij herinnert eraan dat het
-    een schets is.
-
-### Synopsis
-
-```text
-vsa mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
-                [--octave-style {@oct,marker}] [--section SECTION]
-                [--musescore PATH] [--no-align] path
-```
-
-### Beschrijving
-
-Importeert een partituur naar `.mvsa`:
-
-| Bron                          | Pad                                                                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `.mxl` / `.musicxml` / `.xml` | Direct geparst (SATB P1–P4)                                                                             |
-| `.mscz`                       | MuseScore CLI → temp `.mxl` → **SATB-normalisatie** (zelfde explode als [`mscz mxl`](mscz.md)) → parser |
-
-Stemhoogten worden in de gekozen `--pitch`-vorm geschreven (default
-**`ag-vsa`**); `@mode` is majeur (aanname); `@oct` wordt per stem afgeleid.
-`@do` volgt deze volgorde:
-
-1. `--do` op de command line (bijv. `F4`);
-2. bij `.mscz`: aantal kruisen/mollen uit MuseScore `KeySig` (`concertKey`);
-3. anders MusicXML `<key><fifths>` (na MuseScore-conversie of uit `.mxl`);
-4. anders fallback `F4` als er geen voortekening in het bestand staat.
-
-Lossy t.o.v. MuseScore-layout — succes = pitch/duur/lyrics-equivalentie.
-
-**Leesbaarheid van de uitvoer**
-
-- Soft-wrap: LSATB-systemen van ongeveer 80 tekens
-  (`DEFAULT_SYSTEM_SOFT_WIDTH`). Eén maat die alleen al langer is blijft één
-  systeem.
-- **Maatnavigatie:** vóór elk LSATB-systeem staat `#maat N` (`N` = 1-based
-  startmaat van dat systeem), zodat je makkelijk heen-en-weer kunt tussen
-  `.mvsa` en maatnummers in PDF / MuseScore.
-- **A/T/B-uitlijning:** onderstemmen volgen de L/S-posities op **duur** (niet
-  op noot-index of lyrics van A/T/B). Een lange noot die meerdere S-slots
-  dekt, wordt gesplitst/gepaddet (`c4&-` + hold `-`); een lyric-loze spacer na
-  zo’n noot steelt geen volgende lettergreep. Dat voorkomt verschoven Bb/T/B
-  bij MSCZ-import waar A/T/B weinig of scheve lyrics hebben. Heeft een
-  onderstem **meer toonwissels** in dezelfde tijd dan S slots (bijv. S één
-  hele noot, T twee kwarten A→B), dan blijven die tonen als `&`-melisma; L/S
-  worden met holds/ELM’s mee uitgebreid zodat de sync-telling klopt (geen
-  stille truncate). Onder een recite-positie blijft één slot (L-recite telt
-  als 1); daar kan een onderstem-toonwissel nog wegvallen. Heeft de onderstem
-  **minder** noten dan S-slots, dan worden hold-slots naar **duur** verdeeld
-  (gestipte + achtste → drie holds op de lange toon, niet herhaling van de
-  korte). MuseScore-lyrics met streepje in de tekst (`- le`) tellen als één
-  lettergreep; de melisma-staart blijft hangen.
-- Same-pitch holds: opeenvolgende dezelfde toonhoogte (ook over maatgrenzen)
-  wordt op de stemregels als `-` geschreven.
-- Multi-lettergreep lyrics op één noot (spaties, `-`, of soft hyphen) worden
-  recite `( … )` i.p.v. één geplakte lettergreep. Een lone extender `-` wordt
-  lege recite `()~`. Trailing `.` op lyric-tekst wordt weggestript.
-- **Same-pitch recite:** opeenvolgende noten met dezelfde toonhoogte **én**
-  duur die elk een eenvoudige lettergreep dragen, worden vanaf **3**
-  lettergrepen één recite `( … )`. Daarnaast worden lettergrepen direct
-  vóór/na een underlay-recite op dezelfde toon én duur meegenomen (bijv.
-  `Ver` + `(vuld zij …)` + `met` → één recite). Losse paren zoals
-  `we`/`gen` blijven aparte posities.
-- **Woordgrenzen:** MusicXML-`syllabic` stuurt de groepen. Twee `single`s
-  worden alleen gehypheneerd als Pyphen dat bevestigt (met closed-class- en
-  hoofdletter-guards: `Be-waar`, niet `ons-heeft` / `Licht-aan` /
-  `steun-van` / `dag-gaan`). Een `begin`…`end`-keten wordt opnieuw
-  gelettergreepd (`heb-ben het wa-re`); spaties in een `end`-lyric horen bij
-  volgende woorden (`psalm` + `zin-gen voor mijn God` → `psalm-zin-gen voor
-  mijn God`). Gebroken MuseScore-ketens: tweede `begin` telt als `middle`
-  (`Ja-cob`); spaced fragments in recite worden hersteld (`we der ke` →
-  `we-der-ke`). Losse `single` ervoor of erna mag meedoen
-  (`aan-bid-den`, `he-mel-se-Geest`) tenzij de volgende lettergreep een beter
-  woord vormt (`ge-loof` i.p.v. `wa-re-ge`). Woordstreepjes tussen
-  L-posities alleen als de rechterkant `middle`/`end` is (of een recite),
-  plus korte eigennaam-begin (`Ja_-cob`). Over een maatstreep tussen twee
-  recites: `(… wa)- | (re …)`.
-- **Normaalvorm:** standaard schrijft import daarna de canonieke vorm via
-  [`mvsa kuiser`](#vsa-mvsa-kuiser) (lone standaard-`~` op L weggelaten; `~`
-  blijft bij `&`-melisma en na `)`; maatstrepen sync, kolomuitlijning) — zie
-  [syntax — canonieke schrijfvorm](../../specification-mvsa/syntax.md) en
-  [semantiek — canonieke layout](../../specification-mvsa/semantics.md#canonieke-layout-vs-tolerantie).
-
-Bij complexe MuseScore-lyrics is soms `--no-align` nodig (sla kuiser/align
-over) — de sync-telling blijft leidend. Pyphen-woordstreep-warnings van
-`kuiser` zijn advies, geen import-fout.
-
-**Pitch-vormen bij import**
-
-| `--pitch`  | Stemregels                                                                              | Eindanker per systeem |
-| ---------- | --------------------------------------------------------------------------------------- | --------------------- |
-| `ag-vsa`   | **Default.** Eerste klinkende noot per LSATB-systeem absolute a–g; daarna EHM           | ja (a–g)              |
-| `vsa`      | Eerste toon absoluut als doremi; daarna EHM                                             | ja (a–g)              |
-| `doremi`   | Laddergraden                                                                            | nee                   |
-| `a-g`      | Toonnamen met wetenschappelijk cijfer (`bb4`, …); alias `abc`                           | nee                   |
-
-Bij `ag-vsa` en `vsa` plakt de import op elke stemregel een **eindanker** met
-absolute toonhoogte (a–g met wetenschappelijk cijfer) direct achter de
-**laatste maatstreep** van elk systeem, bijvoorbeeld `|g4` of `||a4`. Dat zijn
-check-only ankers: na wijzigingen in het `.mvsa` vangt `mvsa validate` een
-mismatch op (`MVSA-BAR-ANKER`). Op de lyrics-regel (`L:`) blijven de strepen
-kaal.
-
-Syntax van eindankers:
-[specification-mvsa — eindanker](../../specification-mvsa/syntax.md#eindanker-aan-de-maatstreep).
-
-### Argumenten en opties
-
-| Naam                 | Verplicht | Betekenis                                                                              | Default              |
-| -------------------- | --------- | -------------------------------------------------------------------------------------- | -------------------- |
-| `path`               | Ja        | `.mxl` / `.musicxml` / `.xml` / `.mscz`, of map met zulke bestanden.                   | —                    |
-| `--pitch`            | Nee       | `ag-vsa` (default), `vsa`, `doremi`, of `a-g` (alias `abc`).                           | `ag-vsa`             |
-| `-o`, `--output`     | Nee       | Uitvoer-`.mvsa` (alleen bij precies één bronbestand).                                  | `<stem>.import.mvsa` |
-| `--do`               | Nee       | Forceer `@do` (bijv. `F4`). Zonder: KeySig / fifths / fallback.                        | afgeleid             |
-| `--octave-style`     | Nee       | `@oct` of `marker` (nog niet)                                                          | `@oct`               |
-| `--section`          | Nee       | `@sectie`-id in de output                                                              | `import`             |
-| `--musescore`        | Nee       | MuseScore-pad (bij `.mscz`)                                                            | auto                 |
-| `--no-align`         | Nee       | Geen kuiser-normaalvorm (geen align)                                                   | uit                  |
-
-### Voorbeelden
-
-```cmd
-vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa
-vsa mvsa import generated\alleluia-schets2.mxl -o generated\alleluia.import.mvsa --pitch doremi
-vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g
-vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4
-vsa mvsa import lied.mxl -o lied.mvsa --pitch vsa
-vsa mvsa validate lied.mvsa
-```
+Score → `.mvsa` (werkbank): [`mxl mvsa`](mxl.md) / [`mscz mvsa`](mscz.md) — details in [formats/mvsa — Score naar mvsa](../../formats/mvsa.md#score-naar-mvsa).
 
 ---
 
-## `vsa mvsa normalize`
+## `mvsa normalize`
 
 ### Synopsis
 
 ```text
-vsa mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
+mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                    [--octave-style {@oct,marker}] [--no-align] path
 ```
 
@@ -820,8 +658,7 @@ meerdere schetsen met verschillende spellingen in één bestand intact.
 Wil je wél herschrijven naar één vorm, geef dan expliciet `--pitch doremi`,
 `a-g`, `vsa` of `ag-vsa`. (`abc` is een alias van `a-g`.)
 
-**Import uit een ander formaat** (`.mxl` / `.mscz` via `mvsa import` / `mxl
-import`): daar is de default **`ag-vsa`** — er is dan geen “bronnotatie” om
+**Score → `.mvsa`** (`.mxl` / `.mscz` via `mxl mvsa` / `mscz mvsa`): daar is de default **`ag-vsa`** — er is dan geen “bronnotatie” om
 te bewaren.
 
 | `--pitch`   | Gedrag                                                                                          |
@@ -862,22 +699,22 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 ### Voorbeelden
 
 ```cmd
-vsa mvsa normalize examples\mvsa\alleluia-toon-8.canonieke.mvsa -o generated\alleluia.normalized.mvsa
-vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
-vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
+mvsa normalize examples\mvsa\alleluia-toon-8.canonieke.mvsa -o generated\alleluia.normalized.mvsa
+mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
+mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 ```
 
-**Zie ook:** [`transpose`](#vsa-mvsa-transpose) (andere tonica),
-[`kuiser`](#vsa-mvsa-kuiser) (authoring in-place).
+**Zie ook:** [`transpose`](#mvsa-transpose) (andere tonica),
+[`kuiser`](#mvsa-kuiser) (authoring in-place).
 
 ---
 
-## `vsa mvsa transpose`
+## `mvsa transpose`
 
 ### Synopsis
 
 ```text
-vsa mvsa transpose [-h] --to TONIC [-o OUTPUT]
+mvsa transpose [-h] --to TONIC [-o OUTPUT]
                    [--pitch {doremi,a-g,vsa,ag-vsa}]
                    [--octave-style {@oct,marker}] [--no-align] path
 ```
@@ -937,24 +774,24 @@ Commentaren die de oude toonsoort noemen (bijv. `# drie mollen`) worden
 ### Voorbeelden
 
 ```cmd
-vsa mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
-vsa mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F -o generated\alleluia.in-F.mvsa
-vsa mvsa transpose examples\bug-cases --to F4
-vsa mvsa transpose lied.mvsa --to Bb3 --pitch doremi -o generated\lied.in-Bb.mvsa
+mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
+mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F -o generated\alleluia.in-F.mvsa
+mvsa transpose examples\bug-cases --to F4
+mvsa transpose lied.mvsa --to Bb3 --pitch doremi -o generated\lied.in-Bb.mvsa
 ```
 
-**Zie ook:** [`normalize`](#vsa-mvsa-normalize),
+**Zie ook:** [`normalize`](#mvsa-normalize),
 [`@do` / `@mode`](../../specification-mvsa/keywords.md#do),
 [mvsa schrijven 101 — toonsoort](../../guides/mvsa-schrijven-101.md#toonsoort-verzetten-transpose).
 
 ---
 
-## `vsa mvsa kuiser`
+## `mvsa kuiser`
 
 ### Synopsis
 
 ```text
-vsa mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
+mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                 [--octave-style {@oct,marker}] [--no-align] path [path …]
 ```
 
@@ -1012,10 +849,10 @@ dagelijkse authoring-commando.
 ### Voorbeelden
 
 ```cmd
-vsa mvsa kuiser examples\mvsa\alleluia-toon-8.mvsa
-vsa mvsa kuiser examples\mvsa --check
-vsa mvsa kuiser lied.mvsa -o generated\lied.kuiser.mvsa
-vsa mvsa kuiser lied.mvsa --pitch a-g
+mvsa kuiser examples\mvsa\alleluia-toon-8.mvsa
+mvsa kuiser examples\mvsa --check
+mvsa kuiser lied.mvsa -o generated\lied.kuiser.mvsa
+mvsa kuiser lied.mvsa --pitch a-g
 ```
 
 ## Zie ook

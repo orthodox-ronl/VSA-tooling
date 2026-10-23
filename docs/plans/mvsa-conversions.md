@@ -23,8 +23,8 @@ canonieke vorm brengen (zelfde formaat).
 | ------------------------ | ----------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------ |
 | **`.vsa`**               | **normalize** (waar relevant) | — (niet v0)                                      | `vsa musicxml`                                                                                   | via MXL / templates                                                                                     | `vsa audio`            | — (niet gepland)   |
 | **`.mvsa`**              | —                             | **`normalize`** / **`kuiser`** / **`transpose`** | `mvsa mxl` · `score-ir` · `svg` (koormap)                                                        | **`mscz`** via mxl→MuseScore                                                                            | `mvsa mp3`             | — (niet gepland)   |
-| **`.mxl` / `.musicxml`** | —                             | **`import`**                                     | **normalize** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | MuseScore / `mxl mscz`                                                                                  | `vsa audio`            | — (niet gepland)   |
-| **`.mscz`**              | —                             | **`import`** (via mxl)                           | `mscz mxl`                                                                                       | **normalize** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | `vsa audio` (fallback) | — (niet gepland)   |
+| **`.mxl` / `.musicxml`** | —                             | **`mxl mvsa`**                                   | **normalize** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | MuseScore / `mxl mscz`                                                                                  | `vsa audio`            | — (niet gepland)   |
+| **`.mscz`**              | —                             | **`mscz mvsa`** (via mxl)                        | `mscz mxl`                                                                                       | **normalize** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | `vsa audio` (fallback) | — (niet gepland)   |
 | **`.midi` / `.mid`**     | —                             | —                                                | —                                                                                                | —                                                                                                       | —                      | — (niet gepland)   |
 
 **Audio (``.mp3``):** preview-luisteren via MuseScore — zie
@@ -116,13 +116,13 @@ Elke conversie-entry leest één brontype:
 | Command             | Bron                                  | Acties (richting)                                                                              |
 | ------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol                                      |
-| `mvsa` / `vsa mvsa` | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize, transpose, kuiser                  |
-| `mxl`               | `.mxl` / `.musicxml`                  | import → mvsa; mscz; **validate** / **normalize** (playback-checklist)                         |
-| `mscz`              | `.mscz`                               | import → mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)                                 |
+| `mvsa`          | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser                          |
+| `mxl`               | `.mxl` / `.musicxml`                  | mvsa; mscz; **validate** / **normalize** (playback-checklist)                                  |
+| `mscz`              | `.mscz`                               | mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl)                                          |
 | `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte tekst (referentie voor [`zoektekst`](../formats/zoektekst.md); optioneel `.lyrics.txt`) |
 | `vsa audio`         | `.mxl` / `.vsa` / …                   | preview ``.mp3`` via MuseScore                                                                 |
 
-**Transitie:** `vsa mvsa …` blijft de volledige alias van top-level `mvsa`.
+**Commando:** top-level `mvsa` (bron `.mvsa`).
 Windows: `scripts\mvsa.cmd`, `scripts\mxl.cmd`, `scripts\mscz.cmd`.
 
 ---
@@ -149,7 +149,7 @@ verwijzen ernaar; diagonaal is expliciet in de matrix.
 ### Stap 2 — `normalize` (diagonaal `.mvsa` → `.mvsa`) ✅
 
 ```text
-vsa mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa,ag-vsa}] --octave-style @oct
+mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa,ag-vsa}] --octave-style @oct
 ```
 
 - **Default `--pitch preserve`:** noteernamen op S/A/T/B blijven zoals in de
@@ -168,14 +168,14 @@ pitch-equivalent (`tests/test_mvsa_normalize.py`).
 ### Stap 2b — `transpose` (andere tonica, zelfde modus) ✅
 
 ```text
-vsa mvsa transpose PATH --to TONIC [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
+mvsa transpose PATH --to TONIC [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}]
 ```
 
 - Verschuift alle `@do`-regels en klinkende stemtonen naar `--to` (vorm als
   `@do`: `F4` of `F` zonder octaafcijfer).
 - `@mode` blijft gelijk (majeur → majeur).
 - Default `--pitch ag-vsa`; default-uitvoer sibling `<stem>.transposed.mvsa`.
-- Man-pagina: [`mvsa transpose`](../reference/cli/mvsa.md#vsa-mvsa-transpose).
+- Man-pagina: [`mvsa transpose`](../reference/cli/mvsa.md#mvsa-transpose).
 
 **Criterium (gehaald):** `alleluia-9b-toon-3-vokn.mvsa` (Eb → F): validate OK;
 MusicXML-MIDI overal +2 (`tests/test_mvsa_transpose.py`).
@@ -186,7 +186,7 @@ Keten: `.mvsa` → **partituur**-`.mxl` (SA/TB, lege part-namen) → MuseScore C
 → `.mscz` → stem-indicaties uit.
 
 ```text
-vsa mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
+mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
 ```
 
 - Module: `vsa.mvsa_mscz` + `vsa.mscz_partituur` + `vsa.musescore_cli`.
@@ -198,7 +198,8 @@ vsa mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
 ### Stap 4 — Import (score → mvsa) ✅
 
 ```text
-vsa mvsa import PATH [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}] --octave-style @oct
+mxl mvsa PATH [-o OUT] …
+mscz mvsa PATH [-o OUT] …
 ```
 
 - Bron: `.mxl` / `.musicxml` direct (SATB P1–P4); `.mscz` via MuseScore →
@@ -212,7 +213,7 @@ vsa mvsa import PATH [-o OUT] [--pitch {doremi,a-g,vsa,ag-vsa}] --octave-style @
 - Default `--pitch ag-vsa`: per systeem eerste noot absolute a–g, daarna EHM,
   a–g-eindanker; daarna **kuiser-normaalvorm** (canonieke `~` op L, bars sync,
   kolommen); `--no-align` slaat die stap over.
-- Top-level `mxl import` / `mscz import` = alias van `vsa mvsa import`.
+- Score → `.mvsa`: alleen `mxl mvsa` / `mscz mvsa` (geen `mvsa import`; bron = eerste token).
 - `abc` blijft alias van `a-g`. Pyphen-warnings via `kuiser` zijn advies.
 
 **Criterium (gehaald):** roundtrip `mvsa → mxl → mvsa` pitch-equivalent op
@@ -228,14 +229,13 @@ Top-level console-scripts + `scripts\*.cmd`:
 
 | Command             | Bron               | Acties                                                                        |
 | ------------------- | ------------------ | ----------------------------------------------------------------------------- |
-| `mvsa` / `vsa mvsa` | `.mvsa`            | validate, mxl, mscz, pdf, mp3, ogg, wav, import, normalize, transpose, kuiser |
-| `mxl`               | `.mxl`/`.musicxml` | import → mvsa; mscz                                                           |
-| `mscz`              | `.mscz`            | import → mvsa; mxl; **text** (lyrics, geen mvsa)                              |
+| `mvsa`          | `.mvsa`            | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser         |
+| `mxl`               | `.mxl`/`.musicxml` | mvsa; mscz; validate; normalize                                               |
+| `mscz`              | `.mscz`            | mvsa; mxl; **text** (lyrics, geen mvsa)                                       |
 | `vsa text`          | meerdere           | platte tekst incl. MusicXML / `.mscz`                                         |
 
 **Criterium (gehaald):** `mvsa -h`, `mxl -h`, `mscz -h` tonen matrix-acties;
-man-pagina’s `docs/reference/cli/{mvsa,mxl,mscz}.md`; oude `vsa mvsa …` blijft
-werken.
+man-pagina’s `docs/reference/cli/{mvsa,mxl,mscz}.md`.
 
 ---
 
@@ -257,6 +257,6 @@ werken.
 - Roundtrips waar haalbaar; anders pitch/duur-equivalentie.
 - `.mxl` blijft playback-vriendelijk (bestaande profielen / pitfalls).
 - `.mscz` bruikbaar in partituur-workflow.
-- `examples/mvsa/` blijft `vsa mvsa validate`-groen; nieuwe fixtures in
+- `examples/mvsa/` blijft `mvsa validate`-groen; nieuwe fixtures in
   `generated/`.
 - Geen scope-creep op blokhergebruik.

@@ -44,9 +44,9 @@ wint de VSA-spec tot mvsa die keuzes expliciet overneemt of afwijkt.
 - Overlays van A/T/B t.o.v. S;
 - Pagina-layout (MuseScore-“systemen” op een blad);
 - Parallelle `L1` als tweede lyric-nummer
-  (MSCZ/import/normalize: [mvsa-conversions](../plans/mvsa-conversions.md));
+  (MSCZ / `mxl mvsa` / normalize: [mvsa-conversions](../plans/mvsa-conversions.md));
 - Los MIDI-bestand (preview = [audio](../formats/audio.md)).
 
-Wel beschikbaar: `vsa mvsa validate`, `musicxml`, `mscz`, `pdf`, `audio`,
-`import`, `normalize`, `transpose`, `kuiser`.
+Wel beschikbaar: `mvsa validate`, `musicxml`, `mscz`, `pdf`, `audio`,
+`normalize`, `transpose`, `kuiser`; score → `.mvsa`: `mxl mvsa` / `mscz mvsa`.
 Navigatiehub: [Formaten & CLI](../formats/index.md).

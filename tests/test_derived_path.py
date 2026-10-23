@@ -82,6 +82,27 @@ def test_mscz_mxl_default_out_appends_brontype(
     assert captured["out"] == tmp_path / "lied.mscz.mxl"
 
 
+def test_mxl_mvsa_default_out_appends_brontype(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from vsa.cli_mxl import main as mxl_main
+
+    src = tmp_path / "lied.mxl"
+    src.write_text(
+        '<?xml version="1.0"?><score-partwise version="3.1"/>',
+        encoding="utf-8",
+    )
+    captured: dict[str, Path] = {}
+
+    def fake_import(path, out, **kwargs):  # noqa: ANN001
+        captured["out"] = out
+        out.write_text("@title \"t\"\n\n@sectie schets\nL a\nS do\n", encoding="utf-8")
+
+    monkeypatch.setattr("vsa.mvsa_import.import_score_path", fake_import)
+    assert mxl_main(["mvsa", str(src)]) == 0
+    assert captured["out"] == tmp_path / "lied.mxl.mvsa"
+
+
 @pytest.mark.parametrize("fmt", ["mp3", "ogg", "wav"])
 def test_mvsa_audio_subcommand_sets_format(
     fmt: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch

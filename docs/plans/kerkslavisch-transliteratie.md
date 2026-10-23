@@ -281,8 +281,8 @@ Coria-MXL of print-MSCZ genereert.
 ```cmd
 cd /d C:\Git\orthodox-ronl\bibliotheek
 python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
-vsa mvsa validate content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa
-vsa mvsa mxl content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa --hulptekst-as-parts -o generated\coria\<representatie-id>.mxl --bibliotheek-id <zangstuk>/<variant>/<uitvoeringsvorm>
+mvsa validate content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa
+mvsa mxl content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa --hulptekst-as-parts -o generated\coria\<representatie-id>.mxl --bibliotheek-id <zangstuk>/<variant>/<uitvoeringsvorm>
 ```
 
    Vervang paden door jullie echte mapconventie. In het `.mvsa`: `@taal` zetten
@@ -292,7 +292,7 @@ vsa mvsa mxl content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\b
 3. **Print voor zangers** (tweede tekstregel op het blad):
 
 ```cmd
-vsa mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
+mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
 ```
 
 4. **Wat de bibliotheek zelf beslist:** welke representatie een Coria-MXL krijgt,

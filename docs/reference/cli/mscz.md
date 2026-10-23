@@ -1,13 +1,14 @@
 # `mscz` — conversies met MuseScore als bron
 
 Top-level CLI voor bronbestanden `.mscz`.
+Conventie: **`mscz {doeltype}`** (bronextensie → doelextensie).
 Zie het conversieplan:
 [mvsa-conversions](../../plans/mvsa-conversions.md).
 
-Alias voor import: [`vsa mvsa import`](mvsa.md#vsa-mvsa-import) (zelfde
-MSCZ→mxl→mvsa-keten). **Werkbank-bewerkvorm** — niet ongewijzigd als
+**`mscz mvsa`** maakt een **werkbank-bewerkvorm** — niet ongewijzigd als
 catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout). De
-output begint met dezelfde waarschuwingsbanner als `mvsa import`.
+output begint met een ASCII-waarschuwingsbanner. Details:
+[`.mvsa` — score naar mvsa](../../formats/mvsa.md#score-naar-mvsa).
 
 Alias voor platte tekst: [`vsa text`](text.md) (zelfde extractie; ook
 `.mxl` / `.vsa` / `.mvsa`).
@@ -19,38 +20,37 @@ bron. Zie [Invoer bestand of map](input-pad.md).
 ## Synopsis
 
 ```text
-mscz [-h] {import,mxl,text} …
-mscz import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
-            [--octave-style {@oct,marker}] [--section SECTION]
-            [--musescore PATH] [--no-align] path
+mscz [-h] {mvsa,mxl,text} …
+mscz mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
+          [--octave-style {@oct,marker}] [--section SECTION]
+          [--musescore PATH] [--no-align] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
 mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 ```
 
 ## Subcommando's
 
-| Subcommando | Doel                                                                                                                    |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `import`    | Importeer naar `.mvsa` (MuseScore → temp `.mxl` → SATB-explode → parser).                                               |
-| `mxl`       | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts. Default: `<bronnaam>.mxl` (bijv. `lied.mscz.mxl`). |
-| `text`      | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).                                        |
+| Subcommando | Doel                                                                                                                         |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `mvsa`      | Naar `.mvsa` (MuseScore → temp `.mxl` → SATB-explode → parser). Default: `<bronnaam>.mvsa` (bijv. `lied.mscz.mvsa`).         |
+| `mxl`       | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts. Default: `<bronnaam>.mxl` (bijv. `lied.mscz.mxl`).      |
+| `text`      | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).                                             |
 
-**Import-opties** (`--pitch` default `ag-vsa`, `--do`, `--no-align`, soft-wrap,
-eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zelfde keten als
-[`vsa mvsa import`](mvsa.md#vsa-mvsa-import). `@do` komt uit de MuseScore-
-voortekening (`KeySig` / `concertKey`) tenzij je `--do` meegeeft. De
-MSCZ-stap gebruikt dezelfde SATB-explode als `mscz mxl`. A/T/B volgen L/S
-op **duur** (lange noten worden gesplitst/gepaddet), zodat ontbrekende of
-scheve lyrics op de onderstemmen de posities niet verschuiven.
+**`mvsa`-opties** (`--pitch` default `ag-vsa`, `--do`, `--no-align`, soft-wrap,
+eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zie
+[score naar mvsa](../../formats/mvsa.md#score-naar-mvsa). `@do` komt uit de
+MuseScore-voortekening (`KeySig` / `concertKey`) tenzij je `--do` meegeeft.
+De MSCZ-stap gebruikt dezelfde SATB-explode als `mscz mxl`. Default
+`--section schets`.
 
 ## Voorbeelden
 
 ```cmd
-mscz import generated\alleluia-schets2.mscz -o generated\from-mscz.mvsa
-mscz import generated\alleluia-schets2.mscz --pitch a-g -o generated\from-mscz.mvsa
-mscz import generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
-mscz import generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
-vsa mvsa validate generated\from-mscz.mvsa
+mscz mvsa generated\alleluia-schets2.mscz
+mscz mvsa generated\alleluia-schets2.mscz -o generated\from-mscz.mvsa
+mscz mvsa generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
+mscz mvsa generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
+mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
 mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
 ```
@@ -66,5 +66,5 @@ scripts\mscz.cmd -h
 - [Invoer bestand of map](input-pad.md)
 - [`text`](text.md) — platte tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz`
 - [`mvsa`](mvsa.md) — bron `.mvsa`
-- [`mxl`](mxl.md) — bron `.mxl`
-- MSCZ-export vanuit mvsa: [`vsa mvsa mscz`](mvsa.md#vsa-mvsa-mscz)
+- [`mxl`](mxl.md) — bron `.mxl` (`mxl mvsa` voor MusicXML → `.mvsa`)
+- MSCZ-export vanuit mvsa: [`mvsa mscz`](mvsa.md#mvsa-mscz)

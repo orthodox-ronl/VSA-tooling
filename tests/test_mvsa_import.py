@@ -827,6 +827,46 @@ def test_import_maat_marker_survives_kuiser(tmp_path: Path):
     assert lines[idx + 1].startswith("L:")
 
 
+def test_maat_comment_uses_musicxml_number_not_list_index():
+    """#maat volgt MusicXML @number (canonieke maatnummers), niet 0-based index+1."""
+
+    def _meas(number: str, lyric: str) -> str:
+        return (
+            f'<measure number="{number}">'
+            "<attributes><divisions>1</divisions>"
+            "<key><fifths>0</fifths></key></attributes>"
+            "<note><pitch><step>C</step><octave>4</octave></pitch>"
+            "<duration>4</duration><type>whole</type>"
+            '<lyric number="1"><syllabic>single</syllabic>'
+            f"<text>{lyric}</text></lyric></note></measure>"
+        )
+
+    def _rest_voice(number: str, step: str, oct_: str) -> str:
+        return (
+            f'<measure number="{number}">'
+            "<attributes><divisions>1</divisions>"
+            "<key><fifths>0</fifths></key></attributes>"
+            f"<note><pitch><step>{step}</step><octave>{oct_}</octave></pitch>"
+            "<duration>4</duration><type>whole</type></note></measure>"
+        )
+
+    # Twee maten genummerd 10 en 11 (niet 1 en 2).
+    xml = _satb_score_xml(
+        {
+            "P1": _meas("10", "Een") + _meas("11", "Twee"),
+            "P2": _rest_voice("10", "A", "3") + _rest_voice("11", "A", "3"),
+            "P3": _rest_voice("10", "E", "3") + _rest_voice("11", "E", "3"),
+            "P4": _rest_voice("10", "A", "2") + _rest_voice("11", "A", "2"),
+        }
+    )
+    score = parse_musicxml_satb(xml)
+    assert score.measure_numbers == ["10", "11"]
+    # Één maat per systeem → tweede systeem moet #maat 11 zijn, niet 2.
+    text = score_to_mvsa(score, pitch_form="abc", system_soft_width=1)
+    markers = [ln for ln in text.splitlines() if ln.startswith("#maat ")]
+    assert markers == ["#maat 10", "#maat 11"], markers
+
+
 def test_clean_lyric_hyphen_and_trailing_period():
     from vsa.mvsa_import import (
         _clean_import_lyric_text,
@@ -2042,3 +2082,73 @@ def test_read_mscz_key_fifths_from_template_and_wij_hebben():
     assert do_from_fifths(read_mscz_key_fifths(template)) == "F4"
     # Hemelum-bron heeft geen KeySig in de .mscx → None (geen gok).
     assert read_mscz_key_fifths(wij) is None
+
+
+def test_import_musicxml_rest_becomes_r(tmp_path: Path):
+    """MusicXML ``<rest/>`` → stemtoken ``r`` (niet hold ``-``)."""
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <part-list>
+    <score-part id="P1"><part-name>S</part-name></score-part>
+    <score-part id="P2"><part-name>A</part-name></score-part>
+    <score-part id="P3"><part-name>T</part-name></score-part>
+    <score-part id="P4"><part-name>B</part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <note><pitch><step>F</step><alter>1</alter><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type>
+        <lyric><syllabic>single</syllabic><text>U,</text></lyric></note>
+      <note><rest/><duration>2</duration><type>eighth</type></note>
+      <note><rest/><duration>4</duration><type>quarter</type></note>
+      <note><rest/><duration>4</duration><type>quarter</type></note>
+    </measure>
+  </part>
+  <part id="P2">
+    <measure number="1">
+      <note><pitch><step>D</step><alter>1</alter><octave>4</octave></pitch>
+        <duration>4</duration><type>quarter</type></note>
+      <note><rest/><duration>2</duration><type>eighth</type></note>
+      <note><rest/><duration>4</duration><type>quarter</type></note>
+      <note><rest/><duration>4</duration><type>quarter</type></note>
+    </measure>
+  </part>
+  <part id="P3">
+    <measure number="1">
+      <note><pitch><step>B</step><octave>3</octave></pitch>
+        <duration>6</duration><type>quarter</type><dot/></note>
+      <note><pitch><step>C</step><octave>4</octave></pitch>
+        <duration>2</duration><type>eighth</type></note>
+      <note><pitch><step>B</step><octave>3</octave></pitch>
+        <duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>A</step><octave>3</octave></pitch>
+        <duration>4</duration><type>quarter</type></note>
+    </measure>
+  </part>
+  <part id="P4">
+    <measure number="1">
+      <note><pitch><step>B</step><octave>2</octave></pitch>
+        <duration>6</duration><type>quarter</type><dot/></note>
+      <note><pitch><step>C</step><octave>3</octave></pitch>
+        <duration>2</duration><type>eighth</type></note>
+      <note><pitch><step>B</step><octave>2</octave></pitch>
+        <duration>4</duration><type>quarter</type></note>
+      <note><pitch><step>A</step><octave>2</octave></pitch>
+        <duration>4</duration><type>quarter</type></note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    mxl = tmp_path / "rest-r.mxl"
+    write_musicxml_output(mxl, xml)
+    imported = import_score_to_mvsa(mxl, pitch="abc", align=False)
+    # Zoek S-regel met f#/F# en r-slots.
+    s_lines = [ln for ln in imported.splitlines() if ln.startswith("S:")]
+    assert s_lines, imported
+    assert any("r" in ln for ln in s_lines), imported
+    # Geen foutieve hold i.p.v. rust op de S-melisma na de eerste toon.
+    joined = " ".join(s_lines)
+    assert re.search(r"f#4\s*&?\s*r|F#4\s*&?\s*r", joined, re.I) or "&r" in joined.replace(
+        " ", ""
+    ), joined

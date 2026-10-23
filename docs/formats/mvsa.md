@@ -6,40 +6,60 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 
 ## Wat hoort hier
 
-| Onderwerp                           | Waar                                                                                             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Canonieke schrijfvorm, sync, recite | [Syntax](../specification-mvsa/syntax.md), [Semantiek](../specification-mvsa/semantics.md)       |
-| `@`-keywords (titel, tempo, …)      | [Keywords](../specification-mvsa/keywords.md)                                                    |
-| Metadata ↔ `.vsa` (NL-termen)       | [Metadata-brug](../guides/metadata-brug.md)                                                      |
-| Zoektekst in canonieke bron         | [`zoektekst`](zoektekst.md) · CLI [`vsa zoektekst`](../reference/cli/zoektekst.md)               |
-| Validatieregels                     | [Validatie](../specification-mvsa/validation.md)                                                 |
-| Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                                  |
-| Toonsoort / tonica verzetten        | [`mvsa transpose`](../reference/cli/mvsa.md#vsa-mvsa-transpose)                                  |
-| Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap; same-pitch recite; kuiser) |
-| CLI                                 | [`mvsa`](../reference/cli/mvsa.md) (`≡ vsa mvsa`)                                                |
-| Score-IR (scherm-JSON)              | [`score-ir`](score-ir.md) · [`mvsa score-ir`](../reference/cli/mvsa.md#vsa-mvsa-score-ir)        |
-| Muziek-only SVG (koormap)           | [`mvsa-svg`](mvsa-svg.md) · [`mvsa svg`](../reference/cli/mvsa.md#vsa-mvsa-svg)                  |
-| Platte gezongen tekst (extractie)   | [`vsa text`](../reference/cli/text.md)                                                           |
+| Onderwerp                           | Waar                                                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Canonieke schrijfvorm, sync, recite | [Syntax](../specification-mvsa/syntax.md), [Semantiek](../specification-mvsa/semantics.md)                            |
+| `@`-keywords (titel, tempo, …)      | [Keywords](../specification-mvsa/keywords.md)                                                                         |
+| Metadata ↔ `.vsa` (NL-termen)       | [Metadata-brug](../guides/metadata-brug.md)                                                                           |
+| Zoektekst in canonieke bron         | [`zoektekst`](zoektekst.md) · CLI [`vsa zoektekst`](../reference/cli/zoektekst.md)                                    |
+| Validatieregels                     | [Validatie](../specification-mvsa/validation.md)                                                                      |
+| Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                                                       |
+| Toonsoort / tonica verzetten        | [`mvsa transpose`](../reference/cli/mvsa.md#mvsa-transpose)                                                       |
+| Score → `.mvsa` (werkbank)          | [`mxl mvsa`](../reference/cli/mxl.md) / [`mscz mvsa`](../reference/cli/mscz.md) — [Score naar mvsa](#score-naar-mvsa) |
+| CLI (bron `.mvsa`)                  | [`mvsa`](../reference/cli/mvsa.md) ()                                                                     |
+| Score-IR (scherm-JSON)              | [`score-ir`](score-ir.md) · [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir)                             |
+| Muziek-only SVG (koormap)           | [`mvsa-svg`](mvsa-svg.md) · [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                                       |
+| Platte gezongen tekst (extractie)   | [`vsa text`](../reference/cli/text.md)                                                                                |
 
-!!! warning "Import = werkbank"
-    Score→`.mvsa` is een **bewerkvorm** voor de werkbank-fase (woordstreepjes,
-    lege recite, lossy layout). Niet ongewijzigd als catalogusbron gebruiken.
-    De import zet bovenaan een ASCII-waarschuwingsbanner met checklist.
-    Zie [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import).
+## Score naar mvsa
 
-**Import (kort):** `.mxl` gaat rechtstreeks naar de SATB-parser (P1–P4);
-`.mscz` eerst via MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
-[`mscz mxl`](../reference/cli/mscz.md). Default output is de **canonieke
-schrijfvorm** (kuiser-normaalvorm). Soft-wrap zet same-pitch holds als `-`
-ook over systeemovergangen; export en eindanker-check zetten die weer om naar de
-vorige toon (tenzij een beginanker reset) — zie
-[Semantiek — lopende toon over systeemovergangen](../specification-mvsa/semantics.md#lopende-toon-over-systeemovergangen).
-Vóór elk LSATB-systeem zet import `#maat N` (1-based startmaat) voor
-navigatie t.o.v. PDF / MuseScore. Default `--pitch ag-vsa`: eerste noot per
-systeem absolute a–g, daarna EHM, plus check-only a–g-eindankers op
-systeemeinden. Hetzelfde eindanker-gedrag bij `--pitch vsa`; `doremi` /
-`a-g` zetten geen eindankers. Tutorial:
+!!! warning "Alleen voor de werkbank-fase"
+    `mxl mvsa` / `mscz mvsa` zijn bedoeld als **bewerk-/startvorm** — van
+    MuseScore/MusicXML naar bewerkbare `.mvsa`, daarna handmatig afmaken.
+    Niet als kant-en-klare catalogusbron. Elk bestand krijgt na
+    `# Imported: …` een ASCII-waarschuwingsbanner met checklist.
+
+**CLI (conventie bron → doel):**
+
+| Bron                          | Commando     | Default-uitvoer (zonder `-o`)              |
+| ----------------------------- | ------------ | ------------------------------------------ |
+| `.mxl` / `.musicxml` / `.xml` | `mxl mvsa`   | `<bronnaam>.mvsa` (bijv. `lied.mxl.mvsa`)  |
+| `.mscz`                       | `mscz mvsa`  | `<bronnaam>.mvsa` (bijv. `lied.mscz.mvsa`) |
+
+`.mxl` gaat rechtstreeks naar de SATB-parser (P1–P4); `.mscz` eerst via
+MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
+[`mscz mxl`](../reference/cli/mscz.md). Default: **canonieke schrijfvorm**
+(kuiser-normaalvorm), `--pitch ag-vsa`, `--section schets`. Soft-wrap,
+`#maat N`, eindankers: zie hieronder en
+[Canonieke maatnummers](#canonieke-maatnummers). Tutorial:
 [mvsa schrijven 101 — bladmuziek](../guides/mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa).
+
+Man-pagina’s: [`mxl mvsa`](../reference/cli/mxl.md) ·
+[`mscz mvsa`](../reference/cli/mscz.md).
+
+## Canonieke maatnummers
+
+Elke **koormaat** heeft in alle vormen waar een maatnummer zichtbaar is
+(MuseScore/`.mscz`, MusicXML `@number`, import-commentaar `#maat N`,
+partituur-PDF) **hetzelfde nummer**.
+
+| Regel             | Toelichting                                                                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bron              | Het maatnummer is dat van de MuseScore-partituur / MusicXML `measure@number` van de koormaat.                                                                         |
+| `#maat N`         | `N` = dat canonieke nummer van de eerste koormaat in het LSATB-systeem (niet de 1-based index in een genormaliseerde lijst met extra maten).                          |
+| Pauzematen        | Coria-oefenmaten met lyric `[PAUZE]` (na dubbele streep) krijgen een afgeleid nummer `Np` (bijv. `6p`) en **verschuiven** de nummers van volgende koormaten **niet**. |
+| Score → mvsa      | `mscz mvsa` / `mxl mvsa` voegen geen `[PAUZE]`-maten toe (die horen bij playback-`.mxl`, niet bij de authoring-schets).                                               |
+| Systeemovergangen | Soft-wrap-grenzen in `.mvsa` mogen afwijken van MuseScore-systeemovergangen; alleen het **nummer per maat** is gedeeld, niet de regelsprong.                          |
 
 ## Typische commando’s
 
@@ -50,9 +70,10 @@ mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
 mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
-mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
-mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
-mvsa validate generated\alleluia.import.mvsa
+mxl mvsa generated\alleluia.mxl
+mxl mvsa generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
+mscz mvsa generated\alleluia.mscz -o generated\from-mscz.mvsa
+mvsa validate generated\alleluia.mxl.mvsa
 vsa text examples\mvsa\alleluia-toon-8.mvsa
 ```
 

@@ -1,6 +1,6 @@
 """Top-level ``mvsa`` CLI (bron: ``.mvsa``).
 
-Alias van ``vsa mvsa …``. Zie docs/plans/mvsa-conversions.md.
+Zie docs/plans/mvsa-conversions.md.
 """
 
 from __future__ import annotations

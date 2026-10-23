@@ -40,7 +40,7 @@ vsa zoektekst examples\minimal\050_svg_demo.vsa -o generated\demo.zoektekst.vsa
 ```
 
 Catalogus-CI (later): `vsa zoektekst content-source\catalogus --check`, of
-`vsa mvsa validate … --require-zoektekst` voor alleen `.mvsa`.
+`mvsa validate … --require-zoektekst` voor alleen `.mvsa`.
 
 ## Zie ook
 

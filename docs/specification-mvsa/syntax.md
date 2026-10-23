@@ -153,7 +153,7 @@ eráchter.
 
 **Validatie** eist deze kolommen **niet**: alleen de positietelling telt
 ([Semantiek](semantics.md#sync-contract-lengte-posities)). Losse invoer mag
-rompiger zijn; de kuiser mag normaliseren (`vsa mvsa kuiser`). Gegenereerde
+rompiger zijn; de kuiser mag normaliseren (`mvsa kuiser`). Gegenereerde
 output en de voorbeelden in `examples/mvsa` volgen wél deze layout. Hulpje:
 `python scripts/align_mvsa_columns.py examples/mvsa` (alleen kolommen; de
 volledige kuiser-pipeline is `mvsa kuiser`).
@@ -440,7 +440,8 @@ komma’s bij de lettergreep vóór de `)`.
 
 ## 7. Stemregel
 
-Op een stemregel staan alleen **hoogte-stukken**, gescheiden door spaties:
+Op een stemregel staan alleen **hoogte-stukken** (of een rust-slot), gescheiden
+door spaties:
 
 - relatief (EHM): `/`, `\`, `-`, `/3`, `#\`, … — **unidirectioneel**
   (alleen `/…` of alleen `\…`, eventueel met cijfer). Mixen zoals `\/` of
@@ -449,7 +450,11 @@ Op een stemregel staan alleen **hoogte-stukken**, gescheiden door spaties:
   toonnamen `c`…`b`, `Bb`, `fis`, …;
 - octaaf: suffix `-` / `+` / `-1` / `+2` / … of wetenschappelijk cijfer op
   toonnamen (`g3`, `bb4`);
-- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots).
+- melisma: `a4&b4&c5` of `d4&-&-` (aanhouden / zelfde toon in volgende slots);
+- **rust:** `r` of `R` — één slot zonder klinkende toon (duur via de L-ELM van
+  dat slot). Mag alleen staan, of in een melisma: `f#4&r&r&r`. Niet hetzelfde
+  als `-` (aanhouden). Semantiek:
+  [Rusten op de stemregel](semantics.md#rusten-op-de-stemregel).
 
 Of de regel **standaard** relatief of absoluut is, volgt uit de
 [regelidentifier](#regelidentifier): met EHM (`S-:`) relatief + beginanker;
@@ -457,6 +462,9 @@ zonder EHM (`S:`) absoluut. Mix van EHM-stappen en laddergraden (ankers) op
 dezelfde regel blijft toegestaan.
 
 Geen lyrics en geen `_` / `.&.` op de stemregel — die horen in L.
+
+`r` / `R` is **geen** laddergraad: `re` blijft «re»; alleen het losse token
+`r` of `R` is rust.
 
 `so` = `sol`; `si` = `ti`. Namen zijn hoofdletterongevoelig waar dat geen
 toonnaam-conflicten geeft (`Bb` vs `b`).

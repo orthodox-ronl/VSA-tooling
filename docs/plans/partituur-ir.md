@@ -2,12 +2,12 @@
 
 | Veld            | Waarde                                                                                                                                                           |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**      | werkplan; **niet normatief**; stap 1–5 gedaan (IR, OSMD-via-IR, score-ir, koormap-SVG)                                                                            |
+| **Status**      | werkplan; **niet normatief**; stap 1–5 + schermbrug-contract (§7) gedaan; CoriB-MVP en site-embed nog open                                                       |
 | **Doel**        | Vastleggen wat het JSON-achtige tussenmodel bevat dat schermrenderer (koormap-SVG) én CoriB voedt — zonder MuseScore als schermmotor                             |
 | **Eigenaar**    | Export uit `.mvsa` → IR: [VSA-tooling](@bron); consumptie: bibliotheek (shortcode `muziek`) + CoriB                                                              |
 | **Gerelateerd** | [canonical-checklists](../formats/canonical-checklists.md) (S-reeks = layoutdoel), [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md), `@tekst` |
 
-Contract + [`vsa mvsa score-ir`](../reference/cli/mvsa.md#vsa-mvsa-score-ir). Schema-validator en schermrenderer: later.
+Contract + [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir). Schema-validator en schermrenderer: later.
 
 ---
 
@@ -42,7 +42,8 @@ Bron blijft `.mvsa`. MusicXML/MSCZ blijven exportpaden voor MuseScore/print; Sco
 
 - Geen complete MusicXML-vervanging.
 - Geen VSA-glyph-laag op lyrics (later).
-- Geen speelplan-navigatie als verplicht veld (mag later).
+- Speelplan-navigatie is optioneel per maat (`ending` / `repeatTimes` /
+  `navigation`); aanwezig wanneer bladvorm dat vraagt.
 - Geen audio-instrumentatie als kern (CoriB mag defaults kiezen).
 - Geen implementatie van exporter of renderer in dit document.
 
@@ -100,10 +101,17 @@ ScoreDocument
 Measure
   id: string                    # stabiel binnen document, bv. "m1"
   bar: { left?, right }         # single | light-light | light-heavy | repeat-…
+  ending?: { start?, stop? }    # volta-nummers (MusicXML ``<ending>``)
+  repeatTimes?: number          # alleen bij herhaal > 2×
+  navigation?: [ string, … ]    # segno | fine | to_coda | coda | ds_al_* | dc_al_*
   cues: [ Cue, … ]              # @tekst die bij déze maat hoort (vaak 0 of 1)
   lyrics: [ LyricPos, … ]       # gedeelde L-lijn voor partituur
   voices: { S, A, T, B }        # elk: [ VoiceEvent, … ] synchroon in de maat
 ```
+
+Speelplan-bladvorm (volta / herhaal / D.S. / coda) volgt
+`docs/specification-mvsa/speelplan.md` en dezelfde helpers als partituur-MusicXML;
+from-ir emitteert de navigatiemarkeringen voor OSMD.
 
 **Sync-regel:** binnen één maat is het aantal *lengte-posities* op `lyrics` gelijk aan het aantal events per stem die meezingen (holds/melisma zoals in `.mvsa` / huidige export). Exacte telling volgt de bestaande L↔SATB-validator; IR exporteert al-uitgelijnde events.
 
@@ -164,10 +172,11 @@ CLI-export (zelfde keten als partituur-MusicXML-events):
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
+mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
 ```
 
-Default sibling-naam: `lied.mvsa.score-ir.json`. Module: `vsa.score_ir`.
+Default siblings: `lied.mvsa.score-ir.json`; met ``--musicxml`` ook
+`lied.mvsa.from-ir.musicxml`. Module: `vsa.score_ir`.
 
 ---
 
@@ -177,25 +186,76 @@ Default sibling-naam: `lied.mvsa.score-ir.json`. Module: `vsa.score_ir`.
 | --------------------------- | -------------------------------------------------------------- |
 | `.mvsa` → partituur-`.mxl`  | Blijft MuseScore-import / tijdelijke schermbron                |
 | `.mvsa` → `.mscz` / PDF     | Blad / bewerken; niet de gedeelde schermmotor                  |
-| `.mvsa` → Score-IR          | **`vsa mvsa score-ir`** (v0.1 partituur); input voor SVG/CoriB |
+| `.mvsa` → Score-IR          | **`mvsa score-ir`** (v0.1 partituur); input voor SVG/CoriB |
 | Coria-playback-`.mxl`       | Legacy oefenpad; niet het partituur-IR-model                   |
 
 Hulptekst: in IR als lyric-laag `"2"` (later); **niet** als nep-extra-stemparts.
 
 ---
 
-## 7. Volgende stappen
+## 7. Scherm- en CoriB-brug
 
-1. ~~IR-contract + voorbeeld~~
-2. ~~Spike: partituur-MXL in de browser + cues~~ (`examples/spikes/partituur-browser/`)
-3. ~~Exporter `.mvsa` → Score-IR v0.1~~ (`vsa mvsa score-ir`, tests)
-4. ~~Koormap-SVG (MuseScore-brug)~~ — [`vsa mvsa svg`](../reference/cli/mvsa.md#vsa-mvsa-svg) / [mvsa-svg](../formats/mvsa-svg.md)
-5. ~~Score-IR → MusicXML → OSMD~~ — `vsa.score_ir_musicxml`, spike `examples/spikes/partituur-browser/`, CLI ``--musicxml``
-6. CoriB-MVP (speler op Score-IR / OSMD-brug) — later
+Gedeelde **productieschermketen** (geen MuseScore als schermmotor):
+
+```text
+.mvsa  →  Score-IR (JSON)  →  MusicXML (uit IR)  →  OSMD (tekenen)
+```
+
+| Consument                         | Wat laden                                                                 | Tekenen                                      |
+| --------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------- |
+| Koormap / shortcode `muziek`      | Score-IR **of** MusicXML die uit die Score-IR komt (`--musicxml`)         | OSMD op die MusicXML                         |
+| CoriB (later, MVP)                | Zelfde Score-IR als broncontract; tekenen via dezelfde OSMD-brug          | Highlight/mute op voices; geen tweede model  |
+
+**Versiepoort:** weiger onbekende `format` / major van `version` (nu
+`format: "score-ir"`, `version: "0.1"`). Zie §4.
+
+**Sibling-artifacts** (canonieke namen naast `lied.mvsa`):
+
+| Bestand                        | Rol                                      |
+| ------------------------------ | ---------------------------------------- |
+| `lied.mvsa.score-ir.json`      | Score-IR v0.1                            |
+| `lied.mvsa.from-ir.musicxml`   | Partituur-MusicXML **uit** die Score-IR  |
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa score-ir lied.mvsa --musicxml
+mvsa score-ir map-met-mvsa --musicxml
+```
+
+**Bewijs (spike, geen product-UI):** `examples/spikes/partituur-browser/`
+(OSMD in de browser); optioneel headless SVG:
+`examples/spikes/partituur-osmd-svg/`.
+
+**Non-goals van deze brug:**
+
+- Geen MuseScore-paginamodel op de site; geen tall MuseScore-scherm-SVG als
+  hoofdpad ([kale-muziek §4](kale-muziek-svg-en-uitgaven.md)).
+- Geen tweede tekenmodel naast OSMD-uit-IR voor CoriB.
+- Geen CoriB-product-UI in VSA-tooling; alleen dit consumptiecontract.
+- Print/blad blijft MuseScore (`mvsa svg` bladreeks, MSCZ, pagina-pdf).
+
+**Klaar genoeg voor CoriB later:** Score-IR v0.1 + MusicXML-uit-IR + OSMD is
+het afgesproken aansluitpunt; CoriB bouwt speler/oefenen daarop, niet op
+catalogus-MXL of MuseScore-SVG.
 
 ---
 
-## 8. Open punten
+## 8. Volgende stappen
+
+1. ~~IR-contract + voorbeeld~~
+2. ~~Spike: partituur-MXL in de browser + cues~~ (`examples/spikes/partituur-browser/`)
+3. ~~Exporter `.mvsa` → Score-IR v0.1~~ (`mvsa score-ir`, tests)
+4. ~~Koormap-SVG (MuseScore-brug)~~ — [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg) / [mvsa-svg](../formats/mvsa-svg.md)
+5. ~~Score-IR → MusicXML → OSMD~~ — `vsa.score_ir_musicxml`, spike `examples/spikes/partituur-browser/`, CLI ``--musicxml``
+6. ~~Scherm-/CoriB-brugcontract~~ (§7; richting Score-IR/OSMD vast in
+   [kale-muziek §4](kale-muziek-svg-en-uitgaven.md))
+7. **Productiescherm** — shortcode `muziek` / koormap-embed op Score-IR →
+   OSMD (nog open; sluit kale-muziek §4)
+8. CoriB-MVP (speler op §7-brug) — later
+
+---
+
+## 9. Open punten
 
 - Duurencoding: **ELM-tokens** gekozen in v0.1 (`duration.elm`).
 - Recite-print-collapse in IR of alleen in print-profiel?

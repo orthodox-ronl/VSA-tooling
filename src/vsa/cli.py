@@ -82,11 +82,19 @@ def _build_parser():
 
     svg = subparsers.add_parser(
         "svg",
-        help="Render .vsa naar SVG (één bestand of map).",
+        help="Render .vsa naar muziek-only SVG (default: sibling .vsa.svg).",
         description=(
-            "Render eenstemmige .vsa naar SVG. "
-            "INPUT = één .vsa of map (recursief); bij een map is OUTPUT "
-            "een uitvoermap (bestandsnaam: <bronnaam>.svg)."
+            "Render eenstemmige .vsa naar SVG (alleen notatie, geen titel). "
+            "INPUT = één .vsa of map (recursief). Default-uitvoer: sibling "
+            "<bronnaam>.vsa.svg naast elke bron (zelfde naamgeving als "
+            "mvsa svg → .mvsa.svg). -o/--output alleen bij precies één bron."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Voorbeelden:\n"
+            "  vsa svg examples\\minimal\\050_svg_demo.vsa\n"
+            "  vsa svg lied.vsa -o generated\\lied.vsa.svg\n"
+            "  vsa svg examples\\minimal --max-line-width 400"
         ),
     )
     svg.add_argument(
@@ -94,8 +102,14 @@ def _build_parser():
         help=".vsa-bestand of map met .vsa-bestanden (recursief).",
     )
     svg.add_argument(
-        "output",
-        help="Uitvoer-.svg, of uitvoermap bij meerdere bronnen.",
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help=(
+            "Uitvoer-.svg (default: sibling <naam>.vsa.svg per bron). "
+            "Alleen bij precies één bronbestand."
+        ),
     )
     svg.add_argument("--config", default=None)
     svg.add_argument("--max-line-width", type=float, default=None)
@@ -422,8 +436,6 @@ def _build_parser():
             "      Exporteer naar muziek-only SVG (koormap; MuseScore-brug).\n"
             "  mp3|ogg|wav PATH [-o OUTPUT]\n"
             "      Exporteer naar preview-audio (.mp3 / .ogg / .wav) via MuseScore.\n"
-            "  import PATH [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]\n"
-            "      Importeer .mxl/.mscz naar .mvsa (default --pitch: ag-vsa).\n"
             "  normalize PATH [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]\n"
             "      Canoniseer .mvsa (default: behoud noteernamen; optioneel herschrijf).\n"
             "  transpose PATH --to TONIC [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]\n"
@@ -433,33 +445,33 @@ def _build_parser():
             "(+ optioneel pitch).\n"
             "\n"
             "voorbeelden:\n"
-            "  vsa mvsa validate examples\\mvsa\n"
-            "  vsa mvsa mxl lied.mvsa -o out.mxl --section schets1\n"
-            "  vsa mvsa mscz lied.mvsa -o out.mscz\n"
-            "  vsa mvsa mp3 lied.mvsa -o out.mp3\n"
-            "  vsa mvsa ogg lied.mvsa\n"
-            "  vsa mvsa import out.mxl -o out.mvsa --pitch doremi\n"
-            "  vsa mvsa normalize lied.mvsa -o out.mvsa\n"
-            "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch a-g\n"
-            "  vsa mvsa transpose lied.mvsa --to F4 -o out.mvsa\n"
-            "  vsa mvsa kuiser lied.mvsa\n"
-            "  vsa mvsa kuiser examples\\mvsa --check\n"
+            "  mvsa validate examples\\mvsa\n"
+            "  mvsa mxl lied.mvsa -o out.mxl --section schets1\n"
+            "  mvsa mscz lied.mvsa -o out.mscz\n"
+            "  mvsa mp3 lied.mvsa -o out.mp3\n"
+            "  mvsa ogg lied.mvsa\n"
+            "  mvsa normalize lied.mvsa -o out.mvsa\n"
+            "  mvsa normalize lied.mvsa -o out.mvsa --pitch a-g\n"
+            "  mvsa transpose lied.mvsa --to F4 -o out.mvsa\n"
+            "  mvsa kuiser lied.mvsa\n"
+            "  mvsa kuiser examples\\mvsa --check\n"
             "\n"
-            "Top-level alias: mvsa …  (ook: mxl … / mscz … voor andere bronnen).\n"
+            "Andere bronnen: mxl … / mscz …\n"
+            "Score → .mvsa: mxl mvsa … / mscz mvsa …\n"
             "\n"
-            "Hulp: vsa mvsa validate -h | vsa mvsa mxl -h | "
-            "vsa mvsa mscz -h | vsa mvsa pdf -h | vsa mvsa svg -h | "
-            "vsa mvsa mp3 -h | "
-            "vsa mvsa ogg -h | vsa mvsa wav -h | "
-            "vsa mvsa score-ir -h | "
-            "vsa mvsa import -h | vsa mvsa normalize -h | "
-            "vsa mvsa transpose -h | vsa mvsa kuiser -h"
+            "Hulp: mvsa validate -h | mvsa mxl -h | "
+            "mvsa mscz -h | mvsa pdf -h | mvsa svg -h | "
+            "mvsa mp3 -h | "
+            "mvsa ogg -h | mvsa wav -h | "
+            "mvsa score-ir -h | "
+            "mvsa normalize -h | "
+            "mvsa transpose -h | mvsa kuiser -h"
         ),
     )
     mvsa_sub = mvsa.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser}",
+        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -495,10 +507,10 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa mxl examples\\mvsa\\kleine-intocht-zondag-hemelum.mvsa\n"
-            "  vsa mvsa mxl lied.mvsa -o generated\\lied.mxl\n"
-            "  vsa mvsa mxl lied.mvsa --section schets-a-bladcijfer -o out.mxl\n"
-            "  vsa mvsa mxl lied.mscz -o generated\\lied.mxl"
+            "  mvsa mxl examples\\mvsa\\kleine-intocht-zondag-hemelum.mvsa\n"
+            "  mvsa mxl lied.mvsa -o generated\\lied.mxl\n"
+            "  mvsa mxl lied.mvsa --section schets-a-bladcijfer -o out.mxl\n"
+            "  mvsa mxl lied.mscz -o generated\\lied.mxl"
         ),
     )
     m_musicxml.add_argument(
@@ -569,12 +581,12 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa mscz examples\\mvsa\\alleluia-toon-8.canonieke.mvsa\n"
-            "  vsa mvsa mscz lied.mvsa -o generated\\lied.mscz "
+            "  mvsa mscz examples\\mvsa\\alleluia-toon-8.canonieke.mvsa\n"
+            "  mvsa mscz lied.mvsa -o generated\\lied.mscz "
             "--section schets2-oct-doremi\n"
-            "  vsa mvsa mscz lied.mvsa -o out.mscz --layout partituur "
+            "  mvsa mscz lied.mvsa -o out.mscz --layout partituur "
             "--bibliotheek-id zangstuk/var/uv\n"
-            "  vsa mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\\lied.mxl"
+            "  mvsa mscz lied.mvsa -o out.mscz --keep-mxl generated\\lied.mxl"
         ),
     )
     m_mscz.add_argument(
@@ -648,10 +660,10 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa pdf examples\\mvsa\\alleluia-toon-1.mvsa\n"
-            "  vsa mvsa pdf lied.mvsa -o generated\\lied.pdf --keep-mscz generated\\lied.mscz\n"
-            "  vsa mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv\n"
-            "  vsa mvsa pdf lied.mscz -o lied.pdf"
+            "  mvsa pdf examples\\mvsa\\alleluia-toon-1.mvsa\n"
+            "  mvsa pdf lied.mvsa -o generated\\lied.pdf --keep-mscz generated\\lied.mscz\n"
+            "  mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv\n"
+            "  mvsa pdf lied.mscz -o lied.pdf"
         ),
     )
     m_pdf.add_argument(
@@ -720,11 +732,11 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa svg examples\\mvsa\\1a-vredeslitanie.mvsa\n"
-            "  vsa mvsa svg lied.mvsa -o generated\\lied.mvsa.svg\n"
-            "  vsa mvsa svg lied.mvsa --lyrics-font-size 14 --cue-font-size 11\n"
-            "  vsa mvsa svg generated\\lied.mscz -o generated\\lied.svg\n"
-            "  vsa mvsa svg lied.mvsa --section schets1 --keep-mscz generated\\lied.mscz"
+            "  mvsa svg examples\\mvsa\\1a-vredeslitanie.mvsa\n"
+            "  mvsa svg lied.mvsa -o generated\\lied.mvsa.svg\n"
+            "  mvsa svg lied.mvsa --lyrics-font-size 14 --cue-font-size 11\n"
+            "  mvsa svg generated\\lied.mscz -o generated\\lied.svg\n"
+            "  mvsa svg lied.mvsa --section schets1 --keep-mscz generated\\lied.mscz"
         ),
     )
     m_svg.add_argument(
@@ -787,83 +799,6 @@ def _build_parser():
     )
     _add_partituur_style_args(m_svg)
     _add_mvsa_audio_format_parsers(mvsa_sub)
-    m_import = mvsa_sub.add_parser(
-        "import",
-        help="Importeer .mxl/.musicxml/.mscz naar .mvsa.",
-        description=(
-            "Lees SATB MusicXML (of MSCZ via MuseScore) en schrijf .mvsa. "
-            "Default --pitch ag-vsa (a–g anker per systeem, daarna EHM, "
-            "a–g eindanker). Zie docs/plans/mvsa-conversions.md."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "voorbeelden:\n"
-            "  vsa mvsa import generated\\lied.mxl -o generated\\lied.import.mvsa\n"
-            "  vsa mvsa import generated\\lied.mxl -o generated\\lied.import.mvsa "
-            "--pitch doremi\n"
-            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g\n"
-            "  vsa mvsa import lied.mscz -o lied.mvsa --pitch a-g --do F4"
-        ),
-    )
-    m_import.add_argument(
-        "path",
-        help=(
-            ".mxl/.musicxml/.xml/.mscz-bestand, of map met zulke "
-            "bestanden (recursief)."
-        ),
-    )
-    m_import.add_argument(
-        "-o",
-        "--output",
-        metavar="OUTPUT",
-        default=None,
-        help=(
-            "Uitvoer-.mvsa (default: <stem>.import.mvsa per bron). "
-            "Alleen bij precies één bronbestand."
-        ),
-    )
-    m_import.add_argument(
-        "--pitch",
-        choices=["doremi", "a-g", "abc", "vsa", "ag-vsa"],
-        default="ag-vsa",
-        help=(
-            "Doel-spelling op stemregels (default: ag-vsa). "
-            "a-g = toonnamen met cijfer; abc = alias; "
-            "ag-vsa = a–g per systeem + EHM + eindanker."
-        ),
-    )
-    m_import.add_argument(
-        "--do",
-        metavar="PITCH",
-        default=None,
-        help=(
-            "Forceer @do (bijv. F4). Zonder --do: uit MSCZ-KeySig / "
-            "MusicXML-fifths; anders F4."
-        ),
-    )
-    m_import.add_argument(
-        "--octave-style",
-        choices=["@oct", "marker"],
-        default="@oct",
-        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
-    )
-    m_import.add_argument(
-        "--section",
-        metavar="SECTION",
-        default="import",
-        help="Id voor @sectie in de output (default: import).",
-    )
-    m_import.add_argument(
-        "--musescore",
-        metavar="PATH",
-        default=None,
-        help="Pad naar MuseScore (alleen bij .mscz-bron).",
-    )
-    m_import.add_argument(
-        "--no-align",
-        action="store_true",
-        help="Sla canonieke kolomuitlijning over.",
-    )
     m_normalize = mvsa_sub.add_parser(
         "normalize",
         help="Normaliseer .mvsa (uitlijning; optioneel herschrijf hoogten).",
@@ -872,17 +807,17 @@ def _build_parser():
             "noteernamen op S/A/T/B blijven zoals in de bron; alleen "
             "kolomuitlijning. Met --pitch doremi|a-g|vsa|ag-vsa herschrijf je "
             "hoogten (abc blijft alias van a-g). "
-            "(Import uit .mxl/.mscz gebruikt ag-vsa als default.) "
+            "(Score → .mvsa via mxl/mscz mvsa gebruikt ag-vsa als default.) "
             "Zie docs/plans/mvsa-conversions.md."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa normalize examples\\mvsa\\alleluia-toon-8.mvsa "
+            "  mvsa normalize examples\\mvsa\\alleluia-toon-8.mvsa "
             "-o generated\\alleluia.normalized.mvsa\n"
-            "  vsa mvsa normalize examples\\mvsa\\alleluia-toon-8.mvsa "
+            "  mvsa normalize examples\\mvsa\\alleluia-toon-8.mvsa "
             "--pitch a-g -o generated\\alleluia.ag.mvsa\n"
-            "  vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct"
+            "  mvsa normalize lied.mvsa --pitch doremi --octave-style @oct"
         ),
     )
     m_normalize.add_argument(
@@ -933,10 +868,10 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa transpose "
+            "  mvsa transpose "
             "examples\\bug-cases\\alleluia-9b-toon-3-vokn.mvsa --to F4\n"
-            "  vsa mvsa transpose lied.mvsa --to F -o generated\\lied.in-F.mvsa\n"
-            "  vsa mvsa transpose examples\\bug-cases --to F4"
+            "  mvsa transpose lied.mvsa --to F -o generated\\lied.in-F.mvsa\n"
+            "  mvsa transpose examples\\bug-cases --to F4"
         ),
     )
     m_transpose.add_argument(
@@ -988,10 +923,12 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa score-ir examples\\mvsa\\1a-vredeslitanie.mvsa\n"
-            "  vsa mvsa score-ir lied.mvsa -o generated\\lied.score-ir.json\n"
-            "  vsa mvsa ir lied.mvsa --section schets1 -o out.json\n"
-            "  vsa mvsa score-ir lied.mvsa --musicxml generated\\lied.from-ir.musicxml"
+            "  mvsa score-ir examples\\mvsa\\1a-vredeslitanie.mvsa\n"
+            "  mvsa score-ir lied.mvsa -o generated\\lied.score-ir.json\n"
+            "  mvsa ir lied.mvsa --section schets1 -o out.json\n"
+            "  mvsa score-ir lied.mvsa --musicxml\n"
+            "  mvsa score-ir lied.mvsa --musicxml generated\\lied.from-ir.musicxml\n"
+            "  mvsa score-ir examples\\mvsa --musicxml"
         ),
     )
     m_score_ir.add_argument(
@@ -1022,10 +959,14 @@ def _build_parser():
     )
     m_score_ir.add_argument(
         "--musicxml",
-        metavar="PATH",
+        nargs="?",
+        const="",
         default=None,
+        metavar="PATH",
         help=(
-            "Schrijf ook partituur-MusicXML uit Score-IR (OSMD-brug)."
+            "Schrijf ook partituur-MusicXML uit Score-IR (OSMD-brug). "
+            "Zonder PATH: sibling lied.mvsa.from-ir.musicxml (ook bij "
+            "map). Met PATH: alleen bij precies één bron."
         ),
     )
     m_kuiser = mvsa_sub.add_parser(
@@ -1044,10 +985,10 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
-            "  vsa mvsa kuiser examples\\mvsa\\alleluia-toon-8.mvsa\n"
-            "  vsa mvsa kuiser examples\\mvsa --check\n"
-            "  vsa mvsa kuiser lied.mvsa -o generated\\lied.kuiser.mvsa\n"
-            "  vsa mvsa kuiser lied.mvsa --pitch a-g"
+            "  mvsa kuiser examples\\mvsa\\alleluia-toon-8.mvsa\n"
+            "  mvsa kuiser examples\\mvsa --check\n"
+            "  mvsa kuiser lied.mvsa -o generated\\lied.kuiser.mvsa\n"
+            "  mvsa kuiser lied.mvsa --pitch a-g"
         ),
     )
     m_kuiser.add_argument(
@@ -1272,16 +1213,8 @@ def _cmd_svg(args, config):
     files = _cli_collect_sources(args.input, (".vsa",))
     if files is None:
         return 1
-    out_arg = Path(args.output)
-    if len(files) > 1:
-        if out_arg.exists() and out_arg.is_file():
-            print(
-                "Bij meerdere bronnen moet output een map zijn "
-                "(geen bestaand SVG-bestand).",
-                file=sys.stderr,
-            )
-            return 1
-        out_arg.mkdir(parents=True, exist_ok=True)
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
 
     renderer = SVGRenderer(svg_config=config.rendering.svg)
     renderer.max_line_width = (
@@ -1293,9 +1226,9 @@ def _cmd_svg(args, config):
     exit_code = 0
     for input_path in files:
         out = (
-            out_arg / derived_output_path(input_path, ".svg").name
-            if len(files) > 1
-            else out_arg
+            Path(args.output)
+            if args.output
+            else derived_output_path(input_path, ".svg")
         )
         try:
             text = input_path.read_text(encoding="utf-8")
@@ -2028,11 +1961,11 @@ def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog=(
                 "voorbeelden:\n"
-                f"  vsa mvsa {format_name} examples\\mvsa\\alleluia-toon-1.mvsa\n"
-                f"  vsa mvsa {format_name} lied.mvsa "
+                f"  mvsa {format_name} examples\\mvsa\\alleluia-toon-1.mvsa\n"
+                f"  mvsa {format_name} lied.mvsa "
                 f"-o generated\\lied.{format_name}\n"
-                f"  vsa mvsa {format_name} lied.mxl\n"
-                f"  vsa mvsa {format_name} lied.mscz"
+                f"  mvsa {format_name} lied.mxl\n"
+                f"  mvsa {format_name} lied.mscz"
             ),
             **extra,
         )
@@ -2088,8 +2021,6 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_svg(args)
     if getattr(args, "mvsa_command", None) in (*AUDIO_FORMATS, "audio"):
         return _cmd_mvsa_audio(args)
-    if getattr(args, "mvsa_command", None) == "import":
-        return _cmd_mvsa_import(args)
     if getattr(args, "mvsa_command", None) == "normalize":
         return _cmd_mvsa_normalize(args)
     if getattr(args, "mvsa_command", None) == "transpose":
@@ -2100,20 +2031,20 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_kuiser(args)
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
-        "Gebruik: vsa mvsa "
-        "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser} …\n"
-        "  vsa mvsa validate PATH\n"
-        "  vsa mvsa mxl PATH [-o OUTPUT] [--section SECTION]\n"
-        "  vsa mvsa score-ir PATH [-o OUTPUT] [--section SECTION]\n"
-        "  vsa mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
-        "  vsa mvsa pdf PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
-        "  vsa mvsa svg PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
-        "  vsa mvsa mp3|ogg|wav PATH [-o OUTPUT]\n"
-        "  vsa mvsa import PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
-        "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
-        "  vsa mvsa transpose PATH --to TONIC [-o OUTPUT]\n"
-        "  vsa mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
-        "Hulp: vsa mvsa -h | vsa mvsa kuiser -h",
+        "Gebruik: mvsa "
+        "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser} …\n"
+        "  mvsa validate PATH\n"
+        "  mvsa mxl PATH [-o OUTPUT] [--section SECTION]\n"
+        "  mvsa score-ir PATH [-o OUTPUT] [--section SECTION]\n"
+        "  mvsa mscz PATH [-o OUTPUT] [--section SECTION]\n"
+        "  mvsa pdf PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
+        "  mvsa svg PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
+        "  mvsa mp3|ogg|wav PATH [-o OUTPUT]\n"
+        "  mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
+        "  mvsa transpose PATH --to TONIC [-o OUTPUT]\n"
+        "  mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
+        "Score → .mvsa: mxl mvsa … / mscz mvsa …\n"
+        "Hulp: mvsa -h | mvsa kuiser -h",
         file=sys.stderr,
     )
     return 1
@@ -2265,7 +2196,13 @@ def _cmd_mvsa_score_ir(args) -> int:
     files = _cli_collect_sources(args.path, (".mvsa",))
     if files is None:
         return 1
-    if _cli_reject_multi_single_opts(files, args, "musicxml"):
+    # Explicit --musicxml PATH only for one source; bare --musicxml = siblings.
+    mxl_opt = getattr(args, "musicxml", None)
+    if mxl_opt not in (None, "") and _cli_reject_multi_single_opts(
+        files, args, "musicxml"
+    ):
+        return 1
+    if _cli_reject_multi_single_opts(files, args):
         return 1
     exit_code = 0
     for path in files:
@@ -2274,6 +2211,14 @@ def _cmd_mvsa_score_ir(args) -> int:
             if args.output
             else derived_output_path(path, ".score-ir.json")
         )
+        mxl_path = None
+        if mxl_opt is not None:
+            if mxl_opt == "":
+                mxl_path = derived_output_path(path, ".from-ir.musicxml")
+            else:
+                mxl_path = Path(mxl_opt)
+                if mxl_path.suffix.lower() not in {".musicxml", ".xml", ".mxl"}:
+                    mxl_path = mxl_path.with_suffix(".musicxml")
         try:
             export_mvsa_path_to_score_ir(
                 path,
@@ -2281,11 +2226,7 @@ def _cmd_mvsa_score_ir(args) -> int:
                 section_id=args.section,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
             )
-            mxl_out = getattr(args, "musicxml", None)
-            if mxl_out:
-                mxl_path = Path(mxl_out)
-                if mxl_path.suffix.lower() not in {".musicxml", ".xml", ".mxl"}:
-                    mxl_path = mxl_path.with_suffix(".musicxml")
+            if mxl_path is not None:
                 export_score_ir_path_to_musicxml(out, mxl_path)
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
@@ -2302,8 +2243,8 @@ def _cmd_mvsa_score_ir(args) -> int:
             exit_code = 1
             continue
         print(f"Geschreven: {out}")
-        if getattr(args, "musicxml", None):
-            print(f"MusicXML: {Path(args.musicxml)}")
+        if mxl_path is not None:
+            print(f"MusicXML: {mxl_path}")
     return exit_code
 
 
@@ -2589,7 +2530,7 @@ def _cmd_mvsa_svg(args) -> int:
                     )
                     exit_code = 1
                     continue
-                export_mscz_to_svg(
+                written = export_mscz_to_svg(
                     path,
                     out,
                     musescore=musescore,
@@ -2597,7 +2538,7 @@ def _cmd_mvsa_svg(args) -> int:
                     white_background=white_background,
                 )
             elif suffix == ".mvsa":
-                export_mvsa_to_svg(
+                written = export_mvsa_to_svg(
                     path,
                     out,
                     section_id=args.section,
@@ -2630,7 +2571,8 @@ def _cmd_mvsa_svg(args) -> int:
             print(f"{path}: ERROR: {exc}", file=sys.stderr)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        for written_path in written:
+            print(f"Geschreven: {written_path}")
         if keep_mscz is not None:
             print(f"MSCZ: {keep_mscz}")
         if keep_mxl is not None:
@@ -2687,43 +2629,6 @@ def _cmd_mvsa_audio(args) -> int:
         print(f"Geschreven: {written}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
-    return exit_code
-
-
-def _cmd_mvsa_import(args) -> int:
-    from .mvsa_import import MvsaImportError, import_score_path
-
-    files = _cli_collect_sources(
-        args.path, (".mxl", ".musicxml", ".xml", ".mscz")
-    )
-    if files is None:
-        return 1
-    if _cli_reject_multi_single_opts(files, args):
-        return 1
-    musescore = Path(args.musescore) if args.musescore else None
-    exit_code = 0
-    for path in files:
-        out = (
-            Path(args.output)
-            if args.output
-            else path.with_name(f"{path.stem}.import.mvsa")
-        )
-        try:
-            import_score_path(
-                path,
-                out,
-                pitch=args.pitch,
-                octave_style=args.octave_style,
-                align=not args.no_align,
-                section_id=args.section,
-                musescore=musescore,
-                do=getattr(args, "do", None),
-            )
-        except MvsaImportError as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
-            exit_code = 1
-            continue
-        print(f"Geschreven: {out}")
     return exit_code
 
 

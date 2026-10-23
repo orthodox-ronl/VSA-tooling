@@ -77,9 +77,9 @@ echo %ERRORLEVEL%
 | [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).                     |
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                         |
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                           |
-| [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3/import (`mvsa` ≡ `vsa mvsa`). |
-| [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: import → mvsa; mscz via MuseScore.                                       |
-| [`mscz`](mscz.md)                                | Bron `.mscz`: import → mvsa; mxl via MuseScore; text (lyrics).                                    |
+| [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3 (`mvsa`).        |
+| [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: `mxl mvsa`; `mxl mscz`; validate/normalize.                              |
+| [`mscz`](mscz.md)                                | Bron `.mscz`: `mscz mvsa`; `mscz mxl`; text (lyrics).                                             |
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze

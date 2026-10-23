@@ -32,7 +32,7 @@ echo === validate genormaliseerde bestanden ^(*.mvsa.mvsa^) ===
 for %%i in (*.mvsa.mvsa) do (
   echo.
   echo validate %%i
-  vsa mvsa validate "%%i"
+  mvsa validate "%%i"
   if errorlevel 1 set "FAILED=1"
 )
 if not "%FAILED%"=="0" exit /b 1
@@ -51,27 +51,27 @@ if not exist "%SRC%" (
 echo.
 echo === %SRC% ===
 echo validate %SRC%
-vsa mvsa validate "%SRC%"
+mvsa validate "%SRC%"
 if errorlevel 1 exit /b 1
 
 echo.
 echo normalize %SRC%
-vsa mvsa normalize "%SRC%" -o "%SRC%.mvsa"
+mvsa normalize "%SRC%" -o "%SRC%.mvsa"
 if errorlevel 1 exit /b 1
 
 echo.
 echo make mxl %SRC%
-vsa mvsa mxl "%SRC%" -o "%SRC%.mxl"
+mvsa mxl "%SRC%" -o "%SRC%.mxl"
 if errorlevel 1 exit /b 1
 
 echo.
 echo make mscz %SRC%
-vsa mvsa mscz "%SRC%" -o "%SRC%.mscz"
+mvsa mscz "%SRC%" -o "%SRC%.mscz"
 if errorlevel 1 exit /b 1
 
 echo.
 echo make pdf %SRC% ^(zangers / MuseScore-partituur^)
-vsa mvsa pdf "%SRC%.mscz" -o "%SRC%.pdf"
+mvsa pdf "%SRC%.mscz" -o "%SRC%.pdf"
 if errorlevel 1 exit /b 1
 
 exit /b 0

@@ -59,7 +59,7 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).
 
 | Onderdeel                                    | Nu                                                                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `vsa mvsa svg`                               | Kale SVG via MuseScore; bij meerdere pagina’s: bladreeks ``stem-N.svg``                     |
+| `mvsa svg`                               | Kale SVG via MuseScore; bij meerdere pagina’s: bladreeks ``stem-N.svg``                     |
 | Catalogus-sibling PDF                        | MuseScore layout ``partituur`` (titel/colofon in het scorebestand)                          |
 | `pagina-pdf` + `pdf-bijelkaar`               | Kale blad-SVG’s + Markdown-koppen; ``--compact`` binnen bijelkaar                           |
 | `pagina-pdf` zonder bijelkaar                | Zelfde SVG-route (zonder ``--compact``); geen catalogus-PDF-plak                            |
@@ -89,7 +89,7 @@ schermmotor. Tall MuseScore-scherm-SVG is **geen** hoofdpad.
 Contract voor koormap (shortcode `muziek`) en latere CoriB-consumptie:
 [partituur-ir](partituur-ir.md) §7 (Scherm- en CoriB-brug). Tooling-siblings:
 `lied.mvsa.score-ir.json` + `lied.mvsa.from-ir.musicxml` via
-`vsa mvsa score-ir … --musicxml`. Bewijs: spike
+`mvsa score-ir … --musicxml`. Bewijs: spike
 `examples/spikes/partituur-browser/`.
 
 **Nog open (sluit §4 pas dan):** shortcode / koormap-embed in productie die
