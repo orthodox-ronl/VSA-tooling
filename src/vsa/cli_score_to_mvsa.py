@@ -64,6 +64,7 @@ def run_score_to_mvsa(
 ) -> int:
     """Convert score file(s) to ``.mvsa``; default out = ``stem.brontype.mvsa``."""
     from .mvsa_import import MvsaImportError, import_score_path
+    from .mvsa_partituur_stamp import is_mscz_import_mvsa, stamp_mscz_import_mvsa
 
     try:
         files = collect_cli_sources(ns.path, suffixes=suffixes)
@@ -100,5 +101,8 @@ def run_score_to_mvsa(
             print(f"{path}: ERROR: {exc}", file=sys.stderr)
             exit_code = 1
             continue
+        # Bibliotheek-importcontrole: sibling *.mscz.mvsa krijgt partituur-hash.
+        if path.suffix.lower() == ".mscz" and is_mscz_import_mvsa(out):
+            stamp_mscz_import_mvsa(out, path)
         print(f"Geschreven: {out}")
     return exit_code
