@@ -53,6 +53,7 @@ toegestaan bij precies één bronbestand.
 | `score-ir`        | Ja   | `.mvsa`                                                  |
 | `import`          | Ja   | `.mxl` / `.musicxml` / `.xml` / `.mscz`                  |
 | `normalize`       | Ja   | `.mvsa`                                                  |
+| `transpose`       | Ja   | `.mvsa`                                                  |
 | `kuiser`          | Ja   | `.mvsa` (via ``collect_cli_sources``)                    |
 
 ### `mxl` / `mscz` (top-level aliases)

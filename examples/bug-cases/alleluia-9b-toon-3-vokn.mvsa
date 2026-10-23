@@ -1,0 +1,24 @@
+---
+zoektekst: >-
+  Alleluja, Alleluja, Alleluja
+---
+
+# Alleluia toon 3
+
+@title "Alleluia - Toon 3"
+@composer "Znameni"
+@bron "Liturgiemap Vereniging van Orthodoxen"
+@copyright "CC BY-SA 4.0"
+
+# drie mollen: es, bes, as
+@do Eb4
+@mode major
+@tempo 160
+
+@oct S=0 A=0 T=0 B=-1
+
+L: (Al-le-lu-ja, Al-le-lu)-ja.&., Al__&~&~&~&~&_ -le_ lu_&~&~&~&__&~&~&~&~ -ja__ ||
+S:  Bb                       \&/     /&\&\&/&/&\   -    -&/&\&\&/&\&\&/&-    \   ||G
+A:  G                        \&/     /&\&\&/&/&\   -    -&/&\&\&/&\2&-&-&/   \   ||Eb
+T:  Eb                       -&-     -&-&-&-&-&-   -    -&-&-&-&-&\2&\&/&-   \   ||Bb-
+B:  Eb                       -&-   /3&\3&-&-&-&-   -    -&\2&-&-&/2&-&-&-&-  -   ||Eb

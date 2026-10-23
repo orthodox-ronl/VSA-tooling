@@ -56,6 +56,12 @@ een bestand van toonsoort/grondtoon wisselt vóór een nieuw systeem.
 toonnamen op de stemregels. `@do` is document-/sectie-context, geen lokale
 correctie.
 
+**Hele bestand naar een andere tonica** (bijv. Es → F): niet alleen `@do`
+handmatig wijzigen — absolute stemtonen moeten mee. Gebruik
+[`vsa mvsa transpose --to …`](../reference/cli/mvsa.md#vsa-mvsa-transpose)
+([tutorial](../guides/mvsa-schrijven-101.md#toonsoort-verzetten-transpose)).
+`@mode` blijft daarbij gelijk.
+
 **Default** als je `@do` weglaat: `F4`.
 
 ```text

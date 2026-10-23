@@ -20,8 +20,9 @@ Repo-breed kompas (niet alleen mvsa): repo-bestand
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Uitvoeraanwijzingen op `L:` (fase 6)         | Marks 1–5 + 7 in export; volgende: import-roundtrip + liturgische voorbeelden                                  | [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §3 / §7                 |
 
-Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf / audio):
-`examples/mvsa/make.cmd` (PDF via `mvsa pdf`; audio via `mvsa audio`).
+Lokaal bouwen van voorbeelden (validate / normalize / transpose / kuiser /
+mxl / mscz / pdf / audio): `examples/mvsa/make.cmd` (PDF via `mvsa pdf`;
+audio via `mvsa audio`).
 
 ---
 
@@ -29,15 +30,15 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 
 ### Syntax en semantiek
 
-| Punt                                    | Toelichting                                                                    | Richting                                                                       |
-| --------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Speelplan: geneste combinatie-jumps     | D.S./D.C. al Coda is klaar; volta+D.S. e.d. zonder één bladpatroon → expand    | [speelplan.md](speelplan.md) «Bewust later»                                    |
-| Blokhergebruik                          | Secties of stemmen hergebruiken (`@voices`, deelbereiken)                      | Experiment: `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`                     |
-| Overlays t.o.v. S                       | A/T/B als afwijking van de sopraan                                             | Later                                                                          |
-| Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                       | Later                                                                          |
-| Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                                   | Alleen als corpuswerk het vraagt                                               |
-| Uitvoeraanwijzingen: import-roundtrip   | Marks 1–5 + 7 in export; MSCZ/MXL → canonieke `[token]` nog open (incl. sprongen) | Fase 6; [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §6 / §7            |
-| Oefenpauze na dubbele maatstreep        | Lengte / lyric `[PAUZE]` / zichtbaarheid partituur — los van L-`[//]`          | Apart van uitvoeraanwijzingen; zie ontwerp §2                                  |
+| Punt                                    | Toelichting                                                                       | Richting                                                                       |
+| --------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Speelplan: geneste combinatie-jumps     | D.S./D.C. al Coda is klaar; volta+D.S. e.d. zonder één bladpatroon → expand       | [speelplan.md](speelplan.md) «Bewust later»                                    |
+| Blokhergebruik                          | Secties of stemmen hergebruiken (`@voices`, deelbereiken)                         | Experiment: `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`                     |
+| Overlays t.o.v. S                       | A/T/B als afwijking van de sopraan                                                | Later                                                                          |
+| Zichtbare vs. structurele standaardtoon | Oude polyfonie-`~`/`-`-glyph; mag niet opnieuw `~` heten                          | Later                                                                          |
+| Batch-tekst buiten bestand              | Veel teksten op één stemgrid                                                      | Alleen als corpuswerk het vraagt                                               |
+| Uitvoeraanwijzingen: import-roundtrip   | Marks 1–5 + 7 in export; MSCZ/MXL → canonieke `[token]` nog open (incl. sprongen) | Fase 6; [uitvoeraanwijzingen.md](uitvoeraanwijzingen.md) §6 / §7               |
+| Oefenpauze na dubbele maatstreep        | Lengte / lyric `[PAUZE]` / zichtbaarheid partituur — los van L-`[//]`             | Apart van uitvoeraanwijzingen; zie ontwerp §2                                  |
 
 ### Markdown-pipeline en fences
 
@@ -59,7 +60,8 @@ Lokaal bouwen van voorbeelden (validate / normalize / kuiser / mxl / mscz / pdf 
 | Punt                                  | Stand                                                                                                                                                                                                                                                  |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Parser / CLI                          | Top-level `mvsa` / `mxl` / `mscz` + `vsa mvsa …` (conversions stap 5)                                                                                                                                                                                  |
-| Conversieslices                       | normalize, mscz-export, import, bron-commands — zie conversions-plan                                                                                                                                                                                   |
+| Conversieslices                       | normalize, transpose, mscz-export, import, bron-commands — zie conversions-plan                                                                                                                                                                        |
+| Transpose                             | `mvsa transpose --to …`: andere tonica; `@mode` blijft; default `ag-vsa` — [`mvsa.md#transpose`](../reference/cli/mvsa.md#vsa-mvsa-transpose)                                                                                                          |
 | Kuiser-tool                           | `mvsa kuiser`: L-ELM `-`→`~`; ambiguë-`-`-warnings; semantische woordstreepjes (Pyphen, exact); maatstrepen syncen; align; `--check`. Bewust later: conflicterende gedeeltelijke strepen raden; marker-octaaf → `@oct`                                 |
 | `mvsa pdf`                            | `.mvsa`/`.mscz` → MuseScore-PDF; `make.cmd` gebruikt `mvsa pdf`                                                                                                                                                                                        |
 | `vsa`/`mvsa audio`                    | Preview-``.mp3`` via MuseScore; zie [formats/audio.md](../formats/audio.md)                                                                                                                                                                            |

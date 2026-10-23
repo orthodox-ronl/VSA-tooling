@@ -26,6 +26,7 @@ MusicXML of MuseScore.
 | [Ankers](#6-ankers-begin-en-eind)                         | pitch-markers aan begin/eind van een systeem       |
 | [Taak: bladmuziek → mvsa](#7-taak-bladmuziek--mvsa)       | partituur of MusicXML omzetten                     |
 | [Taak: VSA meerstemmig](#8-taak-vsa-meerstemmig-maken)    | eenstemmige VSA uitzetten naar SATB                |
+| [Toonsoort verzetten](#toonsoort-verzetten-transpose)     | bestand of map naar andere tonica (`transpose`)    |
 | [Controleren en exporteren](#9-controleren-en-exporteren) | validate / mxl / mscz                              |
 
 Volledige keyword-lijst: [Keywords (`@…`)](../specification-mvsa/keywords.md).
@@ -182,14 +183,15 @@ elkaar (per frase één stijl is leesbaarder).
 
 ### CLI-namen (`--pitch`)
 
-Bij `import` / `normalize` kies je een **doelspelling**:
+Bij `import` / `normalize` / `transpose` kies je een **doelspelling**:
 
-| `--pitch`    | Schrijft …                                              |
-| ------------ | ------------------------------------------------------- |
-| `doremi`     | laddergraden                                            |
-| `a-g`        | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`) |
-| `vsa`        | eerste toon absoluut, daarna EHM                        |
-| `preserve`   | (alleen normalize) bronspelling behouden — **default**  |
+| `--pitch`  | Schrijft …                                                    |
+| ---------- | ------------------------------------------------------------- |
+| `doremi`   | laddergraden                                                  |
+| `a-g`      | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`)       |
+| `vsa`      | eerste toon absoluut, daarna EHM                              |
+| `ag-vsa`   | absolute a–g + EHM + eindanker (default bij import/transpose) |
+| `preserve` | (alleen normalize) bronspelling behouden — **default**        |
 
 `abc` blijft een **alias** van `a-g` (oude scripts).
 
@@ -197,6 +199,9 @@ Bij `import` / `normalize` kies je een **doelspelling**:
 vsa mvsa import lied.mxl -o lied.mvsa --pitch doremi
 vsa mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
 ```
+
+Alleen de **spelling** wijzigen (zelfde toonsoort) is `normalize`. De
+**tonica** verzetten (Es → F) is [`transpose`](#toonsoort-verzetten-transpose).
 
 ### Handige mix: anker absoluut, sprongen in EHM
 
@@ -329,6 +334,43 @@ Referentie-voorbeeld (bladcijfers):
 
 ---
 
+## Toonsoort verzetten (`transpose`)
+
+**Doel:** een bestaand `.mvsa`-bestand (of een hele map) naar een andere
+tonica brengen, bijvoorbeeld van Es majeur (`@do Eb4`) naar F majeur
+(`@do F4`). De modus blijft gelijk: majeur blijft majeur, mineur blijft
+mineur.
+
+Alleen `@do` handmatig aanpassen is **niet** genoeg als de stemregels
+absolute toonnamen hebben (`Bb`, `||Eb`, …): die moeten mee. Gebruik
+daarom het CLI-commando:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
+```
+
+Default-uitvoer: sibling `<naam>.transposed.mvsa`. Met `-o` kies je zelf
+het pad (alleen bij precies één bronbestand). Een map mag ook: elk
+`.mvsa`-bestand krijgt een sibling.
+
+| Wat                          | Gedrag                                               |
+| ---------------------------- | ---------------------------------------------------- |
+| `--to F4` of `--to F`        | Doeltonica (zonder cijfer: octaaf van de bron-`@do`) |
+| `@mode`                      | Ongewijzigd                                          |
+| Stemtonen                    | Schuiven mee; default spelling `--pitch ag-vsa`      |
+| L-regel, titels, commentaren | Ongewijzigd (ook comments als «drie mollen»)         |
+
+Daarna valideren:
+
+```cmd
+vsa mvsa validate examples\bug-cases\alleluia-9b-toon-3-vokn.transposed.mvsa
+```
+
+Man-pagina: [`vsa mvsa transpose`](../reference/cli/mvsa.md#vsa-mvsa-transpose).
+
+---
+
 ## 8. Taak: VSA meerstemmig maken
 
 **Doel:** een eenstemmige `.vsa`-melodie uitzetten naar L + SATB.
@@ -358,13 +400,14 @@ Voorbeeld met meerdere equivalente schetsen:
 
 ## 9. Controleren en exporteren
 
-| Stap               | Commando (voorbeeld)                                      |
-| ------------------ | --------------------------------------------------------- |
-| Valideren          | `vsa mvsa validate lied.mvsa`                             |
-| MusicXML           | `vsa mvsa musicxml lied.mvsa -o generated\lied.mxl`       |
-| MuseScore          | `vsa mvsa mscz lied.mvsa -o generated\lied.mscz`          |
-| Eén sectie         | voeg `--section sectie-id` toe                            |
-| Uitlijnen / kuisen | `vsa mvsa kuiser lied.mvsa`                               |
+| Stap                 | Commando (voorbeeld)                                      |
+| -------------------- | --------------------------------------------------------- |
+| Valideren            | `vsa mvsa validate lied.mvsa`                             |
+| MusicXML             | `vsa mvsa musicxml lied.mvsa -o generated\lied.mxl`       |
+| MuseScore            | `vsa mvsa mscz lied.mvsa -o generated\lied.mscz`          |
+| Eén sectie           | voeg `--section sectie-id` toe                            |
+| Uitlijnen / kuisen   | `vsa mvsa kuiser lied.mvsa`                               |
+| Andere tonica        | `vsa mvsa transpose lied.mvsa --to F4`                    |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -393,11 +436,12 @@ CLI-detail: [mvsa-referentie](../reference/cli/mvsa.md). Formaten-hub:
 
 ## Zie ook
 
-| Pagina                                                                                      | Rol                 |
-| ------------------------------------------------------------------------------------------- | ------------------- |
-| [specification-mvsa](../specification-mvsa/README.md)                                       | Normatieve draft    |
-| [Keywords](../specification-mvsa/keywords.md)                                               | Alle `@`-regels     |
-| [Syntax](../specification-mvsa/syntax.md) · [Semantiek](../specification-mvsa/semantics.md) | L, stemmen, octaven |
-| [mvsa-conversies](../plans/mvsa-conversions.md)                                             | import / normalize  |
-| [`.mvsa` formaat](../formats/mvsa.md)                                                       | Korte formaatpagina |
-| [CLI-taken](cli-taken.md)                                                                   | Welk `vsa`-commando |
+| Pagina                                                                                      | Rol                            |
+| ------------------------------------------------------------------------------------------- | ------------------------------ |
+| [specification-mvsa](../specification-mvsa/README.md)                                       | Normatieve draft               |
+| [Keywords](../specification-mvsa/keywords.md)                                               | Alle `@`-regels                |
+| [Syntax](../specification-mvsa/syntax.md) · [Semantiek](../specification-mvsa/semantics.md) | L, stemmen, octaven            |
+| [mvsa-conversies](../plans/mvsa-conversions.md)                                             | import / normalize / transpose |
+| [`mvsa transpose`](../reference/cli/mvsa.md#vsa-mvsa-transpose)                             | andere tonica                  |
+| [`.mvsa` formaat](../formats/mvsa.md)                                                       | Korte formaatpagina            |
+| [CLI-taken](cli-taken.md)                                                                   | Welk `vsa`-commando            |

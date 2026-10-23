@@ -31,6 +31,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | mvsa → preview-audio (draft)                         | [`vsa mvsa mp3`/`ogg`/`wav`](../reference/cli/mvsa.md#vsa-mvsa-mp3) (of top-level [`vsa audio`](../reference/cli/audio.md))                         |
 | MusicXML / MuseScore → `.mvsa` (**werkbank**-import) | [`vsa mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) / [`mxl import`](../reference/cli/mxl.md) / [`mscz import`](../reference/cli/mscz.md) |
 | Import + ankers (navigatie / foutzoeken)             | `vsa mvsa import …` (default `ag-vsa`) daarna [`validate`](../reference/cli/mvsa.md#vsa-mvsa-validate)                                              |
+| `.mvsa` naar andere tonica (toonsoort)               | [`vsa mvsa transpose <pad> --to F4`](../reference/cli/mvsa.md#vsa-mvsa-transpose)                                                                   |
 | `.mvsa` leren schrijven                              | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                         |
 
 ## Exitcodes
@@ -81,6 +82,14 @@ site-build; een sibling `.lyrics.txt` is niet verplicht naast de canonieke bron.
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
 vsa mvsa validate generated\alleluia.import.mvsa
+```
+
+Andere tonica (modus blijft gelijk), sibling-uitvoer of `-o`:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
+vsa mvsa validate examples\bug-cases\alleluia-9b-toon-3-vokn.transposed.mvsa
 ```
 
 ## Bronnen

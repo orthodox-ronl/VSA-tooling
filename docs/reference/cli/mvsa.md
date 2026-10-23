@@ -24,14 +24,14 @@ enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,kuiser} …
-vsa mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,kuiser} …
+mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser} …
+vsa mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
               [--hulptekst-as-parts] [--bibliotheek-id ID]
               [--musescore PATH] path
 mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
-              [--musicxml PATH] path
+              [--musicxml [PATH]] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
           [--hulptekst] [--compact]
@@ -64,6 +64,7 @@ mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
 mvsa import [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
+mvsa transpose [-h] --to TONIC [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
 mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 ```
 
@@ -80,6 +81,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 | [`mp3`](#vsa-mvsa-mp3) / `ogg` / `wav` | Exporteer naar preview-audio (``.mp3`` / ``.ogg`` / ``.wav``).  |
 | [`import`](#vsa-mvsa-import)           | Importeer `.mxl` / `.mscz` → `.mvsa` (**werkbank**).            |
 | [`normalize`](#vsa-mvsa-normalize)     | Canoniseer `.mvsa` (default: behoud noteernamen).               |
+| [`transpose`](#vsa-mvsa-transpose)     | Transponeer naar een andere tonica (`@do`); `@mode` blijft.     |
 | [`kuiser`](#vsa-mvsa-kuiser)           | Authoring-kuiser: strepen syncen, woordstreep, align.           |
 
 Hulp op de commandoregel:
@@ -98,6 +100,7 @@ mvsa ogg -h
 mvsa wav -h
 mvsa import -h
 mvsa normalize -h
+mvsa transpose -h
 mvsa kuiser -h
 ```
 
@@ -282,31 +285,35 @@ schermweergave (koormap-SVG / CoriB). Contract:
 [partituur-ir](../../plans/partituur-ir.md). Alias: `ir`.
 
 Optioneel ``--musicxml``: schrijf partituur-MusicXML **uit** die Score-IR
-(OSMD-brug; module `vsa.score_ir_musicxml`). Spike:
-`examples/spikes/partituur-browser/`.
+(OSMD-brug; module `vsa.score_ir_musicxml`). Zonder pad: sibling
+``lied.mvsa.from-ir.musicxml`` (ook bij een map). Met pad: alleen bij één
+bron. Spike: `examples/spikes/partituur-browser/`. Brugcontract:
+[partituur-ir §7](../../plans/partituur-ir.md).
 
 ### Synopsis
 
 ```text
 vsa mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
-                  [--musicxml PATH] path
+                  [--musicxml [PATH]] path
 ```
 
 ### Argumenten
 
-| Argument / optie       | Betekenis                                                                             |
-| ---------------------- | ------------------------------------------------------------------------------------- |
-| `path`                 | Bron-``.mvsa`` of map met ``.mvsa``-bestanden.                                        |
-| `-o` / `--output`      | Uitvoer-``.json``. Default: sibling ``lied.mvsa.score-ir.json``. Alleen bij één bron. |
-| `--section SECTION`    | Alleen deze ``@sectie``-id.                                                           |
-| `--bibliotheek-id ID`  | Zet ``meta.bibliotheekId``.                                                           |
-| `--musicxml PATH`      | Extra: partituur-``.musicxml`` gegenereerd uit de Score-IR.                           |
+| Argument / optie       | Betekenis                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `path`                 | Bron-``.mvsa`` of map met ``.mvsa``-bestanden.                                                     |
+| `-o` / `--output`      | Uitvoer-``.json``. Default: sibling ``lied.mvsa.score-ir.json``. Alleen bij één bron.              |
+| `--section SECTION`    | Alleen deze ``@sectie``-id.                                                                        |
+| `--bibliotheek-id ID`  | Zet ``meta.bibliotheekId``.                                                                        |
+| `--musicxml [PATH]`    | Extra: MusicXML uit Score-IR. Zonder ``PATH``: sibling ``lied.mvsa.from-ir.musicxml`` (ook map).   |
 
 ### Voorbeelden
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa
+vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa --musicxml
+vsa mvsa score-ir examples\mvsa --musicxml
 vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vredeslitanie.score-ir.json
 vsa mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-browser\score.score-ir.json --musicxml examples\spikes\partituur-browser\score.musicxml
 ```
@@ -527,9 +534,13 @@ vsa mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 | `.mvsa` | partituur-MXL → MSCZ (layout ``muziek``, Style-opties) → MuseScore SVG → trim    |
 | `.mscz` | Alleen MuseScore → SVG (+ trim); Style/fonts blijven zoals in het `.mscz`        |
 
-Eén SVG-pagina. Langere stukken die MuseScore over meerdere pagina’s splitst:
-gebruik `--section` (alleen bij `.mvsa`) of verkort het stuk. Na trim:
-**witte achtergrond** (default); ``--transparent`` voor geen achtergrondvlak.
+Eén MuseScore-pagina → één bestand (`-o` / sibling ``.svg``). Meerdere
+pagina’s → **bladreeks** ``stem-1.svg``, ``stem-2.svg``, … (elke pagina
+apart; bedoeld als print-bouwstenen). Op het scherm stapelen tot er een tall
+scherm-SVG of Score-IR-pad is — zie
+[kale-muziek-svg-en-uitgaven](../../plans/kale-muziek-svg-en-uitgaven.md).
+Na trim: **witte achtergrond** (default); ``--transparent`` voor geen
+achtergrondvlak.
 
 Style-opties (`--compact`, systeem-/stafafstand, pagina-marges,
 lyrics-/cue-font) gelden **alleen bij** `.mvsa`; andere Style-vlaggen winnen
@@ -856,6 +867,86 @@ vsa mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\a
 vsa mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 ```
 
+**Zie ook:** [`transpose`](#vsa-mvsa-transpose) (andere tonica),
+[`kuiser`](#vsa-mvsa-kuiser) (authoring in-place).
+
+---
+
+## `vsa mvsa transpose`
+
+### Synopsis
+
+```text
+vsa mvsa transpose [-h] --to TONIC [-o OUTPUT]
+                   [--pitch {doremi,a-g,vsa,ag-vsa}]
+                   [--octave-style {@oct,marker}] [--no-align] path
+```
+
+### Beschrijving
+
+Transponeert een **bestaand** `.mvsa`-bestand naar een andere
+[do-context](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)
+(tonica). Je geeft de **doeltonica** met `--to` (zelfde vorm als
+[`@do`](../../specification-mvsa/keywords.md#do): `F4`, `Bb3`, of `F`
+zonder octaafcijfer — dan geldt het octaaf van de bron-`@do`).
+
+**Wat meeschuift**
+
+- elke sticky `@do`-regel (ook mid-bestand-wissels), met hetzelfde interval;
+- alle klinkende stemtonen (absolute a–g én via EHM/doremi opgeloste tonen).
+
+**Wat gelijk blijft**
+
+- `@mode` (majeur blijft majeur; mineur blijft mineur);
+- `@oct`, L-regel (lyrics, ELM, recite), titels/metadata, commentaren.
+
+Default `--pitch ag-vsa`: na de shift worden stemregels herschreven zoals bij
+import (eerste noot absolute a–g, daarna EHM, absolute eindanker). Andere
+vormen: `doremi`, `a-g`, `vsa` (`abc` is alias van `a-g`).
+
+`normalize` wijzigt **geen** toonsoort (alleen spelling/uitlijning).
+`transpose` is het pad voor “Es majeur → F majeur”. Daarna mag je
+`normalize` of `kuiser` draaien.
+
+Commentaren die de oude toonsoort noemen (bijv. `# drie mollen`) worden
+**niet** automatisch herschreven.
+
+### Argumenten en opties
+
+| Naam                    | Verplicht | Betekenis                                                            | Default                         |
+| ----------------------- | --------- | -------------------------------------------------------------------- | ------------------------------- |
+| `path`                  | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                   | —                               |
+| `--to`                  | Ja        | Doeltonica (`F4`, `Bb3`, of `F` = octaaf van bron-`@do`).            | —                               |
+| `-o`, `--output`        | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                     | `<stem>.transposed.mvsa`        |
+| `--pitch`               | Nee       | `doremi` / `a-g` / `vsa` / `ag-vsa` (geen `preserve`)                | `ag-vsa`                        |
+| `--octave-style`        | Nee       | `@oct` (canoniek) of `marker` (nog niet klaar)                       | `@oct`                          |
+| `--no-align`            | Nee       | Geen kolomuitlijning.                                                | uit (wel alignen)               |
+
+### Output
+
+- **stdout**: `Geschreven: <pad>` bij succes.
+- **bestand**: getransponeerde `.mvsa` (sibling of `-o`).
+
+### Exit status
+
+| Exitcode | Betekenis                                          |
+| -------- | -------------------------------------------------- |
+| `0`      | Transpositie geschreven.                           |
+| `1`      | Pad ontbreekt, validatiefout, of transpositiefout. |
+
+### Voorbeelden
+
+```cmd
+vsa mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
+vsa mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F -o generated\alleluia.in-F.mvsa
+vsa mvsa transpose examples\bug-cases --to F4
+vsa mvsa transpose lied.mvsa --to Bb3 --pitch doremi -o generated\lied.in-Bb.mvsa
+```
+
+**Zie ook:** [`normalize`](#vsa-mvsa-normalize),
+[`@do` / `@mode`](../../specification-mvsa/keywords.md#do),
+[mvsa schrijven 101 — toonsoort](../../guides/mvsa-schrijven-101.md#toonsoort-verzetten-transpose).
+
 ---
 
 ## `vsa mvsa kuiser`
@@ -897,7 +988,8 @@ Gedrag t.o.v. `-` / `~` op L (draft-spec):
   MuseScore-importlyrics soms `--no-align`.
 
 `normalize` blijft het conversiepad (pitch-herschrijf naar een apart
-uitvoerbestand). `kuiser` is het dagelijkse authoring-commando.
+uitvoerbestand). `transpose` verandert de tonica (`@do`). `kuiser` is het
+dagelijkse authoring-commando.
 
 ### Argumenten en opties
 

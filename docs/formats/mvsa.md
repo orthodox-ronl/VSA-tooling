@@ -14,6 +14,7 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 | Zoektekst in canonieke bron         | [`zoektekst`](zoektekst.md) · CLI [`vsa zoektekst`](../reference/cli/zoektekst.md)               |
 | Validatieregels                     | [Validatie](../specification-mvsa/validation.md)                                                 |
 | Pitch-vormen / conversies           | [mvsa-conversies](../plans/mvsa-conversions.md)                                                  |
+| Toonsoort / tonica verzetten        | [`mvsa transpose`](../reference/cli/mvsa.md#vsa-mvsa-transpose)                                  |
 | Import uit `.mxl` / `.mscz`         | [`mvsa import`](../reference/cli/mvsa.md#vsa-mvsa-import) (soft-wrap; same-pitch recite; kuiser) |
 | CLI                                 | [`mvsa`](../reference/cli/mvsa.md) (`≡ vsa mvsa`)                                                |
 | Score-IR (scherm-JSON)              | [`score-ir`](score-ir.md) · [`mvsa score-ir`](../reference/cli/mvsa.md#vsa-mvsa-score-ir)        |
@@ -48,6 +49,7 @@ mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
 mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
+mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
 mvsa import generated\alleluia.mxl -o generated\alleluia.import.mvsa
 mvsa import generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
 mvsa validate generated\alleluia.import.mvsa

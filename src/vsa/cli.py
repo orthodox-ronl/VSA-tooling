@@ -426,6 +426,8 @@ def _build_parser():
             "      Importeer .mxl/.mscz naar .mvsa (default --pitch: ag-vsa).\n"
             "  normalize PATH [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]\n"
             "      Canoniseer .mvsa (default: behoud noteernamen; optioneel herschrijf).\n"
+            "  transpose PATH --to TONIC [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}]\n"
+            "      Transponeer naar opgegeven tonica (@do); @mode blijft gelijk.\n"
             "  kuiser PATH [PATH…] [-o OUTPUT] [--check] [--pitch …]\n"
             "      Authoring-kuiser: strepen syncen, woordstreep-spatie, align "
             "(+ optioneel pitch).\n"
@@ -439,6 +441,7 @@ def _build_parser():
             "  vsa mvsa import out.mxl -o out.mvsa --pitch doremi\n"
             "  vsa mvsa normalize lied.mvsa -o out.mvsa\n"
             "  vsa mvsa normalize lied.mvsa -o out.mvsa --pitch a-g\n"
+            "  vsa mvsa transpose lied.mvsa --to F4 -o out.mvsa\n"
             "  vsa mvsa kuiser lied.mvsa\n"
             "  vsa mvsa kuiser examples\\mvsa --check\n"
             "\n"
@@ -449,13 +452,14 @@ def _build_parser():
             "vsa mvsa mp3 -h | "
             "vsa mvsa ogg -h | vsa mvsa wav -h | "
             "vsa mvsa score-ir -h | "
-            "vsa mvsa import -h | vsa mvsa normalize -h | vsa mvsa kuiser -h"
+            "vsa mvsa import -h | vsa mvsa normalize -h | "
+            "vsa mvsa transpose -h | vsa mvsa kuiser -h"
         ),
     )
     mvsa_sub = mvsa.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,kuiser}",
+        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -912,6 +916,62 @@ def _build_parser():
         help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
     )
     m_normalize.add_argument(
+        "--no-align",
+        action="store_true",
+        help="Sla canonieke kolomuitlijning over.",
+    )
+    m_transpose = mvsa_sub.add_parser(
+        "transpose",
+        help="Transponeer .mvsa naar een opgegeven tonica (@do).",
+        description=(
+            "Verschuif alle @do-regels en klinkende stemtonen naar --to "
+            "(zelfde vorm als @do: F4, Bb3, of F zonder octaafcijfer). "
+            "@mode blijft gelijk (majeur blijft majeur). "
+            "Default --pitch ag-vsa. Uitvoer: sibling "
+            "<stem>.transposed.mvsa (of -o bij één bron)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa mvsa transpose "
+            "examples\\bug-cases\\alleluia-9b-toon-3-vokn.mvsa --to F4\n"
+            "  vsa mvsa transpose lied.mvsa --to F -o generated\\lied.in-F.mvsa\n"
+            "  vsa mvsa transpose examples\\bug-cases --to F4"
+        ),
+    )
+    m_transpose.add_argument(
+        "path",
+        help=".mvsa-bestand of map met .mvsa-bestanden (recursief).",
+    )
+    m_transpose.add_argument(
+        "--to",
+        required=True,
+        metavar="TONIC",
+        help="Doeltonica, bv. F4 of F (octaaf van bron-@do).",
+    )
+    m_transpose.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help=(
+            "Uitvoerbestand (default: <stem>.transposed.mvsa per bron). "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+    m_transpose.add_argument(
+        "--pitch",
+        choices=["doremi", "a-g", "abc", "vsa", "ag-vsa"],
+        default="ag-vsa",
+        help="Spelling op stemregels na transpositie (default: ag-vsa).",
+    )
+    m_transpose.add_argument(
+        "--octave-style",
+        choices=["@oct", "marker"],
+        default="@oct",
+        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+    )
+    m_transpose.add_argument(
         "--no-align",
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
@@ -2032,6 +2092,8 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_import(args)
     if getattr(args, "mvsa_command", None) == "normalize":
         return _cmd_mvsa_normalize(args)
+    if getattr(args, "mvsa_command", None) == "transpose":
+        return _cmd_mvsa_transpose(args)
     if getattr(args, "mvsa_command", None) in ("score-ir", "ir"):
         return _cmd_mvsa_score_ir(args)
     if getattr(args, "mvsa_command", None) == "kuiser":
@@ -2039,7 +2101,7 @@ def _cmd_mvsa(args) -> int:
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
         "Gebruik: vsa mvsa "
-        "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,kuiser} …\n"
+        "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,import,normalize,transpose,kuiser} …\n"
         "  vsa mvsa validate PATH\n"
         "  vsa mvsa mxl PATH [-o OUTPUT] [--section SECTION]\n"
         "  vsa mvsa score-ir PATH [-o OUTPUT] [--section SECTION]\n"
@@ -2049,6 +2111,7 @@ def _cmd_mvsa(args) -> int:
         "  vsa mvsa mp3|ogg|wav PATH [-o OUTPUT]\n"
         "  vsa mvsa import PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
         "  vsa mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
+        "  vsa mvsa transpose PATH --to TONIC [-o OUTPUT]\n"
         "  vsa mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
         "Hulp: vsa mvsa -h | vsa mvsa kuiser -h",
         file=sys.stderr,
@@ -2694,6 +2757,45 @@ def _cmd_mvsa_normalize(args) -> int:
             exit_code = 1
             continue
         except MvsaNormalizeError as exc:
+            loc = f"{path}:{exc.line}: " if getattr(exc, "line", None) else f"{path}: "
+            print(f"{loc}ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {out}")
+    return exit_code
+
+
+def _cmd_mvsa_transpose(args) -> int:
+    from .mvsa_transpose import MvsaTransposeError, transpose_mvsa_path
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    files = _cli_collect_sources(args.path, (".mvsa",))
+    if files is None:
+        return 1
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(args.output)
+            if args.output
+            else path.with_name(f"{path.stem}.transposed.mvsa")
+        )
+        try:
+            transpose_mvsa_path(
+                path,
+                out,
+                to=args.to,
+                pitch=args.pitch,
+                octave_style=args.octave_style,
+                align=not args.no_align,
+            )
+        except MvsaValidationError as exc:
+            for d in exc.diagnostics:
+                print(format_diagnostic(d, path), file=sys.stderr)
+            exit_code = 1
+            continue
+        except MvsaTransposeError as exc:
             loc = f"{path}:{exc.line}: " if getattr(exc, "line", None) else f"{path}: "
             print(f"{loc}ERROR: {exc}", file=sys.stderr)
             exit_code = 1

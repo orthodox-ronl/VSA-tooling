@@ -62,24 +62,24 @@ echo %ERRORLEVEL%
 
 ## Subcommando's
 
-| Subcommando                                      | Doel                                                                                       |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| [`validate`](validate.md)                        | Controleer op [geldige VSA-notatie](@) (`.vsa`, `.md`, of een map).                        |
-| [`parse`](parse.md)                              | Toon parseroutput of de interne [ast](@) van één [vsa-bestand](@bron).                     |
-| [`blocks`](blocks.md)                            | Vind en inspecteer [VSA-blokken](@) in een Markdownbestand.                                |
-| [`svg`](svg.md)                                  | Render één [vsa-bestand](@bron) naar één SVG-bestand.                                      |
-| [`process`](process.md)                          | Genereer SVG-bestanden uit [VSA-blokken](@) in Markdown (zonder Markdown te herschrijven). |
-| [`build-markdown`](build-markdown.md)            | Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.                         |
-| [`pdf`](pdf.md)                                  | Render één Markdownbestand (VSA, includes, pagebreaks) naar A4-PDF.                        |
-| [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).               |
-| [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).       |
-| [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).               |
-| [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).              |
-| [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                  |
-| [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                    |
-| [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/mxl/mscz/pdf/mp3/import (`mvsa` ≡ `vsa mvsa`).    |
-| [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: import → mvsa; mscz via MuseScore.                                |
-| [`mscz`](mscz.md)                                | Bron `.mscz`: import → mvsa; mxl via MuseScore; text (lyrics).                             |
+| Subcommando                                      | Doel                                                                                              |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| [`validate`](validate.md)                        | Controleer op [geldige VSA-notatie](@) (`.vsa`, `.md`, of een map).                               |
+| [`parse`](parse.md)                              | Toon parseroutput of de interne [ast](@) van één [vsa-bestand](@bron).                            |
+| [`blocks`](blocks.md)                            | Vind en inspecteer [VSA-blokken](@) in een Markdownbestand.                                       |
+| [`svg`](svg.md)                                  | Render één [vsa-bestand](@bron) naar één SVG-bestand.                                             |
+| [`process`](process.md)                          | Genereer SVG-bestanden uit [VSA-blokken](@) in Markdown (zonder Markdown te herschrijven).        |
+| [`build-markdown`](build-markdown.md)            | Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.                                |
+| [`pdf`](pdf.md)                                  | Render één Markdownbestand (VSA, includes, pagebreaks) naar A4-PDF.                               |
+| [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).                      |
+| [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).              |
+| [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).                      |
+| [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).                     |
+| [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`).                                         |
+| [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                           |
+| [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3/import (`mvsa` ≡ `vsa mvsa`). |
+| [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: import → mvsa; mscz via MuseScore.                                       |
+| [`mscz`](mscz.md)                                | Bron `.mscz`: import → mvsa; mxl via MuseScore; text (lyrics).                                    |
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze
