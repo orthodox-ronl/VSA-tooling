@@ -26,6 +26,17 @@ def test_score_ir_to_musicxml_has_cues_and_parts() -> None:
     assert "Gezegend" in xml
     assert "<words" in xml
     assert "<lyric" in xml
+    # OSMD: wrap op ``...`` als uitgangspunt; JS kan later tot 1 regel inklappen.
+    assert "Gezegend\n..." in xml or "Gezegend\n…" in xml
+    assert 'font-family="Source Sans 3"' in xml
+    assert 'font-size="12"' in xml
+    assert "default-x=" in xml
+    assert "relative-x=" not in xml
+    assert "osmdWidthFactor=" not in xml
+    assert "senza-misura" in xml
+    # Geen metronoom-glyph (OSMD negeert print-object=no); wel playback-tempo.
+    assert "<metronome" not in xml
+    assert 'sound tempo="' in xml
 
 
 def test_export_path_roundtrip(tmp_path: Path) -> None:
@@ -42,3 +53,255 @@ def test_export_path_roundtrip(tmp_path: Path) -> None:
 def test_rejects_wrong_format() -> None:
     with pytest.raises(ScoreIrMusicxmlError, match="format"):
         score_ir_to_musicxml({"format": "nope", "profile": "partituur"})
+
+
+_SPEELPLAN_VOLTA = """\
+@do F4
+@mode major
+@speelplan 1, 2, 1, 2, 1, 3
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok 3
+L: c_ ||
+S: mi ||
+A: mi ||
+T: mi ||
+B: mi ||
+"""
+
+
+def test_score_ir_speelplan_volta_ab_ac() -> None:
+    """Bladvorm volta in Score-IR → from-ir MusicXML (zelfde merken als partituur)."""
+    doc = export_mvsa_to_score_ir(_SPEELPLAN_VOLTA)
+    assert len(doc["measures"]) == 3
+    m1, m2, m3 = doc["measures"]
+    assert m1["bar"].get("left") == "repeat-start"
+    assert m2["bar"]["right"] == "repeat-end"
+    assert m2["ending"] == {"start": "1,2", "stop": "1,2"}
+    assert m3["ending"] == {"start": "3", "stop": "3"}
+
+    xml = score_ir_to_musicxml(doc)
+    assert xml.count("<measure ") == 6  # 3 maten × 2 parts
+    assert 'direction="forward"' in xml
+    assert 'direction="backward"' in xml
+    assert 'number="1,2"' in xml
+    assert 'number="3"' in xml
+    assert 'type="start"' in xml
+    assert 'type="stop"' in xml
+    p1 = xml.split('<part id="P1">', 1)[1].split("</part>", 1)[0]
+    p2 = xml.split('<part id="P2">', 1)[1].split("</part>", 1)[0]
+    assert "<ending " in p1
+    assert "<ending " not in p2
+
+
+def _three_blok_mvsa(speelplan: str) -> str:
+    return f"""\
+@do F4
+@mode major
+@speelplan {speelplan}
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok 3
+L: c_ ||
+S: mi ||
+A: mi ||
+T: mi ||
+B: mi ||
+"""
+
+
+def test_score_ir_speelplan_simple_repeat() -> None:
+    """``1,2,1,2,3`` → |: 1–2 :| + suffix 3 (geen volta)."""
+    doc = export_mvsa_to_score_ir(_three_blok_mvsa("1, 2, 1, 2, 3"))
+    assert len(doc["measures"]) == 3
+    assert doc["measures"][0]["bar"].get("left") == "repeat-start"
+    assert doc["measures"][1]["bar"]["right"] == "repeat-end"
+    assert "ending" not in doc["measures"][1]
+    xml = score_ir_to_musicxml(doc)
+    assert 'direction="forward"' in xml
+    assert 'direction="backward"' in xml
+    assert "<ending " not in xml
+    assert xml.count("<measure ") == 6
+
+
+def test_score_ir_speelplan_ds_al_fine() -> None:
+    text = """\
+@do F4
+@mode major
+@speelplan nls-1, nls-2, ksl, doxologie, nls-2, ksl
+
+@blok nls-1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok nls-2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok ksl
+L: c_ |
+S: mi |
+A: mi |
+T: mi |
+B: mi |
+
+@blok doxologie
+L: d_ ||
+S: fa ||
+A: fa ||
+T: fa ||
+B: fa ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    assert len(doc["measures"]) == 4
+    assert doc["measures"][1]["navigation"] == ["segno"]
+    assert doc["measures"][2]["navigation"] == ["fine"]
+    assert doc["measures"][3]["navigation"] == ["ds_al_fine"]
+    xml = score_ir_to_musicxml(doc)
+    assert "<segno/>" in xml
+    assert ">Fine</words>" in xml
+    assert ">D.S. al Fine</words>" in xml
+    assert 'dalsegno="segno"' in xml
+    assert xml.count("<measure ") == 8
+
+
+def test_score_ir_speelplan_ds_al_coda() -> None:
+    text = """\
+@do F4
+@mode major
+@speelplan 1, 2, 3, 2, 4
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok 3
+L: c_ |
+S: mi |
+A: mi |
+T: mi |
+B: mi |
+
+@blok 4
+L: d_ ||
+S: fa ||
+A: fa ||
+T: fa ||
+B: fa ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    assert len(doc["measures"]) == 4
+    assert doc["measures"][1]["navigation"] == ["segno", "to_coda"]
+    assert doc["measures"][2]["navigation"] == ["ds_al_coda"]
+    assert doc["measures"][3]["navigation"] == ["coda"]
+    xml = score_ir_to_musicxml(doc)
+    assert "<segno/>" in xml
+    assert ">To Coda</words>" in xml
+    assert ">D.S. al Coda</words>" in xml
+    assert "<coda/>" in xml
+    assert xml.count("<measure ") == 8
+
+
+def test_score_ir_speelplan_dc_al_coda() -> None:
+    text = """\
+@do F4
+@mode major
+@speelplan intro, mid, bridge, intro, mid, coda
+
+@blok intro
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok mid
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok bridge
+L: c_ |
+S: mi |
+A: mi |
+T: mi |
+B: mi |
+
+@blok coda
+L: d_ ||
+S: fa ||
+A: fa ||
+T: fa ||
+B: fa ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    assert len(doc["measures"]) == 4
+    assert "segno" not in doc["measures"][0].get("navigation", [])
+    assert "to_coda" in doc["measures"][1]["navigation"]
+    assert "dc_al_coda" in doc["measures"][2]["navigation"]
+    assert "coda" in doc["measures"][3]["navigation"]
+    xml = score_ir_to_musicxml(doc)
+    assert "<segno/>" not in xml
+    assert ">D.C. al Coda</words>" in xml
+    assert 'dacapo="yes"' in xml
+    assert "<ending " not in xml
+
+
+def test_score_ir_speelplan_expand_fallback() -> None:
+    """Onherleidbaar plan → uitgeschreven matenvolgorde, geen nav-tekens."""
+    doc = export_mvsa_to_score_ir(_three_blok_mvsa("1, 3, 2, 1"))
+    assert len(doc["measures"]) == 4
+    assert all("ending" not in m for m in doc["measures"])
+    assert all(not m.get("navigation") for m in doc["measures"])
+    xml = score_ir_to_musicxml(doc)
+    assert "<ending " not in xml
+    assert "<segno/>" not in xml
+    assert "<coda/>" not in xml
+    assert xml.count("<measure ") == 8
+    assert xml.count(">a</text>") == 2
+    assert xml.count(">b</text>") == 1
+    assert xml.count(">c</text>") == 1

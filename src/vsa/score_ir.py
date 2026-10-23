@@ -16,6 +16,11 @@ from .mvsa_musicxml import (
     PARTS,
     MvsaExportError,
     NoteEvent,
+    _apply_ds_al_coda,
+    _apply_ds_al_fine,
+    _apply_repeat_nav,
+    _apply_volta_ab_ac,
+    _collect_l_jump_nav_marks,
     _mvsa_bar_to_style,
     _system_to_events,
     wrap_tekst_at_ellipsis,
@@ -45,6 +50,10 @@ _BAR_STYLE_TO_IR: dict[str, str] = {
     "heavy-light": "heavy-light",
     "heavy-heavy": "heavy-heavy",
     "none": "none",
+    # Speelplan-bladvorm (zelfde tokens als mvsa_musicxml / from-ir).
+    "repeat-start": "repeat-start",
+    "repeat-end": "repeat-end",
+    "repeat-end-section": "repeat-end-section",
 }
 
 
@@ -135,6 +144,10 @@ def _measure_from_voices(
     bar_left: str | None,
     cues_text: list[str],
     voice_events: dict[str, list[NoteEvent]],
+    ending_start: str | None = None,
+    ending_stop: str | None = None,
+    repeat_times: int | None = None,
+    navigation: list[str] | None = None,
 ) -> dict[str, Any]:
     # Shared lyrics from soprano (same L-line on all singing voices).
     lyrics: list[dict[str, Any]] = []
@@ -174,13 +187,25 @@ def _measure_from_voices(
         for t in cues_text
         if t
     ]
-    return {
+    out: dict[str, Any] = {
         "id": measure_id,
         "bar": bar,
         "cues": cues,
         "lyrics": lyrics,
         "voices": voices_out,
     }
+    ending: dict[str, str] = {}
+    if ending_start:
+        ending["start"] = ending_start
+    if ending_stop:
+        ending["stop"] = ending_stop
+    if ending:
+        out["ending"] = ending
+    if repeat_times is not None and repeat_times > 2:
+        out["repeatTimes"] = repeat_times
+    if navigation:
+        out["navigation"] = list(navigation)
+    return out
 
 
 def export_mvsa_to_score_ir(
@@ -210,14 +235,18 @@ def export_mvsa_to_score_ir(
 
         sections = sections_for_layout(doc, layout="partituur")
 
+    from .mvsa_speelplan import plan_partituur_navigation
+
     voice_measures: dict[str, list[list[NoteEvent]]] = {
         p["voice"]: [] for p in PARTS
     }
     bar_styles: list[str] = []
     measure_left_styles: list[str | None] = []
     measure_staff_texts: list[list[str]] = []
+    blok_measure_range: dict[str, tuple[int, int]] = {}
     pitch_carry: dict[str, Pitch] = {}
     for section in sections:
+        section_start = len(bar_styles)
         for system in section.systems:
             events_by_voice, pitch_carry = _system_to_events(
                 system,
@@ -239,6 +268,42 @@ def export_mvsa_to_score_ir(
                     measure_staff_texts.append(texts)
                 else:
                     measure_staff_texts.append([])
+        if (
+            section.origin == "blok"
+            and section.id
+            and len(bar_styles) > section_start
+        ):
+            blok_measure_range[section.id] = (section_start, len(bar_styles) - 1)
+
+    # Zelfde speelplan-bladvorm als partituur-MusicXML (volta / herhaal / D.S.).
+    ending_start: list[str | None] = [None] * len(bar_styles)
+    ending_stop: list[str | None] = [None] * len(bar_styles)
+    repeat_times: list[int | None] = [None] * len(bar_styles)
+    nav_marks: list[list[str]] = [[] for _ in bar_styles]
+    if section_id is None:
+        nav = plan_partituur_navigation(doc)
+        if nav is not None and nav.kind == "volta_ab_ac" and nav.volta is not None:
+            _apply_volta_ab_ac(
+                nav.volta,
+                blok_measure_range,
+                measure_left_styles,
+                bar_styles,
+                ending_start,
+                ending_stop,
+            )
+        elif nav is not None and nav.kind == "repeat" and nav.repeat is not None:
+            _apply_repeat_nav(
+                nav.repeat,
+                blok_measure_range,
+                measure_left_styles,
+                bar_styles,
+                repeat_times,
+            )
+        elif nav is not None and nav.kind == "ds_al_fine" and nav.ds is not None:
+            _apply_ds_al_fine(nav.ds, blok_measure_range, nav_marks)
+        elif nav is not None and nav.kind == "ds_al_coda" and nav.coda is not None:
+            _apply_ds_al_coda(nav.coda, blok_measure_range, nav_marks)
+        _collect_l_jump_nav_marks(voice_measures.get("S", []), nav_marks)
 
     for i, texts in enumerate(measure_staff_texts):
         if texts:
@@ -268,6 +333,14 @@ def export_mvsa_to_score_ir(
                     else []
                 ),
                 voice_events=voice_slice,
+                ending_start=(
+                    ending_start[mi] if mi < len(ending_start) else None
+                ),
+                ending_stop=ending_stop[mi] if mi < len(ending_stop) else None,
+                repeat_times=(
+                    repeat_times[mi] if mi < len(repeat_times) else None
+                ),
+                navigation=nav_marks[mi] if mi < len(nav_marks) else None,
             )
         )
 

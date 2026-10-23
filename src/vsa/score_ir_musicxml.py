@@ -12,9 +12,19 @@ from typing import Any
 
 from .duration_model import UnknownELM, elm_to_duration
 from .music import Pitch
-from .mvsa_musicxml import LyricSyllable, NoteEvent, _emit_score_partituur
+from .mvsa_musicxml import (
+    LyricSyllable,
+    NoteEvent,
+    _emit_score_partituur,
+    estimate_cue_width_tenths,
+    wrap_tekst_at_ellipsis,
+)
 from .mvsa_parse import StickyContext
 from .score_ir import SCORE_IR_FORMAT, SCORE_IR_PROFILE
+
+# Zelfde defaults als MuseScore-partituur (``mscz_partituur``).
+_OSMD_CUE_FONT = "Source Sans 3"
+_OSMD_CUE_FONT_SIZE = "12"
 
 _IR_BAR_TO_STYLE: dict[str, str] = {
     "single": "regular",
@@ -24,6 +34,10 @@ _IR_BAR_TO_STYLE: dict[str, str] = {
     "heavy-heavy": "heavy-heavy",
     "none": "none",
     "regular": "regular",
+    # Doorgeven aan ``_emit_measure_barlines`` (niet platslaan naar regular).
+    "repeat-start": "repeat-start",
+    "repeat-end": "repeat-end",
+    "repeat-end-section": "repeat-end-section",
 }
 
 
@@ -60,6 +74,16 @@ def _duration_from_ir(raw: Any):
         return elm_to_duration(str(raw["elm"]))
     except UnknownELM as exc:
         raise ScoreIrMusicxmlError(str(exc)) from exc
+
+
+def _screen_cue_text(text: str) -> str:
+    """Cue voor OSMD: wrap op ``...`` (uitgangspunt voor maatbreedte).
+
+    ``score-osmd.js`` zet na layout terug naar één regel als die nóg in de
+    (al berekende) maatbreedte past; anders blijft de wrap staan.
+    """
+    flat = " ".join(str(text).split())
+    return wrap_tekst_at_ellipsis(flat)
 
 
 def _lyrics_for_index(
@@ -130,6 +154,10 @@ def score_ir_to_musicxml(doc: dict[str, Any]) -> str:
     bar_styles: list[str] = []
     measure_left_styles: list[str | None] = []
     measure_staff_texts: list[list[str]] = []
+    measure_ending_start: list[str | None] = []
+    measure_ending_stop: list[str | None] = []
+    measure_repeat_times: list[int | None] = []
+    measure_nav_marks: list[list[str]] = []
 
     for measure in measures:
         if not isinstance(measure, dict):
@@ -144,8 +172,21 @@ def score_ir_to_musicxml(doc: dict[str, Any]) -> str:
         )
         bar_styles.append(right)
         measure_left_styles.append(left)
+        ending = measure.get("ending") or {}
+        measure_ending_start.append(
+            str(ending["start"]) if isinstance(ending, dict) and ending.get("start") else None
+        )
+        measure_ending_stop.append(
+            str(ending["stop"]) if isinstance(ending, dict) and ending.get("stop") else None
+        )
+        rt = measure.get("repeatTimes")
+        measure_repeat_times.append(int(rt) if isinstance(rt, int) else None)
+        nav_raw = measure.get("navigation") or []
+        measure_nav_marks.append(
+            [str(m) for m in nav_raw] if isinstance(nav_raw, list) else []
+        )
         cues = [
-            str(c.get("text", ""))
+            _screen_cue_text(c.get("text", ""))
             for c in (measure.get("cues") or [])
             if isinstance(c, dict) and c.get("text")
         ]
@@ -172,6 +213,23 @@ def score_ir_to_musicxml(doc: dict[str, Any]) -> str:
         "bron": meta_in.get("sourceLabel"),
         "bibliotheek_id": meta_in.get("bibliotheekId"),
     }
+    # MusicXML width: licht voor MuseScore. Geen osmdWidthFactor: cues mogen
+    # op scherm over maten heen (score-osmd.js); verbreden per cue tilt de
+    # layout en duwt buur-cues omhoog.
+    measure_widths: list[int | None] = []
+    measure_osmd_factors: list[float | None] = []
+    for texts in measure_staff_texts:
+        if not texts:
+            measure_widths.append(None)
+            measure_osmd_factors.append(None)
+            continue
+        base = estimate_cue_width_tenths(texts)
+        measure_widths.append(max(base, 120))
+        measure_osmd_factors.append(None)
+    # Geen geforceerde new-system na herhaal/sectie: dat zet vaak één maat
+    # alleen op een regel. Cue-plaatsing t.o.v. de sleutel doet score-osmd.js
+    # na render (OSMD negeert default-x grotendeels).
+    measure_new_system = [False] * len(measures)
     return _emit_score_partituur(
         voice_measures,
         title=title,
@@ -179,7 +237,18 @@ def score_ir_to_musicxml(doc: dict[str, Any]) -> str:
         bar_styles=bar_styles,
         measure_left_styles=measure_left_styles,
         measure_staff_texts=measure_staff_texts,
+        measure_new_system=measure_new_system,
+        measure_widths=measure_widths,
+        measure_ending_start=measure_ending_start,
+        measure_ending_stop=measure_ending_stop,
+        measure_repeat_times=measure_repeat_times,
+        measure_nav_marks=measure_nav_marks,
         meta=meta,
+        staff_text_osmd=True,
+        tempo_sound_only=True,
+        osmd_cue_font=_OSMD_CUE_FONT,
+        osmd_cue_font_size=_OSMD_CUE_FONT_SIZE,
+        measure_osmd_width_factors=measure_osmd_factors,
     )
 
 
