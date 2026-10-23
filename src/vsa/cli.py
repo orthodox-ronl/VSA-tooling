@@ -56,366 +56,12 @@ def main(argv=None):
         return 1
 
 
-def _build_parser():
-    parser = argparse.ArgumentParser(prog="vsa")
-    parser.add_argument("--config", help="Pad naar vsa.toml", default=None)
-    parser.add_argument("--version", action="store_true", help="Toon versie")
-
-    subparsers = parser.add_subparsers(dest="command")
-
-    validate = subparsers.add_parser("validate")
-    validate.add_argument("path")
-    validate.add_argument("--config", default=None)
-    validate.add_argument(
-        "--summary",
-        action="store_true",
-        help="Compacte eenregelige foutmeldingen (zonder broncontext).",
-    )
-
-    parse = subparsers.add_parser("parse")
-    parse.add_argument("path")
-    parse.add_argument("--ast", action="store_true")
-
-    blocks = subparsers.add_parser("blocks")
-    blocks.add_argument("path")
-    blocks.add_argument("--json", action="store_true")
-
-    svg = subparsers.add_parser(
-        "svg",
-        help="Render .vsa naar muziek-only SVG (default: sibling .vsa.svg).",
+def _build_mvsa_parser() -> argparse.ArgumentParser:
+    """Standalone top-level ``mvsa`` parser (not nested under ``vsa``)."""
+    parser = argparse.ArgumentParser(
+        prog="mvsa",
         description=(
-            "Render eenstemmige .vsa naar SVG (alleen notatie, geen titel). "
-            "INPUT = één .vsa of map (recursief). Default-uitvoer: sibling "
-            "<bronnaam>.vsa.svg naast elke bron (zelfde naamgeving als "
-            "mvsa svg → .mvsa.svg). -o/--output alleen bij precies één bron."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "Voorbeelden:\n"
-            "  vsa svg examples\\minimal\\050_svg_demo.vsa\n"
-            "  vsa svg lied.vsa -o generated\\lied.vsa.svg\n"
-            "  vsa svg examples\\minimal --max-line-width 400"
-        ),
-    )
-    svg.add_argument(
-        "input",
-        help=".vsa-bestand of map met .vsa-bestanden (recursief).",
-    )
-    svg.add_argument(
-        "-o",
-        "--output",
-        metavar="OUTPUT",
-        default=None,
-        help=(
-            "Uitvoer-.svg (default: sibling <naam>.vsa.svg per bron). "
-            "Alleen bij precies één bronbestand."
-        ),
-    )
-    svg.add_argument("--config", default=None)
-    svg.add_argument("--max-line-width", type=float, default=None)
-
-    process = subparsers.add_parser("process")
-    process.add_argument("input")
-    process.add_argument("output_dir")
-    process.add_argument("--config", default=None)
-    process.add_argument("--no-validate", action="store_true")
-    process.add_argument("--max-line-width", type=float, default=None)
-
-    build_markdown = subparsers.add_parser("build-markdown")
-    build_markdown.add_argument("input_dir")
-    build_markdown.add_argument("output_dir")
-    build_markdown.add_argument("assets_dir")
-    build_markdown.add_argument("--config", default=None)
-    build_markdown.add_argument("--assets-url-prefix", default=None)
-    build_markdown.add_argument("--max-line-width", type=float, default=None)
-    build_markdown.add_argument(
-        "--output-mode",
-        choices=["img", "shortcode"],
-        default=None,
-    )
-
-    resolve_catalogus = subparsers.add_parser(
-        "resolve-catalogus",
-        help="Los :::include zoek= op naar catalogus-paden in markdown.",
-    )
-    resolve_catalogus.add_argument("path", help="Markdown-bestand met zoek= includes")
-    resolve_catalogus.add_argument(
-        "--content-root",
-        default=None,
-        help="Content-root (default: auto via lokaal/ in bovenliggende mappen)",
-    )
-    resolve_catalogus.add_argument(
-        "--bron-root",
-        default=None,
-        help="Bron-repo root (default: auto via vendor/bron of ../bron)",
-    )
-    resolve_catalogus.add_argument(
-        "-o",
-        "--output",
-        default=None,
-        help="Uitvoerbestand (default: overschrijf invoer)",
-    )
-    resolve_catalogus.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Toon resultaat zonder bestand te schrijven",
-    )
-
-    syllabify = subparsers.add_parser(
-        "syllabify",
-        help=(
-            "Zet of verwijder lettergreepstreepjes in VSA-tekst "
-            "(Pyphen nl_NL; ook brugstreepjes op scope-grenzen)."
-        ),
-    )
-    syllabify.add_argument(
-        "path",
-        help="VSA-bestand (.vsa) of map (recursief alle .vsa).",
-    )
-    syllabify_out = syllabify.add_mutually_exclusive_group()
-    syllabify_out.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Toon resultaat zonder bestanden te schrijven (default zonder schrijfmodus).",
-    )
-    syllabify_out.add_argument(
-        "--in-place",
-        action="store_true",
-        help="Schrijf het resultaat terug naar elk bronbestand.",
-    )
-    syllabify.add_argument(
-        "--extension",
-        metavar="EXT",
-        default=None,
-        help=(
-            "Schrijf naast het bronbestand met deze extensie "
-            "(bijv. .syl.vsa of syl.vsa: xyz.vsa wordt xyz.syl.vsa). "
-            "Niet combineren met --in-place."
-        ),
-    )
-    syllabify.add_argument(
-        "--unsyllabify",
-        action="store_true",
-        help=(
-            "Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes; "
-            "scope-inhoud en ELM-'-' blijven staan)."
-        ),
-    )
-
-    text_cmd = subparsers.add_parser(
-        "text",
-        help=(
-            "Platte gezongen tekst uit .vsa / .mvsa / MusicXML / .mscz "
-            "(zonder notatie; voor zoekindex)."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "Bronnen:\n"
-            "  .vsa / .mvsa — directe extractie\n"
-            "  .mxl / .musicxml / .xml — lyrics uit MusicXML\n"
-            "  .mscz — via tijdelijke MuseScore-.mxl (geen .mvsa)\n"
-            "\n"
-            "MusicXML-regel: eerste part met lyric number 1; geen dubbele\n"
-            "SATB-lyrics. Alias voor .mscz: mscz text PATH.\n"
-            "\n"
-            "PATH = één bronbestand of map (recursief). "
-            "-o alleen bij precies één bron.\n"
-            "\n"
-            "voorbeelden:\n"
-            "  vsa text lied.vsa\n"
-            "  vsa text lied.mscz.mxl -o lied.lyrics.txt\n"
-            "  vsa text lied.mscz --musescore \"C:\\\\Program Files\\\\MuseScore 4\\\\bin\\\\MuseScore4.exe\""
-        ),
-    )
-    text_cmd.add_argument(
-        "path",
-        help=(
-            ".vsa/.mvsa/.mxl/.musicxml/.xml/.mscz-bestand, of map met "
-            "zulke bestanden (recursief)."
-        ),
-    )
-    text_cmd.add_argument(
-        "-o",
-        "--output",
-        default=None,
-        help=(
-            "Schrijf platte tekst naar dit bestand i.p.v. stdout. "
-            "Alleen bij precies één bronbestand."
-        ),
-    )
-    text_cmd.add_argument(
-        "--musescore",
-        default=None,
-        help="Pad naar MuseScore (alleen bij .mscz; default: auto).",
-    )
-
-    zoektekst_cmd = subparsers.add_parser(
-        "zoektekst",
-        help=(
-            "Vul of controleer YAML-zoektekst in canonieke .vsa / .mvsa "
-            "(platte gezongen tekst voor editorzoeken)."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "Default: schrijf/update zoektekst in-place.\n"
-            "--check = geen schrijven; exit 1 bij ontbrekend/afwijkend veld.\n"
-            "\n"
-            "voorbeelden:\n"
-            "  vsa zoektekst examples\\mvsa\\alleluia-toon-1.mvsa\n"
-            "  vsa zoektekst examples\\mvsa --check\n"
-            "  vsa zoektekst lied.vsa -o generated\\lied.zoektekst.vsa\n"
-            "\n"
-            "Contract: docs/formats/zoektekst.md"
-        ),
-    )
-    zoektekst_cmd.add_argument(
-        "paths",
-        nargs="+",
-        help=".vsa / .mvsa-bestand of map (recursief).",
-    )
-    zoektekst_cmd.add_argument(
-        "--check",
-        action="store_true",
-        help="Alleen controleren (geen schrijven); exit 1 bij problemen.",
-    )
-    zoektekst_cmd.add_argument(
-        "-o",
-        "--output",
-        default=None,
-        help="Schrijf naar dit pad i.p.v. in-place (alleen bij één bronbestand).",
-    )
-
-    musicxml = subparsers.add_parser("musicxml")
-    musicxml.add_argument(
-        "input",
-        help="VSA-bestand (.vsa), Markdown-bestand (.md) of map.",
-    )
-    musicxml.add_argument(
-        "output",
-        help=(
-            "Uitvoerbestand (.mxl standaard, of .musicxml) voor een enkel "
-            "invoerbestand, of uitvoermap voor meerdere bestanden."
-        ),
-    )
-    musicxml.add_argument("--config", default=None)
-    musicxml.add_argument(
-        "--format",
-        choices=["musicxml", "mxl"],
-        default=None,
-        help=(
-            "Uitvoerformaat: .mxl (default) of .musicxml. "
-            "Bij een enkel bestand overschrijft een expliciete extensie dit."
-        ),
-    )
-    musicxml.add_argument(
-        "--do",
-        default=None,
-        help="Grondtoon, bijv. F4 (overschrijft bestand-metadata).",
-    )
-    musicxml.add_argument(
-        "--mode",
-        default=None,
-        help="Modus, bijv. major of minor (overschrijft bestand-metadata).",
-    )
-    musicxml.add_argument(
-        "--tempo",
-        default=None,
-        help="Tempo in BPM (overschrijft bestand-metadata).",
-    )
-    musicxml.add_argument(
-        "--musicxml-profile",
-        choices=["playback", "engraving"],
-        default=None,
-        help=(
-            "MusicXML-exportprofiel: playback (default, Coria/MuseScore) "
-            "of engraving (expliciete maatstrepen, typografie)."
-        ),
-    )
-
-    audio = subparsers.add_parser(
-        "audio",
-        help="Exporteer naar audio (.mp3/.ogg/.wav) via MuseScore (preview-luisteren).",
-        description=(
-            "Maak een afspeelbaar audiobestand uit playback-MusicXML of "
-            ".vsa / .mvsa / .mscz (via .mxl). Alleen het artefact - geen "
-            "speler. Vereist MuseScore 4 (of 3)."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "INPUT = één bronbestand of map (recursief). Bij een map is "
-            "OUTPUT een uitvoermap; --keep-mxl alleen bij één bron.\n"
-            "\n"
-            "voorbeelden:\n"
-            "  vsa audio examples\\docs-walkthroughs\\coria-oefenlink\\"
-            "oefenmelodie.vsa generated\\oefenmelodie.mp3\n"
-            "  vsa audio lied.mxl generated\\lied.mp3\n"
-            "  vsa audio lied.mxl generated\\lied --format ogg"
-        ),
-    )
-    audio.add_argument(
-        "input",
-        help=(
-            ".mxl/.musicxml/.vsa/.mvsa/.mscz-bestand, of map met zulke "
-            "bestanden (recursief)."
-        ),
-    )
-    audio.add_argument(
-        "output",
-        help=(
-            "Uitvoerbestand (.mp3/.ogg/.wav), of uitvoermap bij meerdere "
-            "bronnen."
-        ),
-    )
-    audio.add_argument("--config", default=None)
-    audio.add_argument(
-        "--format",
-        choices=["mp3", "ogg", "wav"],
-        default=None,
-        help=(
-            "Uitvoerformaat wanneer output geen expliciete extensie heeft "
-            "(default: mp3, of [audio].format in vsa.toml)."
-        ),
-    )
-    audio.add_argument(
-        "--musescore",
-        metavar="PATH",
-        default=None,
-        help="Pad naar MuseScore-executable (default: auto-detectie).",
-    )
-    audio.add_argument(
-        "--section",
-        metavar="SECTION",
-        default=None,
-        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
-    )
-    audio.add_argument(
-        "--keep-mxl",
-        metavar="PATH",
-        default=None,
-        help=(
-            "Bewaar ook het tussenliggende playback-.mxl op dit pad. "
-            "Alleen bij precies één bronbestand."
-        ),
-    )
-
-    template = subparsers.add_parser(
-        "template",
-        help="vsa-template: valideren van formule-YAML.",
-    )
-    template_sub = template.add_subparsers(dest="template_command")
-    t_validate = template_sub.add_parser(
-        "validate",
-        help="Valideer template.yaml (schema + documentregels).",
-    )
-    t_validate.add_argument(
-        "path",
-        help="template.yaml of map met template.yaml-bestanden.",
-    )
-
-    mvsa = subparsers.add_parser(
-        "mvsa",
-        help="mvsa draft: valideren, normaliseren, MusicXML of MSCZ.",
-        description=(
+            "mvsa draft: valideren, normaliseren, MusicXML of MSCZ. "
             "Draft-tooling voor meerstemmige .mvsa-bestanden "
             "(L + SATB). Zie docs/specification-mvsa/."
         ),
@@ -468,7 +114,7 @@ def _build_parser():
             "mvsa transpose -h | mvsa kuiser -h"
         ),
     )
-    mvsa_sub = mvsa.add_subparsers(
+    mvsa_sub = parser.add_subparsers(
         dest="mvsa_command",
         required=True,
         metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser}",
@@ -1031,6 +677,364 @@ def _build_parser():
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
     )
+    return parser
+
+
+def _build_parser():
+    parser = argparse.ArgumentParser(prog="vsa")
+    parser.add_argument("--config", help="Pad naar vsa.toml", default=None)
+    parser.add_argument("--version", action="store_true", help="Toon versie")
+
+    subparsers = parser.add_subparsers(dest="command")
+
+    validate = subparsers.add_parser("validate")
+    validate.add_argument("path")
+    validate.add_argument("--config", default=None)
+    validate.add_argument(
+        "--summary",
+        action="store_true",
+        help="Compacte eenregelige foutmeldingen (zonder broncontext).",
+    )
+
+    parse = subparsers.add_parser("parse")
+    parse.add_argument("path")
+    parse.add_argument("--ast", action="store_true")
+
+    blocks = subparsers.add_parser("blocks")
+    blocks.add_argument("path")
+    blocks.add_argument("--json", action="store_true")
+
+    svg = subparsers.add_parser(
+        "svg",
+        help="Render .vsa naar muziek-only SVG (default: sibling .vsa.svg).",
+        description=(
+            "Render eenstemmige .vsa naar SVG (alleen notatie, geen titel). "
+            "INPUT = één .vsa of map (recursief). Default-uitvoer: sibling "
+            "<bronnaam>.vsa.svg naast elke bron (zelfde naamgeving als "
+            "mvsa svg → .mvsa.svg). -o/--output alleen bij precies één bron."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Voorbeelden:\n"
+            "  vsa svg examples\\minimal\\050_svg_demo.vsa\n"
+            "  vsa svg lied.vsa -o generated\\lied.vsa.svg\n"
+            "  vsa svg examples\\minimal --max-line-width 400"
+        ),
+    )
+    svg.add_argument(
+        "input",
+        help=".vsa-bestand of map met .vsa-bestanden (recursief).",
+    )
+    svg.add_argument(
+        "-o",
+        "--output",
+        metavar="OUTPUT",
+        default=None,
+        help=(
+            "Uitvoer-.svg (default: sibling <naam>.vsa.svg per bron). "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+    svg.add_argument("--config", default=None)
+    svg.add_argument("--max-line-width", type=float, default=None)
+
+    process = subparsers.add_parser("process")
+    process.add_argument("input")
+    process.add_argument("output_dir")
+    process.add_argument("--config", default=None)
+    process.add_argument("--no-validate", action="store_true")
+    process.add_argument("--max-line-width", type=float, default=None)
+
+    build_markdown = subparsers.add_parser("build-markdown")
+    build_markdown.add_argument("input_dir")
+    build_markdown.add_argument("output_dir")
+    build_markdown.add_argument("assets_dir")
+    build_markdown.add_argument("--config", default=None)
+    build_markdown.add_argument("--assets-url-prefix", default=None)
+    build_markdown.add_argument("--max-line-width", type=float, default=None)
+    build_markdown.add_argument(
+        "--output-mode",
+        choices=["img", "shortcode"],
+        default=None,
+    )
+
+    resolve_catalogus = subparsers.add_parser(
+        "resolve-catalogus",
+        help="Los :::include zoek= op naar catalogus-paden in markdown.",
+    )
+    resolve_catalogus.add_argument("path", help="Markdown-bestand met zoek= includes")
+    resolve_catalogus.add_argument(
+        "--content-root",
+        default=None,
+        help="Content-root (default: auto via lokaal/ in bovenliggende mappen)",
+    )
+    resolve_catalogus.add_argument(
+        "--bron-root",
+        default=None,
+        help="Bron-repo root (default: auto via vendor/bron of ../bron)",
+    )
+    resolve_catalogus.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Uitvoerbestand (default: overschrijf invoer)",
+    )
+    resolve_catalogus.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Toon resultaat zonder bestand te schrijven",
+    )
+
+    syllabify = subparsers.add_parser(
+        "syllabify",
+        help=(
+            "Zet of verwijder lettergreepstreepjes in VSA-tekst "
+            "(Pyphen nl_NL; ook brugstreepjes op scope-grenzen)."
+        ),
+    )
+    syllabify.add_argument(
+        "path",
+        help="VSA-bestand (.vsa) of map (recursief alle .vsa).",
+    )
+    syllabify_out = syllabify.add_mutually_exclusive_group()
+    syllabify_out.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Toon resultaat zonder bestanden te schrijven (default zonder schrijfmodus).",
+    )
+    syllabify_out.add_argument(
+        "--in-place",
+        action="store_true",
+        help="Schrijf het resultaat terug naar elk bronbestand.",
+    )
+    syllabify.add_argument(
+        "--extension",
+        metavar="EXT",
+        default=None,
+        help=(
+            "Schrijf naast het bronbestand met deze extensie "
+            "(bijv. .syl.vsa of syl.vsa: xyz.vsa wordt xyz.syl.vsa). "
+            "Niet combineren met --in-place."
+        ),
+    )
+    syllabify.add_argument(
+        "--unsyllabify",
+        action="store_true",
+        help=(
+            "Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes; "
+            "scope-inhoud en ELM-'-' blijven staan)."
+        ),
+    )
+
+    text_cmd = subparsers.add_parser(
+        "text",
+        help=(
+            "Platte gezongen tekst uit .vsa / .mvsa / MusicXML / .mscz "
+            "(zonder notatie; voor zoekindex)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Bronnen:\n"
+            "  .vsa / .mvsa — directe extractie\n"
+            "  .mxl / .musicxml / .xml — lyrics uit MusicXML\n"
+            "  .mscz — via tijdelijke MuseScore-.mxl (geen .mvsa)\n"
+            "\n"
+            "MusicXML-regel: eerste part met lyric number 1; geen dubbele\n"
+            "SATB-lyrics. Alias voor .mscz: mscz text PATH.\n"
+            "\n"
+            "PATH = één bronbestand of map (recursief). "
+            "-o alleen bij precies één bron.\n"
+            "\n"
+            "voorbeelden:\n"
+            "  vsa text lied.vsa\n"
+            "  vsa text lied.mscz.mxl -o lied.lyrics.txt\n"
+            "  vsa text lied.mscz --musescore \"C:\\\\Program Files\\\\MuseScore 4\\\\bin\\\\MuseScore4.exe\""
+        ),
+    )
+    text_cmd.add_argument(
+        "path",
+        help=(
+            ".vsa/.mvsa/.mxl/.musicxml/.xml/.mscz-bestand, of map met "
+            "zulke bestanden (recursief)."
+        ),
+    )
+    text_cmd.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help=(
+            "Schrijf platte tekst naar dit bestand i.p.v. stdout. "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+    text_cmd.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore (alleen bij .mscz; default: auto).",
+    )
+
+    zoektekst_cmd = subparsers.add_parser(
+        "zoektekst",
+        help=(
+            "Vul of controleer YAML-zoektekst in canonieke .vsa / .mvsa "
+            "(platte gezongen tekst voor editorzoeken)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Default: schrijf/update zoektekst in-place.\n"
+            "--check = geen schrijven; exit 1 bij ontbrekend/afwijkend veld.\n"
+            "\n"
+            "voorbeelden:\n"
+            "  vsa zoektekst examples\\mvsa\\alleluia-toon-1.mvsa\n"
+            "  vsa zoektekst examples\\mvsa --check\n"
+            "  vsa zoektekst lied.vsa -o generated\\lied.zoektekst.vsa\n"
+            "\n"
+            "Contract: docs/formats/zoektekst.md"
+        ),
+    )
+    zoektekst_cmd.add_argument(
+        "paths",
+        nargs="+",
+        help=".vsa / .mvsa-bestand of map (recursief).",
+    )
+    zoektekst_cmd.add_argument(
+        "--check",
+        action="store_true",
+        help="Alleen controleren (geen schrijven); exit 1 bij problemen.",
+    )
+    zoektekst_cmd.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Schrijf naar dit pad i.p.v. in-place (alleen bij één bronbestand).",
+    )
+
+    musicxml = subparsers.add_parser("musicxml")
+    musicxml.add_argument(
+        "input",
+        help="VSA-bestand (.vsa), Markdown-bestand (.md) of map.",
+    )
+    musicxml.add_argument(
+        "output",
+        help=(
+            "Uitvoerbestand (.mxl standaard, of .musicxml) voor een enkel "
+            "invoerbestand, of uitvoermap voor meerdere bestanden."
+        ),
+    )
+    musicxml.add_argument("--config", default=None)
+    musicxml.add_argument(
+        "--format",
+        choices=["musicxml", "mxl"],
+        default=None,
+        help=(
+            "Uitvoerformaat: .mxl (default) of .musicxml. "
+            "Bij een enkel bestand overschrijft een expliciete extensie dit."
+        ),
+    )
+    musicxml.add_argument(
+        "--do",
+        default=None,
+        help="Grondtoon, bijv. F4 (overschrijft bestand-metadata).",
+    )
+    musicxml.add_argument(
+        "--mode",
+        default=None,
+        help="Modus, bijv. major of minor (overschrijft bestand-metadata).",
+    )
+    musicxml.add_argument(
+        "--tempo",
+        default=None,
+        help="Tempo in BPM (overschrijft bestand-metadata).",
+    )
+    musicxml.add_argument(
+        "--musicxml-profile",
+        choices=["playback", "engraving"],
+        default=None,
+        help=(
+            "MusicXML-exportprofiel: playback (default, Coria/MuseScore) "
+            "of engraving (expliciete maatstrepen, typografie)."
+        ),
+    )
+
+    audio = subparsers.add_parser(
+        "audio",
+        help="Exporteer naar audio (.mp3/.ogg/.wav) via MuseScore (preview-luisteren).",
+        description=(
+            "Maak een afspeelbaar audiobestand uit playback-MusicXML of "
+            ".vsa / .mvsa / .mscz (via .mxl). Alleen het artefact - geen "
+            "speler. Vereist MuseScore 4 (of 3)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "INPUT = één bronbestand of map (recursief). Bij een map is "
+            "OUTPUT een uitvoermap; --keep-mxl alleen bij één bron.\n"
+            "\n"
+            "voorbeelden:\n"
+            "  vsa audio examples\\docs-walkthroughs\\coria-oefenlink\\"
+            "oefenmelodie.vsa generated\\oefenmelodie.mp3\n"
+            "  vsa audio lied.mxl generated\\lied.mp3\n"
+            "  vsa audio lied.mxl generated\\lied --format ogg"
+        ),
+    )
+    audio.add_argument(
+        "input",
+        help=(
+            ".mxl/.musicxml/.vsa/.mvsa/.mscz-bestand, of map met zulke "
+            "bestanden (recursief)."
+        ),
+    )
+    audio.add_argument(
+        "output",
+        help=(
+            "Uitvoerbestand (.mp3/.ogg/.wav), of uitvoermap bij meerdere "
+            "bronnen."
+        ),
+    )
+    audio.add_argument("--config", default=None)
+    audio.add_argument(
+        "--format",
+        choices=["mp3", "ogg", "wav"],
+        default=None,
+        help=(
+            "Uitvoerformaat wanneer output geen expliciete extensie heeft "
+            "(default: mp3, of [audio].format in vsa.toml)."
+        ),
+    )
+    audio.add_argument(
+        "--musescore",
+        metavar="PATH",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto-detectie).",
+    )
+    audio.add_argument(
+        "--section",
+        metavar="SECTION",
+        default=None,
+        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+    )
+    audio.add_argument(
+        "--keep-mxl",
+        metavar="PATH",
+        default=None,
+        help=(
+            "Bewaar ook het tussenliggende playback-.mxl op dit pad. "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+
+    template = subparsers.add_parser(
+        "template",
+        help="vsa-template: valideren van formule-YAML.",
+    )
+    template_sub = template.add_subparsers(dest="template_command")
+    t_validate = template_sub.add_parser(
+        "validate",
+        help="Valideer template.yaml (schema + documentregels).",
+    )
+    t_validate.add_argument(
+        "path",
+        help="template.yaml of map met template.yaml-bestanden.",
+    )
 
     pdf = subparsers.add_parser(
         "pdf",
@@ -1114,8 +1118,6 @@ def _run(args):
     if args.command == "template":
         return _cmd_template(args)
 
-    if args.command == "mvsa":
-        return _cmd_mvsa(args)
 
     if args.command == "pdf":
         return _cmd_pdf(args, config)
@@ -2004,6 +2006,13 @@ def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
             default=None,
             help="Bewaar ook het tussenliggende playback-.mxl op dit pad.",
         )
+
+
+def run_standalone_mvsa(argv: list[str] | None = None) -> int:
+    """Entry for top-level ``mvsa`` console-script / ``cli_mvsa``."""
+    parser = _build_mvsa_parser()
+    args = parser.parse_args(argv)
+    return _cmd_mvsa(args)
 
 
 def _cmd_mvsa(args) -> int:

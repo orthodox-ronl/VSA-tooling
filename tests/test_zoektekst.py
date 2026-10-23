@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from vsa.cli import main as vsa_main
+from vsa.cli_mvsa import main as mvsa_main
 from vsa.zoektekst import (
     apply_zoektekst,
     check_zoektekst,
@@ -109,7 +110,7 @@ def test_cli_check_and_write(tmp_path: Path) -> None:
 def test_cli_mvsa_validate_require_zoektekst(tmp_path: Path) -> None:
     path = tmp_path / "lied.mvsa"
     path.write_text(_MVSA, encoding="utf-8")
-    assert vsa_main(["mvsa", "validate", str(path)]) == 0
-    assert vsa_main(["mvsa", "validate", str(path), "--require-zoektekst"]) == 1
+    assert mvsa_main(["validate", str(path)]) == 0
+    assert mvsa_main(["validate", str(path), "--require-zoektekst"]) == 1
     assert vsa_main(["zoektekst", str(path)]) == 0
-    assert vsa_main(["mvsa", "validate", str(path), "--require-zoektekst"]) == 0
+    assert mvsa_main(["validate", str(path), "--require-zoektekst"]) == 0

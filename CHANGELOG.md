@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Docs/CLI-voorbeelden: overal `mvsa …` i.p.v. `vsa mvsa …` (bron = command)
+- Docs/CLI-voorbeelden: overal `mvsa …` i.p.v. `vsa mvsa …` (bron = command);
+  nested `vsa mvsa` verwijderd — alleen top-level `mvsa`
 - CLI: score → `.mvsa` is `mxl mvsa` / `mscz mvsa` (conventie bron→doel); `import` verwijderd uit `mvsa`/`mxl`/`mscz`
 - Canonieke maatnummers: MusicXML/MuseScore-`@number` blijft leidend;
   Coria-`[PAUZE]` krijgt `Np` zonder hernummering; import-`#maat N` gebruikt
