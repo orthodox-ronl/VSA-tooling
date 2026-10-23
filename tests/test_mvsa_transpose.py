@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from vsa.cli import main as vsa_main
+from vsa.cli_mvsa import main as mvsa_main
 from vsa.music import Pitch
 from vsa.mvsa_musicxml import export_mvsa_to_musicxml
 from vsa.mvsa_transpose import (
@@ -88,9 +88,8 @@ def test_transpose_alleluia_to_f_without_octave():
 
 def test_cli_transpose_alleluia(tmp_path: Path):
     out = tmp_path / "alleluia.in-F.mvsa"
-    code = vsa_main(
+    code = mvsa_main(
         [
-            "mvsa",
             "transpose",
             str(ALLELUIA),
             "--to",

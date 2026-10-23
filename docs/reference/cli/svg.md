@@ -15,7 +15,7 @@ vsa svg [-h] [--config CONFIG] [--max-line-width MAX_LINE_WIDTH]
 ```
 
 **Invoer:** `input` mag één `.vsa` **of** een map zijn (recursief). Default
-per bron: sibling ``<bronnaam>.vsa.svg`` (zie [derived pad](../formats/vsa-svg.md)).
+per bron: sibling ``<bronnaam>.vsa.svg`` (zie [derived pad](../../formats/vsa-svg.md)).
 `-o` / `--output` alleen bij precies één bronbestand. Zie
 [Invoer bestand of map](input-pad.md).
 
