@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-24 23:41 CEST.
+  , gebouwd 2026-10-25 00:01 CEST.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4720,7 +4720,9 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek-tr
 mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 </code></pre></div>
 <p>Default na trim: <strong>witte</strong> achtergrond. <code>--transparent</code> laat de achtergrond
-leeg (handig op gekleurde pagina’s).</p>
+leeg (handig op gekleurde pagina’s). De trim zet <code>viewBox</code> op de getekende
+inhoud inclusief MuseScore-<code>transform</code> (glyphs staan lokaal rond <code>(0,0)</code>);
+anders zouden linker- en bovenmarge veel te breed blijven.</p>
 <p>Bij bron <code>.mvsa</code>: optioneel <code>--compact</code> (dichtste Style-baseline; andere
 Style-opties winnen), systeemafstand, stafafstand (<code>--staff-distance</code>),
 pagina-marges (<code>--page-margin-top</code> / <code>--page-margin-bottom</code>), fonts en
@@ -4774,7 +4776,7 @@ koormap-brug.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-10-25
         
       </p>
       
