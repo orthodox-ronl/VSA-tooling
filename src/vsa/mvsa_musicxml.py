@@ -1346,6 +1346,9 @@ def _pack_same_pitch_run(
     run: list[NoteEvent], *, allow_dotted: bool = False
 ) -> list[NoteEvent]:
     """One same-pitch melisma run → one note or a tie-chain (I2)."""
+    # S8 recite-print: breve + spacers niet samentrekken (zelfde pitch).
+    if any(n.spacer or n.breve_head for n in run):
+        return list(run)
     first = run[0]
     total = sum(_note_divs(n) for n in run)
 
@@ -1364,6 +1367,7 @@ def _pack_same_pitch_run(
                     lyrics=list(first.lyrics),
                     recite=first.recite,
                     spacer=first.spacer,
+                    breve_head=first.breve_head,
                     duration_divisions=None,
                     stemless=first.stemless,
                 )
@@ -1382,6 +1386,7 @@ def _pack_same_pitch_run(
                 lyrics=list(first.lyrics),
                 recite=first.recite,
                 spacer=first.spacer,
+                breve_head=first.breve_head,
                 duration_divisions=first.duration_divisions,
                 stemless=first.stemless,
             )
@@ -1397,6 +1402,7 @@ def _pack_same_pitch_run(
                 lyrics=lyrics,
                 recite=first.recite,
                 spacer=first.spacer,
+                breve_head=first.breve_head if i == 0 else False,
                 duration_divisions=div_override,
                 stemless=first.stemless,
                 tie_start=(i < len(parts) - 1),
@@ -1406,32 +1412,12 @@ def _pack_same_pitch_run(
     return out
 
 
-def _collapse_same_pitch_melisma(
-    notes: list[NoteEvent], *, allow_dotted: bool = False
-) -> list[NoteEvent]:
-    """Same-pitch melisma → collapse and/or tie-keten (S13/R7).
-
-    *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één
-    noot zolang de som ≤ dubbelgepunt whole (28). Langer → I2-tie-keten
-    (geen ``type``/``duration``-mismatch; MuseScore heraanslaat anders).
-    Partituur/MSCZ (default): **I1** ongestipt ≤ whole; **I2** tie-keten.
-
-    Slur alleen bij toonwissels binnen het melisma; pure hold → ties
-    (partituur, of playback bij overflow) of één noot (playback ≤ 28).
-    """
-    if len(notes) <= 1:
-        return notes
-
-    runs: list[list[NoteEvent]] = []
-    for note in notes:
-        if runs and _pitch_equal(runs[-1][-1].pitch, note.pitch):
-            runs[-1].append(note)
-        else:
-            runs.append([note])
-
-    packed: list[NoteEvent] = []
-    for run in runs:
-        packed.extend(_pack_same_pitch_run(run, allow_dotted=allow_dotted))
+def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
+    """Lyric/slur-opschoning binnen één same-pitch-run (niet over S8-spacers)."""
+    # S8 recite-print: breve + spacers houden hun per-lettergreep-lyrics;
+    # geen frase-slur over de hele maat.
+    if any(n.spacer or n.breve_head for n in packed):
+        return list(packed)
 
     n = len(packed)
     if n == 1:
@@ -1452,6 +1438,7 @@ def _collapse_same_pitch_melisma(
                 lyrics=lyrics,
                 recite=only.recite,
                 spacer=only.spacer,
+                breve_head=only.breve_head,
                 duration_divisions=only.duration_divisions,
                 stemless=only.stemless,
                 tie_start=only.tie_start,
@@ -1497,6 +1484,7 @@ def _collapse_same_pitch_melisma(
                 lyrics=lyrics,
                 recite=note.recite,
                 spacer=note.spacer,
+                breve_head=note.breve_head,
                 duration_divisions=note.duration_divisions,
                 stemless=note.stemless,
                 slur_start=(use_slur and i == 0),
@@ -1505,6 +1493,39 @@ def _collapse_same_pitch_melisma(
                 tie_stop=note.tie_stop,
             )
         )
+    return out
+
+
+def _collapse_same_pitch_melisma(
+    notes: list[NoteEvent], *, allow_dotted: bool = False
+) -> list[NoteEvent]:
+    """Same-pitch melisma → collapse and/or tie-keten (S13/R7).
+
+    *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één
+    noot zolang de som ≤ dubbelgepunt whole (28). Langer → I2-tie-keten
+    (geen ``type``/``duration``-mismatch; MuseScore heraanslaat anders).
+    Partituur/MSCZ (default): **I1** ongestipt ≤ whole; **I2** tie-keten.
+
+    Slur alleen bij toonwissels binnen het melisma; pure hold → ties
+    (partituur, of playback bij overflow) of één noot (playback ≤ 28).
+
+    Finalize lyric/slur **per pitch-run**, zodat S8-spacers niet hun lyrics
+    verliezen en er geen slur over de hele maat ontstaat.
+    """
+    if len(notes) <= 1:
+        return notes
+
+    runs: list[list[NoteEvent]] = []
+    for note in notes:
+        if runs and _pitch_equal(runs[-1][-1].pitch, note.pitch):
+            runs[-1].append(note)
+        else:
+            runs.append([note])
+
+    out: list[NoteEvent] = []
+    for run in runs:
+        packed = _pack_same_pitch_run(run, allow_dotted=allow_dotted)
+        out.extend(_finalize_same_pitch_run(packed))
     return out
 
 
@@ -2734,8 +2755,12 @@ def _emit_single_note(
         # lyrics in MuseScore-PDF — zie templates: visible=0 + play=0 in MSCZ).
         out.append("<stem>none</stem>")
         out.append("<notehead>none</notehead>")
-    elif ev.stemless or ev.breve_head:
-        # ||O||-midden: stokloos; breve-kop zet MSCZ-postprocess (headType).
+    elif ev.breve_head:
+        # S8 ||O||: stokloos + breve-kop; metrisch = ``type`` van rand (geen
+        # ``type=breve`` — MuseScore rekt maat). OSMD eert ``notehead breve``.
+        out.append("<stem>none</stem>")
+        out.append("<notehead>breve</notehead>")
+    elif ev.stemless:
         out.append("<stem>none</stem>")
     else:
         out.append(f"<stem>{stem}</stem>")

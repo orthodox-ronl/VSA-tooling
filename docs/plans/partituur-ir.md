@@ -69,13 +69,13 @@ Metadata die wél nuttig is om het stuk te *herkennen* (ids, korte titel voor UI
 
 Canonieke schermbedoeling (gelijk aan checklist S2–S5, S15, S19):
 
-| Regel              | Eis                                                                             |
-| ------------------ | ------------------------------------------------------------------------------- |
-| Balken             | Twee: boven = S+A (G), onder = T+B (F)                                          |
-| Voices             | Per balk twee: S/T stok omhoog, A/B omlaag                                      |
-| Lyrics             | Primair tussen de balken (niet 4× herhaald)                                     |
-| `@tekst`           | Boven het systeem, geankerd aan de **gecue-de maat**                            |
-| Recite (scherm v1) | Eén klinkende noot per lettergreep is genoeg; print-collapse is optioneel later |
+| Regel              | Eis                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Balken             | Twee: boven = S+A (G), onder = T+B (F)                                                                                                                             |
+| Voices             | Per balk twee: S/T stok omhoog, A/B omlaag                                                                                                                         |
+| Lyrics             | Primair tussen de balken (niet 4× herhaald)                                                                                                                        |
+| `@tekst`           | Boven het systeem, geankerd aan de **gecue-de maat**                                                                                                               |
+| Recite / melisma   | Zelfde **print-eindvorm** als S8/S13: lange recite 1–(n−2)–1; same-pitch melisma compact (gestipt waar kan). Coria-playback (M10) blijft één noot per lettergreep. |
 
 CoriB gebruikt **hetzelfde** partituurbeeld; oefenen = highlight/mute op voices, geen tweede tekenmodel.
 
@@ -142,14 +142,27 @@ LyricPos
 ```text
 VoiceEvent
   pitch: { step, alter?, octave } | "rest" | "hold"
-  duration: { type, dots?, divisions? }   # of canonieke ELM-token
+  duration: { elm }                       # canonieke ELM-token
   lyricIndex?: number                     # index in measure.lyrics (eerste noot van melisma)
-  melisma?: { extend: bool, slur?: bool, tie?: bool }
+  melisma?: {
+    extend?: bool
+    slurStart?: bool, slurStop?: bool
+    tieStart?: bool, tieStop?: bool
+  }
   recite?: bool
+  print?: { spacer?: bool, stemless?: bool, breveHead?: bool }  # S8
   marks?: { … }                           # stubs ok in v0.1
 ```
 
 `hold` = continue toon zonder nieuwe aanslag (mvsa `-` op stem). Melisma-tekst alleen op het event met `lyricIndex`.
+
+**S8 in IR:** na partituur-collapse blijven midden-events met `print.breveHead`
+(stokloze `||O||`) en `print.spacer` (onzichtbare kop, zichtbare lyric).
+from-ir MusicXML: spacers → `notehead none` + `stem none`; midden →
+`notehead breve` + `stem none` (geen `type=breve`).
+
+**S13 in IR:** same-pitch melisma al als compacte (gestipte) noot waar
+representeerbaar — OSMD-eindvorm, niet de MuseScore-import I1-tie-keten.
 
 ### 4.5 meta (mag wel / mag niet)
 
@@ -186,7 +199,7 @@ Default siblings: `lied.mvsa.score-ir.json`; met ``--musicxml`` ook
 | --------------------------- | -------------------------------------------------------------- |
 | `.mvsa` → partituur-`.mxl`  | Blijft MuseScore-import / tijdelijke schermbron                |
 | `.mvsa` → `.mscz` / PDF     | Blad / bewerken; niet de gedeelde schermmotor                  |
-| `.mvsa` → Score-IR          | **`mvsa score-ir`** (v0.1 partituur); input voor SVG/CoriB |
+| `.mvsa` → Score-IR          | **`mvsa score-ir`** (v0.1 partituur); input voor SVG/CoriB     |
 | Coria-playback-`.mxl`       | Legacy oefenpad; niet het partituur-IR-model                   |
 
 Hulptekst: in IR als lyric-laag `"2"` (later); **niet** als nep-extra-stemparts.
@@ -258,6 +271,7 @@ catalogus-MXL of MuseScore-SVG.
 ## 9. Open punten
 
 - Duurencoding: **ELM-tokens** gekozen in v0.1 (`duration.elm`).
-- Recite-print-collapse in IR of alleen in print-profiel?
+- ~~Recite-print-collapse in IR of alleen in print-profiel?~~ → in IR + from-ir
+  (S8/S13; zie §3–§4.4).
 - Meerdere cues op één maat; cues midden in een maat (nu: alleen measure-start).
 - Of `profile: "oefen"` een apart document is of een view-flag op hetzelfde bestand.

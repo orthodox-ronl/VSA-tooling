@@ -118,18 +118,31 @@ def _event_to_note(
     li = ev.get("lyricIndex")
     lyrics = _lyrics_for_index(measure, li if isinstance(li, int) else None)
     melisma = ev.get("melisma") or {}
+    if not isinstance(melisma, dict):
+        melisma = {}
     if lyrics and melisma.get("extend"):
         lyrics[0].extend = True
+    # Prefer explicit start/stop; legacy ``slur``/``tie`` = beide kanten.
+    slur_legacy = bool(melisma.get("slur"))
+    tie_legacy = bool(melisma.get("tie"))
+    print_opts = ev.get("print") or {}
+    if not isinstance(print_opts, dict):
+        print_opts = {}
     marks = ev.get("marks") or {}
+    if not isinstance(marks, dict):
+        marks = {}
     return NoteEvent(
         pitch=pitch,
         duration=duration,
         lyrics=lyrics,
         recite=bool(ev.get("recite")),
-        slur_start=bool(melisma.get("slur")),
-        slur_stop=bool(melisma.get("slur")),
-        tie_start=bool(melisma.get("tie")),
-        tie_stop=bool(melisma.get("tie")),
+        spacer=bool(print_opts.get("spacer")),
+        stemless=bool(print_opts.get("stemless")),
+        breve_head=bool(print_opts.get("breveHead")),
+        slur_start=bool(melisma.get("slurStart")) or slur_legacy,
+        slur_stop=bool(melisma.get("slurStop")) or slur_legacy,
+        tie_start=bool(melisma.get("tieStart")) or tie_legacy,
+        tie_stop=bool(melisma.get("tieStop")) or tie_legacy,
         caesura=bool(marks.get("caesura")),
         caesura_elm=marks.get("caesuraElm"),
         breath=bool(marks.get("breath")),
@@ -213,6 +226,9 @@ def score_ir_to_musicxml(doc: dict[str, Any]) -> str:
         "bron": meta_in.get("sourceLabel"),
         "bibliotheek_id": meta_in.get("bibliotheekId"),
     }
+    tempo_in = meta_in.get("tempo")
+    if tempo_in is not None and str(tempo_in).strip():
+        meta["tempo"] = str(tempo_in).strip()
     # MusicXML width: licht voor MuseScore. Geen osmdWidthFactor: cues mogen
     # op scherm over maten heen (score-osmd.js); verbreden per cue tilt de
     # layout en duwt buur-cues omhoog.

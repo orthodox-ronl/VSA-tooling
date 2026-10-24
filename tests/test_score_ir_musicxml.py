@@ -55,6 +55,65 @@ def test_rejects_wrong_format() -> None:
         score_ir_to_musicxml({"format": "nope", "profile": "partituur"})
 
 
+_S8_RECITE = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: (Al-le-lu-ia, al-le) ||
+S:  Bb                 ||
+A:  g                  ||
+T:  d                  ||
+B:  g                  ||
+"""
+
+
+def test_from_ir_tempo_from_mvsa_meta() -> None:
+    text = (
+        '@title "t"\n'
+        "@tempo 160\n"
+        "@do F4\n@mode major\n@oct S=0 A=0 T=-1 B=-1\n"
+        "L: a ||\nS: c ||\nA: c ||\nT: c ||\nB: c ||\n"
+    )
+    doc = export_mvsa_to_score_ir(text)
+    assert doc["meta"].get("tempo") == "160"
+    xml = score_ir_to_musicxml(doc)
+    assert 'sound tempo="160"' in xml
+
+
+def test_from_ir_s8_emits_spacer_noteheads() -> None:
+    """from-ir MusicXML: spacer → notehead none; midden → breve-kop (S8)."""
+    doc = export_mvsa_to_score_ir(_S8_RECITE)
+    xml = score_ir_to_musicxml(doc)
+    assert "<notehead>none</notehead>" in xml
+    assert "<notehead>breve</notehead>" in xml
+    assert "<type>breve</type>" not in xml
+    assert "<stem>none</stem>" in xml
+
+
+_S13_MELISMA = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: a_&_ ||
+S: g&g  ||
+A: d&d  ||
+T: bb&bb ||
+B: g&g  ||
+"""
+
+
+def test_from_ir_s13_compact_melisma() -> None:
+    doc = export_mvsa_to_score_ir(_S13_MELISMA)
+    xml = score_ir_to_musicxml(doc)
+    p1 = xml.split('<part id="P1">', 1)[1].split("</part>", 1)[0]
+    # Eén maat: weinig <note> (SA = voice 1+2); same-pitch niet als hakwerk.
+    notes = p1.count("<note>")
+    assert notes <= 4, f"te veel noten in P1: {notes}"
+    assert "<tie " not in p1 or p1.count("<tie ") == 0
+
+
 _SPEELPLAN_VOLTA = """\
 @do F4
 @mode major

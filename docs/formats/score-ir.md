@@ -17,11 +17,17 @@ MuseScore. Brugcontract: [partituur-ir §7](../plans/partituur-ir.md).
 Schrijf beide met ``mvsa score-ir … --musicxml`` (zonder pad; werkt ook
 op een map).
 
+**Print-eindvorm (S8/S13):** Score-IR bewaart recite-spacers
+(`print.spacer` / `print.breveHead`) en compacte same-pitch melisma’s;
+from-ir MusicXML tekent die voor OSMD (zelfde informatiedichtheid als
+blad-SVG, geen MuseScore-paginamodel). Details:
+[partituur-ir §4.4](../plans/partituur-ir.md).
+
 | Onderwerp                         | Waar                                                                 |
 | --------------------------------- | -------------------------------------------------------------------- |
 | Contract (velden, partituur)      | [partituur-ir](../plans/partituur-ir.md)                             |
 | Scherm- / CoriB-brug              | [partituur-ir §7](../plans/partituur-ir.md)                          |
-| CLI                               | [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir)    |
+| CLI                               | [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir)            |
 | Score-IR → MusicXML (OSMD)        | `vsa.score_ir_musicxml` · CLI ``--musicxml``                         |
 | Browser-spike                     | `examples/spikes/partituur-browser/`                                 |
 

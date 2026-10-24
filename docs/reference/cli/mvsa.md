@@ -284,6 +284,10 @@ Optioneel ``--musicxml``: schrijf partituur-MusicXML **uit** die Score-IR
 bron. Spike: `examples/spikes/partituur-browser/`. Brugcontract:
 [partituur-ir §7](../../plans/partituur-ir.md).
 
+Het eerste ``@tempo`` in het ``.mvsa``-bestand komt in Score-IR als
+``meta.tempo`` en in from-ir MusicXML als ``<sound tempo="…"/>`` (standaard
+130 BPM als er geen ``@tempo`` staat).
+
 ### Synopsis
 
 ```text

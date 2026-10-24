@@ -58,3 +58,95 @@ def test_unknown_section_raises() -> None:
     text = VREDE.read_text(encoding="utf-8")
     with pytest.raises(MvsaExportError, match="sectie"):
         export_mvsa_to_score_ir(text, section_id="bestaat-niet")
+
+
+_S8_RECITE = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: (Al-le-lu-ia, al-le) ||
+S:  Bb                 ||
+A:  g                  ||
+T:  d                  ||
+B:  g                  ||
+"""
+
+
+def test_score_ir_s8_recite_print_fields() -> None:
+    """Lange recite (≥6): S8 1-(n-2)-1 met print.spacer / breveHead in IR."""
+    doc = export_mvsa_to_score_ir(_S8_RECITE)
+    m1 = doc["measures"][0]
+    sop = m1["voices"]["S"]
+    prints = [ev.get("print") or {} for ev in sop]
+    assert any(p.get("breveHead") for p in prints), "||O||-midden ontbreekt"
+    spacers = [p for p in prints if p.get("spacer")]
+    assert spacers, "recite-spacers ontbreken in IR"
+    assert all(p.get("stemless") for p in prints if p.get("spacer"))
+    # Zichtbare randnoten: geen spacer/breveHead
+    visible = [
+        ev
+        for ev in sop
+        if not (ev.get("print") or {}).get("spacer")
+        and not (ev.get("print") or {}).get("breveHead")
+    ]
+    assert len(visible) >= 2
+
+
+_S13_MELISMA = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: a_&_ ||
+S: g&g  ||
+A: d&d  ||
+T: bb&bb ||
+B: g&g  ||
+"""
+
+
+def test_score_ir_s13_same_pitch_compact() -> None:
+    """Same-pitch melisma → één compacte (gestipte) noot in Score-IR (OSMD-eindvorm)."""
+    doc = export_mvsa_to_score_ir(_S13_MELISMA)
+    sop = doc["measures"][0]["voices"]["S"]
+    sounding = [ev for ev in sop if ev.get("pitch")]
+    assert len(sounding) == 1, f"verwacht 1 noot, kreeg {len(sounding)}"
+    # half + half = whole, of gestipte vorm via elm
+    assert sounding[0]["duration"]["elm"] in {"__", "_.", "_"}
+
+
+def test_score_ir_s8_keeps_all_lyrics_no_phrase_slur() -> None:
+    """S8-spacers behouden lettergrepen; geen slur van eerste naar laatste noot."""
+    # Minimaal: lange recite + aparte cadens-noot (andere toon).
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: (Al-le-lu-ia, al-le) -ia ||
+S:  Bb                  /   ||
+A:  g                   -   ||
+T:  d                   \\   ||
+B:  g                   \\2  ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    m1 = doc["measures"][0]
+    texts = [
+        "".join(s["text"] for s in ly.get("syllables", []))
+        for ly in m1["lyrics"]
+    ]
+    joined = " ".join(texts)
+    assert "Al" in joined and "le" in joined and "lu" in joined
+    assert len(m1["lyrics"]) >= 6, f"te weinig lyric-posities: {texts}"
+    sop = m1["voices"]["S"]
+    starts = [
+        i for i, ev in enumerate(sop) if (ev.get("melisma") or {}).get("slurStart")
+    ]
+    stops = [
+        i for i, ev in enumerate(sop) if (ev.get("melisma") or {}).get("slurStop")
+    ]
+    if starts and stops:
+        assert not (starts == [0] and stops == [len(sop) - 1]), (
+            "frase-slur over hele maat (S8+cadens) mag niet"
+        )

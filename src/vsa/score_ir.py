@@ -20,6 +20,7 @@ from .mvsa_musicxml import (
     _apply_ds_al_fine,
     _apply_repeat_nav,
     _apply_volta_ab_ac,
+    _collapse_same_pitch_melisma,
     _collect_l_jump_nav_marks,
     _mvsa_bar_to_style,
     _system_to_events,
@@ -88,14 +89,27 @@ def _serialize_voice_event(
     melisma: dict[str, Any] = {}
     if any(ly.extend for ly in ev.lyrics):
         melisma["extend"] = True
-    if ev.slur_start or ev.slur_stop:
-        melisma["slur"] = True
-    if ev.tie_start or ev.tie_stop:
-        melisma["tie"] = True
+    if ev.slur_start:
+        melisma["slurStart"] = True
+    if ev.slur_stop:
+        melisma["slurStop"] = True
+    if ev.tie_start:
+        melisma["tieStart"] = True
+    if ev.tie_stop:
+        melisma["tieStop"] = True
     if melisma:
         event["melisma"] = melisma
     if ev.recite:
         event["recite"] = True
+    print_opts: dict[str, Any] = {}
+    if ev.spacer:
+        print_opts["spacer"] = True
+    if ev.stemless:
+        print_opts["stemless"] = True
+    if ev.breve_head:
+        print_opts["breveHead"] = True
+    if print_opts:
+        event["print"] = print_opts
     marks: dict[str, Any] = {}
     if ev.caesura:
         marks["caesura"] = True
@@ -256,7 +270,13 @@ def export_mvsa_to_score_ir(
             )
             for voice, measures in events_by_voice.items():
                 voice_measures.setdefault(voice, [])
-                voice_measures[voice].extend(measures)
+                # S13 eindvorm voor OSMD: gestipte same-pitch (niet I1-ties).
+                # S8-spacers/breve blijven intact via pack-guard.
+                collapsed = [
+                    _collapse_same_pitch_melisma(m, allow_dotted=True)
+                    for m in measures
+                ]
+                voice_measures[voice].extend(collapsed)
             for mi, bundle in enumerate(system.measures):
                 bar_styles.append(_mvsa_bar_to_style(bundle.final_bar))
                 left = None
@@ -356,6 +376,8 @@ def export_mvsa_to_score_ir(
         meta["bibliotheekId"] = bib
     if getattr(doc, "bron", None):
         meta["sourceLabel"] = doc.bron
+    if getattr(doc, "tempo", None) is not None:
+        meta["tempo"] = str(doc.tempo)
 
     return {
         "format": SCORE_IR_FORMAT,
