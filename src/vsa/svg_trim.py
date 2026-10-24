@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import xml.etree.ElementTree as ET
 
 _NUM_RE = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?")
 _WHITE_PAGE_PATH_RE = re.compile(
@@ -14,24 +15,114 @@ _VIEWBOX_RE = re.compile(r'\bviewBox="([^"]*)"', re.IGNORECASE)
 _WIDTH_RE = re.compile(r'\bwidth="([^"]*)"', re.IGNORECASE)
 _HEIGHT_RE = re.compile(r'\bheight="([^"]*)"', re.IGNORECASE)
 
+_Matrix = tuple[float, float, float, float, float, float]
+_IDENTITY: _Matrix = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+
 
 class SvgTrimError(ValueError):
     """SVG had no drawable content to trim to."""
 
 
+def _local_tag(tag: str) -> str:
+    if "}" in tag:
+        return tag.rsplit("}", 1)[-1]
+    return tag
+
+
+def _parse_transform(value: str | None) -> _Matrix:
+    """Parse a single ``matrix(...)`` or ``translate(...)``; else identity."""
+    if not value:
+        return _IDENTITY
+    raw = value.strip()
+    m = re.fullmatch(r"matrix\(\s*([^)]+)\)", raw)
+    if m:
+        nums = [float(x) for x in re.split(r"[,\s]+", m.group(1).strip()) if x]
+        if len(nums) != 6:
+            return _IDENTITY
+        return (nums[0], nums[1], nums[2], nums[3], nums[4], nums[5])
+    m = re.fullmatch(r"translate\(\s*([^)]+)\)", raw)
+    if m:
+        nums = [float(x) for x in re.split(r"[,\s]+", m.group(1).strip()) if x]
+        if not nums:
+            return _IDENTITY
+        tx = nums[0]
+        ty = nums[1] if len(nums) > 1 else 0.0
+        return (1.0, 0.0, 0.0, 1.0, tx, ty)
+    return _IDENTITY
+
+
+def _mul(a: _Matrix, b: _Matrix) -> _Matrix:
+    a0, a1, a2, a3, a4, a5 = a
+    b0, b1, b2, b3, b4, b5 = b
+    return (
+        a0 * b0 + a2 * b1,
+        a1 * b0 + a3 * b1,
+        a0 * b2 + a2 * b3,
+        a1 * b2 + a3 * b3,
+        a0 * b4 + a2 * b5 + a4,
+        a1 * b4 + a3 * b5 + a5,
+    )
+
+
+def _apply(m: _Matrix, x: float, y: float) -> tuple[float, float]:
+    a, b, c, d, e, f = m
+    return a * x + c * y + e, b * x + d * y + f
+
+
+def _add_pairs(
+    xs: list[float],
+    ys: list[float],
+    matrix: _Matrix,
+    blob: str,
+) -> None:
+    nums = [float(n) for n in _NUM_RE.findall(blob)]
+    for i in range(0, len(nums) - 1, 2):
+        gx, gy = _apply(matrix, nums[i], nums[i + 1])
+        xs.append(gx)
+        ys.append(gy)
+
+
 def _collect_xy(svg: str) -> tuple[list[float], list[float]]:
+    """Collect drawable x/y in **user** space (MuseScore ``transform`` applied).
+
+    MuseScore puts noteheads/glyphs in local coordinates near ``(0,0)`` and
+    places them with ``transform="matrix(...)"``. Ignoring those transforms
+    made the content bbox include local ``0`` and left huge left/top margins
+    after padding.
+    """
     xs: list[float] = []
     ys: list[float] = []
-    for pts in re.findall(r'\bpoints="([^"]+)"', svg):
-        nums = [float(n) for n in _NUM_RE.findall(pts)]
-        for i in range(0, len(nums) - 1, 2):
-            xs.append(nums[i])
-            ys.append(nums[i + 1])
-    for d in re.findall(r'\bd="([^"]+)"', svg):
-        nums = [float(n) for n in _NUM_RE.findall(d)]
-        for i in range(0, len(nums) - 1, 2):
-            xs.append(nums[i])
-            ys.append(nums[i + 1])
+    try:
+        root = ET.fromstring(svg)
+    except ET.ParseError:
+        # Fallback: pre-transform naive scan (same as historical behaviour).
+        for pts in re.findall(r'\bpoints="([^"]+)"', svg):
+            _add_pairs(xs, ys, _IDENTITY, pts)
+        for d in re.findall(r'\bd="([^"]+)"', svg):
+            _add_pairs(xs, ys, _IDENTITY, d)
+        return xs, ys
+
+    def walk(el: ET.Element, matrix: _Matrix) -> None:
+        tag = _local_tag(el.tag)
+        if tag == "rect" and (el.get("class") or "") == "vsa-page-bg":
+            return
+        if tag == "path" and (el.get("fill") or "").lower() == "#ffffff":
+            # Full-page MuseScore background (also stripped by regex earlier).
+            return
+        local = _parse_transform(el.get("transform"))
+        m2 = _mul(matrix, local)
+        if tag == "path":
+            d = el.get("d")
+            if d:
+                _add_pairs(xs, ys, m2, d)
+        elif tag in ("polyline", "polygon"):
+            pts = el.get("points")
+            if pts:
+                _add_pairs(xs, ys, m2, pts)
+        for child in el:
+            walk(child, m2)
+
+    walk(root, _IDENTITY)
     return xs, ys
 
 
@@ -44,8 +135,9 @@ def trim_musescore_svg(
     """Crop MuseScore SVG ``viewBox``/size to drawn content.
 
     Removes the full-page white background path, then sets ``viewBox`` from
-    polyline/path coordinates plus *padding*. Width stays ``210mm``; height
-    scales with the content aspect ratio (no empty A4 underbelly).
+    polyline/path coordinates (with ``transform`` applied) plus *padding*.
+    Width stays ``210mm``; height scales with the content aspect ratio (no
+    empty A4 underbelly).
 
     *white_background* (default True): insert an opaque white ``<rect>`` for
     the trimmed viewBox. Set False for a transparent background.

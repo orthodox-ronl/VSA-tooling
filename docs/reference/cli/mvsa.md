@@ -509,8 +509,9 @@ mvsa pdf lied.mscz -o lied.pdf
 
 Exporteer `.mvsa` of `.mscz` naar partituur-SVG voor koormap-pagina’s
 (shortcode `muziek` later in bibliotheek). SVG-hoogte ≈ inhoud
-(viewBox-trim). MuseScore-brug — Score-IR/OSMD later voor gedeelde
-schermrenderer. Formaatpagina: [mvsa-svg](../../formats/mvsa-svg.md).
+(viewBox-trim, inclusief MuseScore-``transform`` op glyphs). MuseScore-brug —
+Score-IR/OSMD later voor gedeelde schermrenderer. Formaatpagina:
+[mvsa-svg](../../formats/mvsa-svg.md).
 
 ### Synopsis
 

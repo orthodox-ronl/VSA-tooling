@@ -20,7 +20,9 @@ mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 ```
 
 Default na trim: **witte** achtergrond. ``--transparent`` laat de achtergrond
-leeg (handig op gekleurde pagina’s).
+leeg (handig op gekleurde pagina’s). De trim zet ``viewBox`` op de getekende
+inhoud inclusief MuseScore-``transform`` (glyphs staan lokaal rond ``(0,0)``);
+anders zouden linker- en bovenmarge veel te breed blijven.
 
 Bij bron `.mvsa`: optioneel ``--compact`` (dichtste Style-baseline; andere
 Style-opties winnen), systeemafstand, stafafstand (``--staff-distance``),
