@@ -562,7 +562,12 @@ def _insert_accidental(note: ET.Element, name: str) -> None:
 
 
 def apply_playback_accidentals(root: ET.Element) -> int:
-    """Zet ``<accidental>`` waar klinkende toon afwijkt van voortekening/maat."""
+    """Zet ``<accidental>`` waar klinkende toon afwijkt van voortekening/maat.
+
+    Verwijdert eerst bestaande ``<accidental>`` per noot, zodat herhaalde
+    kruizen/mollen uit de emit niet blijven staan wanneer de maat al die
+    alter actief heeft (zelfde erfregels als zichtbare voortekens).
+    """
     n = 0
     for part in _music_parts(root):
         fifths = 0
@@ -577,6 +582,9 @@ def apply_playback_accidentals(root: ET.Element) -> int:
             implied_key = _key_alters(fifths)
             state: dict[tuple[str, str], int] = {}
             for note in _children(measure, "note"):
+                for child in list(note):
+                    if local(child.tag) == "accidental":
+                        note.remove(child)
                 sounding = _note_sounding_alter(note)
                 pitch = _child(note, "pitch")
                 if sounding is None or pitch is None:

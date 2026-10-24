@@ -213,3 +213,35 @@ def test_insert_accidental_after_dot_not_between_type_and_dot() -> None:
     _insert_accidental(note, "sharp")
     tags = [_local(c.tag) for c in note]
     assert tags.index("type") < tags.index("dot") < tags.index("accidental")
+
+
+def test_apply_playback_accidentals_strips_redundant() -> None:
+    """Herhaalde <accidental> in één maat → alleen eerste blijft."""
+    from vsa.musicxml_coria_timing import apply_playback_accidentals
+
+    root = ET.fromstring(
+        """
+        <score-partwise>
+          <part-list><score-part id="P1"><part-name>A</part-name></score-part></part-list>
+          <part id="P1">
+            <measure number="1">
+              <attributes><key><fifths>-1</fifths></key></attributes>
+              <note>
+                <pitch><step>F</step><alter>1</alter><octave>4</octave></pitch>
+                <duration>4</duration><type>quarter</type>
+                <accidental>sharp</accidental>
+              </note>
+              <note>
+                <pitch><step>F</step><alter>1</alter><octave>4</octave></pitch>
+                <duration>4</duration><type>quarter</type>
+                <accidental>sharp</accidental>
+              </note>
+            </measure>
+          </part>
+        </score-partwise>
+        """
+    )
+    apply_playback_accidentals(root)
+    notes = list(root.iter("note"))
+    assert notes[0].findtext("accidental") == "sharp"
+    assert notes[1].find("accidental") is None

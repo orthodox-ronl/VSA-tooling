@@ -364,3 +364,75 @@ def test_score_ir_speelplan_expand_fallback() -> None:
     assert xml.count(">a</text>") == 2
     assert xml.count(">b</text>") == 1
     assert xml.count(">c</text>") == 1
+
+
+_FS_SHARP_RUN = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: a_ b_ c_ ||
+S: Bb4 Bb4 Bb4 ||
+A: f#4 f#4 f#4 ||
+T: d4 d4 d4 ||
+B: g3 g3 g3 ||
+"""
+
+
+def test_partituur_accidental_once_per_measure() -> None:
+    """F#: <alter> op elke noot; <accidental> alleen op eerste in de maat.
+
+    Via partituur-emit (niet from-IR): Score-IR trekt same-pitch samen tot
+    één noot, waardoor die keten geen herhaalde F# meer heeft.
+    """
+    import xml.etree.ElementTree as ET
+
+    from vsa.mvsa_musicxml import export_mvsa_to_musicxml
+
+    xml = export_mvsa_to_musicxml(_FS_SHARP_RUN, layout="partituur")
+    root = ET.fromstring(xml)
+    p1 = root.find("part")
+    assert p1 is not None
+    measure = p1.find("measure")
+    assert measure is not None
+    f_sharps = [
+        n
+        for n in measure.findall("note")
+        if (n.findtext("pitch/step") == "F" and n.findtext("pitch/alter") == "1")
+    ]
+    assert len(f_sharps) == 3
+    assert f_sharps[0].findtext("accidental") == "sharp"
+    assert f_sharps[1].find("accidental") is None
+    assert f_sharps[2].find("accidental") is None
+
+
+def test_from_ir_accidental_resets_each_measure() -> None:
+    """Na maatstreep opnieuw een zichtbaar kruis (from-IR / Score-IR)."""
+    import xml.etree.ElementTree as ET
+
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: a_ | b_ ||
+S: Bb4 | Bb4 ||
+A: f#4 | f#4 ||
+T: d4 | d4 ||
+B: g3 | g3 ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    xml = score_ir_to_musicxml(doc)
+    root = ET.fromstring(xml)
+    p1 = root.find("part")
+    assert p1 is not None
+    measures = p1.findall("measure")
+    assert len(measures) >= 2
+    for mi in (0, 1):
+        f_sharps = [
+            n
+            for n in measures[mi].findall("note")
+            if (n.findtext("pitch/step") == "F" and n.findtext("pitch/alter") == "1")
+        ]
+        assert len(f_sharps) == 1
+        assert f_sharps[0].findtext("accidental") == "sharp"

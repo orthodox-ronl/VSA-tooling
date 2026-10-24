@@ -34,6 +34,7 @@ from .mvsa_validate import MvsaValidationError
 from .mvsa_validate import resolve_stem_map_key
 from .mvsa_validate import split_directive_assignments
 from .syllabify import display_lyric_text
+from .musicxml_renderer import _visible_accidental
 from .pitch_resolver import (
     PitchResolver,
     degree_to_pitch,
@@ -67,13 +68,6 @@ PARTITUUR_PARTS = (
 _DEGREE_RE = HEIGHT_DEGREE_RE
 _NOTE_RE = HEIGHT_NOTE_RE
 _EHM_RE = HEIGHT_EHM_RE
-
-ALTER_ACCIDENTAL = {
-    1.0: "sharp",
-    -1.0: "flat",
-    2.0: "double-sharp",
-    -2.0: "double-flat",
-}
 
 _DEGREE_INDEX = {"do": 0, "re": 1, "mi": 2, "fa": 3, "sol": 4, "la": 5, "ti": 6}
 
@@ -2412,8 +2406,9 @@ def _emit_score_playback(
                     '<note><rest/><duration>16</duration><type>whole</type></note>'
                 )
             else:
+                measure_alters: dict[str, int] = {}
                 for ev in events:
-                    _emit_note(out, ev, fifths=fifths)
+                    _emit_note(out, ev, fifths=fifths, measure_alters=measure_alters)
             _emit_measure_barlines(
                 out,
                 mi,
@@ -2591,6 +2586,7 @@ def _emit_score_partituur(
                     lower,
                     fifths=fifths,
                     with_lyrics=with_lyrics,
+                    measure_alters={},
                 )
             if top_staff and nav_end:
                 _emit_nav_marks(out, nav_end)
@@ -2619,8 +2615,10 @@ def _emit_staff_voices(
     *,
     fifths: int,
     with_lyrics: bool,
+    measure_alters: dict[str, int] | None = None,
 ) -> None:
     """Voice 1 (stok omhoog) → backup → voice 2 (stok omlaag)."""
+    alters = measure_alters if measure_alters is not None else {}
     for ev in upper:
         _emit_single_note(
             out,
@@ -2630,6 +2628,7 @@ def _emit_staff_voices(
             with_lyrics=with_lyrics,
             voice=1,
             stem="up",
+            measure_alters=alters,
         )
     total_u = sum(_note_divs(ev) for ev in upper)
     if upper and lower:
@@ -2646,12 +2645,26 @@ def _emit_staff_voices(
             with_lyrics=False,
             voice=2,
             stem="down",
+            measure_alters=alters,
         )
 
 
-def _emit_note(out: list[str], ev: NoteEvent, *, fifths: int) -> None:
+def _emit_note(
+    out: list[str],
+    ev: NoteEvent,
+    *,
+    fifths: int,
+    measure_alters: dict[str, int] | None = None,
+) -> None:
     _emit_single_note(
-        out, ev, fifths=fifths, chord=False, with_lyrics=True, voice=1, stem="up"
+        out,
+        ev,
+        fifths=fifths,
+        chord=False,
+        with_lyrics=True,
+        voice=1,
+        stem="up",
+        measure_alters=measure_alters if measure_alters is not None else {},
     )
 
 
@@ -2670,6 +2683,7 @@ def _emit_chord(
         [secondary] if secondary is not None else [],
         fifths=fifths,
         with_lyrics=with_lyrics,
+        measure_alters={},
     )
 
 
@@ -2682,6 +2696,7 @@ def _emit_single_note(
     with_lyrics: bool,
     voice: int = 1,
     stem: str = "up",
+    measure_alters: dict[str, int] | None = None,
 ) -> None:
     p = ev.pitch
     d = ev.duration
@@ -2691,8 +2706,12 @@ def _emit_single_note(
     if not is_rest:
         assert p is not None
         alt = f"<alter>{int(p.alter)}</alter>" if p.alter else ""
-        if p.alter in ALTER_ACCIDENTAL and p.alter != _key_alter(p.step, fifths):
-            accidental = f"<accidental>{ALTER_ACCIDENTAL[p.alter]}</accidental>"
+        # Maat-lokaal: alleen zichtbaar voorteken bij wissel t.o.v. key/eerdere
+        # alter (zelfde regels als musicxml_renderer._visible_accidental).
+        alters = measure_alters if measure_alters is not None else {}
+        name = _visible_accidental(p.step, p.alter, fifths, alters)
+        if name is not None:
+            accidental = f"<accidental>{name}</accidental>"
     dots = "".join("<dot/>" for _ in range(d.dots))
     lyric_xml = ""
     if with_lyrics:
@@ -2810,13 +2829,3 @@ def _emit_single_note(
         out.append('<wedge type="stop" number="1"/>')
         out.append("</direction-type>")
         out.append("</direction>")
-
-
-def _key_alter(step: str, fifths: int) -> float:
-    sharp_order = ("F", "C", "G", "D", "A", "E", "B")
-    if fifths > 0:
-        return 1.0 if step in sharp_order[:fifths] else 0.0
-    if fifths < 0:
-        flat_order = tuple(reversed(sharp_order))
-        return -1.0 if step in flat_order[:(-fifths)] else 0.0
-    return 0.0
