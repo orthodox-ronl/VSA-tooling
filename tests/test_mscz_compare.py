@@ -281,7 +281,8 @@ def test_cli_help_lists_compare(capsys):
     assert exc.value.code == 0
     out = capsys.readouterr().out
     assert "compare" in out
-    assert "{mvsa,mxl,text,compare}" in out
+    assert "normalize" in out
+    assert "products" in out
 
 
 def test_format_report_contains_sections(tmp_path: Path):

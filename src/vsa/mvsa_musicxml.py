@@ -1343,22 +1343,33 @@ def _pack_same_pitch_run(
     # S8 recite-print: breve + spacers niet samentrekken (zelfde pitch).
     if any(n.spacer or n.breve_head for n in run):
         return list(run)
+    # Eén noot in deze pitch-run: niet herbouwen (behoud extend/slur van
+    # multi-pitch-melisma). Alleen langere same-pitch-runs packen/collapsen.
+    if len(run) == 1:
+        return list(run)
     first = run[0]
     total = sum(_note_divs(n) for n in run)
 
     if allow_dotted:
         # Coria stript ``<tie>``: prefer one sounding note when representable.
-        # Keep intentional dotted ELM slots (``_.``) when the run is already one note.
-        if len(run) == 1:
-            return list(run)
         dur, div_override = _duration_from_divs(total)
         if div_override is None:
             # ≤ double-dotted whole: één MusicXML-duur, type en duration matchen.
+            # Collapse: geen melisma-extender op de ene klinkende noot.
+            lyrics = [
+                LyricSyllable(
+                    text=ly.text,
+                    syllabic=ly.syllabic,
+                    number=ly.number,
+                    extend=False,
+                )
+                for ly in first.lyrics
+            ]
             return [
                 NoteEvent(
                     pitch=first.pitch,
                     duration=dur,
-                    lyrics=list(first.lyrics),
+                    lyrics=lyrics,
                     recite=first.recite,
                     spacer=first.spacer,
                     breve_head=first.breve_head,
@@ -1373,11 +1384,20 @@ def _pack_same_pitch_run(
 
     parts = _pack_safe_divs(total, allow_dotted=False)
     if not parts:
+        lyrics = [
+            LyricSyllable(
+                text=ly.text,
+                syllabic=ly.syllabic,
+                number=ly.number,
+                extend=False,
+            )
+            for ly in first.lyrics
+        ]
         return [
             NoteEvent(
                 pitch=first.pitch,
                 duration=first.duration,
-                lyrics=list(first.lyrics),
+                lyrics=lyrics,
                 recite=first.recite,
                 spacer=first.spacer,
                 breve_head=first.breve_head,
@@ -1388,7 +1408,19 @@ def _pack_same_pitch_run(
     out: list[NoteEvent] = []
     for i, divs in enumerate(parts):
         dur, div_override = _duration_from_divs(divs)
-        lyrics = list(first.lyrics) if i == 0 else []
+        if i == 0:
+            lyrics = [
+                LyricSyllable(
+                    text=ly.text,
+                    syllabic=ly.syllabic,
+                    number=ly.number,
+                    # Collapse/tie-keten: extender alleen bij multi-pitch elders.
+                    extend=False,
+                )
+                for ly in first.lyrics
+            ]
+        else:
+            lyrics = []
         out.append(
             NoteEvent(
                 pitch=first.pitch,
@@ -1416,12 +1448,19 @@ def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
     n = len(packed)
     if n == 1:
         only = packed[0]
+        # Enkele noot in deze pitch-run: behoud extend/slur van multi-pitch-
+        # melisma (gezet in ``_position_to_notes``). Same-pitch-collapse heeft
+        # extend al uitgezet in ``_pack_same_pitch_run``.
         lyrics = [
             LyricSyllable(
                 text=ly.text,
-                syllabic=ly.syllabic if ly.syllabic != "begin" else "single",
+                syllabic=(
+                    "single"
+                    if ly.syllabic == "begin" and not ly.extend
+                    else ly.syllabic
+                ),
                 number=ly.number,
-                extend=False,
+                extend=ly.extend,
             )
             for ly in only.lyrics
         ]
@@ -1435,6 +1474,8 @@ def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
                 breve_head=only.breve_head,
                 duration_divisions=only.duration_divisions,
                 stemless=only.stemless,
+                slur_start=only.slur_start,
+                slur_stop=only.slur_stop,
                 tie_start=only.tie_start,
                 tie_stop=only.tie_stop,
             )

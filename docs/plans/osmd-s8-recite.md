@@ -54,8 +54,9 @@ Score-IR → from-ir → OSMD + A1-adapter (S8).
 
 ### 2.2 Besluitkader + peiling (run 1 gedaan)
 
-Spike: [`examples/spikes/osmd-s8-peiling/`](../../examples/spikes/osmd-s8-peiling/)
-(OSMD **1.9.3**, zelfde lijn als bibliotheek-scherm; geen post-render JS).
+Spike: `examples/spikes/osmd-s8-peiling/` in de repo (geen MkDocs-pagina;
+alleen lokaal/peiling). OSMD **1.9.3**, zelfde lijn als bibliotheek-scherm;
+geen post-render JS.
 Patroon: Al (kwart) → le (breve) → lu/i/a (spacers) → al (kwart).
 
 | Variant                    | Encoding                                              | Spacer-koppen in OSMD | Lyrics Al…al |
