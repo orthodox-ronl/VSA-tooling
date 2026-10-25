@@ -16,3 +16,4 @@ De CLI-referentie is opgesplitst in losse man-pagina's per subcommando.
 | `resolve-catalogus`    | [cli/resolve-catalogus.md](cli/resolve-catalogus.md) |
 | `syllabify`            | [cli/syllabify.md](cli/syllabify.md)                 |
 | `musicxml`             | [cli/musicxml.md](cli/musicxml.md)                   |
+| `products`             | [cli/products.md](cli/products.md)                   |

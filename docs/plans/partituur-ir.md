@@ -5,7 +5,7 @@
 | **Status**      | werkplan; **niet normatief**; stap 1–5 + schermbrug-contract (§7) gedaan; CoriB-MVP en site-embed nog open                                                       |
 | **Doel**        | Vastleggen wat het JSON-achtige tussenmodel bevat dat schermrenderer (koormap-SVG) én CoriB voedt — zonder MuseScore als schermmotor                             |
 | **Eigenaar**    | Export uit `.mvsa` → IR: [VSA-tooling](@bron); consumptie: bibliotheek (shortcode `muziek`) + CoriB                                                              |
-| **Gerelateerd** | [canonical-checklists](../formats/canonical-checklists.md) (S-reeks = layoutdoel), [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md), `@tekst` |
+| **Gerelateerd** | [contract-index](../formats/contract-index.md), [canonical-checklists](../formats/canonical-checklists.md) (S-reeks = layoutdoel), [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md), `@tekst` |
 
 Contract + [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir). Schema-validator en schermrenderer: later.
 

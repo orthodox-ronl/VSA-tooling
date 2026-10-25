@@ -8,7 +8,7 @@ MusicXML (`.musicxml`).
 ```text
 vsa musicxml [-h] [--config CONFIG] [--format {musicxml,mxl}] [--do DO]
              [--mode MODE] [--tempo TEMPO]
-             [--musicxml-profile {playback,engraving}]
+             [--musicxml-profile {playback,engraving}] [--syllabify]
              input output
 ```
 
@@ -30,12 +30,19 @@ Gedrag hangt af van het type van `input`:
 | Map                       | `output` is een map; alle `.vsa`- en `.md`-bestanden worden recursief verwerkt, met behoud van relatieve mapstructuur.                                            |
 
 Standaard gebruikt `vsa musicxml` het `playback`-profiel (bedoeld voor
-afspelen/import in Coria en MuseScore zonder handmatige opschoning). Kies
+afspelen/import in Coria en MuseScore zonder handmatige opschoning). Bij
+`playback` volgt na de export een **Coria-finalize** (sanitize + voortekens;
+geen DOCTYPE in het MusicXML) — checklist M* in
+[canonical-checklists](../../formats/canonical-checklists.md). Kies
 `engraving` (via `--musicxml-profile` of frontmatter
 `muziek.musicxml-profile: engraving`) als je de partituur verder wilt
-bewerken en expliciete maatstrepen of typografie-hints nodig hebt. Zie
-[musicxml-export.md](../../guides/musicxml-export.md) voor de volledige
-uitleg van beide profielen en alle frontmatter-instellingen.
+bewerken en expliciete maatstrepen of typografie-hints nodig hebt; dan
+blijft finalize uit. Zie [musicxml-export.md](../../guides/musicxml-export.md)
+voor de volledige uitleg van beide profielen en alle frontmatter-instellingen.
+
+`--syllabify` voegt tijdelijke lettergreepstreepjes toe vóór de export; de
+canonieke `.vsa` blijft ongewijzigd. [`vsa products`](products.md) doet die
+syllabify altijd voor de MXL-sibling. Losse bron bewerken: [`vsa syllabify`](syllabify.md).
 
 ## Argumenten en opties
 
@@ -49,6 +56,7 @@ uitleg van beide profielen en alle frontmatter-instellingen.
 | `--mode MODE`                                 | Nee       | Modus, `major` of `minor` (overschrijft bestand-metadata `muziek.mode`).          | Bestand-metadata, anders `major`                                | —                                      |
 | `--tempo TEMPO`                               | Nee       | Tempo in BPM (overschrijft bestand-metadata `muziek.tempo`).                      | Bestand-metadata; zonder expliciete waarde geen tempo-markering | —                                      |
 | `--musicxml-profile {playback,engraving}`     | Nee       | Exportprofiel (overschrijft bestand-metadata `muziek.musicxml-profile`).          | Bestand-metadata, anders `playback`                             | Alleen `playback` of `engraving`       |
+| `--syllabify`                                 | Nee       | Tijdelijke lettergreepstreepjes vóór export (bronbestand blijft ongewijzigd).     | Uit                                                             | Alleen zinvol bij `.vsa`-invoer        |
 | `-h`, `--help`                                | Nee       | Toon hulp voor dit subcommando.                                                   | —                                                               | —                                      |
 
 ## Output
@@ -117,6 +125,13 @@ Met een expliciet exportprofiel:
 vsa musicxml lied.vsa lied.mxl --musicxml-profile engraving
 ```
 
+Coria-playback met tijdelijke syllabify (zelfde MXL-keten als `vsa products`,
+zonder SVG/meta):
+
+```cmd
+vsa musicxml lied.vsa lied.mxl --syllabify
+```
+
 ## Voorbeelden — falen
 
 Onbekend bestandstype als invoer:
@@ -147,6 +162,8 @@ sluiten.
 ## Zie ook
 
 - Volledige workflow, profielen, Coria-integratie en frontmatter-instellingen: [musicxml-export.md](../../guides/musicxml-export.md)
+- [`vsa products`](products.md) — MXL + SVG + products-meta (syllabify + finalize)
+- [`vsa syllabify`](syllabify.md) — lettergreepstreepjes in de bron zelf
 - [`vsa validate`](validate.md) — controleer [VSA-notatie](@bron) vóór export.
 - Outputreferentie: [outputs.md](../outputs.md)
 - Bron-contract (exporttype mxl/coria): [exporttype-coria](https://orthodox-ronl.github.io/bron/reference/exporttype-coria/)

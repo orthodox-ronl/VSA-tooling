@@ -195,11 +195,13 @@ Hergebruik: `docs/guides/reuse-vsa-tooling.md`.
 [`docs/specification-vsa-templates/rendering-pitfalls.md`](docs/specification-vsa-templates/rendering-pitfalls.md)
 lezen (maatstrepen, collapse-regels, MuseScore `position`, Coria vs print).
 
-**MVSA → MXL/MSCZ:** canonieke contracten in
+**Contracten (alle formaten / OSMD):** start bij
+[`docs/formats/contract-index.md`](docs/formats/contract-index.md).
+**MVSA → MXL/MSCZ:** checklists in
 [`docs/formats/canonical-checklists.md`](docs/formats/canonical-checklists.md)
 (M-reeks Coria, S-reeks partituur). Same-pitch melisma samentrekken geldt voor
-**beide** (M5a/S13); recite-print-collapse alleen partituur (M10). Cursor-regel:
-`.cursor/rules/mvsa-export-contracten.mdc`.
+**beide** (M5a/S13); recite-print-collapse alleen partituur (M10). Cursor-regels:
+`contracten-eerst.mdc`, `mvsa-export-contracten.mdc`.
 
 ### Belangrijke grenzen
 
@@ -267,6 +269,7 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 | `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                |
 | `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken       |
 | `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                          |
+| `contracten-eerst.mdc`                | Altijd [contract-index](docs/formats/contract-index.md) eerst |
 
 Na bulk-tabellen: `python scripts/align_markdown_tables.py <pad>`.
 

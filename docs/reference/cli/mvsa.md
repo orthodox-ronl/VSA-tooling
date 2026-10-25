@@ -23,7 +23,7 @@ enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser} …
+mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
               [--hulptekst-as-parts] [--bibliotheek-id ID]
@@ -79,6 +79,8 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 | [`normalize`](#mvsa-normalize)     | Canoniseer `.mvsa` (default: behoud noteernamen).               |
 | [`transpose`](#mvsa-transpose)     | Transponeer naar een andere tonica (`@do`); `@mode` blijft.     |
 | [`kuiser`](#mvsa-kuiser)           | Authoring-kuiser: strepen syncen, woordstreep, align.           |
+| [`import`](#mvsa-import)           | Score/MusicXML → werkbank-`.mvsa` (catalogus-vrij; = `mscz`/`mxl mvsa`). |
+| [`products`](#mvsa-products)       | Standaardproducten + `*.products-meta.json` (versheid).                 |
 
 Hulp op de commandoregel:
 
@@ -860,10 +862,76 @@ mvsa kuiser lied.mvsa -o generated\lied.kuiser.mvsa
 mvsa kuiser lied.mvsa --pitch a-g
 ```
 
+---
+
+## `mvsa import`
+
+### Synopsis
+
+```text
+mvsa import [-h] [-o OUTPUT] [--pitch …] [--musescore PATH] path
+```
+
+### Beschrijving
+
+Zet een **`.mscz`** of MusicXML (`.mxl` / `.musicxml` / `.xml`) om naar
+werkbank-`.mvsa`. **Catalogus-vrij** (geen plaatsing in de bibliotheek).
+
+| Bronextensie | Zelfde als |
+| --- | --- |
+| `.mscz` | [`mscz mvsa`](mscz.md) |
+| `.mxl` / `.musicxml` / `.xml` | [`mxl mvsa`](mxl.md) |
+
+Andere extensies → exit 1 met duidelijke fout. Contract-navigatie:
+[contract-index](../../formats/contract-index.md).
+
+### Voorbeelden
+
+```cmd
+mvsa import lied.mscz
+mvsa import examples\importer\tweede-antifoon-zondag-hemelum.mxl -o generated\from-mxl.mvsa
+mscz mvsa lied.mscz
+```
+
+---
+
+## `mvsa products`
+
+### Synopsis
+
+```text
+mvsa products [-h] [--force] [--dry-run] [--skip-svg] [--musescore PATH] path
+```
+
+### Beschrijving
+
+Schrijft voor elke `.mvsa` onder `path`:
+
+| Product | Bestand |
+| --- | --- |
+| Coria-`.mxl` | `{stam}.mvsa.mxl` |
+| Score-IR | `{stam}.mvsa.score-ir.json` |
+| from-ir MusicXML | `{stam}.mvsa.from-ir.musicxml` |
+| SVG (tenzij `--skip-svg`) | `{stam}.mvsa.svg` |
+| Meta | `{stam}.mvsa.products-meta.json` |
+
+Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
+(`--force` regenereert). Kaal: geen bibliotheek-stamps.
+[contract-index](../../formats/contract-index.md).
+
+### Voorbeelden
+
+```cmd
+mvsa products examples\mvsa\1a-vredeslitanie.mvsa --skip-svg
+mvsa products examples\mvsa --dry-run --skip-svg
+```
+
 ## Zie ook
 
 - Draft-spec: [specification-mvsa](../../specification-mvsa/README.md)
 - Conversieplan: [mvsa-conversions](../../plans/mvsa-conversions.md)
+- Straat-CLIs: [straat-clis](../../plans/straat-clis.md)
+- Contract-index: [contract-index](../../formats/contract-index.md)
 - Invoer bestand of map: [input-pad.md](input-pad.md)
 - Voorbeelden: [examples/mvsa](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)
 - Eenstemmig: [`vsa validate`](validate.md), [`vsa musicxml`](musicxml.md)

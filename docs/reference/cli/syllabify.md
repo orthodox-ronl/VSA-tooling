@@ -123,12 +123,15 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa syllabify pad\naar\xyz.syl.vsa --unsyllabify --in-place
 ```
 
-Na schrijven MusicXML-product vernieuwen:
+Voor Coria-MXL hoef je de bron niet in-place te syllabifyen:
+[`vsa products`](products.md) (en `vsa musicxml --syllabify`) doen tijdelijke
+streepjes alleen voor de export. In-place alleen als je de canonieke `.vsa`
+zelf wilt hypheneren:
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa syllabify pad\naar\bestand.vsa --in-place
-scripts\vsa-products.cmd
+vsa products pad\naar\bestand.vsa --force
 ```
 
 Voorbeeldtransformatie:
@@ -140,3 +143,9 @@ Voorbeeldtransformatie:
 | `marte{la_}{/ren}`         | `mar-te-{la_}-{/ren}`           | `marte{la_}{/ren}`       |
 | `Jo{+\han_}{/nes_}`        | `Jo-{+\han_}-{/nes_}`           | `Jo{+\han_}{/nes_}`      |
 | `{/heb}ben`                | `{/heb}-ben`                    | `{/heb}ben`              |
+
+## Zie ook
+
+- [`vsa products`](products.md) — MXL met tijdelijke syllabify (bron ongewijzigd)
+- [`vsa musicxml --syllabify`](musicxml.md) — losse MusicXML met dezelfde optie
+- [`vsa text`](text.md) — platte gezongen tekst

@@ -1,0 +1,22 @@
+---
+description: Bij format/export/normalize/OSMD altijd eerst de contract-index
+alwaysApply: true
+---
+
+# Contracten eerst
+
+Voor **elk** werk aan export, normalize, layout, Score-IR/from-ir, OSMD,
+MusicXML/MSCZ/SVG/PDF of productstraten:
+
+1. Open
+   [`docs/formats/contract-index.md`](docs/formats/contract-index.md).
+2. Zoek het onderwerp → canonieke hub → checklist-/profiel-id.
+3. Wijzig normatieve tekst **alleen** in die hub; elders alleen linken.
+4. Noem in PR/docs/tests het contract-id (bijv. S8, M5a, R7, layout
+   `partituur`).
+
+Niet opnieuw “bedenken” wat een `.mscz` of recite/melisma mag zijn —
+dat staat al in checklists + [MSCZ-leesbaarheid](docs/formats/mscz-leesbaarheid.md).
+
+MVSA-export in het bijzonder: ook
+[`mvsa-export-contracten.mdc`](mvsa-export-contracten.mdc).

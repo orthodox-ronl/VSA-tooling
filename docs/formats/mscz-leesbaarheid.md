@@ -1,5 +1,10 @@
 # MSCZ-leesbaarheid (partituur-layout)
 
+Navigatie: [contract-index](contract-index.md) · layoutprofielen:
+[`.mscz`](mscz.md#layoutprofielen---layout) · checklist S*:
+[canonieke checklists](canonical-checklists.md#checklist-mscz-partituur-musescore).
+
+
 Doel: regels zodat een genormaliseerde / gegenereerde `.mscz` **op het blad
 leesbaar** blijft — geen tekst in buurmaten, geen verwarrende bogen, geen
 rommelige maatnummers. Dit is het layoutprofiel **`partituur`**

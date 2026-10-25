@@ -3,6 +3,9 @@
 Native MuseScore-bestand (zip met o.a. `.mscx`). In deze toolchain vooral
 voor de **partituur-workflow**; Coria gebruikt `.mxl`.
 
+Contracten: [contract-index](contract-index.md) (leesbaarheid + S* +
+layoutprofielen).
+
 ## Wat hoort hier
 
 | Onderwerp             | Waar                                                                                                                       |

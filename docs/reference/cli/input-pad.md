@@ -37,6 +37,7 @@ toegestaan bij precies één bronbestand.
 | `text`                | Ja    | `.vsa` / `.mvsa` / MusicXML / `.mscz`                      |
 | `zoektekst`           | Ja    | `.vsa` / `.mvsa` (`iter_vsa_mvsa_files` → helper)          |
 | `musicxml`            | Deels | map ondersteund in renderer-pad; check man-pagina          |
+| `products`            | Ja    | `.vsa` (`collect_cli_sources` / street products)           |
 | `audio`               | Ja    | zelfde bronnen; bij map is `output` een uitvoermap         |
 | `template validate`   | Ja    | `template.yaml` in map                                     |
 

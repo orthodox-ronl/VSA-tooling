@@ -117,7 +117,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     mvsa_sub = parser.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser}",
+        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -677,6 +677,11 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
     )
+    from .cli_import import add_mvsa_import_parser
+    from .street_products import add_products_parser
+
+    add_mvsa_import_parser(mvsa_sub)
+    add_products_parser(mvsa_sub, street="mvsa", with_skip_svg=True)
     return parser
 
 
@@ -737,6 +742,10 @@ def _build_parser():
     )
     svg.add_argument("--config", default=None)
     svg.add_argument("--max-line-width", type=float, default=None)
+
+    from .street_products import add_products_parser as _add_vsa_products_parser
+
+    _add_vsa_products_parser(subparsers, street="vsa", with_skip_svg=False)
 
     process = subparsers.add_parser("process")
     process.add_argument("input")
@@ -955,6 +964,14 @@ def _build_parser():
             "of engraving (expliciete maatstrepen, typografie)."
         ),
     )
+    musicxml.add_argument(
+        "--syllabify",
+        action="store_true",
+        help=(
+            "Voeg tijdelijke lettergreepstreepjes toe vóór export "
+            "(canonieke .vsa blijft ongewijzigd). Zelfde als vsa products."
+        ),
+    )
 
     audio = subparsers.add_parser(
         "audio",
@@ -1090,6 +1107,16 @@ def _run(args):
 
     if args.command == "svg":
         return _cmd_svg(args, config)
+
+    if args.command == "products":
+        from .street_products import run_street_products
+
+        return run_street_products(
+            "vsa",
+            args.path,
+            force=bool(args.force),
+            dry_run=bool(args.dry_run),
+        )
 
     if args.command == "process":
         return _cmd_process(args, config)
@@ -1518,7 +1545,12 @@ def _cmd_musicxml(args, config):
             rel = vsa_file.relative_to(input_path)
             out_file = output_dir / rel.with_suffix(output_suffix)
             out_file.parent.mkdir(parents=True, exist_ok=True)
-            rc = _export_vsa_to_musicxml(vsa_file, out_file, cli_overrides)
+            rc = _export_vsa_to_musicxml(
+                vsa_file,
+                out_file,
+                cli_overrides,
+                syllabify=bool(getattr(args, "syllabify", False)),
+            )
             if rc != 0:
                 return rc
             written += 1
@@ -1539,7 +1571,12 @@ def _cmd_musicxml(args, config):
 
     if input_path.suffix.lower() == ".vsa":
         out_path = _resolve_musicxml_output_path(output_path, args)
-        rc = _export_vsa_to_musicxml(input_path, out_path, cli_overrides)
+        rc = _export_vsa_to_musicxml(
+            input_path,
+            out_path,
+            cli_overrides,
+            syllabify=bool(getattr(args, "syllabify", False)),
+        )
         if rc == 0:
             print(f"MusicXML geschreven naar: {out_path}")
         return rc
@@ -1641,32 +1678,28 @@ def _export_vsa_to_musicxml(
     input_path: Path,
     output_path: Path,
     cli_overrides: dict[str, str],
+    *,
+    syllabify: bool = False,
 ) -> int:
-    text = input_path.read_text(encoding="utf-8")
-    frontmatter, vsa_body = parse_vsa_frontmatter(text)
+    from .vsa_musicxml_export import (
+        IncludeVsaError as ExportIncludeError,
+        MusicXMLExportError as ExportMusicXMLError,
+        export_vsa_to_musicxml,
+    )
+
     try:
-        vsa_body, _ = prepare_vsa_body(text, input_path)
-    except IncludeVsaError as exc:
+        export_vsa_to_musicxml(
+            input_path,
+            output_path,
+            cli_overrides=cli_overrides,
+            syllabify=syllabify,
+        )
+    except ExportIncludeError as exc:
         print(f"{input_path}: {exc.message_nl}", file=sys.stderr)
         return 1
-    fm_meta = frontmatter_to_block_metadata(frontmatter)
-
-    metadata = dict(DEFAULT_METADATA)
-    metadata.update(fm_meta)
-    metadata.update(cli_overrides)
-
-    explicit_keys = set(fm_meta.keys()) | set(cli_overrides.keys())
-
-    document = Parser(preserve_vsa_source_newlines(vsa_body)).parse()
-
-    try:
-        renderer = MusicXMLRenderer(metadata=metadata, explicit_keys=explicit_keys)
-        xml_str = renderer.render(document)
-    except MusicXMLExportError as exc:
+    except ExportMusicXMLError as exc:
         print(f"{input_path}: fout bij MusicXML-export: {exc}", file=sys.stderr)
         return 1
-
-    write_musicxml_output(output_path, xml_str)
     return 0
 
 
@@ -2038,10 +2071,26 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_score_ir(args)
     if getattr(args, "mvsa_command", None) == "kuiser":
         return _cmd_mvsa_kuiser(args)
+    if getattr(args, "mvsa_command", None) == "import":
+        from .cli_import import run_mvsa_import
+
+        return run_mvsa_import(args)
+    if getattr(args, "mvsa_command", None) == "products":
+        from .street_products import run_street_products
+
+        musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
+        return run_street_products(
+            "mvsa",
+            args.path,
+            force=bool(args.force),
+            dry_run=bool(args.dry_run),
+            skip_svg=bool(getattr(args, "skip_svg", False)),
+            musescore=musescore,
+        )
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
         "Gebruik: mvsa "
-        "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser} …\n"
+        "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products} …\n"
         "  mvsa validate PATH\n"
         "  mvsa mxl PATH [-o OUTPUT] [--section SECTION]\n"
         "  mvsa score-ir PATH [-o OUTPUT] [--section SECTION]\n"

@@ -1,5 +1,7 @@
 # `.mvsa` — meerstemmige tekstbron (draft)
 
+Contracten / producten: [contract-index](contract-index.md).
+
 Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 [specification-mvsa](../specification-mvsa/README.md). Tutorial:
 [mvsa schrijven 101](../guides/mvsa-schrijven-101.md).

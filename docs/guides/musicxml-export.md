@@ -6,7 +6,14 @@ of naar platte **`.musicxml`**. Open het in MuseScore of speel af op
 
 Deze pagina is de workflow-uitleg (profielen, Coria, mappen, opties). Voor de
 volledige CLI-syntax, alle argumenten en foutgevallen: zie de man-pagina
-[`vsa musicxml`](../reference/cli/musicxml.md).
+[`vsa musicxml`](../reference/cli/musicxml.md). Voor siblings + meta in één
+keer: [`vsa products`](../reference/cli/products.md) (tijdelijke syllabify +
+Coria-finalize op de MXL; SVG uit de ongewijzigde bron).
+
+Bij het **`playback`**-profiel schrijft `vsa musicxml` altijd Coria-klare
+MusicXML (finalize: sanitize + voortekens, geen DOCTYPE). Optioneel
+`--syllabify` voor tijdelijke lettergreepstreepjes zonder de `.vsa` te
+wijzigen.
 
 ## Snel starten
 

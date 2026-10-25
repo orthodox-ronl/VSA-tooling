@@ -99,6 +99,7 @@ nav:
       - .mscz: formats/mscz.md
       - .mp3 / audio: formats/audio.md
       - .midi / .mid: formats/midi.md
+    - Contract-index: formats/contract-index.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
     - Commando's:
@@ -107,9 +108,11 @@ nav:
       - mxl: reference/cli/mxl.md
       - mscz: reference/cli/mscz.md
       - vsa musicxml: reference/cli/musicxml.md
+      - vsa products: reference/cli/products.md
       - vsa audio: reference/cli/audio.md
     - Scripts (cmd): formats/scripts.md
     - Conversieplan: plans/mvsa-conversions.md
+    - Straat-CLIs (plan): plans/straat-clis.md
   - Handleidingen:
     - Overzicht: manuals/index.md
     - Consumer-site — waar hoort wat: manuals/consumer-site.md
@@ -190,6 +193,7 @@ nav:
       - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
       - reference/cli/musicxml.md
+      - reference/cli/products.md
       - reference/cli/audio.md
       - reference/cli/mvsa.md
       - reference/cli/mxl.md
@@ -214,6 +218,8 @@ nav:
     - plans/docs-content-publiek-en-paginatypen.md
     - mvsa v0 — meerstemmige invoer: plans/mvsa-v0-syntax.md
     - mvsa-conversies (mxl/mscz/normalize): plans/mvsa-conversions.md
+    - Straat-CLIs (plan): plans/straat-clis.md
+    - OSMD S8-recite (plan): plans/osmd-s8-recite.md
     - plans/vsa-polyphony-proposal.md
 
 extra_css:

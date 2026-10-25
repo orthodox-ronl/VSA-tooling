@@ -1,8 +1,9 @@
 """Top-level ``mscz`` CLI (bron: ``.mscz``).
 
-Acties: mvsa (score → werkbank); mxl (via MuseScore); text (lyrics via
-temp-mxl); compare (score ↔ ``.mvsa``).
-Conventie: ``mscz {doeltype}`` — zie docs/plans/mvsa-conversions.md.
+Acties: mvsa (score → werkbank); import (.mvsa/.mxl → .mscz); mxl; text;
+compare (score ↔ ``.mvsa``).
+Conventie: ``mscz {doeltype}`` of ``mscz import`` — zie
+docs/plans/mvsa-conversions.md · docs/formats/contract-index.md.
 """
 
 from __future__ import annotations
@@ -24,6 +25,22 @@ def main(argv: list[str] | None = None) -> int:
     ns = parser.parse_args(args)
     if ns.mscz_command == "mvsa":
         return run_score_to_mvsa(ns, suffixes=_MSCZ_SUFFIXES)
+    if ns.mscz_command == "import":
+        from .cli_import import run_mscz_import
+
+        return run_mscz_import(ns)
+    if ns.mscz_command == "products":
+        from .street_products import run_street_products
+
+        musescore = Path(ns.musescore) if getattr(ns, "musescore", None) else None
+        return run_street_products(
+            "mscz",
+            ns.path,
+            force=bool(ns.force),
+            dry_run=bool(ns.dry_run),
+            skip_svg=bool(getattr(ns, "skip_svg", False)),
+            musescore=musescore,
+        )
     if ns.mscz_command == "mxl":
         return _cmd_mscz_to_mxl(ns)
     if ns.mscz_command == "text":
@@ -65,6 +82,10 @@ def _build_parser() -> argparse.ArgumentParser:
             "subcommando's:\n"
             "  mvsa PATH [--pitch {doremi,a-g,vsa,ag-vsa}] [-o OUT]\n"
             "      Naar .mvsa (werkbank-schets; default --pitch: ag-vsa).\n"
+            "  import PATH …\n"
+            "      .mvsa/.mxl → .mscz (catalogus-vrij; = mvsa mscz / mxl mscz).\n"
+            "  products PATH [--force] [--dry-run] [--skip-svg]\n"
+            "      Coria-.mxl (+ SVG) + products-meta.json.\n"
             "  mxl PATH [-o OUT] [--musescore PATH]\n"
             "      Exporteer naar .mxl via MuseScore.\n"
             "  text PATH [-o OUT] [--musescore PATH]\n"
@@ -74,13 +95,13 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Vergelijk .mvsa met verse import van de score "
             "(+ import-gaten).\n"
             "\n"
-            "PATH = één .mscz of map (recursief). "
+            "PATH = één bronbestand of map (recursief). "
             "-o alleen bij precies één bron.\n"
             "compare: SCORE = .mscz of MusicXML; MVSA = .mvsa-bestand.\n"
             "\n"
             "voorbeelden:\n"
             "  mscz mvsa lied.mscz\n"
-            "  mscz mvsa lied.mscz -o lied.mvsa --pitch doremi\n"
+            "  mscz import lied.mvsa\n"
             "  mscz mxl lied.mscz -o lied.mxl\n"
             "  mscz text lied.mscz -o lied.lyrics.txt\n"
             "  mscz compare lied.mscz lied.mscz.mvsa\n"
@@ -91,7 +112,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mscz_command",
         required=True,
-        metavar="{mvsa,mxl,text,compare}",
+        metavar="{mvsa,import,mxl,text,compare,products}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -108,6 +129,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+
+    from .cli import _add_partituur_style_args
+    from .cli_import import add_mscz_import_parser
+    from .street_products import add_products_parser
+
+    add_mscz_import_parser(sub, add_style_args=_add_partituur_style_args)
+    add_products_parser(sub, street="mscz", with_skip_svg=True)
 
     mxl = sub.add_parser(
         "mxl",

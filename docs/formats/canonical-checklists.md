@@ -1,5 +1,7 @@
 # Canonieke checklists (.mxl / .mscz / PDF)
 
+Navigatie over alle contract-hubs: [contract-index](contract-index.md).
+
 Doel: vastleggen wat **wij** als normale vorm zien in gegenereerde of
 genormaliseerde `.mxl` / `.mscz` (en afgeleide PDF’s). Dat zijn de targets
 voor export én voor eventuele diagonaal-normalisatie (zelfde formaat → ons

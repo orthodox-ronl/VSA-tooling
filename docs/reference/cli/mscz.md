@@ -20,10 +20,11 @@ bron. Zie [Invoer bestand of map](input-pad.md).
 ## Synopsis
 
 ```text
-mscz [-h] {mvsa,mxl,text,compare} …
+mscz [-h] {mvsa,import,mxl,text,compare,products} …
 mscz mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
           [--octave-style {@oct,marker}] [--section SECTION]
           [--musescore PATH] [--no-align] path
+mscz import [-h] [-o OUTPUT] [--layout PROFILE] […] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
 mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
@@ -35,6 +36,8 @@ mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
 | Subcommando | Doel                                                                                                                         |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `mvsa`      | Naar `.mvsa` (MuseScore → temp `.mxl` → SATB-explode → parser). Default: `<bronnaam>.mvsa` (bijv. `lied.mscz.mvsa`).         |
+| `import`    | **Naar `.mscz`** uit `.mvsa` of MusicXML (catalogus-vrij). Zelfde als [`mvsa mscz`](mvsa.md#mvsa-mscz) / `mxl mscz`. Toegestaan: `.mvsa`, `.mxl`, `.musicxml`, `.xml`. Contract: [contract-index](../../formats/contract-index.md), [MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md). |
+| `products`  | Coria-`.mxl` (+ SVG tenzij `--skip-svg`) + `{stam}.mscz.products-meta.json`. Flags: `--force`, `--dry-run`. |
 | `mxl`       | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts. Default: `<bronnaam>.mxl` (bijv. `lied.mscz.mxl`).      |
 | `text`      | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).                                             |
 | `compare`   | Controleer of een `.mvsa` nog overeenkomt met verse `mscz`/`mxl mvsa`-import (lyrics, toonhoogte, duur-info, import-gaten). |
@@ -78,6 +81,7 @@ of fout. Import-gaten veranderen de exitcode niet.
 ```cmd
 mscz mvsa generated\alleluia-schets2.mscz
 mscz mvsa generated\alleluia-schets2.mscz -o generated\from-mscz.mvsa
+mscz import examples\mvsa\1a-vredeslitanie.mvsa -o generated\from-mvsa.mscz
 mscz mvsa generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-mscz.mvsa
 mscz mvsa generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
 mvsa validate generated\from-mscz.mvsa

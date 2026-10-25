@@ -1,6 +1,7 @@
 """Shared CLI: ``{mxl|mscz} mvsa`` — score → werkbank-``.mvsa``.
 
-Conventie: eerste token = brontype, tweede = doeltype (geen ``import``).
+Conventie: eerste token = brontype, tweede = doeltype.
+Alias: ``mvsa import`` (bestemmingstraat) — zie ``cli_import``.
 """
 
 from __future__ import annotations

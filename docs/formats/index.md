@@ -4,6 +4,10 @@ Overzicht van de **bronformaten** die de toolchain leest of schrijft, en de
 **commando’s / `.cmd`-scripts** per bron. Normatieve details staan in de
 specificaties; dit is de navigatiehub.
 
+**Contracten (checklists, layoutprofielen, Score-IR/OSMD):** start bij de
+[contract-index](contract-index.md). Straat-CLI’s / producten (plan):
+[straat-CLIs](../plans/straat-clis.md).
+
 ## Conversiematrix (kort)
 
 Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.

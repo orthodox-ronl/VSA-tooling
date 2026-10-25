@@ -1,10 +1,13 @@
 # Score-IR (`.score-ir.json`) — schermtussenmodel (draft)
 
+Contracten (S8/S13 e.d.): [contract-index](contract-index.md).
+
 JSON-tussenmodel tussen `.mvsa` en schermweergave (koormap / shortcode
 `muziek`, later CoriB). Geen MuseScore-bestand; geen A4/colofon.
 
 **Productieschermpad:** Score-IR → MusicXML (uit IR) → OSMD. Print/blad blijft
 MuseScore. Brugcontract: [partituur-ir §7](../plans/partituur-ir.md).
+Bedoelde printvorm = checklists; OSMD-emit: [osmd-s8-recite](../plans/osmd-s8-recite.md).
 
 **Sibling-artifacts** (naast `lied.mvsa`, zelfde naamgeving als andere
 `mvsa`-exports):
