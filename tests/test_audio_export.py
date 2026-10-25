@@ -15,9 +15,18 @@ from vsa.audio_export import (
     normalize_audio_format,
     resolve_audio_output_path,
 )
+from vsa.audio_trim import (
+    encode_trimmed_audio,
+    find_ffmpeg,
+    last_audible_end_seconds,
+    wav_duration_seconds,
+    write_silent_padded_pcm16_fixture,
+)
 from vsa.config import load_config
 from vsa.musescore_cli import MuseScoreNotFoundError, find_musescore
 from vsa.musicxml_package import write_musicxml_output
+
+FFMPEG = find_ffmpeg()
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
 OEFEN = EXAMPLES / "docs-walkthroughs" / "coria-oefenlink" / "oefenmelodie.vsa"
@@ -106,7 +115,35 @@ def test_export_rejects_unknown_suffix(tmp_path: Path):
         export_to_audio(src, tmp_path / "out.mp3")
 
 
-@pytest.mark.skipif(MUSESCORE is None, reason="MuseScore niet geïnstalleerd")
+def test_last_audible_end_ignores_trailing_silence(tmp_path: Path):
+    wav = tmp_path / "tone_then_silence.wav"
+    write_silent_padded_pcm16_fixture(
+        wav, tone_ms=100, silence_ms=800, rate=8000
+    )
+    end = last_audible_end_seconds(wav, threshold=0.01)
+    dur = wav_duration_seconds(wav)
+    assert 0.09 <= end <= 0.12
+    assert dur == pytest.approx(0.9, abs=0.02)
+
+
+@pytest.mark.skipif(FFMPEG is None, reason="ffmpeg niet geïnstalleerd")
+def test_encode_trimmed_audio_cuts_trailing_silence(tmp_path: Path):
+    src = tmp_path / "padded.wav"
+    write_silent_padded_pcm16_fixture(
+        src, tone_ms=100, silence_ms=800, rate=8000
+    )
+    out = tmp_path / "trimmed.wav"
+    encode_trimmed_audio(src, out, pad_ms=10, threshold=0.01)
+    dur = wav_duration_seconds(out)
+    end = last_audible_end_seconds(out, threshold=0.01)
+    assert dur == pytest.approx(0.11, abs=0.03)
+    assert dur - end <= 0.05
+
+
+@pytest.mark.skipif(
+    MUSESCORE is None or FFMPEG is None,
+    reason="MuseScore of ffmpeg niet geïnstalleerd",
+)
 def test_export_minimal_mxl_to_mp3(tmp_path: Path):
     mxl = tmp_path / "score.mxl"
     write_musicxml_output(mxl, _MINIMAL_MUSICXML)
@@ -117,7 +154,26 @@ def test_export_minimal_mxl_to_mp3(tmp_path: Path):
     assert out.stat().st_size > 100
 
 
-@pytest.mark.skipif(MUSESCORE is None, reason="MuseScore niet geïnstalleerd")
+@pytest.mark.skipif(
+    MUSESCORE is None or FFMPEG is None,
+    reason="MuseScore of ffmpeg niet geïnstalleerd",
+)
+def test_export_minimal_mxl_wav_has_short_trailing_silence(tmp_path: Path):
+    """Checklist A5: hoogstens ~50 ms stilte na laatste hoorbare sample."""
+    mxl = tmp_path / "score.mxl"
+    write_musicxml_output(mxl, _MINIMAL_MUSICXML)
+    out = tmp_path / "score.wav"
+    export_musicxml_to_audio(mxl, out, format_name="wav")
+    dur = wav_duration_seconds(out)
+    end = last_audible_end_seconds(out, threshold=0.01)
+    assert dur > 0.5
+    assert dur - end <= 0.05
+
+
+@pytest.mark.skipif(
+    MUSESCORE is None or FFMPEG is None,
+    reason="MuseScore of ffmpeg niet geïnstalleerd",
+)
 def test_export_vsa_to_mp3(tmp_path: Path):
     assert OEFEN.is_file()
     out = tmp_path / "oefenmelodie.mp3"
@@ -129,7 +185,10 @@ def test_export_vsa_to_mp3(tmp_path: Path):
     assert keep.is_file()
 
 
-@pytest.mark.skipif(MUSESCORE is None, reason="MuseScore niet geïnstalleerd")
+@pytest.mark.skipif(
+    MUSESCORE is None or FFMPEG is None,
+    reason="MuseScore of ffmpeg niet geïnstalleerd",
+)
 def test_export_mvsa_section_to_mp3(tmp_path: Path):
     assert ALLELUIA.is_file()
     out = tmp_path / "alleluia.mp3"

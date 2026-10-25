@@ -36,7 +36,9 @@ precies één bron. Zie [Invoer bestand of map](input-pad.md).
 Zonder expliciete extensie op `output` geldt ``--format`` (default ``mp3``,
 of ``[audio].format`` in ``vsa.toml``).
 
-Vereist **MuseScore 4** (of 3), zoals `mvsa pdf` / `mvsa mscz`.
+Vereist **MuseScore 4** (of 3), zoals `mvsa pdf` / `mvsa mscz`, én
+**ffmpeg** op PATH (knippt sleepstilte aan het eind; checklist A5 in
+[formats/audio](../../formats/audio.md)).
 
 ## Argumenten en opties
 

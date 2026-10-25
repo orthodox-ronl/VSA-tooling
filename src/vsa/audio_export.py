@@ -2,6 +2,9 @@
 
 Preview-luisteren: één afspeelbaar artefact (default ``.mp3``). Geen speler,
 geen stemkeuze — de consumer-site maakt de knop.
+
+Na MuseScore wordt sleepstilte aan het eind weggeknipt (contract A5): kort pad
+(~10 ms) na de laatste hoorbare sample, via ffmpeg.
 """
 
 from __future__ import annotations
@@ -10,6 +13,11 @@ import os
 import tempfile
 from pathlib import Path
 
+from .audio_trim import (
+    DEFAULT_TRAILING_PAD_MS,
+    AudioTrimError,
+    encode_trimmed_audio,
+)
 from .musescore_cli import (
     MuseScoreConvertError,
     MuseScoreNotFoundError,
@@ -60,8 +68,13 @@ def export_musicxml_to_audio(
     *,
     musescore: Path | None = None,
     format_name: str | None = None,
+    trailing_pad_ms: int = DEFAULT_TRAILING_PAD_MS,
 ) -> Path:
-    """Convert an existing ``.mxl`` / ``.musicxml`` to audio via MuseScore."""
+    """Convert an existing ``.mxl`` / ``.musicxml`` to audio via MuseScore.
+
+    MuseScore renders to a temporary ``.wav``; trailing silence is trimmed
+    (checklist A5) before encoding to the requested format with ffmpeg.
+    """
     source = Path(source)
     out = resolve_audio_output_path(out, format_name=format_name)
     if not source.is_file():
@@ -70,10 +83,24 @@ def export_musicxml_to_audio(
         raise AudioExportError(
             f"Audio-export verwacht .mxl/.musicxml, kreeg: {source.name}"
         )
+    fd, name = tempfile.mkstemp(suffix=".wav", prefix="vsa-audio-render-")
+    os.close(fd)
+    render_wav = Path(name)
     try:
-        convert_with_musescore(source, out, musescore=musescore)
-    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-        raise AudioExportError(str(exc)) from exc
+        try:
+            convert_with_musescore(source, render_wav, musescore=musescore)
+        except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+            raise AudioExportError(str(exc)) from exc
+        try:
+            encode_trimmed_audio(
+                render_wav,
+                out,
+                pad_ms=trailing_pad_ms,
+            )
+        except AudioTrimError as exc:
+            raise AudioExportError(str(exc)) from exc
+    finally:
+        render_wav.unlink(missing_ok=True)
     return out
 
 
@@ -85,6 +112,7 @@ def export_to_audio(
     musescore: Path | None = None,
     section_id: str | None = None,
     keep_mxl: Path | None = None,
+    trailing_pad_ms: int = DEFAULT_TRAILING_PAD_MS,
 ) -> Path:
     """Export ``.mxl`` / ``.vsa`` / ``.mvsa`` / ``.mscz`` to audio.
 
@@ -109,7 +137,11 @@ def export_to_audio(
                 "Audio-export: --section/--keep-mxl gelden niet bij .mxl/.musicxml"
             )
         return export_musicxml_to_audio(
-            path, out, musescore=musescore, format_name=format_name
+            path,
+            out,
+            musescore=musescore,
+            format_name=format_name,
+            trailing_pad_ms=trailing_pad_ms,
         )
 
     tmp_mxl: Path | None = None
@@ -132,7 +164,11 @@ def export_to_audio(
             section_id=section_id,
         )
         return export_musicxml_to_audio(
-            mxl_path, out, musescore=musescore, format_name=format_name
+            mxl_path,
+            out,
+            musescore=musescore,
+            format_name=format_name,
+            trailing_pad_ms=trailing_pad_ms,
         )
     finally:
         if tmp_mxl is not None:

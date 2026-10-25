@@ -20,12 +20,13 @@ afspeelknop.
 
 ## Checklist (richting)
 
-| #   | Eis                           | Toelichting                                                                  |
-| --- | ----------------------------- | ---------------------------------------------------------------------------- |
-| A1  | Speelbaar                     | Bestand opent/afspeelt in gangbare spelers / HTML5 ``<audio>``.              |
-| A2  | Pitch/duur-equivalent         | Zelfde klinkende noten als playback-``.mxl`` (binnen MuseScore-afronding).   |
-| A3  | Geen stemkeuze                | Alle parts gemengd (MuseScore-default); geen wizard.                         |
-| A4  | Geen partituur-eis            | Lyrics/layout/streepjes geen vereiste voor het audiobestand.                 |
+| #   | Eis                           | Toelichting                                                                                           |
+| --- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| A1  | Speelbaar                     | Bestand opent/afspeelt in gangbare spelers / HTML5 ``<audio>``.                                       |
+| A2  | Pitch/duur-equivalent         | Zelfde klinkende noten als playback-``.mxl`` (binnen MuseScore-afronding).                            |
+| A3  | Geen stemkeuze                | Alle parts gemengd (MuseScore-default); geen wizard.                                                  |
+| A4  | Geen partituur-eis            | Lyrics/layout/streepjes geen vereiste voor het audiobestand.                                          |
+| A5  | Geen sleepstilte aan het eind | Na de laatste hoorbare sample hoogstens ~10 ms stilte; MuseScore-napadding wordt weggeknipt (ffmpeg). |
 
 ## Conversies
 
@@ -46,8 +47,15 @@ zet je het afspeeltempo met [`@tempo`](../specification-mvsa/keywords.md)
 onzichtbaar op blad/PDF) en dus in `mvsa mp3` / Coria. Gedeelde namen met
 `.vsa`:
 [metadata-brug](../guides/metadata-brug.md). Canonieke playback-MXL gebruikt
-**piano** op elke partij (checklist M8). Bitrate en extra instrumentkeuze
-buiten die piano zijn in v1 MuseScore-defaults.
+**piano** op elke partij (checklist M8). Na trim hercodeert ffmpeg naar
+preview-bitrate (mp3 LAME ``-q:a 5`` ≈ 80–100 kbps VBR; ogg Vorbis ``-q:a 4``).
+Dat is kleiner dan studiokwaliteit, maar helder genoeg om even mee te
+beluisteren. Extra instrumentkeuze blijft MuseScore-default.
+
+**Sleepstilte:** MuseScore zet vaak seconden stilte ná de laatste noot in het
+audiobestand. `vsa audio` / `mvsa mp3` knipt die weg en laat ongeveer
+**10 ms** stilte over (A5). Daarvoor is **ffmpeg** op PATH nodig, naast
+MuseScore.
 
 ## Bestandsnaamgeving
 
