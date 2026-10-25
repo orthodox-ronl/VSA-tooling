@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -82,13 +83,30 @@ def test_from_ir_tempo_from_mvsa_meta() -> None:
 
 
 def test_from_ir_s8_emits_spacer_noteheads() -> None:
-    """from-ir MusicXML: spacer → notehead none; midden → breve-kop (S8)."""
+    """A1-marker: spacer → notehead none (+ stem none); midden → breve (S8).
+
+    ``notehead none`` is het canonieke scherm-markercontract voor de OSMD-
+    adapter (bibliotheek). OSMD zelf eert de tag niet als onzichtbare kop —
+    zie docs/plans/osmd-s8-recite.md.
+    """
     doc = export_mvsa_to_score_ir(_S8_RECITE)
     xml = score_ir_to_musicxml(doc)
     assert "<notehead>none</notehead>" in xml
     assert "<notehead>breve</notehead>" in xml
     assert "<type>breve</type>" not in xml
     assert "<stem>none</stem>" in xml
+    # Minstens één spacer-noot: stem none + notehead none in dezelfde <note>.
+    notes = re.findall(r"<note>(.*?)</note>", xml, flags=re.DOTALL)
+    spacer_notes = [
+        n
+        for n in notes
+        if "<notehead>none</notehead>" in n and "<stem>none</stem>" in n
+    ]
+    assert spacer_notes, "S8 A1-marker (stem none + notehead none) ontbreekt"
+    assert any("<lyric" in n and "<text>" in n for n in spacer_notes), (
+        "spacer-marker moet lyric behouden (geen print-object=no op hele note)"
+    )
+    assert all('print-object="no"' not in n for n in spacer_notes)
 
 
 _S13_MELISMA = """\

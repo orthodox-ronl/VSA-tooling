@@ -22,9 +22,16 @@ op een map).
 
 **Print-eindvorm (S8/S13):** Score-IR bewaart recite-spacers
 (`print.spacer` / `print.breveHead`) en compacte same-pitch melisma’s;
-from-ir MusicXML tekent die voor OSMD (zelfde informatiedichtheid als
-blad-SVG, geen MuseScore-paginamodel). Details:
+from-ir MusicXML emitteert die voor het schermpad (zelfde informatiedichtheid
+als blad-SVG, geen MuseScore-paginamodel). Details:
 [partituur-ir §4.4](../plans/partituur-ir.md).
+
+**S8 / OSMD (contract A1):** `print.spacer` → from-ir
+`<stem>none</stem>` + `<notehead>none</notehead>` (lyrics blijven op de
+noot). Dat is een **stabiele marker** voor de scherm-OSMD-adapter, geen
+belofte dat OSMD/VexFlow de kop zelf verbergt (peiling:
+[osmd-s8-recite](../plans/osmd-s8-recite.md)). Breve-midden:
+`notehead breve` + `stem none` (geen `type=breve`).
 
 | Onderwerp                         | Waar                                                                 |
 | --------------------------------- | -------------------------------------------------------------------- |

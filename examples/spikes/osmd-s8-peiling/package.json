@@ -1,0 +1,14 @@
+{
+  "name": "osmd-s8-peiling",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Peiling: S8-spacer MusicXML-varianten vs OSMD (geen product-emit).",
+  "scripts": {
+    "generate": "node generate-variants.mjs",
+    "probe": "node generate-variants.mjs && node probe.mjs"
+  },
+  "dependencies": {
+    "puppeteer": "^24.2.0"
+  }
+}

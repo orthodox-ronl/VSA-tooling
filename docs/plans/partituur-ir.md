@@ -159,7 +159,9 @@ VoiceEvent
 **S8 in IR:** na partituur-collapse blijven midden-events met `print.breveHead`
 (stokloze `||O||`) en `print.spacer` (onzichtbare kop, zichtbare lyric).
 from-ir MusicXML: spacers → `notehead none` + `stem none`; midden →
-`notehead breve` + `stem none` (geen `type=breve`).
+`notehead breve` + `stem none` (geen `type=breve`). **A1:** `notehead none`
+is scherm-**marker** voor de OSMD-adapter; OSMD tekent die kop niet vanzelf
+weg — zie [osmd-s8-recite](osmd-s8-recite.md).
 
 **S13 in IR:** same-pitch melisma al als compacte (gestipte) noot waar
 representeerbaar — OSMD-eindvorm, niet de MuseScore-import I1-tie-keten.
@@ -262,8 +264,8 @@ catalogus-MXL of MuseScore-SVG.
 5. ~~Score-IR → MusicXML → OSMD~~ — `vsa.score_ir_musicxml`, spike `examples/spikes/partituur-browser/`, CLI ``--musicxml``
 6. ~~Scherm-/CoriB-brugcontract~~ (§7; richting Score-IR/OSMD vast in
    [kale-muziek §4](kale-muziek-svg-en-uitgaven.md))
-7. **Productiescherm** — shortcode `muziek` / koormap-embed op Score-IR →
-   OSMD (nog open; sluit kale-muziek §4)
+7. ~~**Productiescherm** (mvsa / S8)~~ — bibliotheek from-ir → OSMD; S8 A1
+   ([osmd-s8-recite](osmd-s8-recite.md)); rest kale-muziek §4 (`.vsa`, CoriB, …)
 8. CoriB-MVP (speler op §7-brug) — later
 
 ---

@@ -2770,8 +2770,10 @@ def _emit_single_note(
     if is_rest:
         pass  # rust: geen stem/notehead
     elif ev.spacer:
-        # Onzichtbare kop, wél lyrics (``print-object=no`` op <note> verbergt
-        # lyrics in MuseScore-PDF — zie templates: visible=0 + play=0 in MSCZ).
+        # S8 spacer: lyrics zichtbaar. MuseScore-PDF: geen print-object=no op
+        # hele <note> (verbergt lyrics); MSCZ zet visible=0+play=0.
+        # from-ir / OSMD: ``notehead none`` is **A1-marker** voor de
+        # scherm-adapter — OSMD tekent de kop wél (zie osmd-s8-recite).
         out.append("<stem>none</stem>")
         out.append("<notehead>none</notehead>")
     elif ev.breve_head:

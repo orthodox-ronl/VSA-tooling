@@ -286,6 +286,12 @@ Optioneel ``--musicxml``: schrijf partituur-MusicXML **uit** die Score-IR
 bron. Spike: `examples/spikes/partituur-browser/`. Brugcontract:
 [partituur-ir §7](../../plans/partituur-ir.md).
 
+S8-recite in from-ir: spacers krijgen ``<notehead>none</notehead>`` als
+**marker** voor de scherm-OSMD-adapter (contract A1). OSMD verbergt die kop
+niet uit XML alleen — zie
+[osmd-s8-recite](../../plans/osmd-s8-recite.md) en
+[score-ir](../../formats/score-ir.md).
+
 Het eerste ``@tempo`` in het ``.mvsa``-bestand komt in Score-IR als
 ``meta.tempo`` en in from-ir MusicXML als ``<sound tempo="…"/>`` (standaard
 130 BPM als er geen ``@tempo`` staat).

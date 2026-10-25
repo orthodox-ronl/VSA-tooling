@@ -1,31 +1,31 @@
 # OSMD-schermketen voor S8-recite (plan)
 
-| Veld            | Waarde                                                                                                                                           |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Status**      | plan; **geen code** tot expliciete OK per run                                                                                                    |
-| **Doel**        | Scherm toont S8-recite via OSMD + from-ir; bibliotheek mag `.mvsa.svg` missen voor `.mvsa` + from-ir                                             |
-| **Referentie**  | Catalogus `alleluia/9a-toon-8/groningen` — sibling `.mvsa.svg` vs gewenste OSMD-look                                                             |
-| **Context**     | Tooling `2f24bdc3d` (tempo/S8 in Score-IR/from-ir); bibliotheek `4c292ef76` (tijdelijk scherm = `.mvsa.svg` bij `<notehead>none</notehead>`)     |
+| Veld            | Waarde                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Status**      | **afgerond** (runs 0–4): A1-marker + OSMD-adapter; S8-SVG-bypass weg; CI groen                                                                                                                   |
+| **Doel**        | Scherm toont S8-recite via OSMD + from-ir; bibliotheek mag `.mvsa.svg` missen voor `.mvsa` + from-ir                                                                                             |
+| **Referentie**  | Catalogus `alleluia/9a-toon-8/groningen` — sibling `.mvsa.svg` vs gewenste OSMD-look                                                                                                             |
+| **Context**     | Start: tooling tempo/S8 in from-ir; bibliotheek had tijdelijke SVG-bypass. Eind: A1 marker + adapter, bypass weg.                                                                                |
 | **Gerelateerd** | [contract-index](../formats/contract-index.md), [partituur-ir](partituur-ir.md) §4.4/§7, [canonical-checklists S8](../formats/canonical-checklists.md), bibliotheek `schermpartituur.md` §2/§5.1 |
 
 ---
 
 ## 0. Antwoord eerst
 
-**Probleem:** from-ir zet S8-spacers als MusicXML `<notehead>none</notehead>`.
-MuseScore snapt dat; OSMD/VexFlow niet. JS die koppen verhult is geen
-structurele fix. De bibliotheek toont daarom tijdelijk `.mvsa.svg` zodra
-from-ir `notehead none` bevat.
+**Probleem (opgelost):** from-ir zet S8-spacers als MusicXML
+`<notehead>none</notehead>`. MuseScore snapt dat; OSMD/VexFlow niet.
+Oplossing **A1:** die tag is een stabiele **marker**; de bibliotheek-OSMD-
+adapter (`score-osmd.js`) verbergt spacer-koppen; geen `.mvsa.svg`-bypass
+meer. CI: `s8-alleluia-hide-check.mjs`.
 
 **Eindbeeld (Alleluia 9a toon 8 Groningen, S8-recite):** Al = kwart → le =
 breve (stokloos) → middenlettergrepen = **alleen tekst** (geen koppen, geen
 streepjes) → 3e «al» = kwart → cadens. Zelfde informatiedichtheid als de
 sibling `.mvsa.svg`; pixel-perfecte MuseScore-pariteit is geen eis.
 
-**Aanbevolen architectuur:** **één from-ir = OSMD-profiel** — de bestaande
-sibling `{stam}.mvsa.from-ir.musicxml` krijgt een S8-emit die OSMD wél
-tekent. Score-IR blijft `print.spacer` / `print.breveHead`. Geen derde
-sibling-XML en geen site-JS als primaire oplossing.
+**Architectuur (vast):** **één from-ir = OSMD-profiel (A)** + **A1** —
+marker in tooling, adapter + CI in bibliotheek. Score-IR blijft
+`print.spacer` / `print.breveHead`.
 
 ---
 
@@ -35,11 +35,10 @@ sibling-XML en geen site-JS als primaire oplossing.
 | ------------------------------------------------ | ------------------------------------------------------------------------ |
 | MuseScore-semantiek in from-ir (`notehead none`) | OSMD/VexFlow tekent die printlaag niet zoals MuseScore                   |
 | JS-hide na render (bibliotheek)                  | Breekbaar, moeilijk te testen, blijft MuseScore-XML misbruiken           |
-| Scherm = `.mvsa.svg` bij S8                      | Werkt nu; blokkeert “from-ir genoeg voor scherm” en dwingt MuseScore-SVG |
+| Scherm = `.mvsa.svg` bij S8                      | Was tijdelijke bypass; **weg** na groene A1-adapter                      |
 
-**Afspraak:** print/blad blijft MuseScore (`mvsa svg` / MSCZ). Scherm blijft
-Score-IR → from-ir → OSMD. S8-gap zit in de **from-ir-emit**, niet in de
-site als eerste fixplaats.
+**Afspraak:** print/blad blijft MuseScore (`mvsa svg` / MSCZ). Scherm =
+Score-IR → from-ir → OSMD + A1-adapter (S8).
 
 ---
 
@@ -53,15 +52,51 @@ site als eerste fixplaats.
 | **B. `print-object` op noot/kop**          | Spacers met MusicXML `print-object` i.p.v. `notehead none`      | Standaard MusicXML                                                              | Op **hele** `<note>` verdwijnen lyrics (bekend S8/R3-risico); OSMD-gedrag per attribuut onzeker — peilen vóór kiezen |
 | **C. Sibling XML**                         | Bijv. `{stam}.mvsa.from-ir.osmd.musicxml` naast huidige from-ir | Oude from-ir onaangetast; A/B zonder catalogus-breuk                            | Derde product-artifact; publicatiecontrole + shortcode + docs groeien; dubbele waarheid                              |
 
-### 2.2 Besluitkader (run 1 peilt, run 2 kiest definitief)
+### 2.2 Besluitkader + peiling (run 1 gedaan)
 
-1. **Peil in spike** (één maat / Alleluia-fragment) welke MusicXML-vorm OSMD
-   tekent als: alleen lyric zichtbaar, geen kop, geen stok, geen streepje —
-   zonder post-render JS.
-2. Als peiling **B** betrouwbaar maakt (lyrics blijven): mag B de emit van A
-   zijn.
-3. Alleen **C** als A de huidige from-ir-consumenten breekt (nav-CI,
-   externe tools) én die niet in dezelfde tooling-run meegenomen kunnen.
+Spike: [`examples/spikes/osmd-s8-peiling/`](../../examples/spikes/osmd-s8-peiling/)
+(OSMD **1.9.3**, zelfde lijn als bibliotheek-scherm; geen post-render JS).
+Patroon: Al (kwart) → le (breve) → lu/i/a (spacers) → al (kwart).
+
+| Variant                    | Encoding                                              | Spacer-koppen in OSMD | Lyrics Al…al |
+| -------------------------- | ----------------------------------------------------- | --------------------- | ------------ |
+| `01-notehead-none`         | Huidige from-ir: `stem none` + `notehead none`        | **zichtbaar** (3/3)   | compleet     |
+| `02-print-object-note`     | `print-object="no"` op hele `<note>`                  | **zichtbaar** (3/3)   | compleet     |
+| `03-print-object-notehead` | `<notehead print-object="no">normal</notehead>`       | **zichtbaar** (3/3)   | compleet     |
+| `04-stemless-normal-head`  | Controle: alleen `stem none`                          | **zichtbaar** (3/3)   | compleet     |
+| `05-rest-with-lyric`       | `<rest/>` + lyric (structureel alternatief)           | rust-glyph (erger)    | compleet     |
+
+Meting: per `g.vf-stavenote` de bbox-oppervlakte van `.vf-notehead`; spacer-
+slots met oppervlakte ≫ 0 = zichtbare kop. Samenvatting:
+`examples/spikes/osmd-s8-peiling/out/peiling-summary.json` (lokaal na
+`npm run probe`; `out/` staat in `.gitignore`).
+
+#### Besluit (run 1)
+
+1. **B afgewezen** als from-ir-emit: OSMD eert `print-object` hier niet om
+   koppen te verbergen; lyrics blijven wél (anders dan MuseScore-PDF bij
+   `print-object=no` op de hele noot).
+2. **`notehead none` alleen is geen OSMD-printlaag:** variant 01 tekent
+   dezelfde zichtbare spacer-koppen als normale stemloze koppen (04).
+3. **C niet nodig** om attr-redenen: een tweede sibling-XML met dezelfde
+   visibility-trucs helpt OSMD niet.
+4. **A blijft de architectuur** (één `{stam}.mvsa.from-ir.musicxml`), maar
+   “OSMD-vriendelijke mapping” is **geen** MusicXML-visibility-attribuut.
+   Run 2 koos **A1** (marker + adapter).
+
+#### Besluit (run 2): **A1 gekozen**
+
+| Id     | Status      | Strategie                                                                                                                                     |
+| ------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A1** | **gekozen** | Stabiele spacer-**marker** in from-ir (`stem none` + `notehead none`, lyrics op de noot) + gespecificeerde OSMD-adapter in bibliotheek + CI   |
+| A2     | afgewezen   | Andere partituurvorm — niet nodig zolang A1 het eindbeeld haalt                                                                               |
+| A3     | afgewezen   | Headless scherm-SVG i.p.v. live OSMD                                                                                                          |
+
+**Tooling (deze run):** from-ir-emit ongewijzigd qua tags; docs +
+`test_from_ir_s8_emits_spacer_noteheads` vastleggen A1-marker (lyric blijft;
+geen `print-object=no` op spacer-`<note>`).
+
+**Bibliotheek (run 3, gedaan):** adapter = productgedrag; SVG-bypass weg.
 
 **Non-goals:** tweede Score-IR; Coria-playback wijzigen; MuseScore-partituur-MXL
 (S8 spacers in MSCZ) herschrijven; pixel-match SVG↔OSMD.
@@ -69,12 +104,12 @@ site als eerste fixplaats.
 ### 2.3 Score-IR blijft stabiel
 
 ```text
-.mvsa → Score-IR (print.spacer / breveHead) → from-ir MusicXML → OSMD
+.mvsa → Score-IR (print.spacer / breveHead) → from-ir MusicXML → OSMD + A1-adapter
 ```
 
 - IR-velden `print.spacer` / `print.breveHead` / `stemless` blijven.
-- Alleen de **MusicXML-mapping** van die velden voor from-ir verandert
-  (OSMD-vriendelijk).
+- from-ir spacer-marker: `stem none` + `notehead none` + lyric; OSMD alleen
+  tekent de eindvorm ná de scherm-adapter.
 - MuseScore-keten (partituur-MXL → MSCZ → `mvsa svg`) blijft S8/R3 zoals nu.
 
 ---
@@ -84,10 +119,10 @@ site als eerste fixplaats.
 | Repo            | Doet                                                                                                                                                                                             | Doet niet in dit plan                                    |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
 | **VSA-tooling** | Peiling + from-ir S8-emit; unit/contract-tests; man-pagina / format-hub / checklist-noot; spike of fixture tegen OSMD waar nuttig                                                                | Bibliotheek-templates; catalogus-regen van alle siblings |
-| **bibliotheek** | Ná groene tooling: temporary SVG-bypass voor `notehead none` **verwijderen**; `schermpartituur` §2/§5.1 bijwerken; steekproef Alleluia 9a-8; JS-hide/regressie-scripts opschonen of herbestemmen | Eigen MusicXML-herschrijf; tweede schermmotor            |
+| **bibliotheek** | **Gedaan:** SVG-bypass weg; A1-adapter + CI; `schermpartituur` §2/§5.1                                                                                                                           | Eigen MusicXML-herschrijf; tweede schermmotor            |
 
-**Volgorde (hard):** eerst tooling emit + tests groen → dan bibliotheek
-schermketen terug naar “from-ir wint altijd bij `.mvsa`”.
+**Volgorde (afgerond):** tooling marker-contract → bibliotheek adapter +
+“from-ir wint altijd bij `.mvsa`” (ook S8).
 
 ---
 
@@ -108,26 +143,20 @@ Voor `alleluia/9a-toon-8/groningen` op het scherm met alleen
 
 ## 5. Tests
 
-### 5.1 VSA-tooling (verplicht bij emit-wijziging)
+### 5.1 VSA-tooling (A1 — gedaan in run 2)
 
-| Laag              | Wat                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unit              | from-ir XML: spacers/breve krijgen de **nieuwe** OSMD-mapping; geen regressie op non-S8                                                    |
-| Contract          | Score-IR → from-ir blijft S8 1–(n−2)–1 in IR; alleen emit-tags wijzigen                                                                    |
-| Fixture           | Mini-`.mvsa` of bestaande S8-fixture; assert op afwezigheid van misleidende tags (`notehead none` alleen als peiling dat nog nodig blijkt) |
-| Handmatig / spike | Browser of bestaande `examples/spikes/partituur-browser/` op Alleluia-fragment                                                             |
+| Laag     | Wat                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Contract | `test_from_ir_s8_emits_spacer_noteheads`: spacer = `stem none` + `notehead none` + lyric; geen `print-object=no` op spacer-note |
+| Docs     | `score-ir.md`, checklist S8, `mvsa score-ir`, `partituur-ir` §4.4 — A1-marker expliciet                                         |
 
-Bestaande test `test_from_ir_s8_emits_spacer_noteheads` **herscrijven** naar
-het gekozen OSMD-contract (niet stil laten falen).
+### 5.2 Bibliotheek (run 3)
 
-### 5.2 Bibliotheek (ná tooling)
-
-| Laag       | Wat                                                                 |
-| ---------- | ------------------------------------------------------------------- |
-| Spec       | `schermpartituur.md`: S8-uitzondering §2/§5.1 schrappen of “gedaan” |
-| Steekproef | Catalogusblad + koormap-slot Alleluia 9a-8 zonder SVG-bypass        |
-| CI | `s8-alleluia-hide-check` / JS-finalize: verwijderen of omzetten naar
-  “geen hide nodig”-assert |
+| Laag       | Wat                                                                              |
+| ---------- | -------------------------------------------------------------------------------- |
+| Spec       | `schermpartituur.md`: SVG-bypass §2/§5.1 weg; adapter = A1-productgedrag         |
+| Steekproef | Catalogusblad + koormap-slot Alleluia 9a-8 zonder verplichte `.mvsa.svg`         |
+| CI         | `s8-alleluia-hide-check`: houden/hernoemen als adapter-assert (niet “geen hide”) |
 
 ---
 
@@ -155,30 +184,22 @@ fixture. Schrijf uitslag + aanbevolen mapping in docs/plans/osmd-s8-recite.md
 §2 (Besluit). Geen wijziging product-from-ir, geen bibliotheek.
 ```
 
-### Run 2 — from-ir emit + tests (VSA-tooling)
+### Run 2 — A1 marker-contract (VSA-tooling) — **gedaan**
 
 ```text
 Repo: VSA-tooling.
-Stap: pas from-ir S8-mapping aan volgens osmd-s8-recite Besluit (run 1).
-Unit/contract-tests bijwerken; docs synchroon (score-ir, checklist S8-noot,
-mvsa man/CLI waar from-ir genoemd). Geen bibliotheek. Geen bulk-catalogus.
+Alleen A1: marker-contract in docs/tests; from-ir houdt notehead none.
+Geen bibliotheek-bypass-verwijdering.
 ```
 
-### Run 3 — bibliotheek schermketen (bibliotheek)
+### Run 3 — bibliotheek schermketen — **gedaan**
 
-```text
-Repo: bibliotheek (nieuwe chat / move-to-root).
-Ná tooling met nieuwe from-ir: verwijder S8→.mvsa.svg-bypass in
-bieb-score/schermpartituur; steekproef alleluia/9a-toon-8/groningen;
-JS-hide/S8-check opschonen. Geen tooling-emit in deze run.
-```
+SVG-bypass weg; A1-adapter (DOM-stemrijen) + `s8-alleluia-hide-check` in
+`check`/Pages-CI; `schermpartituur` §2/§5.1.
 
-### Run 4 — docs/norm afronden (licht, beide of alleen links)
+### Run 4 — docs/norm afronden — **gedaan**
 
-```text
-Werk schermpartituur + tooling plan-status bij: S8-schermgap gesloten;
-verwijs naar osmd-s8-recite. Geen nieuwe features.
-```
+Plan-status + cross-links; S8-schermgap gesloten.
 
 **Goedkoper formuleren:** zeg expliciet *«alleen run N — …»*.
 
@@ -191,8 +212,8 @@ verwijs naar osmd-s8-recite. Geen nieuwe features.
 | Run 0   | `docs/plans/osmd-s8-recite.md`, `plans/README.md`, mkdocs-nav                                                                       | Plan + vindbaarheid              |
 | Run 1   | Dit plan §2 Besluit                                                                                                                 | Empirische keuze vastleggen      |
 | Run 2   | `docs/formats/score-ir.md`, checklist S8-zin over from-ir, `docs/reference/cli/mvsa.md` (from-ir), eventueel `partituur-ir.md` §4.4 | Emit-contract synchroon met code |
-| Run 3   | bibliotheek `docs/specs/schermpartituur.md` §2/§5.1                                                                                 | Tijdelijke SVG-bypass eruit      |
-| Run 4   | Cross-links kale-muziek / partituur-ir “productiescherm”                                                                            | Gap-status                       |
+| Run 3   | bibliotheek `schermpartituur` §2/§5.1 + adapter/CI                                                                                  | SVG-bypass eruit; A1 norm        |
+| Run 4   | Dit plan + [kale-muziek](kale-muziek-svg-en-uitgaven.md) / [partituur-ir](partituur-ir.md)                                          | Gap-status gesloten              |
 
 Terminologie: `zangstuk-id` → `variant-id` → `uitvoeringsvorm-id` →
 `representatie-id`; geen ad-hoc “scherm-IR”.
@@ -201,25 +222,27 @@ Terminologie: `zangstuk-id` → `variant-id` → `uitvoeringsvorm-id` →
 
 ## 8. Risico’s en open peilpunten
 
-| Risico                                               | Mitigatie                                                                   |
-| ---------------------------------------------------- | --------------------------------------------------------------------------- |
-| OSMD eert geen enkele “onzichtbare kop + lyric”-truc | Dan pas C (sibling) of smalle JS als *laatste* noodoplossing — alleen na OK |
-| Nav-/volta-regressie bij XML-wijziging               | Bestaande from-ir nav-tests + bibliotheek nav-check meenemen in run 2/3     |
-| Verwarren MuseScore-MXL en from-ir                   | Docs: from-ir = scherm/OSMD; partituur-MXL/MSCZ = blad                      |
-| Tempo/`<sound tempo>` recent                         | Niet terugdraaien; S8-emit orthogonaal houden                               |
+| Risico                                               | Mitigatie                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| OSMD eert geen MusicXML-visibility voor spacers      | Bevestigd in run 1; A1-adapter (gekozen) — geen B/C-attr                  |
+| A1 “blijft JS-hack”                                  | Mitigated: marker-contract + schermpartituur §5.1 + CI (adapter = norm)   |
+| Nav-/volta-regressie bij XML-wijziging               | Bestaande from-ir nav-tests + bibliotheek nav-check meenemen in run 2/3   |
+| Verwarren MuseScore-MXL en from-ir                   | Docs: from-ir = scherm/OSMD; partituur-MXL/MSCZ = blad                    |
+| Tempo/`<sound tempo>` recent                         | Niet terugdraaien; S8-pad orthogonaal houden                              |
 
-**Open tot run 1:** exacte MusicXML-tags voor spacer (B vs andere OSMD-vriendelijke
-vorm). **Open product:** of korte recite (`n < 6`) ongewijzigd blijft (ja,
-tenzij peiling anders eist).
+**Geen open S8-schermgap meer.** Korte recite (`n < 6`) blijft ongewijzigd.
+Verdere schermwerk (CoriB, cue-pariteit SVG↔OSMD) hoort elders — niet hier.
 
 ---
 
-## 9. Succescheck (plan klaar genoeg)
+## 9. Succescheck
 
 - [x] Architectuur A/B/C + aanbeveling
 - [x] Scope tooling vs bibliotheek
 - [x] Tests per repo
 - [x] Gefaseerde runs met kopieerbare opdrachtregels
 - [x] Docs-matrix
-- [ ] Run 1 peiling uitgevoerd (nog niet)
-- [ ] Product-emit (run 2) — wacht op OK
+- [x] Run 1 peiling (B afgewezen; visibility-attrs werken niet in OSMD)
+- [x] Run 2 A1 marker-contract (docs + tests)
+- [x] Run 3 bibliotheek (bypass weg; adapter + CI)
+- [x] Run 4 plan-status + cross-links

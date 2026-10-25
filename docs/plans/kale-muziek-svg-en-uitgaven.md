@@ -59,7 +59,7 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).
 
 | Onderdeel                                    | Nu                                                                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `mvsa svg`                               | Kale SVG via MuseScore; bij meerdere pagina’s: bladreeks ``stem-N.svg``                     |
+| `mvsa svg`                                   | Kale SVG via MuseScore; bij meerdere pagina’s: bladreeks ``stem-N.svg``                     |
 | Catalogus-sibling PDF                        | MuseScore layout ``partituur`` (titel/colofon in het scorebestand)                          |
 | `pagina-pdf` + `pdf-bijelkaar`               | Kale blad-SVG’s + Markdown-koppen; ``--compact`` binnen bijelkaar                           |
 | `pagina-pdf` zonder bijelkaar                | Zelfde SVG-route (zonder ``--compact``); geen catalogus-PDF-plak                            |
@@ -74,9 +74,10 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).
 | 0    | Deze afspraak vastleggen + herinnering schermpad / Score-IR                                  | VSA-tooling (+ pointer bibliotheek) | **gedaan**        |
 | 1    | Multi-page MuseScore-SVG als **bladreeks** (niet langer harde fout voor bladgebruik)         | VSA-tooling                         | **gedaan**        |
 | 2    | `pagina-pdf`: samenstellen uit blad-SVG’s + Markdown; catalogus-PDF-plakpad uitfaseren       | bibliotheek                         | **gedaan**        |
-| 3    | **Score-IR/OSMD** als productieschermpad (geen MuseScore-paginamodel op de site)             | VSA-tooling + bibliotheek           | **in gang** — §4  |
+| 3    | **Score-IR/OSMD** als productieschermpad (geen MuseScore-paginamodel op de site)             | VSA-tooling + bibliotheek           | **deels** — §4    |
 
-Fase 3: richting is vast (Score-IR/OSMD); productiescherm op de site is nog open.
+Fase 3: richting is vast; bibliotheek toont canonieke `.mvsa` via from-ir →
+OSMD (incl. S8 A1 — [osmd-s8-recite](osmd-s8-recite.md)). Rest open: zie §4.
 
 ---
 
@@ -92,9 +93,11 @@ Contract voor koormap (shortcode `muziek`) en latere CoriB-consumptie:
 `mvsa score-ir … --musicxml`. Bewijs: spike
 `examples/spikes/partituur-browser/`.
 
-**Nog open (sluit §4 pas dan):** shortcode / koormap-embed in productie die
-deze keten gebruikt (niet alleen de spike). Tot die tijd mag de site tijdelijk
-bladreeks of MuseScore-brug-SVG blijven tonen; dat is geen eindmodel.
+**Stand:** bibliotheek-shortcode `muziek` / catalogus gebruikt from-ir → OSMD
+voor canonieke `.mvsa` (S8: A1-adapter, geen SVG-bypass —
+[osmd-s8-recite](osmd-s8-recite.md)). **Nog open t.o.v. eindbeeld §4:** o.a.
+`.vsa` zonder Score-IR, cue-/SVG-pariteit, CoriB. MuseScore-SVG blijft
+fallback, niet het S8-schermpad.
 
 **Herinneringsborging (naast dit plan):**
 
