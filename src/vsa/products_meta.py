@@ -189,6 +189,28 @@ def resolve_product_path(bron: Path, name: str) -> Path:
     return bron.parent / name
 
 
+def expand_required_keys(
+    products: dict[str, Any],
+    required_keys: set[str],
+) -> set[str]:
+    """Map abstract ``svg`` to bladreeks keys when meta has ``svg-N``.
+
+    Street ``products`` and consumers often require key ``svg``. One MuseScore
+    page stores that key; several pages store ``svg-1``…``svg-N`` and no
+    seed ``svg``. Treat a required ``svg`` as satisfied by the page keys.
+    """
+    if "svg" not in required_keys:
+        return set(required_keys)
+    page_keys = {
+        key
+        for key in products
+        if isinstance(key, str) and key.startswith("svg-")
+    }
+    if not page_keys:
+        return set(required_keys)
+    return (set(required_keys) - {"svg"}) | page_keys
+
+
 def freshness(
     bron: Path,
     *,
@@ -198,6 +220,9 @@ def freshness(
 
     If *required_keys* is set, only those product keys are required.
     Otherwise every key in meta ``products`` must exist and match.
+
+    A required key ``svg`` is also satisfied by bladreeks keys ``svg-1``…
+    when those are present in meta (seed ``*.svg`` then does not exist).
     """
     if not bron.is_file():
         return "missing", f"bron ontbreekt: {bron}"
@@ -216,7 +241,11 @@ def freshness(
     products = meta.get("products")
     if not isinstance(products, dict) or not products:
         return "stale", "meta zonder products"
-    keys = required_keys if required_keys is not None else set(products)
+    keys = (
+        expand_required_keys(products, required_keys)
+        if required_keys is not None
+        else set(products)
+    )
     for key in keys:
         entry = products.get(key)
         name = product_file_name(entry)

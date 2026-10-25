@@ -913,17 +913,19 @@ mvsa products [-h] [--force] [--dry-run] [--skip-svg] [--musescore PATH] path
 
 Schrijft voor elke `.mvsa` onder `path`:
 
-| Product                   | Bestand                          |
-| ------------------------- | -------------------------------- |
-| Coria-`.mxl`              | `{stam}.mvsa.mxl`                |
-| Score-IR                  | `{stam}.mvsa.score-ir.json`      |
-| from-ir MusicXML          | `{stam}.mvsa.from-ir.musicxml`   |
-| SVG (tenzij `--skip-svg`) | `{stam}.mvsa.svg`                |
-| Meta                      | `{stam}.mvsa.products-meta.json` |
+| Product                   | Bestand                                                                 |
+| ------------------------- | ----------------------------------------------------------------------- |
+| Coria-`.mxl`              | `{stam}.mvsa.mxl`                                                       |
+| Score-IR                  | `{stam}.mvsa.score-ir.json`                                             |
+| from-ir MusicXML          | `{stam}.mvsa.from-ir.musicxml`                                          |
+| SVG (tenzij `--skip-svg`) | één pagina: `{stam}.mvsa.svg`; bladreeks: `{stam}.mvsa-1.svg`, …        |
+| Meta                      | `{stam}.mvsa.products-meta.json` (`svg` of `svg-1`…; zie products-meta) |
 
 Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
-(`--force` regenereert). Kaal: geen bibliotheek-stamps.
-[contract-index](../../formats/contract-index.md).
+(`--force` regenereert). Bladreeks-meta zonder seed-`.svg` telt als vers
+voor de SVG-eis. Kaal: geen bibliotheek-stamps.
+[contract-index](../../formats/contract-index.md) ·
+[products-meta](../../formats/products-meta.md).
 
 ### Voorbeelden
 

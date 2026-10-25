@@ -64,7 +64,12 @@ Voorbeelden: `lied.vsa.products-meta.json`, `lied.mvsa.products-meta.json`,
 | `products.*.generated_at`    | Ja        | UTC-tijdstip waarop **dit** productbestand geschreven werd (informatief). |
 
 Product-keys per straat: zie [contract-index](contract-index.md) (tabel
-`mvsa`/`mscz`/`vsa products`). Bladreeks-SVG: `svg` of `svg-1`, `svg-2`, …
+`mvsa`/`mscz`/`vsa products`). Bladreeks-SVG: één pagina → key `svg`
+(bestand `stem.svg`); ≥2 MuseScore-pagina’s → keys `svg-1`…`svg-N`
+(bestanden `stem-1.svg`…; seed `stem.svg` bestaat dan niet). Wissel
+bladreeks ↔ enkel: dode keys droppen (`svg` of oude `svg-N`).
+`freshness(..., required_keys={"svg", …})` accepteert `svg-N` als
+voldoening voor de abstracte eis `svg`.
 
 ### Wie schrijft welke keys
 

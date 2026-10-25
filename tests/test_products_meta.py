@@ -23,6 +23,7 @@ from vsa.street_products import (
     products_mscz_one,
     products_mvsa_one,
     products_vsa_one,
+    svg_meta_products,
 )
 _REPO = Path(__file__).resolve().parents[1]
 _MVSA = _REPO / "examples" / "mvsa" / "1a-vredeslitanie.mvsa"
@@ -276,6 +277,45 @@ def test_assign_svg_products_single_keeps_svg(tmp_path: Path) -> None:
     assert products == {"svg": written}
 
 
+def test_freshness_required_svg_accepts_bladreeks(tmp_path: Path) -> None:
+    """Street products require key ``svg``; bladreeks meta uses ``svg-N``."""
+    bron = tmp_path / "lied.mscz"
+    bron.write_bytes(b"PK\x03\x04fake")
+    mxl = tmp_path / "lied.mscz.mxl"
+    p1 = tmp_path / "lied.mscz-1.svg"
+    p2 = tmp_path / "lied.mscz-2.svg"
+    mxl.write_text("<score/>", encoding="utf-8")
+    p1.write_text("<svg>1</svg>", encoding="utf-8")
+    p2.write_text("<svg>2</svg>", encoding="utf-8")
+    write_meta(bron, {"mxl": mxl, "svg-1": p1, "svg-2": p2})
+    status, msg = freshness(bron, required_keys={"mxl", "svg"})
+    assert status == "ok", msg
+    status, msg = freshness(bron, required_keys={"mxl", "svg", "score-ir"})
+    assert status == "missing"
+    assert "score-ir" in msg
+
+
+def test_svg_meta_products_switch_single_and_bladreeks(tmp_path: Path) -> None:
+    bron = tmp_path / "lied.mscz"
+    bron.write_bytes(b"PK\x03\x04fake")
+    single = tmp_path / "lied.mscz.svg"
+    p1 = tmp_path / "lied.mscz-1.svg"
+    p2 = tmp_path / "lied.mscz-2.svg"
+    single.write_text("<svg/>", encoding="utf-8")
+    p1.write_text("<svg>1</svg>", encoding="utf-8")
+    p2.write_text("<svg>2</svg>", encoding="utf-8")
+
+    write_meta(bron, {"svg": single})
+    products, drop = svg_meta_products(bron, [p1, p2])
+    assert set(products) == {"svg-1", "svg-2"}
+    assert "svg" in drop
+
+    write_meta(bron, {"svg-1": p1, "svg-2": p2}, drop_keys={"svg"})
+    products, drop = svg_meta_products(bron, [single])
+    assert products == {"svg": single}
+    assert drop == {"svg-1", "svg-2"}
+
+
 def _fake_write_mxl(_src: Path, dest: Path, **_kwargs: object) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text("<score/>", encoding="utf-8")
@@ -320,6 +360,20 @@ def test_mscz_products_bladreeks_meta_no_dead_svg(tmp_path: Path) -> None:
         path = tmp_path / entry["file"]
         assert path.is_file()
         assert entry["sha256"] == sha256_file(path)
+    # Zonder --force: versheid ziet bladreeks als voldoening voor required ``svg``.
+    with (
+        patch(
+            "vsa.musicxml_playback_normalize.export_mscz_to_playback_mxl",
+            side_effect=_fake_write_mxl,
+        ) as mxl_mock,
+        patch(
+            "vsa.mvsa_mscz.export_mscz_to_svg",
+            side_effect=_fake_bladreeks_svg,
+        ) as svg_mock,
+    ):
+        assert products_mscz_one(bron, force=False) == 0
+        assert mxl_mock.call_count == 0
+        assert svg_mock.call_count == 0
 
 
 def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
