@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5178,19 +5178,21 @@ partituur-PDF) <strong>hetzelfde nummer</strong>.</p>
 </tbody>
 </table>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mvsa validate examples\mvsa
-mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
-mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
-mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
-mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
-mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
-mxl mvsa generated\alleluia.mxl
-mxl mvsa generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
-mscz mvsa generated\alleluia.mscz -o generated\from-mscz.mvsa
-mvsa validate generated\alleluia.mxl.mvsa
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\mvsa.cmd validate examples\mvsa
+scripts\mvsa.cmd mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
+scripts\mvsa.cmd mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
+scripts\mvsa.cmd pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
+scripts\mvsa.cmd svg examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mvsa.svg
+scripts\mvsa.cmd normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
+scripts\mvsa.cmd transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
+scripts\mxl.cmd mvsa generated\alleluia.mxl
+scripts\mxl.cmd normalize generated\alleluia.mxl -o generated\alleluia.norm.mxl
+scripts\mscz.cmd mvsa generated\alleluia.mscz -o generated\from-mscz.mvsa
+scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
+scripts\mvsa.cmd validate generated\alleluia.mxl.mvsa
 vsa text examples\mvsa\alleluia-toon-8.mvsa
 </code></pre></div>
-<p>Via repo-script: <code>scripts\mvsa.cmd …</code></p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../">Formaten &amp; CLI — overzicht</a></li>

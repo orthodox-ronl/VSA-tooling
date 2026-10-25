@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5243,26 +5243,32 @@ uitrolpad; zie <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
 <tr>
 <td><strong>mscz</strong></td>
 <td>scherm-SVG</td>
-<td>leesbaarheid + <code>muziek</code> (via <code>mvsa svg</code> op <code>.mscz</code>)</td>
-<td><code>mvsa svg</code> → doel: <code>mscz svg</code></td>
+<td>leesbaarheid + layout <code>muziek</code> (kale SVG)</td>
+<td><code>mscz svg</code> (<code>.mscz</code> geweigerd bij <code>mvsa svg</code>)</td>
 </tr>
 <tr>
 <td><strong>mscz</strong></td>
 <td>bron-PDF</td>
 <td>P* + <code>partituur</code></td>
-<td><code>mvsa pdf</code> op <code>.mscz</code> → doel: <code>mscz pdf</code></td>
+<td><code>mscz pdf</code> (<code>.mscz</code> geweigerd bij <code>mvsa pdf</code>)</td>
 </tr>
 <tr>
 <td><strong>mscz</strong></td>
 <td>normalize</td>
 <td>leesbaarheid + layout <code>partituur</code> + S*</td>
-<td>nu: bibliotheek <code>layout</code> / tooling layout → doel: <code>mscz normalize</code></td>
+<td><code>mscz normalize</code> (<code>--layout partituur</code>/<code>muziek</code>/<code>plain</code>)</td>
 </tr>
 <tr>
 <td><strong>mscz</strong></td>
 <td>import (→ <code>.mscz</code>)</td>
 <td>leesbaarheid / S*</td>
 <td><strong><code>mscz import</code></strong> (= <code>mvsa mscz</code> / <code>mxl mscz</code>)</td>
+</tr>
+<tr>
+<td><strong>mscz</strong></td>
+<td><code>products</code> (bundel)</td>
+<td>products-meta + M* + kale SVG</td>
+<td><code>mscz products</code> (intern = mxl + svg + …)</td>
 </tr>
 <tr>
 <td><strong>vsa</strong></td>
@@ -5292,7 +5298,7 @@ uitrolpad; zie <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
 <td><strong>vsa</strong></td>
 <td>normalize</td>
 <td>specification VSA (canonieke notatie)</td>
-<td>expliciet maken als <code>vsa normalize</code> waar nodig</td>
+<td><strong>n.v.t.</strong> — geen <code>vsa normalize</code>; canonieke <code>.vsa</code> via authoring + <a href="../../reference/cli/validate/"><code>vsa validate</code></a></td>
 </tr>
 <tr>
 <td><strong>manual</strong></td>
@@ -5321,9 +5327,11 @@ uitrolpad; zie <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
 </tbody>
 </table>
 <h2 id="sidecar-meta-herkomst-versheid">Sidecar-meta (herkomst / versheid)<a class="headerlink" href="#sidecar-meta-herkomst-versheid" title="Permanent link">&para;</a></h2>
-<p>Canonieke hub: <strong><a href="../products-meta/">products-meta.md</a></strong> (schema <strong>2</strong>
-doelbeeld: bron-hash + productbestanden met <strong>inhouds-hashes</strong>;
-invariante “(H_A) uit (H_B)” blijft waar of meta is stale).</p>
+<p>Canonieke hub: <strong><a href="../products-meta/">products-meta.md</a></strong> (schema <strong>2</strong>:
+bron-hash + productbestanden met <strong>inhouds-hashes</strong> én per product
+<code>generated_at</code>; invariante “(H_A) uit (H_B)” blijft waar of meta is
+stale). Individuele product-subs mergen keys; zie fase 7 in
+<a href="../../plans/straat-clis/">straat-CLIs</a>.</p>
 <p>Sibling <code>{stam}.{bron}.products-meta.json</code>. <strong>Schrijver:</strong> tooling
 street-<code>products</code> (niet bibliotheek). Geschreven voor:</p>
 <table>
@@ -5339,12 +5347,24 @@ street-<code>products</code> (niet bibliotheek). Geschreven voor:</p>
 <td><code>mxl</code>, <code>score-ir</code>, <code>from-ir</code> (+ <code>svg</code> / <code>svg-N</code> tenzij <code>--skip-svg</code>)</td>
 </tr>
 <tr>
+<td><code>mvsa mxl</code>/<code>svg</code>/<code>pdf</code>/<code>score-ir</code></td>
+<td>merge van <code>mxl</code> / <code>svg</code>… / <code>pdf</code> / <code>score-ir</code> (+ <code>from-ir</code> bij <code>--musicxml</code>)</td>
+</tr>
+<tr>
 <td><code>mscz products</code></td>
 <td><code>mxl</code> (+ <code>svg</code> / <code>svg-N</code> tenzij <code>--skip-svg</code>)</td>
 </tr>
 <tr>
+<td><code>mscz mxl</code>/<code>svg</code>/<code>pdf</code></td>
+<td>merge van <code>mxl</code> / <code>svg</code>… / <code>pdf</code> in dezelfde sidecar</td>
+</tr>
+<tr>
 <td><code>vsa products</code></td>
 <td><code>mxl</code>, <code>svg</code></td>
+</tr>
+<tr>
+<td><code>vsa musicxml</code> / <code>vsa svg</code></td>
+<td>merge van <code>mxl</code> / <code>svg</code> (bron <code>.vsa</code>, sibling-output)</td>
 </tr>
 </tbody>
 </table>

@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4913,9 +4913,15 @@ Bedoelde printvorm = checklists; OSMD-emit: <a href="../../plans/osmd-s8-recite/
 op een map).</p>
 <p><strong>Print-eindvorm (S8/S13):</strong> Score-IR bewaart recite-spacers
 (<code>print.spacer</code> / <code>print.breveHead</code>) en compacte same-pitch melisma’s;
-from-ir MusicXML tekent die voor OSMD (zelfde informatiedichtheid als
-blad-SVG, geen MuseScore-paginamodel). Details:
+from-ir MusicXML emitteert die voor het schermpad (zelfde informatiedichtheid
+als blad-SVG, geen MuseScore-paginamodel). Details:
 <a href="../../plans/partituur-ir/">partituur-ir §4.4</a>.</p>
+<p><strong>S8 / OSMD (contract A1):</strong> <code>print.spacer</code> → from-ir
+<code>&lt;stem&gt;none&lt;/stem&gt;</code> + <code>&lt;notehead&gt;none&lt;/notehead&gt;</code> (lyrics blijven op de
+noot). Dat is een <strong>stabiele marker</strong> voor de scherm-OSMD-adapter, geen
+belofte dat OSMD/VexFlow de kop zelf verbergt (peiling:
+<a href="../../plans/osmd-s8-recite/">osmd-s8-recite</a>). Breve-midden:
+<code>notehead breve</code> + <code>stem none</code> (geen <code>type=breve</code>).</p>
 <table>
 <thead>
 <tr>

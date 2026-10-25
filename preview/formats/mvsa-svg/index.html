@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4883,11 +4883,15 @@
 
 
 <h1 id="partituur-svg-uit-mvsa-of-mscz-koormap-brug">Partituur-SVG uit <code>.mvsa</code> of <code>.mscz</code> (koormap-brug)<a class="headerlink" href="#partituur-svg-uit-mvsa-of-mscz-koormap-brug" title="Permanent link">&para;</a></h1>
-<p>Afgeleide <strong>partituur-SVG</strong>, inhoudshoogte na trim. Bron <code>.mvsa</code>: muziek-only
-(geen titel/colofon). Bron <code>.mscz</code>: MuseScore tekent wat er al in het bestand
-staat (inclusief Style/fonts). Bedoeld voor koormap-pagina’s
-(bibliotheek-shortcode <code>muziek</code> later). Past het stuk op één MuseScore-pagina,
-dan één <code>.svg</code>; anders een <strong>bladreeks</strong> (<code>stem-1.svg</code>, <code>stem-2.svg</code>, …).</p>
+<p>Afgeleide <strong>kale partituur-SVG</strong>, inhoudshoogte na trim. Alleen muziek:
+notenbalken, lyrics, uitvoeringsaanwijzingen, maatnummers e.d. — <strong>geen</strong>
+titel, copyright, colofon of bewerkersregel. Bron <code>.mvsa</code>: layout <code>muziek</code>
+via <a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a>. Bron <code>.mscz</code>:
+<a href="../../reference/cli/mscz/"><code>mscz svg</code></a> — blad-chrome op een tijdelijke kopie
+gestript (het bron-<code>.mscz</code> blijft ongewijzigd); Style/fonts uit het bestand
+blijven. Bedoeld voor koormap-pagina’s (bibliotheek-shortcode <code>muziek</code> later).
+Past het stuk op één MuseScore-pagina, dan één <code>.svg</code>; anders een <strong>bladreeks</strong>
+(<code>stem-1.svg</code>, <code>stem-2.svg</code>, …).</p>
 <table>
 <thead>
 <tr>
@@ -4897,8 +4901,12 @@ dan één <code>.svg</code>; anders een <strong>bladreeks</strong> (<code>stem-1
 </thead>
 <tbody>
 <tr>
-<td>CLI</td>
+<td>CLI (<code>.mvsa</code>)</td>
 <td><a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a></td>
+</tr>
+<tr>
+<td>CLI (<code>.mscz</code>)</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz svg</code></a></td>
 </tr>
 <tr>
 <td>MSCZ-layout <code>muziek</code></td>
@@ -4911,9 +4919,9 @@ dan één <code>.svg</code>; anders een <strong>bladreeks</strong> (<code>stem-1
 </tbody>
 </table>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.svg
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek-tr.svg --transparent
-mvsa svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
+scripts\mvsa.cmd svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.svg
+scripts\mvsa.cmd svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek-tr.svg --transparent
+scripts\mscz.cmd svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 </code></pre></div>
 <p>Default na trim: <strong>witte</strong> achtergrond. <code>--transparent</code> laat de achtergrond
 leeg (handig op gekleurde pagina’s). De trim zet <code>viewBox</code> op de getekende
@@ -4924,8 +4932,8 @@ Style-opties winnen), systeemafstand, stafafstand (<code>--staff-distance</code>
 pagina-marges (<code>--page-margin-top</code> / <code>--page-margin-bottom</code>), fonts en
 <code>--measure-spacing</code> — zelfde Style-opties als bij
 <a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../mscz/"><code>.mscz</code></a>.
-Bij bron <code>.mscz</code> staan die waarden al in het bestand; Style-CLI-opties
-gelden dan niet.</p>
+Bij bron <code>.mscz</code> (<code>mscz svg</code>) gelden Style-CLI-opties niet (waarden staan al
+in het bestand); blad-chrome wordt altijd gestript vóór de SVG-export.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4

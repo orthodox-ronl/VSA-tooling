@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5075,8 +5075,20 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/products/"><code>vsa products &lt;pad&gt;</code></a></td>
 </tr>
 <tr>
+<td><code>.vsa</code> canonieke notatie controleren</td>
+<td><a href="../../reference/cli/validate/"><code>vsa validate</code></a> (geen aparte <code>vsa normalize</code>)</td>
+</tr>
+<tr>
 <td>mvsa valideren (draft)</td>
 <td><a href="../../reference/cli/mvsa/#mvsa-validate"><code>mvsa validate &lt;pad&gt;</code></a></td>
+</tr>
+<tr>
+<td><code>.mvsa</code> normaliseren (spelling / uitlijning)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-normalize"><code>mvsa normalize</code></a></td>
+</tr>
+<tr>
+<td><code>.mxl</code> naar Coria/playback-profiel</td>
+<td><a href="../../reference/cli/mxl/"><code>mxl normalize</code></a></td>
 </tr>
 <tr>
 <td>mvsa → SATB MusicXML (draft)</td>
@@ -5091,8 +5103,16 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir &lt;pad&gt; --musicxml</code></a> (siblings <code>.score-ir.json</code> + <code>.from-ir.musicxml</code>)</td>
 </tr>
 <tr>
-<td>mvsa/mscz → partituur-SVG (koormap; MuseScore-brug)</td>
-<td><a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg &lt;pad&gt; [-o …]</code></a> (dicht: <code>--compact</code>)</td>
+<td>mvsa → partituur-SVG (koormap; MuseScore-brug)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg &lt;pad.mvsa&gt; [-o …]</code></a> (dicht: <code>--compact</code>)</td>
+</tr>
+<tr>
+<td>mscz → kale muziek-SVG / print-PDF</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz svg</code></a> / <a href="../../reference/cli/mscz/"><code>mscz pdf</code></a></td>
+</tr>
+<tr>
+<td>mscz → layout/leesbaarheid opnieuw</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz normalize</code></a> (<code>--layout partituur</code>/<code>muziek</code>/<code>plain</code>)</td>
 </tr>
 <tr>
 <td>mvsa → Coria met hulptekst-keuze</td>
@@ -5104,7 +5124,7 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 </tr>
 <tr>
 <td>mvsa → MuseScore / print-PDF (draft)</td>
-<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../../reference/cli/mvsa/#mvsa-pdf"><code>pdf</code></a> (dicht: <code>--compact</code>)</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../../reference/cli/mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> (dicht: <code>--compact</code>; PDF uit <code>.mscz</code>: <code>mscz pdf</code>)</td>
 </tr>
 <tr>
 <td>mvsa → preview-audio (draft)</td>

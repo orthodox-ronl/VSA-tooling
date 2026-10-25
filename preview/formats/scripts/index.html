@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5074,9 +5074,15 @@ aanroepen. De <code>.cmd</code>-bestanden werken altijd vanuit de repo-root.</p>
 
 scripts\mvsa.cmd -h
 scripts\mvsa.cmd validate examples\mvsa
-scripts\mxl.cmd import generated\alleluia.mxl -o generated\x.mvsa
+scripts\mvsa.cmd normalize examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.normalized.mvsa
+scripts\mxl.cmd normalize generated\alleluia.mxl -o generated\alleluia.norm.mxl
 scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\y.mxl
+scripts\mscz.cmd svg generated\alleluia.mscz -o generated\alleluia.svg
+scripts\mscz.cmd pdf generated\alleluia.mscz -o generated\alleluia.pdf
+scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
 </code></pre></div>
+<p>In handleidingen en voorbeelden: altijd <code>scripts\*.cmd</code> (of <code>vsa</code>/<code>mvsa</code>/<code>mxl</code>/<code>mscz</code>
+op PATH na install). Geen <code>python -m vsa.cli…</code> als gebruikerscommando.</p>
 <h2 id="overige-repo-scripts">Overige repo-scripts<a class="headerlink" href="#overige-repo-scripts" title="Permanent link">&para;</a></h2>
 <p>Installatie, testen, docs-build: zie
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/scripts/README.md">scripts/README.md</a>
@@ -5128,7 +5134,7 @@ scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\y.mxl
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-12
+        Bijgewerkt: 2026-10-25
         
       </p>
       

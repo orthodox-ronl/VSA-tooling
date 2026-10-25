@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5582,7 +5582,7 @@ canonieke vorm brengen (zelfde formaat).</p>
 <tbody>
 <tr>
 <td><strong><code>.vsa</code></strong></td>
-<td><strong>normalize</strong> (waar relevant)</td>
+<td>validate (geen <code>vsa normalize</code>)</td>
 <td>— (niet v0)</td>
 <td><code>vsa musicxml</code></td>
 <td>via MXL / templates</td>
@@ -5592,9 +5592,9 @@ canonieke vorm brengen (zelfde formaat).</p>
 <tr>
 <td><strong><code>.mvsa</code></strong></td>
 <td>—</td>
-<td><strong><code>normalize</code></strong> / <strong><code>kuiser</code></strong> / <strong><code>transpose</code></strong></td>
-<td><code>mvsa mxl</code> · <code>score-ir</code> · <code>svg</code> (koormap)</td>
-<td><strong><code>mscz</code></strong> via mxl→MuseScore</td>
+<td><strong><code>mvsa normalize</code></strong> / <strong><code>kuiser</code></strong> / <strong><code>transpose</code></strong></td>
+<td><code>mvsa mxl</code> · <code>score-ir</code> · <code>mvsa svg</code></td>
+<td><strong><code>mvsa mscz</code></strong></td>
 <td><code>mvsa mp3</code></td>
 <td>— (niet gepland)</td>
 </tr>
@@ -5602,8 +5602,8 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td><strong><code>.mxl</code> / <code>.musicxml</code></strong></td>
 <td>—</td>
 <td><strong><code>mxl mvsa</code></strong></td>
-<td><strong>normalize</strong> → <a href="../../formats/canonical-checklists/#checklist-mxl-coria-playback">checklist MXL</a></td>
-<td>MuseScore / <code>mxl mscz</code></td>
+<td><strong><code>mxl normalize</code></strong> → <a href="../../formats/canonical-checklists/#checklist-mxl-coria-playback">checklist MXL</a></td>
+<td><code>mxl mscz</code></td>
 <td><code>vsa audio</code></td>
 <td>— (niet gepland)</td>
 </tr>
@@ -5612,7 +5612,7 @@ canonieke vorm brengen (zelfde formaat).</p>
 <td>—</td>
 <td><strong><code>mscz mvsa</code></strong> (via mxl)</td>
 <td><code>mscz mxl</code></td>
-<td><strong>normalize</strong> → <a href="../../formats/canonical-checklists/#checklist-mscz-partituur-musescore">checklist MSCZ</a></td>
+<td><strong><code>mscz normalize</code></strong> → <a href="../../formats/canonical-checklists/#checklist-mscz-partituur-musescore">checklist MSCZ</a></td>
 <td><code>vsa audio</code> (fallback)</td>
 <td>— (niet gepland)</td>
 </tr>
@@ -6027,7 +6027,7 @@ man-pagina’s <code>docs/reference/cli/{mvsa,mxl,mscz}.md</code>.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-10-25
         
       </p>
       

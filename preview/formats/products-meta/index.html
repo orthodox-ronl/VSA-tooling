@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1136,6 +1136,17 @@
   
     <nav class="md-nav" aria-label="Schema 2 (normatief)">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wie-schrijft-welke-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wie schrijft welke keys
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#schema-1-legacy" class="md-nav__link">
@@ -5042,6 +5053,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#wie-schrijft-welke-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wie schrijft welke keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-1-legacy" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5168,11 +5190,13 @@ afbouw; zie <a href="../../plans/straat-clis/">straat-CLIs</a>).</p>
 <span class="w">  </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">"mxl"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mvsa.mxl"</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex sha256 van dat productbestand&gt;"</span>
+<span class="w">      </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex sha256 van dat productbestand&gt;"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"generated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;UTC ISO-8601 wanneer dit productbestand geschreven werd&gt;"</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">"svg-1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mvsa-1.svg"</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex&gt;"</span>
+<span class="w">      </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex&gt;"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"generated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;UTC ISO-8601&gt;"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
@@ -5209,7 +5233,7 @@ afbouw; zie <a href="../../plans/straat-clis/">straat-CLIs</a>).</p>
 <tr>
 <td><code>products</code></td>
 <td>Ja</td>
-<td>Object: product-key → <code>{ "file", "sha256" }</code>. Minimaal één key.</td>
+<td>Object: product-key → productentry. Minimaal één key.</td>
 </tr>
 <tr>
 <td><code>products.*.file</code></td>
@@ -5221,22 +5245,45 @@ afbouw; zie <a href="../../plans/straat-clis/">straat-CLIs</a>).</p>
 <td>Ja</td>
 <td>SHA-256 (hex, lowercase) van de bytes van dat sibling-bestand.</td>
 </tr>
+<tr>
+<td><code>products.*.generated_at</code></td>
+<td>Ja</td>
+<td>UTC-tijdstip waarop <strong>dit</strong> productbestand geschreven werd (informatief).</td>
+</tr>
 </tbody>
 </table>
 <p>Product-keys per straat: zie <a href="../contract-index/">contract-index</a> (tabel
 <code>mvsa</code>/<code>mscz</code>/<code>vsa products</code>). Bladreeks-SVG: <code>svg</code> of <code>svg-1</code>, <code>svg-2</code>, …</p>
+<h3 id="wie-schrijft-welke-keys">Wie schrijft welke keys<a class="headerlink" href="#wie-schrijft-welke-keys" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>{straat} products</code></strong> — schrijft alle standaardkeys van die straat
+  (volledige set) + top-level <code>generated_at</code>.</li>
+<li><strong>Individuele product-subs</strong> (bijv. <code>mscz svg</code>, <code>mscz mxl</code>) — mogen de
+  sidecar <strong>mergen</strong>: bestaande keys van andere producten behouden als
+  <code>bron_sha256</code> nog klopt; bijgewerkte keys krijgen nieuwe <code>file</code> /
+  <code>sha256</code> / <code>generated_at</code>. Wijkt de bron-hash af → treat as stale /
+  herschrijf alleen de keys van deze run (of eis <code>--force</code> / volle
+  <code>products</code>); geen stille mix van oude en nieuwe bron.</li>
+</ul>
+<p>Nieuwe schrijfacties zetten <code>products.*.generated_at</code>. Bestaande
+schema-2-meta zonder per-product-tijdstip mag <code>freshness()</code> nog lezen.
+Individuele product-subs: <code>write_meta(..., merge=True)</code> — zie
+<a href="../../plans/straat-clis/">straat-CLIs fase 7</a>.</p>
 <h3 id="schema-1-legacy">Schema 1 (legacy)<a class="headerlink" href="#schema-1-legacy" title="Permanent link">&para;</a></h3>
 <p>Oude sidecars met alleen bestandsnamen (<code>"mxl": "lied.mvsa.mxl"</code>) zijn
 <strong>stale</strong>: <code>freshness()</code> eist schema 2. Opnieuw <code>… products</code> schrijft
 schema 2.</p>
 <h2 id="invariante-hard">Invariante (hard)<a class="headerlink" href="#invariante-hard" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Schrijver = exporteur.</strong> Alleen tooling street-<code>products</code> (of een
-   gelijkwaardige export die dezelfde siblings maakt) mag deze sidecar
-   <strong>overschrijven</strong>. Consumers mogen lezen; niet “achteraf” een andere
+<li><strong>Schrijver = exporteur.</strong> Alleen tooling street-<code>products</code> of een
+   individuele product-sub die dezelfde siblings maakt, mag deze sidecar
+   <strong>schrijven/mergen</strong>. Consumers mogen lezen; niet “achteraf” een andere
    herkomst claimen zonder opnieuw te exporteren.</li>
-<li><strong>Atomaire waarheid.</strong> Na een geslaagde <code>products</code>-run weerspiegelt de
-   sidecar exact de bron en de productbestanden die bij die run horen.</li>
+<li><strong>Atomaire waarheid per run.</strong> Na een geslaagde <code>products</code>-run
+   weerspiegelt de sidecar exact de bron en alle standaardproducten van
+   die run. Na een individuele product-sub kloppen minstens de keys die
+   die sub net schreef (plus behouden keys alleen als bron-hash gelijk
+   bleef).</li>
 <li><strong>Bron wijzigt → meta mag niet oud blijven.</strong> Als de bytes van de bron
    niet meer gelijk zijn aan <code>bron_sha256</code>, is de hele sidecar <strong>stale</strong>.
    Geen productregel uit die meta mag dan als “nog geldig” gelden.</li>
@@ -5290,7 +5337,19 @@ check (<code>--only-invalid</code>); die vervangt deze herkomst-sidecar niet.</p
 <tbody>
 <tr>
 <td>Tooling <code>vsa</code>/<code>mvsa</code>/<code>mscz products</code></td>
-<td>Schrijft sidecar bij elke geslaagde export (schema 2: inclusief product-hashes)</td>
+<td>Schrijft sidecar bij elke geslaagde export (schema 2: hashes + product-<code>generated_at</code>)</td>
+</tr>
+<tr>
+<td>Tooling <code>mscz mxl</code> / <code>svg</code> / <code>pdf</code></td>
+<td>Merget de bijbehorende product-key(s) in dezelfde sidecar (sibling-output; anders overslaan + melding)</td>
+</tr>
+<tr>
+<td>Tooling <code>mvsa mxl</code> / <code>svg</code> / <code>pdf</code> / <code>score-ir</code></td>
+<td>Idem; <code>score-ir</code> + optioneel <code>from-ir</code> bij <code>--musicxml</code></td>
+</tr>
+<tr>
+<td>Tooling <code>vsa musicxml</code> / <code>vsa svg</code></td>
+<td>Merget <code>mxl</code> / <code>svg</code> (bron <code>.vsa</code>; sibling-output)</td>
 </tr>
 <tr>
 <td>Tooling <code>freshness()</code> / <code>--force</code></td>
@@ -5314,6 +5373,14 @@ check (<code>--only-invalid</code>); die vervangt deze herkomst-sidecar niet.</p
 <tr>
 <td>Schema 2 (product-<code>sha256</code>)</td>
 <td><strong>gedaan</strong> in tooling (<code>products_meta.py</code>)</td>
+</tr>
+<tr>
+<td>Schema 2 product-<code>generated_at</code></td>
+<td><strong>gedaan</strong> (<code>write_meta</code> / <code>build_meta</code>; fase 7b)</td>
+</tr>
+<tr>
+<td>Merge vanuit individuele product-subs</td>
+<td><strong>gedaan</strong> API; <strong>mscz</strong> + <strong>mvsa</strong> + <strong>vsa</strong> (<code>musicxml</code>/<code>svg</code>)</td>
 </tr>
 <tr>
 <td>Bibliotheek check/regen op meta</td>

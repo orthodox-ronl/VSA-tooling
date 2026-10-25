@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5035,7 +5035,15 @@ layoutprofielen).</p>
 </tr>
 <tr>
 <td>Print-PDF (zangers)</td>
-<td><a href="../../reference/cli/mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> (via MuseScore; ook vanaf <code>.mscz</code>)</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz pdf</code></a> (bron <code>.mscz</code>); vanuit <code>.mvsa</code>: <a href="../../reference/cli/mvsa/#mvsa-pdf"><code>mvsa pdf</code></a></td>
+</tr>
+<tr>
+<td>Kale muziek-SVG</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz svg</code></a>; vanuit <code>.mvsa</code>: <a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a></td>
+</tr>
+<tr>
+<td>Normalize (layout)</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz normalize</code></a> — zelfde profielen als <code>--layout</code> hieronder</td>
 </tr>
 <tr>
 <td>Layoutprofiel</td>
@@ -5154,14 +5162,17 @@ tegen S uitgelijnd; zie
 <a href="../mvsa/#score-naar-mvsa">score naar mvsa</a>.</p>
 </div>
 <h2 id="typische-commandos">Typische commando’s<a class="headerlink" href="#typische-commandos" title="Permanent link">&para;</a></h2>
-<p><div class="highlight"><pre><span></span><code>mscz mvsa generated\alleluia.mscz
-mscz mvsa generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
-mvsa validate generated\from-mscz.mvsa
-mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
-mscz text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
-mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\mscz.cmd mvsa generated\alleluia.mscz
+scripts\mscz.cmd mvsa generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
+scripts\mvsa.cmd validate generated\from-mscz.mvsa
+scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\from-mscz.mxl
+scripts\mscz.cmd svg generated\alleluia.mscz -o generated\alleluia.svg
+scripts\mscz.cmd pdf generated\alleluia.mscz -o generated\alleluia.pdf
+scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
+scripts\mscz.cmd text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
+scripts\mvsa.cmd mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 </code></pre></div>
-Via repo-script: <code>scripts\mscz.cmd …</code></p>
 <p>Vereist MuseScore 4 (of 3) lokaal, tenzij je alleen <code>.mxl</code> gebruikt.</p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>

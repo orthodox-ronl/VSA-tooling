@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1518,10 +1518,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#contracten" class="md-nav__link">
+  <a href="#normalize-per-straat-check-7e" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Contracten
+        Normalize per straat (check 7e)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gat-overzicht-fase-7-afgesloten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gat-overzicht (fase 7 — afgesloten)
       
     </span>
   </a>
@@ -4923,10 +4934,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#contracten" class="md-nav__link">
+  <a href="#normalize-per-straat-check-7e" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Contracten
+        Normalize per straat (check 7e)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gat-overzicht-fase-7-afgesloten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gat-overzicht (fase 7 — afgesloten)
       
     </span>
   </a>
@@ -5076,10 +5098,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#contracten" class="md-nav__link">
+  <a href="#normalize-per-straat-check-7e" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Contracten
+        Normalize per straat (check 7e)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gat-overzicht-fase-7-afgesloten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gat-overzicht (fase 7 — afgesloten)
       
     </span>
   </a>
@@ -5134,8 +5167,7 @@
 
 
 <h1 id="straat-clis-en-producten-plan">Straat-CLIs en producten (plan)<a class="headerlink" href="#straat-clis-en-producten-plan" title="Permanent link">&para;</a></h1>
-<p>Status: fases <strong>1–5 gedaan</strong>; fase <strong>6</strong> (products-meta schema 2 +
-tooling/bibliotheek op meta-hashes) <strong>open</strong> — normatieve spec:
+<p>Status: fases <strong>1–7e gedaan</strong>. Normatieve meta-spec:
 <a href="../../formats/products-meta/">products-meta.md</a>.</p>
 <p>Dit plan is <strong>niet</strong> de plek voor print-/melisma-/layout-regels. Die staan
 in de <a href="../../formats/contract-index/">contract-index</a> en de hubs die daar
@@ -5173,38 +5205,126 @@ genoemd worden.</p>
 </tr>
 </tbody>
 </table>
-<p>Per straat: individuele product-subs, <code>products</code> (alles + sidecar-meta),
-<code>normalize</code> (bestaand contract), <code>import</code> (catalogus-vrij;
-<code>{doel} import bron.{ext}</code> ≡ <code>{bron} {doel}</code>).</p>
+<p>Per straat:</p>
+<ol>
+<li><strong>Individuele product-subs</strong> — elk product dat bij die bronfamilie
+   hoort, via <code>{straat} {product}</code> (bijv. <code>mscz svg</code>, <code>mscz pdf</code>,
+   <code>mvsa svg</code>). Geen cross-street omweg (<code>mvsa svg</code> op <code>.mscz</code> is fout).</li>
+<li><strong><code>products</code></strong> — alle standaardproducten van die straat + sidecar-meta.</li>
+<li><strong><code>normalize</code></strong> / <strong><code>import</code></strong> waar het contract dat vraagt
+   (<code>{doel} import bron.{ext}</code> ≡ <code>{bron} {doel}</code>).</li>
+</ol>
 <p>Bibliotheek: orchestratie (<code>all-products</code> / check op meta), <code>bieb</code>,
 <code>scripts\pdf.cmd</code> → <code>index.md.pdf</code>. Geen blijvende shims voor afgeschafte
 namen. Frontmatter: <code>manueel</code> / <code>manual</code> i.p.v. <code>artefacten_handmatig</code>.</p>
+<p>Gebruikerscommando’s: de <code>scripts\*.cmd</code> wrappers (<code>mscz</code>, <code>mvsa</code>,
+<code>vsa</code>, …) — geen <code>python -m vsa.cli …</code> in handleidingen of handover.</p>
 <h2 id="versheid-sidecar-meta">Versheid (sidecar-meta)<a class="headerlink" href="#versheid-sidecar-meta" title="Permanent link">&para;</a></h2>
 <p><strong>Canonieke spec:</strong> <a href="../../formats/products-meta/">products-meta.md</a>.</p>
-<p>Doelbeeld (schema <strong>2</strong>): tooling schrijft bron-hash <strong>én</strong> hashes van
-elk afgeleid bestand. Invariante: claim “product (H_A) uit bron (H_B)”
-klopt, of meta is niet <code>ok</code>. Bibliotheek leest meta; zet geen parallelle
-herkomststempel als bron van waarheid.</p>
-<p>Tooling schrijft schema <strong>2</strong> (fase 6b). Schema-1-sidecars tellen als
-stale tot opnieuw <code>products</code>.</p>
+<p>Schema <strong>2</strong>: bron-hash, product-hashes, én per product een
+<code>generated_at</code> (wanneer dát productbestand geschreven werd). Top-level
+<code>generated_at</code> = tijdstip van de meta-schrijfactie.</p>
+<p>Individuele product-subs <strong>én</strong> <code>products</code> schrijven/bijwerken dezelfde
+sidecar (merge per product-key; zie products-meta).</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"bron"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mvsa"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"bron"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mscz"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"bron_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"generated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">"mxl"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mvsa.mxl"</span><span class="p">,</span><span class="w"> </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">"svg"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mvsa.svg"</span><span class="p">,</span><span class="w"> </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="nt">"mxl"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mscz.mxl"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"generated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">"svg"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mscz.svg"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"generated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Diepere <code>mxl validate</code> blijft apart (<code>--only-invalid</code>).</p>
-<h2 id="contracten">Contracten<a class="headerlink" href="#contracten" title="Permanent link">&para;</a></h2>
-<p>Normatieve inhoudsopgave + straat×product-tabel:
-<strong><a href="../../formats/contract-index/">contract-index</a></strong>.</p>
-<p>OSMD / Score-IR vallen onder dezelfde checklists (bedoelde vorm); emit
-verschilt alleen waar de hub dat toelaat (<a href="../osmd-s8-recite/">osmd-s8-recite</a>,
-<a href="../partituur-ir/">partituur-ir</a>).</p>
+<h2 id="normalize-per-straat-check-7e">Normalize per straat (check 7e)<a class="headerlink" href="#normalize-per-straat-check-7e" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Straat</th>
+<th>CLI</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mvsa</td>
+<td><code>mvsa normalize</code></td>
+<td>aanwezig (spelling / uitlijning)</td>
+</tr>
+<tr>
+<td>mxl</td>
+<td><code>mxl normalize</code></td>
+<td>aanwezig (Coria/playback-profiel)</td>
+</tr>
+<tr>
+<td>mscz</td>
+<td><code>mscz normalize</code></td>
+<td>aanwezig (layout <code>partituur</code>/<code>muziek</code>/<code>plain</code>)</td>
+</tr>
+<tr>
+<td>vsa</td>
+<td>—</td>
+<td><strong>geen</strong> <code>vsa normalize</code>; canonieke <code>.vsa</code> via authoring + <code>vsa validate</code></td>
+</tr>
+<tr>
+<td>manual</td>
+<td>—</td>
+<td>uitgesteld (geen contract-hub)</td>
+</tr>
+</tbody>
+</table>
+<p>Regressie: <code>tests/test_street_normalize.py</code>.</p>
+<h2 id="gat-overzicht-fase-7-afgesloten">Gat-overzicht (fase 7 — afgesloten)<a class="headerlink" href="#gat-overzicht-fase-7-afgesloten" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Straat</th>
+<th>Was omweg / gat</th>
+<th>Canonieke CLI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>mscz</strong></td>
+<td>SVG via <code>mvsa svg</code> op <code>.mscz</code></td>
+<td><code>mscz svg</code></td>
+</tr>
+<tr>
+<td><strong>mscz</strong></td>
+<td>PDF via <code>mvsa pdf</code> op <code>.mscz</code></td>
+<td><code>mscz pdf</code></td>
+</tr>
+<tr>
+<td><strong>mscz</strong></td>
+<td>normalize via bibliotheek/<code>layout</code></td>
+<td><code>mscz normalize</code></td>
+</tr>
+<tr>
+<td><strong>vsa</strong></td>
+<td>expliciete <code>normalize</code></td>
+<td>n.v.t. (zie tabel hierboven)</td>
+</tr>
+<tr>
+<td><strong>alle</strong></td>
+<td>product-<code>generated_at</code></td>
+<td>schema 2 in <code>write_meta</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>mscz products</code> blijft als bundel; intern dezelfde paden als
+<code>mscz mxl</code> / <code>mscz svg</code> / ….</p>
+<p>Kale SVG uit <code>.mscz</code>: chrome-strip op tijdelijke kopie (layout <code>muziek</code>),
+bronbestand ongewijzigd — zie <a href="../../formats/mvsa-svg/">mvsa-svg</a> /
+<code>export_mscz_to_svg</code>.</p>
 <h2 id="fasering">Fasering<a class="headerlink" href="#fasering" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -5255,6 +5375,31 @@ verschilt alleen waar de hub dat toelaat (<a href="../osmd-s8-recite/">osmd-s8-r
 <td>Bibliotheek: check/regen op meta; in-file stamps afbouwen</td>
 <td><strong>gedaan</strong> (sync zonder versheidstempels; meta leidend)</td>
 </tr>
+<tr>
+<td><strong>7a</strong></td>
+<td>Spec: product-<code>generated_at</code> + merge-regels in products-meta</td>
+<td><strong>gedaan</strong> (<a href="../../formats/products-meta/">products-meta</a>)</td>
+</tr>
+<tr>
+<td><strong>7b</strong></td>
+<td>Tooling: schrijf/merge <code>generated_at</code> per product-key</td>
+<td><strong>gedaan</strong> (<code>products_meta.write_meta</code>)</td>
+</tr>
+<tr>
+<td><strong>7c</strong></td>
+<td><code>mscz svg</code> + <code>mscz pdf</code> (+ tests/docs); <code>.mscz</code> weg bij <code>mvsa svg</code>/<code>pdf</code></td>
+<td><strong>gedaan</strong></td>
+</tr>
+<tr>
+<td><strong>7d</strong></td>
+<td>Overige ontbrekende straat-product-subs (<code>mscz normalize</code>, …)</td>
+<td><strong>gedaan</strong> (<code>mscz normalize</code>)</td>
+</tr>
+<tr>
+<td><strong>7e</strong></td>
+<td>Docs/man-pages/scripts: alleen <code>{straat} {product}</code>; omwegen weg</td>
+<td><strong>gedaan</strong> (normalize-check alle straten)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="gerelateerd">Gerelateerd<a class="headerlink" href="#gerelateerd" title="Permanent link">&para;</a></h2>
@@ -5263,6 +5408,7 @@ verschilt alleen waar de hub dat toelaat (<a href="../osmd-s8-recite/">osmd-s8-r
 <li><a href="../mvsa-conversions/">mvsa-conversions</a></li>
 <li><a href="../../formats/canonical-checklists/">canonical-checklists</a></li>
 <li><a href="../../formats/mscz-leesbaarheid/">MSCZ-leesbaarheid</a></li>
+<li><a href="../kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a></li>
 </ul>
 
 

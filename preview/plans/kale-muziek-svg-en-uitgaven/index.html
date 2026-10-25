@@ -93,8 +93,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5153,11 +5153,12 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).</p>
 <td>3</td>
 <td><strong>Score-IR/OSMD</strong> als productieschermpad (geen MuseScore-paginamodel op de site)</td>
 <td>VSA-tooling + bibliotheek</td>
-<td><strong>in gang</strong> — §4</td>
+<td><strong>deels</strong> — §4</td>
 </tr>
 </tbody>
 </table>
-<p>Fase 3: richting is vast (Score-IR/OSMD); productiescherm op de site is nog open.</p>
+<p>Fase 3: richting is vast; bibliotheek toont canonieke <code>.mvsa</code> via from-ir →
+OSMD (incl. S8 A1 — <a href="../osmd-s8-recite/">osmd-s8-recite</a>). Rest open: zie §4.</p>
 <hr />
 <h2 id="4-open-verplichting-score-irosmd-als-schermpad">4. Open verplichting: Score-IR/OSMD als schermpad<a class="headerlink" href="#4-open-verplichting-score-irosmd-als-schermpad" title="Permanent link">&para;</a></h2>
 <p><strong>Richting (vastgelegd):</strong> productiescherm = <strong>Score-IR → MusicXML (uit IR) →
@@ -5168,9 +5169,11 @@ schermmotor. Tall MuseScore-scherm-SVG is <strong>geen</strong> hoofdpad.</p>
 <code>lied.mvsa.score-ir.json</code> + <code>lied.mvsa.from-ir.musicxml</code> via
 <code>mvsa score-ir … --musicxml</code>. Bewijs: spike
 <code>examples/spikes/partituur-browser/</code>.</p>
-<p><strong>Nog open (sluit §4 pas dan):</strong> shortcode / koormap-embed in productie die
-deze keten gebruikt (niet alleen de spike). Tot die tijd mag de site tijdelijk
-bladreeks of MuseScore-brug-SVG blijven tonen; dat is geen eindmodel.</p>
+<p><strong>Stand:</strong> bibliotheek-shortcode <code>muziek</code> / catalogus gebruikt from-ir → OSMD
+voor canonieke <code>.mvsa</code> (S8: A1-adapter, geen SVG-bypass —
+<a href="../osmd-s8-recite/">osmd-s8-recite</a>). <strong>Nog open t.o.v. eindbeeld §4:</strong> o.a.
+<code>.vsa</code> zonder Score-IR, cue-/SVG-pariteit, CoriB. MuseScore-SVG blijft
+fallback, niet het S8-schermpad.</p>
 <p><strong>Herinneringsborging (naast dit plan):</strong></p>
 <ul>
 <li>Cursor-regel <code>.cursor/rules/kale-muziek-svg-uitgaven.mdc</code> — bij werk aan
@@ -5222,7 +5225,7 @@ bladreeks of MuseScore-brug-SVG blijven tonen; dat is geen eindmodel.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-10-25
         
       </p>
       

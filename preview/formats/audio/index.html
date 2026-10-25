@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/products-meta-schema-2</code>
-  , gebouwd 2026-10-25 15:36 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-25 21:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5121,6 +5121,11 @@ afspeelknop.</p>
 <td>Geen partituur-eis</td>
 <td>Lyrics/layout/streepjes geen vereiste voor het audiobestand.</td>
 </tr>
+<tr>
+<td>A5</td>
+<td>Geen sleepstilte aan het eind</td>
+<td>Na de laatste hoorbare sample hoogstens ~10 ms stilte; MuseScore-napadding wordt weggeknipt (ffmpeg).</td>
+</tr>
 </tbody>
 </table>
 <h2 id="conversies">Conversies<a class="headerlink" href="#conversies" title="Permanent link">&para;</a></h2>
@@ -5159,8 +5164,14 @@ zet je het afspeeltempo met <a href="../../specification-mvsa/keywords/"><code>@
 onzichtbaar op blad/PDF) en dus in <code>mvsa mp3</code> / Coria. Gedeelde namen met
 <code>.vsa</code>:
 <a href="../../guides/metadata-brug/">metadata-brug</a>. Canonieke playback-MXL gebruikt
-<strong>piano</strong> op elke partij (checklist M8). Bitrate en extra instrumentkeuze
-buiten die piano zijn in v1 MuseScore-defaults.</p>
+<strong>piano</strong> op elke partij (checklist M8). Na trim hercodeert ffmpeg naar
+preview-bitrate (mp3 LAME <code>-q:a 5</code> ≈ 80–100 kbps VBR; ogg Vorbis <code>-q:a 4</code>).
+Dat is kleiner dan studiokwaliteit, maar helder genoeg om even mee te
+beluisteren. Extra instrumentkeuze blijft MuseScore-default.</p>
+<p><strong>Sleepstilte:</strong> MuseScore zet vaak seconden stilte ná de laatste noot in het
+audiobestand. <code>vsa audio</code> / <code>mvsa mp3</code> knipt die weg en laat ongeveer
+<strong>10 ms</strong> stilte over (A5). Daarvoor is <strong>ffmpeg</strong> op PATH nodig, naast
+MuseScore.</p>
 <h2 id="bestandsnaamgeving">Bestandsnaamgeving<a class="headerlink" href="#bestandsnaamgeving" title="Permanent link">&para;</a></h2>
 <p>Zonder <code>-o</code>: <code>stem.brontype.mp3</code> (of <code>.ogg</code> / <code>.wav</code>), bv.
 <code>lied.mvsa.mp3</code>. In <code>generated/</code> hetzelfde patroon. Expliciet <code>-o</code> mag
@@ -5232,7 +5243,7 @@ een korte naam blijven. Zie
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-12
+        Bijgewerkt: 2026-10-25
         
       </p>
       
