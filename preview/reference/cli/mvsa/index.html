@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-25 21:14 CET.
+  , gebouwd 2026-10-25 21:24 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -9161,17 +9161,19 @@ mscz mvsa lied.mscz
 </tr>
 <tr>
 <td>SVG (tenzij <code>--skip-svg</code>)</td>
-<td><code>{stam}.mvsa.svg</code></td>
+<td>één pagina: <code>{stam}.mvsa.svg</code>; bladreeks: <code>{stam}.mvsa-1.svg</code>, …</td>
 </tr>
 <tr>
 <td>Meta</td>
-<td><code>{stam}.mvsa.products-meta.json</code></td>
+<td><code>{stam}.mvsa.products-meta.json</code> (<code>svg</code> of <code>svg-1</code>…; zie products-meta)</td>
 </tr>
 </tbody>
 </table>
 <p>Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
-(<code>--force</code> regenereert). Kaal: geen bibliotheek-stamps.
-<a href="../../../formats/contract-index/">contract-index</a>.</p>
+(<code>--force</code> regenereert). Bladreeks-meta zonder seed-<code>.svg</code> telt als vers
+voor de SVG-eis. Kaal: geen bibliotheek-stamps.
+<a href="../../../formats/contract-index/">contract-index</a> ·
+<a href="../../../formats/products-meta/">products-meta</a>.</p>
 <h3 id="voorbeelden_10">Voorbeelden<a class="headerlink" href="#voorbeelden_10" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mvsa products examples\mvsa\1a-vredeslitanie.mvsa --skip-svg
 mvsa products examples\mvsa --dry-run --skip-svg

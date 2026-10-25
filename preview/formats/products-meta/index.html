@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-25 21:14 CET.
+  , gebouwd 2026-10-25 21:24 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5253,7 +5253,12 @@ afbouw; zie <a href="../../plans/straat-clis/">straat-CLIs</a>).</p>
 </tbody>
 </table>
 <p>Product-keys per straat: zie <a href="../contract-index/">contract-index</a> (tabel
-<code>mvsa</code>/<code>mscz</code>/<code>vsa products</code>). Bladreeks-SVG: <code>svg</code> of <code>svg-1</code>, <code>svg-2</code>, …</p>
+<code>mvsa</code>/<code>mscz</code>/<code>vsa products</code>). Bladreeks-SVG: één pagina → key <code>svg</code>
+(bestand <code>stem.svg</code>); ≥2 MuseScore-pagina’s → keys <code>svg-1</code>…<code>svg-N</code>
+(bestanden <code>stem-1.svg</code>…; seed <code>stem.svg</code> bestaat dan niet). Wissel
+bladreeks ↔ enkel: dode keys droppen (<code>svg</code> of oude <code>svg-N</code>).
+<code>freshness(..., required_keys={"svg", …})</code> accepteert <code>svg-N</code> als
+voldoening voor de abstracte eis <code>svg</code>.</p>
 <h3 id="wie-schrijft-welke-keys">Wie schrijft welke keys<a class="headerlink" href="#wie-schrijft-welke-keys" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong><code>{straat} products</code></strong> — schrijft alle standaardkeys van die straat
