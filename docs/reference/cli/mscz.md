@@ -20,12 +20,16 @@ bron. Zie [Invoer bestand of map](input-pad.md).
 ## Synopsis
 
 ```text
-mscz [-h] {mvsa,import,mxl,text,compare,products} …
+mscz [-h] {mvsa,import,mxl,svg,pdf,normalize,text,compare,products} …
 mscz mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
           [--octave-style {@oct,marker}] [--section SECTION]
           [--musescore PATH] [--no-align] path
 mscz import [-h] [-o OUTPUT] [--layout PROFILE] […] path
 mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
+mscz svg [-h] [-o OUTPUT] [--musescore PATH] [--no-trim] [--transparent] path
+mscz pdf [-h] [-o OUTPUT] [--musescore PATH] path
+mscz normalize [-h] [-o OUTPUT] [--layout PROFILE] [--bibliotheek-id ID]
+               [--compact] [Style-opties…] path
 mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
              score mvsa
@@ -33,14 +37,17 @@ mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
 
 ## Subcommando's
 
-| Subcommando | Doel                                                                                                                         |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `mvsa`      | Naar `.mvsa` (MuseScore → temp `.mxl` → SATB-explode → parser). Default: `<bronnaam>.mvsa` (bijv. `lied.mscz.mvsa`).         |
-| `import`    | **Naar `.mscz`** uit `.mvsa` of MusicXML (catalogus-vrij). Zelfde als [`mvsa mscz`](mvsa.md#mvsa-mscz) / `mxl mscz`. Toegestaan: `.mvsa`, `.mxl`, `.musicxml`, `.xml`. Contract: [contract-index](../../formats/contract-index.md), [MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md). |
-| `products`  | Coria-`.mxl` (+ SVG tenzij `--skip-svg`) + `{stam}.mscz.products-meta.json`. Flags: `--force`, `--dry-run`. |
-| `mxl`       | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts. Default: `<bronnaam>.mxl` (bijv. `lied.mscz.mxl`).      |
-| `text`      | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).                                             |
-| `compare`   | Controleer of een `.mvsa` nog overeenkomt met verse `mscz`/`mxl mvsa`-import (lyrics, toonhoogte, duur-info, import-gaten). |
+| Subcommando  | Doel                                                                                                                                                                                                                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mvsa`       | Naar `.mvsa` (MuseScore → temp `.mxl` → SATB-explode → parser). Default: `<bronnaam>.mvsa` (bijv. `lied.mscz.mvsa`).                                                                                                                                                                         |
+| `import`     | **Naar `.mscz`** uit `.mvsa` of MusicXML (catalogus-vrij). Zelfde als [`mvsa mscz`](mvsa.md#mvsa-mscz) / `mxl mscz`. Toegestaan: `.mvsa`, `.mxl`, `.musicxml`, `.xml`. Contract: [contract-index](../../formats/contract-index.md), [MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md). |
+| `products`   | Coria-`.mxl` (+ SVG tenzij `--skip-svg`) + `{stam}.mscz.products-meta.json`. Flags: `--force`, `--dry-run`.                                                                                                                                                                                  |
+| `mxl`        | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts. Default: `<bronnaam>.mxl` (bijv. `lied.mscz.mxl`). Merget key `mxl` in `{stam}.mscz.products-meta.json` (sibling-output).                                                                                               |
+| `svg`        | Kale muziek-SVG (chrome-strip op tijdelijke kopie; bron-`.mscz` ongewijzigd). Zie [mvsa-svg](../../formats/mvsa-svg.md). Niet via [`mvsa svg`](mvsa.md#mvsa-svg). Merget `svg` / `svg-N` in products-meta.                                                                                   |
+| `pdf`        | Print-PDF voor zangers via MuseScore. Niet via [`mvsa pdf`](mvsa.md#mvsa-pdf). Merget key `pdf` in products-meta (sibling-output).                                                                                                                                                           |
+| `normalize`  | Leesbaarheid + layoutprofiel op bestaand `.mscz` (default `partituur`; ook `muziek` / `plain`). Geen MuseScore-CLI. Zie [`.mscz` layout](../../formats/mscz.md#layoutprofielen---layout).                                                                                                    |
+| `text`       | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).                                                                                                                                                                                                             |
+| `compare`    | Controleer of een `.mvsa` nog overeenkomt met verse `mscz`/`mxl mvsa`-import (lyrics, toonhoogte, duur-info, import-gaten).                                                                                                                                                                  |
 
 **`mvsa`-opties** (`--pitch` default `ag-vsa`, `--do`, `--no-align`, soft-wrap,
 eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zie
@@ -86,10 +93,27 @@ mscz mvsa generated\alleluia-schets2.mscz --pitch a-g --do F4 -o generated\from-
 mscz mvsa generated\alleluia-schets2.mscz --pitch vsa -o generated\from-mscz.vsa.mvsa
 mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
+mscz svg generated\alleluia-schets2.mscz -o generated\alleluia-schets2.svg
+mscz pdf generated\alleluia-schets2.mscz -o generated\alleluia-schets2.pdf
 mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
 mscz compare generated\alleluia-schets2.mscz generated\alleluia-schets2.mscz.mvsa
 mscz compare generated\from-mscz.mxl generated\from-mscz.mvsa
 ```
+
+### `mscz svg` / `mscz pdf` / `mscz normalize`
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\mscz.cmd svg generated\alleluia-schets2.mscz -o generated\alleluia-schets2.svg
+scripts\mscz.cmd pdf generated\alleluia-schets2.mscz -o generated\alleluia-schets2.pdf
+scripts\mscz.cmd normalize generated\alleluia-schets2.mscz --layout partituur
+scripts\mscz.cmd normalize generated\alleluia-schets2.mscz -o generated\alleluia.partituur.mscz --compact
+```
+
+**`normalize`:** past het gekozen layoutprofiel toe op een bestaand `.mscz`
+(zelfde nabewerking als na `mvsa mscz` / `mscz import`). Default: overschrijf
+de bron; met `-o` schrijf je een kopie. Style-opties (`--compact`,
+systeemafstand, fonts, …) gelden niet bij `--layout plain`.
 
 Via repo-script:
 
@@ -101,7 +125,7 @@ scripts\mscz.cmd -h
 
 - [Invoer bestand of map](input-pad.md)
 - [`text`](text.md) — platte tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz`
-- [`mvsa`](mvsa.md) — bron `.mvsa`
+- [`mvsa`](mvsa.md) — bron `.mvsa` (`mvsa svg` / `mvsa pdf` alleen voor `.mvsa`)
 - [`mxl`](mxl.md) — bron `.mxl` (`mxl mvsa` voor MusicXML → `.mvsa`)
 - MSCZ-export vanuit mvsa: [`mvsa mscz`](mvsa.md#mvsa-mscz)
-- Formaat: [`.mscz`](../../formats/mscz.md) · [score naar mvsa](../../formats/mvsa.md#score-naar-mvsa)
+- Formaat: [`.mscz`](../../formats/mscz.md) · [score naar mvsa](../../formats/mvsa.md#score-naar-mvsa) · [mvsa-svg](../../formats/mvsa-svg.md)

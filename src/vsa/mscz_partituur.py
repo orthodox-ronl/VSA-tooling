@@ -424,10 +424,13 @@ def apply_partituur_mscz_conventions(
 
 
 # MuseScore 4 zet vaak ``<eid>`` vóór ``<style>`` — niet alleen ``Text>style``.
+_MUZIEK_CHROME_STYLES = (
+    "title|subtitle|composer|lyricist|translator|arranger|copyright"
+)
 _MUZIEK_HEADER_VBOX_RE = re.compile(
     r"<VBox\b[^>]*>"
     r"(?:(?!</VBox>).)*?"
-    r"<style>\s*(?:title|subtitle|composer|lyricist)\s*</style>"
+    rf"<style>\s*(?:{_MUZIEK_CHROME_STYLES})\s*</style>"
     r"(?:(?!</VBox>).)*?"
     r"</VBox>\s*",
     re.IGNORECASE | re.DOTALL,
@@ -435,7 +438,7 @@ _MUZIEK_HEADER_VBOX_RE = re.compile(
 _MUZIEK_HEADER_TEXT_RE = re.compile(
     r"<Text\b[^>]*>"
     r"(?:(?!</Text>).)*?"
-    r"<style>\s*(?:title|subtitle|composer|lyricist)\s*</style>"
+    rf"<style>\s*(?:{_MUZIEK_CHROME_STYLES})\s*</style>"
     r"(?:(?!</Text>).)*?"
     r"</Text>\s*",
     re.IGNORECASE | re.DOTALL,
@@ -449,7 +452,16 @@ def _strip_header_footer_colophon_for_muziek(mscx: str) -> str:
     # Losse header-Text mocht er nog iets buiten die VBox staan.
     mscx = _MUZIEK_HEADER_TEXT_RE.sub("", mscx)
     mscx = _COLOPHON_VBOX_RE.sub("", mscx)
-    for meta in ("workTitle", "movementTitle", "composer", "lyricist", "subtitle"):
+    for meta in (
+        "workTitle",
+        "movementTitle",
+        "composer",
+        "lyricist",
+        "subtitle",
+        "copyright",
+        "arranger",
+        "translator",
+    ):
         pat = re.compile(rf"<metaTag name=\"{meta}\">.*?</metaTag>\s*", re.DOTALL)
         mscx = pat.sub("", mscx)
     for key in ("oddFooterC", "evenFooterC"):
@@ -468,6 +480,32 @@ def _strip_header_footer_colophon_for_muziek(mscx: str) -> str:
         elif "<Style>" in mscx:
             mscx = mscx.replace("<Style>", f"<Style>{tag}", 1)
     return mscx
+
+
+def strip_mscz_sheet_chrome(path: Path) -> None:
+    """In-place: strip blad-chrome (titel/colofon/footer) for kale SVG.
+
+    Does **not** re-apply recite/Style/partituur-conventions — only removes
+    sheet chrome so MuseScore SVG keeps staves, lyrics, cues, measure numbers.
+    Layoutprofiel ``muziek`` / contract: docs/formats/mvsa-svg.md.
+    """
+    path = Path(path)
+    if not path.is_file() or path.suffix.lower() != ".mscz":
+        raise MsczPartituurError(f"geen .mscz: {path}")
+    with zipfile.ZipFile(path, "r") as zin:
+        names = zin.namelist()
+        mscx_name = next((n for n in names if n.lower().endswith(".mscx")), None)
+        if mscx_name is None:
+            raise MsczPartituurError(f"geen .mscx in {path}")
+        mscx = zin.read(mscx_name).decode("utf-8")
+        other = {n: zin.read(n) for n in names if n != mscx_name}
+    mscx = _strip_header_footer_colophon_for_muziek(mscx)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        for n, data in other.items():
+            zout.writestr(n, data)
+        zout.writestr(mscx_name, mscx.encode("utf-8"))
+    tmp.replace(path)
 
 
 def _fix_ds_al_fine_play_until(mscx: str) -> str:

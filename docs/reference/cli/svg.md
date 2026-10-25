@@ -32,6 +32,9 @@ met [VSA-blokken](@) gebruik je [`vsa process`](process.md) of
 een foutmelding en exitcode `1`. Draai bij twijfel eerst
 [`vsa validate`](validate.md).
 
+Bij sibling-output (default) merget `vsa svg` product-key `svg` in
+`{stam}.vsa.products-meta.json` — zie [products-meta](../../formats/products-meta.md).
+
 ## Argumenten en opties
 
 | Naam                              | Verplicht | Betekenis                                                             | Default                                       | Beperkingen                          |

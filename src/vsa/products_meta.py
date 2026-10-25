@@ -64,35 +64,106 @@ def product_sha256(entry: Any) -> str | None:
     return None
 
 
+def build_product_entry(
+    path: Path,
+    *,
+    generated_at: str | None = None,
+) -> dict[str, str]:
+    """Schema-2 productentry: ``file`` + ``sha256`` + ``generated_at``."""
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(f"productbestand ontbreekt voor meta: {path}")
+    return {
+        "file": path.name,
+        "sha256": sha256_file(path),
+        "generated_at": generated_at or utc_now_iso(),
+    }
+
+
 def build_meta(
     bron: Path,
     products: dict[str, Path],
     *,
     bron_sha256: str | None = None,
     generated_at: str | None = None,
+    product_generated_at: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Build schema-2 meta; each product has ``file`` + ``sha256``."""
+    """Build schema-2 meta; each product has ``file`` + ``sha256`` + ``generated_at``."""
+    stamp = generated_at or utc_now_iso()
     product_entries: dict[str, dict[str, str]] = {}
     for key, path in sorted(products.items()):
-        path = Path(path)
-        if not path.is_file():
-            raise FileNotFoundError(f"productbestand ontbreekt voor meta: {path}")
-        product_entries[key] = {
-            "file": path.name,
-            "sha256": sha256_file(path),
-        }
+        per_key = None
+        if product_generated_at is not None:
+            per_key = product_generated_at.get(key)
+        product_entries[key] = build_product_entry(
+            path, generated_at=per_key or stamp
+        )
     return {
         "schema": SCHEMA_VERSION,
         "bron": bron.name,
         "bron_sha256": bron_sha256 or sha256_file(bron),
-        "generated_at": generated_at or utc_now_iso(),
+        "generated_at": stamp,
         "products": product_entries,
     }
 
 
-def write_meta(bron: Path, products: dict[str, Path]) -> Path:
+def _bron_sha256_matches(meta: dict[str, Any], bron_sha: str) -> bool:
+    stored = meta.get("bron_sha256")
+    return isinstance(stored, str) and stored == bron_sha
+
+
+def write_meta(
+    bron: Path,
+    products: dict[str, Path],
+    *,
+    merge: bool = False,
+    drop_keys: set[str] | None = None,
+    generated_at: str | None = None,
+    product_generated_at: dict[str, str] | None = None,
+) -> Path:
+    """Write schema-2 sidecar.
+
+    ``merge=False`` (default, ``{straat} products``): replace ``products``
+    with exactly the keys in *products*.
+
+    ``merge=True`` (individuele product-subs): keep other product keys when
+    existing meta is schema 2 and ``bron_sha256`` still matches; otherwise
+    write only the keys from this run (no silent mix of old/new bron).
+
+    *drop_keys*: after merge (or on the new set), remove these product keys
+    (bijv. dode ``svg`` na bladreeks ``svg-1``…).
+    """
     dest = meta_path_for(bron)
-    payload = build_meta(bron, products)
+    stamp = generated_at or utc_now_iso()
+    bron_sha = sha256_file(bron)
+    payload = build_meta(
+        bron,
+        products,
+        bron_sha256=bron_sha,
+        generated_at=stamp,
+        product_generated_at=product_generated_at,
+    )
+
+    if merge:
+        existing = load_meta(bron)
+        if (
+            existing is not None
+            and existing.get("schema") == SCHEMA_VERSION
+            and _bron_sha256_matches(existing, bron_sha)
+        ):
+            kept = existing.get("products")
+            if isinstance(kept, dict) and kept:
+                merged = dict(kept)
+                merged.update(payload["products"])
+                payload["products"] = dict(sorted(merged.items()))
+
+    if drop_keys:
+        for key in drop_keys:
+            payload["products"].pop(key, None)
+
+    if not payload["products"]:
+        raise ValueError("products-meta: geen product-keys over na schrijven")
+
     dest.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",

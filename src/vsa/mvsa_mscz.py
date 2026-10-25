@@ -296,11 +296,15 @@ def export_mscz_to_svg(
     trim: bool = True,
     white_background: bool = True,
 ) -> list[Path]:
-    """Convert ``.mscz`` to MuseScore SVG; optionally trim to content height.
+    """Convert ``.mscz`` to kale MuseScore SVG (geen titel/colofon/footer).
 
-    One MuseScore-page → ``out``. Several pages → bladreeks
+    Sheet chrome wordt op een tijdelijke kopie gestript (bron ``.mscz`` blijft
+    ongewijzigd). One MuseScore-page → ``out``. Several pages → bladreeks
     ``out.stem-1.svg`` … ``out.stem-N.svg`` (``out`` itself is then absent).
     """
+    import shutil
+
+    from .mscz_partituur import strip_mscz_sheet_chrome
     from .musescore_cli import list_musescore_svg_pages
     from .svg_trim import SvgTrimError, trim_musescore_svg
 
@@ -312,10 +316,23 @@ def export_mscz_to_svg(
         raise MvsaMsczError(f"Bestand niet gevonden: {mscz}")
     if mscz.suffix.lower() != ".mscz":
         raise MvsaMsczError(f"SVG-export verwacht .mscz, kreeg: {mscz.name}")
+
+    fd, tmp_name = tempfile.mkstemp(suffix=".mscz", prefix="mscz-svg-")
+    os.close(fd)
+    tmp_mscz = Path(tmp_name)
     try:
-        first = convert_with_musescore(mscz, out, musescore=musescore)
-    except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-        raise MvsaMsczError(str(exc)) from exc
+        shutil.copy2(mscz, tmp_mscz)
+        try:
+            strip_mscz_sheet_chrome(tmp_mscz)
+        except MsczPartituurError as exc:
+            raise MvsaMsczError(str(exc)) from exc
+        try:
+            first = convert_with_musescore(tmp_mscz, out, musescore=musescore)
+        except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+            raise MvsaMsczError(str(exc)) from exc
+    finally:
+        tmp_mscz.unlink(missing_ok=True)
+
     pages = list_musescore_svg_pages(out)
     if out.is_file() and not pages:
         written = [out]

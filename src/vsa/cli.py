@@ -298,10 +298,10 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     _add_partituur_style_args(m_mscz)
     m_pdf = mvsa_sub.add_parser(
         "pdf",
-        help="Exporteer .mvsa (of .mscz) naar print-PDF voor zangers.",
+        help="Exporteer .mvsa naar print-PDF voor zangers.",
         description=(
-            "Partituur-PDF via MuseScore. Bron .mvsa: keten mvsa -> mscz -> pdf. "
-            "Bron .mscz: alleen MuseScore-conversie. Vereist MuseScore 4 (of 3)."
+            "Partituur-PDF via MuseScore. Keten: .mvsa -> .mscz -> .pdf. "
+            "Vereist MuseScore 4 (of 3). Bron .mscz: gebruik mscz pdf."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
@@ -309,12 +309,12 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "  mvsa pdf examples\\mvsa\\alleluia-toon-1.mvsa\n"
             "  mvsa pdf lied.mvsa -o generated\\lied.pdf --keep-mscz generated\\lied.mscz\n"
             "  mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv\n"
-            "  mvsa pdf lied.mscz -o lied.pdf"
+            "  mscz pdf lied.mscz -o lied.pdf"
         ),
     )
     m_pdf.add_argument(
         "path",
-        help=".mvsa- of .mscz-bestand, of map met zulke bestanden (recursief).",
+        help=".mvsa-bestand of map met .mvsa-bestanden (recursief).",
     )
     m_pdf.add_argument(
         "-o",
@@ -369,11 +369,12 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     _add_partituur_style_args(m_pdf)
     m_svg = mvsa_sub.add_parser(
         "svg",
-        help="Exporteer .mvsa of .mscz naar partituur-SVG (koormap).",
+        help="Exporteer .mvsa naar partituur-SVG (koormap).",
         description=(
-            "Bron .mvsa: muziek-only SVG via MuseScore (geen titel/colofon), "
-            "daarna viewBox-trim. Bron .mscz: alleen MuseScore → SVG (+ trim); "
-            "Style/fonts in het .mscz blijven behouden. Vereist MuseScore 4."
+            "Bron .mvsa: kale muziek-SVG via MuseScore "
+            "(geen titel/colofon/footer; layout muziek-chrome), "
+            "daarna viewBox-trim. Vereist MuseScore 4. "
+            "Bron .mscz: gebruik mscz svg."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
@@ -381,13 +382,13 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "  mvsa svg examples\\mvsa\\1a-vredeslitanie.mvsa\n"
             "  mvsa svg lied.mvsa -o generated\\lied.mvsa.svg\n"
             "  mvsa svg lied.mvsa --lyrics-font-size 14 --cue-font-size 11\n"
-            "  mvsa svg generated\\lied.mscz -o generated\\lied.svg\n"
+            "  mscz svg generated\\lied.mscz -o generated\\lied.svg\n"
             "  mvsa svg lied.mvsa --section schets1 --keep-mscz generated\\lied.mscz"
         ),
     )
     m_svg.add_argument(
         "path",
-        help=".mvsa- of .mscz-bestand, of map met zulke bestanden (recursief).",
+        help=".mvsa-bestand of map met .mvsa-bestanden (recursief).",
     )
     m_svg.add_argument(
         "-o",
@@ -1275,6 +1276,11 @@ def _cmd_svg(args, config):
             exit_code = 1
             continue
         print(f"SVG geschreven naar: {out}")
+        from .street_products import merge_street_product_meta
+
+        meta = merge_street_product_meta(input_path, {"svg": out})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
@@ -1541,6 +1547,8 @@ def _cmd_musicxml(args, config):
         output_dir = Path(args.output)
         output_dir.mkdir(parents=True, exist_ok=True)
         written = 0
+        from .street_products import merge_street_product_meta
+
         for vsa_file in sorted(input_path.rglob("*.vsa")):
             rel = vsa_file.relative_to(input_path)
             out_file = output_dir / rel.with_suffix(output_suffix)
@@ -1554,6 +1562,9 @@ def _cmd_musicxml(args, config):
             if rc != 0:
                 return rc
             written += 1
+            meta = merge_street_product_meta(vsa_file, {"mxl": out_file})
+            if meta is not None:
+                print(f"Meta: {meta.name}", flush=True)
         for md_file in sorted(input_path.rglob("*.md")):
             rel = md_file.relative_to(input_path)
             out_subdir = output_dir / rel.with_suffix("")
@@ -1579,6 +1590,11 @@ def _cmd_musicxml(args, config):
         )
         if rc == 0:
             print(f"MusicXML geschreven naar: {out_path}")
+            from .street_products import merge_street_product_meta
+
+            meta = merge_street_product_meta(input_path, {"mxl": out_path})
+            if meta is not None:
+                print(f"Meta: {meta.name}", flush=True)
         return rc
 
     if input_path.suffix.lower() in {".md", ".markdown"}:
@@ -1792,6 +1808,18 @@ def _cli_collect_sources(
     except InputPathError as exc:
         print(str(exc), file=sys.stderr)
         return None
+
+
+def _reject_mscz_use_mscz_street(cmd: str, path: Path | str) -> bool:
+    """True = ``.mscz``-bestand geweigerd; stderr wijst naar ``mscz {cmd}``."""
+    p = Path(path)
+    if p.is_file() and p.suffix.lower() == ".mscz":
+        print(
+            f"mvsa {cmd} weigert .mscz; gebruik: mscz {cmd} {p}",
+            file=sys.stderr,
+        )
+        return True
+    return False
 
 
 def _cli_reject_multi_single_opts(
@@ -2303,6 +2331,14 @@ def _cmd_mvsa_score_ir(args) -> int:
         print(f"Geschreven: {out}")
         if mxl_path is not None:
             print(f"MusicXML: {mxl_path}")
+        from .street_products import merge_street_product_meta
+
+        meta_products: dict[str, Path] = {"score-ir": out}
+        if mxl_path is not None:
+            meta_products["from-ir"] = mxl_path
+        meta = merge_street_product_meta(path, meta_products)
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
@@ -2406,6 +2442,12 @@ def _cmd_mvsa_musicxml(args) -> int:
             exit_code = 1
             continue
         print(f"Geschreven: {out}")
+        if suffix == ".mvsa":
+            from .street_products import merge_street_product_meta
+
+            meta = merge_street_product_meta(path, {"mxl": out})
+            if meta is not None:
+                print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
@@ -2461,15 +2503,13 @@ def _cmd_mvsa_mscz(args) -> int:
 
 
 def _cmd_mvsa_pdf(args) -> int:
-    from .mvsa_mscz import (
-        MvsaMsczError,
-        export_mscz_to_pdf,
-        export_mvsa_to_pdf,
-    )
+    from .mvsa_mscz import MvsaMsczError, export_mvsa_to_pdf
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
 
-    files = _cli_collect_sources(args.path, (".mvsa", ".mscz"))
+    if _reject_mscz_use_mscz_street("pdf", args.path):
+        return 1
+    files = _cli_collect_sources(args.path, (".mvsa",))
     if files is None:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mscz", "keep_mxl"):
@@ -2482,48 +2522,20 @@ def _cmd_mvsa_pdf(args) -> int:
             if args.output
             else derived_output_path(path, ".pdf")
         )
-        suffix = path.suffix.lower()
         try:
-            if suffix == ".mscz":
-                if (
-                    args.section
-                    or args.keep_mscz
-                    or args.keep_mxl
-                    or args.layout
-                    or args.bibliotheek_id
-                    or _has_partituur_style_cli(args)
-                ):
-                    print(
-                        "mvsa pdf: --section/--keep-mscz/--keep-mxl/--layout/"
-                        "--bibliotheek-id en Style-opties "
-                        "(systeem-/stafafstand/marges/fonts) "
-                        "gelden alleen bij .mvsa",
-                        file=sys.stderr,
-                    )
-                    exit_code = 1
-                    continue
-                export_mscz_to_pdf(path, out, musescore=musescore)
-            elif suffix == ".mvsa":
-                keep_mscz = Path(args.keep_mscz) if args.keep_mscz else None
-                keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
-                export_mvsa_to_pdf(
-                    path,
-                    out,
-                    section_id=args.section,
-                    musescore=musescore,
-                    keep_mscz=keep_mscz,
-                    keep_mxl=keep_mxl,
-                    layout=args.layout,
-                    bibliotheek_id=args.bibliotheek_id,
-                    **_partituur_style_kwargs(args),
-                )
-            else:
-                print(
-                    f"mvsa pdf verwacht .mvsa of .mscz, kreeg: {path.name}",
-                    file=sys.stderr,
-                )
-                exit_code = 1
-                continue
+            keep_mscz = Path(args.keep_mscz) if args.keep_mscz else None
+            keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
+            export_mvsa_to_pdf(
+                path,
+                out,
+                section_id=args.section,
+                musescore=musescore,
+                keep_mscz=keep_mscz,
+                keep_mxl=keep_mxl,
+                layout=args.layout,
+                bibliotheek_id=args.bibliotheek_id,
+                **_partituur_style_kwargs(args),
+            )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
@@ -2543,15 +2555,22 @@ def _cmd_mvsa_pdf(args) -> int:
             print(f"MSCZ: {args.keep_mscz}")
         if args.keep_mxl:
             print(f"MXL: {args.keep_mxl}")
+        from .street_products import MSCZ_PDF_KEY, merge_street_product_meta
+
+        meta = merge_street_product_meta(path, {MSCZ_PDF_KEY: out})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
 def _cmd_mvsa_svg(args) -> int:
-    from .mvsa_mscz import MvsaMsczError, export_mscz_to_svg, export_mvsa_to_svg
+    from .mvsa_mscz import MvsaMsczError, export_mvsa_to_svg
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
 
-    files = _cli_collect_sources(args.path, (".mvsa", ".mscz"))
+    if _reject_mscz_use_mscz_street("svg", args.path):
+        return 1
+    files = _cli_collect_sources(args.path, (".mvsa",))
     if files is None:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mscz", "keep_mxl"):
@@ -2568,53 +2587,19 @@ def _cmd_mvsa_svg(args) -> int:
         )
         keep_mscz = Path(args.keep_mscz) if args.keep_mscz else None
         keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
-        suffix = path.suffix.lower()
         try:
-            if suffix == ".mscz":
-                if (
-                    args.section
-                    or args.keep_mscz
-                    or args.keep_mxl
-                    or args.bibliotheek_id
-                    or _has_partituur_style_cli(args)
-                ):
-                    print(
-                        "mvsa svg: --section/--keep-mscz/--keep-mxl/"
-                        "--bibliotheek-id en Style-opties "
-                        "(systeem-/stafafstand/marges/fonts) "
-                        "gelden alleen bij .mvsa (bij .mscz staat Style "
-                        "al in het bestand)",
-                        file=sys.stderr,
-                    )
-                    exit_code = 1
-                    continue
-                written = export_mscz_to_svg(
-                    path,
-                    out,
-                    musescore=musescore,
-                    trim=trim,
-                    white_background=white_background,
-                )
-            elif suffix == ".mvsa":
-                written = export_mvsa_to_svg(
-                    path,
-                    out,
-                    section_id=args.section,
-                    musescore=musescore,
-                    keep_mscz=keep_mscz,
-                    keep_mxl=keep_mxl,
-                    bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                    trim=trim,
-                    white_background=white_background,
-                    **_partituur_style_kwargs(args),
-                )
-            else:
-                print(
-                    f"mvsa svg verwacht .mvsa of .mscz, kreeg: {path.name}",
-                    file=sys.stderr,
-                )
-                exit_code = 1
-                continue
+            written = export_mvsa_to_svg(
+                path,
+                out,
+                section_id=args.section,
+                musescore=musescore,
+                keep_mscz=keep_mscz,
+                keep_mxl=keep_mxl,
+                bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                trim=trim,
+                white_background=white_background,
+                **_partituur_style_kwargs(args),
+            )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
@@ -2635,6 +2620,12 @@ def _cmd_mvsa_svg(args) -> int:
             print(f"MSCZ: {keep_mscz}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
+        from .street_products import merge_street_product_meta, svg_meta_products
+
+        products, drop = svg_meta_products(path, written)
+        meta = merge_street_product_meta(path, products, drop_keys=drop or None)
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 

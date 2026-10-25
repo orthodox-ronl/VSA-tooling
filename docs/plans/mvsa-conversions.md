@@ -19,13 +19,13 @@ Rijen = **bron**, kolommen = **doel**. De **diagonaal** is normalisatie: een
 bestand waarin iets is gewijzigd of gemengd geschreven weer naar een gekozen
 canonieke vorm brengen (zelfde formaat).
 
-| Bron ↓ \ Doel →          | `.vsa`                        | `.mvsa`                                          | `.mxl` / `.musicxml`                                                                             | `.mscz`                                                                                                 | `.mp3` / audio         | `.midi` / `.mid`   |
-| ------------------------ | ----------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------ |
-| **`.vsa`**               | **normalize** (waar relevant) | — (niet v0)                                      | `vsa musicxml`                                                                                   | via MXL / templates                                                                                     | `vsa audio`            | — (niet gepland)   |
-| **`.mvsa`**              | —                             | **`normalize`** / **`kuiser`** / **`transpose`** | `mvsa mxl` · `score-ir` · `svg` (koormap)                                                        | **`mscz`** via mxl→MuseScore                                                                            | `mvsa mp3`             | — (niet gepland)   |
-| **`.mxl` / `.musicxml`** | —                             | **`mxl mvsa`**                                   | **normalize** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | MuseScore / `mxl mscz`                                                                                  | `vsa audio`            | — (niet gepland)   |
-| **`.mscz`**              | —                             | **`mscz mvsa`** (via mxl)                        | `mscz mxl`                                                                                       | **normalize** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | `vsa audio` (fallback) | — (niet gepland)   |
-| **`.midi` / `.mid`**     | —                             | —                                                | —                                                                                                | —                                                                                                       | —                      | — (niet gepland)   |
+| Bron ↓ \ Doel →          | `.vsa`                          | `.mvsa`                                               | `.mxl` / `.musicxml`                                                                                   | `.mscz`                                                                                                        | `.mp3` / audio         | `.midi` / `.mid`   |
+| ------------------------ | ------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------ |
+| **`.vsa`**               | validate (geen `vsa normalize`) | — (niet v0)                                           | `vsa musicxml`                                                                                         | via MXL / templates                                                                                            | `vsa audio`            | — (niet gepland)   |
+| **`.mvsa`**              | —                               | **`mvsa normalize`** / **`kuiser`** / **`transpose`** | `mvsa mxl` · `score-ir` · `mvsa svg`                                                                   | **`mvsa mscz`**                                                                                                | `mvsa mp3`             | — (niet gepland)   |
+| **`.mxl` / `.musicxml`** | —                               | **`mxl mvsa`**                                        | **`mxl normalize`** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | `mxl mscz`                                                                                                     | `vsa audio`            | — (niet gepland)   |
+| **`.mscz`**              | —                               | **`mscz mvsa`** (via mxl)                             | `mscz mxl`                                                                                             | **`mscz normalize`** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | `vsa audio` (fallback) | — (niet gepland)   |
+| **`.midi` / `.mid`**     | —                               | —                                                     | —                                                                                                      | —                                                                                                              | —                      | — (niet gepland)   |
 
 **Audio (``.mp3``):** preview-luisteren via MuseScore — zie
 [formats/audio.md](../formats/audio.md). **``.midi``:** **niet gepland**
@@ -116,9 +116,9 @@ Elke conversie-entry leest één brontype:
 | Command             | Bron                                  | Acties (richting)                                                                              |
 | ------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `vsa`               | `.vsa`                                | validate, musicxml, svg, …; later `normalize` waar zinvol                                      |
-| `mvsa`          | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser                          |
+| `mvsa`              | `.mvsa`                               | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser                          |
 | `mxl`               | `.mxl` / `.musicxml`                  | mvsa; mscz; **validate** / **normalize** (playback-checklist)                                  |
-| `mscz`              | `.mscz`                               | mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl); **compare** (t.o.v. verse import)         |
+| `mscz`              | `.mscz`                               | mvsa; mxl (MuseScore); **text** (lyrics via temp-mxl); **compare** (t.o.v. verse import)       |
 | `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz` | platte tekst (referentie voor [`zoektekst`](../formats/zoektekst.md); optioneel `.lyrics.txt`) |
 | `vsa audio`         | `.mxl` / `.vsa` / …                   | preview ``.mp3`` via MuseScore                                                                 |
 
@@ -230,7 +230,7 @@ Top-level console-scripts + `scripts\*.cmd`:
 
 | Command             | Bron               | Acties                                                                        |
 | ------------------- | ------------------ | ----------------------------------------------------------------------------- |
-| `mvsa`          | `.mvsa`            | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser         |
+| `mvsa`              | `.mvsa`            | validate, mxl, mscz, pdf, mp3, ogg, wav, normalize, transpose, kuiser         |
 | `mxl`               | `.mxl`/`.musicxml` | mvsa; mscz; validate; normalize                                               |
 | `mscz`              | `.mscz`            | mvsa; mxl; **text** (lyrics, geen mvsa); **compare**                          |
 | `vsa text`          | meerdere           | platte tekst incl. MusicXML / `.mscz`                                         |

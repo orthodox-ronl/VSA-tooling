@@ -12,13 +12,14 @@ from pathlib import Path
 
 from .derived_path import derived_output_path
 from .input_paths import InputPathError, collect_cli_sources
-from .products_meta import freshness, write_meta
+from .products_meta import freshness, load_meta, write_meta
 
 # Product keys written into meta (stable ids for consumers).
 MVSA_CORE_KEYS = ("mxl", "score-ir", "from-ir")
 MVSA_SVG_KEY = "svg"
 MSCZ_CORE_KEYS = ("mxl",)
 MSCZ_SVG_KEY = "svg"
+MSCZ_PDF_KEY = "pdf"
 VSA_CORE_KEYS = ("mxl", "svg")
 
 
@@ -28,12 +29,74 @@ def _log(msg: str, *, dry_run: bool) -> None:
 
 
 def _assign_svg_products(products: dict[str, Path], written: list[Path]) -> None:
-    """One page → ``svg``; bladreeks → ``svg-1``, ``svg-2``, …"""
+    """One page → ``svg``; bladreeks → ``svg-1``, ``svg-2``, … (geen dode ``svg``)."""
     if len(written) == 1:
         products["svg"] = written[0]
         return
+    # Seed-pad ``*.svg`` bestaat bij bladreeks niet; alleen svg-N behouden.
+    products.pop("svg", None)
     for i, path in enumerate(written, start=1):
         products[f"svg-{i}"] = path
+
+
+def _paths_are_siblings(bron: Path, paths: list[Path]) -> bool:
+    parent = bron.resolve().parent
+    return all(Path(p).resolve().parent == parent for p in paths)
+
+
+def merge_street_product_meta(
+    bron: Path,
+    products: dict[str, Path],
+    *,
+    drop_keys: set[str] | None = None,
+) -> Path | None:
+    """Merge product keys into ``*.products-meta.json`` next to *bron*.
+
+    Alleen keys waarvan het productbestand een sibling van de bron is.
+    Returns the meta path, or ``None`` when nothing was written.
+    """
+    if not products:
+        return None
+    sibling: dict[str, Path] = {}
+    for key, path in products.items():
+        if _paths_are_siblings(bron, [path]):
+            sibling[key] = path
+        else:
+            print(
+                f"{bron.name}: products-meta key '{key}' overgeslagen "
+                "(bestand niet naast de bron; gebruik sibling-output).",
+                file=sys.stderr,
+            )
+    if not sibling:
+        return None
+    return write_meta(bron, sibling, merge=True, drop_keys=drop_keys)
+
+
+def svg_meta_products(
+    bron: Path,
+    written: list[Path],
+) -> tuple[dict[str, Path], set[str]]:
+    """Map SVG-export → meta-keys + keys to drop (bladreeks ↔ enkel)."""
+    products: dict[str, Path] = {}
+    _assign_svg_products(products, written)
+    drop: set[str] = set()
+    existing = load_meta(bron)
+    prev = existing.get("products") if existing else None
+    if len(written) == 1:
+        # Enkele pagina: ``svg``; oude bladreeks-keys weg.
+        if isinstance(prev, dict):
+            for key in prev:
+                if key.startswith("svg-"):
+                    drop.add(key)
+    else:
+        # Bladreeks: geen dode ``svg``; overbodige svg-N weg.
+        drop.add("svg")
+        keep = set(products)
+        if isinstance(prev, dict):
+            for key in prev:
+                if key.startswith("svg-") and key not in keep:
+                    drop.add(key)
+    return products, drop
 
 
 def _need_regen(bron: Path, *, force: bool, required_keys: set[str]) -> bool:

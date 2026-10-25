@@ -20,6 +20,45 @@ ROOT = Path(__file__).resolve().parents[1]
 VREDE = ROOT / "examples" / "mvsa" / "1a-vredeslitanie.mvsa"
 MUSESCORE = find_musescore()
 
+_MINI_MSCX_WITH_CHROME = """<?xml version='1.0'?>
+<museScore version="4.20">
+  <Score>
+    <Style>
+      <showFooter>1</showFooter>
+      <oddFooterC>© Test</oddFooterC>
+    </Style>
+    <metaTag name="workTitle">Titel Hier</metaTag>
+    <metaTag name="copyright">© Test</metaTag>
+    <Staff id="1">
+      <VBox>
+        <height>10</height>
+        <eid>fake-eid-vbox</eid>
+        <Text>
+          <eid>fake-eid-title</eid>
+          <style>title</style>
+          <text>Titel Hier</text>
+          </Text>
+        </VBox>
+      <Measure>
+        <voice>
+          <Rest>
+            <durationType>measure</durationType>
+            <duration>1/1</duration>
+            </Rest>
+          </voice>
+        </Measure>
+      </Staff>
+    </Score>
+  </museScore>
+"""
+
+
+def _write_mini_mscz(path: Path, mscx: str = _MINI_MSCX_WITH_CHROME) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr(f"{path.stem}.mscx", mscx)
+    return path
+
 
 def test_resolve_single_svg_page_folds_to_dest(tmp_path: Path) -> None:
     dest = tmp_path / "lied.svg"
@@ -45,8 +84,7 @@ def test_resolve_multi_svg_pages_keeps_bladreeks(tmp_path: Path) -> None:
 def test_export_mscz_to_svg_trims_bladreeks(tmp_path: Path) -> None:
     from vsa.mvsa_mscz import export_mscz_to_svg
 
-    mscz = tmp_path / "lied.mscz"
-    mscz.write_bytes(b"PK\x03\x04fake")
+    mscz = _write_mini_mscz(tmp_path / "lied.mscz")
     out = tmp_path / "lied.svg"
     page_svg = (
         '<?xml version="1.0"?>\n'
@@ -87,11 +125,11 @@ def test_export_svg_without_musescore_raises(tmp_path: Path) -> None:
 
 
 def test_export_mscz_to_svg_passes_through(tmp_path: Path) -> None:
-    """Bestaand .mscz → SVG (Style/fonts blijven in het .mscz)."""
+    """Bestaand .mscz → SVG; bronbestand blijft ongewijzigd."""
     from vsa.mvsa_mscz import export_mscz_to_svg
 
-    mscz = tmp_path / "lied.mscz"
-    mscz.write_bytes(b"PK\x03\x04fake")
+    mscz = _write_mini_mscz(tmp_path / "lied.mscz")
+    before = mscz.read_bytes()
     out = tmp_path / "lied.svg"
     fake_svg = (
         '<?xml version="1.0"?>\n'
@@ -105,6 +143,43 @@ def test_export_mscz_to_svg_passes_through(tmp_path: Path) -> None:
     with patch("vsa.mvsa_mscz.convert_with_musescore", side_effect=_fake_convert):
         export_mscz_to_svg(mscz, out, trim=False)
     assert out.read_text(encoding="utf-8") == fake_svg
+    assert mscz.read_bytes() == before
+
+
+def test_export_mscz_to_svg_strips_chrome_before_convert(tmp_path: Path) -> None:
+    """Kale SVG: MuseScore krijgt een kopie zonder titel/copyright; bron intact."""
+    from vsa.mvsa_mscz import export_mscz_to_svg
+
+    mscz = _write_mini_mscz(tmp_path / "lied.mscz")
+    before = mscz.read_bytes()
+    out = tmp_path / "lied.svg"
+    seen: dict[str, str] = {}
+
+    def _fake_convert(src, dest, **_kwargs):
+        src = Path(src)
+        with zipfile.ZipFile(src) as z:
+            mscx_name = next(n for n in z.namelist() if n.lower().endswith(".mscx"))
+            body = z.read(mscx_name).decode("utf-8")
+        seen["body"] = body
+        Path(dest).write_text(
+            '<?xml version="1.0"?>\n'
+            '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" '
+            'viewBox="0 0 10 10"></svg>\n',
+            encoding="utf-8",
+        )
+
+    with patch("vsa.mvsa_mscz.convert_with_musescore", side_effect=_fake_convert):
+        export_mscz_to_svg(mscz, out, trim=False)
+
+    assert "Titel Hier" not in seen["body"]
+    assert "<style>title</style>" not in seen["body"]
+    assert "© Test" not in seen["body"]
+    assert "<showFooter>0</showFooter>" in seen["body"]
+    assert mscz.read_bytes() == before
+    with zipfile.ZipFile(mscz) as z:
+        bron = z.read("lied.mscx").decode("utf-8")
+    assert "Titel Hier" in bron
+    assert "© Test" in bron
 
 
 def test_normalize_includes_muziek() -> None:

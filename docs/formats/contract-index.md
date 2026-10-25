@@ -47,44 +47,50 @@ Product = afgeleid bestand dat de consumer (o.a. bibliotheek) nodig heeft.
 Straat-CLI’s (`vsa` / `mvsa` / `mscz` / `manual`) en `products` zijn het
 uitrolpad; zie [straat-CLIs (plan)](../plans/straat-clis.md).
 
-| Straat           | Product / actie          | Contract (hub + id)                                 | CLI nu / doel                                                                                          |
-| ---------------- | ------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **mvsa**         | Coria-`.mxl`             | checklists M* + K*                                  | `mvsa mxl` / `mvsa musicxml`                                                                           |
-| **mvsa**         | Score-IR + from-ir       | partituur-ir / score-ir; S8 → osmd-s8-recite        | `mvsa score-ir [--musicxml]`                                                                           |
-| **mvsa**         | scherm/blad-SVG          | leesbaarheid + layout `muziek`                      | `mvsa svg`                                                                                             |
-| **mvsa**         | bron-PDF                 | checklists P* + layout `partituur`                  | `mvsa pdf`                                                                                             |
-| **mvsa**         | audio / lyrics           | audio.md / zoektekst + `vsa text`                   | `mvsa mp3` · text-export                                                                               |
-| **mvsa**         | normalize                | mvsa-normalize man-page (canonieke spelling)        | `mvsa normalize`                                                                                       |
-| **mvsa**         | import (→ `.mvsa`)       | mvsa-conversions; werkbank-bewerkvorm               | **`mvsa import`** (= `mscz mvsa` / `mxl mvsa`)                                                         |
-| **mscz**         | Coria-`.mxl`             | checklists M*                                       | `mscz mxl`                                                                                             |
-| **mscz**         | scherm-SVG               | leesbaarheid + `muziek` (via `mvsa svg` op `.mscz`) | `mvsa svg` → doel: `mscz svg`                                                                          |
-| **mscz**         | bron-PDF                 | P* + `partituur`                                    | `mvsa pdf` op `.mscz` → doel: `mscz pdf`                                                               |
-| **mscz**         | normalize                | leesbaarheid + layout `partituur` + S*              | nu: bibliotheek `layout` / tooling layout → doel: `mscz normalize`                                     |
-| **mscz**         | import (→ `.mscz`)       | leesbaarheid / S*                                   | **`mscz import`** (= `mvsa mscz` / `mxl mscz`)                                                         |
-| **vsa**          | Coria-`.mxl`             | M* (mono waar van toepassing) + rendering playback  | `vsa products` (syllabify + finalize) · `vsa musicxml` ([`--syllabify`](../reference/cli/musicxml.md)) |
-| **vsa**          | scherm-SVG               | vsa-svg / native renderer                           | `vsa svg`                                                                                              |
-| **vsa**          | bron-PDF                 | P* waar van toepassing                              | `vsa pdf`                                                                                              |
-| **vsa**          | audio / lyrics           | audio.md / text                                     | `vsa audio` / `vsa text`                                                                               |
-| **vsa**          | normalize                | specification VSA (canonieke notatie)               | expliciet maken als `vsa normalize` waar nodig                                                         |
-| **manual**       | geen auto-`products`     | consumer: `manueel`/`manual`-flag                   | geen stille regen                                                                                      |
-| **manual**       | format-normalize SVG/PDF | **nog geen** hub — pas CLI ná contract              | uitgesteld                                                                                             |
-| **mxl** (format) | normalize playback       | M*                                                  | `mxl normalize`                                                                                        |
-| **mxl**          | → mvsa / mscz            | mvsa-conversions + S*/M*                            | `mxl mvsa` / `mxl mscz`                                                                                |
+| Straat           | Product / actie          | Contract (hub + id)                                 | CLI nu / doel                                                                                                      |
+| ---------------- | ------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **mvsa**         | Coria-`.mxl`             | checklists M* + K*                                  | `mvsa mxl` / `mvsa musicxml`                                                                                       |
+| **mvsa**         | Score-IR + from-ir       | partituur-ir / score-ir; S8 → osmd-s8-recite        | `mvsa score-ir [--musicxml]`                                                                                       |
+| **mvsa**         | scherm/blad-SVG          | leesbaarheid + layout `muziek`                      | `mvsa svg`                                                                                                         |
+| **mvsa**         | bron-PDF                 | checklists P* + layout `partituur`                  | `mvsa pdf`                                                                                                         |
+| **mvsa**         | audio / lyrics           | audio.md / zoektekst + `vsa text`                   | `mvsa mp3` · text-export                                                                                           |
+| **mvsa**         | normalize                | mvsa-normalize man-page (canonieke spelling)        | `mvsa normalize`                                                                                                   |
+| **mvsa**         | import (→ `.mvsa`)       | mvsa-conversions; werkbank-bewerkvorm               | **`mvsa import`** (= `mscz mvsa` / `mxl mvsa`)                                                                     |
+| **mscz**         | Coria-`.mxl`             | checklists M*                                       | `mscz mxl`                                                                                                         |
+| **mscz**         | scherm-SVG               | leesbaarheid + layout `muziek` (kale SVG)           | `mscz svg` (`.mscz` geweigerd bij `mvsa svg`)                                                                      |
+| **mscz**         | bron-PDF                 | P* + `partituur`                                    | `mscz pdf` (`.mscz` geweigerd bij `mvsa pdf`)                                                                      |
+| **mscz**         | normalize                | leesbaarheid + layout `partituur` + S*              | `mscz normalize` (`--layout partituur`/`muziek`/`plain`)                                                           |
+| **mscz**         | import (→ `.mscz`)       | leesbaarheid / S*                                   | **`mscz import`** (= `mvsa mscz` / `mxl mscz`)                                                                     |
+| **mscz**         | `products` (bundel)      | products-meta + M* + kale SVG                       | `mscz products` (intern = mxl + svg + …)                                                                           |
+| **vsa**          | Coria-`.mxl`             | M* (mono waar van toepassing) + rendering playback  | `vsa products` (syllabify + finalize) · `vsa musicxml` ([`--syllabify`](../reference/cli/musicxml.md))             |
+| **vsa**          | scherm-SVG               | vsa-svg / native renderer                           | `vsa svg`                                                                                                          |
+| **vsa**          | bron-PDF                 | P* waar van toepassing                              | `vsa pdf`                                                                                                          |
+| **vsa**          | audio / lyrics           | audio.md / text                                     | `vsa audio` / `vsa text`                                                                                           |
+| **vsa**          | normalize                | specification VSA (canonieke notatie)               | **n.v.t.** — geen `vsa normalize`; canonieke `.vsa` via authoring + [`vsa validate`](../reference/cli/validate.md) |
+| **manual**       | geen auto-`products`     | consumer: `manueel`/`manual`-flag                   | geen stille regen                                                                                                  |
+| **manual**       | format-normalize SVG/PDF | **nog geen** hub — pas CLI ná contract              | uitgesteld                                                                                                         |
+| **mxl** (format) | normalize playback       | M*                                                  | `mxl normalize`                                                                                                    |
+| **mxl**          | → mvsa / mscz            | mvsa-conversions + S*/M*                            | `mxl mvsa` / `mxl mscz`                                                                                            |
 
 ## Sidecar-meta (herkomst / versheid)
 
-Canonieke hub: **[products-meta.md](products-meta.md)** (schema **2**
-doelbeeld: bron-hash + productbestanden met **inhouds-hashes**;
-invariante “\(H_A\) uit \(H_B\)” blijft waar of meta is stale).
+Canonieke hub: **[products-meta.md](products-meta.md)** (schema **2**:
+bron-hash + productbestanden met **inhouds-hashes** én per product
+`generated_at`; invariante “\(H_A\) uit \(H_B\)” blijft waar of meta is
+stale). Individuele product-subs mergen keys; zie fase 7 in
+[straat-CLIs](../plans/straat-clis.md).
 
 Sibling `{stam}.{bron}.products-meta.json`. **Schrijver:** tooling
 street-`products` (niet bibliotheek). Geschreven voor:
 
-| CLI             | Kernproducten (meta-keys)                                            |
-| --------------- | -------------------------------------------------------------------- |
-| `mvsa products` | `mxl`, `score-ir`, `from-ir` (+ `svg` / `svg-N` tenzij `--skip-svg`) |
-| `mscz products` | `mxl` (+ `svg` / `svg-N` tenzij `--skip-svg`)                        |
-| `vsa products`  | `mxl`, `svg`                                                         |
+| CLI                               | Kernproducten (meta-keys)                                                    |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `mvsa products`                   | `mxl`, `score-ir`, `from-ir` (+ `svg` / `svg-N` tenzij `--skip-svg`)         |
+| `mvsa mxl`/`svg`/`pdf`/`score-ir` | merge van `mxl` / `svg`… / `pdf` / `score-ir` (+ `from-ir` bij `--musicxml`) |
+| `mscz products`                   | `mxl` (+ `svg` / `svg-N` tenzij `--skip-svg`)                                |
+| `mscz mxl`/`svg`/`pdf`            | merge van `mxl` / `svg`… / `pdf` in dezelfde sidecar                         |
+| `vsa products`                    | `mxl`, `svg`                                                                 |
+| `vsa musicxml` / `vsa svg`        | merge van `mxl` / `svg` (bron `.vsa`, sibling-output)                        |
 
 Flags: `--force`, `--dry-run`. Geen tweede inhoudsnorm (geen M*/S* in
 meta) — alleen herkomst/versheid. In-file bibliotheek-stamps zijn geen

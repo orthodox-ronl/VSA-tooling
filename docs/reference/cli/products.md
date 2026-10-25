@@ -33,6 +33,10 @@ Voor elke `.vsa` onder `path` (bestand of map, recursief):
 **SVG** komt uit de **ongewijzigde** bron (geen syllabify), via dezelfde
 native renderer als [`vsa svg`](svg.md).
 
+Losse product-subs mergen dezelfde sidecar: [`vsa musicxml`](musicxml.md)
+(key `mxl`) en [`vsa svg`](svg.md) (key `svg`), bij sibling-output naast
+de `.vsa`.
+
 Slaat over als de meta-hash van de bron nog klopt en de productbestanden
 er zijn. `--force` regenereert altijd.
 

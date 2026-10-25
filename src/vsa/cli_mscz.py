@@ -1,7 +1,7 @@
 """Top-level ``mscz`` CLI (bron: ``.mscz``).
 
-Acties: mvsa (score → werkbank); import (.mvsa/.mxl → .mscz); mxl; text;
-compare (score ↔ ``.mvsa``).
+Acties: mvsa (score → werkbank); import (.mvsa/.mxl → .mscz); mxl; svg; pdf;
+normalize; text; compare (score ↔ ``.mvsa``); products.
 Conventie: ``mscz {doeltype}`` of ``mscz import`` — zie
 docs/plans/mvsa-conversions.md · docs/formats/contract-index.md.
 """
@@ -43,6 +43,12 @@ def main(argv: list[str] | None = None) -> int:
         )
     if ns.mscz_command == "mxl":
         return _cmd_mscz_to_mxl(ns)
+    if ns.mscz_command == "svg":
+        return _cmd_mscz_svg(ns)
+    if ns.mscz_command == "pdf":
+        return _cmd_mscz_pdf(ns)
+    if ns.mscz_command == "normalize":
+        return _cmd_mscz_normalize(ns)
     if ns.mscz_command == "text":
         return _cmd_mscz_text(ns)
     if ns.mscz_command == "compare":
@@ -88,6 +94,13 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Coria-.mxl (+ SVG) + products-meta.json.\n"
             "  mxl PATH [-o OUT] [--musescore PATH]\n"
             "      Exporteer naar .mxl via MuseScore.\n"
+            "  svg PATH [-o OUT] [--musescore PATH] [--no-trim] [--transparent]\n"
+            "      Kale muziek-SVG (chrome-strip op tijdelijke kopie).\n"
+            "  pdf PATH [-o OUT] [--musescore PATH]\n"
+            "      Print-PDF voor zangers (MuseScore).\n"
+            "  normalize PATH [-o OUT] [--layout PROFILE] [--bibliotheek-id ID]\n"
+            "      Leesbaarheid + layoutprofiel op bestaand .mscz "
+            "(default partituur).\n"
             "  text PATH [-o OUT] [--musescore PATH]\n"
             "      Platte gezongen tekst (via temp-.mxl; geen .mvsa).\n"
             "  compare SCORE MVSA [--musescore PATH] [--pitch …]\n"
@@ -103,6 +116,9 @@ def _build_parser() -> argparse.ArgumentParser:
             "  mscz mvsa lied.mscz\n"
             "  mscz import lied.mvsa\n"
             "  mscz mxl lied.mscz -o lied.mxl\n"
+            "  mscz svg lied.mscz -o lied.svg\n"
+            "  mscz pdf lied.mscz -o lied.pdf\n"
+            "  mscz normalize lied.mscz --layout partituur\n"
             "  mscz text lied.mscz -o lied.lyrics.txt\n"
             "  mscz compare lied.mscz lied.mscz.mvsa\n"
             "\n"
@@ -112,7 +128,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mscz_command",
         required=True,
-        metavar="{mvsa,import,mxl,text,compare,products}",
+        metavar="{mvsa,import,mxl,svg,pdf,normalize,text,compare,products}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -132,6 +148,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     from .cli import _add_partituur_style_args
     from .cli_import import add_mscz_import_parser
+    from .mscz_layout import MSCZ_LAYOUT_PROFILES
     from .street_products import add_products_parser
 
     add_mscz_import_parser(sub, add_style_args=_add_partituur_style_args)
@@ -160,6 +177,142 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+
+    svg = sub.add_parser(
+        "svg",
+        help="Exporteer .mscz naar kale muziek-SVG (koormap).",
+        description=(
+            "Kale muziek-SVG via MuseScore: blad-chrome op tijdelijke kopie "
+            "gestript (bron-.mscz ongewijzigd), daarna viewBox-trim. "
+            "Vereist MuseScore 4. Cross-street: niet via mvsa svg."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  mscz svg lied.mscz\n"
+            "  mscz svg lied.mscz -o generated\\lied.svg\n"
+            "  mscz svg lied.mscz --transparent\n"
+            "  mscz svg map-met-mscz\\\n"
+        ),
+    )
+    svg.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+    )
+    svg.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help=(
+            "Uitvoer-.svg (default: sibling <bronnaam>.svg). "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+    svg.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto).",
+    )
+    svg.add_argument(
+        "--no-trim",
+        action="store_true",
+        help="Laat MuseScore-A4-SVG ongewijzigd (geen viewBox-trim).",
+    )
+    svg.add_argument(
+        "--transparent",
+        action="store_true",
+        help=(
+            "Geen witte achtergrond na trim (transparant). "
+            "Default: witte rechthoek achter de notatie."
+        ),
+    )
+
+    pdf = sub.add_parser(
+        "pdf",
+        help="Exporteer .mscz naar print-PDF voor zangers.",
+        description=(
+            "Print-PDF via MuseScore CLI (partituur zoals in het .mscz). "
+            "Vereist MuseScore 4 (of 3). Cross-street: niet via mvsa pdf."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  mscz pdf lied.mscz\n"
+            "  mscz pdf lied.mscz -o generated\\lied.pdf\n"
+            "  mscz pdf map-met-mscz\\\n"
+        ),
+    )
+    pdf.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+    )
+    pdf.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help=(
+            "Uitvoer-.pdf (default: sibling <bronnaam>.pdf). "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+    pdf.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto).",
+    )
+
+    normalize = sub.add_parser(
+        "normalize",
+        help="Pas layoutprofiel/leesbaarheid toe op bestaand .mscz.",
+        description=(
+            "Past een MSCZ-layoutprofiel toe op een bestaand .mscz "
+            "(checklist S* + leesbaarheid). Default: partituur. "
+            "Geen MuseScore-CLI nodig. Zie docs/formats/mscz-leesbaarheid.md."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  mscz normalize lied.mscz\n"
+            "  mscz normalize lied.mscz -o generated\\lied.partituur.mscz\n"
+            "  mscz normalize lied.mscz --layout muziek\n"
+            "  mscz normalize lied.mscz --layout partituur --compact\n"
+            "  mscz normalize lied.mscz --bibliotheek-id zangstuk/var/uv\n"
+        ),
+    )
+    normalize.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+    )
+    normalize.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help=(
+            "Uitvoer-.mscz (default: overschrijf elke bron). "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+    normalize.add_argument(
+        "--layout",
+        metavar="PROFILE",
+        default=None,
+        choices=list(MSCZ_LAYOUT_PROFILES),
+        help=(
+            "MSCZ-layoutprofiel: partituur (default; A4/leesbaarheid/colofon), "
+            "muziek (zelfde zonder titel/colofon), of plain (geen nabewerking)."
+        ),
+    )
+    normalize.add_argument(
+        "--bibliotheek-id",
+        metavar="ID",
+        default=None,
+        dest="bibliotheek_id",
+        help=(
+            "Expliciete bibliotheek-id voor colofon (profiel partituur). "
+            "Consumer bepaalt de id."
+        ),
+    )
+    _add_partituur_style_args(normalize)
 
     text = sub.add_parser(
         "text",
@@ -272,6 +425,7 @@ def _cmd_mscz_compare(ns: argparse.Namespace) -> int:
 def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .musicxml_playback_normalize import export_mscz_to_playback_mxl
+    from .street_products import MSCZ_CORE_KEYS, merge_street_product_meta
 
     files = _collect(ns.path)
     if files is None:
@@ -293,6 +447,122 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
             exit_code = 1
             continue
         print(f"Geschreven: {out}")
+        meta = merge_street_product_meta(path, {MSCZ_CORE_KEYS[0]: out})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
+    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
+    from .mvsa_mscz import MvsaMsczError, export_mscz_to_svg
+    from .street_products import merge_street_product_meta, svg_meta_products
+
+    files = _collect(ns.path)
+    if files is None:
+        return 1
+    if _reject_multi_output(files, ns.output):
+        return 1
+    musescore = Path(ns.musescore) if ns.musescore else None
+    trim = not bool(ns.no_trim)
+    white_background = not bool(ns.transparent)
+    exit_code = 0
+    for path in files:
+        out = Path(ns.output) if ns.output else derived_output_path(path, ".svg")
+        try:
+            written = export_mscz_to_svg(
+                path,
+                out,
+                musescore=musescore,
+                trim=trim,
+                white_background=white_background,
+            )
+        except (MvsaMsczError, MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        for written_path in written:
+            print(f"Geschreven: {written_path}")
+        products, drop = svg_meta_products(path, written)
+        meta = merge_street_product_meta(path, products, drop_keys=drop or None)
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
+    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
+    from .mvsa_mscz import MvsaMsczError, export_mscz_to_pdf
+    from .street_products import MSCZ_PDF_KEY, merge_street_product_meta
+
+    files = _collect(ns.path)
+    if files is None:
+        return 1
+    if _reject_multi_output(files, ns.output):
+        return 1
+    musescore = Path(ns.musescore) if ns.musescore else None
+    exit_code = 0
+    for path in files:
+        out = Path(ns.output) if ns.output else derived_output_path(path, ".pdf")
+        try:
+            export_mscz_to_pdf(path, out, musescore=musescore)
+        except (MvsaMsczError, MuseScoreNotFoundError, MuseScoreConvertError) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {out}")
+        meta = merge_street_product_meta(path, {MSCZ_PDF_KEY: out})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mscz_normalize(ns: argparse.Namespace) -> int:
+    from .cli_import import _partituur_style_kwargs
+    from .mscz_layout import MsczLayoutError, normalize_mscz_path
+    from .mscz_partituur import (
+        MsczPartituurError,
+        build_partituur_style_overrides,
+    )
+
+    files = _collect(ns.path)
+    if files is None:
+        return 1
+    if _reject_multi_output(files, ns.output):
+        return 1
+    try:
+        style_overrides = build_partituur_style_overrides(**_partituur_style_kwargs(ns))
+    except MsczPartituurError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    exit_code = 0
+    for path in files:
+        out = Path(ns.output) if ns.output else None
+        try:
+            written, profile = normalize_mscz_path(
+                path,
+                out,
+                layout=ns.layout,
+                bibliotheek_id=ns.bibliotheek_id,
+                style_overrides=style_overrides or None,
+            )
+        except (MsczLayoutError, MsczPartituurError) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written} (layout {profile})")
     return exit_code
 
 

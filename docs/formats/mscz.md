@@ -10,10 +10,12 @@ layoutprofielen).
 
 | Onderwerp             | Waar                                                                                                                       |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) (partituur-mxl → MuseScore)                                          |
-| Print-PDF (zangers)   | [`mvsa pdf`](../reference/cli/mvsa.md#mvsa-pdf) (via MuseScore; ook vanaf `.mscz`)                                     |
+| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) (partituur-mxl → MuseScore)                                              |
+| Print-PDF (zangers)   | [`mscz pdf`](../reference/cli/mscz.md) (bron `.mscz`); vanuit `.mvsa`: [`mvsa pdf`](../reference/cli/mvsa.md#mvsa-pdf)     |
+| Kale muziek-SVG       | [`mscz svg`](../reference/cli/mscz.md); vanuit `.mvsa`: [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                    |
+| Normalize (layout)    | [`mscz normalize`](../reference/cli/mscz.md) — zelfde profielen als `--layout` hieronder                                   |
 | Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak                                       |
-| Import → `.mvsa`      | [`mscz mvsa`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; default `ag-vsa` = ankers)    |
+| Import → `.mvsa`      | [`mscz mvsa`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; default `ag-vsa` = ankers)      |
 | → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                                                     |
 | Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)                                           |
 | Score ↔ `.mvsa`       | [`mscz compare`](../reference/cli/mscz.md#mscz-compare) (t.o.v. verse import; lyrics, toonhoogte, duur-info, import-gaten) |
@@ -108,14 +110,17 @@ fallback.
 ## Typische commando’s
 
 ```cmd
-mscz mvsa generated\alleluia.mscz
-mscz mvsa generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
-mvsa validate generated\from-mscz.mvsa
-mscz mxl generated\alleluia.mscz -o generated\from-mscz.mxl
-mscz text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
-mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\mscz.cmd mvsa generated\alleluia.mscz
+scripts\mscz.cmd mvsa generated\alleluia.mscz --pitch a-g -o generated\from-mscz.ag.mvsa
+scripts\mvsa.cmd validate generated\from-mscz.mvsa
+scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\from-mscz.mxl
+scripts\mscz.cmd svg generated\alleluia.mscz -o generated\alleluia.svg
+scripts\mscz.cmd pdf generated\alleluia.mscz -o generated\alleluia.pdf
+scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
+scripts\mscz.cmd text generated\alleluia.mscz -o generated\alleluia.mscz.lyrics.txt
+scripts\mvsa.cmd mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
 ```
-Via repo-script: `scripts\mscz.cmd …`
 
 Vereist MuseScore 4 (of 3) lokaal, tenzij je alleen `.mxl` gebruikt.
 

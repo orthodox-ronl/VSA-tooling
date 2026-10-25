@@ -7,8 +7,9 @@ docs/guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer.
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Mapping
 
 from .mscz_partituur import MsczPartituurError, apply_partituur_mscz_conventions
 
@@ -94,6 +95,50 @@ def apply_mscz_layout_profile(
     return profile
 
 
+def normalize_mscz_path(
+    src: Path,
+    dest: Path | None = None,
+    *,
+    layout: str | None = None,
+    bibliotheek_id: str | None = None,
+    style_overrides: Mapping[str, str] | None = None,
+) -> tuple[Path, str]:
+    """Apply a layout profile to an existing ``.mscz`` (street ``mscz normalize``).
+
+    Writes *dest* (default: overwrite *src*). When *dest* differs from *src*,
+    copies the bron first, then applies the profile on the copy.
+    Returns ``(written_path, profile_id)``.
+    """
+    src = Path(src)
+    if not src.is_file():
+        raise MsczLayoutError(f"Bestand niet gevonden: {src}")
+    if src.suffix.lower() != ".mscz":
+        raise MsczLayoutError(f"normalize verwacht .mscz, kreeg: {src.name}")
+
+    profile = normalize_mscz_layout(layout)
+    if style_overrides and profile == "plain":
+        raise MsczLayoutError(
+            "Style-opties (systeem-/stafafstand / pagina-marges / fonts / "
+            "measure-spacing) gelden niet bij --layout plain "
+            "(geen Style-nabewerking)"
+        )
+
+    out = Path(dest) if dest is not None else src
+    if out.suffix.lower() != ".mscz":
+        out = out.with_suffix(".mscz")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.resolve() != src.resolve():
+        shutil.copy2(src, out)
+
+    apply_mscz_layout_profile(
+        out,
+        layout=profile,
+        bibliotheek_id=bibliotheek_id,
+        style_overrides=dict(style_overrides) if style_overrides else None,
+    )
+    return out, profile
+
+
 __all__ = [
     "DEFAULT_MSCZ_LAYOUT",
     "MSCZ_LAYOUT_DESCRIPTIONS",
@@ -103,4 +148,5 @@ __all__ = [
     "MsczPartituurError",
     "apply_mscz_layout_profile",
     "normalize_mscz_layout",
+    "normalize_mscz_path",
 ]

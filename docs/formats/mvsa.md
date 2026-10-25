@@ -70,20 +70,21 @@ partituur-PDF) **hetzelfde nummer**.
 ## Typische commando’s
 
 ```cmd
-mvsa validate examples\mvsa
-mvsa mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
-mvsa mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
-mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
-mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
-mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
-mxl mvsa generated\alleluia.mxl
-mxl mvsa generated\alleluia.mxl --pitch doremi -o generated\alleluia.doremi.mvsa
-mscz mvsa generated\alleluia.mscz -o generated\from-mscz.mvsa
-mvsa validate generated\alleluia.mxl.mvsa
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+scripts\mvsa.cmd validate examples\mvsa
+scripts\mvsa.cmd mxl examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mxl
+scripts\mvsa.cmd mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mscz
+scripts\mvsa.cmd pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf --keep-mscz generated\alleluia.mscz
+scripts\mvsa.cmd svg examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.mvsa.svg
+scripts\mvsa.cmd normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
+scripts\mvsa.cmd transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4 -o generated\alleluia.in-F.mvsa
+scripts\mxl.cmd mvsa generated\alleluia.mxl
+scripts\mxl.cmd normalize generated\alleluia.mxl -o generated\alleluia.norm.mxl
+scripts\mscz.cmd mvsa generated\alleluia.mscz -o generated\from-mscz.mvsa
+scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
+scripts\mvsa.cmd validate generated\alleluia.mxl.mvsa
 vsa text examples\mvsa\alleluia-toon-8.mvsa
 ```
-
-Via repo-script: `scripts\mvsa.cmd …`
 
 ## Zie ook
 

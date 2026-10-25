@@ -40,28 +40,47 @@ Voorbeelden: `lied.vsa.products-meta.json`, `lied.mvsa.products-meta.json`,
   "products": {
     "mxl": {
       "file": "lied.mvsa.mxl",
-      "sha256": "<hex sha256 van dat productbestand>"
+      "sha256": "<hex sha256 van dat productbestand>",
+      "generated_at": "<UTC ISO-8601 wanneer dit productbestand geschreven werd>"
     },
     "svg-1": {
       "file": "lied.mvsa-1.svg",
-      "sha256": "<hex>"
+      "sha256": "<hex>",
+      "generated_at": "<UTC ISO-8601>"
     }
   }
 }
 ```
 
-| Veld                      | Verplicht | Betekenis                                                                 |
-| ------------------------- | --------- | ------------------------------------------------------------------------- |
-| `schema`                  | Ja        | Exact `2` voor dit contract.                                              |
-| `bron`                    | Ja        | Bestandsnaam van de bron (sibling-naam, geen pad).                        |
-| `bron_sha256`             | Ja        | SHA-256 (hex, lowercase) van de **huidige** bronbytes bij schrijven.      |
-| `generated_at`            | Ja        | UTC-tijdstip van deze meta-schrijfactie (informatief).                    |
-| `products`                | Ja        | Object: product-key → `{ "file", "sha256" }`. Minimaal één key.           |
-| `products.*.file`         | Ja        | Sibling-bestandsnaam (geen pad).                                          |
-| `products.*.sha256`       | Ja        | SHA-256 (hex, lowercase) van de bytes van dat sibling-bestand.            |
+| Veld                         | Verplicht | Betekenis                                                                 |
+| ---------------------------- | --------- | ------------------------------------------------------------------------- |
+| `schema`                     | Ja        | Exact `2` voor dit contract.                                              |
+| `bron`                       | Ja        | Bestandsnaam van de bron (sibling-naam, geen pad).                        |
+| `bron_sha256`                | Ja        | SHA-256 (hex, lowercase) van de **huidige** bronbytes bij schrijven.      |
+| `generated_at`               | Ja        | UTC-tijdstip van deze meta-schrijfactie (informatief).                    |
+| `products`                   | Ja        | Object: product-key → productentry. Minimaal één key.                     |
+| `products.*.file`            | Ja        | Sibling-bestandsnaam (geen pad).                                          |
+| `products.*.sha256`          | Ja        | SHA-256 (hex, lowercase) van de bytes van dat sibling-bestand.            |
+| `products.*.generated_at`    | Ja        | UTC-tijdstip waarop **dit** productbestand geschreven werd (informatief). |
 
 Product-keys per straat: zie [contract-index](contract-index.md) (tabel
 `mvsa`/`mscz`/`vsa products`). Bladreeks-SVG: `svg` of `svg-1`, `svg-2`, …
+
+### Wie schrijft welke keys
+
+- **`{straat} products`** — schrijft alle standaardkeys van die straat
+  (volledige set) + top-level `generated_at`.
+- **Individuele product-subs** (bijv. `mscz svg`, `mscz mxl`) — mogen de
+  sidecar **mergen**: bestaande keys van andere producten behouden als
+  `bron_sha256` nog klopt; bijgewerkte keys krijgen nieuwe `file` /
+  `sha256` / `generated_at`. Wijkt de bron-hash af → treat as stale /
+  herschrijf alleen de keys van deze run (of eis `--force` / volle
+  `products`); geen stille mix van oude en nieuwe bron.
+
+Nieuwe schrijfacties zetten `products.*.generated_at`. Bestaande
+schema-2-meta zonder per-product-tijdstip mag `freshness()` nog lezen.
+Individuele product-subs: `write_meta(..., merge=True)` — zie
+[straat-CLIs fase 7](../plans/straat-clis.md).
 
 ### Schema 1 (legacy)
 
@@ -71,12 +90,15 @@ schema 2.
 
 ## Invariante (hard)
 
-1. **Schrijver = exporteur.** Alleen tooling street-`products` (of een
-   gelijkwaardige export die dezelfde siblings maakt) mag deze sidecar
-   **overschrijven**. Consumers mogen lezen; niet “achteraf” een andere
+1. **Schrijver = exporteur.** Alleen tooling street-`products` of een
+   individuele product-sub die dezelfde siblings maakt, mag deze sidecar
+   **schrijven/mergen**. Consumers mogen lezen; niet “achteraf” een andere
    herkomst claimen zonder opnieuw te exporteren.
-2. **Atomaire waarheid.** Na een geslaagde `products`-run weerspiegelt de
-   sidecar exact de bron en de productbestanden die bij die run horen.
+2. **Atomaire waarheid per run.** Na een geslaagde `products`-run
+   weerspiegelt de sidecar exact de bron en alle standaardproducten van
+   die run. Na een individuele product-sub kloppen minstens de keys die
+   die sub net schreef (plus behouden keys alleen als bron-hash gelijk
+   bleef).
 3. **Bron wijzigt → meta mag niet oud blijven.** Als de bytes van de bron
    niet meer gelijk zijn aan `bron_sha256`, is de hele sidecar **stale**.
    Geen productregel uit die meta mag dan als “nog geldig” gelden.
@@ -105,19 +127,24 @@ check (`--only-invalid`); die vervangt deze herkomst-sidecar niet.
 
 ## Wie schrijft / wie leest
 
-| Rol                                  | Verantwoordelijkheid                                                                                           |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Tooling `vsa`/`mvsa`/`mscz products` | Schrijft sidecar bij elke geslaagde export (schema 2: inclusief product-hashes)                                |
-| Tooling `freshness()` / `--force`    | Leest sidecar om regen te slaan                                                                                |
-| Bibliotheek `products` / `check`     | Mag **alleen lezen** voor orchestratie en publicatiecontrole; geen eigen herkomststempel als bron van waarheid |
+| Rol                                             | Verantwoordelijkheid                                                                                           |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Tooling `vsa`/`mvsa`/`mscz products`            | Schrijft sidecar bij elke geslaagde export (schema 2: hashes + product-`generated_at`)                         |
+| Tooling `mscz mxl` / `svg` / `pdf`              | Merget de bijbehorende product-key(s) in dezelfde sidecar (sibling-output; anders overslaan + melding)         |
+| Tooling `mvsa mxl` / `svg` / `pdf` / `score-ir` | Idem; `score-ir` + optioneel `from-ir` bij `--musicxml`                                                        |
+| Tooling `vsa musicxml` / `vsa svg`              | Merget `mxl` / `svg` (bron `.vsa`; sibling-output)                                                             |
+| Tooling `freshness()` / `--force`               | Leest sidecar om regen te slaan                                                                                |
+| Bibliotheek `products` / `check`                | Mag **alleen lezen** voor orchestratie en publicatiecontrole; geen eigen herkomststempel als bron van waarheid |
 
 ## Implementatiestatus
 
-| Onderdeel                         | Status                                      |
-| --------------------------------- | ------------------------------------------- |
-| Schema 2 (product-`sha256`)       | **gedaan** in tooling (`products_meta.py`)  |
-| Bibliotheek check/regen op meta   | **gedaan** (stamp alleen fallback `no_meta`)|
-| Afbouw in-file versheidstempels   | **gedaan** in `sync_*_products` (vsa/mvsa/mscz) |
+| Onderdeel                             | Status                                                            |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| Schema 2 (product-`sha256`)           | **gedaan** in tooling (`products_meta.py`)                        |
+| Schema 2 product-`generated_at`       | **gedaan** (`write_meta` / `build_meta`; fase 7b)                 |
+| Merge vanuit individuele product-subs | **gedaan** API; **mscz** + **mvsa** + **vsa** (`musicxml`/`svg`)  |
+| Bibliotheek check/regen op meta       | **gedaan** (stamp alleen fallback `no_meta`)                      |
+| Afbouw in-file versheidstempels       | **gedaan** in `sync_*_products` (vsa/mvsa/mscz)                   |
 
 ## Zie ook
 

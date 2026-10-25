@@ -44,6 +44,9 @@ voor de volledige uitleg van beide profielen en alle frontmatter-instellingen.
 canonieke `.vsa` blijft ongewijzigd. [`vsa products`](products.md) doet die
 syllabify altijd voor de MXL-sibling. Losse bron bewerken: [`vsa syllabify`](syllabify.md).
 
+Bij bron `.vsa` en sibling-output merget `vsa musicxml` product-key `mxl` in
+`{stam}.vsa.products-meta.json` — zie [products-meta](../../formats/products-meta.md).
+
 ## Argumenten en opties
 
 | Naam                                          | Verplicht | Betekenis                                                                         | Default                                                         | Beperkingen                            |

@@ -28,8 +28,9 @@ headless Chrome op US Letter terugvallen — dat is **niet** canoniek. Zie
 
 Coria- en MusicXML-links horen bij de website en komen niet in de PDF.
 
-Partituur-PDF vanuit `.mvsa`/`.mscz` (`mvsa pdf`) valt onder dezelfde
-checklist-P6; daar komt A4 uit de MuseScore-Style van het `.mscz` (zie
+Partituur-PDF vanuit `.mvsa` ([`mvsa pdf`](mvsa.md#mvsa-pdf)) of `.mscz`
+([`mscz pdf`](mscz.md)) valt onder dezelfde checklist-P6; daar komt A4 uit
+de MuseScore-Style van het `.mscz` (zie
 [MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md) en MSCZ S7).
 
 Vóór het renderen geldt dezelfde validatie als [`vsa validate`](validate.md).
