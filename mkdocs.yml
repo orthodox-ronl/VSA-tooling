@@ -100,6 +100,7 @@ nav:
       - .mp3 / audio: formats/audio.md
       - .midi / .mid: formats/midi.md
     - Contract-index: formats/contract-index.md
+    - Products-meta (herkomst-sidecar): formats/products-meta.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
     - Commando's:

@@ -1,8 +1,7 @@
 """Sidecar ``*.products-meta.json`` for street ``products`` freshness.
 
-Schema and semantics: docs/formats/contract-index.md ·
-docs/plans/straat-clis.md. No content contract for .mxl/.mscz — only
-source hash vs siblings.
+Normative hub: ``docs/formats/products-meta.md`` (schema 2).
+No M*/S* content contract — only provenance/freshness.
 """
 
 from __future__ import annotations
@@ -14,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 META_SUFFIX = ".products-meta.json"
 
 Freshness = Literal["ok", "missing", "stale", "no_meta"]
@@ -45,6 +44,26 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
+def product_file_name(entry: Any) -> str | None:
+    """Schema 2 ``{file, sha256}`` of legacy schema-1 bestandsnaam."""
+    if isinstance(entry, str) and entry:
+        return entry
+    if isinstance(entry, dict):
+        name = entry.get("file")
+        if isinstance(name, str) and name:
+            return name
+    return None
+
+
+def product_sha256(entry: Any) -> str | None:
+    """Product-inhouds-hash uit schema-2-entry; anders ``None``."""
+    if isinstance(entry, dict):
+        sha = entry.get("sha256")
+        if isinstance(sha, str) and sha:
+            return sha
+    return None
+
+
 def build_meta(
     bron: Path,
     products: dict[str, Path],
@@ -52,13 +71,22 @@ def build_meta(
     bron_sha256: str | None = None,
     generated_at: str | None = None,
 ) -> dict[str, Any]:
-    """Build meta dict; product values are **file names** (siblings)."""
+    """Build schema-2 meta; each product has ``file`` + ``sha256``."""
+    product_entries: dict[str, dict[str, str]] = {}
+    for key, path in sorted(products.items()):
+        path = Path(path)
+        if not path.is_file():
+            raise FileNotFoundError(f"productbestand ontbreekt voor meta: {path}")
+        product_entries[key] = {
+            "file": path.name,
+            "sha256": sha256_file(path),
+        }
     return {
         "schema": SCHEMA_VERSION,
         "bron": bron.name,
         "bron_sha256": bron_sha256 or sha256_file(bron),
         "generated_at": generated_at or utc_now_iso(),
-        "products": {k: p.name for k, p in sorted(products.items())},
+        "products": product_entries,
     }
 
 
@@ -95,16 +123,19 @@ def freshness(
     *,
     required_keys: set[str] | None = None,
 ) -> tuple[Freshness, str]:
-    """Fast check: meta + bron hash + listed product files exist.
+    """Fast check: schema 2 + bron-hash + product files + product-hashes.
 
-    If *required_keys* is set, only those product keys are required to exist.
-    Otherwise every key in meta ``products`` must exist on disk.
+    If *required_keys* is set, only those product keys are required.
+    Otherwise every key in meta ``products`` must exist and match.
     """
     if not bron.is_file():
         return "missing", f"bron ontbreekt: {bron}"
     meta = load_meta(bron)
     if meta is None:
         return "no_meta", f"geen {meta_path_for(bron).name}"
+    schema = meta.get("schema")
+    if schema != SCHEMA_VERSION:
+        return "stale", f"meta schema {schema!r} (verwacht {SCHEMA_VERSION})"
     stored = meta.get("bron_sha256")
     if not isinstance(stored, str) or not stored:
         return "stale", "meta zonder bron_sha256"
@@ -116,10 +147,16 @@ def freshness(
         return "stale", "meta zonder products"
     keys = required_keys if required_keys is not None else set(products)
     for key in keys:
-        name = products.get(key)
-        if not isinstance(name, str) or not name:
+        entry = products.get(key)
+        name = product_file_name(entry)
+        if not name:
             return "missing", f"product '{key}' ontbreekt in meta"
         path = resolve_product_path(bron, name)
         if not path.is_file():
             return "missing", f"productbestand ontbreekt: {path.name}"
+        expected = product_sha256(entry)
+        if not expected:
+            return "stale", f"product '{key}' zonder sha256"
+        if sha256_file(path) != expected:
+            return "stale", f"product '{key}' sha256 wijkt af van bestand"
     return "ok", "meta en producten in orde"

@@ -5,7 +5,8 @@ Overzicht van de **bronformaten** die de toolchain leest of schrijft, en de
 specificaties; dit is de navigatiehub.
 
 **Contracten (checklists, layoutprofielen, Score-IR/OSMD):** start bij de
-[contract-index](contract-index.md). Straat-CLI’s / producten (plan):
+[contract-index](contract-index.md). Herkomst van `products`-siblings:
+[products-meta](products-meta.md). Straat-CLI’s / producten (plan):
 [straat-CLIs](../plans/straat-clis.md).
 
 ## Conversiematrix (kort)

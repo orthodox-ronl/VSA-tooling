@@ -1,10 +1,10 @@
 # `vsa products` — standaardproducten + meta
 
 Genereer de standaard siblings bij een `.vsa`-bron: Coria-playback-`.mxl`,
-muziek-`.svg`, en `{stam}.vsa.products-meta.json` voor versheid. Geen
-bibliotheek-stamps (die horen bij de consumer).
+muziek-`.svg`, en `{stam}.vsa.products-meta.json` voor herkomst/versheid.
 
-Contract: [contract-index](../../formats/contract-index.md). Straatplan:
+Herkomst-sidecar (schema, invariante): [products-meta](../../formats/products-meta.md).
+Contract-matrix: [contract-index](../../formats/contract-index.md). Straatplan:
 [straat-CLIs](../../plans/straat-clis.md).
 
 ## Synopsis

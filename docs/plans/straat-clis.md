@@ -1,7 +1,8 @@
 # Straat-CLIs en producten (plan)
 
-Status: fases **1–5 gedaan** (contract-index, `import`, `products` + meta,
-bibliotheek meta/`pdf.cmd`/`manueel`, wrappers weg, docs-sync).
+Status: fases **1–5 gedaan**; fase **6** (products-meta schema 2 +
+tooling/bibliotheek op meta-hashes) **open** — normatieve spec:
+[products-meta.md](../formats/products-meta.md).
 
 Dit plan is **niet** de plek voor print-/melisma-/layout-regels. Die staan
 in de [contract-index](../formats/contract-index.md) en de hubs die daar
@@ -11,12 +12,12 @@ genoemd worden.
 
 Eén CLI per **straat** (bronfamilie):
 
-| Straat (docs) | CLI | Alias |
-| --- | --- | --- |
-| vsa | `vsa` | — |
-| mvsa | `mvsa` | — |
-| mscz | `mscz` | — |
-| manueel | `manual` | `manueel` → `manual` |
+| Straat (docs) | CLI      | Alias                |
+| ------------- | -------- | -------------------- |
+| vsa           | `vsa`    | —                    |
+| mvsa          | `mvsa`   | —                    |
+| mscz          | `mscz`   | —                    |
+| manueel       | `manual` | `manueel` → `manual` |
 
 Per straat: individuele product-subs, `products` (alles + sidecar-meta),
 `normalize` (bestaand contract), `import` (catalogus-vrij;
@@ -28,18 +29,30 @@ namen. Frontmatter: `manueel` / `manual` i.p.v. `artefacten_handmatig`.
 
 ## Versheid (sidecar-meta)
 
+**Canonieke spec:** [products-meta.md](../formats/products-meta.md).
+
+Doelbeeld (schema **2**): tooling schrijft bron-hash **én** hashes van
+elk afgeleid bestand. Invariante: claim “product \(H_A\) uit bron \(H_B\)”
+klopt, of meta is niet `ok`. Bibliotheek leest meta; zet geen parallelle
+herkomststempel als bron van waarheid.
+
+Tooling schrijft schema **2** (fase 6b). Schema-1-sidecars tellen als
+stale tot opnieuw `products`.
+
 ```json
 {
-  "schema": 1,
+  "schema": 2,
   "bron": "lied.mvsa",
   "bron_sha256": "…",
   "generated_at": "…",
-  "products": { "mxl": "lied.mvsa.mxl", "svg": "lied.mvsa.svg" }
+  "products": {
+    "mxl": { "file": "lied.mvsa.mxl", "sha256": "…" },
+    "svg": { "file": "lied.mvsa.svg", "sha256": "…" }
+  }
 }
 ```
 
-Stale = meta ontbreekt of `bron_sha256` past niet; missing = pad in
-`products` ontbreekt. Diepere `mxl validate` blijft apart (`--only-invalid`).
+Diepere `mxl validate` blijft apart (`--only-invalid`).
 
 ## Contracten
 
@@ -52,13 +65,16 @@ verschilt alleen waar de hub dat toelaat ([osmd-s8-recite](osmd-s8-recite.md),
 
 ## Fasering
 
-| Fase | Inhoud | Status |
-| --- | --- | --- |
-| 1 | Contract-index + matrix + PDF-/meta-afspraak in docs | **gedaan** ([contract-index](../formats/contract-index.md)) |
-| 2 | `import`-alias + extensie-gates + tests | **gedaan** (`mvsa import` / `mscz import`) |
-| 3 | `products` + sidecar-meta in tooling | **gedaan** (`mvsa`/`mscz`/`vsa products`) |
-| 4 | Bibliotheek: meta-check, `pdf.cmd`, frontmatter, oude namen weg | **gedaan** |
-| 5 | Docs-sync bibliotheek + rommelcheck | **gedaan** |
+| Fase | Inhoud                                                          | Status                                                      |
+| ---- | --------------------------------------------------------------- | ----------------------------------------------------------- |
+| 1    | Contract-index + matrix + PDF-/meta-afspraak in docs            | **gedaan** ([contract-index](../formats/contract-index.md)) |
+| 2    | `import`-alias + extensie-gates + tests                         | **gedaan** (`mvsa import` / `mscz import`)                  |
+| 3    | `products` + sidecar-meta in tooling                            | **gedaan** (`mvsa`/`mscz`/`vsa products`)                   |
+| 4    | Bibliotheek: meta-check, `pdf.cmd`, frontmatter, oude namen weg | **gedaan**                                                  |
+| 5    | Docs-sync bibliotheek + rommelcheck                             | **gedaan**                                                  |
+| 6a   | Spec products-meta schema 2 + invariante                        | **gedaan** ([products-meta](../formats/products-meta.md))   |
+| 6b   | Tooling: schema 2 schrijven + `freshness()` op product-hashes   | **gedaan** (`src/vsa/products_meta.py`)                     |
+| 6c   | Bibliotheek: check/regen op meta; in-file stamps afbouwen       | **gedaan** (sync zonder versheidstempels; meta leidend)     |
 
 ## Gerelateerd
 

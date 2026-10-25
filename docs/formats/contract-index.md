@@ -39,6 +39,7 @@ mvsa-export: `mvsa-export-contracten.mdc`).
 | Zoektekst / lyrics-export                                                | [zoektekst.md](zoektekst.md) · [`vsa text`](../reference/cli/text.md)                                                                                                | `vsa text` / `mscz text`                  |
 | Audio-preview                                                            | [audio.md](audio.md)                                                                                                                                                 | `vsa audio` / `mvsa mp3`                  |
 | Scherm/Download in de **bibliotheek**-site                               | bibliotheek [`schermpartituur.md`](https://github.com/orthodox-ronl/bibliotheek/blob/main/docs/specs/schermpartituur.md) — **linkt** hierheen, geen tweede checklist | Hugo / shortcode `muziek`                 |
+| Products-meta (herkomst-sidecar, schema 2)                               | [products-meta.md](products-meta.md)                                                                                                                                 | `vsa`/`mvsa`/`mscz products`              |
 
 ## Straat × product × contract (doelbeeld)
 
@@ -70,20 +71,24 @@ uitrolpad; zie [straat-CLIs (plan)](../plans/straat-clis.md).
 | **mxl** (format) | normalize playback       | M*                                                  | `mxl normalize`                                                                                        |
 | **mxl**          | → mvsa / mscz            | mvsa-conversions + S*/M*                            | `mxl mvsa` / `mxl mscz`                                                                                |
 
-## Sidecar-meta (versheid, schema v1)
+## Sidecar-meta (herkomst / versheid)
 
-Sibling `{stam}.{bron}.products-meta.json` (bijv. `lied.mvsa.products-meta.json`)
-met `bron_sha256` + productpaden. Geschreven door:
+Canonieke hub: **[products-meta.md](products-meta.md)** (schema **2**
+doelbeeld: bron-hash + productbestanden met **inhouds-hashes**;
+invariante “\(H_A\) uit \(H_B\)” blijft waar of meta is stale).
 
-| CLI             | Kernproducten (meta-keys)                                  |
-| --------------- | ---------------------------------------------------------- |
-| `mvsa products` | `mxl`, `score-ir`, `from-ir` (+ `svg` tenzij `--skip-svg`) |
-| `mscz products` | `mxl` (+ `svg` tenzij `--skip-svg`)                        |
-| `vsa products`  | `mxl`, `svg`                                               |
+Sibling `{stam}.{bron}.products-meta.json`. **Schrijver:** tooling
+street-`products` (niet bibliotheek). Geschreven voor:
 
-Flags: `--force`, `--dry-run`. Geen bibliotheek-stamps (consumer). Geen
-tweede inhoudsnorm — alleen versheid t.o.v. bron. Zie
-[straat-CLIs](../plans/straat-clis.md).
+| CLI             | Kernproducten (meta-keys)                                            |
+| --------------- | -------------------------------------------------------------------- |
+| `mvsa products` | `mxl`, `score-ir`, `from-ir` (+ `svg` / `svg-N` tenzij `--skip-svg`) |
+| `mscz products` | `mxl` (+ `svg` / `svg-N` tenzij `--skip-svg`)                        |
+| `vsa products`  | `mxl`, `svg`                                                         |
+
+Flags: `--force`, `--dry-run`. Geen tweede inhoudsnorm (geen M*/S* in
+meta) — alleen herkomst/versheid. In-file bibliotheek-stamps zijn geen
+canonieke versheidsbron (afbouw: straat-plan).
 
 **`vsa products` MXL:** tijdelijke syllabify + playback-export + Coria-finalize
 (sanitize/voortekens). SVG uit de ongewijzigde bron. Man-pagina:
