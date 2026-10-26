@@ -65,8 +65,10 @@ def test_vsa_cli_text(tmp_path, capsys) -> None:
     path = tmp_path / "voorbeeld.vsa"
     path.write_text(_ANTIFOON_SNIPPET, encoding="utf-8")
     assert main(["text", str(path)]) == 0
-    out = capsys.readouterr().out
-    assert "Juich voor God" in out
+    lyrics = tmp_path / "voorbeeld.vsa.lyrics.txt"
+    assert lyrics.is_file()
+    assert "Juich voor God" in lyrics.read_text(encoding="utf-8")
+    assert "Geschreven:" in capsys.readouterr().out
 
 
 def test_mvsa_plain_joins_measures() -> None:
@@ -478,13 +480,13 @@ def test_musicxml_fixture_corpus_mxl_not_duplicated() -> None:
     assert text.lower().count("profeet") == 1
 
 
-def test_cli_text_musicxml_and_output_file(tmp_path, capsys) -> None:
+def test_cli_text_musicxml_rejected_street_pure(tmp_path, capsys) -> None:
     path = tmp_path / "lied.musicxml"
     path.write_text(_MUSICXML_SYLLABICS, encoding="utf-8")
     out = tmp_path / "lied.lyrics.txt"
-    assert main(["text", str(path), "-o", str(out)]) == 0
-    assert out.read_text(encoding="utf-8").strip() == "Heilige God Heerlijk"
-    assert "Geschreven:" in capsys.readouterr().out
+    assert main(["text", str(path), "-o", str(out)]) == 1
+    err = capsys.readouterr().err
+    assert "weigert .musicxml" in err
 
 
 def test_cli_text_rejects_unknown_suffix(tmp_path, capsys) -> None:
@@ -492,7 +494,7 @@ def test_cli_text_rejects_unknown_suffix(tmp_path, capsys) -> None:
     path.write_text("x", encoding="utf-8")
     assert main(["text", str(path)]) == 1
     err = capsys.readouterr().err
-    assert ".vsa" in err or "verwacht" in err
+    assert "weigert" in err
 
 
 def test_plain_text_from_mscz_without_musescore_raises(tmp_path: Path) -> None:

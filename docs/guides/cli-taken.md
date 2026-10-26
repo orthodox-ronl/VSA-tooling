@@ -15,7 +15,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | Eén SVG maken (muziek-only; default sibling `.vsa.svg`) | [`vsa svg <input.vsa> [-o …]`](../reference/cli/svg.md)                                                                                               |
 | Markdownbestanden verwerken naar SVG                    | [`vsa process <input> <output>`](../reference/cli/process.md)                                                                                         |
 | [Hugo-output](@) genereren                              | [`vsa build-markdown …`](../reference/cli/build-markdown.md)                                                                                          |
-| Markdown + VSA naar A4-PDF                              | [`vsa pdf <bestand.md>`](../reference/cli/pdf.md)                                                                                                     |
+| Markdown + VSA naar A4-PDF                              | [`md pdf <bestand.md>`](../reference/cli/md.md#md-pdf) (verouderd: [`vsa pdf`](../reference/cli/pdf.md))                                              |
 | `zoek=`-includes oplossen naar catalogus                | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                                                                         |
 | Lettergreepstreepjes (bestand of map)                   | [`vsa syllabify <pad>`](../reference/cli/syllabify.md)                                                                                                |
 | Platte gezongen tekst (zoekindex)                       | [`vsa text <pad>`](../reference/cli/text.md) (`.vsa` / `.mvsa` / MusicXML / `.mscz`)                                                                  |

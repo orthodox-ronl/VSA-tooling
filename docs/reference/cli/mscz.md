@@ -10,8 +10,9 @@ catalogusbron gebruiken (woordstreepjes, lege recite, lossy layout). De
 output begint met een ASCII-waarschuwingsbanner. Details:
 [`.mvsa` — score naar mvsa](../../formats/mvsa.md#score-naar-mvsa).
 
-Alias voor platte tekst: [`vsa text`](text.md) (zelfde extractie; ook
-`.mxl` / `.vsa` / `.mvsa`).
+**Straat-puur:** product-subs accepteren alleen `.mscz`. Andere bronnen:
+`vsa …` / `mvsa …`. Universele productcatalogus:
+[contract-index](../../formats/contract-index.md#universele-productcatalogus).
 
 **Invoer:** `path` mag één `.mscz` **of** een map zijn (recursief). Bij
 meerdere bronnen: sibling-output per bestand; `-o` alleen bij precies één
@@ -20,34 +21,36 @@ bron. Zie [Invoer bestand of map](input-pad.md).
 ## Synopsis
 
 ```text
-mscz [-h] {mvsa,import,mxl,svg,pdf,normalize,text,compare,products} …
+mscz [-h] {mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,text,compare,products} …
 mscz mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
           [--octave-style {@oct,marker}] [--section SECTION]
           [--musescore PATH] [--no-align] path
 mscz import [-h] [-o OUTPUT] [--layout PROFILE] […] path
-mscz mxl [-h] [-o OUTPUT] [--musescore PATH] path
-mscz svg [-h] [-o OUTPUT] [--musescore PATH] [--no-trim] [--transparent] path
-mscz pdf [-h] [-o OUTPUT] [--musescore PATH] path
+mscz mxl|svg|pdf|mp3|ogg|wav|mscz|text [-h] [-o OUTPUT] [--musescore PATH] path
+mscz score-ir [-h] [-o OUTPUT] [--musicxml [PATH]] [--musescore PATH] path
 mscz normalize [-h] [-o OUTPUT] [--layout PROFILE] [--bibliotheek-id ID]
                [--compact] [Style-opties…] path
-mscz text [-h] [-o OUTPUT] [--musescore PATH] path
 mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
              score mvsa
+mscz products [-h] [--force] [--dry-run] [--skip-svg] [--musescore PATH] path
 ```
 
 ## Subcommando's
 
-| Subcommando  | Doel                                                                                                                                                                                                                                                                                         |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mvsa`       | Naar `.mvsa` (MuseScore → temp `.mxl` → SATB-explode → parser). Default: `<bronnaam>.mvsa` (bijv. `lied.mscz.mvsa`).                                                                                                                                                                         |
-| `import`     | **Naar `.mscz`** uit `.mvsa` of MusicXML (catalogus-vrij). Zelfde als [`mvsa mscz`](mvsa.md#mvsa-mscz) / `mxl mscz`. Toegestaan: `.mvsa`, `.mxl`, `.musicxml`, `.xml`. Contract: [contract-index](../../formats/contract-index.md), [MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md). |
-| `products`   | Coria-`.mxl` (+ SVG: één pagina `stem.svg` of bladreeks `stem-N.svg`) + `{stam}.mscz.products-meta.json` (`svg` / `svg-N`). Flags: `--force`, `--dry-run`. Zie [products-meta](../../formats/products-meta.md).                                                                              |
-| `mxl`        | Naar Coria-`.mxl`: MuseScore-export, daarna explode naar vier parts. Default: `<bronnaam>.mxl` (bijv. `lied.mscz.mxl`). Merget key `mxl` in `{stam}.mscz.products-meta.json` (sibling-output).                                                                                               |
-| `svg`        | Kale muziek-SVG (chrome-strip op tijdelijke kopie; bron-`.mscz` ongewijzigd). Zie [mvsa-svg](../../formats/mvsa-svg.md). Niet via [`mvsa svg`](mvsa.md#mvsa-svg). Merget `svg` / `svg-N` in products-meta.                                                                                   |
-| `pdf`        | Print-PDF voor zangers via MuseScore. Niet via [`mvsa pdf`](mvsa.md#mvsa-pdf). Merget key `pdf` in products-meta (sibling-output).                                                                                                                                                           |
-| `normalize`  | Leesbaarheid + layoutprofiel op bestaand `.mscz` (default `partituur`; ook `muziek` / `plain`). Geen MuseScore-CLI. Zie [`.mscz` layout](../../formats/mscz.md#layoutprofielen---layout).                                                                                                    |
-| `text`       | Platte gezongen tekst via temp-`.mxl` (geen `.mvsa`; zie [`vsa text`](text.md)).                                                                                                                                                                                                             |
-| `compare`    | Controleer of een `.mvsa` nog overeenkomt met verse `mscz`/`mxl mvsa`-import (lyrics, toonhoogte, duur-info, import-gaten).                                                                                                                                                                  |
+| Subcommando       | Doel                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mvsa`            | Naar `.mvsa` (werkbank). Default: `<bronnaam>.mvsa`.                                                                                                          |
+| `import`          | **Naar `.mscz`** uit `.mvsa`/MusicXML (= `mvsa mscz` / `mxl mscz`).                                                                                           |
+| `products`        | **Universele** standaardset + `{stam}.mscz.products-meta.json`. Zie [products-meta](../../formats/products-meta.md).                                          |
+| `mxl`             | Coria-`.mxl`; merget key `mxl`.                                                                                                                               |
+| `svg`             | Kale muziek-SVG; merget `svg` / `svg-N`. Niet via `mvsa svg`.                                                                                                 |
+| `pdf`             | Print-PDF; merget `pdf`. Niet via `mvsa pdf`.                                                                                                                 |
+| `mp3`/`ogg`/`wav` | Preview-audio; `mp3` merget key `mp3`.                                                                                                                        |
+| `score-ir`        | Score-IR (+ `--musicxml` → from-ir); merget `score-ir` / `from-ir`.                                                                                           |
+| `mscz`            | Partituur-sibling `*.mscz.mscz` (layout `partituur`); merget key `mscz`.                                                                                      |
+| `normalize`       | Layoutprofiel in-place of `-o` (geen meta-product tenzij sibling via `mscz mscz`).                                                                            |
+| `text`            | Lyrics-product `*.lyrics.txt`; merget key `lyrics`.                                                                                                           |
+| `compare`         | Score (`.mscz` of MusicXML) ↔ `.mvsa`.                                                                                                                        |
 
 **`mvsa`-opties** (`--pitch` default `ag-vsa`, `--do`, `--no-align`, soft-wrap,
 eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zie
@@ -95,7 +98,10 @@ mvsa validate generated\from-mscz.mvsa
 mscz mxl generated\alleluia-schets2.mscz -o generated\from-mscz.mxl
 mscz svg generated\alleluia-schets2.mscz -o generated\alleluia-schets2.svg
 mscz pdf generated\alleluia-schets2.mscz -o generated\alleluia-schets2.pdf
-mscz text generated\alleluia-schets2.mscz -o generated\alleluia.lyrics.txt
+mscz text generated\alleluia-schets2.mscz
+mscz mp3 generated\alleluia-schets2.mscz --force
+mscz score-ir generated\alleluia-schets2.mscz --musicxml
+mscz products generated\alleluia-schets2.mscz --force
 mscz compare generated\alleluia-schets2.mscz generated\alleluia-schets2.mscz.mvsa
 mscz compare generated\from-mscz.mxl generated\from-mscz.mvsa
 ```

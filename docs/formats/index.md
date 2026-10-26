@@ -13,22 +13,20 @@ specificaties; dit is de navigatiehub.
 
 Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
-| Bron ↓ \ Doel → | `.vsa`                          | `.mvsa`                                    | `.mxl`                     | `.mscz`              | `.mp3` / audio         | `.midi`              |
-| --------------- | ------------------------------- | ------------------------------------------ | -------------------------- | -------------------- | ---------------------- | -------------------- |
-| **`.vsa`**      | validate (geen `vsa normalize`) | —                                          | `vsa musicxml`             | via mxl / templates  | `vsa audio`            | — (niet gepland)     |
-| **`.mvsa`**     | —                               | `mvsa normalize` / `kuiser` / `transpose`  | `mvsa mxl` · `score-ir`    | `mvsa mscz`          | `mvsa mp3`/`ogg`/`wav` | — (niet gepland)     |
-| **`.mxl`**      | —                               | `mxl mvsa`                                 | `mxl normalize`            | `mxl mscz`           | `vsa audio`            | — (niet gepland)     |
-| **`.mscz`**     | —                               | `mscz mvsa`                                | `mscz mxl`                 | `mscz normalize`     | `vsa audio` (fallback) | — (niet gepland)     |
-| **`.midi`**     | —                               | —                                          | —                          | —                    | —                      | — (niet gepland)     |
+| Bron ↓ \ Doel → | `.vsa`                          | `.mvsa`                                    | `.mxl`                          | `.mscz`                 | `.mp3` / audio         | `.midi`              |
+| --------------- | ------------------------------- | ------------------------------------------ | ------------------------------- | ----------------------- | ---------------------- | -------------------- |
+| **`.vsa`**      | validate (geen `vsa normalize`) | —                                          | `vsa musicxml` / `vsa products` | `vsa products` → `mscz` | `vsa audio`            | — (niet gepland)     |
+| **`.mvsa`**     | —                               | `mvsa normalize` / `kuiser` / `transpose`  | `mvsa mxl` · `score-ir`         | `mvsa mscz`             | `mvsa mp3`/`ogg`/`wav` | — (niet gepland)     |
+| **`.mxl`**      | —                               | `mxl mvsa`                                 | `mxl normalize`                 | `mxl mscz`              | via notatiestraat      | — (niet gepland)     |
+| **`.mscz`**     | —                               | `mscz mvsa`                                | `mscz mxl`                      | `mscz mscz` / normalize | `mscz mp3`/`ogg`/`wav` | — (niet gepland)     |
+| **`.midi`**     | —                               | —                                          | —                               | —                       | —                      | — (niet gepland)     |
 
 - **Audio (``.mp3`` / ``.ogg`` / ``.wav``):** preview-luisteren; CLI
   [`vsa audio`](../reference/cli/audio.md) — zie [`.mp3` / audio](audio.md).
 - **``.midi`` / ``.mid``:** **niet gepland** (preview = audio) — zie [`.midi`](midi.md).
-- **Zoektekst in canonieke `.vsa` / `.mvsa`:** veld `zoektekst` in
-  YAML-frontmatter — [zoektekst](zoektekst.md). Extractie / export:
-  [`vsa text`](../reference/cli/text.md) op `.vsa` / `.mvsa` / MusicXML /
-  `.mscz` (geen aparte matrixkolom; schrijft geen `.mvsa`-sibling). Alias op
-  MuseScore-bron: [`mscz text`](../reference/cli/mscz.md).
+- **Zoektekst / lyrics:** YAML-`zoektekst` in canonieke `.vsa`/`.mvsa`
+  ([zoektekst](zoektekst.md)); sibling-product `*.lyrics.txt` via
+  `{straat} text` / `{straat} products` (meta-key `lyrics`).
 - Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 - **Score → `.mvsa`** (`.mxl` / `.mscz`): **werkbank-bewerkvorm** (niet
   catalogus-klaar); soft-wrap, holds, recite; default `--pitch ag-vsa` (a–g
@@ -54,14 +52,13 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
 ## Commando’s
 
-| Command             | Bron                                      | Man-pagina                                 |
-| ------------------- | ----------------------------------------- | ------------------------------------------ |
-| `vsa`               | `.vsa` (+ Markdown-workflows)             | [CLI-overzicht](../reference/cli/index.md) |
-| `vsa text`          | `.vsa` / `.mvsa` / MusicXML / `.mscz`     | [`text`](../reference/cli/text.md)         |
-| `vsa audio`         | `.mxl` / `.vsa` / …                       | [`audio`](../reference/cli/audio.md)       |
-| `mvsa`              | `.mvsa`                                   | [`mvsa`](../reference/cli/mvsa.md)         |
-| `mxl`               | `.mxl` / `.musicxml`                      | [`mxl`](../reference/cli/mxl.md)           |
-| `mscz`              | `.mscz` (`mxl`/`svg`/`pdf`/`normalize`/…) | [`mscz`](../reference/cli/mscz.md)         |
+| Command              | Bron                                      | Man-pagina                                                                |
+| -------------------- | ----------------------------------------- | ------------------------------------------------------------------------- |
+| `vsa`                | `.vsa` (+ Markdown-workflows)             | [CLI-overzicht](../reference/cli/index.md)                                |
+| `vsa text` / `audio` | alleen `.vsa` (straat-puur)               | [`text`](../reference/cli/text.md) · [`audio`](../reference/cli/audio.md) |
+| `mvsa`               | `.mvsa`                                   | [`mvsa`](../reference/cli/mvsa.md)                                        |
+| `mxl`                | `.mxl` / `.musicxml`                      | [`mxl`](../reference/cli/mxl.md)                                          |
+| `mscz`               | `.mscz` (universele producten + import)   | [`mscz`](../reference/cli/mscz.md)                                        |
 
 Na `pip install -e .` staan `vsa`, `mvsa`, `mxl` en `mscz` op PATH.
 
@@ -70,9 +67,9 @@ Na `pip install -e .` staan `vsa`, `mvsa`, `mxl` en `mscz` op PATH.
 Zonder `-o` schrijft de CLI `stem.brontype.doeltype` naast de bron (laatste
 segment = echte extensie), bv. `lied.mvsa` → `lied.mvsa.mscz`. In
 `generated/` hetzelfde patroon, bv. `alleluia.mvsa.mxl`, `lied.mvsa.mp3`.
-Optioneel lyrics-product uit `.mscz` / `.mxl`: `lied.mscz.lyrics.txt` via
-[`vsa text`](../reference/cli/text.md) — niet verplicht naast canonieke
-`.vsa` / `.mvsa` (daar: [`zoektekst`](zoektekst.md)). Expliciet `-o` mag
+Lyrics-product: `lied.*.lyrics.txt` via `{straat} text` / `products`
+(meta `lyrics`). Editorzoeken in bron: [`zoektekst`](zoektekst.md).
+Expliciet `-o` mag
 een korte naam blijven. Details:
 [canonieke checklists — naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie).
 
@@ -85,6 +82,7 @@ In de repo-root (via `scripts\`):
 | `scripts\mvsa.cmd` | `python -m vsa.cli_mvsa` |
 | `scripts\mxl.cmd`  | `python -m vsa.cli_mxl`  |
 | `scripts\mscz.cmd` | `python -m vsa.cli_mscz` |
+| `scripts\md.cmd`   | `python -m vsa.cli_md`   |
 
 Details: [Scripts (cmd)](scripts.md) · [scripts/README](https://github.com/orthodox-ronl/VSA-tooling/blob/main/scripts/README.md).
 
@@ -93,4 +91,5 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 scripts\mvsa.cmd -h
 scripts\mxl.cmd -h
 scripts\mscz.cmd -h
+scripts\md.cmd -h
 ```

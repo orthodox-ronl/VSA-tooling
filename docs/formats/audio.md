@@ -30,12 +30,12 @@ afspeelknop.
 
 ## Conversies
 
-| Bron                         | Commando                                                              |
+| Bron                         | Commando (straat-puur)                                                |
 | ---------------------------- | --------------------------------------------------------------------- |
-| ``.mxl`` / ``.musicxml``     | `vsa audio` / `mvsa mp3` / `ogg` / `wav`                              |
 | ``.vsa``                     | `vsa audio` (via playback MusicXML)                                   |
-| ``.mvsa``                    | `mvsa mp3` / `ogg` / `wav` (via playback MusicXML)                    |
-| ``.mscz``                    | `vsa audio` / `mvsa mp3` / `ogg` / `wav` (via playback-MXL + piano)   |
+| ``.mvsa``                    | `mvsa mp3` / `ogg` / `wav`                                            |
+| ``.mscz``                    | `mscz mp3` / `ogg` / `wav`                                            |
+| ``.mxl`` / ``.musicxml``     | via `mxl` / import naar notatiestraat; geen cross-street audio        |
 
 Bij ``mvsa`` is het **subcommando het formaat** (``mp3`` / ``ogg`` / ``wav``).
 Bij ``vsa audio``: ``--format`` of ``[audio] format`` in ``vsa.toml``

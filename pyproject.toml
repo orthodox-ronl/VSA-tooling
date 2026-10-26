@@ -20,6 +20,8 @@ vsa = "vsa.cli:main"
 mvsa = "vsa.cli_mvsa:main"
 mxl = "vsa.cli_mxl:main"
 mscz = "vsa.cli_mscz:main"
+md = "vsa.cli_md:main"
+markdown = "vsa.cli_md:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

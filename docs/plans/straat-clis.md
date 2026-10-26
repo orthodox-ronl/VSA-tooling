@@ -1,7 +1,10 @@
 # Straat-CLIs en producten (plan)
 
-Status: fases **1–7e gedaan**. Normatieve meta-spec:
-[products-meta.md](../formats/products-meta.md).
+Status: fases **1–7e gedaan**; daarna **universele productcatalogus**
+(elk product uit elke bronstraat; volle `{straat} products`) — zie
+[contract-index — universele productcatalogus](../formats/contract-index.md#universele-productcatalogus).
+
+Normatieve meta-spec: [products-meta.md](../formats/products-meta.md).
 
 Dit plan is **niet** de plek voor print-/melisma-/layout-regels. Die staan
 in de [contract-index](../formats/contract-index.md) en de hubs die daar
@@ -11,12 +14,13 @@ genoemd worden.
 
 Eén CLI per **straat** (bronfamilie):
 
-| Straat (docs) | CLI      | Alias                |
-| ------------- | -------- | -------------------- |
-| vsa           | `vsa`    | —                    |
-| mvsa          | `mvsa`   | —                    |
-| mscz          | `mscz`   | —                    |
-| manueel       | `manual` | `manueel` → `manual` |
+| Straat (docs) | CLI        | Alias                  |
+| ------------- | ---------- | ---------------------- |
+| vsa           | `vsa`      | —                      |
+| mvsa          | `mvsa`     | —                      |
+| mscz          | `mscz`     | —                      |
+| md            | `md`       | `markdown` → `md`      |
+| manueel       | `manual`   | `manueel` → `manual`   |
 
 Per straat:
 

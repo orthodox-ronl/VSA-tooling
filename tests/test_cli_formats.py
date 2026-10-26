@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from vsa.cli_md import main as md_main
 from vsa.cli_mscz import main as mscz_main
 from vsa.cli_mvsa import main as mvsa_main
 from vsa.cli_mxl import main as mxl_main
@@ -19,7 +20,7 @@ def test_mvsa_help_lists_subcommands(capsys):
     assert "kuiser" in out
     assert (
         "{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,"
-        "normalize,transpose,kuiser,import,products}"
+        "normalize,transpose,kuiser,text,import,products}"
     ) in out
     assert "pdf" in out
     assert "svg" in out
@@ -41,12 +42,25 @@ def test_mscz_help_lists_matrix_actions(capsys):
     assert exc.value.code == 0
     out = capsys.readouterr().out
     assert "mvsa" in out
-    assert "{mvsa,import,mxl,svg,pdf,normalize,text,compare,products}" in out
+    assert "mp3" in out
+    assert "score-ir" in out
     assert "mxl" in out
     assert "svg" in out
     assert "pdf" in out
     assert "normalize" in out
     assert "compare" in out
+    assert "products" in out
+
+
+def test_md_help_lists_products(capsys):
+    with pytest.raises(SystemExit) as exc:
+        md_main(["-h"])
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    assert "{pdf,svg,text}" in out
+    assert "pdf" in out
+    assert "svg" in out
+    assert "text" in out
 
 
 def test_mvsa_validate_alias_works():

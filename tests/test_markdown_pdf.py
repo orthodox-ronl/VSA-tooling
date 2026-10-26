@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from vsa.cli import main
+from vsa.cli_md import main as md_main
 from vsa.markdown_pdf import (
     PdfError,
     expand_print_shortcodes,
@@ -161,6 +162,50 @@ def test_cli_pdf_writes_output(tmp_path: Path, monkeypatch, capsys):
     assert exit_code == 0
     assert pdf_path.is_file()
     assert "PDF geschreven naar:" in captured.out
+    assert "verouderd" in captured.err
+    assert "md pdf" in captured.err
+
+
+def test_md_pdf_default_sibling_name(tmp_path: Path, monkeypatch, capsys):
+    source = tmp_path / "demo.md"
+    source.write_text("# Demo\n\nTekst.\n", encoding="utf-8")
+    expected = tmp_path / "demo.md.pdf"
+
+    def fake_html_to_pdf(html_path, pdf_path, *, chrome_command=None):
+        Path(pdf_path).write_bytes(b"%PDF-1.4\n%%EOF\n")
+
+    monkeypatch.setattr("vsa.markdown_pdf.html_file_to_pdf", fake_html_to_pdf)
+
+    exit_code = md_main(["pdf", str(source)])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert expected.is_file()
+    assert "PDF geschreven naar:" in captured.out
+    assert "verouderd" not in captured.err
+
+
+def test_md_text_writes_sibling(tmp_path: Path, capsys):
+    source = tmp_path / "liturgie.md"
+    source.write_text(
+        "---\ntitle: Demo\n---\n\n"
+        "# Kop\n\nZin met [link](https://example.com).\n\n"
+        "::: vsa-notatie\n"
+        "[:] Heilig\n"
+        ":::\n",
+        encoding="utf-8",
+    )
+    exit_code = md_main(["text", str(source)])
+    captured = capsys.readouterr()
+    out = tmp_path / "liturgie.md.txt"
+    assert exit_code == 0
+    assert out.is_file()
+    text = out.read_text(encoding="utf-8")
+    assert "title:" not in text
+    assert "Kop" in text
+    assert "link" in text
+    assert "https://" not in text
+    assert "Heilig" in text
+    assert "Geschreven:" in captured.out
 
 
 def test_pdf_resolves_catalogus_id_from_nested_cwd(tmp_path: Path, monkeypatch):

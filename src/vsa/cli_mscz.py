@@ -1,9 +1,8 @@
 """Top-level ``mscz`` CLI (bron: ``.mscz``).
 
-Acties: mvsa (score → werkbank); import (.mvsa/.mxl → .mscz); mxl; svg; pdf;
-normalize; text; compare (score ↔ ``.mvsa``); products.
-Conventie: ``mscz {doeltype}`` of ``mscz import`` — zie
-docs/plans/mvsa-conversions.md · docs/formats/contract-index.md.
+Universele producten + import/normalize/compare. Alleen invoer ``.mscz``
+(uitzondering: ``compare`` SCORE mag MusicXML; ``import`` andere bron).
+Contract: docs/formats/contract-index.md.
 """
 
 from __future__ import annotations
@@ -47,6 +46,12 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_mscz_svg(ns)
     if ns.mscz_command == "pdf":
         return _cmd_mscz_pdf(ns)
+    if ns.mscz_command in ("mp3", "ogg", "wav"):
+        return _cmd_mscz_audio(ns)
+    if ns.mscz_command == "score-ir":
+        return _cmd_mscz_score_ir(ns)
+    if ns.mscz_command == "mscz":
+        return _cmd_mscz_product(ns)
     if ns.mscz_command == "normalize":
         return _cmd_mscz_normalize(ns)
     if ns.mscz_command == "text":
@@ -91,44 +96,27 @@ def _build_parser() -> argparse.ArgumentParser:
             "  import PATH …\n"
             "      .mvsa/.mxl → .mscz (catalogus-vrij; = mvsa mscz / mxl mscz).\n"
             "  products PATH [--force] [--dry-run] [--skip-svg]\n"
-            "      Coria-.mxl (+ SVG) + products-meta.json.\n"
-            "  mxl PATH [-o OUT] [--musescore PATH]\n"
-            "      Exporteer naar .mxl via MuseScore.\n"
-            "  svg PATH [-o OUT] [--musescore PATH] [--no-trim] [--transparent]\n"
-            "      Kale muziek-SVG (chrome-strip op tijdelijke kopie).\n"
-            "  pdf PATH [-o OUT] [--musescore PATH]\n"
-            "      Print-PDF voor zangers (MuseScore).\n"
-            "  normalize PATH [-o OUT] [--layout PROFILE] [--bibliotheek-id ID]\n"
-            "      Leesbaarheid + layoutprofiel op bestaand .mscz "
-            "(default partituur).\n"
-            "  text PATH [-o OUT] [--musescore PATH]\n"
-            "      Platte gezongen tekst (via temp-.mxl; geen .mvsa).\n"
-            "  compare SCORE MVSA [--musescore PATH] [--pitch …]\n"
-            "      [--strict-duration]\n"
-            "      Vergelijk .mvsa met verse import van de score "
-            "(+ import-gaten).\n"
+            "      Universele standaardproducten + products-meta.json.\n"
+            "  mxl|svg|pdf|mp3|ogg|wav|score-ir|mscz|text PATH …\n"
+            "      Individuele producten (alleen .mscz).\n"
+            "  normalize PATH …\n"
+            "      Layoutprofiel op bestaand .mscz.\n"
+            "  compare SCORE MVSA …\n"
+            "      SCORE = .mscz of MusicXML.\n"
             "\n"
-            "PATH = één bronbestand of map (recursief). "
-            "-o alleen bij precies één bron.\n"
-            "compare: SCORE = .mscz of MusicXML; MVSA = .mvsa-bestand.\n"
+            "PATH = één .mscz of map (recursief). -o alleen bij één bron.\n"
             "\n"
             "voorbeelden:\n"
-            "  mscz mvsa lied.mscz\n"
-            "  mscz import lied.mvsa\n"
-            "  mscz mxl lied.mscz -o lied.mxl\n"
-            "  mscz svg lied.mscz -o lied.svg\n"
-            "  mscz pdf lied.mscz -o lied.pdf\n"
-            "  mscz normalize lied.mscz --layout partituur\n"
-            "  mscz text lied.mscz -o lied.lyrics.txt\n"
-            "  mscz compare lied.mscz lied.mscz.mvsa\n"
-            "\n"
-            "Alias text: vsa text … (ook .mxl / .vsa / .mvsa)."
+            "  mscz mp3 lied.mscz --force\n"
+            "  mscz products lied.mscz --force\n"
+            "  mscz text lied.mscz\n"
+            "  mscz score-ir lied.mscz --musicxml\n"
         ),
     )
     sub = parser.add_subparsers(
         dest="mscz_command",
         required=True,
-        metavar="{mvsa,import,mxl,svg,pdf,normalize,text,compare,products}",
+        metavar="{mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,text,compare,products}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -261,6 +249,89 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Pad naar MuseScore-executable (default: auto).",
     )
 
+    from .audio_export import AUDIO_FORMATS
+
+    for format_name in AUDIO_FORMATS:
+        audio_p = sub.add_parser(
+            format_name,
+            help=f"Exporteer .mscz naar preview-audio (.{format_name}).",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
+        audio_p.add_argument(
+            "path",
+            help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+        )
+        audio_p.add_argument(
+            "-o",
+            "--output",
+            default=None,
+            help=(
+                f"Uitvoer (default: sibling .{format_name}). "
+                "Alleen bij precies één bronbestand."
+            ),
+        )
+        audio_p.add_argument(
+            "--musescore",
+            default=None,
+            help="Pad naar MuseScore-executable (default: auto).",
+        )
+
+    score_ir = sub.add_parser(
+        "score-ir",
+        help="Exporteer Score-IR (+ optioneel from-ir MusicXML).",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    score_ir.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+    )
+    score_ir.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Uitvoer Score-IR JSON (default: sibling .score-ir.json).",
+    )
+    score_ir.add_argument(
+        "--musicxml",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="PATH",
+        help=(
+            "Schrijf ook from-ir MusicXML. Zonder PATH: sibling "
+            ".from-ir.musicxml."
+        ),
+    )
+    score_ir.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore-executable (default: auto).",
+    )
+
+    mscz_prod = sub.add_parser(
+        "mscz",
+        help="Partituur-conform .mscz-sibling (layout partituur).",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    mscz_prod.add_argument(
+        "path",
+        help=".mscz-bestand of map met .mscz-bestanden (recursief).",
+    )
+    mscz_prod.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help=(
+            "Uitvoer (default: sibling <bronnaam>.mscz). "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+    mscz_prod.add_argument(
+        "--musescore",
+        default=None,
+        help="Pad naar MuseScore (ongebruikt bij pure normalize; default: auto).",
+    )
+
     normalize = sub.add_parser(
         "normalize",
         help="Pas layoutprofiel/leesbaarheid toe op bestaand .mscz.",
@@ -316,13 +387,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     text = sub.add_parser(
         "text",
-        help="Platte gezongen tekst uit .mscz (via MuseScore; geen .mvsa).",
+        help="Lyrics-product: sibling .lyrics.txt (+ meta).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
-            "Zelfde extractie als ``vsa text`` op MusicXML: eerste part met\n"
-            "lyric number 1, lettergrepen samengevoegd tot woorden.\n"
-            "Schrijft geen .mvsa-sibling.\n"
-            "Bij een map: één run per .mscz; -o alleen bij één bronbestand."
+            "Default: sibling <bronnaam>.lyrics.txt + products-meta key lyrics.\n"
+            "Alleen .mscz (straat-puur)."
         ),
     )
     text.add_argument(
@@ -334,7 +403,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--output",
         default=None,
         help=(
-            "Schrijf platte tekst naar dit bestand i.p.v. stdout. "
+            "Uitvoer (default: sibling .lyrics.txt). "
             "Alleen bij precies één bronbestand."
         ),
     )
@@ -567,26 +636,166 @@ def _cmd_mscz_normalize(ns: argparse.Namespace) -> int:
 
 
 def _cmd_mscz_text(ns: argparse.Namespace) -> int:
-    """Forward naar ``vsa text`` per bronbestand (geen .mvsa)."""
-    from .cli import main as vsa_main
+    from .street_product_export import write_lyrics_product
+    from .street_products import LYRICS_KEY, merge_street_product_meta
 
     files = _collect(ns.path)
     if files is None:
         return 1
     if _reject_multi_output(files, ns.output):
         return 1
+    musescore = Path(ns.musescore) if ns.musescore else None
     exit_code = 0
     for path in files:
-        forwarded = ["text", str(path)]
-        if ns.output:
-            forwarded.extend(["-o", ns.output])
-        if ns.musescore:
-            forwarded.extend(["--musescore", ns.musescore])
-        if len(files) > 1:
-            print(f"=== {path} ===", flush=True)
-        rc = vsa_main(forwarded)
-        if rc != 0:
-            exit_code = rc
+        out = (
+            Path(ns.output)
+            if ns.output
+            else derived_output_path(path, ".lyrics.txt")
+        )
+        try:
+            written = write_lyrics_product(path, out, musescore=musescore)
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+        meta = merge_street_product_meta(path, {LYRICS_KEY: written})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
+    from .audio_export import AUDIO_FORMATS, AudioExportError, export_to_audio
+    from .street_products import MP3_KEY, merge_street_product_meta
+
+    fmt = ns.mscz_command
+    if fmt not in AUDIO_FORMATS:
+        fmt = "mp3"
+    files = _collect(ns.path)
+    if files is None:
+        return 1
+    if _reject_multi_output(files, ns.output):
+        return 1
+    musescore = Path(ns.musescore) if ns.musescore else None
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(ns.output)
+            if ns.output
+            else derived_output_path(path, f".{fmt}")
+        )
+        try:
+            written = export_to_audio(
+                path, out, format_name=fmt, musescore=musescore
+            )
+        except AudioExportError as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+        if fmt == "mp3":
+            meta = merge_street_product_meta(path, {MP3_KEY: written})
+            if meta is not None:
+                print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
+    from .score_ir_musicxml import (
+        ScoreIrMusicxmlError,
+        export_score_ir_path_to_musicxml,
+    )
+    from .street_product_export import (
+        StreetProductExportError,
+        export_bron_to_score_ir,
+    )
+    from .street_products import merge_street_product_meta
+
+    files = _collect(ns.path)
+    if files is None:
+        return 1
+    if _reject_multi_output(files, ns.output):
+        return 1
+    musescore = Path(ns.musescore) if ns.musescore else None
+    mxl_opt = getattr(ns, "musicxml", None)
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(ns.output)
+            if ns.output
+            else derived_output_path(path, ".score-ir.json")
+        )
+        mxl_path = None
+        if mxl_opt is not None:
+            if mxl_opt == "":
+                mxl_path = derived_output_path(path, ".from-ir.musicxml")
+            else:
+                mxl_path = Path(mxl_opt)
+        try:
+            export_bron_to_score_ir(path, out, musescore=musescore)
+            if mxl_path is not None:
+                export_score_ir_path_to_musicxml(out, mxl_path)
+        except (StreetProductExportError, ScoreIrMusicxmlError) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {out}")
+        meta_products: dict[str, Path] = {"score-ir": out}
+        if mxl_path is not None:
+            print(f"MusicXML: {mxl_path}")
+            meta_products["from-ir"] = mxl_path
+        meta = merge_street_product_meta(path, meta_products)
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mscz_product(ns: argparse.Namespace) -> int:
+    """Partituur-sibling ``*.mscz.mscz`` (meta-key ``mscz``)."""
+    from .street_product_export import (
+        StreetProductExportError,
+        export_bron_to_mscz_product,
+    )
+    from .street_products import MSCZ_PRODUCT_KEY, merge_street_product_meta
+
+    files = _collect(ns.path)
+    if files is None:
+        return 1
+    if _reject_multi_output(files, ns.output):
+        return 1
+    musescore = Path(ns.musescore) if ns.musescore else None
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(ns.output)
+            if ns.output
+            else derived_output_path(path, ".mscz")
+        )
+        try:
+            written = export_bron_to_mscz_product(
+                path, out, musescore=musescore
+            )
+        except StreetProductExportError as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+        meta = merge_street_product_meta(path, {MSCZ_PRODUCT_KEY: written})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 

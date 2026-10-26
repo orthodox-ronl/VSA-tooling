@@ -63,19 +63,23 @@ Voorbeelden: `lied.vsa.products-meta.json`, `lied.mvsa.products-meta.json`,
 | `products.*.sha256`          | Ja        | SHA-256 (hex, lowercase) van de bytes van dat sibling-bestand.            |
 | `products.*.generated_at`    | Ja        | UTC-tijdstip waarop **dit** productbestand geschreven werd (informatief). |
 
-Product-keys per straat: zie [contract-index](contract-index.md) (tabel
-`mvsa`/`mscz`/`vsa products`). Bladreeks-SVG: één pagina → key `svg`
-(bestand `stem.svg`); ≥2 MuseScore-pagina’s → keys `svg-1`…`svg-N`
-(bestanden `stem-1.svg`…; seed `stem.svg` bestaat dan niet). Wissel
-bladreeks ↔ enkel: dode keys droppen (`svg` of oude `svg-N`).
+**Universele standaardkeys** (zelfde set voor `vsa` / `mvsa` / `mscz`
+`products`): `mxl`, `score-ir`, `from-ir`, `mscz`, `pdf`, `mp3`,
+`lyrics`, plus `svg` of `svg-1`…`svg-N`. Zie
+[contract-index — universele productcatalogus](contract-index.md#universele-productcatalogus).
+
+Bladreeks-SVG: één pagina → key `svg` (bestand `stem.svg`); ≥2
+MuseScore-pagina’s → keys `svg-1`…`svg-N` (bestanden `stem-1.svg`…;
+seed `stem.svg` bestaat dan niet). Wissel bladreeks ↔ enkel: dode keys
+droppen (`svg` of oude `svg-N`).
 `freshness(..., required_keys={"svg", …})` accepteert `svg-N` als
 voldoening voor de abstracte eis `svg`.
 
 ### Wie schrijft welke keys
 
-- **`{straat} products`** — schrijft alle standaardkeys van die straat
-  (volledige set) + top-level `generated_at`.
-- **Individuele product-subs** (bijv. `mscz svg`, `mscz mxl`) — mogen de
+- **`{straat} products`** — schrijft de **volledige universele**
+  standaardset + top-level `generated_at` (bron = die straat).
+- **Individuele product-subs** (bijv. `mscz svg`, `mvsa mp3`) — mogen de
   sidecar **mergen**: bestaande keys van andere producten behouden als
   `bron_sha256` nog klopt; bijgewerkte keys krijgen nieuwe `file` /
   `sha256` / `generated_at`. Wijkt de bron-hash af → treat as stale /
@@ -134,10 +138,8 @@ check (`--only-invalid`); die vervangt deze herkomst-sidecar niet.
 
 | Rol                                             | Verantwoordelijkheid                                                                                           |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Tooling `vsa`/`mvsa`/`mscz products`            | Schrijft sidecar bij elke geslaagde export (schema 2: hashes + product-`generated_at`)                         |
-| Tooling `mscz mxl` / `svg` / `pdf`              | Merget de bijbehorende product-key(s) in dezelfde sidecar (sibling-output; anders overslaan + melding)         |
-| Tooling `mvsa mxl` / `svg` / `pdf` / `score-ir` | Idem; `score-ir` + optioneel `from-ir` bij `--musicxml`                                                        |
-| Tooling `vsa musicxml` / `vsa svg`              | Merget `mxl` / `svg` (bron `.vsa`; sibling-output)                                                             |
+| Tooling `vsa`/`mvsa`/`mscz products`            | Schrijft sidecar bij elke geslaagde export (universele keys; schema 2)                                         |
+| Tooling `{straat} {product}`                    | Merget de bijbehorende product-key(s) (sibling-output; anders overslaan + melding)                             |
 | Tooling `freshness()` / `--force`               | Leest sidecar om regen te slaan                                                                                |
 | Bibliotheek `products` / `check`                | Mag **alleen lezen** voor orchestratie en publicatiecontrole; geen eigen herkomststempel als bron van waarheid |
 

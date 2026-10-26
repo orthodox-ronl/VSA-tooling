@@ -11,7 +11,7 @@ from pathlib import Path
 from .block_parser import DEFAULT_METADATA, parse_markdown_blocks
 from .config import load_config
 from .markdown_builder import build_markdown_site
-from .markdown_pdf import PdfError, write_markdown_pdf
+from .markdown_pdf import PdfError
 from .markdown_processor import ProcessValidationError, process_path
 from .musicxml_package import (
     _MUSICXML_SUFFIX,
@@ -117,7 +117,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     mvsa_sub = parser.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products}",
+        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,text,import,products}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -678,6 +678,30 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
     )
+    m_text = mvsa_sub.add_parser(
+        "text",
+        help="Platte gezongen tekst → sibling .lyrics.txt (product lyrics).",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  mvsa text lied.mvsa\n"
+            "  mvsa text lied.mvsa -o generated\\lied.lyrics.txt"
+        ),
+    )
+    m_text.add_argument(
+        "path",
+        help=".mvsa-bestand of map met .mvsa-bestanden (recursief).",
+    )
+    m_text.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help=(
+            "Uitvoer (default: sibling <bronnaam>.lyrics.txt). "
+            "Alleen bij precies één bronbestand."
+        ),
+    )
+
     from .cli_import import add_mvsa_import_parser
     from .street_products import add_products_parser
 
@@ -746,7 +770,31 @@ def _build_parser():
 
     from .street_products import add_products_parser as _add_vsa_products_parser
 
-    _add_vsa_products_parser(subparsers, street="vsa", with_skip_svg=False)
+    _add_vsa_products_parser(subparsers, street="vsa", with_skip_svg=True)
+
+    vsa_score_ir = subparsers.add_parser(
+        "score-ir",
+        help="Score-IR (+ optioneel from-ir) uit .vsa.",
+    )
+    vsa_score_ir.add_argument("path", help=".vsa-bestand of map (recursief).")
+    vsa_score_ir.add_argument("-o", "--output", default=None)
+    vsa_score_ir.add_argument(
+        "--musicxml",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="PATH",
+        help="Schrijf ook from-ir MusicXML (zonder PATH: sibling).",
+    )
+    vsa_score_ir.add_argument("--musescore", default=None)
+
+    vsa_mscz = subparsers.add_parser(
+        "mscz",
+        help="Partituur-.mscz-sibling uit .vsa (meta-key mscz).",
+    )
+    vsa_mscz.add_argument("path", help=".vsa-bestand of map (recursief).")
+    vsa_mscz.add_argument("-o", "--output", default=None)
+    vsa_mscz.add_argument("--musescore", default=None)
 
     process = subparsers.add_parser("process")
     process.add_argument("input")
@@ -839,34 +887,22 @@ def _build_parser():
     text_cmd = subparsers.add_parser(
         "text",
         help=(
-            "Platte gezongen tekst uit .vsa / .mvsa / MusicXML / .mscz "
-            "(zonder notatie; voor zoekindex)."
+            "Lyrics-product uit .vsa → sibling .lyrics.txt (meta lyrics)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
-            "Bronnen:\n"
-            "  .vsa / .mvsa — directe extractie\n"
-            "  .mxl / .musicxml / .xml — lyrics uit MusicXML\n"
-            "  .mscz — via tijdelijke MuseScore-.mxl (geen .mvsa)\n"
-            "\n"
-            "MusicXML-regel: eerste part met lyric number 1; geen dubbele\n"
-            "SATB-lyrics. Alias voor .mscz: mscz text PATH.\n"
-            "\n"
-            "PATH = één bronbestand of map (recursief). "
-            "-o alleen bij precies één bron.\n"
+            "Alleen .vsa (straat-puur). Voor .mvsa: mvsa text; voor .mscz: "
+            "mscz text.\n"
+            "Default: sibling <bronnaam>.lyrics.txt + products-meta.\n"
             "\n"
             "voorbeelden:\n"
             "  vsa text lied.vsa\n"
-            "  vsa text lied.mscz.mxl -o lied.lyrics.txt\n"
-            "  vsa text lied.mscz --musescore \"C:\\\\Program Files\\\\MuseScore 4\\\\bin\\\\MuseScore4.exe\""
+            "  vsa text lied.vsa -o generated\\lied.lyrics.txt"
         ),
     )
     text_cmd.add_argument(
         "path",
-        help=(
-            ".vsa/.mvsa/.mxl/.musicxml/.xml/.mscz-bestand, of map met "
-            "zulke bestanden (recursief)."
-        ),
+        help=".vsa-bestand of map met .vsa-bestanden (recursief).",
     )
     text_cmd.add_argument(
         "-o",
@@ -976,22 +1012,19 @@ def _build_parser():
 
     audio = subparsers.add_parser(
         "audio",
-        help="Exporteer naar audio (.mp3/.ogg/.wav) via MuseScore (preview-luisteren).",
+        help="Exporteer .vsa naar audio (.mp3/.ogg/.wav) via MuseScore.",
         description=(
-            "Maak een afspeelbaar audiobestand uit playback-MusicXML of "
-            ".vsa / .mvsa / .mscz (via .mxl). Alleen het artefact - geen "
-            "speler. Vereist MuseScore 4 (of 3)."
+            "Preview-audio uit .vsa (straat-puur). Voor .mvsa: mvsa mp3; "
+            "voor .mscz: mscz mp3. Vereist MuseScore 4 (of 3)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
-            "INPUT = één bronbestand of map (recursief). Bij een map is "
+            "INPUT = één .vsa of map (recursief). Bij een map is "
             "OUTPUT een uitvoermap; --keep-mxl alleen bij één bron.\n"
             "\n"
             "voorbeelden:\n"
             "  vsa audio examples\\docs-walkthroughs\\coria-oefenlink\\"
-            "oefenmelodie.vsa generated\\oefenmelodie.mp3\n"
-            "  vsa audio lied.mxl generated\\lied.mp3\n"
-            "  vsa audio lied.mxl generated\\lied --format ogg"
+            "oefenmelodie.vsa generated\\oefenmelodie.mp3"
         ),
     )
     audio.add_argument(
@@ -1056,14 +1089,20 @@ def _build_parser():
 
     pdf = subparsers.add_parser(
         "pdf",
-        help="Render een Markdownbestand (VSA, includes, pagebreaks) naar PDF.",
+        help=(
+            "Verouderd: Markdown → A4-PDF. Gebruik ``md pdf`` "
+            "(zelfde keten; default sibling *.md.pdf)."
+        ),
     )
     pdf.add_argument("input", help="Markdownbestand (.md) met VSA-blokken en/of includes.")
     pdf.add_argument(
         "-o",
         "--output",
         default=None,
-        help="Uitvoer-PDF (default: <stem>.pdf in de huidige map).",
+        help=(
+            "Uitvoer-PDF (default: sibling <bronnaam>.pdf, bv. index.md.pdf). "
+            "Zie md pdf."
+        ),
     )
     pdf.add_argument("--config", default=None)
     pdf.add_argument(
@@ -1112,11 +1151,14 @@ def _run(args):
     if args.command == "products":
         from .street_products import run_street_products
 
+        musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
         return run_street_products(
             "vsa",
             args.path,
             force=bool(args.force),
             dry_run=bool(args.dry_run),
+            skip_svg=bool(getattr(args, "skip_svg", False)),
+            musescore=musescore,
         )
 
     if args.command == "process":
@@ -1133,6 +1175,12 @@ def _run(args):
 
     if args.command == "text":
         return _cmd_text(args)
+
+    if args.command == "score-ir":
+        return _cmd_vsa_score_ir(args)
+
+    if args.command == "mscz":
+        return _cmd_vsa_mscz_product(args)
 
     if args.command == "zoektekst":
         return _cmd_zoektekst(args)
@@ -1340,39 +1388,57 @@ def _cmd_build_markdown(args, config):
 
 
 def _cmd_pdf(args, config):
-    input_path = Path(args.input)
-    output_path = Path(args.output) if args.output else Path(input_path.stem + ".pdf")
-    chrome_command = [args.chrome] if args.chrome else None
-    result = write_markdown_pdf(
-        input_path,
-        output_path,
+    """Verouderd alias voor ``md pdf`` (site-Markdown → A4-PDF)."""
+    from .cli_md import run_markdown_pdf_cli
+
+    print(
+        "Let op: `vsa pdf` is verouderd; gebruik `md pdf` "
+        "(zelfde opties; default sibling *.md.pdf).",
+        file=sys.stderr,
+    )
+    return run_markdown_pdf_cli(
+        input_path=Path(args.input),
+        output=Path(args.output) if args.output else None,
+        config_path=getattr(args, "config", None),
         content_root=args.content_root,
         bron_root=args.bron_root,
-        config=config,
         max_line_width=args.max_line_width,
-        chrome_command=chrome_command,
+        chrome=args.chrome,
     )
-    print(f"PDF geschreven naar: {result}")
-    return 0
 
 
 def _cmd_text(args) -> int:
+    """``vsa text``: alleen ``.vsa`` → sibling ``*.lyrics.txt`` (+ meta)."""
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
-    from .text_export import plain_text_from_path
+    from .street_product_export import write_lyrics_product
+    from .street_products import LYRICS_KEY, merge_street_product_meta
 
-    files = _cli_collect_sources(
-        args.path, (".vsa", ".mvsa", ".mxl", ".musicxml", ".xml", ".mscz")
-    )
+    if _reject_wrong_street_source(
+        "vsa", "text", args.path, wrong_suffix=".mscz"
+    ):
+        return 1
+    if _reject_wrong_street_source(
+        "vsa", "text", args.path, wrong_suffix=".mvsa"
+    ):
+        return 1
+    if _reject_non_street_file("vsa", "text", args.path, allowed=(".vsa",)):
+        return 1
+
+    files = _cli_collect_sources(args.path, (".vsa",))
     if files is None:
         return 1
     if _cli_reject_multi_single_opts(files, args):
         return 1
     musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
-    out_single = Path(args.output) if getattr(args, "output", None) else None
     exit_code = 0
     for path in files:
+        out = (
+            Path(args.output)
+            if getattr(args, "output", None)
+            else derived_output_path(path, ".lyrics.txt")
+        )
         try:
-            text = plain_text_from_path(path, musescore=musescore)
+            written = write_lyrics_product(path, out, musescore=musescore)
         except ValueError as exc:
             print(f"{path}: text: {exc}", file=sys.stderr)
             exit_code = 1
@@ -1381,19 +1447,14 @@ def _cmd_text(args) -> int:
             print(f"{path}: text: {exc}", file=sys.stderr)
             exit_code = 1
             continue
-        except Exception as exc:  # noqa: BLE001 — CLI toont parsefouten leesbaar
+        except Exception as exc:  # noqa: BLE001
             print(f"text: fout bij lezen van {path}: {exc}", file=sys.stderr)
             exit_code = 1
             continue
-        if out_single is not None:
-            out_single.parent.mkdir(parents=True, exist_ok=True)
-            payload = text if text.endswith("\n") or text == "" else text + "\n"
-            out_single.write_text(payload, encoding="utf-8", newline="\n")
-            print(f"Geschreven: {out_single}")
-        else:
-            if len(files) > 1:
-                print(f"=== {path} ===", flush=True)
-            print(text)
+        print(f"Geschreven: {written}")
+        meta = merge_street_product_meta(path, {LYRICS_KEY: written})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
@@ -1619,10 +1680,17 @@ def _cmd_audio(args, config) -> int:
     from .audio_export import AudioExportError, export_to_audio, normalize_audio_format
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
+    from .street_products import MP3_KEY, merge_street_product_meta
 
-    files = _cli_collect_sources(
-        args.input, (".mxl", ".musicxml", ".xml", ".vsa", ".mvsa", ".mscz")
-    )
+    if _reject_wrong_street_source(
+        "vsa", "audio", args.input, wrong_suffix=".mscz", hint_cmd="mp3"
+    ):
+        return 1
+    if _reject_wrong_street_source(
+        "vsa", "audio", args.input, wrong_suffix=".mvsa", hint_cmd="mp3"
+    ):
+        return 1
+    files = _cli_collect_sources(args.input, (".vsa",))
     if files is None:
         return 1
     # Positional ``output`` is altijd gezet; bij meerdere bronnen = uitvoermap.
@@ -1677,6 +1745,10 @@ def _cmd_audio(args, config) -> int:
         print(f"Audio geschreven naar: {written}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
+        if format_name == "mp3":
+            meta = merge_street_product_meta(path, {MP3_KEY: written})
+            if meta is not None:
+                print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
@@ -1812,14 +1884,60 @@ def _cli_collect_sources(
 
 def _reject_mscz_use_mscz_street(cmd: str, path: Path | str) -> bool:
     """True = ``.mscz``-bestand geweigerd; stderr wijst naar ``mscz {cmd}``."""
+    return _reject_wrong_street_source("mvsa", cmd, path, wrong_suffix=".mscz")
+
+
+def _reject_wrong_street_source(
+    cli: str,
+    cmd: str,
+    path: Path | str,
+    *,
+    wrong_suffix: str,
+    hint_street: str | None = None,
+    hint_cmd: str | None = None,
+) -> bool:
+    """True = bronbestand met *wrong_suffix* geweigerd; stderr met hint."""
     p = Path(path)
-    if p.is_file() and p.suffix.lower() == ".mscz":
-        print(
-            f"mvsa {cmd} weigert .mscz; gebruik: mscz {cmd} {p}",
-            file=sys.stderr,
-        )
-        return True
-    return False
+    if not (p.is_file() and p.suffix.lower() == wrong_suffix.lower()):
+        return False
+    street = hint_street or wrong_suffix.lstrip(".")
+    sub = hint_cmd or cmd
+    print(
+        f"{cli} {cmd} weigert {wrong_suffix}; gebruik: {street} {sub} {p}",
+        file=sys.stderr,
+    )
+    return True
+
+
+def _reject_non_street_file(
+    cli: str,
+    cmd: str,
+    path: Path | str,
+    *,
+    allowed: tuple[str, ...],
+) -> bool:
+    """True = enkel bestand met verkeerde extensie geweigerd."""
+    p = Path(path)
+    if not p.is_file():
+        return False
+    suf = p.suffix.lower()
+    if suf in {a.lower() for a in allowed}:
+        return False
+    # Hint: map extensie → straat
+    hint = {
+        ".mscz": "mscz",
+        ".mvsa": "mvsa",
+        ".vsa": "vsa",
+        ".mxl": "mxl",
+        ".musicxml": "mxl",
+        ".xml": "mxl",
+    }.get(suf, "de juiste straat-CLI")
+    print(
+        f"{cli} {cmd} weigert {suf or '(geen extensie)'}; "
+        f"gebruik: {hint} {cmd} {p}",
+        file=sys.stderr,
+    )
+    return True
 
 
 def _cli_reject_multi_single_opts(
@@ -2008,13 +2126,12 @@ def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
         parser = mvsa_sub.add_parser(
             format_name,
             help=(
-                f"Exporteer .mvsa (of .mxl/.mscz) naar audio (.{format_name}) "
-                "via MuseScore."
+                f"Exporteer .mvsa naar audio (.{format_name}) via MuseScore."
             ),
             description=(
-                f"Preview-luisteren: playback-.mxl -> MuseScore -> .{format_name}. "
-                "Bron .mvsa/.vsa: eerst MusicXML-playback. .mscz: fallback via .mxl. "
-                "Alleen het artefact; de consumer-site maakt de afspeelknop."
+                f"Preview-luisteren: .mvsa → playback-.mxl → MuseScore → "
+                f".{format_name}. Alleen .mvsa (straat-puur); voor .mscz: "
+                f"mscz {format_name}; voor .vsa: vsa audio / vsa {format_name}."
                 + (
                     " Alias: audio (verouderd; zelfde als mp3)."
                     if format_name == "mp3"
@@ -2026,18 +2143,13 @@ def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
                 "voorbeelden:\n"
                 f"  mvsa {format_name} examples\\mvsa\\alleluia-toon-1.mvsa\n"
                 f"  mvsa {format_name} lied.mvsa "
-                f"-o generated\\lied.{format_name}\n"
-                f"  mvsa {format_name} lied.mxl\n"
-                f"  mvsa {format_name} lied.mscz"
+                f"-o generated\\lied.{format_name}"
             ),
             **extra,
         )
         parser.add_argument(
             "path",
-            help=(
-                ".mvsa-/.mxl-/.musicxml-/.vsa-/.mscz-bestand, of map "
-                "(recursief)."
-            ),
+            help=".mvsa-bestand of map met .mvsa-bestanden (recursief).",
         )
         parser.add_argument(
             "-o",
@@ -2099,6 +2211,8 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_score_ir(args)
     if getattr(args, "mvsa_command", None) == "kuiser":
         return _cmd_mvsa_kuiser(args)
+    if getattr(args, "mvsa_command", None) == "text":
+        return _cmd_mvsa_text(args)
     if getattr(args, "mvsa_command", None) == "import":
         from .cli_import import run_mvsa_import
 
@@ -2343,28 +2457,20 @@ def _cmd_mvsa_score_ir(args) -> int:
 
 
 def _cmd_mvsa_musicxml(args) -> int:
-    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .musicxml_package import musicxml_output_suffix
-    from .musicxml_playback_normalize import (
-        export_mscz_to_playback_mxl,
-        normalize_playback_mxl_path,
-    )
     from .mvsa_musicxml import MvsaExportError, export_mvsa_path
     from .mvsa_validate import MvsaValidationError, format_diagnostic
+    from .street_products import merge_street_product_meta
 
-    files = _cli_collect_sources(
-        args.path, (".mvsa", ".mscz", ".mxl", ".musicxml", ".xml")
-    )
+    if _reject_wrong_street_source("mvsa", "mxl", args.path, wrong_suffix=".mscz"):
+        return 1
+    if _reject_non_street_file("mvsa", "mxl", args.path, allowed=(".mvsa",)):
+        return 1
+    files = _cli_collect_sources(args.path, (".mvsa",))
     if files is None:
         return 1
     if _cli_reject_multi_single_opts(files, args):
         return 1
-    mvsa_only = (
-        args.section
-        or getattr(args, "bibliotheek_id", None)
-        or bool(getattr(args, "hulptekst", False))
-        or bool(getattr(args, "hulptekst_as_parts", False))
-    )
     exit_code = 0
     for path in files:
         out = (
@@ -2374,59 +2480,17 @@ def _cmd_mvsa_musicxml(args) -> int:
         )
         if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
             out = out.with_suffix(musicxml_output_suffix(path=out))
-        suffix = path.suffix.lower()
         try:
-            if suffix == ".mvsa":
-                export_mvsa_path(
-                    path,
-                    out,
-                    section_id=args.section,
-                    bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                    hulptekst=bool(getattr(args, "hulptekst", False)),
-                    hulptekst_as_parts=bool(
-                        getattr(args, "hulptekst_as_parts", False)
-                    ),
-                )
-            elif suffix == ".mscz":
-                if mvsa_only:
-                    print(
-                        "mvsa mxl: --section/--bibliotheek-id/--hulptekst/"
-                        "--hulptekst-as-parts gelden alleen bij .mvsa",
-                        file=sys.stderr,
-                    )
-                    exit_code = 1
-                    continue
-                musescore = (
-                    Path(args.musescore)
-                    if getattr(args, "musescore", None)
-                    else None
-                )
-                export_mscz_to_playback_mxl(path, out, musescore=musescore)
-            elif suffix in {".mxl", ".musicxml", ".xml"}:
-                if mvsa_only:
-                    print(
-                        "mvsa mxl: --section/--bibliotheek-id/--hulptekst/"
-                        "--hulptekst-as-parts gelden alleen bij .mvsa",
-                        file=sys.stderr,
-                    )
-                    exit_code = 1
-                    continue
-                if getattr(args, "musescore", None):
-                    print(
-                        "mvsa mxl: --musescore geldt alleen bij .mscz",
-                        file=sys.stderr,
-                    )
-                    exit_code = 1
-                    continue
-                normalize_playback_mxl_path(path, out, apply_timing=True)
-            else:
-                print(
-                    f"mvsa mxl verwacht .mvsa, .mscz of .mxl/.musicxml, "
-                    f"kreeg: {path.name}",
-                    file=sys.stderr,
-                )
-                exit_code = 1
-                continue
+            export_mvsa_path(
+                path,
+                out,
+                section_id=args.section,
+                bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                hulptekst=bool(getattr(args, "hulptekst", False)),
+                hulptekst_as_parts=bool(
+                    getattr(args, "hulptekst_as_parts", False)
+                ),
+            )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
@@ -2437,17 +2501,10 @@ def _cmd_mvsa_musicxml(args) -> int:
             print(f"{loc}ERROR: {exc}", file=sys.stderr)
             exit_code = 1
             continue
-        except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
-            exit_code = 1
-            continue
         print(f"Geschreven: {out}")
-        if suffix == ".mvsa":
-            from .street_products import merge_street_product_meta
-
-            meta = merge_street_product_meta(path, {"mxl": out})
-            if meta is not None:
-                print(f"Meta: {meta.name}", flush=True)
+        meta = merge_street_product_meta(path, {"mxl": out})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
@@ -2499,6 +2556,147 @@ def _cmd_mvsa_mscz(args) -> int:
         print(f"Geschreven: {out}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
+        from .street_products import MSCZ_PRODUCT_KEY, merge_street_product_meta
+
+        meta = merge_street_product_meta(path, {MSCZ_PRODUCT_KEY: out})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mvsa_text(args) -> int:
+    """``mvsa text``: alleen ``.mvsa`` → sibling lyrics + meta."""
+    from .street_product_export import write_lyrics_product
+    from .street_products import LYRICS_KEY, merge_street_product_meta
+
+    if _reject_wrong_street_source("mvsa", "text", args.path, wrong_suffix=".mscz"):
+        return 1
+    if _reject_wrong_street_source(
+        "mvsa", "text", args.path, wrong_suffix=".vsa", hint_street="vsa"
+    ):
+        return 1
+    if _reject_non_street_file("mvsa", "text", args.path, allowed=(".mvsa",)):
+        return 1
+    files = _cli_collect_sources(args.path, (".mvsa",))
+    if files is None:
+        return 1
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(args.output)
+            if args.output
+            else derived_output_path(path, ".lyrics.txt")
+        )
+        try:
+            written = write_lyrics_product(path, out)
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+        meta = merge_street_product_meta(path, {LYRICS_KEY: written})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_vsa_score_ir(args) -> int:
+    from .score_ir_musicxml import (
+        ScoreIrMusicxmlError,
+        export_score_ir_path_to_musicxml,
+    )
+    from .street_product_export import (
+        StreetProductExportError,
+        export_bron_to_score_ir,
+    )
+    from .street_products import merge_street_product_meta
+
+    if _reject_non_street_file("vsa", "score-ir", args.path, allowed=(".vsa",)):
+        return 1
+    files = _cli_collect_sources(args.path, (".vsa",))
+    if files is None:
+        return 1
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
+    musescore = Path(args.musescore) if args.musescore else None
+    mxl_opt = getattr(args, "musicxml", None)
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(args.output)
+            if args.output
+            else derived_output_path(path, ".score-ir.json")
+        )
+        mxl_path = None
+        if mxl_opt is not None:
+            mxl_path = (
+                derived_output_path(path, ".from-ir.musicxml")
+                if mxl_opt == ""
+                else Path(mxl_opt)
+            )
+        try:
+            export_bron_to_score_ir(path, out, musescore=musescore)
+            if mxl_path is not None:
+                export_score_ir_path_to_musicxml(out, mxl_path)
+        except (StreetProductExportError, ScoreIrMusicxmlError) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {out}")
+        meta_products: dict[str, Path] = {"score-ir": out}
+        if mxl_path is not None:
+            print(f"MusicXML: {mxl_path}")
+            meta_products["from-ir"] = mxl_path
+        meta = merge_street_product_meta(path, meta_products)
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_vsa_mscz_product(args) -> int:
+    from .street_product_export import (
+        StreetProductExportError,
+        export_bron_to_mscz_product,
+    )
+    from .street_products import MSCZ_PRODUCT_KEY, merge_street_product_meta
+
+    if _reject_non_street_file("vsa", "mscz", args.path, allowed=(".vsa",)):
+        return 1
+    files = _cli_collect_sources(args.path, (".vsa",))
+    if files is None:
+        return 1
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
+    musescore = Path(args.musescore) if args.musescore else None
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(args.output)
+            if args.output
+            else derived_output_path(path, ".mscz")
+        )
+        try:
+            written = export_bron_to_mscz_product(
+                path, out, musescore=musescore
+            )
+        except StreetProductExportError as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+        meta = merge_street_product_meta(path, {MSCZ_PRODUCT_KEY: written})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 
@@ -2633,16 +2831,27 @@ def _cmd_mvsa_audio(args) -> int:
     from .audio_export import AUDIO_FORMATS, AudioExportError, export_to_audio
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
+    from .street_products import MP3_KEY, merge_street_product_meta
 
-    files = _cli_collect_sources(
-        args.path, (".mvsa", ".mxl", ".musicxml", ".xml", ".vsa", ".mscz")
-    )
+    cmd = getattr(args, "mvsa_command", None)
+    format_name = cmd if cmd in AUDIO_FORMATS else "mp3"
+    if _reject_wrong_street_source(
+        "mvsa", format_name, args.path, wrong_suffix=".mscz"
+    ):
+        return 1
+    if _reject_wrong_street_source(
+        "mvsa", format_name, args.path, wrong_suffix=".vsa", hint_street="vsa"
+    ):
+        return 1
+    if _reject_non_street_file(
+        "mvsa", format_name, args.path, allowed=(".mvsa",)
+    ):
+        return 1
+    files = _cli_collect_sources(args.path, (".mvsa",))
     if files is None:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mxl"):
         return 1
-    cmd = getattr(args, "mvsa_command", None)
-    format_name = cmd if cmd in AUDIO_FORMATS else "mp3"
     musescore = Path(args.musescore) if args.musescore else None
     exit_code = 0
     for path in files:
@@ -2678,6 +2887,10 @@ def _cmd_mvsa_audio(args) -> int:
         print(f"Geschreven: {written}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
+        if format_name == "mp3":
+            meta = merge_street_product_meta(path, {MP3_KEY: written})
+            if meta is not None:
+                print(f"Meta: {meta.name}", flush=True)
     return exit_code
 
 

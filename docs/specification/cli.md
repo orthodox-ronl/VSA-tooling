@@ -426,26 +426,32 @@ Betekenis:
 | shortcode zichtbaar als tekst | controleer Hugo shortcode-bestand     |
 | oude output blijft zichtbaar  | verwijder `generated` en bouw opnieuw |
 
-## `vsa pdf <bestand.md>`
+## `md pdf <bestand.md>` (verouderd: `vsa pdf`)
 
 ### Doel
 
 Maak een A4-PDF van één Markdownbestand: VSA-blokken, includes en pagebreaks
 worden net als bij `build-markdown` opgelost; daarna print Edge/Chrome.
+Canonieke CLI: `md pdf` (alias `markdown pdf`). `vsa pdf` blijft als
+verouderd alias met stderr-waarschuwing.
 
 ### Gebruik
 
 ```cmd
-vsa pdf <bestand.md> -o uit.pdf
+md pdf <bestand.md>
+md pdf <bestand.md> -o uit.pdf
 ```
+
+Default zonder `-o`: sibling `<bronnaam>.pdf` (bijv. `index.md.pdf`).
 
 ### Output
 
 | Output | Voorbeeld        |
 | ------ | ---------------- |
-| PDF    | `uit.pdf`        |
+| PDF    | `index.md.pdf`   |
 
 Fouten (validatie) gebruiken hetzelfde formaat als `vsa validate`.
+Man-pagina: [`md`](../reference/cli/md.md).
 
 ## `vsa.toml`
 

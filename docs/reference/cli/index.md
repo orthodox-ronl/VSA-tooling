@@ -70,7 +70,8 @@ echo %ERRORLEVEL%
 | [`svg`](svg.md)                                  | Render één [vsa-bestand](@bron) naar één SVG-bestand.                                                         |
 | [`process`](process.md)                          | Genereer SVG-bestanden uit [VSA-blokken](@) in Markdown (zonder Markdown te herschrijven).                    |
 | [`build-markdown`](build-markdown.md)            | Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.                                            |
-| [`pdf`](pdf.md)                                  | Render één Markdownbestand (VSA, includes, pagebreaks) naar A4-PDF.                                           |
+| [`md`](md.md)                                    | Markdown-straat: `md pdf` / `md svg` / `md text` (site-PDF, VSA-SVG’s, platte tekst).                         |
+| [`pdf`](pdf.md)                                  | Verouderd alias voor [`md pdf`](md.md#md-pdf) (Markdown → A4-PDF).                                            |
 | [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).                                  |
 | [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).                          |
 | [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).                                  |
@@ -81,6 +82,9 @@ echo %ERRORLEVEL%
 | [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3 (`mvsa`).                                 |
 | [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: `mxl mvsa`; `mxl mscz`; validate/normalize.                                          |
 | [`mscz`](mscz.md)                                | Bron `.mscz`: `mvsa`; `mxl`; `svg`; `pdf`; `normalize`; text; `compare`; `products`.                          |
+
+Scripts voor format-straten: `scripts\mvsa.cmd`, `scripts\mxl.cmd`,
+`scripts\mscz.cmd`, `scripts\md.cmd` (zie [scripts](../../formats/scripts.md)).
 
 Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze

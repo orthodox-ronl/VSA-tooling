@@ -2,23 +2,27 @@
 
 Contracten (S8/S13 e.d.): [contract-index](contract-index.md).
 
-JSON-tussenmodel tussen `.mvsa` en schermweergave (koormap / shortcode
-`muziek`, later CoriB). Geen MuseScore-bestand; geen A4/colofon.
+JSON-tussenmodel voor schermweergave (koormap / shortcode `muziek`,
+later CoriB). Geen MuseScore-bestand; geen A4/colofon. Het productcontract
+geldt voor **elke** notatiebron (`.vsa` / `.mvsa` / `.mscz`); de
+bronstraat bepaalt alleen de CLI (`vsa score-ir` / `mvsa score-ir` /
+`mscz score-ir`). Zie
+[contract-index — universele productcatalogus](contract-index.md#universele-productcatalogus).
 
 **Productieschermpad:** Score-IR → MusicXML (uit IR) → OSMD. Print/blad blijft
 MuseScore. Brugcontract: [partituur-ir §7](../plans/partituur-ir.md).
 Bedoelde printvorm = checklists; OSMD-emit: [osmd-s8-recite](../plans/osmd-s8-recite.md).
 
-**Sibling-artifacts** (naast `lied.mvsa`, zelfde naamgeving als andere
-`mvsa`-exports):
+**Sibling-artifacts** (naamgeving `{bron}.score-ir.json` /
+`{bron}.from-ir.musicxml`):
 
-| Artifact                         | Defaultnaam                   |
+| Artifact                         | Voorbeeld                     |
 | -------------------------------- | ----------------------------- |
 | Score-IR JSON                    | `lied.mvsa.score-ir.json`     |
-| MusicXML uit IR (OSMD)           | `lied.mvsa.from-ir.musicxml`  |
+| MusicXML uit IR (OSMD)           | `lied.mscz.from-ir.musicxml`  |
 
-Schrijf beide met ``mvsa score-ir … --musicxml`` (zonder pad; werkt ook
-op een map).
+Schrijf beide met ``{straat} score-ir … --musicxml`` (zonder pad; werkt
+ook op een map). Alleen de eigen bronextensie per straat.
 
 **Print-eindvorm (S8/S13):** Score-IR bewaart recite-spacers
 (`print.spacer` / `print.breveHead`) en compacte same-pitch melisma’s;
@@ -33,13 +37,13 @@ belofte dat OSMD/VexFlow de kop zelf verbergt (peiling:
 [osmd-s8-recite](../plans/osmd-s8-recite.md)). Breve-midden:
 `notehead breve` + `stem none` (geen `type=breve`).
 
-| Onderwerp                         | Waar                                                                 |
-| --------------------------------- | -------------------------------------------------------------------- |
-| Contract (velden, partituur)      | [partituur-ir](../plans/partituur-ir.md)                             |
-| Scherm- / CoriB-brug              | [partituur-ir §7](../plans/partituur-ir.md)                          |
-| CLI                               | [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir)            |
-| Score-IR → MusicXML (OSMD)        | `vsa.score_ir_musicxml` · CLI ``--musicxml``                         |
-| Browser-spike                     | `examples/spikes/partituur-browser/`                                 |
+| Onderwerp                         | Waar                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------ |
+| Contract (velden, partituur)      | [partituur-ir](../plans/partituur-ir.md)                                             |
+| Scherm- / CoriB-brug              | [partituur-ir §7](../plans/partituur-ir.md)                                          |
+| CLI                               | `{straat} score-ir` — o.a. [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir) |
+| Score-IR → MusicXML (OSMD)        | `vsa.score_ir_musicxml` · CLI ``--musicxml``                                         |
+| Browser-spike                     | `examples/spikes/partituur-browser/`                                                 |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling

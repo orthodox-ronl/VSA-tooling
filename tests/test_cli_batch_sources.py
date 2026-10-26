@@ -145,10 +145,12 @@ def test_vsa_text_directory(tmp_path: Path, monkeypatch, capsys):
     _minimal_vsa(d / "two.vsa", "Heer")
     rc = main(["text", str(d)])
     assert rc == 0
+    assert (d / "one.vsa.lyrics.txt").is_file()
+    assert (d / "two.vsa.lyrics.txt").is_file()
     out = capsys.readouterr().out
-    assert "=== " in out
-    assert "one.vsa" in out
-    assert "two.vsa" in out
+    assert "Geschreven:" in out
+    assert "one.vsa.lyrics.txt" in out
+    assert "two.vsa.lyrics.txt" in out
 
 
 def test_vsa_text_dir_rejects_output_flag(tmp_path: Path, monkeypatch, capsys):

@@ -111,7 +111,7 @@ Transforms: Oefenhoek `mscz-product-transforms.md` (PDF-kolom).
 
 **Canonieke pagina:** elke door ons geproduceerde PDF is **A4 staand**
 (210×297 mm). US Letter is **niet** canoniek — noch voor partituur-PDF
-(`mvsa pdf` / MuseScore), noch voor Markdown-PDF ([`vsa pdf`](../reference/cli/pdf.md)).
+(`mvsa pdf` / MuseScore), noch voor Markdown-PDF ([`md pdf`](../reference/cli/md.md#md-pdf); verouderd: [`vsa pdf`](../reference/cli/pdf.md)).
 
 | #   | Eis                                  | Toelichting                                                                                                                                                                                      |
 | --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -120,9 +120,9 @@ Transforms: Oefenhoek `mscz-product-transforms.md` (PDF-kolom).
 | P3  | **Geen Coria-links**                 | Oefenmateriaal hoort niet in papieren/PDF-uitgave (tenzij later bewust toegevoegd).                                                                                                              |
 | P4  | **Copyright-regel + colofon**        | **Later** (nog niet verplicht in deze toolchain): korte copyright-regel op **elke** pagina (footer) én een colofon (zoals Oefenhoek `mscz-partituur-contract`). Niet vergeten bij PDF-producten. |
 | P5  | **Provenance (Oefenhoek)**           | Optioneel: partituur-hash / generator-meta zoals in product-transforms — nog niet verplicht in VSA-tooling-export.                                                                               |
-| P6  | **A4 staand**                        | Paginaformaat **A4** (210×297 mm), niet US Letter. Partituur: MuseScore-Style (`pageWidth`/`pageHeight`, zie MSCZ S7). Markdown-PDF (`vsa pdf`): print-CSS `@page` 210×297 mm.                   |
+| P6  | **A4 staand**                        | Paginaformaat **A4** (210×297 mm), niet US Letter. Partituur: MuseScore-Style (`pageWidth`/`pageHeight`, zie MSCZ S7). Site-Markdown-PDF (`md pdf`): print-CSS `@page` 210×297 mm.               |
 
-[`vsa pdf`](../reference/cli/pdf.md) is een andere pipeline (Markdown + VSA-SVG,
+[`md pdf`](../reference/cli/md.md#md-pdf) is een andere pipeline (Markdown + VSA-SVG,
 geen MuseScore-partituur) maar valt onder **dezelfde** A4-eis (P6).
 
 ## Verschillen bewust hangende houden
@@ -153,13 +153,14 @@ zijn.
 | CLI-default (zonder `-o`): `stem.brontype.doeltype`    | `lied.mvsa` → `lied.mvsa.mscz`; `lied.mscz` → `lied.mscz.mxl`                      |
 | Bij voorkeur in `generated/`: zelfde patroon           | `alleluia.mvsa.mxl`, `alleluia.mscz.mvsa`, `tropaar.vsa.mxl`                       |
 | Zoektekst in canonieke `.vsa` / `.mvsa`                | Veld `zoektekst` in YAML-frontmatter — zie [zoektekst](zoektekst.md)               |
-| Lyrics-product (optioneel; o.a. uit `.mscz` / `.mxl`)  | `lied.mscz.lyrics.txt` via [`vsa text -o`](../reference/cli/text.md)               |
+| Lyrics-product (meta-key `lyrics`)                     | `lied.mscz.lyrics.txt` via `{straat} text` / `{straat} products`                   |
 | **Laatste** segment = echte extensie voor tools        | `.mxl`, `.mvsa`, `.mscz`, `.mp3` / `.ogg` / `.wav`, of `.txt` bij lyrics-producten |
 | Expliciet `-o` mag enkelvoudig blijven                 | `-o out.mxl` of `-o generated\lied.mscz`                                           |
 | Geen fout als de naam “simpel” is                      | normalize/export falen niet op ontbrekende dubbele extensie                        |
 
-Een sibling `*.vsa.lyrics.txt` / `*.mvsa.lyrics.txt` is **niet** verplicht naast
-een canonieke bron; editorzoeken loopt via `zoektekst` in het bronbestand.
+Sibling `*.lyrics.txt` is een **standaardproduct** naast elke notatiebron.
+Editorzoeken in canonieke `.vsa`/`.mvsa` loopt daarnaast via YAML-`zoektekst`
+([zoektekst](zoektekst.md)).
 
 In `examples/mvsa/` worden conversieproducten **niet** gecommit (zie
 `.gitignore`); alleen bron-`.mvsa` (+ README / ISSUES).

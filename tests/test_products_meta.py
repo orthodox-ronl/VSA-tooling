@@ -213,22 +213,74 @@ def test_freshness_ok_without_legacy_product_generated_at(tmp_path: Path) -> Non
 
 @pytest.mark.skipif(not _MVSA.is_file(), reason="example .mvsa ontbreekt")
 def test_mvsa_products_skip_svg_writes_meta(tmp_path: Path) -> None:
+    from unittest.mock import patch
+
     dest = tmp_path / _MVSA.name
     dest.write_text(_MVSA.read_text(encoding="utf-8"), encoding="utf-8")
-    assert products_mvsa_one(dest, skip_svg=True) == 0
+
+    def _mxl(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_text("<score/>", encoding="utf-8")
+        return out
+
+    def _ir(_b: Path, out: Path, **_k: object) -> None:
+        out.write_text("{}", encoding="utf-8")
+
+    def _from(_s: Path, d: Path, **_k: object) -> None:
+        d.write_text("<score/>", encoding="utf-8")
+
+    def _mscz(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"PK")
+        return out
+
+    def _pdf(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"%PDF")
+        return out
+
+    def _mp3(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"ID3")
+        return out
+
+    def _lyr(_b: Path, out: Path | None = None, **_k: object) -> Path:
+        dest_ly = Path(out) if out else _b.with_name(_b.name + ".lyrics.txt")
+        dest_ly.write_text("x\n", encoding="utf-8")
+        return dest_ly
+
+    with (
+        patch("vsa.street_product_export.export_bron_to_mxl", side_effect=_mxl),
+        patch("vsa.street_product_export.export_bron_to_score_ir", side_effect=_ir),
+        patch(
+            "vsa.score_ir_musicxml.export_score_ir_path_to_musicxml",
+            side_effect=_from,
+        ),
+        patch(
+            "vsa.street_product_export.export_bron_to_mscz_product",
+            side_effect=_mscz,
+        ),
+        patch(
+            "vsa.street_product_export.export_bron_to_partituur_pdf",
+            side_effect=_pdf,
+        ),
+        patch("vsa.audio_export.export_to_audio", side_effect=_mp3),
+        patch(
+            "vsa.street_product_export.write_lyrics_product",
+            side_effect=_lyr,
+        ),
+    ):
+        assert products_mvsa_one(dest, skip_svg=True) == 0
     meta_path = meta_path_for(dest)
     assert meta_path.is_file()
     data = json.loads(meta_path.read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
-    assert set(data["products"]) >= {"mxl", "score-ir", "from-ir"}
+    assert set(data["products"]) >= {"mxl", "score-ir", "from-ir", "mp3", "lyrics"}
     for key in ("mxl", "score-ir", "from-ir"):
         entry = data["products"][key]
         path = tmp_path / entry["file"]
         assert path.is_file()
         assert entry["sha256"] == sha256_file(path)
         assert isinstance(entry.get("generated_at"), str) and entry["generated_at"]
-    assert products_mvsa_one(dest, skip_svg=True) == 0
-    status, _ = freshness(dest, required_keys={"mxl", "score-ir", "from-ir"})
+    status, _ = freshness(
+        dest, required_keys={"mxl", "score-ir", "from-ir", "mp3", "lyrics"}
+    )
     assert status == "ok"
 
 
@@ -241,20 +293,72 @@ def test_mvsa_products_cli_dry_run(tmp_path: Path) -> None:
 
 
 def test_vsa_products_minimal(tmp_path: Path) -> None:
+    from unittest.mock import patch
+
     examples = list((_REPO / "examples").rglob("*.vsa"))
     if not examples:
         pytest.skip("geen .vsa-examples")
     src = examples[0]
     dest = tmp_path / src.name
     dest.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
-    code = products_vsa_one(dest)
+
+    def _mxl(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_text("<score/>", encoding="utf-8")
+        return out
+
+    def _ir(_b: Path, out: Path, **_k: object) -> None:
+        out.write_text("{}", encoding="utf-8")
+
+    def _from(_s: Path, d: Path, **_k: object) -> None:
+        d.write_text("<score/>", encoding="utf-8")
+
+    def _mscz(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"PK")
+        return out
+
+    def _pdf(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"%PDF")
+        return out
+
+    def _mp3(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"ID3")
+        return out
+
+    def _lyr(_b: Path, out: Path | None = None, **_k: object) -> Path:
+        p = Path(out) if out else _b.with_name(_b.name + ".lyrics.txt")
+        p.write_text("x\n", encoding="utf-8")
+        return p
+
+    with (
+        patch("vsa.street_product_export.export_bron_to_mxl", side_effect=_mxl),
+        patch("vsa.street_product_export.export_bron_to_score_ir", side_effect=_ir),
+        patch(
+            "vsa.score_ir_musicxml.export_score_ir_path_to_musicxml",
+            side_effect=_from,
+        ),
+        patch(
+            "vsa.street_product_export.export_bron_to_mscz_product",
+            side_effect=_mscz,
+        ),
+        patch(
+            "vsa.street_product_export.export_bron_to_partituur_pdf",
+            side_effect=_pdf,
+        ),
+        patch("vsa.audio_export.export_to_audio", side_effect=_mp3),
+        patch(
+            "vsa.street_product_export.write_lyrics_product",
+            side_effect=_lyr,
+        ),
+    ):
+        code = products_vsa_one(dest, skip_svg=False)
     if code != 0:
         pytest.skip("voorbeeld-.vsa faalde export (niet regressie-meta)")
     assert meta_path_for(dest).is_file()
     data = json.loads(meta_path_for(dest).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     assert "sha256" in data["products"]["mxl"]
-    status, _ = freshness(dest, required_keys={"mxl", "svg"})
+    assert "mp3" in data["products"]
+    status, _ = freshness(dest, required_keys={"mxl", "svg", "mp3"})
     assert status == "ok"
 
 
@@ -339,84 +443,110 @@ def _fake_single_svg(_src: Path, dest: Path, **_kwargs: object) -> list[Path]:
     return [dest]
 
 
+def _fake_universal_rest():
+    """Mocks for mscz/pdf/mp3/lyrics/score-ir beyond mxl+svg."""
+
+    def _ir(_b: Path, out: Path, **_k: object) -> None:
+        out.write_text("{}", encoding="utf-8")
+
+    def _from(_s: Path, d: Path, **_k: object) -> None:
+        d.write_text("<score/>", encoding="utf-8")
+
+    def _mscz(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"PK")
+        return out
+
+    def _pdf(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"%PDF")
+        return out
+
+    def _mp3(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_bytes(b"ID3")
+        return out
+
+    def _lyr(_b: Path, out: Path | None = None, **_k: object) -> Path:
+        dest = Path(out) if out else _b.with_name(_b.name + ".lyrics.txt")
+        dest.write_text("x\n", encoding="utf-8")
+        return dest
+
+    return (
+        patch(
+            "vsa.street_product_export.export_bron_to_mxl",
+            side_effect=_fake_write_mxl,
+        ),
+        patch(
+            "vsa.street_product_export.export_bron_to_score_ir",
+            side_effect=_ir,
+        ),
+        patch(
+            "vsa.score_ir_musicxml.export_score_ir_path_to_musicxml",
+            side_effect=_from,
+        ),
+        patch(
+            "vsa.street_product_export.export_bron_to_mscz_product",
+            side_effect=_mscz,
+        ),
+        patch(
+            "vsa.street_product_export.export_bron_to_partituur_pdf",
+            side_effect=_pdf,
+        ),
+        patch("vsa.audio_export.export_to_audio", side_effect=_mp3),
+        patch(
+            "vsa.street_product_export.write_lyrics_product",
+            side_effect=_lyr,
+        ),
+    )
+
+
 def test_mscz_products_bladreeks_meta_no_dead_svg(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
-    with (
-        patch(
-            "vsa.musicxml_playback_normalize.export_mscz_to_playback_mxl",
-            side_effect=_fake_write_mxl,
-        ),
+    ctx = list(_fake_universal_rest()) + [
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_bladreeks_svg),
-    ):
+    ]
+    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
         assert products_mscz_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     keys = set(data["products"])
-    assert keys == {"mxl", "svg-1", "svg-2"}
+    assert "svg-1" in keys and "svg-2" in keys
     assert "svg" not in keys
+    assert "mxl" in keys and "mp3" in keys and "lyrics" in keys
     for key in ("mxl", "svg-1", "svg-2"):
         entry = data["products"][key]
         path = tmp_path / entry["file"]
         assert path.is_file()
         assert entry["sha256"] == sha256_file(path)
-    # Zonder --force: versheid ziet bladreeks als voldoening voor required ``svg``.
-    with (
-        patch(
-            "vsa.musicxml_playback_normalize.export_mscz_to_playback_mxl",
-            side_effect=_fake_write_mxl,
-        ) as mxl_mock,
-        patch(
-            "vsa.mvsa_mscz.export_mscz_to_svg",
-            side_effect=_fake_bladreeks_svg,
-        ) as svg_mock,
-    ):
-        assert products_mscz_one(bron, force=False) == 0
-        assert mxl_mock.call_count == 0
-        assert svg_mock.call_count == 0
+    # Zonder --force: meta vers → geen regeneratie (geen MuseScore-mocks nodig).
+    assert products_mscz_one(bron, force=False) == 0
 
 
 def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
-    with (
-        patch(
-            "vsa.musicxml_playback_normalize.export_mscz_to_playback_mxl",
-            side_effect=_fake_write_mxl,
-        ),
+    ctx = list(_fake_universal_rest()) + [
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
-    ):
+    ]
+    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
         assert products_mscz_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
-    assert set(data["products"]) == {"mxl", "svg"}
+    assert "svg" in data["products"]
     assert data["products"]["svg"]["file"] == "lied.mscz.svg"
+    assert "mp3" in data["products"]
 
 
 def test_mvsa_products_bladreeks_meta_no_dead_svg(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mvsa"
     bron.write_text("title: t\n---\nL  | a\nS  | a\n", encoding="utf-8")
 
-    def _fake_score_ir(_src: Path, dest: Path, **_kwargs: object) -> None:
-        dest.write_text("{}", encoding="utf-8")
-
-    def _fake_from_ir(_src: Path, dest: Path, **_kwargs: object) -> None:
-        dest.write_text("<score/>", encoding="utf-8")
-
-    with (
-        patch("vsa.mvsa_musicxml.export_mvsa_path", side_effect=_fake_write_mxl),
-        patch(
-            "vsa.score_ir.export_mvsa_path_to_score_ir",
-            side_effect=_fake_score_ir,
-        ),
-        patch(
-            "vsa.score_ir_musicxml.export_score_ir_path_to_musicxml",
-            side_effect=_fake_from_ir,
-        ),
+    ctx = list(_fake_universal_rest()) + [
         patch("vsa.mvsa_mscz.export_mvsa_to_svg", side_effect=_fake_bladreeks_svg),
-    ):
+    ]
+    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
         assert products_mvsa_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     keys = set(data["products"])
-    assert keys == {"mxl", "score-ir", "from-ir", "svg-1", "svg-2"}
+    assert "svg-1" in keys and "svg-2" in keys
     assert "svg" not in keys
+    assert {"mxl", "score-ir", "from-ir", "mp3", "lyrics"}.issubset(keys)

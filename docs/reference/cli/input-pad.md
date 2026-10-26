@@ -46,27 +46,28 @@ toegestaan bij precies één bronbestand.
 | Commando          | Map? | Extensies                                                |
 | ----------------- | ---- | -------------------------------------------------------- |
 | `validate`        | Ja   | `.mvsa` (`collect_mvsa_files` → ``collect_input_files``) |
-| `mxl`             | Ja   | `.mvsa` / `.mscz` / `.mxl` / `.musicxml` / `.xml`        |
+| `mxl`             | Ja   | alleen `.mvsa` (straat-puur; `.mscz` → `mscz mxl`)       |
 | `mscz`            | Ja   | `.mvsa`                                                  |
-| `pdf`             | Ja   | `.mvsa` / `.mscz`                                        |
-| `svg`             | Ja   | `.mvsa` / `.mscz`                                        |
-| `mp3`/`ogg`/`wav` | Ja   | `.mvsa` / `.mxl` / `.musicxml` / `.vsa` / `.mscz`        |
+| `pdf` / `svg`     | Ja   | alleen `.mvsa` (`.mscz` → `mscz pdf` / `mscz svg`)       |
+| `mp3`/`ogg`/`wav` | Ja   | alleen `.mvsa`                                           |
+| `text`            | Ja   | alleen `.mvsa`                                           |
 | `score-ir`        | Ja   | `.mvsa`                                                  |
 | `normalize`       | Ja   | `.mvsa`                                                  |
 | `transpose`       | Ja   | `.mvsa`                                                  |
 | `kuiser`          | Ja   | `.mvsa` (via ``collect_cli_sources``)                    |
+| `products`        | Ja   | `.mvsa`                                                  |
 
-### `mxl` / `mscz` (top-level aliases)
+### `mxl` / `mscz` (top-level)
 
-| Commando        | Map? | Extensies / opmerking                                       |
-| --------------- | ---- | ----------------------------------------------------------- |
-| `mxl mvsa`      | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml`` → ``.mvsa``             |
-| `mxl mscz`      | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml``                         |
-| `mxl validate`  | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml``                         |
-| `mxl normalize` | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml`` (default: in-place)     |
-| `mscz mvsa`     | Ja   | ``.mscz`` → ``.mvsa``                                       |
-| `mscz mxl`      | Ja   | ``.mscz``                                                   |
-| `mscz text`     | Ja   | ``.mscz`` (per bestand → ``vsa text``; ``-o`` alleen bij 1) |
+| Commando              | Map? | Extensies / opmerking                                          |
+| --------------------- | ---- | -------------------------------------------------------------- |
+| `mxl mvsa`            | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml`` → ``.mvsa``                |
+| `mxl mscz`            | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml``                            |
+| `mxl validate`        | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml``                            |
+| `mxl normalize`       | Ja   | ``.mxl`` / ``.musicxml`` / ``.xml`` (default: in-place)        |
+| `mscz …` (producten)  | Ja   | alleen ``.mscz`` (`mxl`/`svg`/`pdf`/`mp3`/`score-ir`/`text`/…) |
+| `mscz compare`        | Nee  | SCORE = ``.mscz`` of MusicXML; MVSA = ``.mvsa``                |
+| `mscz import`         | Ja   | ``.mvsa`` / MusicXML → ``.mscz``                               |
 
 ## Migratie
 
@@ -74,6 +75,6 @@ Gedeelde helper is in gebruik voor `mvsa`-exports, `mxl`/`mscz`-aliases,
 top-level `text` / `audio` / `svg`, en de wrappers `collect_mvsa_files` /
 `iter_vsa_files` / `iter_vsa_mvsa_files`.
 
-Optioneel later: top-level `vsa pdf` / `parse` alleen als bestand-of-map
-zinvol is; overige map-scanners (`musicxml`, `validate`, `process`,
+`md pdf` / `md svg` / `md text` ondersteunen bestand-of-map. Optioneel later:
+`vsa parse` en overige map-scanners (`musicxml`, `validate`, `process`,
 `template`) waar die nog eigen `rglob` hebben.

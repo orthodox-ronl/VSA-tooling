@@ -1,10 +1,15 @@
-# `vsa pdf` — Markdown met VSA naar PDF
+# `vsa pdf` — verouderd (gebruik `md pdf`)
 
-Render één Markdownbestand naar een A4-PDF: [VSA-blokken](@) worden SVG,
-`:::include` wordt opgelost, `:::pagebreak:::` / `{{< pagebreak >}}` worden
-paginaeinden, en `:::web-only:::` verdwijnt (print-only blijft).
+`vsa pdf` blijft werken als **alias** voor
+[`md pdf`](md.md#md-pdf): Markdown met VSA → A4-PDF via Edge/Chrome.
 
-## Synopsis
+Bij elke aanroep schrijft de CLI een waarschuwing naar stderr:
+
+```text
+Let op: `vsa pdf` is verouderd; gebruik `md pdf` (zelfde opties; default sibling *.md.pdf).
+```
+
+## Synopsis (alias)
 
 ```text
 vsa pdf [-h] [--config CONFIG] [--content-root CONTENT_ROOT]
@@ -13,97 +18,22 @@ vsa pdf [-h] [--config CONFIG] [--content-root CONTENT_ROOT]
          input
 ```
 
-## Beschrijving
-
-`vsa pdf` gebruikt dezelfde voorbereiding als
-[`vsa build-markdown`](build-markdown.md) voor **één** bestand: validatie,
-catalogus-`zoek=`, includes, directives, SVG-render. Daarna wordt de
-gegenereerde Markdown naar HTML omgezet (Hugo-shortcodes voor print/web
-inbegrepen) en via Edge/Chrome/Chromium naar PDF geprint.
-
-**Papierformaat (canoniek P6):** A4 staand (210×297 mm). Dat staat in de
-print-CSS (`@page`), niet als aparte Chrome-CLI-flag. Zonder die CSS zou
-headless Chrome op US Letter terugvallen — dat is **niet** canoniek. Zie
-[canonieke checklists — PDF P6](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).
-
-Coria- en MusicXML-links horen bij de website en komen niet in de PDF.
-
-Partituur-PDF vanuit `.mvsa` ([`mvsa pdf`](mvsa.md#mvsa-pdf)) of `.mscz`
-([`mscz pdf`](mscz.md)) valt onder dezelfde checklist-P6; daar komt A4 uit
-de MuseScore-Style van het `.mscz` (zie
-[MSCZ-leesbaarheid](../../formats/mscz-leesbaarheid.md) en MSCZ S7).
-
-Vóór het renderen geldt dezelfde validatie als [`vsa validate`](validate.md).
-Fouten gebruiken hetzelfde formaat: bestand, regel, kolom, code, bronregel.
-
-## Argumenten en opties
-
-| Naam                          | Verplicht | Betekenis                                                                                          | Default                                                           | Beperkingen        |
-| ----------------------------- | --------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------ |
-| `input`                       | Ja        | Markdownbestand (`.md` / `.markdown`).                                                             | —                                                                 | Moet bestaan.      |
-| `-o`, `--output OUTPUT`       | Nee       | Pad van de PDF.                                                                                    | `<stem>.pdf` in de huidige map                                    | Wordt overschreven |
-| `--content-root CONTENT_ROOT` | Nee       | Root voor catalogus-includes (`lokaal/`).                                                          | Eerste bovenliggende map met `lokaal/`, anders de map van `input` | —                  |
-| `--bron-root BRON_ROOT`       | Nee       | Root van de bron-repo.                                                                             | Auto (`vendor/bron` of `../bron`)                                 | —                  |
-| `--config CONFIG`             | Nee       | Pad naar een alternatief `vsa.toml`.                                                               | Auto-detectie                                                     | —                  |
-| `--max-line-width N`          | Nee       | Maximale SVG-regelbreedte.                                                                         | `max-line-width` uit `vsa.toml`, anders `800`                     | Getal (float)      |
-| `--chrome CHROME`             | Nee       | Pad naar Edge, Chrome of Chromium.                                                                 | `CHROME_PATH` / `EDGE_PATH` / auto-detectie                       | Bestaan            |
-| `-h`, `--help`                | Nee       | Toon hulp.                                                                                         | —                                                                 | —                  |
-
-## Output
-
-- **stdout**: `PDF geschreven naar: <pad>`
-- **bestand**: de PDF op `--output` (of `<stem>.pdf`)
-
-## Exit status
-
-| Exitcode | Betekenis                                                                 |
-| -------- | ------------------------------------------------------------------------- |
-| `0`      | PDF geschreven.                                                           |
-| `1`      | Validatiefout, include-/directivefout, of geen browser voor PDF-export.   |
-
-## Voorbeelden — succes
+Argumenten en gedrag zijn gelijk aan [`md pdf`](md.md#md-pdf), inclusief
+default sibling-naam (`index.md` → `index.md.pdf`).
 
 ```cmd
-vsa pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md -o liturgie.pdf
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+md pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
 ```
 
-Verwachte output:
+## Wat is dit niet?
 
-```text
-PDF geschreven naar: liturgie.pdf
-```
-
-## Voorbeelden — falen
-
-Ongeldige VSA in het Markdownbestand:
-
-```text
-fout.md:2:8
-ERROR: VSA-SYNTAX-MODIFIER-IN-SUNG-TEXT: Modifierteken in gezongen tekst.
-[:] {fout/}
-       ^
-```
-
-Exitcode: `1`. Er wordt geen PDF geschreven.
-
-Geen Edge/Chrome:
-
-```text
-ERROR: geen Chromium-browser gevonden voor PDF-export
-Installeer Microsoft Edge of Google Chrome, of zet CHROME_PATH naar het .exe-bestand.
-```
-
-### Wat doe je bij problemen?
-
-| Probleem                         | Controle                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------ |
-| Validatiefout                    | Zelfde als `vsa validate`: regel/kolom en hint in de melding.            |
-| Include niet gevonden            | `--content-root` naar de map met `lokaal/` (meestal `content-source`).   |
-| Geen browser                     | Edge is standaard op Windows; anders `CHROME_PATH`.                      |
-| Pagebreak ontbreekt in de PDF    | Gebruik `:::pagebreak:::` of `{{< pagebreak >}}` op een eigen regel.     |
+- **Partituur-PDF** uit `.mvsa` / `.mscz`: [`mvsa pdf`](mvsa.md#mvsa-pdf) /
+  [`mscz pdf`](mscz.md) (MuseScore; checklist P*).
+- **Notatie-SVG** uit `.vsa`: [`vsa svg`](svg.md).
 
 ## Zie ook
 
-- [`vsa build-markdown`](build-markdown.md) — dezelfde Markdown/SVG-keten voor een hele site.
-- [`vsa validate`](validate.md) — alleen controleren, zonder PDF.
-- Consumer-site (Hugo-print-CSS): VSA-demo `static/css/site.css` (`@media print`).
+- [`md`](md.md) — canonieke Markdown-straat (`pdf` / `svg` / `text`)
+- [`vsa build-markdown`](build-markdown.md)
+- [contract-index — site-Markdown-PDF](../../formats/contract-index.md)

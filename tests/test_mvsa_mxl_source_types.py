@@ -1,4 +1,4 @@
-"""mvsa mxl accepteert .mvsa/.mscz/.mxl; geen UTF-8-crash op binaire bronnen."""
+"""mvsa mxl: alleen .mvsa (straat-puur); geen UTF-8-crash op binaire bronnen."""
 
 from __future__ import annotations
 
@@ -35,9 +35,18 @@ def test_mvsa_mxl_rejects_unknown_suffix_clearly(capsys, tmp_path: Path) -> None
     err = capsys.readouterr().err
     assert code == 1
     assert "utf-8" not in err.lower()
-    assert "Verwacht bestand met extensie" in err
-    assert ".mvsa" in err
+    assert "weigert .pdf" in err
     assert "lied.pdf" in err
+
+
+def test_mvsa_mxl_rejects_mscz_with_hint(capsys, tmp_path: Path) -> None:
+    mscz = tmp_path / "lied.mscz"
+    mscz.write_bytes(b"PK\x03\x04")
+    code = mvsa_main(["mxl", str(mscz)])
+    err = capsys.readouterr().err
+    assert code == 1
+    assert "weigert .mscz" in err
+    assert "mscz mxl" in err
 
 
 def test_mvsa_validate_mscz_no_utf8_crash(capsys, tmp_path: Path) -> None:
