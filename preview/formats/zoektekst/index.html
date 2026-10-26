@@ -94,7 +94,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-25 21:24 CET.
+  , gebouwd 2026-10-26 08:49 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3811,6 +3811,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/md/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    md — producten uit Markdown (.md)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/pdf/" class="md-nav__link">
         
   
@@ -3818,7 +3846,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — Markdown met VSA naar PDF
+    vsa pdf — verouderd (gebruik md pdf)
   
 
     
@@ -5020,7 +5048,7 @@ ook in het bronbestand zelf — niet als handmatige kopie, maar als afgeleid vel
 </tr>
 <tr>
 <td>Sibling <code>.lyrics.txt</code></td>
-<td>Geen verplicht product naast een canonieke <code>.vsa</code> / <code>.mvsa</code>. Optioneel blijven voor export uit <code>.mscz</code> / <code>.mxl</code> of site-build (<code>vsa text -o</code>) — zie <a href="../canonical-checklists/#bestandsnaamgeving-conventie">naamgeving</a></td>
+<td><strong>Standaardproduct</strong> (meta-key <code>lyrics</code>): <code>{straat} text</code> / <code>{straat} products</code> schrijft <code>*.lyrics.txt</code> naast elke notatiebron (<code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>) voor site-/indexzoeken. YAML-<code>zoektekst</code> blijft daarnaast voor editorzoeken <em>in</em> canonieke <code>.vsa</code>/<code>.mvsa</code>. Zie <a href="../contract-index/#universele-productcatalogus">contract-index</a> · <a href="../canonical-checklists/#bestandsnaamgeving-conventie">naamgeving</a></td>
 </tr>
 </tbody>
 </table>
@@ -5088,8 +5116,8 @@ blokscalar <code>|</code> met regeleinden mag, zolang de genormaliseerde vorm kl
 <td><a href="https://github.com/orthodox-ronl/bron/blob/main/docs/specs/catalogus-zoek-api.md">catalogus zoek-API</a></td>
 </tr>
 <tr>
-<td>Export van alleen woorden naar bestand</td>
-<td><a href="../../reference/cli/text/"><code>vsa text -o</code></a> (o.a. uit <code>.mscz</code> / <code>.mxl</code>)</td>
+<td>Export lyrics-product (<code>*.lyrics.txt</code>)</td>
+<td><code>{straat} text</code> — <a href="../../reference/cli/text/"><code>vsa text</code></a> / <code>mvsa text</code> / <code>mscz text</code></td>
 </tr>
 <tr>
 <td>Gezongen lettergrepen in de partituur</td>
@@ -5168,7 +5196,7 @@ blokscalar <code>|</code> met regeleinden mag, zolang de genormaliseerde vorm kl
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-12
+        Bijgewerkt: 2026-10-26
         
       </p>
       

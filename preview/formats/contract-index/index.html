@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-25 21:24 CET.
+  , gebouwd 2026-10-26 08:49 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1098,10 +1098,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#straat-product-contract-doelbeeld" class="md-nav__link">
+  <a href="#universele-productcatalogus" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Straat × product × contract (doelbeeld)
+        Universele productcatalogus
       
     </span>
   </a>
@@ -3939,6 +3939,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/md/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    md — producten uit Markdown (.md)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/pdf/" class="md-nav__link">
         
   
@@ -3946,7 +3974,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — Markdown met VSA naar PDF
+    vsa pdf — verouderd (gebruik md pdf)
   
 
     
@@ -4991,10 +5019,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#straat-product-contract-doelbeeld" class="md-nav__link">
+  <a href="#universele-productcatalogus" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Straat × product × contract (doelbeeld)
+        Universele productcatalogus
       
     </span>
   </a>
@@ -5071,8 +5099,12 @@ aanraakt. Normatieve regels staan <strong>alleen</strong> in de hubs hieronder. 
 <li>Kanalen (Coria-<code>.mxl</code>, MuseScore-<code>.mscz</code>, Score-IR, from-ir, OSMD) delen
    dezelfde <strong>bedoelde</strong> print-/recite-/melisma-vorm; alleen de <em>emit</em> mag
    per kanaal verschillen als de hub dat zo scheidt (bijv. M10 vs R5).</li>
-<li><code>normalize</code> / toekomstig <code>products</code> / <code>import</code> <strong>implementeren</strong> deze
-   hubs; ze definiëren geen parallelle norm.</li>
+<li><code>normalize</code> / <code>products</code> / <code>import</code> <strong>implementeren</strong> deze hubs; ze
+   definiëren geen parallelle norm.</li>
+<li>Een <strong>product</strong> heeft één contract. De <strong>bronstraat</strong> (<code>vsa</code> / <code>mvsa</code> /
+   <code>mscz</code>) bepaalt alleen de CLI-prefix en toegestane invoerextensie — niet
+   of het product bestaat. Elk standaardproduct moet uit elke notatiebron
+   (<code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>) genereerbaar zijn volgens dat productcontract.</li>
 </ol>
 <p>Agent-regel in de repo: <code>.cursor/rules/contracten-eerst.mdc</code> (en voor
 mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
@@ -5099,7 +5131,7 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 <tr>
 <td>P-reeks (PDF A4 e.d.)</td>
 <td><a href="../canonical-checklists/">canonical-checklists.md</a> §PDF</td>
-<td><code>mvsa pdf</code> / <code>mscz pdf</code> / <code>vsa pdf</code></td>
+<td><code>mvsa pdf</code> / <code>mscz pdf</code> (partituur); <code>md pdf</code> (site-Markdown)</td>
 </tr>
 <tr>
 <td>Bestandsnaamgeving <code>{stam}.{bron}.{doel}</code></td>
@@ -5134,7 +5166,7 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 <tr>
 <td>Score-IR / from-ir (bedoelde printvorm)</td>
 <td><a href="../score-ir/">score-ir.md</a> · <a href="../../plans/partituur-ir/">partituur-ir</a></td>
-<td><code>mvsa score-ir</code></td>
+<td><code>{straat} score-ir</code> (uit <code>.vsa</code>/<code>.mvsa</code>/<code>.mscz</code>)</td>
 </tr>
 <tr>
 <td>OSMD-scherm (S8 e.d.; emit, zelfde bedoeling)</td>
@@ -5144,7 +5176,7 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 <tr>
 <td>Kale muziek-SVG / scherm vs blad</td>
 <td><a href="../mvsa-svg/">mvsa-svg.md</a> · <a href="../../plans/kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a></td>
-<td><code>mvsa svg</code> layout <code>muziek</code></td>
+<td><code>{straat} svg</code></td>
 </tr>
 <tr>
 <td>Eenstemmig <code>.vsa</code></td>
@@ -5154,17 +5186,17 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 <tr>
 <td>MusicXML-exportprofielen (playback e.d.)</td>
 <td><a href="../../specification/rendering/#musicxml-exportprofielen">rendering — MusicXML</a></td>
-<td><code>vsa musicxml</code></td>
+<td><code>vsa musicxml</code> / <code>vsa mxl</code></td>
 </tr>
 <tr>
-<td>Zoektekst / lyrics-export</td>
+<td>Zoektekst (YAML in bron) / lyrics-product (sibling)</td>
 <td><a href="../zoektekst/">zoektekst.md</a> · <a href="../../reference/cli/text/"><code>vsa text</code></a></td>
-<td><code>vsa text</code> / <code>mscz text</code></td>
+<td><code>{straat} text</code> → <code>*.lyrics.txt</code></td>
 </tr>
 <tr>
 <td>Audio-preview</td>
 <td><a href="../audio/">audio.md</a></td>
-<td><code>vsa audio</code> / <code>mvsa mp3</code></td>
+<td><code>{straat} mp3</code> / <code>ogg</code> / <code>wav</code></td>
 </tr>
 <tr>
 <td>Scherm/Download in de <strong>bibliotheek</strong>-site</td>
@@ -5178,201 +5210,129 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 </tr>
 </tbody>
 </table>
-<h2 id="straat-product-contract-doelbeeld">Straat × product × contract (doelbeeld)<a class="headerlink" href="#straat-product-contract-doelbeeld" title="Permanent link">&para;</a></h2>
-<p>Product = afgeleid bestand dat de consumer (o.a. bibliotheek) nodig heeft.
-Straat-CLI’s (<code>vsa</code> / <code>mvsa</code> / <code>mscz</code> / <code>manual</code>) en <code>products</code> zijn het
-uitrolpad; zie <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
+<h2 id="universele-productcatalogus">Universele productcatalogus<a class="headerlink" href="#universele-productcatalogus" title="Permanent link">&para;</a></h2>
+<p>Product = afgeleid bestand met <strong>één</strong> contract. De consumer (o.a.
+bibliotheek) mag per bron selecteren wat zij nodig heeft; tooling
+genereert de <strong>volledige</strong> standaardset uit elke notatiebron.
+Straat-CLI’s: <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
 <table>
 <thead>
 <tr>
-<th>Straat</th>
-<th>Product / actie</th>
-<th>Contract (hub + id)</th>
-<th>CLI nu / doel</th>
+<th>Meta-key</th>
+<th>Sibling (voorbeeld)</th>
+<th>Contract (hub)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>mvsa</strong></td>
-<td>Coria-<code>.mxl</code></td>
-<td>checklists M* + K*</td>
-<td><code>mvsa mxl</code> / <code>mvsa musicxml</code></td>
+<td><code>mxl</code></td>
+<td><code>lied.mvsa.mxl</code></td>
+<td>checklists M* (Coria / playback)</td>
 </tr>
 <tr>
-<td><strong>mvsa</strong></td>
-<td>Score-IR + from-ir</td>
-<td>partituur-ir / score-ir; S8 → osmd-s8-recite</td>
-<td><code>mvsa score-ir [--musicxml]</code></td>
+<td><code>svg</code> / <code>svg-N</code></td>
+<td><code>lied.mscz.svg</code></td>
+<td>kale scherm-SVG — <a href="../mvsa-svg/">mvsa-svg</a></td>
 </tr>
 <tr>
-<td><strong>mvsa</strong></td>
-<td>scherm/blad-SVG</td>
-<td>leesbaarheid + layout <code>muziek</code></td>
-<td><code>mvsa svg</code></td>
+<td><code>pdf</code></td>
+<td><code>lied.vsa.pdf</code></td>
+<td>checklists P* / partituur-print</td>
 </tr>
 <tr>
-<td><strong>mvsa</strong></td>
-<td>bron-PDF</td>
-<td>checklists P* + layout <code>partituur</code></td>
-<td><code>mvsa pdf</code></td>
+<td><code>mp3</code></td>
+<td><code>lied.mscz.mp3</code></td>
+<td><a href="../audio/">audio.md</a> (ogg/wav alleen los)</td>
 </tr>
 <tr>
-<td><strong>mvsa</strong></td>
-<td>audio / lyrics</td>
-<td>audio.md / zoektekst + <code>vsa text</code></td>
-<td><code>mvsa mp3</code> · text-export</td>
+<td><code>lyrics</code></td>
+<td><code>lied.mscz.lyrics.txt</code></td>
+<td>platte tekst — <a href="../zoektekst/">zoektekst</a> / text</td>
 </tr>
 <tr>
-<td><strong>mvsa</strong></td>
+<td><code>score-ir</code></td>
+<td><code>lied.mvsa.score-ir.json</code></td>
+<td><a href="../score-ir/">score-ir.md</a> / partituur-ir</td>
+</tr>
+<tr>
+<td><code>from-ir</code></td>
+<td><code>lied.mvsa.from-ir.musicxml</code></td>
+<td>MusicXML uit IR → OSMD</td>
+</tr>
+<tr>
+<td><code>mscz</code></td>
+<td><code>lied.vsa.mscz</code></td>
+<td>checklists S* / leesbaarheid (partituur-<code>.mscz</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>CLI: <code>{straat} {product}</code> met alleen de eigen bronextensie
+(<code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>). Voorbeeld: <code>mscz score-ir</code>, <code>vsa mp3</code>,
+<code>mvsa lyrics</code> via <code>mvsa text</code>.</p>
+<p><strong>Zelfde-type:</strong> <code>.mscz</code> → product <code>mscz</code> = partituur-conform maken
+(layout <code>partituur</code>), niet overslaan. Bron-<code>.vsa</code>/<code>.mvsa</code> blijven bron
+(geen meta-key voor het brontype zelf).</p>
+<p><strong>Invoer (straat-puur):</strong> product/export-subs weigeren vreemde extensies
+met hint naar de juiste straat. Uitzonderingen: <code>mvsa import</code> /
+<code>mscz import</code> (destination import); <code>mscz compare</code> (SCORE mag MusicXML);
+format-CLI <code>mxl …</code>.</p>
+<p><strong>Geen product (wel straat-actie):</strong> <code>normalize</code>, <code>import</code>, <code>validate</code>,
+<code>transpose</code>, <code>kuiser</code>, <code>compare</code> — geen meta-keys in <code>products</code>.</p>
+<p><strong>Site-Markdown-PDF:</strong> <code>md pdf</code> (alias <code>markdown pdf</code>; verouderd:
+<code>vsa pdf</code>) en bibliotheek-<code>scripts\pdf.cmd</code> → <code>index.md.pdf</code> zijn <strong>geen</strong>
+notatie-product <code>pdf</code> (P<em>). Partituur-PDF volgt P</em> via <code>mvsa pdf</code> /
+<code>mscz pdf</code>. Man-pagina: <a href="../../reference/cli/md/"><code>md</code></a>.</p>
+<table>
+<thead>
+<tr>
+<th>Actie (niet-product)</th>
+<th>Straat / CLI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td>normalize</td>
-<td>mvsa-normalize man-page (canonieke spelling)</td>
-<td><code>mvsa normalize</code></td>
+<td><code>mvsa normalize</code> · <code>mscz normalize</code> · <code>mxl normalize</code> (geen <code>vsa normalize</code>)</td>
 </tr>
 <tr>
-<td><strong>mvsa</strong></td>
-<td>import (→ <code>.mvsa</code>)</td>
-<td>mvsa-conversions; werkbank-bewerkvorm</td>
-<td><strong><code>mvsa import</code></strong> (= <code>mscz mvsa</code> / <code>mxl mvsa</code>)</td>
+<td>import</td>
+<td><code>mvsa import</code> · <code>mscz import</code></td>
 </tr>
 <tr>
-<td><strong>mscz</strong></td>
-<td>Coria-<code>.mxl</code></td>
-<td>checklists M*</td>
-<td><code>mscz mxl</code></td>
+<td>validate</td>
+<td><code>mvsa validate</code> · <code>vsa validate</code> · <code>mxl validate</code></td>
 </tr>
 <tr>
-<td><strong>mscz</strong></td>
-<td>scherm-SVG</td>
-<td>leesbaarheid + layout <code>muziek</code> (kale SVG)</td>
-<td><code>mscz svg</code> (<code>.mscz</code> geweigerd bij <code>mvsa svg</code>)</td>
-</tr>
-<tr>
-<td><strong>mscz</strong></td>
-<td>bron-PDF</td>
-<td>P* + <code>partituur</code></td>
-<td><code>mscz pdf</code> (<code>.mscz</code> geweigerd bij <code>mvsa pdf</code>)</td>
-</tr>
-<tr>
-<td><strong>mscz</strong></td>
-<td>normalize</td>
-<td>leesbaarheid + layout <code>partituur</code> + S*</td>
-<td><code>mscz normalize</code> (<code>--layout partituur</code>/<code>muziek</code>/<code>plain</code>)</td>
-</tr>
-<tr>
-<td><strong>mscz</strong></td>
-<td>import (→ <code>.mscz</code>)</td>
-<td>leesbaarheid / S*</td>
-<td><strong><code>mscz import</code></strong> (= <code>mvsa mscz</code> / <code>mxl mscz</code>)</td>
-</tr>
-<tr>
-<td><strong>mscz</strong></td>
-<td><code>products</code> (bundel)</td>
-<td>products-meta + M* + kale SVG</td>
-<td><code>mscz products</code> (intern = mxl + svg + …)</td>
-</tr>
-<tr>
-<td><strong>vsa</strong></td>
-<td>Coria-<code>.mxl</code></td>
-<td>M* (mono waar van toepassing) + rendering playback</td>
-<td><code>vsa products</code> (syllabify + finalize) · <code>vsa musicxml</code> (<a href="../../reference/cli/musicxml/"><code>--syllabify</code></a>)</td>
-</tr>
-<tr>
-<td><strong>vsa</strong></td>
-<td>scherm-SVG</td>
-<td>vsa-svg / native renderer</td>
-<td><code>vsa svg</code></td>
-</tr>
-<tr>
-<td><strong>vsa</strong></td>
-<td>bron-PDF</td>
-<td>P* waar van toepassing</td>
-<td><code>vsa pdf</code></td>
-</tr>
-<tr>
-<td><strong>vsa</strong></td>
-<td>audio / lyrics</td>
-<td>audio.md / text</td>
-<td><code>vsa audio</code> / <code>vsa text</code></td>
-</tr>
-<tr>
-<td><strong>vsa</strong></td>
-<td>normalize</td>
-<td>specification VSA (canonieke notatie)</td>
-<td><strong>n.v.t.</strong> — geen <code>vsa normalize</code>; canonieke <code>.vsa</code> via authoring + <a href="../../reference/cli/validate/"><code>vsa validate</code></a></td>
-</tr>
-<tr>
-<td><strong>manual</strong></td>
+<td><code>manual</code></td>
 <td>geen auto-<code>products</code></td>
-<td>consumer: <code>manueel</code>/<code>manual</code>-flag</td>
-<td>geen stille regen</td>
-</tr>
-<tr>
-<td><strong>manual</strong></td>
-<td>format-normalize SVG/PDF</td>
-<td><strong>nog geen</strong> hub — pas CLI ná contract</td>
-<td>uitgesteld</td>
-</tr>
-<tr>
-<td><strong>mxl</strong> (format)</td>
-<td>normalize playback</td>
-<td>M*</td>
-<td><code>mxl normalize</code></td>
-</tr>
-<tr>
-<td><strong>mxl</strong></td>
-<td>→ mvsa / mscz</td>
-<td>mvsa-conversions + S<em>/M</em></td>
-<td><code>mxl mvsa</code> / <code>mxl mscz</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="sidecar-meta-herkomst-versheid">Sidecar-meta (herkomst / versheid)<a class="headerlink" href="#sidecar-meta-herkomst-versheid" title="Permanent link">&para;</a></h2>
-<p>Canonieke hub: <strong><a href="../products-meta/">products-meta.md</a></strong> (schema <strong>2</strong>:
-bron-hash + productbestanden met <strong>inhouds-hashes</strong> én per product
-<code>generated_at</code>; invariante “(H_A) uit (H_B)” blijft waar of meta is
-stale). Individuele product-subs mergen keys; zie fase 7 in
-<a href="../../plans/straat-clis/">straat-CLIs</a>.</p>
-<p>Sibling <code>{stam}.{bron}.products-meta.json</code>. <strong>Schrijver:</strong> tooling
-street-<code>products</code> (niet bibliotheek). Geschreven voor:</p>
+<p>Canonieke hub: <strong><a href="../products-meta/">products-meta.md</a></strong> (schema <strong>2</strong>).</p>
+<p>Sibling <code>{bronnaam}.products-meta.json</code>. <strong>Schrijver:</strong> tooling
+street-<code>products</code> of individuele product-subs (merge).</p>
 <table>
 <thead>
 <tr>
 <th>CLI</th>
-<th>Kernproducten (meta-keys)</th>
+<th>Standaardkeys (universeel)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>mvsa products</code></td>
-<td><code>mxl</code>, <code>score-ir</code>, <code>from-ir</code> (+ <code>svg</code> / <code>svg-N</code> tenzij <code>--skip-svg</code>)</td>
+<td><code>vsa</code>/<code>mvsa</code>/<code>mscz products</code></td>
+<td><code>mxl</code>, <code>score-ir</code>, <code>from-ir</code>, <code>mscz</code>, <code>pdf</code>, <code>mp3</code>, <code>lyrics</code> + <code>svg</code>/<code>svg-N</code> (tenzij <code>--skip-svg</code>)</td>
 </tr>
 <tr>
-<td><code>mvsa mxl</code>/<code>svg</code>/<code>pdf</code>/<code>score-ir</code></td>
-<td>merge van <code>mxl</code> / <code>svg</code>… / <code>pdf</code> / <code>score-ir</code> (+ <code>from-ir</code> bij <code>--musicxml</code>)</td>
-</tr>
-<tr>
-<td><code>mscz products</code></td>
-<td><code>mxl</code> (+ <code>svg</code> / <code>svg-N</code> tenzij <code>--skip-svg</code>)</td>
-</tr>
-<tr>
-<td><code>mscz mxl</code>/<code>svg</code>/<code>pdf</code></td>
-<td>merge van <code>mxl</code> / <code>svg</code>… / <code>pdf</code> in dezelfde sidecar</td>
-</tr>
-<tr>
-<td><code>vsa products</code></td>
-<td><code>mxl</code>, <code>svg</code></td>
-</tr>
-<tr>
-<td><code>vsa musicxml</code> / <code>vsa svg</code></td>
-<td>merge van <code>mxl</code> / <code>svg</code> (bron <code>.vsa</code>, sibling-output)</td>
+<td>Individuele <code>{straat} {product}</code></td>
+<td>merge van de bijbehorende key(s) in dezelfde sidecar</td>
 </tr>
 </tbody>
 </table>
-<p>Flags: <code>--force</code>, <code>--dry-run</code>. Geen tweede inhoudsnorm (geen M<em>/S</em> in
-meta) — alleen herkomst/versheid. In-file bibliotheek-stamps zijn geen
-canonieke versheidsbron (afbouw: straat-plan).</p>
-<p><strong><code>vsa products</code> MXL:</strong> tijdelijke syllabify + playback-export + Coria-finalize
-(sanitize/voortekens). SVG uit de ongewijzigde bron. Man-pagina:
+<p>Flags: <code>--force</code>, <code>--dry-run</code>. Geen tweede inhoudsnorm in meta.</p>
+<p><strong><code>vsa products</code> MXL:</strong> tijdelijke syllabify + playback-export + Coria-finalize.
+SVG uit de ongewijzigde bron. Man-pagina:
 <a href="../../reference/cli/products/"><code>vsa products</code></a>.</p>
 <h2 id="pdf-namen-afspraak">PDF-namen (afspraak)<a class="headerlink" href="#pdf-namen-afspraak" title="Permanent link">&para;</a></h2>
 <table>
@@ -5385,8 +5345,8 @@ canonieke versheidsbron (afbouw: straat-plan).</p>
 </thead>
 <tbody>
 <tr>
-<td>Uit notatiebron</td>
-<td><code>xxx pdf</code></td>
+<td>Uit notatiebron (product <code>pdf</code>)</td>
+<td><code>{straat} pdf</code></td>
 <td><code>{stam}.{bron}.pdf</code> (naamgevingsconventie)</td>
 </tr>
 <tr>
@@ -5437,7 +5397,7 @@ punt, geen excuus voor een parallelle checklist in de site-repo.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-10-26
         
       </p>
       

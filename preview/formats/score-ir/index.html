@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-25 21:24 CET.
+  , gebouwd 2026-10-26 08:49 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3836,6 +3836,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/md/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    md — producten uit Markdown (.md)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/pdf/" class="md-nav__link">
         
   
@@ -3843,7 +3871,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — Markdown met VSA naar PDF
+    vsa pdf — verouderd (gebruik md pdf)
   
 
     
@@ -4884,18 +4912,22 @@
 
 <h1 id="score-ir-score-irjson-schermtussenmodel-draft">Score-IR (<code>.score-ir.json</code>) — schermtussenmodel (draft)<a class="headerlink" href="#score-ir-score-irjson-schermtussenmodel-draft" title="Permanent link">&para;</a></h1>
 <p>Contracten (S8/S13 e.d.): <a href="../contract-index/">contract-index</a>.</p>
-<p>JSON-tussenmodel tussen <code>.mvsa</code> en schermweergave (koormap / shortcode
-<code>muziek</code>, later CoriB). Geen MuseScore-bestand; geen A4/colofon.</p>
+<p>JSON-tussenmodel voor schermweergave (koormap / shortcode <code>muziek</code>,
+later CoriB). Geen MuseScore-bestand; geen A4/colofon. Het productcontract
+geldt voor <strong>elke</strong> notatiebron (<code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>); de
+bronstraat bepaalt alleen de CLI (<code>vsa score-ir</code> / <code>mvsa score-ir</code> /
+<code>mscz score-ir</code>). Zie
+<a href="../contract-index/#universele-productcatalogus">contract-index — universele productcatalogus</a>.</p>
 <p><strong>Productieschermpad:</strong> Score-IR → MusicXML (uit IR) → OSMD. Print/blad blijft
 MuseScore. Brugcontract: <a href="../../plans/partituur-ir/">partituur-ir §7</a>.
 Bedoelde printvorm = checklists; OSMD-emit: <a href="../../plans/osmd-s8-recite/">osmd-s8-recite</a>.</p>
-<p><strong>Sibling-artifacts</strong> (naast <code>lied.mvsa</code>, zelfde naamgeving als andere
-<code>mvsa</code>-exports):</p>
+<p><strong>Sibling-artifacts</strong> (naamgeving <code>{bron}.score-ir.json</code> /
+<code>{bron}.from-ir.musicxml</code>):</p>
 <table>
 <thead>
 <tr>
 <th>Artifact</th>
-<th>Defaultnaam</th>
+<th>Voorbeeld</th>
 </tr>
 </thead>
 <tbody>
@@ -4905,12 +4937,12 @@ Bedoelde printvorm = checklists; OSMD-emit: <a href="../../plans/osmd-s8-recite/
 </tr>
 <tr>
 <td>MusicXML uit IR (OSMD)</td>
-<td><code>lied.mvsa.from-ir.musicxml</code></td>
+<td><code>lied.mscz.from-ir.musicxml</code></td>
 </tr>
 </tbody>
 </table>
-<p>Schrijf beide met <code>mvsa score-ir … --musicxml</code> (zonder pad; werkt ook
-op een map).</p>
+<p>Schrijf beide met <code>{straat} score-ir … --musicxml</code> (zonder pad; werkt
+ook op een map). Alleen de eigen bronextensie per straat.</p>
 <p><strong>Print-eindvorm (S8/S13):</strong> Score-IR bewaart recite-spacers
 (<code>print.spacer</code> / <code>print.breveHead</code>) en compacte same-pitch melisma’s;
 from-ir MusicXML emitteert die voor het schermpad (zelfde informatiedichtheid
@@ -4940,7 +4972,7 @@ belofte dat OSMD/VexFlow de kop zelf verbergt (peiling:
 </tr>
 <tr>
 <td>CLI</td>
-<td><a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir</code></a></td>
+<td><code>{straat} score-ir</code> — o.a. <a href="../../reference/cli/mvsa/#mvsa-score-ir"><code>mvsa score-ir</code></a></td>
 </tr>
 <tr>
 <td>Score-IR → MusicXML (OSMD)</td>
@@ -4993,7 +5025,7 @@ mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a.score
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-10-26
         
       </p>
       

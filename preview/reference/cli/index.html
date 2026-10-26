@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-25 21:24 CET.
+  , gebouwd 2026-10-26 08:49 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4118,6 +4118,34 @@
   
   
     <li class="md-nav__item">
+      <a href="md/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    md — producten uit Markdown (.md)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="pdf/" class="md-nav__link">
         
   
@@ -4125,7 +4153,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — Markdown met VSA naar PDF
+    vsa pdf — verouderd (gebruik md pdf)
   
 
     
@@ -5380,8 +5408,12 @@ globale <code>--config</code>.</p>
 <td>Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.</td>
 </tr>
 <tr>
+<td><a href="md/"><code>md</code></a></td>
+<td>Markdown-straat: <code>md pdf</code> / <code>md svg</code> / <code>md text</code> (site-PDF, VSA-SVG’s, platte tekst).</td>
+</tr>
+<tr>
 <td><a href="pdf/"><code>pdf</code></a></td>
-<td>Render één Markdownbestand (VSA, includes, pagebreaks) naar A4-PDF.</td>
+<td>Verouderd alias voor <a href="md/#md-pdf"><code>md pdf</code></a> (Markdown → A4-PDF).</td>
 </tr>
 <tr>
 <td><a href="resolve-catalogus/"><code>resolve-catalogus</code></a></td>
@@ -5425,6 +5457,8 @@ globale <code>--config</code>.</p>
 </tr>
 </tbody>
 </table>
+<p>Scripts voor format-straten: <code>scripts\mvsa.cmd</code>, <code>scripts\mxl.cmd</code>,
+<code>scripts\mscz.cmd</code>, <code>scripts\md.cmd</code> (zie <a href="../../formats/scripts/">scripts</a>).</p>
 <p>Elke pagina hierboven beschrijft de volledige syntax, alle argumenten en
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze
 overzichtspagina herhaalt die details niet.</p>
@@ -5512,7 +5546,7 @@ voor het volledige overzicht.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-10-26
         
       </p>
       

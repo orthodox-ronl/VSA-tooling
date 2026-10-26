@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-25 21:24 CET.
+  , gebouwd 2026-10-26 08:49 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3830,6 +3830,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/md/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    md — producten uit Markdown (.md)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/pdf/" class="md-nav__link">
         
   
@@ -3837,7 +3865,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — Markdown met VSA naar PDF
+    vsa pdf — verouderd (gebruik md pdf)
   
 
     
@@ -5515,13 +5543,17 @@
 </tr>
 </tbody>
 </table>
-<h2 id="vsa-pdf-bestandmd"><code>vsa pdf &lt;bestand.md&gt;</code><a class="headerlink" href="#vsa-pdf-bestandmd" title="Permanent link">&para;</a></h2>
+<h2 id="md-pdf-bestandmd-verouderd-vsa-pdf"><code>md pdf &lt;bestand.md&gt;</code> (verouderd: <code>vsa pdf</code>)<a class="headerlink" href="#md-pdf-bestandmd-verouderd-vsa-pdf" title="Permanent link">&para;</a></h2>
 <h3 id="doel_7">Doel<a class="headerlink" href="#doel_7" title="Permanent link">&para;</a></h3>
 <p>Maak een A4-PDF van één Markdownbestand: VSA-blokken, includes en pagebreaks
-worden net als bij <code>build-markdown</code> opgelost; daarna print Edge/Chrome.</p>
+worden net als bij <code>build-markdown</code> opgelost; daarna print Edge/Chrome.
+Canonieke CLI: <code>md pdf</code> (alias <code>markdown pdf</code>). <code>vsa pdf</code> blijft als
+verouderd alias met stderr-waarschuwing.</p>
 <h3 id="gebruik_7">Gebruik<a class="headerlink" href="#gebruik_7" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>vsa pdf &lt;bestand.md&gt; -o uit.pdf
+<div class="highlight"><pre><span></span><code>md pdf &lt;bestand.md&gt;
+md pdf &lt;bestand.md&gt; -o uit.pdf
 </code></pre></div>
+<p>Default zonder <code>-o</code>: sibling <code>&lt;bronnaam&gt;.pdf</code> (bijv. <code>index.md.pdf</code>).</p>
 <h3 id="output_4">Output<a class="headerlink" href="#output_4" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -5533,11 +5565,12 @@ worden net als bij <code>build-markdown</code> opgelost; daarna print Edge/Chrom
 <tbody>
 <tr>
 <td>PDF</td>
-<td><code>uit.pdf</code></td>
+<td><code>index.md.pdf</code></td>
 </tr>
 </tbody>
 </table>
-<p>Fouten (validatie) gebruiken hetzelfde formaat als <code>vsa validate</code>.</p>
+<p>Fouten (validatie) gebruiken hetzelfde formaat als <code>vsa validate</code>.
+Man-pagina: <a href="../../reference/cli/md/"><code>md</code></a>.</p>
 <h2 id="vsatoml"><code>vsa.toml</code><a class="headerlink" href="#vsatoml" title="Permanent link">&para;</a></h2>
 <h3 id="doel_8">Doel<a class="headerlink" href="#doel_8" title="Permanent link">&para;</a></h3>
 <p>Projectdefaults vastleggen.</p>
@@ -5731,7 +5764,7 @@ mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bla
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-10-26
         
       </p>
       
