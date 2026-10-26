@@ -500,6 +500,15 @@ def strip_mscz_sheet_chrome(path: Path) -> None:
         mscx = zin.read(mscx_name).decode("utf-8")
         other = {n: zin.read(n) for n in names if n != mscx_name}
     mscx = _strip_header_footer_colophon_for_muziek(mscx)
+    # MS4 houdt layout-Style vaak alleen in score_style.mss — footer/header
+    # uitzetten moet daar ook, anders blijft paginatekst onderaan een hoge
+    # pagina hangen (lege strip + Text in SVG).
+    for name, data in list(other.items()):
+        lower = name.lower()
+        if lower.endswith(".mss") or name.endswith("score_style.mss"):
+            other[name] = _strip_header_footer_colophon_for_muziek(
+                data.decode("utf-8")
+            ).encode("utf-8")
     tmp = path.with_suffix(path.suffix + ".tmp")
     with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zout:
         for n, data in other.items():

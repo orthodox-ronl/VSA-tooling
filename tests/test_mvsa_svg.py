@@ -239,6 +239,47 @@ def test_muziek_layout_strips_title_from_mscz(tmp_path: Path) -> None:
     assert "<showFooter>0</showFooter>" in body
 
 
+def test_strip_chrome_clears_footer_in_score_style_mss(tmp_path: Path) -> None:
+    """MS4: Style vaak alleen in mss — footer uitzetten moet daar ook."""
+    from vsa.mscz_partituur import strip_mscz_sheet_chrome
+
+    mscx = """<?xml version='1.0'?>
+<museScore version="4.20">
+  <Score>
+    <Staff id="1">
+      <Measure>
+        <voice>
+          <Rest>
+            <durationType>measure</durationType>
+            <duration>1/1</duration>
+          </Rest>
+        </voice>
+      </Measure>
+    </Staff>
+  </Score>
+</museScore>
+"""
+    mss = """<?xml version="1.0" encoding="UTF-8"?>
+<museScore version="4.70">
+  <Style>
+    <pageHeight>11.6929</pageHeight>
+    <showFooter>1</showFooter>
+    <oddFooterC>CC BY — zie colofon</oddFooterC>
+  </Style>
+</museScore>
+"""
+    path = tmp_path / "mss-only.mscz"
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr("score.mscx", mscx)
+        z.writestr("score_style.mss", mss)
+    strip_mscz_sheet_chrome(path)
+    with zipfile.ZipFile(path) as z:
+        body = z.read("score_style.mss").decode("utf-8")
+    assert "<showFooter>0</showFooter>" in body
+    assert "<oddFooterC></oddFooterC>" in body
+    assert "CC BY" not in body
+
+
 @pytest.mark.skipif(MUSESCORE is None, reason="MuseScore niet geïnstalleerd")
 def test_export_vredeslitanie_svg_trimmed(tmp_path: Path) -> None:
     out = tmp_path / "vrede.svg"

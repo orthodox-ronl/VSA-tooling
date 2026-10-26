@@ -10,6 +10,9 @@ node_modules/
 
 # MuseScore/lokale PDF-export — niet committen (scans horen in bron)
 *.pdf
+# Uitzondering: spike-proef-PDF’s in bug-cases wél zichtbaar/commitbaar
+!examples/bug-cases/*.pdf
+!examples/bug-cases/**/*.pdf
 
 # MuseScore autosave — nergens committen
 *.autosave

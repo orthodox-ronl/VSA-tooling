@@ -5,8 +5,9 @@ notenbalken, lyrics, uitvoeringsaanwijzingen, maatnummers e.d. — **geen**
 titel, copyright, colofon of bewerkersregel. Bron `.mvsa`: layout ``muziek``
 via [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg). Bron `.mscz`:
 [`mscz svg`](../reference/cli/mscz.md) — blad-chrome op een tijdelijke kopie
-gestript (het bron-``.mscz`` blijft ongewijzigd); Style/fonts uit het bestand
-blijven. Bedoeld voor koormap-pagina’s (bibliotheek-shortcode `muziek` later).
+gestript (het bron-``.mscz`` blijft ongewijzigd; Style-footer/header ook in
+``score_style.mss``); Style/fonts uit het bestand blijven verder. Bedoeld voor
+koormap-pagina’s (bibliotheek-shortcode `muziek` later).
 Past het stuk op één MuseScore-pagina, dan één `.svg`; anders een **bladreeks**
 (`stem-1.svg`, `stem-2.svg`, …).
 
