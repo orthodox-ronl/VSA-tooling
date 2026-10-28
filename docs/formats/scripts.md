@@ -5,16 +5,16 @@ importeerbaar) en roepen daarna de top-level CLI aan.
 
 ## Formaat-scripts
 
-| Script             | Equivalent                          | Bron                 |
-| ------------------ | ----------------------------------- | -------------------- |
-| `scripts\mvsa.cmd` | `mvsa …` / `python -m vsa.cli_mvsa` | `.mvsa`              |
-| `scripts\mxl.cmd`  | `mxl …` / `python -m vsa.cli_mxl`   | `.mxl` / `.musicxml` |
-| `scripts\mscz.cmd` | `mscz …` / `python -m vsa.cli_mscz` | `.mscz`              |
-| `scripts\md.cmd`   | `md …` / `python -m vsa.cli_md`     | `.md` / `.markdown`  |
+| Script                 | Equivalent                            | Bron                 |
+| ---------------------- | ------------------------------------- | -------------------- |
+| `scripts\mvsa.cmd`     | `mvsa …` / `python -m vsa.cli_mvsa`   | `.mvsa`              |
+| `scripts\mxl.cmd`      | `mxl …` / `python -m vsa.cli_mxl`     | `.mxl` / `.musicxml` |
+| `scripts\mscz.cmd`     | `mscz …` / `python -m vsa.cli_mscz`   | `.mscz`              |
+| `scripts\markdown.cmd` | `markdown …` / `python -m vsa.cli_md` | `.md` / `.markdown`  |
 
-Na `pip install -e .` kun je ook zonder script `mvsa`, `mxl`, `mscz`, `md`
-(alias `markdown`) op PATH aanroepen. De `.cmd`-bestanden werken altijd
-vanuit de repo-root.
+Na `pip install -e .` kun je ook zonder script `mvsa`, `mxl`, `mscz`,
+`markdown` op PATH aanroepen. Geen `md`-entrypoint: op Windows is `md`
+makedir. De `.cmd`-bestanden werken altijd vanuit de repo-root.
 
 ## Voorbeelden
 
@@ -29,10 +29,10 @@ scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\y.mxl
 scripts\mscz.cmd svg generated\alleluia.mscz -o generated\alleluia.svg
 scripts\mscz.cmd pdf generated\alleluia.mscz -o generated\alleluia.pdf
 scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
-scripts\md.cmd pdf examples\consumer-minimal\content-source\index.md
+scripts\markdown.cmd pdf examples\consumer-minimal\content-source\index.md
 ```
 
-In handleidingen en voorbeelden: altijd `scripts\*.cmd` (of `vsa`/`mvsa`/`mxl`/`mscz`/`md`
+In handleidingen en voorbeelden: altijd `scripts\*.cmd` (of `vsa`/`mvsa`/`mxl`/`mscz`/`markdown`
 op PATH na install). Geen `python -m vsa.cli…` als gebruikerscommando.
 
 ## Overige repo-scripts
@@ -46,7 +46,7 @@ Installatie, testen, docs-build: zie
 - [`mvsa`](../reference/cli/mvsa.md)
 - [`mxl`](../reference/cli/mxl.md)
 - [`mscz`](../reference/cli/mscz.md)
-- [`md`](../reference/cli/md.md)
+- [`markdown`](../reference/cli/markdown.md)
 - [CLI-overzicht](../reference/cli/index.md)
 
 ## Zie ook

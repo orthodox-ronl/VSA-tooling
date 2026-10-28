@@ -22,6 +22,7 @@ CI gebruikt `examples\consumer-minimal\content-source`.
 | `mvsa` | top-level CLI; bron `.mvsa` |
 | `mxl` | top-level `mxl` (import / mscz; bron `.mxl`) |
 | `mscz` | top-level `mscz` (import / mxl; bron `.mscz`) |
+| `markdown` | top-level `markdown` (pdf / svg / text; bron `.md`) |
 | `check-docs` | docs-hygiene |
 | `migrate-metadata` | dry-run/`--apply`: zet `@toon` (uit titel/pad) en optioneel `--tempo` (`@tempo 130`) op `.mvsa` |
 

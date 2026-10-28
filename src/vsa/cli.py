@@ -1090,7 +1090,7 @@ def _build_parser():
     pdf = subparsers.add_parser(
         "pdf",
         help=(
-            "Verouderd: Markdown → A4-PDF. Gebruik ``md pdf`` "
+            "Verouderd: Markdown → A4-PDF. Gebruik ``markdown pdf`` "
             "(zelfde keten; default sibling *.md.pdf)."
         ),
     )
@@ -1101,7 +1101,7 @@ def _build_parser():
         default=None,
         help=(
             "Uitvoer-PDF (default: sibling <bronnaam>.pdf, bv. index.md.pdf). "
-            "Zie md pdf."
+            "Zie markdown pdf."
         ),
     )
     pdf.add_argument("--config", default=None)
@@ -1388,11 +1388,11 @@ def _cmd_build_markdown(args, config):
 
 
 def _cmd_pdf(args, config):
-    """Verouderd alias voor ``md pdf`` (site-Markdown → A4-PDF)."""
+    """Verouderd alias voor ``markdown pdf`` (site-Markdown → A4-PDF)."""
     from .cli_md import run_markdown_pdf_cli
 
     print(
-        "Let op: `vsa pdf` is verouderd; gebruik `md pdf` "
+        "Let op: `vsa pdf` is verouderd; gebruik `markdown pdf` "
         "(zelfde opties; default sibling *.md.pdf).",
         file=sys.stderr,
     )

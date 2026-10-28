@@ -75,6 +75,6 @@ Gedeelde helper is in gebruik voor `mvsa`-exports, `mxl`/`mscz`-aliases,
 top-level `text` / `audio` / `svg`, en de wrappers `collect_mvsa_files` /
 `iter_vsa_files` / `iter_vsa_mvsa_files`.
 
-`md pdf` / `md svg` / `md text` ondersteunen bestand-of-map. Optioneel later:
+`markdown pdf` / `markdown svg` / `markdown text` ondersteunen bestand-of-map. Optioneel later:
 `vsa parse` en overige map-scanners (`musicxml`, `validate`, `process`,
 `template`) waar die nog eigen `rglob` hebben.

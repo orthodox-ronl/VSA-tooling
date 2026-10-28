@@ -78,12 +78,12 @@ MusicXML-export gebruikt [metadata](@) uit `.vsa`-frontmatter en renderer-/expor
 ## PDF (site-Markdown)
 
 ```cmd
-md pdf <bestand.md>
-md pdf <bestand.md> -o uit.pdf
+markdown pdf <bestand.md>
+markdown pdf <bestand.md> -o uit.pdf
 ```
 
 A4-PDF van één Markdownbestand na dezelfde VSA/include/pagebreak-keten als
 `build-markdown`. Default sibling: `<bronnaam>.pdf`. Vereist Edge, Chrome of
 Chromium (`CHROME_PATH`). Verouderd alias: `vsa pdf`. Zie
-[`md`](cli/md.md). Partituur-PDF: `mvsa pdf` / `mscz pdf`.
+[`markdown`](cli/markdown.md). Partituur-PDF: `mvsa pdf` / `mscz pdf`.
 

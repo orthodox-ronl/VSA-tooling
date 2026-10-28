@@ -1,12 +1,12 @@
-# `vsa pdf` — verouderd (gebruik `md pdf`)
+# `vsa pdf` — verouderd (gebruik `markdown pdf`)
 
 `vsa pdf` blijft werken als **alias** voor
-[`md pdf`](md.md#md-pdf): Markdown met VSA → A4-PDF via Edge/Chrome.
+[`markdown pdf`](markdown.md#markdown-pdf): Markdown met VSA → A4-PDF via Edge/Chrome.
 
 Bij elke aanroep schrijft de CLI een waarschuwing naar stderr:
 
 ```text
-Let op: `vsa pdf` is verouderd; gebruik `md pdf` (zelfde opties; default sibling *.md.pdf).
+Let op: `vsa pdf` is verouderd; gebruik `markdown pdf` (zelfde opties; default sibling *.md.pdf).
 ```
 
 ## Synopsis (alias)
@@ -18,12 +18,12 @@ vsa pdf [-h] [--config CONFIG] [--content-root CONTENT_ROOT]
          input
 ```
 
-Argumenten en gedrag zijn gelijk aan [`md pdf`](md.md#md-pdf), inclusief
+Argumenten en gedrag zijn gelijk aan [`markdown pdf`](markdown.md#markdown-pdf), inclusief
 default sibling-naam (`index.md` → `index.md.pdf`).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-md pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
+markdown pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
 ```
 
 ## Wat is dit niet?
@@ -34,6 +34,6 @@ md pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
 
 ## Zie ook
 
-- [`md`](md.md) — canonieke Markdown-straat (`pdf` / `svg` / `text`)
+- [`markdown`](markdown.md) — canonieke Markdown-straat (`pdf` / `svg` / `text`)
 - [`vsa build-markdown`](build-markdown.md)
 - [contract-index — site-Markdown-PDF](../../formats/contract-index.md)

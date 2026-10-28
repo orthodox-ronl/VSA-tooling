@@ -1,8 +1,9 @@
-"""Top-level ``md`` / ``markdown`` CLI (bron: ``.md`` / ``.markdown``).
+"""Top-level ``markdown`` CLI (bron: ``.md`` / ``.markdown``).
 
 Producten: pdf (pagina-A4), svg (VSA-blokken), text (platte pagina-tekst).
-Geen validate/kuiser/normalize. Contract: docs/formats/contract-index.md
-(site-Markdown vs notatie-product pdf).
+Geen validate/kuiser/normalize. Geen ``md``-entrypoint: op Windows is ``md``
+makedir. Contract: docs/formats/contract-index.md (site-Markdown vs
+notatie-product pdf).
 """
 
 from __future__ import annotations
@@ -46,15 +47,15 @@ def run_markdown_pdf_cli(
     max_line_width: float | None,
     chrome: str | None,
 ) -> int:
-    """Gedeelde implementatie voor ``md pdf`` en verouderd ``vsa pdf``."""
+    """Gedeelde implementatie voor ``markdown pdf`` en verouderd ``vsa pdf``."""
     from .config import load_config
     from .markdown_pdf import PdfError, write_markdown_pdf
     from .markdown_processor import ProcessValidationError
 
     if input_path.suffix.lower() not in {".md", ".markdown"}:
         print(
-            f"md pdf weigert {input_path.suffix or '(geen extensie)'}; "
-            f"gebruik een .md-bestand: md pdf {input_path}",
+            f"markdown pdf weigert {input_path.suffix or '(geen extensie)'}; "
+            f"gebruik een .md-bestand: markdown pdf {input_path}",
             file=sys.stderr,
         )
         return 1
@@ -115,10 +116,11 @@ def _reject_multi_output(files: list[Path], output: str | None) -> bool:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="md",
+        prog="markdown",
         description=(
             "Producten uit Markdown (.md): pagina-PDF, VSA-SVG’s, platte tekst. "
-            "Alias: markdown. Zie docs/reference/cli/md.md."
+            "Geen `md`-commando (Windows = makedir). "
+            "Zie docs/reference/cli/markdown.md."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
@@ -128,10 +130,10 @@ def _build_parser() -> argparse.ArgumentParser:
             "  text PATH [-o OUT] — platte tekst (default sibling *.md.txt)\n"
             "\n"
             "voorbeelden:\n"
-            "  md pdf index.md\n"
-            "  md pdf index.md -o index.md.pdf\n"
-            "  md text liturgie.md\n"
-            "  md svg liturgie.md -o generated\\svg\n"
+            "  markdown pdf index.md\n"
+            "  markdown pdf index.md -o index.md.pdf\n"
+            "  markdown text liturgie.md\n"
+            "  markdown svg liturgie.md -o generated\\svg\n"
         ),
     )
     sub = parser.add_subparsers(

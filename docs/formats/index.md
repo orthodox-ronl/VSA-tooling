@@ -77,12 +77,12 @@ een korte naam blijven. Details:
 
 In de repo-root (via `scripts\`):
 
-| Script             | Roept aan                |
-| ------------------ | ------------------------ |
-| `scripts\mvsa.cmd` | `python -m vsa.cli_mvsa` |
-| `scripts\mxl.cmd`  | `python -m vsa.cli_mxl`  |
-| `scripts\mscz.cmd` | `python -m vsa.cli_mscz` |
-| `scripts\md.cmd`   | `python -m vsa.cli_md`   |
+| Script                 | Roept aan                |
+| ---------------------- | ------------------------ |
+| `scripts\mvsa.cmd`     | `python -m vsa.cli_mvsa` |
+| `scripts\mxl.cmd`      | `python -m vsa.cli_mxl`  |
+| `scripts\mscz.cmd`     | `python -m vsa.cli_mscz` |
+| `scripts\markdown.cmd` | `python -m vsa.cli_md`   |
 
 Details: [Scripts (cmd)](scripts.md) · [scripts/README](https://github.com/orthodox-ronl/VSA-tooling/blob/main/scripts/README.md).
 
@@ -91,5 +91,5 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 scripts\mvsa.cmd -h
 scripts\mxl.cmd -h
 scripts\mscz.cmd -h
-scripts\md.cmd -h
+scripts\markdown.cmd -h
 ```

@@ -472,7 +472,7 @@ pagina-marges, fonts) hebben dezelfde betekenis als bij
 [PDF P6](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz));
 via MuseScore-Style van het `.mscz` (MSCZ S7). US Letter is niet canoniek.
 
-Dit is **niet** [`md pdf`](md.md#md-pdf) (Markdown + VSA-SVG via browser; wél
+Dit is **niet** [`markdown pdf`](markdown.md#markdown-pdf) (Markdown + VSA-SVG via browser; wél
 dezelfde A4-eis P6).
 
 ### Argumenten en opties

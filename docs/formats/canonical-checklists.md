@@ -111,7 +111,7 @@ Transforms: Oefenhoek `mscz-product-transforms.md` (PDF-kolom).
 
 **Canonieke pagina:** elke door ons geproduceerde PDF is **A4 staand**
 (210×297 mm). US Letter is **niet** canoniek — noch voor partituur-PDF
-(`mvsa pdf` / MuseScore), noch voor Markdown-PDF ([`md pdf`](../reference/cli/md.md#md-pdf); verouderd: [`vsa pdf`](../reference/cli/pdf.md)).
+(`mvsa pdf` / MuseScore), noch voor Markdown-PDF ([`markdown pdf`](../reference/cli/markdown.md#markdown-pdf); verouderd: [`vsa pdf`](../reference/cli/pdf.md)).
 
 | #   | Eis                                  | Toelichting                                                                                                                                                                                      |
 | --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -120,9 +120,9 @@ Transforms: Oefenhoek `mscz-product-transforms.md` (PDF-kolom).
 | P3  | **Geen Coria-links**                 | Oefenmateriaal hoort niet in papieren/PDF-uitgave (tenzij later bewust toegevoegd).                                                                                                              |
 | P4  | **Copyright-regel + colofon**        | **Later** (nog niet verplicht in deze toolchain): korte copyright-regel op **elke** pagina (footer) én een colofon (zoals Oefenhoek `mscz-partituur-contract`). Niet vergeten bij PDF-producten. |
 | P5  | **Provenance (Oefenhoek)**           | Optioneel: partituur-hash / generator-meta zoals in product-transforms — nog niet verplicht in VSA-tooling-export.                                                                               |
-| P6  | **A4 staand**                        | Paginaformaat **A4** (210×297 mm), niet US Letter. Partituur: MuseScore-Style (`pageWidth`/`pageHeight`, zie MSCZ S7). Site-Markdown-PDF (`md pdf`): print-CSS `@page` 210×297 mm.               |
+| P6  | **A4 staand**                        | Paginaformaat **A4** (210×297 mm), niet US Letter. Partituur: MuseScore-Style (`pageWidth`/`pageHeight`, zie MSCZ S7). Site-Markdown-PDF (`markdown pdf`): print-CSS `@page` 210×297 mm.               |
 
-[`md pdf`](../reference/cli/md.md#md-pdf) is een andere pipeline (Markdown + VSA-SVG,
+[`markdown pdf`](../reference/cli/markdown.md#markdown-pdf) is een andere pipeline (Markdown + VSA-SVG,
 geen MuseScore-partituur) maar valt onder **dezelfde** A4-eis (P6).
 
 ## Verschillen bewust hangende houden

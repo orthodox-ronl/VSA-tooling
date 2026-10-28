@@ -163,7 +163,7 @@ def test_cli_pdf_writes_output(tmp_path: Path, monkeypatch, capsys):
     assert pdf_path.is_file()
     assert "PDF geschreven naar:" in captured.out
     assert "verouderd" in captured.err
-    assert "md pdf" in captured.err
+    assert "markdown pdf" in captured.err
 
 
 def test_md_pdf_default_sibling_name(tmp_path: Path, monkeypatch, capsys):

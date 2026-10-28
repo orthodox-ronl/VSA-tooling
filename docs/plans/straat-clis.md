@@ -14,13 +14,13 @@ genoemd worden.
 
 Eén CLI per **straat** (bronfamilie):
 
-| Straat (docs) | CLI        | Alias                  |
-| ------------- | ---------- | ---------------------- |
-| vsa           | `vsa`      | —                      |
-| mvsa          | `mvsa`     | —                      |
-| mscz          | `mscz`     | —                      |
-| md            | `md`       | `markdown` → `md`      |
-| manueel       | `manual`   | `manueel` → `manual`   |
+| Straat (docs) | CLI        | Alias                          |
+| ------------- | ---------- | ------------------------------ |
+| vsa           | `vsa`      | —                              |
+| mvsa          | `mvsa`     | —                              |
+| mscz          | `mscz`     | —                              |
+| markdown      | `markdown` | — (geen `md`: Windows makedir) |
+| manueel       | `manual`   | `manueel` → `manual`           |
 
 Per straat:
 

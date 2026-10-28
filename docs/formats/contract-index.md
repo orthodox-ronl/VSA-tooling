@@ -28,7 +28,7 @@ mvsa-export: `mvsa-export-contracten.mdc`).
 | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | Kern + M-reeks (Coria / playback-`.mxl`)                                 | [canonical-checklists.md](canonical-checklists.md) §MXL                                                                                                              | `mvsa mxl` / `mxl normalize` / `mscz mxl`                     |
 | S-reeks (partituur-`.mscz`)                                              | [canonical-checklists.md](canonical-checklists.md) §MSCZ                                                                                                             | `mvsa mscz` / layout `partituur`                              |
-| P-reeks (PDF A4 e.d.)                                                    | [canonical-checklists.md](canonical-checklists.md) §PDF                                                                                                              | `mvsa pdf` / `mscz pdf` (partituur); `md pdf` (site-Markdown) |
+| P-reeks (PDF A4 e.d.)                                                    | [canonical-checklists.md](canonical-checklists.md) §PDF                                                                                                              | `mvsa pdf` / `mscz pdf` (partituur); `markdown pdf` (site-Markdown) |
 | Bestandsnaamgeving `{stam}.{bron}.{doel}`                                | [canonical-checklists.md](canonical-checklists.md)#bestandsnaamgeving-conventie                                                                                      | alle exports zonder `-o`                                      |
 | MSCZ-leesbaarheid (R*/L*/S* print: melisma, breve, spacers, slurs, cues) | [mscz-leesbaarheid.md](mscz-leesbaarheid.md)                                                                                                                         | layoutprofiel `partituur` / `muziek`                          |
 | Layoutprofielen `partituur` / `muziek` / `plain`                         | [mscz.md](mscz.md)#layoutprofielen---layout                                                                                                                          | `mvsa mscz` / `mvsa svg` / `mvsa pdf`                         |
@@ -79,10 +79,10 @@ format-CLI `mxl …`.
 **Geen product (wel straat-actie):** `normalize`, `import`, `validate`,
 `transpose`, `kuiser`, `compare` — geen meta-keys in `products`.
 
-**Site-Markdown-PDF:** `md pdf` (alias `markdown pdf`; verouderd:
-`vsa pdf`) en bibliotheek-`scripts\pdf.cmd` → `index.md.pdf` zijn **geen**
+**Site-Markdown-PDF:** `markdown pdf` (verouderd: `vsa pdf`) en
+bibliotheek-`scripts\pdf.cmd` → `index.md.pdf` zijn **geen**
 notatie-product `pdf` (P*). Partituur-PDF volgt P* via `mvsa pdf` /
-`mscz pdf`. Man-pagina: [`md`](../reference/cli/md.md).
+`mscz pdf`. Man-pagina: [`markdown`](../reference/cli/markdown.md).
 
 | Actie (niet-product) | Straat / CLI                                                                 |
 | -------------------- | ---------------------------------------------------------------------------- |
