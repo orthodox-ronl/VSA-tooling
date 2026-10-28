@@ -63,19 +63,23 @@ def test_mscz_mxl_writes_and_merges_meta(tmp_path: Path) -> None:
     assert data["products"]["pdf"]["file"] == "lied.mscz.pdf"
 
 
-def test_mscz_svg_meta_single_and_bladreeks(tmp_path: Path) -> None:
+def test_mscz_svg_meta_single_tall_not_bladreeks(tmp_path: Path) -> None:
+    """Product-meta heeft altijd één key ``svg`` (tall); geen ``svg-N``-bladreeks."""
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
     with patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_svg):
         assert mscz_main(["svg", str(bron)]) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert set(data["products"]) == {"svg"}
+    assert data["products"]["svg"]["file"] == "lied.mscz.svg"
 
+    # Ook als de exporter per ongeluk meerdere pagina's teruggeeft: meta = één svg.
     with patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_bladreeks):
         assert mscz_main(["svg", str(bron)]) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
-    assert set(data["products"]) == {"svg-1", "svg-2"}
-    assert "svg" not in data["products"]
+    assert set(data["products"]) == {"svg"}
+    assert not any(k.startswith("svg-") for k in data["products"])
+    assert data["products"]["svg"]["file"] == "lied.mscz-1.svg"
 
 
 def test_mscz_pdf_skips_meta_when_not_sibling(tmp_path: Path, capsys) -> None:
