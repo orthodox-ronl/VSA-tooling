@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-28 08:37 CET.
+  , gebouwd 2026-10-28 19:46 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -8580,16 +8580,15 @@ voor gedeelde schermrenderer. Formaatpagina:
 </tr>
 </tbody>
 </table>
-<p>Eén MuseScore-pagina → één bestand (<code>-o</code> / sibling <code>.svg</code>). Meerdere
-pagina’s → <strong>bladreeks</strong> <code>stem-1.svg</code>, <code>stem-2.svg</code>, … (elke pagina
-apart; bedoeld als print-bouwstenen). Op het scherm stapelen tot er een tall
-scherm-SVG of Score-IR-pad is — zie
+<p>Altijd <strong>één tall-SVG</strong> (compact Style + hoge <code>pageHeight</code>): sibling
+<code>.svg</code> / <code>-o</code>. Geen A4-bladreeks. Scherm-fallback én bouwsteen voor
+bibliotheek <code>index.md.pdf</code> — zie
+<a href="../../../formats/mvsa-svg/">mvsa-svg</a> en
 <a href="../../../plans/kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a>.
 Na trim: <strong>witte achtergrond</strong> (default); <code>--transparent</code> voor geen
 achtergrondvlak.</p>
-<p>Style-opties (<code>--compact</code>, systeem-/stafafstand, pagina-marges,
-lyrics-/cue-font): andere Style-vlaggen winnen van <code>--compact</code>. Heb je al
-een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p>
+<p>Style: compact is default; andere Style-vlaggen winnen. <code>--compact</code> blijft
+geldig. Heb je al een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p>
 <h3 id="argumenten_1">Argumenten<a class="headerlink" href="#argumenten_1" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -8625,7 +8624,7 @@ een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p
 </tr>
 <tr>
 <td><code>--no-trim</code></td>
-<td>Laat volle A4-SVG van MuseScore staan.</td>
+<td>Sla viewBox-trim over.</td>
 </tr>
 <tr>
 <td><code>--transparent</code></td>
@@ -8637,15 +8636,15 @@ een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p
 </tr>
 <tr>
 <td><code>--compact</code></td>
-<td>Dichtste Style-baseline; andere Style-opties winnen (zie <code>mscz</code>).</td>
+<td>Compact-baseline (default voor SVG; expliciete Style-opties winnen).</td>
 </tr>
 <tr>
 <td><code>--min-system-distance SP</code></td>
-<td>Min. systeemafstand (default <code>8</code>).</td>
+<td>Min. systeemafstand (SVG-default compact <code>2</code>).</td>
 </tr>
 <tr>
 <td><code>--max-system-distance SP</code></td>
-<td>Max. systeemafstand (default <code>14</code>).</td>
+<td>Max. systeemafstand (SVG-default compact <code>2</code>).</td>
 </tr>
 <tr>
 <td><code>--staff-distance SP</code></td>
@@ -8653,11 +8652,11 @@ een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p
 </tr>
 <tr>
 <td><code>--page-margin-top MM</code></td>
-<td>Bovenmarge in mm (default <code>15</code>).</td>
+<td>Bovenmarge in mm (SVG-default compact <code>5</code>).</td>
 </tr>
 <tr>
 <td><code>--page-margin-bottom MM</code></td>
-<td>Ondermarge in mm (default <code>15</code>).</td>
+<td>Ondermarge in mm (SVG-default compact <code>5</code>).</td>
 </tr>
 <tr>
 <td><code>--lyrics-font FACE</code></td>
@@ -9189,17 +9188,16 @@ mscz mvsa lied.mscz
 </tr>
 <tr>
 <td>SVG (tenzij <code>--skip-svg</code>)</td>
-<td>één pagina: <code>{stam}.mvsa.svg</code>; bladreeks: <code>{stam}.mvsa-1.svg</code>, …</td>
+<td><code>{stam}.mvsa.svg</code> (tall, compact)</td>
 </tr>
 <tr>
 <td>Meta</td>
-<td><code>{stam}.mvsa.products-meta.json</code> (<code>svg</code> of <code>svg-1</code>…; zie products-meta)</td>
+<td><code>{stam}.mvsa.products-meta.json</code> (key <code>svg</code>; zie products-meta)</td>
 </tr>
 </tbody>
 </table>
 <p>Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
-(<code>--force</code> regenereert). Bladreeks-meta zonder seed-<code>.svg</code> telt als vers
-voor de SVG-eis. Kaal: geen bibliotheek-stamps.
+(<code>--force</code> regenereert). Kaal: geen bibliotheek-stamps.
 <a href="../../../formats/contract-index/">contract-index</a> ·
 <a href="../../../formats/products-meta/">products-meta</a>.</p>
 <h3 id="voorbeelden_10">Voorbeelden<a class="headerlink" href="#voorbeelden_10" title="Permanent link">&para;</a></h3>

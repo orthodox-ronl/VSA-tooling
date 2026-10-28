@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-28 08:37 CET.
+  , gebouwd 2026-10-28 19:46 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4917,10 +4917,11 @@ titel, copyright, colofon of bewerkersregel. Bron <code>.mvsa</code>: layout <co
 via <a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg</code></a>. Bron <code>.mscz</code>:
 <a href="../../reference/cli/mscz/"><code>mscz svg</code></a> — blad-chrome op een tijdelijke kopie
 gestript (het bron-<code>.mscz</code> blijft ongewijzigd; Style-footer/header ook in
-<code>score_style.mss</code>); Style/fonts uit het bestand blijven verder. Bedoeld voor
-koormap-pagina’s (bibliotheek-shortcode <code>muziek</code> later).
-Past het stuk op één MuseScore-pagina, dan één <code>.svg</code>; anders een <strong>bladreeks</strong>
-(<code>stem-1.svg</code>, <code>stem-2.svg</code>, …).</p>
+<code>score_style.mss</code>).</p>
+<p>Productvorm: <strong>één tall-SVG</strong> (hoge MuseScore-<code>pageHeight</code>) in <strong>compact</strong>
+Style — geen A4-bladreeks (<code>stem-N.svg</code>). Die sibling voedt scherm-fallback
+én <code>index.md.pdf</code> (systeemsnee naar A4). A4-paginering zit in de PDF, niet
+in het SVG-product.</p>
 <table>
 <thead>
 <tr>
@@ -4956,23 +4957,20 @@ scripts\mscz.cmd svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from
 leeg (handig op gekleurde pagina’s). De trim zet <code>viewBox</code> op de getekende
 inhoud inclusief MuseScore-<code>transform</code> (glyphs staan lokaal rond <code>(0,0)</code>);
 anders zouden linker- en bovenmarge veel te breed blijven.</p>
-<p>Bij bron <code>.mvsa</code>: optioneel <code>--compact</code> (dichtste Style-baseline; andere
-Style-opties winnen), systeemafstand, stafafstand (<code>--staff-distance</code>),
-pagina-marges (<code>--page-margin-top</code> / <code>--page-margin-bottom</code>), fonts en
-<code>--measure-spacing</code> — zelfde Style-opties als bij
-<a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../mscz/"><code>.mscz</code></a>.
-Bij bron <code>.mscz</code> (<code>mscz svg</code>) gelden Style-CLI-opties niet (waarden staan al
-in het bestand); blad-chrome wordt altijd gestript vóór de SVG-export.</p>
+<p>Bij bron <code>.mvsa</code>: compact is de <strong>default</strong> voor SVG (dichtste Style-baseline);
+expliciete Style-opties winnen. Zelfde vlaggen als bij
+<a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../mscz/"><code>.mscz</code></a>
+(systeemafstand, marges, fonts, <code>--measure-spacing</code>). <code>--compact</code> blijft
+geldig (no-op t.o.v. de default). Bij bron <code>.mscz</code> (<code>mscz svg</code>) past de
+export compact + tall op een tijdelijke kopie; blad-chrome wordt gestript.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 4 --max-system-distance 4
 </code></pre></div>
-<p><strong>Brug:</strong> MuseScore tekent de SVG. Afspraak over kale scherm- vs blad-SVG,
-catalogus-PDF vs koormap-pagina-PDF, en latere tall scherm-SVG / Score-IR:
-<a href="../../plans/kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a>.
-Een gedeelde browser-renderer (OSMD / Score-IR) voor koormap én CoriB blijft
-het beoogde schermpad (plan §4); dit MuseScore-product dekt nu de
-koormap-brug.</p>
+<p><strong>Brug:</strong> MuseScore tekent de tall-SVG. Scherm-hoofdpad blijft Score-IR/OSMD
+(<a href="../../plans/kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a> §4);
+deze sibling is scherm-fallback en print-bouwsteen voor bibliotheek
+<code>index.md.pdf</code>.</p>
 
 
 
@@ -5009,7 +5007,7 @@ koormap-brug.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-26
+        Bijgewerkt: 2026-10-28
         
       </p>
       

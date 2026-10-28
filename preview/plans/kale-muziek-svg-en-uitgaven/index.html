@@ -94,7 +94,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-28 08:37 CET.
+  , gebouwd 2026-10-28 19:46 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5069,18 +5069,18 @@ niet opnieuw uit het MuseScore-titelblok wanneer je een pagina-PDF bouwt.</p>
 <tbody>
 <tr>
 <td><strong>Scherm-SVG</strong></td>
-<td>Website (pc, tablet, smalle telefoon)</td>
-<td>Bij voorkeur <strong>één</strong> doorlopend / hoog beeld; mag scrollen; dynamisch schalen</td>
+<td>Website-fallback (pc, tablet, telefoon)</td>
+<td><strong>Één</strong> tall compacte MuseScore-SVG; mag scrollen; dynamisch schalen</td>
 </tr>
 <tr>
-<td><strong>Blad-SVG</strong></td>
-<td>Bouwsteen voor A4-print-PDF</td>
-<td>Nul of meer bestanden; elk past op <strong>hoogstens één</strong> printbaar blad</td>
+<td><strong>Print-PDF</strong></td>
+<td><code>index.md.pdf</code> (Download/Print pagina)</td>
+<td>Zelfde tall-SVG, gesneden op systeembrenzen naar A4</td>
 </tr>
 </tbody>
 </table>
-<p>Zelfde bron; verschillende afgeleiden. Print blijft bladreeks; schermrichting
-is Score-IR/OSMD (§4), tot die keten in productie op de site staat.</p>
+<p>Zelfde sibling-SVG voor scherm-fallback én print-compose. Scherm-hoofdpad
+blijft Score-IR/OSMD (§4). A4-bladreeks (<code>stem-N.svg</code>) is verlaten.</p>
 <h3 id="13-twee-pdf-soorten-niet-door-elkaar">1.3 Twee PDF-soorten — niet door elkaar<a class="headerlink" href="#13-twee-pdf-soorten-niet-door-elkaar" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -5126,24 +5126,20 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).</p>
 </thead>
 <tbody>
 <tr>
-<td><code>mvsa svg</code></td>
-<td>Kale SVG via MuseScore; bij meerdere pagina’s: bladreeks <code>stem-N.svg</code></td>
+<td><code>mvsa</code>/<code>mscz</code> <code>svg</code> + <code>products</code></td>
+<td>Eén tall compacte kale SVG (geen bladreeks)</td>
 </tr>
 <tr>
 <td>Catalogus-sibling PDF</td>
 <td>MuseScore layout <code>partituur</code> (titel/colofon in het scorebestand)</td>
 </tr>
 <tr>
-<td><code>pagina-pdf</code> + <code>pdf-bijelkaar</code></td>
-<td>Kale blad-SVG’s + Markdown-koppen; <code>--compact</code> binnen bijelkaar</td>
+<td>bibliotheek <code>pdf.cmd</code> / <code>index.md.pdf</code></td>
+<td>Bestaande tall-SVG + Markdown; systeemsnee naar A4 (lokaal exporteren alleen indien SVG ontbreekt)</td>
 </tr>
 <tr>
-<td><code>pagina-pdf</code> zonder bijelkaar</td>
-<td>Zelfde SVG-route (zonder <code>--compact</code>); geen catalogus-PDF-plak</td>
-</tr>
-<tr>
-<td>Lange stukken (bijv. communievers Groningen)</td>
-<td>Bladreeks in pagina-PDF; scherm: Score-IR/OSMD (fase 3, richting vast)</td>
+<td>Lange stukken</td>
+<td>Tall-SVG + snede; scherm: Score-IR/OSMD (fase 3)</td>
 </tr>
 </tbody>
 </table>
@@ -5167,9 +5163,9 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).</p>
 </tr>
 <tr>
 <td>1</td>
-<td>Multi-page MuseScore-SVG als <strong>bladreeks</strong> (niet langer harde fout voor bladgebruik)</td>
+<td>~~Bladreeks~~ → <strong>één tall compacte SVG</strong> als product (scherm-fallback + print-bouwsteen)</td>
 <td>VSA-tooling</td>
-<td><strong>gedaan</strong></td>
+<td><strong>gedaan</strong> (tall)</td>
 </tr>
 <tr>
 <td>2</td>
@@ -5190,8 +5186,8 @@ OSMD (incl. S8 A1 — <a href="../osmd-s8-recite/">osmd-s8-recite</a>). Rest ope
 <hr />
 <h2 id="4-open-verplichting-score-irosmd-als-schermpad">4. Open verplichting: Score-IR/OSMD als schermpad<a class="headerlink" href="#4-open-verplichting-score-irosmd-als-schermpad" title="Permanent link">&para;</a></h2>
 <p><strong>Richting (vastgelegd):</strong> productiescherm = <strong>Score-IR → MusicXML (uit IR) →
-OSMD</strong>. MuseScore blijft voor print-blad-SVG’s / MSCZ / blad-PDF — niet als
-schermmotor. Tall MuseScore-scherm-SVG is <strong>geen</strong> hoofdpad.</p>
+OSMD</strong>. MuseScore-tall-SVG is <strong>fallback</strong> + bouwsteen voor <code>index.md.pdf</code>,
+niet de schermmotor. MSCZ / blad-PDF blijven MuseScore.</p>
 <p>Contract voor koormap (shortcode <code>muziek</code>) en latere CoriB-consumptie:
 <a href="../partituur-ir/">partituur-ir</a> §7 (Scherm- en CoriB-brug). Tooling-siblings:
 <code>lied.mvsa.score-ir.json</code> + <code>lied.mvsa.from-ir.musicxml</code> via
@@ -5215,7 +5211,7 @@ fallback, niet het S8-schermpad.</p>
 <li>Geen normatieve wijziging van CLI-gedrag in deze documentronde.</li>
 <li>Geen verplichting om catalogus-sibling-PDF af te schaffen — alleen om die
   niet meer als koormap-bouwsteen te gebruiken.</li>
-<li>Geen tall MuseScore-scherm-SVG als productiedoel (§4 koos Score-IR/OSMD).</li>
+<li>Geen vervanging van OSMD door tall-SVG op het scherm (§4); tall-SVG = fallback + print.</li>
 </ul>
 
 
@@ -5253,7 +5249,7 @@ fallback, niet het S8-schermpad.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-10-28
         
       </p>
       
