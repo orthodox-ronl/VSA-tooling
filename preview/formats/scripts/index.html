@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-26 15:15 CET.
+  , gebouwd 2026-10-28 08:37 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3928,14 +3928,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/cli/md/" class="md-nav__link">
+      <a href="../../reference/cli/markdown/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    md — producten uit Markdown (.md)
+    markdown — producten uit Markdown (.md)
   
 
     
@@ -3963,7 +3963,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik md pdf)
+    vsa pdf — verouderd (gebruik markdown pdf)
   
 
     
@@ -5094,15 +5094,15 @@ importeerbaar) en roepen daarna de top-level CLI aan.</p>
 <td><code>.mscz</code></td>
 </tr>
 <tr>
-<td><code>scripts\md.cmd</code></td>
-<td><code>md …</code> / <code>python -m vsa.cli_md</code></td>
+<td><code>scripts\markdown.cmd</code></td>
+<td><code>markdown …</code> / <code>python -m vsa.cli_md</code></td>
 <td><code>.md</code> / <code>.markdown</code></td>
 </tr>
 </tbody>
 </table>
-<p>Na <code>pip install -e .</code> kun je ook zonder script <code>mvsa</code>, <code>mxl</code>, <code>mscz</code>, <code>md</code>
-(alias <code>markdown</code>) op PATH aanroepen. De <code>.cmd</code>-bestanden werken altijd
-vanuit de repo-root.</p>
+<p>Na <code>pip install -e .</code> kun je ook zonder script <code>mvsa</code>, <code>mxl</code>, <code>mscz</code>,
+<code>markdown</code> op PATH aanroepen. Geen <code>md</code>-entrypoint: op Windows is <code>md</code>
+makedir. De <code>.cmd</code>-bestanden werken altijd vanuit de repo-root.</p>
 <h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 
@@ -5114,9 +5114,9 @@ scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\y.mxl
 scripts\mscz.cmd svg generated\alleluia.mscz -o generated\alleluia.svg
 scripts\mscz.cmd pdf generated\alleluia.mscz -o generated\alleluia.pdf
 scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
-scripts\md.cmd pdf examples\consumer-minimal\content-source\index.md
+scripts\markdown.cmd pdf examples\consumer-minimal\content-source\index.md
 </code></pre></div>
-<p>In handleidingen en voorbeelden: altijd <code>scripts\*.cmd</code> (of <code>vsa</code>/<code>mvsa</code>/<code>mxl</code>/<code>mscz</code>/<code>md</code>
+<p>In handleidingen en voorbeelden: altijd <code>scripts\*.cmd</code> (of <code>vsa</code>/<code>mvsa</code>/<code>mxl</code>/<code>mscz</code>/<code>markdown</code>
 op PATH na install). Geen <code>python -m vsa.cli…</code> als gebruikerscommando.</p>
 <h2 id="overige-repo-scripts">Overige repo-scripts<a class="headerlink" href="#overige-repo-scripts" title="Permanent link">&para;</a></h2>
 <p>Installatie, testen, docs-build: zie
@@ -5127,7 +5127,7 @@ op PATH na install). Geen <code>python -m vsa.cli…</code> als gebruikerscomman
 <li><a href="../../reference/cli/mvsa/"><code>mvsa</code></a></li>
 <li><a href="../../reference/cli/mxl/"><code>mxl</code></a></li>
 <li><a href="../../reference/cli/mscz/"><code>mscz</code></a></li>
-<li><a href="../../reference/cli/md/"><code>md</code></a></li>
+<li><a href="../../reference/cli/markdown/"><code>markdown</code></a></li>
 <li><a href="../../reference/cli/">CLI-overzicht</a></li>
 </ul>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
@@ -5170,7 +5170,7 @@ op PATH na install). Geen <code>python -m vsa.cli…</code> als gebruikerscomman
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-26
+        Bijgewerkt: 2026-10-28
         
       </p>
       
