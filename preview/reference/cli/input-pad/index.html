@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-28 19:46 CET.
+  , gebouwd 2026-10-28 22:24 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3698,6 +3698,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Afspraak">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#geneste-afgeleiden-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geneste afgeleiden (batch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5011,6 +5028,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Afspraak">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#geneste-afgeleiden-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geneste afgeleiden (batch)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5115,6 +5149,15 @@
 <p><strong>Meerdere bronnen:</strong> sibling-output per bestand (<code>derived_output_path</code>).
 <code>-o</code> / <code>--keep-*</code> / vergelijkbare enkelvoudige uitvoerpaden zijn <strong>alleen</strong>
 toegestaan bij precies één bronbestand.</p>
+<h3 id="geneste-afgeleiden-batch">Geneste afgeleiden (batch)<a class="headerlink" href="#geneste-afgeleiden-batch" title="Permanent link">&para;</a></h3>
+<p>Bestandsnamen volgen <code>stem.brontype.doeltype</code> (bijv. <code>lied.mvsa</code> →
+<code>lied.mvsa.mscz</code>). Bij een <strong>map</strong> slaagt de helper bestanden over waarvan
+de stam al een brontype-extensie heeft (<code>.mvsa</code>, <code>.vsa</code>, <code>.mscz</code>,
+<code>.mxl</code>, …). Zo maakt <code>mscz products catalogus/</code> geen
+<code>lied.mvsa.mscz.svg</code> of <code>lied.mvsa.mscz.products-meta.json</code> aan.</p>
+<p><strong>Wel</strong> toegestaan: het bestand expliciet noemen
+(<code>mscz products lied.mvsa.mscz</code>), als je bewust producten van die
+afgeleide wilt.</p>
 <h2 id="inventaris">Inventaris<a class="headerlink" href="#inventaris" title="Permanent link">&para;</a></h2>
 <h3 id="vsa-top-level"><code>vsa</code> (top-level)<a class="headerlink" href="#vsa-top-level" title="Permanent link">&para;</a></h3>
 <table>
