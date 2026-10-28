@@ -204,7 +204,7 @@ def _build_parser() -> argparse.ArgumentParser:
     svg.add_argument(
         "--no-trim",
         action="store_true",
-        help="Laat MuseScore-A4-SVG ongewijzigd (geen viewBox-trim).",
+        help="Sla viewBox-trim over (tall compacte SVG blijft één bestand).",
     )
     svg.add_argument(
         "--transparent",

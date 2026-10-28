@@ -6,10 +6,12 @@ titel, copyright, colofon of bewerkersregel. Bron `.mvsa`: layout ``muziek``
 via [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg). Bron `.mscz`:
 [`mscz svg`](../reference/cli/mscz.md) — blad-chrome op een tijdelijke kopie
 gestript (het bron-``.mscz`` blijft ongewijzigd; Style-footer/header ook in
-``score_style.mss``); Style/fonts uit het bestand blijven verder. Bedoeld voor
-koormap-pagina’s (bibliotheek-shortcode `muziek` later).
-Past het stuk op één MuseScore-pagina, dan één `.svg`; anders een **bladreeks**
-(`stem-1.svg`, `stem-2.svg`, …).
+``score_style.mss``).
+
+Productvorm: **één tall-SVG** (hoge MuseScore-`pageHeight`) in **compact**
+Style — geen A4-bladreeks (`stem-N.svg`). Die sibling voedt scherm-fallback
+én `index.md.pdf` (systeemsnee naar A4). A4-paginering zit in de PDF, niet
+in het SVG-product.
 
 | Onderwerp                    | Waar                                                               |
 | ---------------------------- | ------------------------------------------------------------------ |
@@ -30,23 +32,20 @@ leeg (handig op gekleurde pagina’s). De trim zet ``viewBox`` op de getekende
 inhoud inclusief MuseScore-``transform`` (glyphs staan lokaal rond ``(0,0)``);
 anders zouden linker- en bovenmarge veel te breed blijven.
 
-Bij bron `.mvsa`: optioneel ``--compact`` (dichtste Style-baseline; andere
-Style-opties winnen), systeemafstand, stafafstand (``--staff-distance``),
-pagina-marges (``--page-margin-top`` / ``--page-margin-bottom``), fonts en
-``--measure-spacing`` — zelfde Style-opties als bij
-[`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) / [`.mscz`](mscz.md).
-Bij bron `.mscz` (`mscz svg`) gelden Style-CLI-opties niet (waarden staan al
-in het bestand); blad-chrome wordt altijd gestript vóór de SVG-export.
+Bij bron `.mvsa`: compact is de **default** voor SVG (dichtste Style-baseline);
+expliciete Style-opties winnen. Zelfde vlaggen als bij
+[`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) / [`.mscz`](mscz.md)
+(systeemafstand, marges, fonts, ``--measure-spacing``). ``--compact`` blijft
+geldig (no-op t.o.v. de default). Bij bron `.mscz` (`mscz svg`) past de
+export compact + tall op een tijdelijke kopie; blad-chrome wordt gestript.
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 4 --max-system-distance 4
 ```
 
-**Brug:** MuseScore tekent de SVG. Afspraak over kale scherm- vs blad-SVG,
-catalogus-PDF vs koormap-pagina-PDF, en latere tall scherm-SVG / Score-IR:
-[kale-muziek-svg-en-uitgaven](../plans/kale-muziek-svg-en-uitgaven.md).
-Een gedeelde browser-renderer (OSMD / Score-IR) voor koormap én CoriB blijft
-het beoogde schermpad (plan §4); dit MuseScore-product dekt nu de
-koormap-brug.
+**Brug:** MuseScore tekent de tall-SVG. Scherm-hoofdpad blijft Score-IR/OSMD
+([kale-muziek-svg-en-uitgaven](../plans/kale-muziek-svg-en-uitgaven.md) §4);
+deze sibling is scherm-fallback en print-bouwsteen voor bibliotheek
+`index.md.pdf`.

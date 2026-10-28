@@ -296,15 +296,20 @@ def export_mscz_to_svg(
     trim: bool = True,
     white_background: bool = True,
 ) -> list[Path]:
-    """Convert ``.mscz`` to kale MuseScore SVG (geen titel/colofon/footer).
+    """Convert ``.mscz`` to één kale tall-SVG (compact Style, geen bladreeks).
 
-    Sheet chrome wordt op een tijdelijke kopie gestript (bron ``.mscz`` blijft
-    ongewijzigd). One MuseScore-page → ``out``. Several pages → bladreeks
-    ``out.stem-1.svg`` … ``out.stem-N.svg`` (``out`` itself is then absent).
+    Sheet chrome wordt op een tijdelijke kopie gestript; daarna compacte
+    Style + hoge ``pageHeight`` zodat MuseScore geen A4-pagina’s splitst.
+    Schrijft altijd ``out`` (sibling ``*.svg``). Oude ``stem-N.svg`` worden
+    verwijderd. Bron ``.mscz`` blijft ongewijzigd.
     """
     import shutil
 
-    from .mscz_partituur import strip_mscz_sheet_chrome
+    from .mscz_partituur import (
+        patch_mscz_style,
+        strip_mscz_sheet_chrome,
+        tall_compact_svg_style_overrides,
+    )
     from .musescore_cli import list_musescore_svg_pages
     from .svg_trim import SvgTrimError, trim_musescore_svg
 
@@ -317,6 +322,12 @@ def export_mscz_to_svg(
     if mscz.suffix.lower() != ".mscz":
         raise MvsaMsczError(f"SVG-export verwacht .mscz, kreeg: {mscz.name}")
 
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.exists():
+        out.unlink()
+    for stale in out.parent.glob(f"{out.stem}-*.svg"):
+        stale.unlink(missing_ok=True)
+
     fd, tmp_name = tempfile.mkstemp(suffix=".mscz", prefix="mscz-svg-")
     os.close(fd)
     tmp_mscz = Path(tmp_name)
@@ -324,6 +335,7 @@ def export_mscz_to_svg(
         shutil.copy2(mscz, tmp_mscz)
         try:
             strip_mscz_sheet_chrome(tmp_mscz)
+            patch_mscz_style(tmp_mscz, tall_compact_svg_style_overrides())
         except MsczPartituurError as exc:
             raise MvsaMsczError(str(exc)) from exc
         try:
@@ -336,10 +348,22 @@ def export_mscz_to_svg(
     pages = list_musescore_svg_pages(out)
     if out.is_file() and not pages:
         written = [out]
+    elif len(pages) == 1 and not out.exists():
+        pages[0].replace(out)
+        written = [out]
     elif pages:
-        written = pages
+        for path in pages:
+            path.unlink(missing_ok=True)
+        raise MvsaMsczError(
+            f"tall-SVG leverde {len(pages)} MuseScore-pagina’s i.p.v. één "
+            f"({out.name}); verhoog pageHeight of meld als bug"
+        )
     else:
         written = [first]
+        if first.resolve() != out.resolve() and first.is_file():
+            first.replace(out)
+            written = [out]
+
     if trim:
         for path in written:
             try:
@@ -378,16 +402,37 @@ def export_mvsa_to_svg(
     cue_font_size: float | None = None,
     measure_spacing: float | None = None,
 ) -> list[Path]:
-    """Export ``.mvsa`` to music-only koormap SVG (layout ``muziek``).
+    """Export ``.mvsa`` to één kale tall-SVG (layout ``muziek``, compact).
 
-    Chain: partituur-MXL → MSCZ (geen titel/colofon) → MuseScore SVG → trim.
+    Chain: partituur-MXL → MSCZ → MuseScore tall-SVG → trim.
+    Style-baseline is ``--compact`` (expliciete kwargs winnen).
     Default: witte achtergrond na trim; ``white_background=False`` = transparant.
-    Return: één pad, of een bladreeks bij meerdere MuseScore-pagina’s.
+    Return: altijd ``[out]`` (geen bladreeks).
     """
+    from .mscz_partituur import apply_compact_style_preset
+
     path = Path(path)
     out = Path(out)
     if out.suffix.lower() != ".svg":
         out = out.with_suffix(".svg")
+
+    style = apply_compact_style_preset(
+        {
+            "min_system_distance": min_system_distance,
+            "max_system_distance": max_system_distance,
+            "staff_distance": staff_distance,
+            "page_margin_top_mm": page_margin_top_mm,
+            "page_margin_bottom_mm": page_margin_bottom_mm,
+            "lyrics_min_top_distance": lyrics_min_top_distance,
+            "lyrics_min_bottom_distance": lyrics_min_bottom_distance,
+            "lyrics_min_distance": lyrics_min_distance,
+            "lyrics_font": lyrics_font,
+            "lyrics_font_size": lyrics_font_size,
+            "cue_font": cue_font,
+            "cue_font_size": cue_font_size,
+            "measure_spacing": measure_spacing,
+        }
+    )
 
     tmp_mscz: Path | None = None
     if keep_mscz is not None:
@@ -410,19 +455,19 @@ def export_mvsa_to_svg(
             keep_mxl=keep_mxl,
             layout="muziek",
             bibliotheek_id=bibliotheek_id,
-            min_system_distance=min_system_distance,
-            max_system_distance=max_system_distance,
-            staff_distance=staff_distance,
-            page_margin_top_mm=page_margin_top_mm,
-            page_margin_bottom_mm=page_margin_bottom_mm,
-            lyrics_min_top_distance=lyrics_min_top_distance,
-            lyrics_min_bottom_distance=lyrics_min_bottom_distance,
-            lyrics_min_distance=lyrics_min_distance,
-            lyrics_font=lyrics_font,
-            lyrics_font_size=lyrics_font_size,
-            cue_font=cue_font,
-            cue_font_size=cue_font_size,
-            measure_spacing=measure_spacing,
+            min_system_distance=style.get("min_system_distance"),
+            max_system_distance=style.get("max_system_distance"),
+            staff_distance=style.get("staff_distance"),
+            page_margin_top_mm=style.get("page_margin_top_mm"),
+            page_margin_bottom_mm=style.get("page_margin_bottom_mm"),
+            lyrics_min_top_distance=style.get("lyrics_min_top_distance"),
+            lyrics_min_bottom_distance=style.get("lyrics_min_bottom_distance"),
+            lyrics_min_distance=style.get("lyrics_min_distance"),
+            lyrics_font=style.get("lyrics_font"),
+            lyrics_font_size=style.get("lyrics_font_size"),
+            cue_font=style.get("cue_font"),
+            cue_font_size=style.get("cue_font_size"),
+            measure_spacing=style.get("measure_spacing"),
         )
         return export_mscz_to_svg(
             mscz_path,

@@ -55,7 +55,7 @@ Straat-CLI’s: [straat-CLIs (plan)](../plans/straat-clis.md).
 | Meta-key         | Sibling (voorbeeld)           | Contract (hub)                                      |
 | ---------------- | ----------------------------- | --------------------------------------------------- |
 | `mxl`            | `lied.mvsa.mxl`               | checklists M* (Coria / playback)                    |
-| `svg` / `svg-N`  | `lied.mscz.svg`               | kale scherm-SVG — [mvsa-svg](mvsa-svg.md)           |
+| `svg`            | `lied.mscz.svg`               | kale tall compacte SVG — [mvsa-svg](mvsa-svg.md)   |
 | `pdf`            | `lied.vsa.pdf`                | checklists P* / partituur-print                     |
 | `mp3`            | `lied.mscz.mp3`               | [audio.md](audio.md) (ogg/wav alleen los)           |
 | `lyrics`         | `lied.mscz.lyrics.txt`        | platte tekst — [zoektekst](zoektekst.md) / text     |
@@ -100,7 +100,7 @@ street-`products` of individuele product-subs (merge).
 
 | CLI                               | Standaardkeys (universeel)                                                                         |
 | --------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `vsa`/`mvsa`/`mscz products`      | `mxl`, `score-ir`, `from-ir`, `mscz`, `pdf`, `mp3`, `lyrics` + `svg`/`svg-N` (tenzij `--skip-svg`) |
+| `vsa`/`mvsa`/`mscz products`      | `mxl`, `score-ir`, `from-ir`, `mscz`, `pdf`, `mp3`, `lyrics` + `svg` (tenzij `--skip-svg`) |
 | Individuele `{straat} {product}`  | merge van de bijbehorende key(s) in dezelfde sidecar                                               |
 
 Flags: `--force`, `--dry-run`. Geen tweede inhoudsnorm in meta.

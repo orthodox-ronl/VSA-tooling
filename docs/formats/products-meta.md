@@ -65,15 +65,13 @@ Voorbeelden: `lied.vsa.products-meta.json`, `lied.mvsa.products-meta.json`,
 
 **Universele standaardkeys** (zelfde set voor `vsa` / `mvsa` / `mscz`
 `products`): `mxl`, `score-ir`, `from-ir`, `mscz`, `pdf`, `mp3`,
-`lyrics`, plus `svg` of `svg-1`…`svg-N`. Zie
+`lyrics`, `svg`. Zie
 [contract-index — universele productcatalogus](contract-index.md#universele-productcatalogus).
 
-Bladreeks-SVG: één pagina → key `svg` (bestand `stem.svg`); ≥2
-MuseScore-pagina’s → keys `svg-1`…`svg-N` (bestanden `stem-1.svg`…;
-seed `stem.svg` bestaat dan niet). Wissel bladreeks ↔ enkel: dode keys
-droppen (`svg` of oude `svg-N`).
-`freshness(..., required_keys={"svg", …})` accepteert `svg-N` als
-voldoening voor de abstracte eis `svg`.
+SVG-product: altijd key `svg` (één tall compacte sibling `stem.svg`).
+Oude bladreeks-keys `svg-1`…`svg-N` worden bij schrijven gedropt.
+`freshness(..., required_keys={"svg", …})` accepteert tijdelijk nog
+legacy `svg-N` tot products opnieuw is gedraaid.
 
 ### Wie schrijft welke keys
 

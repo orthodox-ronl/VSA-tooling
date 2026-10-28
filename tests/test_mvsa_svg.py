@@ -81,8 +81,11 @@ def test_resolve_multi_svg_pages_keeps_bladreeks(tmp_path: Path) -> None:
     assert p1.is_file() and p2.is_file()
 
 
-def test_export_mscz_to_svg_trims_bladreeks(tmp_path: Path) -> None:
-    from vsa.mvsa_mscz import export_mscz_to_svg
+def test_export_mscz_to_svg_rejects_multi_page_after_tall(
+    tmp_path: Path,
+) -> None:
+    """Tall-export mag geen bladreeks meer opleveren."""
+    from vsa.mvsa_mscz import MvsaMsczError, export_mscz_to_svg
 
     mscz = _write_mini_mscz(tmp_path / "lied.mscz")
     out = tmp_path / "lied.svg"
@@ -104,14 +107,37 @@ def test_export_mscz_to_svg_trims_bladreeks(tmp_path: Path) -> None:
         return p1
 
     with patch("vsa.mvsa_mscz.convert_with_musescore", side_effect=_fake_convert):
-        written = export_mscz_to_svg(mscz, out, trim=True)
-    assert [p.name for p in written] == ["lied-1.svg", "lied-2.svg"]
+        with pytest.raises(MvsaMsczError, match="tall-SVG"):
+            export_mscz_to_svg(mscz, out, trim=True)
     assert not out.exists()
-    for path in written:
-        text = path.read_text(encoding="utf-8")
-        height = re.search(r'\bheight="([^"]+)"', text)
-        assert height is not None
-        assert "297" not in height.group(1)
+    assert not list(tmp_path.glob("lied-*.svg"))
+
+
+def test_export_mscz_to_svg_trims_single_tall(tmp_path: Path) -> None:
+    from vsa.mvsa_mscz import export_mscz_to_svg
+
+    mscz = _write_mini_mscz(tmp_path / "lied.mscz")
+    out = tmp_path / "lied.svg"
+    page_svg = (
+        '<?xml version="1.0"?>\n'
+        '<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" '
+        'viewBox="0 0 100 200">'
+        '<path fill="#ffffff" d="M0,0 L100,0 L100,200 L0,200 z"/>'
+        '<path fill="#000000" d="M10,10 L20,10 L20,20 L10,20 z"/>'
+        "</svg>\n"
+    )
+
+    def _fake_convert(_src, dest, **_kwargs):
+        Path(dest).write_text(page_svg, encoding="utf-8")
+        return Path(dest)
+
+    with patch("vsa.mvsa_mscz.convert_with_musescore", side_effect=_fake_convert):
+        written = export_mscz_to_svg(mscz, out, trim=True)
+    assert written == [out]
+    text = out.read_text(encoding="utf-8")
+    height = re.search(r'\bheight="([^"]+)"', text)
+    assert height is not None
+    assert "297" not in height.group(1)
 
 
 def test_export_svg_without_musescore_raises(tmp_path: Path) -> None:
@@ -175,6 +201,8 @@ def test_export_mscz_to_svg_strips_chrome_before_convert(tmp_path: Path) -> None
     assert "<style>title</style>" not in seen["body"]
     assert "© Test" not in seen["body"]
     assert "<showFooter>0</showFooter>" in seen["body"]
+    assert "<pageHeight>20000</pageHeight>" in seen["body"]
+    assert "<minSystemDistance>2</minSystemDistance>" in seen["body"]
     assert mscz.read_bytes() == before
     with zipfile.ZipFile(mscz) as z:
         bron = z.read("lied.mscx").decode("utf-8")

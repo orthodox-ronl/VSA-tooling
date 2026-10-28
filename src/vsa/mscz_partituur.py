@@ -482,6 +482,72 @@ def _strip_header_footer_colophon_for_muziek(mscx: str) -> str:
     return mscx
 
 
+# Doorlopende (tall) kale SVG: één MuseScore-pagina hoog genoeg voor het
+# hele stuk; A4-paginering gebeurt later bij index.md.pdf (systeemsnee).
+TALL_SVG_PAGE_HEIGHT_IN = "20000"
+
+
+def tall_compact_svg_style_overrides() -> dict[str, str]:
+    """Style voor product-SVG: compact + hoge pageHeight (geen A4-bladreeks)."""
+    kw = apply_compact_style_preset({})
+    overrides = build_partituur_style_overrides(
+        min_system_distance=kw["min_system_distance"],
+        max_system_distance=kw["max_system_distance"],
+        page_margin_top_mm=kw["page_margin_top_mm"],
+        page_margin_bottom_mm=kw["page_margin_bottom_mm"],
+        lyrics_min_top_distance=kw["lyrics_min_top_distance"],
+        lyrics_min_bottom_distance=kw["lyrics_min_bottom_distance"],
+        lyrics_min_distance=kw["lyrics_min_distance"],
+    )
+    overrides["pageHeight"] = TALL_SVG_PAGE_HEIGHT_IN
+    overrides["enableVerticalSpread"] = "0"
+    overrides["maxPageFillSpread"] = "0"
+    overrides["lastSystemFillLimit"] = "0"
+    return overrides
+
+
+def patch_mscz_style(path: Path, overrides: Mapping[str, str]) -> None:
+    """In-place Style-tags in ``.mscx`` en eventuele ``.mss`` bijwerken."""
+    path = Path(path)
+    if not path.is_file() or path.suffix.lower() != ".mscz":
+        raise MsczPartituurError(f"geen .mscz: {path}")
+    if not overrides:
+        return
+    with zipfile.ZipFile(path, "r") as zin:
+        names = zin.namelist()
+        mscx_name = next(
+            (n for n in names if n.lower().endswith(".mscx")), None
+        )
+        if mscx_name is None:
+            raise MsczPartituurError(f"geen .mscx in {path}")
+        files = {n: zin.read(n) for n in names}
+
+    def patch_xml(raw: bytes) -> bytes:
+        text = raw.decode("utf-8")
+        if "<Style>" not in text:
+            return raw
+        for key, val in overrides.items():
+            pat = re.compile(rf"<{key}>.*?</{key}>", re.DOTALL)
+            tag = f"<{key}>{val}</{key}>"
+            if pat.search(text):
+                text = pat.sub(tag, text)
+            else:
+                text = text.replace("<Style>", f"<Style>{tag}", 1)
+        return text.encode("utf-8")
+
+    files[mscx_name] = patch_xml(files[mscx_name])
+    for name in list(files):
+        lower = name.lower()
+        if lower.endswith(".mss") or name.endswith("score_style.mss"):
+            files[name] = patch_xml(files[name])
+
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        for name, data in files.items():
+            zout.writestr(name, data)
+    tmp.replace(path)
+
+
 def strip_mscz_sheet_chrome(path: Path) -> None:
     """In-place: strip blad-chrome (titel/colofon/footer) for kale SVG.
 

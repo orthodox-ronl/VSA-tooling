@@ -541,17 +541,16 @@ mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 | ------- | -------------------------------------------------------------------------------- |
 | `.mvsa` | partituur-MXL → MSCZ (layout ``muziek``, Style-opties) → MuseScore SVG → trim    |
 
-Eén MuseScore-pagina → één bestand (`-o` / sibling ``.svg``). Meerdere
-pagina’s → **bladreeks** ``stem-1.svg``, ``stem-2.svg``, … (elke pagina
-apart; bedoeld als print-bouwstenen). Op het scherm stapelen tot er een tall
-scherm-SVG of Score-IR-pad is — zie
+Altijd **één tall-SVG** (compact Style + hoge `pageHeight`): sibling
+``.svg`` / ``-o``. Geen A4-bladreeks. Scherm-fallback én bouwsteen voor
+bibliotheek `index.md.pdf` — zie
+[mvsa-svg](../../formats/mvsa-svg.md) en
 [kale-muziek-svg-en-uitgaven](../../plans/kale-muziek-svg-en-uitgaven.md).
 Na trim: **witte achtergrond** (default); ``--transparent`` voor geen
 achtergrondvlak.
 
-Style-opties (`--compact`, systeem-/stafafstand, pagina-marges,
-lyrics-/cue-font): andere Style-vlaggen winnen van `--compact`. Heb je al
-een `.mscz`: gebruik [`mscz svg`](mscz.md).
+Style: compact is default; andere Style-vlaggen winnen. ``--compact`` blijft
+geldig. Heb je al een `.mscz`: gebruik [`mscz svg`](mscz.md).
 
 ### Argumenten
 
@@ -563,15 +562,15 @@ een `.mscz`: gebruik [`mscz svg`](mscz.md).
 | `--musescore`                | MuseScore-executable.                                                                     |
 | `--keep-mscz`                | Bewaar tussenliggende ``.mscz``.                                                          |
 | `--keep-mxl`                 | Bewaar tussenliggende partituur-``.mxl``.                                                 |
-| `--no-trim`                  | Laat volle A4-SVG van MuseScore staan.                                                    |
+| `--no-trim`                  | Sla viewBox-trim over.                                                                    |
 | `--transparent`              | Geen witte achtergrond na trim (default is wit).                                          |
 | `--bibliotheek-id`           | Genegeerd voor layout ``muziek``.                                                         |
-| `--compact`                  | Dichtste Style-baseline; andere Style-opties winnen (zie ``mscz``).                       |
-| `--min-system-distance SP`   | Min. systeemafstand (default ``8``).                                                      |
-| `--max-system-distance SP`   | Max. systeemafstand (default ``14``).                                                     |
+| `--compact`                  | Compact-baseline (default voor SVG; expliciete Style-opties winnen).                      |
+| `--min-system-distance SP`   | Min. systeemafstand (SVG-default compact ``2``).                                          |
+| `--max-system-distance SP`   | Max. systeemafstand (SVG-default compact ``2``).                                          |
 | `--staff-distance SP`        | Stafafstand in één systeem (+ accolade).                                                  |
-| `--page-margin-top MM`       | Bovenmarge in mm (default ``15``).                                                        |
-| `--page-margin-bottom MM`    | Ondermarge in mm (default ``15``).                                                        |
+| `--page-margin-top MM`       | Bovenmarge in mm (SVG-default compact ``5``).                                             |
+| `--page-margin-bottom MM`    | Ondermarge in mm (SVG-default compact ``5``).                                             |
 | `--lyrics-font FACE`         | Lettertype zangtekst.                                                                     |
 | `--lyrics-font-size PT`      | Puntgrootte zangtekst (default ``13``).                                                   |
 | `--cue-font FACE`            | Lettertype cues/`@tekst`.                                                                 |
@@ -918,12 +917,11 @@ Schrijft voor elke `.mvsa` onder `path`:
 | Coria-`.mxl`              | `{stam}.mvsa.mxl`                                                       |
 | Score-IR                  | `{stam}.mvsa.score-ir.json`                                             |
 | from-ir MusicXML          | `{stam}.mvsa.from-ir.musicxml`                                          |
-| SVG (tenzij `--skip-svg`) | één pagina: `{stam}.mvsa.svg`; bladreeks: `{stam}.mvsa-1.svg`, …        |
-| Meta                      | `{stam}.mvsa.products-meta.json` (`svg` of `svg-1`…; zie products-meta) |
+| SVG (tenzij `--skip-svg`) | `{stam}.mvsa.svg` (tall, compact)                                       |
+| Meta                      | `{stam}.mvsa.products-meta.json` (key `svg`; zie products-meta)         |
 
 Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
-(`--force` regenereert). Bladreeks-meta zonder seed-`.svg` telt als vers
-voor de SVG-eis. Kaal: geen bibliotheek-stamps.
+(`--force` regenereert). Kaal: geen bibliotheek-stamps.
 [contract-index](../../formats/contract-index.md) ·
 [products-meta](../../formats/products-meta.md).
 

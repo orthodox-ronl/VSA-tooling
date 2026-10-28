@@ -15,7 +15,8 @@ from .input_paths import InputPathError, collect_cli_sources
 from .products_meta import freshness, load_meta, write_meta
 
 # Universele standaardkeys (zelfde set voor vsa / mvsa / mscz products).
-# ``svg`` is apart: bladreeks gebruikt ``svg-N``; ``--skip-svg`` laat svg weg.
+# ``svg`` = één tall compacte sibling; ``--skip-svg`` laat svg weg.
+# Oude meta met ``svg-N`` (bladreeks) wordt bij schrijven gedropt.
 UNIVERSAL_PRODUCT_KEYS = (
     "mxl",
     "score-ir",
@@ -45,13 +46,11 @@ def _log(msg: str, *, dry_run: bool) -> None:
 
 
 def _assign_svg_products(products: dict[str, Path], written: list[Path]) -> None:
-    """One page → ``svg``; bladreeks → ``svg-1``, ``svg-2``, … (geen dode ``svg``)."""
-    if len(written) == 1:
-        products["svg"] = written[0]
+    """Tall product-SVG: altijd één key ``svg`` (geen bladreeks ``svg-N``)."""
+    if not written:
+        products.pop("svg", None)
         return
-    products.pop("svg", None)
-    for i, path in enumerate(written, start=1):
-        products[f"svg-{i}"] = path
+    products["svg"] = written[0]
 
 
 def _paths_are_siblings(bron: Path, paths: list[Path]) -> bool:
@@ -87,24 +86,16 @@ def svg_meta_products(
     bron: Path,
     written: list[Path],
 ) -> tuple[dict[str, Path], set[str]]:
-    """Map SVG-export → meta-keys + keys to drop (bladreeks ↔ enkel)."""
+    """Map SVG-export → key ``svg``; drop legacy bladreeks-keys ``svg-N``."""
     products: dict[str, Path] = {}
     _assign_svg_products(products, written)
     drop: set[str] = set()
     existing = load_meta(bron)
     prev = existing.get("products") if existing else None
-    if len(written) == 1:
-        if isinstance(prev, dict):
-            for key in prev:
-                if key.startswith("svg-"):
-                    drop.add(key)
-    else:
-        drop.add("svg")
-        keep = set(products)
-        if isinstance(prev, dict):
-            for key in prev:
-                if key.startswith("svg-") and key not in keep:
-                    drop.add(key)
+    if isinstance(prev, dict):
+        for key in prev:
+            if key.startswith("svg-"):
+                drop.add(key)
     return products, drop
 
 

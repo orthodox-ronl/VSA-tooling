@@ -193,11 +193,10 @@ def expand_required_keys(
     products: dict[str, Any],
     required_keys: set[str],
 ) -> set[str]:
-    """Map abstract ``svg`` to bladreeks keys when meta has ``svg-N``.
+    """Legacy: map required ``svg`` to ``svg-N`` when old bladreeks-meta bestaat.
 
-    Street ``products`` and consumers often require key ``svg``. One MuseScore
-    page stores that key; several pages store ``svg-1``…``svg-N`` and no
-    seed ``svg``. Treat a required ``svg`` as satisfied by the page keys.
+    Nieuwe exports schrijven alleen key ``svg`` (tall). Oude sidecars met
+    ``svg-1``… blijven leesbaar tot ``products`` opnieuw draait.
     """
     if "svg" not in required_keys:
         return set(required_keys)

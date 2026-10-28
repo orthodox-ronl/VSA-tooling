@@ -362,15 +362,13 @@ def test_vsa_products_minimal(tmp_path: Path) -> None:
     assert status == "ok"
 
 
-def test_assign_svg_products_bladreeks_drops_seed_svg(tmp_path: Path) -> None:
+def test_assign_svg_products_uses_first_as_svg(tmp_path: Path) -> None:
     seed = tmp_path / "lied.mscz.svg"
     p1 = tmp_path / "lied.mscz-1.svg"
-    p2 = tmp_path / "lied.mscz-2.svg"
     products: dict[str, Path] = {"mxl": tmp_path / "lied.mscz.mxl", "svg": seed}
-    _assign_svg_products(products, [p1, p2])
-    assert "svg" not in products
-    assert products["svg-1"] == p1
-    assert products["svg-2"] == p2
+    _assign_svg_products(products, [p1])
+    assert products["svg"] == p1
+    assert "svg-1" not in products
 
 
 def test_assign_svg_products_single_keeps_svg(tmp_path: Path) -> None:
@@ -381,8 +379,10 @@ def test_assign_svg_products_single_keeps_svg(tmp_path: Path) -> None:
     assert products == {"svg": written}
 
 
-def test_freshness_required_svg_accepts_bladreeks(tmp_path: Path) -> None:
-    """Street products require key ``svg``; bladreeks meta uses ``svg-N``."""
+def test_freshness_required_svg_still_accepts_legacy_bladreeks(
+    tmp_path: Path,
+) -> None:
+    """Oude meta met ``svg-N`` blijft leesbaar tot products opnieuw schrijft."""
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
     mxl = tmp_path / "lied.mscz.mxl"
@@ -399,7 +399,7 @@ def test_freshness_required_svg_accepts_bladreeks(tmp_path: Path) -> None:
     assert "score-ir" in msg
 
 
-def test_svg_meta_products_switch_single_and_bladreeks(tmp_path: Path) -> None:
+def test_svg_meta_products_drops_legacy_bladreeks_keys(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
     single = tmp_path / "lied.mscz.svg"
@@ -408,11 +408,6 @@ def test_svg_meta_products_switch_single_and_bladreeks(tmp_path: Path) -> None:
     single.write_text("<svg/>", encoding="utf-8")
     p1.write_text("<svg>1</svg>", encoding="utf-8")
     p2.write_text("<svg>2</svg>", encoding="utf-8")
-
-    write_meta(bron, {"svg": single})
-    products, drop = svg_meta_products(bron, [p1, p2])
-    assert set(products) == {"svg-1", "svg-2"}
-    assert "svg" in drop
 
     write_meta(bron, {"svg-1": p1, "svg-2": p2}, drop_keys={"svg"})
     products, drop = svg_meta_products(bron, [single])
@@ -423,18 +418,6 @@ def test_svg_meta_products_switch_single_and_bladreeks(tmp_path: Path) -> None:
 def _fake_write_mxl(_src: Path, dest: Path, **_kwargs: object) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text("<score/>", encoding="utf-8")
-
-
-def _fake_bladreeks_svg(_src: Path, dest: Path, **_kwargs: object) -> list[Path]:
-    dest = Path(dest)
-    pages = [
-        dest.parent / f"{dest.stem}-1.svg",
-        dest.parent / f"{dest.stem}-2.svg",
-    ]
-    for page in pages:
-        page.write_text("<svg/>", encoding="utf-8")
-    assert not dest.exists()
-    return pages
 
 
 def _fake_single_svg(_src: Path, dest: Path, **_kwargs: object) -> list[Path]:
@@ -498,26 +481,30 @@ def _fake_universal_rest():
     )
 
 
-def test_mscz_products_bladreeks_meta_no_dead_svg(tmp_path: Path) -> None:
+def test_mscz_products_tall_svg_meta_drops_bladreeks(tmp_path: Path) -> None:
+    """Products schrijft key ``svg``; legacy ``svg-N`` verdwijnt uit meta."""
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
+    legacy1 = tmp_path / "lied.mscz-1.svg"
+    legacy2 = tmp_path / "lied.mscz-2.svg"
+    legacy1.write_text("<svg>old1</svg>", encoding="utf-8")
+    legacy2.write_text("<svg>old2</svg>", encoding="utf-8")
+    write_meta(bron, {"svg-1": legacy1, "svg-2": legacy2})
     ctx = list(_fake_universal_rest()) + [
-        patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_bladreeks_svg),
+        patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
     ]
     with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
         assert products_mscz_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     keys = set(data["products"])
-    assert "svg-1" in keys and "svg-2" in keys
-    assert "svg" not in keys
+    assert "svg" in keys
+    assert "svg-1" not in keys and "svg-2" not in keys
     assert "mxl" in keys and "mp3" in keys and "lyrics" in keys
-    for key in ("mxl", "svg-1", "svg-2"):
-        entry = data["products"][key]
-        path = tmp_path / entry["file"]
-        assert path.is_file()
-        assert entry["sha256"] == sha256_file(path)
-    # Zonder --force: meta vers → geen regeneratie (geen MuseScore-mocks nodig).
+    entry = data["products"]["svg"]
+    path = tmp_path / entry["file"]
+    assert path.is_file()
+    assert entry["sha256"] == sha256_file(path)
     assert products_mscz_one(bron, force=False) == 0
 
 
@@ -535,18 +522,18 @@ def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
     assert "mp3" in data["products"]
 
 
-def test_mvsa_products_bladreeks_meta_no_dead_svg(tmp_path: Path) -> None:
+def test_mvsa_products_tall_svg_meta_key(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mvsa"
     bron.write_text("title: t\n---\nL  | a\nS  | a\n", encoding="utf-8")
 
     ctx = list(_fake_universal_rest()) + [
-        patch("vsa.mvsa_mscz.export_mvsa_to_svg", side_effect=_fake_bladreeks_svg),
+        patch("vsa.mvsa_mscz.export_mvsa_to_svg", side_effect=_fake_single_svg),
     ]
     with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
         assert products_mvsa_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     keys = set(data["products"])
-    assert "svg-1" in keys and "svg-2" in keys
-    assert "svg" not in keys
+    assert "svg" in keys
+    assert "svg-1" not in keys
     assert {"mxl", "score-ir", "from-ir", "mp3", "lyrics"}.issubset(keys)
