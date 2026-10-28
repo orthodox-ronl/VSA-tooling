@@ -3,6 +3,10 @@
 **Afspraak:** een ``path``-argument is óf één bronbestand, óf een map waarvan
 recursief alle bestanden met de toegestane extensie(s) worden verzameld.
 
+**Batch (map):** sla geneste afgeleiden over — bestanden waarvan de stam al
+een brontype-extensie heeft (``lied.mvsa.mscz`` bij zoeken op ``.mscz``).
+Eén expliciet bestandspad blijft toegestaan.
+
 Zie ``docs/reference/cli/input-pad.md`` (inventaris + toekomstige migratie).
 """
 
@@ -10,6 +14,19 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from pathlib import Path
+
+# Extensies die als brontype in ``stem.brontype.doeltype`` voorkomen.
+# Een batch mag geen product-van-product oppikken (``*.mvsa.mscz`` → svg).
+BRONTYPE_SUFFIXES = frozenset(
+    {
+        ".mvsa",
+        ".vsa",
+        ".mscz",
+        ".mxl",
+        ".musicxml",
+        ".xml",
+    }
+)
 
 
 class InputPathError(ValueError):
@@ -29,6 +46,16 @@ def normalize_suffixes(suffixes: Sequence[str]) -> frozenset[str]:
     if not out:
         raise InputPathError("minstens één bestands-extensie vereist")
     return frozenset(out)
+
+
+def is_nested_derived_source(path: Path | str) -> bool:
+    """True als ``path`` een afgeleide is van een ander brontype.
+
+    Voorbeeld: ``lied.mvsa.mscz`` (stam eindigt op ``.mvsa``) — product van
+    ``lied.mvsa``, geen losse ``.mscz``-bron voor batch-``products``.
+    """
+    stem = Path(path).stem.lower()
+    return any(stem.endswith(bron) for bron in BRONTYPE_SUFFIXES)
 
 
 def collect_input_files(
@@ -52,7 +79,9 @@ def collect_input_files(
     -------
     list[Path]
         Gesorteerde lijst van bestaande bestanden. Mag leeg zijn als de map
-        geen matches heeft.
+        geen matches heeft. Bij een **map** worden geneste afgeleiden
+        (zie :func:`is_nested_derived_source`) weggelaten. Bij één
+        **bestand** blijft het pad staan, ook als het genest is.
 
     Raises
     ------
@@ -77,7 +106,11 @@ def collect_input_files(
         else:
             candidates = p.iterdir()
         return sorted(
-            c for c in candidates if c.is_file() and c.suffix.lower() in allowed
+            c
+            for c in candidates
+            if c.is_file()
+            and c.suffix.lower() in allowed
+            and not is_nested_derived_source(c)
         )
     raise InputPathError(f"Geen bestand of map: {p}")
 

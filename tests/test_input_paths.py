@@ -8,6 +8,7 @@ from vsa.input_paths import (
     InputPathError,
     collect_cli_sources,
     collect_input_files,
+    is_nested_derived_source,
     normalize_suffixes,
 )
 
@@ -72,3 +73,39 @@ def test_collect_cli_sources_finds_files(tmp_path: Path):
     a = tmp_path / "a.mvsa"
     a.write_text("@title t\n", encoding="utf-8")
     assert collect_cli_sources(tmp_path, suffixes=[".mvsa"]) == [a]
+
+
+def test_is_nested_derived_source():
+    assert is_nested_derived_source("lied.mvsa.mscz")
+    assert is_nested_derived_source(Path("x.vsa.mscz"))
+    assert is_nested_derived_source("lied.mscz.mscz")
+    assert not is_nested_derived_source("lied.mscz")
+    assert not is_nested_derived_source("lied.mvsa")
+
+
+def test_collect_directory_skips_nested_derived(tmp_path: Path):
+    """Batch: ``*.mvsa.mscz`` is geen losse mscz-bron; echte ``.mscz`` wel."""
+    real = tmp_path / "bron.mscz"
+    nested = tmp_path / "lied.mvsa.mscz"
+    nested_svg_meta = tmp_path / "sub"
+    nested_svg_meta.mkdir()
+    deep = nested_svg_meta / "x.mvsa.mscz"
+    real.write_bytes(b"PK")
+    nested.write_bytes(b"PK")
+    deep.write_bytes(b"PK")
+    got = collect_input_files(tmp_path, suffixes=[".mscz"])
+    assert got == [real]
+
+
+def test_collect_explicit_nested_derived_allowed(tmp_path: Path):
+    """Expliciet bestandspad: geneste afgeleide blijft toegestaan."""
+    nested = tmp_path / "lied.mvsa.mscz"
+    nested.write_bytes(b"PK")
+    assert collect_input_files(nested, suffixes=[".mscz"]) == [nested]
+
+
+def test_collect_cli_sources_only_nested_raises(tmp_path: Path):
+    nested = tmp_path / "lied.mvsa.mscz"
+    nested.write_bytes(b"PK")
+    with pytest.raises(InputPathError, match="Geen passende"):
+        collect_cli_sources(tmp_path, suffixes=[".mscz"])

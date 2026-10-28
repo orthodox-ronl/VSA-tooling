@@ -65,7 +65,9 @@ Straat-CLI’s: [straat-CLIs (plan)](../plans/straat-clis.md).
 
 CLI: `{straat} {product}` met alleen de eigen bronextensie
 (`.vsa` / `.mvsa` / `.mscz`). Voorbeeld: `mscz score-ir`, `vsa mp3`,
-`mvsa lyrics` via `mvsa text`.
+`mvsa lyrics` via `mvsa text`. Batch op een map pikt geen geneste
+afgeleiden op (`lied.mvsa.mscz` bij `mscz products`); zie
+[input-pad](../reference/cli/input-pad.md#geneste-afgeleiden-batch).
 
 **Zelfde-type:** `.mscz` → product `mscz` = partituur-conform maken
 (layout `partituur`), niet overslaan. Bron-`.vsa`/`.mvsa` blijven bron

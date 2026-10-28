@@ -93,6 +93,51 @@ def test_score_ir_s8_recite_print_fields() -> None:
     assert len(visible) >= 2
 
 
+_S8_SHORT_RECITE_PLUS_SAME = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: (Al-le-lu-ja, Al) -le -lu_ ||
+S:  a                 a   /   ||
+A:  f+                -   -   ||
+T:  c                 c   /   ||
+B:  f                 f   bb  ||
+"""
+
+
+def test_score_ir_s8_extends_short_recite_same_pitch() -> None:
+    """Korte recite (5) + zelfde-toon-vervolg → S8 (zoals Alleluia toon 3)."""
+    doc = export_mvsa_to_score_ir(_S8_SHORT_RECITE_PLUS_SAME)
+    sop = doc["measures"][0]["voices"]["S"]
+    prints = [ev.get("print") or {} for ev in sop]
+    assert any(p.get("breveHead") for p in prints), "||O||-midden ontbreekt"
+    assert any(p.get("spacer") for p in prints), "recite-spacers ontbreken"
+    # Eerste zichtbare rand + breve + spacers + laatste rand, daarna melodie.
+    assert sop[0].get("recite") is True
+    assert (sop[1].get("print") or {}).get("breveHead") is True
+
+
+def test_score_ir_short_recite_keeps_syllables() -> None:
+    """Korte recite zonder verlenging: één noot per lettergreep (geen melisma-eat)."""
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: (Al-le-lu) -ja ||
+S:  Bb         /  ||
+A:  g          -  ||
+T:  d          \\  ||
+B:  g          \\2 ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    sop = doc["measures"][0]["voices"]["S"]
+    recite_evs = [ev for ev in sop if ev.get("recite")]
+    assert len(recite_evs) == 3, f"verwacht 3 recite-noten, kreeg {len(recite_evs)}"
+    assert not any((ev.get("print") or {}).get("breveHead") for ev in sop)
+
+
 _S13_MELISMA = """\
 @do F4
 @mode major

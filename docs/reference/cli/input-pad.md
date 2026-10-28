@@ -19,6 +19,18 @@ Nieuwe of gewijzigde commando’s met bestandsinvoer gebruiken deze helper
 ``-o`` / ``--keep-*`` / vergelijkbare enkelvoudige uitvoerpaden zijn **alleen**
 toegestaan bij precies één bronbestand.
 
+### Geneste afgeleiden (batch)
+
+Bestandsnamen volgen ``stem.brontype.doeltype`` (bijv. ``lied.mvsa`` →
+``lied.mvsa.mscz``). Bij een **map** slaagt de helper bestanden over waarvan
+de stam al een brontype-extensie heeft (``.mvsa``, ``.vsa``, ``.mscz``,
+``.mxl``, …). Zo maakt ``mscz products catalogus/`` geen
+``lied.mvsa.mscz.svg`` of ``lied.mvsa.mscz.products-meta.json`` aan.
+
+**Wel** toegestaan: het bestand expliciet noemen
+(``mscz products lied.mvsa.mscz``), als je bewust producten van die
+afgeleide wilt.
+
 ## Inventaris
 
 ### `vsa` (top-level)

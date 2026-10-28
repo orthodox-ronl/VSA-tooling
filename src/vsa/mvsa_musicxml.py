@@ -935,6 +935,8 @@ def _system_to_events(
                 measure_events[key].extend(notes)
 
         for key, evs in measure_events.items():
+            if layout == "partituur":
+                evs = _apply_recite_print_collapse_to_measure(evs)
             result[key].append(evs)
 
     if layout == "partituur":
@@ -1341,7 +1343,8 @@ def _pack_same_pitch_run(
 ) -> list[NoteEvent]:
     """One same-pitch melisma run → one note or a tie-chain (I2)."""
     # S8 recite-print: breve + spacers niet samentrekken (zelfde pitch).
-    if any(n.spacer or n.breve_head for n in run):
+    # Korte recite (n < 6, nog geen ||O||): ook niet — één noot per lettergreep.
+    if any(n.spacer or n.breve_head or n.recite for n in run):
         return list(run)
     # Eén noot in deze pitch-run: niet herbouwen (behoud extend/slur van
     # multi-pitch-melisma). Alleen langere same-pitch-runs packen/collapsen.
@@ -1440,9 +1443,8 @@ def _pack_same_pitch_run(
 
 def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
     """Lyric/slur-opschoning binnen één same-pitch-run (niet over S8-spacers)."""
-    # S8 recite-print: breve + spacers houden hun per-lettergreep-lyrics;
-    # geen frase-slur over de hele maat.
-    if any(n.spacer or n.breve_head for n in packed):
+    # S8 / korte recite: per-lettergreep-lyrics behouden; geen frase-slur.
+    if any(n.spacer or n.breve_head or n.recite for n in packed):
         return list(packed)
 
     n = len(packed)
@@ -1620,6 +1622,69 @@ def _collapse_recite_for_partituur(
             recite=True,
         )
     )
+    return out
+
+
+def _duration_key(dur: Duration) -> tuple[str, int]:
+    return (dur.note_type, dur.dots)
+
+
+def _extend_recite_run_for_print(notes: list[NoteEvent], start: int) -> int:
+    """Einde (exclusief) van recite-run vanaf *start*, incl. zelfde-toon-vervolg.
+
+    Na een korte ``(…)``-recite mag een volgende lettergreep op dezelfde toon
+    en duur (bijv. ``-le`` na ``(Al-le-lu-ja, Al)``) meetellen voor S8.
+    """
+    first = notes[start]
+    end = start + 1
+    while end < len(notes):
+        nxt = notes[end]
+        if nxt.spacer or nxt.breve_head:
+            break
+        if not _pitch_equal(first.pitch, nxt.pitch):
+            break
+        if _duration_key(nxt.duration) != _duration_key(first.duration):
+            break
+        if not nxt.recite and not nxt.lyrics:
+            break
+        end += 1
+        if not nxt.recite:
+            # Eén of meer vervolgnoten na de haakjes-recite; blijf zoeken.
+            continue
+    return end
+
+
+def _apply_recite_print_collapse_to_measure(
+    notes: list[NoteEvent],
+) -> list[NoteEvent]:
+    """S8 op maatniveau: korte recite + zelfde-toon-vervolg → 1-(n-2)-1.
+
+    Reeds ge-collapse'de S8 (breve/spacers) blijft onaangeroerd. Alleen
+    partituur-layout roept dit aan.
+    """
+    if not notes:
+        return notes
+    out: list[NoteEvent] = []
+    i = 0
+    while i < len(notes):
+        cur = notes[i]
+        if cur.spacer or cur.breve_head:
+            out.append(cur)
+            i += 1
+            continue
+        if not cur.recite:
+            out.append(cur)
+            i += 1
+            continue
+        end = _extend_recite_run_for_print(notes, i)
+        run = notes[i:end]
+        if len(run) >= RECITE_PRINT_COLLAPSE_MIN:
+            out.extend(
+                _collapse_recite_for_partituur(run, edge_dur=run[0].duration)
+            )
+        else:
+            out.extend(run)
+        i = end
     return out
 
 
