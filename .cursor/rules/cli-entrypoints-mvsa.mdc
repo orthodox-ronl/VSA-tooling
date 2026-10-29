@@ -1,0 +1,20 @@
+# CLI-entrypoints: geen `vsa mvsa`
+
+**Nooit** `vsa mvsa …` — dat bestaat niet.
+
+| Bron        | Commando (console-script)                                      |
+| ----------- | -------------------------------------------------------------- |
+| `.mvsa`     | `mvsa validate` / `mvsa mxl` / `mvsa mscz` / `mvsa pdf` / …    |
+| `.mscz`     | `mscz …`                                                       |
+| `.mxl`      | `mxl …`                                                        |
+| `.vsa`      | `vsa validate` / `vsa svg` / `vsa musicxml` / …                |
+
+Hulptekst (alleen `.mvsa`):
+
+```cmd
+mvsa mxl pad\lied.mvsa --hulptekst
+mvsa mxl pad\lied.mvsa --hulptekst-as-parts
+mvsa mscz pad\lied.mvsa --hulptekst
+```
+
+Sibling-uitvoer (default): `lied.mvsa.mxl`, `lied.mvsa.mscz`, enz.
