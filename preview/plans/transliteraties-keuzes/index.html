@@ -93,7 +93,7 @@
             
   
   <strong>Preview</strong>
-   — branch <code>translit</code>
+   — branch <code>development</code>
   , gebouwd 2026-10-29 21:04 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
@@ -4982,39 +4982,6 @@
 
 
 <h1 id="keuzes-voor-de-transliteraties">Keuzes voor de transliteraties<a class="headerlink" href="#keuzes-voor-de-transliteraties" title="Permanent link">&para;</a></h1>
-<table>
-<thead>
-<tr>
-<th>Veld</th>
-<th>Waarde</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Status</strong></td>
-<td><strong>v1 bevroren</strong> (branch <code>translit</code>); expert-antwoorden hieronder</td>
-</tr>
-<tr>
-<td><strong>Code</strong></td>
-<td><code>src/vsa/transliterate.py</code> (schema <code>parochie</code>)</td>
-</tr>
-<tr>
-<td><strong>Intern</strong></td>
-<td>apostrof <code>'</code>; <code>Иисусе</code> → <code>Iesusje</code>; bron-hoofdletter volgen</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Samenvatting v1 (wat de tooling doet):</strong></p>
-<ul>
-<li>Ksl→Latijn: default <code>е</code>→<code>je</code>, uitzonderingen <code>це</code>/<code>пре</code>/<code>ге</code>/<code>ец</code> en na
-  <code>ж ш щ ч ц г</code>; <code>ь</code>→<code>'</code>; <code>-ий</code>/<code>-ый</code>→<code>iej</code>; overrides o.a. <code>Nynje</code>,
-  <code>Djevo</code>, <code>Marieje</code>, <code>Trisvjatoje</code>, <code>Voskresje</code>, <code>Gospod'</code>, <code>Iesusje</code>.</li>
-<li>Nl→Cyrillisch: <code>Heer</code>→<code>Хиир</code>; <code>en</code>/<code>den</code>→<code>эн</code>/<code>дэн</code>; <code>Eer</code>→<code>Ир</code>;
-  <code>ee</code>→<code>ей</code> (uitz. <code>eeuwen</code>→<code>эувен</code>); <code>ij</code>→<code>ей</code>; <code>ui</code> begin→<code>ау</code>, midden→<code>ёй</code>;
-  <code>g</code>→<code>х</code>; overrides <code>Amen</code>→<code>Аминь</code>, <code>Christus</code>→<code>Христус</code>, enz.</li>
-</ul>
-<p>Open: expert stuurt later meer <code>е</code>/<code>e</code>-patronen → kleine tabelupdate.</p>
-<hr />
 <h2 id="keuze-1-letter-in-het-kerkslavisch-latijnse-hulptekst">Keuze 1 — Letter е in het kerkslavisch (Latijnse hulptekst)<a class="headerlink" href="#keuze-1-letter-in-het-kerkslavisch-latijnse-hulptekst" title="Permanent link">&para;</a></h2>
 <p>Jij schreef: bij ныне hoor je duidelijk nynje, maar bij Богородице / Царице meer een gewone è (Bogoroditse, niet “Bogoroditsje”).</p>
 <p>Vraag: Wat willen we als standaard?</p>
@@ -5176,7 +5143,7 @@ God / Glorie en andere Nederlandse ‘g’ klanken als ‘x’ in Сyrillisch &g
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-29
+        Bijgewerkt: 2026-10-21
         
       </p>
       
