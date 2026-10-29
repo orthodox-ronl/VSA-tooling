@@ -161,6 +161,69 @@ def test_score_ir_s13_same_pitch_compact() -> None:
     assert sounding[0]["duration"]["elm"] in {"__", "_.", "_"}
 
 
+def test_score_ir_s13_pitch_change_melisma_closes_slur() -> None:
+    """S13/S2: melisma met toonwissel + trailing hold → slurStart én slurStop (K3).
+
+    Regressie cherubijnenhymne (alt/bas ``d4&c4&-``): open slur liep door
+    over volgende lettergrepen/maten.
+    """
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=-1 T=-1 B=-2
+
+L: uit~&~&~ ||
+S: g4&f4&e4 ||
+A: d4&c4&-  ||
+B: Bb2&c3&- ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    for voice in ("S", "A", "B"):
+        evs = doc["measures"][0]["voices"][voice]
+        starts = [
+            i
+            for i, ev in enumerate(evs)
+            if (ev.get("melisma") or {}).get("slurStart")
+        ]
+        stops = [
+            i
+            for i, ev in enumerate(evs)
+            if (ev.get("melisma") or {}).get("slurStop")
+        ]
+        assert starts and stops, f"{voice}: melisma-slur ontbreekt ({starts=}, {stops=})"
+        assert len(starts) == len(stops) == 1, f"{voice}: {starts=} {stops=}"
+        assert starts[0] < stops[0], f"{voice}: slur volgorde {starts[0]}≥{stops[0]}"
+
+
+def test_score_ir_k2_hyphen_syllables_not_merged_as_melisma() -> None:
+    """K2/L3/M5a: twee lettergrepen same-pitch in één maat blijven twee noten.
+
+    ``-beel_-den~`` met ``f4 -`` mag niet tot één noot + weggegooid «den».
+    """
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=-1 T=-1 B=-2
+
+L: -beel_-den~ ||
+S: f4     -    ||
+A: -      -    ||
+B: f2     -    ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    m0 = doc["measures"][0]
+    texts = [
+        "".join(s["text"] for s in ly.get("syllables", []))
+        for ly in m0["lyrics"]
+    ]
+    assert "beel" in texts and "den" in texts, f"lettergrepen kwijt: {texts}"
+    sop = [ev for ev in m0["voices"]["S"] if ev.get("pitch")]
+    assert len(sop) == 2, f"S: verwacht 2 noten, kreeg {len(sop)}"
+    assert not any(
+        (ev.get("melisma") or {}).get("slurStart") for ev in m0["voices"]["S"]
+    ), "hyphen-lettergrepen mogen geen melisma-slur krijgen (L3/S2)"
+
+
 def test_score_ir_s8_keeps_all_lyrics_no_phrase_slur() -> None:
     """S8-spacers behouden lettergrepen; geen slur van eerste naar laatste noot."""
     # Minimaal: lange recite + aparte cadens-noot (andere toon).

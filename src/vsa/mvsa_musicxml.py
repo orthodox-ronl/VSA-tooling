@@ -12,7 +12,7 @@ Layouts (canonieke checklists):
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Literal
 from xml.sax.saxutils import escape
@@ -1533,28 +1533,42 @@ def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
     return out
 
 
+def _note_has_lyric_text(note: NoteEvent) -> bool:
+    """True als de noot gezongen lettergreeptekst draagt (K2/K3)."""
+    return any((ly.text or "").strip() for ly in note.lyrics)
+
+
 def _collapse_same_pitch_melisma(
     notes: list[NoteEvent], *, allow_dotted: bool = False
 ) -> list[NoteEvent]:
-    """Same-pitch melisma → collapse and/or tie-keten (S13/R7).
+    """Same-pitch melisma → collapse and/or tie-keten (S13/R7 / M5a).
 
     *allow_dotted* (playback/Coria): behoud gestipte ELM's; same-pitch → één
     noot zolang de som ≤ dubbelgepunt whole (28). Langer → I2-tie-keten
     (geen ``type``/``duration``-mismatch; MuseScore heraanslaat anders).
     Partituur/MSCZ (default): **I1** ongestipt ≤ whole; **I2** tie-keten.
 
-    Slur alleen bij toonwissels binnen het melisma; pure hold → ties
-    (partituur, of playback bij overflow) of één noot (playback ≤ 28).
+    Collapse alleen **binnen één lettergreep** (K2/L3/M5a): een noot met
+    eigen lyric-tekst is een nieuwe lettergreep en mag niet met de vorige
+    same-pitch-noot worden samengevoegd (hyphen ≠ melisma).
 
-    Finalize lyric/slur **per pitch-run**, zodat S8-spacers niet hun lyrics
-    verliezen en er geen slur over de hele maat ontstaat.
+    Slur alleen bij toonwissels binnen die lettergreep (S2/S13); pure hold
+    → ties (partituur, of playback bij overflow) of één noot (playback ≤ 28).
     """
-    if len(notes) <= 1:
+    if not notes:
         return notes
+    if len(notes) == 1:
+        return _apply_melisma_slurs_by_syllable(notes)
 
     runs: list[list[NoteEvent]] = []
     for note in notes:
-        if runs and _pitch_equal(runs[-1][-1].pitch, note.pitch):
+        # Vervolgslot zonder eigen tekst mag same-pitch bij de vorige;
+        # nieuwe lettergreep (lyric) breekt de run — ook bij gelijke toon.
+        if (
+            runs
+            and _pitch_equal(runs[-1][-1].pitch, note.pitch)
+            and not _note_has_lyric_text(note)
+        ):
             runs[-1].append(note)
         else:
             runs.append([note])
@@ -1563,6 +1577,70 @@ def _collapse_same_pitch_melisma(
     for run in runs:
         packed = _pack_same_pitch_run(run, allow_dotted=allow_dotted)
         out.extend(_finalize_same_pitch_run(packed))
+    return _apply_melisma_slurs_by_syllable(out)
+
+
+def _apply_melisma_slurs_by_syllable(notes: list[NoteEvent]) -> list[NoteEvent]:
+    """S2/S13: melisma-slur per lettergreep bij toonwissels; nooit open slur.
+
+    Groep = noot met lyric-tekst + lyric-loze vervolgnoten tot de volgende
+    lettergreep. Recite/spacers: geen slur (R4).
+    """
+    if not notes:
+        return notes
+
+    groups: list[list[int]] = []
+    for i, note in enumerate(notes):
+        if not groups or _note_has_lyric_text(note):
+            groups.append([i])
+        else:
+            groups[-1].append(i)
+
+    slur_start = [False] * len(notes)
+    slur_stop = [False] * len(notes)
+    force_extend = [False] * len(notes)
+
+    for group in groups:
+        group_notes = [notes[i] for i in group]
+        if any(n.spacer or n.breve_head or n.recite for n in group_notes):
+            continue
+        sounding = [i for i in group if notes[i].pitch is not None]
+        if len(sounding) < 2:
+            continue
+        if not any(
+            not _pitch_equal(notes[sounding[j]].pitch, notes[sounding[j + 1]].pitch)
+            for j in range(len(sounding) - 1)
+        ):
+            continue
+        slur_start[sounding[0]] = True
+        slur_stop[sounding[-1]] = True
+        force_extend[sounding[0]] = True
+
+    out: list[NoteEvent] = []
+    for i, note in enumerate(notes):
+        lyrics = list(note.lyrics)
+        if force_extend[i] and lyrics:
+            lyrics = [
+                LyricSyllable(
+                    text=ly.text,
+                    syllabic=(
+                        "begin"
+                        if ly.syllabic == "single"
+                        else ly.syllabic
+                    ),
+                    number=ly.number,
+                    extend=True,
+                )
+                for ly in lyrics
+            ]
+        out.append(
+            replace(
+                note,
+                lyrics=lyrics,
+                slur_start=slur_start[i],
+                slur_stop=slur_stop[i],
+            )
+        )
     return out
 
 

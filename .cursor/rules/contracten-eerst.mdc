@@ -6,14 +6,19 @@ alwaysApply: true
 # Contracten eerst
 
 Voor **elk** werk aan export, normalize, layout, Score-IR/from-ir, OSMD,
-MusicXML/MSCZ/SVG/PDF of productstraten:
+MusicXML/MSCZ/SVG/PDF, melisma, recite of productstraten — **vóór** code
+of content wijzigen, niet pas na een bugmelding:
 
 1. Open
    [`docs/formats/contract-index.md`](docs/formats/contract-index.md).
 2. Zoek het onderwerp → canonieke hub → checklist-/profiel-id.
-3. Wijzig normatieve tekst **alleen** in die hub; elders alleen linken.
-4. Noem in PR/docs/tests het contract-id (bijv. S8, M5a, R7, layout
-   `partituur`).
+3. Lees de relevante regel(s); noem het contract-id in uitleg/PR/tests
+   (bijv. S8, M5a, S13, K2/K3, L3/L4, S2/S4, layout `partituur`).
+4. Wijzig normatieve tekst **alleen** in die hub; elders alleen linken.
+
+**Melisma (K2/K3/S13/L3/S2):** meerdere noten op **één** lettergreep.
+Hyphen (`Va-der`) ≠ melisma. Geen open slur/extender die over volgende
+lettergrepen of maten doorloopt; geen frase-slur die als melisma oogt.
 
 Niet opnieuw “bedenken” wat een `.mscz` of recite/melisma mag zijn —
 dat staat al in checklists + [MSCZ-leesbaarheid](docs/formats/mscz-leesbaarheid.md).
