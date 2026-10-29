@@ -35,7 +35,7 @@ def test_ksl_partituur_lyric_number_2() -> None:
 def test_nl_playback_lyric_number_2() -> None:
     xml = export_mvsa_to_musicxml(NL_MINI, layout="playback", hulptekst=True)
     assert 'lyric number="2"' in xml
-    assert "<text>Хер</text>" in xml
+    assert "<text>Хиир</text>" in xml
     assert "<text>онт</text>" in xml
     assert "<text>ферм</text>" in xml
     assert "<text>У</text>" in xml
