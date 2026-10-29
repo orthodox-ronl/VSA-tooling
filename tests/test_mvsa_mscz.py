@@ -965,7 +965,8 @@ def test_collapse_same_pitch_half_quarter_to_dotted_half(tmp_path: Path):
     assert "<dots>1</dots>" in out
     assert "<durationType>half</durationType>" in out
     assert 'type="Tie"' not in out
-    assert "<text>God</text>" in out
+    # Woord-einde-lyric krijgt trailing NBSP (pad_lyric_word_gaps).
+    assert "<text>God\u00a0</text>" in out
 
 
 def test_collapse_preserves_pitch_change_melisma(tmp_path: Path):
