@@ -94,7 +94,7 @@
   
   <strong>Preview</strong>
    — branch <code>translit</code>
-  , gebouwd 2026-10-29 16:20 CET.
+  , gebouwd 2026-10-29 20:14 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5013,6 +5013,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#5a-besluiten-productmodel-nu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5a. Besluiten productmodel (nu)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5a. Besluiten productmodel (nu)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#doelen-producten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doelen → producten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-vlaggen-vsa-tooling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI-vlaggen (VSA-tooling)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wat-de-bibliotheek-beslist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wat de bibliotheek beslist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bewust-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bewust later
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#6-converter-ketens-en-mvp-prioriteit" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5192,7 +5253,11 @@
 <tbody>
 <tr>
 <td><strong>Status</strong></td>
-<td>werkplan; <strong>fase 1–3 gedaan</strong>; schema <strong>v1 bevroren</strong> (branch <code>translit</code>); keuzes: <a href="../transliteraties-keuzes/">transliteraties-keuzes</a>; review: <a href="../hulptekst-reviewcorpus/">hulptekst-reviewcorpus</a></td>
+<td>werkplan; <strong>fase 1–3 gedaan</strong>; schema <strong>v1 bevroren</strong>; <strong>productbesluiten vast</strong> (§5a); keuzes: <a href="../transliteraties-keuzes/">transliteraties-keuzes</a>; review: <a href="../hulptekst-reviewcorpus/">hulptekst-reviewcorpus</a></td>
+</tr>
+<tr>
+<td><strong>CLI-vlaggen</strong></td>
+<td><code>--translit</code> / <code>--translit-as-parts</code> (niet <code>--hulptekst</code>)</td>
 </tr>
 <tr>
 <td><strong>Doel</strong></td>
@@ -5217,7 +5282,7 @@ hoort als aparte kleine follow-up; die staat niet in deze taak.</p>
 <h2 id="1-doelen-en-non-goals">1. Doelen en non-goals<a class="headerlink" href="#1-doelen-en-non-goals" title="Permanent link">&para;</a></h2>
 <h3 id="doelen">Doelen<a class="headerlink" href="#doelen" title="Permanent link">&para;</a></h3>
 <p>Koorleden lezen niet allemaal hetzelfde schrift. De toolchain moet daarom
-<strong>hulptekst</strong> kunnen tonen naast de brontekst: dezelfde noten, andere
+<strong>translit</strong> kunnen tonen naast de brontekst: dezelfde noten, andere
 lettertekens, dezelfde lettergreepdeling (zelfde event-telling).</p>
 <p>Twee richtingen zijn kernvereiste:</p>
 <table>
@@ -5417,6 +5482,73 @@ lyric number 1 per part (M3). Lyric number 2 op het blad en optionele
 Coria-extra-parts voor hulptekst horen als <strong>latere checklist-items</strong> bij de
 implementatiefase; dit plan herschrijft die checklists nog niet.</p>
 <hr />
+<h2 id="5a-besluiten-productmodel-nu">5a. Besluiten productmodel (nu)<a class="headerlink" href="#5a-besluiten-productmodel-nu" title="Permanent link">&para;</a></h2>
+<p>Vastgelegd voor tooling + bibliotheek-UI. Wijzigen alleen via bewuste herziening.</p>
+<h3 id="doelen-producten">Doelen → producten<a class="headerlink" href="#doelen-producten" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Doel</th>
+<th>Wat de gebruiker nodig heeft</th>
+<th>Productvorm (nu)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Oefenen (Coria)</strong></td>
+<td>Per stem de bron <strong>of</strong> de getranslitereerde tekst kiezen</td>
+<td><strong>Eén</strong> playback-<code>.mxl</code> met <code>--translit-as-parts</code> (extra parts, volume 0). Geen tweede MXL, geen aan/uit-bestandsschakelaar.</td>
+</tr>
+<tr>
+<td><strong>2. Koormap-pagina</strong></td>
+<td>Soms met, soms zonder translit tonen / downloaden / printen</td>
+<td><strong>Twee</strong> afgeleiden van dezelfde uitvoeringsvorm: zonder lyric 2, en met lyric 2 (bron + translit onder dezelfde noten). UI-schakelaar wisselt welk bestand getoond wordt.</td>
+</tr>
+<tr>
+<td><strong>3. Catalogus-pagina</strong></td>
+<td>Idem</td>
+<td>Zelfde model als koormap: aparte PDF/SVG/(MSCZ) met en zonder <code>--translit</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cli-vlaggen-vsa-tooling">CLI-vlaggen (VSA-tooling)<a class="headerlink" href="#cli-vlaggen-vsa-tooling" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Vlag</th>
+<th>Commando’s</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--translit</code></td>
+<td><code>mvsa mxl</code>, <code>mvsa mscz</code>, <code>mscz import</code>, <code>mvsa pdf</code>, <code>mvsa svg</code></td>
+<td>Lyric number 2 = transliteratie (blad/scherm-keten).</td>
+</tr>
+<tr>
+<td><code>--translit-as-parts</code></td>
+<td><strong>alleen</strong> <code>mvsa mxl</code></td>
+<td>Coria-extra parts; impliceert <code>--translit</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Geen</strong> <code>--translit</code> op: <code>mvsa text</code> / lyrics (alleen bron voor zoekindex), <code>mvsa mp3</code> (klank wijzigt niet), standaard <code>mvsa products</code> (bouwt de variant zonder; “met translit” blijft aparte exportaanroep of later apart productbeleid in de bibliotheek).</p>
+<h3 id="wat-de-bibliotheek-beslist">Wat de bibliotheek beslist<a class="headerlink" href="#wat-de-bibliotheek-beslist" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Welke uitvoeringsvormen <strong>beide</strong> blad/scherm-varianten krijgen (niet verplicht overal).</li>
+<li>Standaardstand van de UI-schakelaar (bijv. KSL vaker “met”, NL vaker “zonder”).</li>
+<li>Stabiele <a class="og-termref" href="/bron/terms/representatie" title="Representatie: Een bestand waarin een Uitvoeringsvorm concreet is vastgelegd.">representatie</a>-namen / bestandsnamen voor met vs zonder.</li>
+<li>Of Score-IR/OSMD-scherm dezelfde met/zonder-split volgt (zodra dat het toonpad is).</li>
+</ul>
+<h3 id="bewust-later">Bewust later<a class="headerlink" href="#bewust-later" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Apart product “alleen translit” als enige lyric-regel (nu niet).</li>
+<li><code>--translit</code> op <code>products</code> als standaard meta-key.</li>
+<li>Eenstemmig <code>.vsa</code>-straat met dezelfde vlaggen (aparte follow-up als de bibliotheek dat nodig heeft).</li>
+<li>Handmatige <code>L1</code> blijft winnen van auto-<code>--translit</code>; UI mag dan geen dubbele belofte doen.</li>
+</ul>
+<hr />
 <h2 id="6-converter-ketens-en-mvp-prioriteit">6. Converter-ketens en MVP-prioriteit<a class="headerlink" href="#6-converter-ketens-en-mvp-prioriteit" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
   phase1["Fase 1 MVP: hulptekst beide richtingen"]
@@ -5437,7 +5569,7 @@ implementatiefase; dit plan herschrijft die checklists nog niet.</p>
 <tbody>
 <tr>
 <td><strong>1 — MVP</strong></td>
-<td>Transliterator-module (beide richtingen) + export <code>.vsa</code> / <code>.mvsa</code> → mxl/mscz met lyric number 2; optioneel Coria-dubbelpart (vlag zoals <code>--hulptekst-as-parts</code>). Minstens één geïntegreerd voorbeeld <strong>ksl→Latijn</strong> én één <strong>nl→Cyrillisch</strong>.</td>
+<td>Transliterator-module (beide richtingen) + export <code>.vsa</code> / <code>.mvsa</code> → mxl/mscz met lyric number 2; optioneel Coria-dubbelpart (vlag zoals <code>--translit-as-parts</code>). Minstens één geïntegreerd voorbeeld <strong>ksl→Latijn</strong> én één <strong>nl→Cyrillisch</strong>.</td>
 <td><code>vsa→mvsa</code> als tussenstap alleen als die nuttig is — niet voor elk pad.</td>
 </tr>
 <tr>
@@ -5575,20 +5707,25 @@ Coria-MXL of print-MSCZ genereert.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\bibliotheek
 python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
 mvsa validate content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa
-mvsa mxl content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa --hulptekst-as-parts -o generated\coria\&lt;representatie-id&gt;.mxl --bibliotheek-id &lt;zangstuk&gt;/&lt;variant&gt;/&lt;uitvoeringsvorm&gt;
+mvsa mxl content-source\bibliotheek\&lt;zangstuk&gt;\&lt;variant&gt;\&lt;uitvoeringsvorm&gt;\bron.mvsa --translit-as-parts -o generated\coria\&lt;representatie-id&gt;.mxl --bibliotheek-id &lt;zangstuk&gt;/&lt;variant&gt;/&lt;uitvoeringsvorm&gt;
 </code></pre></div>
 <p>Vervang paden door jullie echte mapconventie. In het <code>.mvsa</code>: <code>@taal</code> zetten
    waar nl en ksl door elkaar lopen; optioneel <code>@taal Lap=aap Lus=noot</code> voor
    vrije Coria-labels.</p>
 <ol>
-<li><strong>Print voor zangers</strong> (tweede tekstregel op het blad):</li>
+<li><strong>Print / koormap met translit</strong> (tweede tekstregel; apart product naast
+   de variant zonder <code>--translit</code>):</li>
 </ol>
-<div class="highlight"><pre><span></span><code>mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
+<div class="highlight"><pre><span></span><code>mvsa mscz …\bron.mvsa --translit -o generated\print\….mscz --bibliotheek-id …
+mvsa pdf …\bron.mvsa --translit -o generated\print\….pdf --bibliotheek-id …
+mvsa svg …\bron.mvsa --translit -o generated\koormap\….svg
 </code></pre></div>
 <ol>
 <li><strong>Wat de bibliotheek zelf beslist:</strong> welke representatie een Coria-MXL krijgt,
-   of hulptekst verplicht is, en freshness/sync — dat blijft consumer-beleid
-   (<a href="../../guides/reuse-vsa-tooling/#ownership-tooling-vs-consumer">reuse-vsa-tooling</a>).</li>
+   of beide blad/scherm-varianten (met/zonder translit) worden gebouwd, en
+   freshness/sync — dat blijft consumer-beleid
+   (<a href="../../guides/reuse-vsa-tooling/#ownership-tooling-vs-consumer">reuse-vsa-tooling</a>;
+   productmodel §5a).</li>
 </ol>
 <p>Transliterator-kwaliteit (parochieschema) is een <strong>apart</strong> traject via
 <a href="../hulptekst-reviewcorpus/">hulptekst-reviewcorpus</a>; export werkt al met het
