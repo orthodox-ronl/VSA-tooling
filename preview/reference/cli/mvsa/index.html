@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-29 21:04 CET.
+   — branch <code>translit</code>
+  , gebouwd 2026-10-29 21:06 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -7679,14 +7679,14 @@ enkelvoudige paden (<code>--keep-mxl</code>, …) zijn alleen toegestaan bij pre
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products} …
 mvsa validate [-h] path
-mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
-              [--hulptekst-as-parts] [--bibliotheek-id ID]
+mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
+              [--translit-as-parts] [--bibliotheek-id ID]
               [--musescore PATH] path
 mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
               [--musicxml [PATH]] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
-          [--hulptekst] [--compact]
+          [--translit] [--compact]
           [--min-system-distance SP] [--max-system-distance SP]
           [--staff-distance SP]
           [--page-margin-top MM] [--page-margin-bottom MM]
@@ -7694,15 +7694,15 @@ mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--cue-font FACE] [--cue-font-size PT] path
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
-         [--layout PROFILE] [--bibliotheek-id ID] [--compact]
+         [--layout PROFILE] [--bibliotheek-id ID] [--translit] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
          [--lyrics-font FACE] [--lyrics-font-size PT]
          [--cue-font FACE] [--cue-font-size PT] path
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-         [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim] [--transparent]
-         [--compact]
+         [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
+         [--transparent] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
@@ -7892,8 +7892,8 @@ mvsa validate examples\mvsa\alleluia-toon-8.mvsa --require-zoektekst
 <hr />
 <h2 id="mvsa-mxl"><code>mvsa mxl</code><a class="headerlink" href="#mvsa-mxl" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_2">Synopsis<a class="headerlink" href="#synopsis_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
-                  [--hulptekst-as-parts] [--bibliotheek-id ID]
+<div class="highlight"><pre><span></span><code>mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
+                  [--translit-as-parts] [--bibliotheek-id ID]
                   [--musescore PATH] path
 </code></pre></div>
 <h3 id="beschrijving_1">Beschrijving<a class="headerlink" href="#beschrijving_1" title="Permanent link">&para;</a></h3>
@@ -7908,7 +7908,7 @@ mvsa validate examples\mvsa\alleluia-toon-8.mvsa --require-zoektekst
 <tbody>
 <tr>
 <td><code>.mvsa</code></td>
-<td>SATB-export (vier parts). Optioneel <code>--section</code> / hulptekst-vlaggen.</td>
+<td>SATB-export (vier parts). Optioneel <code>--section</code> / translit-vlaggen.</td>
 </tr>
 <tr>
 <td><code>.mscz</code></td>
@@ -7944,14 +7944,14 @@ pad als part-namen gebruikt (SATB-letters → Soprano/Alto/Tenor/Bass).</p>
 </thead>
 <tbody>
 <tr>
-<td><code>--hulptekst</code></td>
+<td><code>--translit</code></td>
 <td>Blad én Coria-MXL</td>
 <td>Lyric number 2 onder dezelfde noten (transliteratie). Handmatige <code>L1</code> wint als lyric 2 al bestaat.</td>
 </tr>
 <tr>
-<td><code>--hulptekst-as-parts</code></td>
+<td><code>--translit-as-parts</code></td>
 <td>Alleen Coria-MXL</td>
-<td>Extra parts: zelfde pitches, lyrics van laag 2; part-namen <code>{stem} ({label})</code>. Labels uit <code>@taal</code> (zie <a href="../../../specification-mvsa/keywords/#taal">keywords — @taal</a>). Volume 0 op hulp-parts. Impliceert <code>--hulptekst</code>.</td>
+<td>Extra parts: zelfde pitches, lyrics van laag 2; part-namen <code>{stem} ({label})</code>. Labels uit <code>@taal</code> (zie <a href="../../../specification-mvsa/keywords/#taal">keywords — @taal</a>). Volume 0 op hulp-parts. Impliceert <code>--translit</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -8001,18 +8001,18 @@ VSA).</p>
 <td>Optioneel.</td>
 </tr>
 <tr>
-<td><code>--hulptekst</code></td>
+<td><code>--translit</code></td>
 <td>Nee</td>
 <td>Alleen bij <code>.mvsa</code>: tweede lyric-laag (number=2).</td>
 <td>uit</td>
 <td>Zie beschrijving hierboven.</td>
 </tr>
 <tr>
-<td><code>--hulptekst-as-parts</code></td>
+<td><code>--translit-as-parts</code></td>
 <td>Nee</td>
-<td>Alleen bij <code>.mvsa</code>: Coria-extra parts met hulptekst (volume 0).</td>
+<td>Alleen bij <code>.mvsa</code>: Coria-extra parts met translit (volume 0).</td>
 <td>uit</td>
-<td>Impliceert <code>--hulptekst</code>.</td>
+<td>Impliceert <code>--translit</code>.</td>
 </tr>
 <tr>
 <td><code>--musescore PATH</code></td>
@@ -8063,13 +8063,13 @@ VSA).</p>
 <div class="highlight"><pre><span></span><code>mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 </code></pre></div>
 <p>Coria met keuze tussen lyrics-lagen (trisagion, kerkslavische sectie):</p>
-<div class="highlight"><pre><span></span><code>mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
+<div class="highlight"><pre><span></span><code>mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --translit-as-parts -o generated\trisagion-ksl-coria.mxl
 </code></pre></div>
 <p>Vanuit MuseScore-partituur (zelfde resultaat als <code>mscz mxl</code>):</p>
 <div class="highlight"><pre><span></span><code>mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o generated\bug-cases\cherubijnen.mxl
 </code></pre></div>
-<p>Blad/MSCZ: lyric 2 op partituur-MXL (keten via <code>mscz --hulptekst</code>):</p>
-<div class="highlight"><pre><span></span><code>mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --hulptekst -o generated\hulptekst-ksl.mscz
+<p>Blad/MSCZ: lyric 2 op partituur-MXL (keten via <code>mscz --translit</code>):</p>
+<div class="highlight"><pre><span></span><code>mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --translit -o generated\hulptekst-ksl.mscz
 </code></pre></div>
 <h3 id="voorbeelden-falen">Voorbeelden — falen<a class="headerlink" href="#voorbeelden-falen" title="Permanent link">&para;</a></h3>
 <p>Onbekende sectie-id of sync-fout in het <code>.mvsa</code>-bestand levert exitcode <code>1</code>
@@ -8160,7 +8160,7 @@ mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-b
 <h3 id="synopsis_4">Synopsis<a class="headerlink" href="#synopsis_4" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
               [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
-              [--hulptekst] [--compact] [--min-system-distance SP]
+              [--translit] [--compact] [--min-system-distance SP]
               [--max-system-distance SP] [--staff-distance SP]
               [--page-margin-top MM] [--page-margin-bottom MM]
               [--lyrics-font FACE] [--lyrics-font-size PT]
@@ -8261,7 +8261,7 @@ standaard Windows-pad
 <td>pad-sniff / geen</td>
 </tr>
 <tr>
-<td><code>--hulptekst</code></td>
+<td><code>--translit</code></td>
 <td>Nee</td>
 <td>Tweede lyric-laag in tussen-MXL (blad «tweede regel»).</td>
 <td>uit</td>
@@ -8379,7 +8379,7 @@ geschreven (MuseScore 4). Details: <a href="../../../formats/mscz/"><code>.mscz<
 <h3 id="synopsis_5">Synopsis<a class="headerlink" href="#synopsis_5" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH]
-             [--layout PROFILE] [--bibliotheek-id ID] [--compact]
+             [--layout PROFILE] [--bibliotheek-id ID] [--translit] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
              [--page-margin-top MM] [--page-margin-bottom MM]
@@ -8403,9 +8403,11 @@ Alleen bron <strong><code>.mvsa</code></strong>. Voor een bestaand <code>.mscz</
 </tr>
 </tbody>
 </table>
-<p><code>--layout</code> / <code>--bibliotheek-id</code> / Style-opties (<code>--compact</code>, systeem-/stafafstand,
-pagina-marges, fonts) hebben dezelfde betekenis als bij
-<a href="#mvsa-mscz"><code>mscz</code></a>; andere Style-vlaggen winnen van <code>--compact</code>.</p>
+<p><code>--layout</code> / <code>--bibliotheek-id</code> / <code>--translit</code> / Style-opties (<code>--compact</code>,
+systeem-/stafafstand, pagina-marges, fonts) hebben dezelfde betekenis als bij
+<a href="#mvsa-mscz"><code>mscz</code></a>; andere Style-vlaggen winnen van <code>--compact</code>.
+Met <code>--translit</code>: tweede tekstregel (lyric 2) in de PDF — zie
+<a href="../../../plans/kerkslavisch-transliteratie/#5a-besluiten-productmodel-nu">productbesluiten</a>.</p>
 <p><strong>Canoniek:</strong> A4 staand (checklist
 <a href="../../../formats/canonical-checklists/#checklist-pdf-afgeleide-van-mscz">PDF P6</a>);
 via MuseScore-Style van het <code>.mscz</code> (MSCZ S7). US Letter is niet canoniek.</p>
@@ -8469,6 +8471,12 @@ dezelfde A4-eis P6).</p>
 <td>Nee</td>
 <td>Bij <code>partituur</code>: colofon-id.</td>
 <td>pad-sniff / geen</td>
+</tr>
+<tr>
+<td><code>--translit</code></td>
+<td>Nee</td>
+<td>Tweede lyric-laag in tussen-MXL/MSCZ (blad «met translit»).</td>
+<td>uit</td>
 </tr>
 <tr>
 <td><code>--compact</code></td>
@@ -8545,6 +8553,7 @@ mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
 mvsa pdf lied.mvsa --compact
 mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
+mvsa pdf examples\mvsa\hulptekst-nl-mini.mvsa --translit -o generated\nl-translit.pdf
 mscz pdf lied.mscz -o lied.pdf
 </code></pre></div>
 <hr />
@@ -8557,7 +8566,7 @@ voor gedeelde schermrenderer. Formaatpagina:
 <a href="../../../formats/mvsa-svg/">mvsa-svg</a>.</p>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-             [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim]
+             [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
              [--transparent] [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
@@ -8586,7 +8595,8 @@ bibliotheek <code>index.md.pdf</code> — zie
 <a href="../../../formats/mvsa-svg/">mvsa-svg</a> en
 <a href="../../../plans/kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a>.
 Na trim: <strong>witte achtergrond</strong> (default); <code>--transparent</code> voor geen
-achtergrondvlak.</p>
+achtergrondvlak. Met <code>--translit</code>: tweede tekstregel (lyric 2) — zie
+<a href="../../../plans/kerkslavisch-transliteratie/#5a-besluiten-productmodel-nu">productbesluiten</a>.</p>
 <p>Style: compact is default; andere Style-vlaggen winnen. <code>--compact</code> blijft
 geldig. Heb je al een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p>
 <h3 id="argumenten_1">Argumenten<a class="headerlink" href="#argumenten_1" title="Permanent link">&para;</a></h3>
@@ -8621,6 +8631,10 @@ geldig. Heb je al een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz 
 <tr>
 <td><code>--keep-mxl</code></td>
 <td>Bewaar tussenliggende partituur-<code>.mxl</code>.</td>
+</tr>
+<tr>
+<td><code>--translit</code></td>
+<td>Tweede lyric-laag in tussen-MXL/MSCZ (koormap «met translit»).</td>
 </tr>
 <tr>
 <td><code>--no-trim</code></td>
