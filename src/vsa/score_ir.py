@@ -80,10 +80,17 @@ def _serialize_voice_event(
     *,
     lyric_index: int | None,
 ) -> dict[str, Any]:
-    event: dict[str, Any] = {
-        "pitch": _pitch_to_ir(ev.pitch),
-        "duration": {"elm": _duration_to_elm(ev.duration)},
-    }
+    # Rusten (pitch=None): zelfde model als mvsa_musicxml._emit_single_note.
+    if ev.pitch is None:
+        event: dict[str, Any] = {
+            "rest": True,
+            "duration": {"elm": _duration_to_elm(ev.duration)},
+        }
+    else:
+        event = {
+            "pitch": _pitch_to_ir(ev.pitch),
+            "duration": {"elm": _duration_to_elm(ev.duration)},
+        }
     if lyric_index is not None:
         event["lyricIndex"] = lyric_index
     melisma: dict[str, Any] = {}
@@ -229,13 +236,26 @@ def export_mvsa_to_score_ir(
     section_id: str | None = None,
     source_path: Path | None = None,
     bibliotheek_id: str | None = None,
+    allow_import_sync_errors: bool = False,
 ) -> dict[str, Any]:
     """Validate + build Score-IR document (profile ``partituur``).
 
     Raises :class:`MvsaValidationError` or :class:`MvsaExportError`.
+
+    ``allow_import_sync_errors``: voor tijdelijke VSA→MXL→MVSA-brug
+    (score-ir uit ``.vsa``); ``MVSA-SYNC`` mag dan als waarschuwing
+    door — de import-schets is bewust niet catalogus-schoon.
     """
     doc = parse_mvsa(text)
     errors = [d for d in doc.diagnostics if d.severity == "error"]
+    if allow_import_sync_errors:
+        soft = [d for d in errors if d.code == "MVSA-SYNC"]
+        errors = [d for d in errors if d.code != "MVSA-SYNC"]
+        for d in soft:
+            print(
+                f"score-ir: negeer import-{d.code}: {d.message}",
+                flush=True,
+            )
     if errors:
         raise MvsaValidationError(errors)
 
@@ -401,6 +421,7 @@ def export_mvsa_to_score_ir_json(
     source_path: Path | None = None,
     bibliotheek_id: str | None = None,
     indent: int = 2,
+    allow_import_sync_errors: bool = False,
 ) -> str:
     doc = export_mvsa_to_score_ir(
         text,
@@ -408,6 +429,7 @@ def export_mvsa_to_score_ir_json(
         section_id=section_id,
         source_path=source_path,
         bibliotheek_id=bibliotheek_id,
+        allow_import_sync_errors=allow_import_sync_errors,
     )
     return json.dumps(doc, ensure_ascii=False, indent=indent) + "\n"
 
@@ -418,6 +440,7 @@ def export_mvsa_path_to_score_ir(
     *,
     section_id: str | None = None,
     bibliotheek_id: str | None = None,
+    allow_import_sync_errors: bool = False,
 ) -> None:
     path = Path(path)
     if path.suffix.lower() != ".mvsa":
@@ -431,6 +454,7 @@ def export_mvsa_path_to_score_ir(
         section_id=section_id,
         source_path=path,
         bibliotheek_id=bibliotheek_id,
+        allow_import_sync_errors=allow_import_sync_errors,
     )
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)

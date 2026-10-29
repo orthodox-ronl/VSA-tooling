@@ -81,11 +81,13 @@ def export_bron_to_score_ir(
             raise StreetProductExportError(
                 f"score-ir verwacht .vsa/.mvsa/.mscz, kreeg {bron.name}"
             )
+        # Brug-MVSA is een import-schets: MVSA-SYNC mag score-ir niet blokkeren.
         export_mvsa_path_to_score_ir(
             tmp_mvsa,
             out,
             section_id=section_id,
             bibliotheek_id=bibliotheek_id,
+            allow_import_sync_errors=True,
         )
     except (MvsaImportError, MvsaExportError, MusicXMLExportError) as exc:
         raise StreetProductExportError(str(exc)) from exc

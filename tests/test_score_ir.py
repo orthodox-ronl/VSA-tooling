@@ -195,3 +195,20 @@ B:  g                   \\2  ||
         assert not (starts == [0] and stops == [len(sop) - 1]), (
             "frase-slur over hele maat (S8+cadens) mag niet"
         )
+
+
+def test_serialize_rest_event() -> None:
+    """Rusten (pitch=None) horen als rest:true in Score-IR, geen crash."""
+    from vsa.music import Duration
+    from vsa.mvsa_musicxml import NoteEvent
+    from vsa.score_ir import _serialize_voice_event
+
+    ev = NoteEvent(
+        pitch=None,
+        duration=Duration(note_type="whole", dots=0, divisions=4),
+        lyrics=[],
+    )
+    out = _serialize_voice_event(ev, lyric_index=None)
+    assert out.get("rest") is True
+    assert "pitch" not in out
+    assert out["duration"]["elm"] == "__"

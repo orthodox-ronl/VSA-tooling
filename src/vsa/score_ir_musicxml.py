@@ -57,7 +57,10 @@ def _require_score_ir(doc: dict[str, Any]) -> None:
         )
 
 
-def _pitch_from_ir(raw: Any) -> Pitch:
+def _pitch_from_ir(raw: Any) -> Pitch | None:
+    """Pitch uit IR; ``None`` = rust (alleen via ``rest: true`` in het event)."""
+    if raw is None:
+        return None
     if not isinstance(raw, dict) or "step" not in raw or "octave" not in raw:
         raise ScoreIrMusicxmlError(f"ongeldige pitch: {raw!r}")
     return Pitch(
@@ -113,7 +116,15 @@ def _event_to_note(
     *,
     measure: dict[str, Any],
 ) -> NoteEvent:
-    pitch = _pitch_from_ir(ev.get("pitch"))
+    is_rest = bool(ev.get("rest"))
+    if is_rest:
+        pitch: Pitch | None = None
+    else:
+        pitch = _pitch_from_ir(ev.get("pitch"))
+        if pitch is None:
+            raise ScoreIrMusicxmlError(
+                f"event zonder pitch en zonder rest: {ev!r}"
+            )
     duration = _duration_from_ir(ev.get("duration"))
     li = ev.get("lyricIndex")
     lyrics = _lyrics_for_index(measure, li if isinstance(li, int) else None)
