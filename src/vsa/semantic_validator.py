@@ -93,14 +93,15 @@ class SemanticValidator:
             ])
 
             if height > 0 and length > 0 and height != length:
+                line, column = self._line_column(getattr(node, "start", None))
                 diagnostics.add(
                     code=code,
                     message_nl=(
                         "Hoogte- en lengte-modifier bevatten niet hetzelfde "
                         "aantal muzikale posities."
                     ),
-                    line=1,
-                    column=1,
+                    line=line,
+                    column=column,
                     severity=self._severity(code),
                     category="semantic",
                     hint_nl=(

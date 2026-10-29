@@ -316,20 +316,12 @@ def _validate_vsa_text(source: str, text: str, result: ValidationResult,
     diagnostics = SemanticValidator(document, semantic_options, source_text=semantic_text).validate()
 
     for diagnostic in diagnostics.items:
-        line = diagnostic.line
-        column = diagnostic.column
-
-        if diagnostic.code == "VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH":
-            location = _first_modifier_count_mismatch_location(semantic_text)
-            if location is not None:
-                line, column = location
-
         line, column = _source_line_column(
             text,
             semantic_text,
             offset_map,
-            line,
-            column,
+            diagnostic.line,
+            diagnostic.column,
             source_line_offset,
         )
 
@@ -481,51 +473,6 @@ def _iter_scopes(text: str):
             return
         yield start, end, text[start + 1:end]
         index = end + 1
-
-
-def _first_modifier_count_mismatch_location(text: str):
-    for start, end, content in _iter_scopes(text):
-        counts = _modifier_counts_heuristic(content)
-        if counts is None:
-            continue
-        height_count, length_count = counts
-        if height_count > 0 and length_count > 0 and height_count != length_count:
-            return _line_column_from_position(text, start)
-    return None
-
-
-def _modifier_counts_heuristic(content: str):
-    if "_" not in content:
-        return None
-
-    before_underscore, after_underscore = content.split("_", 1)
-    prefix = _scope_prefix(before_underscore)
-
-    if not prefix:
-        return None
-
-    height_count = len([char for char in prefix if char in "/\\-~"])
-    length_count = len([char for char in after_underscore if char in "/\\-~"])
-
-    return height_count, length_count
-
-
-def _scope_prefix(text: str):
-    index = 0
-    n = len(text)
-    while index < n:
-        ch = text[index]
-        if ch in _BASE_MODIFIER_CHARS or ch == "&":
-            index += 1
-        elif (
-            ch in _HALFTOON_PREFIX_CHARS
-            and index + 1 < n
-            and text[index + 1] in _BASE_MODIFIER_CHARS
-        ):
-            index += 2
-        else:
-            break
-    return text[:index]
 
 
 def _line_column_from_exception(text: str, exc: Exception):
