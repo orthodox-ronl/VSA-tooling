@@ -32,6 +32,10 @@ leeg (handig op gekleurde pagina’s). De trim zet ``viewBox`` op de getekende
 inhoud inclusief MuseScore-``transform`` (glyphs staan lokaal rond ``(0,0)``);
 anders zouden linker- en bovenmarge veel te breed blijven.
 
+Na MuseScore-export schuift de toolchain te krappe opeenvolgende lyric-paths
+uit elkaar (~0,45 spatium), zodat woorden niet als «desheils» aan elkaar
+plakken — MuseScore zelf houdt die bboxes vrijwel tegen elkaar.
+
 Bij bron `.mvsa`: compact is de **default** voor SVG (dichtste Style-baseline);
 expliciete Style-opties winnen. Zelfde vlaggen als bij
 [`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) / [`.mscz`](mscz.md)
@@ -42,7 +46,7 @@ export compact + tall op een tijdelijke kopie; blad-chrome wordt gestript.
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 4 --max-system-distance 4
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 9 --max-system-distance 9
 ```
 
 **Brug:** MuseScore tekent de tall-SVG. Scherm-hoofdpad blijft Score-IR/OSMD

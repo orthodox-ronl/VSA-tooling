@@ -393,9 +393,9 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 | `--layout PROFILE`           | Nee       | `partituur`, `muziek` of `plain`.                                                                           | `partituur`                                |
 | `--bibliotheek-id ID`        | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback.                                                      | pad-sniff / geen                           |
 | `--hulptekst`                | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»).                                                      | uit                                        |
-| `--compact`                  | Nee       | Dichtste Style-baseline (systeem 2/2, lyric 0.1, marge 5 mm); andere Style-opties winnen; niet bij `plain`. | uit                                        |
-| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `8` (bij `--compact`: `2`)                 |
-| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `14` (bij `--compact`: `2`)                |
+| `--compact`                  | Nee       | Dichtste Style-baseline (systeem 7/7, lyric 0.1, marge 5 mm, maat-spreiding 1.6); andere Style-opties winnen; niet bij `plain`. | uit                                        |
+| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `8` (bij `--compact`: `7`)                 |
+| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `14` (bij `--compact`: `7`)                |
 | `--staff-distance SP`        | Nee       | Afstand tussen balken in één systeem (+ accolade); niet bij `plain`.                                        | MuseScore + lyrics                         |
 | `--page-margin-top MM`       | Nee       | Bovenmarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
 | `--page-margin-bottom MM`    | Nee       | Ondermarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
@@ -403,7 +403,7 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 | `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst; niet bij `plain`.                                                                    | `13`                                       |
 | `--cue-font FACE`            | Nee       | Lettertype cues (`@tekst`); niet bij `plain`.                                                               | `Source Sans 3`                            |
 | `--cue-font-size PT`         | Nee       | Puntgrootte cues; niet bij `plain`.                                                                         | `12`                                       |
-| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                                                       | `1.2`                                      |
+| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                                                       | `1.2` (bij `--compact`: `1.6`)             |
 
 ### Output
 
@@ -427,7 +427,7 @@ mvsa mscz lied.mvsa -o out.mscz --layout partituur --bibliotheek-id zangstuk/var
 mvsa mscz lied.mvsa -o raw.mscz --layout plain
 mvsa mscz lied.mvsa -o out.mscz --min-system-distance 10 --max-system-distance 18
 mvsa mscz lied.mvsa -o out.mscz --compact
-mvsa mscz lied.mvsa -o out.mscz --compact --min-system-distance 4 --max-system-distance 4
+mvsa mscz lied.mvsa -o out.mscz --compact --min-system-distance 9 --max-system-distance 9
 mvsa mscz lied.mvsa -o out.mscz --staff-distance 4.5
 mvsa mscz lied.mvsa -o out.mscz --page-margin-top 5 --page-margin-bottom 5
 mvsa mscz lied.mvsa -o out.mscz --lyrics-font-size 14 --cue-font-size 11
@@ -497,7 +497,7 @@ dezelfde A4-eis P6).
 | `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst (zie `mscz`).                                            | `13`                                     |
 | `--cue-font FACE`            | Nee       | Lettertype cues (zie `mscz`).                                                  | `Source Sans 3`                          |
 | `--cue-font-size PT`         | Nee       | Puntgrootte cues (zie `mscz`).                                                 | `12`                                     |
-| `--measure-spacing F`        | Nee       | Maat-spreiding (zie `mscz`).                                                   | `1.2`                                    |
+| `--measure-spacing F`        | Nee       | Maat-spreiding (zie `mscz`).                                                   | `1.2` (compact: `1.6`)                   |
 
 ### Voorbeelden
 
@@ -507,7 +507,7 @@ mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
 mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
 mvsa pdf lied.mvsa --compact
-mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
 mscz pdf lied.mscz -o lied.pdf
 ```
 
@@ -566,8 +566,8 @@ geldig. Heb je al een `.mscz`: gebruik [`mscz svg`](mscz.md).
 | `--transparent`              | Geen witte achtergrond na trim (default is wit).                                          |
 | `--bibliotheek-id`           | Genegeerd voor layout ``muziek``.                                                         |
 | `--compact`                  | Compact-baseline (default voor SVG; expliciete Style-opties winnen).                      |
-| `--min-system-distance SP`   | Min. systeemafstand (SVG-default compact ``2``).                                          |
-| `--max-system-distance SP`   | Max. systeemafstand (SVG-default compact ``2``).                                          |
+| `--min-system-distance SP`   | Min. systeemafstand (SVG-default compact ``7``).                                          |
+| `--max-system-distance SP`   | Max. systeemafstand (SVG-default compact ``7``).                                          |
 | `--staff-distance SP`        | Stafafstand in één systeem (+ accolade).                                                  |
 | `--page-margin-top MM`       | Bovenmarge in mm (SVG-default compact ``5``).                                             |
 | `--page-margin-bottom MM`    | Ondermarge in mm (SVG-default compact ``5``).                                             |
@@ -575,7 +575,7 @@ geldig. Heb je al een `.mscz`: gebruik [`mscz svg`](mscz.md).
 | `--lyrics-font-size PT`      | Puntgrootte zangtekst (default ``13``).                                                   |
 | `--cue-font FACE`            | Lettertype cues/`@tekst`.                                                                 |
 | `--cue-font-size PT`         | Puntgrootte cues (default ``12``).                                                        |
-| `--measure-spacing F`        | Maat-spreiding (default ``1.2``).                                                         |
+| `--measure-spacing F`        | Maat-spreiding (default ``1.2``; SVG-compact ``1.6``).                                    |
 
 ### Voorbeelden
 
@@ -586,7 +586,7 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.sv
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --lyrics-font-size 14 --cue-font-size 11
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --measure-spacing 1.8
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 9 --max-system-distance 9
 mscz svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 ```
 

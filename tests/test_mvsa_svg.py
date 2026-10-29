@@ -202,7 +202,7 @@ def test_export_mscz_to_svg_strips_chrome_before_convert(tmp_path: Path) -> None
     assert "© Test" not in seen["body"]
     assert "<showFooter>0</showFooter>" in seen["body"]
     assert "<pageHeight>20000</pageHeight>" in seen["body"]
-    assert "<minSystemDistance>2</minSystemDistance>" in seen["body"]
+    assert "<minSystemDistance>7</minSystemDistance>" in seen["body"]
     assert mscz.read_bytes() == before
     with zipfile.ZipFile(mscz) as z:
         bron = z.read("lied.mscx").decode("utf-8")

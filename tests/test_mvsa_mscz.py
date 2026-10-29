@@ -170,17 +170,61 @@ def test_system_distance_rejected_with_plain_layout():
         )
 
 
+def test_pad_lyric_word_gaps_in_mscx():
+    from vsa.mscz_partituur import pad_lyric_word_gaps_in_mscx
+
+    nbsp = "\u00a0"
+    src = (
+        "<Lyrics><text>des</text></Lyrics>"
+        "<Lyrics><ticks_f>1/4</ticks_f><text>heils</text></Lyrics>"
+        "<Lyrics><syllabic>begin</syllabic><text>ne</text></Lyrics>"
+        "<Lyrics><syllabic>end</syllabic><text>men</text></Lyrics>"
+        f"<Lyrics><text>al{nbsp}</text></Lyrics>"
+    )
+    out = pad_lyric_word_gaps_in_mscx(src)
+    assert f"<text>des{nbsp}</text>" in out
+    assert f"<text>heils{nbsp}</text>" in out
+    assert "<text>ne</text>" in out  # begin: geen pad
+    assert f"<text>men{nbsp}</text>" in out
+    assert f"<text>al{nbsp}</text>" in out
+
+
+def test_enforce_svg_lyric_word_gaps():
+    from vsa.svg_lyric_gaps import enforce_svg_lyric_word_gaps
+
+    # Twee lyrics die elkaar raken (spatium≈100 via staff lines).
+    staff = (
+        '<polyline class="StaffLines" points="0,0 100,0" />'
+        '<polyline class="StaffLines" points="0,100 100,100" />'
+        '<polyline class="StaffLines" points="0,200 100,200" />'
+        '<polyline class="StaffLines" points="0,300 100,300" />'
+        '<polyline class="StaffLines" points="0,400 100,400" />'
+    )
+    # bbox A: x 0..50; B: x 52..100 → gap 2, spatium 100 → te krap
+    svg = (
+        f"<svg>{staff}"
+        '<path class="Lyrics" d="M0,500 L50,500 L50,520 L0,520 Z"/>'
+        '<path class="Lyrics" d="M52,500 L100,500 L100,520 L52,520 Z"/>'
+        "</svg>"
+    )
+    out = enforce_svg_lyric_word_gaps(svg, min_gap_spatium=0.45)
+    assert 'transform="translate(' in out
+    assert "Lyrics" in out
+
+
 def test_compact_style_preset():
     from vsa.mscz_partituur import (
         COMPACT_LYRICS_MIN_BOTTOM_DISTANCE,
         COMPACT_LYRICS_MIN_DISTANCE,
         COMPACT_LYRICS_MIN_TOP_DISTANCE,
         COMPACT_MAX_SYSTEM_DISTANCE,
+        COMPACT_MEASURE_SPACING,
         COMPACT_MIN_SYSTEM_DISTANCE,
         COMPACT_PAGE_MARGIN_BOTTOM_MM,
         COMPACT_PAGE_MARGIN_TOP_MM,
         apply_compact_style_preset,
         build_partituur_style_overrides,
+        tall_compact_svg_style_overrides,
     )
 
     filled = apply_compact_style_preset(
@@ -193,6 +237,7 @@ def test_compact_style_preset():
             "lyrics_min_bottom_distance": None,
             "lyrics_min_distance": None,
             "lyrics_font": None,
+            "measure_spacing": None,
         }
     )
     assert filled["min_system_distance"] == COMPACT_MIN_SYSTEM_DISTANCE
@@ -202,8 +247,9 @@ def test_compact_style_preset():
     assert filled["lyrics_min_top_distance"] == COMPACT_LYRICS_MIN_TOP_DISTANCE
     assert filled["lyrics_min_bottom_distance"] == COMPACT_LYRICS_MIN_BOTTOM_DISTANCE
     assert filled["lyrics_min_distance"] == COMPACT_LYRICS_MIN_DISTANCE
+    assert filled["measure_spacing"] == COMPACT_MEASURE_SPACING
 
-    # Expliciete waarden winnen; ontbrekende max volgt min (niet compact 2)
+    # Expliciete min wint; ontbrekende max = compact, tenzij die < min → dan = min
     partial = apply_compact_style_preset(
         {
             "min_system_distance": 5.0,
@@ -211,21 +257,30 @@ def test_compact_style_preset():
             "page_margin_top_mm": 8.0,
             "page_margin_bottom_mm": None,
             "lyrics_min_top_distance": 0.5,
+            "measure_spacing": 1.9,
         }
     )
     assert partial["min_system_distance"] == 5.0
-    assert partial["max_system_distance"] == 5.0
+    assert partial["max_system_distance"] == COMPACT_MAX_SYSTEM_DISTANCE
     assert partial["page_margin_top_mm"] == 8.0
     assert partial["page_margin_bottom_mm"] == COMPACT_PAGE_MARGIN_BOTTOM_MM
     assert partial["lyrics_min_top_distance"] == 0.5
     assert partial["lyrics_min_bottom_distance"] == COMPACT_LYRICS_MIN_BOTTOM_DISTANCE
+    assert partial["measure_spacing"] == 1.9
+
+    # Expliciete min hoger dan compact-max → max wordt opgetrokken tot min
+    raised = apply_compact_style_preset(
+        {"min_system_distance": 10.0, "max_system_distance": None}
+    )
+    assert raised["min_system_distance"] == 10.0
+    assert raised["max_system_distance"] == 10.0
 
     # Alleen max hoger → meer lucht; min blijft compact tenzij max < min
     airier = apply_compact_style_preset(
-        {"min_system_distance": None, "max_system_distance": 6.0}
+        {"min_system_distance": None, "max_system_distance": 9.0}
     )
     assert airier["min_system_distance"] == COMPACT_MIN_SYSTEM_DISTANCE
-    assert airier["max_system_distance"] == 6.0
+    assert airier["max_system_distance"] == 9.0
 
     overrides = build_partituur_style_overrides(
         **{
@@ -238,14 +293,24 @@ def test_compact_style_preset():
                 "lyrics_min_top_distance",
                 "lyrics_min_bottom_distance",
                 "lyrics_min_distance",
+                "measure_spacing",
             )
         }
     )
-    assert overrides["minSystemDistance"] == "2"
-    assert overrides["maxSystemDistance"] == "2"
+    assert overrides["minSystemDistance"] == "7"
+    assert overrides["maxSystemDistance"] == "7"
+    assert overrides["measureSpacing"] == "1.6"
     assert overrides["lyricsMinTopDistance"] == "0.1"
     assert overrides["lyricsMinBottomDistance"] == "0.1"
     assert "pageOddTopMargin" in overrides
+
+    tall = tall_compact_svg_style_overrides()
+    assert tall["minSystemDistance"] == "7"
+    assert tall["maxSystemDistance"] == "7"
+    assert tall["measureSpacing"] == "1.6"
+    assert tall["minNoteDistance"] == "0.75"
+    assert tall["lyricsOddFontFace"] == "Source Sans 3"
+    assert tall["lyricsOddFontSpatiumDependent"] == "0"
 
 
 def test_style_overrides_synced_to_score_style_mss(tmp_path: Path):

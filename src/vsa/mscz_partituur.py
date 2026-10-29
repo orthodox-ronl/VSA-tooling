@@ -51,7 +51,9 @@ _STYLE_OVERRIDES = {
     "lyricsOddAlign": "center,baseline",
     "lyricsEvenAlign": "center,baseline",
     "lyricsMinDistance": "0.6",
-    "minNoteDistance": "0.5",
+    # 0.75: genoeg ruimte zodat naast elkaar staande lyrics niet in elkaar
+    # lopen (was 0.5; te krap bij compacte maten met korte lettergrepen).
+    "minNoteDistance": "0.75",
     "measureSpacing": "1.2",
     "lyricsPlacement": "1",
     "lyricsOddFontFace": _FONT,
@@ -156,15 +158,22 @@ def _require_font_face(name: str, value: str) -> str:
 
 
 # ``--compact`` preset (spikes compact-layout + lyric-clearance):
-# lage vaste systeemafstand (MuseScore mag lokaal uitdijen voor cues);
-# strakke lyric-clearance tussen SA/TB; kleinere boven-/ondermarge.
-COMPACT_MIN_SYSTEM_DISTANCE = 2.0
-COMPACT_MAX_SYSTEM_DISTANCE = 2.0
+# vaste systeemafstand ruim genoeg dat de *hook* van de accolade niet door
+# het maatnummer van het volgende systeem snijdt (4 was nog te krap: stem
+# leek ok, hook overlapte ~0.75 sp); strakke lyric-clearance tussen SA/TB;
+# kleinere boven-/ondermarge; maat-spreiding + lyric-woordspaties (zie
+# ``pad_mscz_lyric_word_gaps``) tegen «desheils».
+COMPACT_MIN_SYSTEM_DISTANCE = 7.0
+COMPACT_MAX_SYSTEM_DISTANCE = 7.0
 COMPACT_PAGE_MARGIN_TOP_MM = 5.0
 COMPACT_PAGE_MARGIN_BOTTOM_MM = 5.0
 COMPACT_LYRICS_MIN_TOP_DISTANCE = 0.1
 COMPACT_LYRICS_MIN_BOTTOM_DISTANCE = 0.1
 COMPACT_LYRICS_MIN_DISTANCE = 0.1
+COMPACT_MEASURE_SPACING = 1.6
+COMPACT_MIN_NOTE_DISTANCE = 0.75
+_LYRICS_FONT = _FONT
+_LYRICS_FONT_SIZE = "13"
 
 
 def apply_compact_style_preset(kwargs: dict) -> dict:
@@ -200,6 +209,8 @@ def apply_compact_style_preset(kwargs: dict) -> dict:
         out["lyrics_min_bottom_distance"] = COMPACT_LYRICS_MIN_BOTTOM_DISTANCE
     if out.get("lyrics_min_distance") is None:
         out["lyrics_min_distance"] = COMPACT_LYRICS_MIN_DISTANCE
+    if out.get("measure_spacing") is None:
+        out["measure_spacing"] = COMPACT_MEASURE_SPACING
     return out
 
 
@@ -390,6 +401,8 @@ def apply_partituur_mscz_conventions(
     mscx = _collapse_same_pitch_tie_runs(mscx)
     # Recite-print (S8/R3): ||O||-kop + onhoorbare spacers; maatlengte herstellen.
     mscx = _apply_recite_print_conventions(mscx)
+    # Woordspaties in lyrics — MuseScore plakt anders «des»+«heils» aan elkaar.
+    mscx = pad_lyric_word_gaps_in_mscx(mscx)
     if music_only:
         mscx = _strip_header_footer_colophon_for_muziek(mscx)
     else:
@@ -498,12 +511,82 @@ def tall_compact_svg_style_overrides() -> dict[str, str]:
         lyrics_min_top_distance=kw["lyrics_min_top_distance"],
         lyrics_min_bottom_distance=kw["lyrics_min_bottom_distance"],
         lyrics_min_distance=kw["lyrics_min_distance"],
+        lyrics_font=_LYRICS_FONT,
+        lyrics_font_size=float(_LYRICS_FONT_SIZE),
+        measure_spacing=kw["measure_spacing"],
     )
+    overrides["minNoteDistance"] = _format_style_number(COMPACT_MIN_NOTE_DISTANCE)
+    # Geïmporteerde scores hebben vaak Arial/spatiumDependent=1 — te breed.
+    overrides["lyricsOddFontSpatiumDependent"] = "0"
+    overrides["lyricsEvenFontSpatiumDependent"] = "0"
     overrides["pageHeight"] = TALL_SVG_PAGE_HEIGHT_IN
     overrides["enableVerticalSpread"] = "0"
     overrides["maxPageFillSpread"] = "0"
     overrides["lastSystemFillLimit"] = "0"
     return overrides
+
+
+_LYRICS_BLOCK_RE = re.compile(r"<Lyrics>.*?</Lyrics>", re.DOTALL)
+
+
+# NBSP: MuseScore trimt ASCII-spaties aan lyric-randen; NBSP blijft staan en
+# vergroot de layout-bbox iets. Harde leesbare woordscheiding zit in
+# ``svg_lyric_gaps.enforce_svg_lyric_word_gaps`` na de MuseScore-SVG.
+_LYRIC_WORD_PAD = "\u00a0"
+
+
+def pad_lyric_word_gaps_in_mscx(mscx: str) -> str:
+    """Zet trailing NBSP op woord-einde-lyrics in ``.mscx``-XML.
+
+    Helpt MuseScore iets meer breedte te reserveren. Hyphen-lettergrepen
+    (``syllabic`` begin/middle) blijven onaangeraakt. Zichtbare scheiding
+    tussen woorden garandeert de SVG-nabewerking.
+    """
+
+    def _repl(match: re.Match[str]) -> str:
+        block = match.group(0)
+        syll = re.search(r"<syllabic>(.*?)</syllabic>", block)
+        kind = (syll.group(1).strip().lower() if syll else "single")
+        if kind in {"begin", "middle"}:
+            return block
+
+        def _text_repl(tm: re.Match[str]) -> str:
+            raw = tm.group(1)
+            if raw == "":
+                return tm.group(0)
+            if raw.endswith(_LYRIC_WORD_PAD):
+                return tm.group(0)
+            raw = raw.rstrip(" ")
+            return f"<text>{raw}{_LYRIC_WORD_PAD}</text>"
+
+        return re.sub(r"<text>(.*?)</text>", _text_repl, block, count=1)
+
+    return _LYRICS_BLOCK_RE.sub(_repl, mscx)
+
+
+def pad_mscz_lyric_word_gaps(path: Path) -> None:
+    """In-place: woordspaties in lyrics van een ``.mscz`` (zie pad_lyric_word_gaps_in_mscx)."""
+    path = Path(path)
+    if not path.is_file() or path.suffix.lower() != ".mscz":
+        raise MsczPartituurError(f"geen .mscz: {path}")
+    with zipfile.ZipFile(path, "r") as zin:
+        names = zin.namelist()
+        mscx_name = next(
+            (n for n in names if n.lower().endswith(".mscx")), None
+        )
+        if mscx_name is None:
+            raise MsczPartituurError(f"geen .mscx in {path}")
+        files = {n: zin.read(n) for n in names}
+    text = files[mscx_name].decode("utf-8")
+    patched = pad_lyric_word_gaps_in_mscx(text)
+    if patched == text:
+        return
+    files[mscx_name] = patched.encode("utf-8")
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        for name, data in files.items():
+            zout.writestr(name, data)
+    tmp.replace(path)
 
 
 def patch_mscz_style(path: Path, overrides: Mapping[str, str]) -> None:

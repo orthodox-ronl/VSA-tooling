@@ -1973,9 +1973,10 @@ def _add_partituur_style_args(parser: argparse.ArgumentParser) -> None:
         "--compact",
         action="store_true",
         help=(
-            "Dichtste Style-baseline: systeemafstand min=max 2 spatium, "
-            "lyric-clearance 0.1 (SA/TB), boven-/ondermarge 5 mm. Andere "
-            "Style-opties winnen van deze preset. Niet bij --layout plain."
+            "Dichtste Style-baseline: systeemafstand min=max 7 spatium, "
+            "lyric-clearance 0.1 (SA/TB), boven-/ondermarge 5 mm, "
+            "maat-spreiding 1.6. Andere Style-opties winnen van deze preset. "
+            "Niet bij --layout plain."
         ),
     )
     parser.add_argument(
@@ -2078,8 +2079,9 @@ def _add_partituur_style_args(parser: argparse.ArgumentParser) -> None:
         dest="measure_spacing",
         help=(
             "Horizontale maat-afstand (MuseScore Style measureSpacing). "
-            "Default: 1.2. Hoger = meer spreiding. Niet bij --layout plain. "
-            "Lost geen cue-brede maten op (aparte maat-width)."
+            "Default: 1.2 (bij --compact: 1.6). Hoger = meer spreiding. "
+            "Niet bij --layout plain. Lost geen cue-brede maten op "
+            "(aparte maat-width)."
         ),
     )
 

@@ -36,8 +36,10 @@ Op `mvsa mscz` / `pdf` / `svg` (bron `.mvsa`):
 
 | Sleutel                         | Waarde                                      |
 | ------------------------------- | ------------------------------------------- |
-| `min`/`maxSystemDistance`       | **2** / **2**                               |
+| `min`/`maxSystemDistance`       | **7** / **7** (hook vs maatnummer)          |
 | `lyricsMinTop/Bottom/Distance`  | **0.1** (SA/TB dichter)                     |
+| `measureSpacing`                | **1.6**                                     |
+| lyric woordspaties              | trailing spatie op woord-einde-lyrics       |
 | pagina-marge boven/onder        | **5** mm                                    |
 
 Style naar `.mscx` **én** `score_style.mss`. **Andere Style-CLI-opties
@@ -46,7 +48,7 @@ winnen** van `--compact` (per sleutel).
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa pdf lied.mvsa --compact
-mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
 ```
 
 Normatieve docs: [`docs/formats/mscz.md`](../../../docs/formats/mscz.md),

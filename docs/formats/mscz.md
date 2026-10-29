@@ -60,14 +60,18 @@ mvsa mscz lied.mvsa -o generated\lied.mscz --lyrics-font-size 14 --cue-font-size
 `--max-system-distance` (spatium). Niet bij `--layout plain`.
 
 **`--compact`:** dichtste Style-baseline (pdf/svg/mscz): systeemafstand
-min=max **2** spatium (MuseScore mag lokaal meer voor cues), lyric-clearance
-**0.1** (SA/TB dichter), boven-/ondermarge **5** mm. Style wordt ook naar
+min=max **7** spatium (genoeg dat de accolade-*hook* niet door het
+maatnummer van het volgende systeem snijdt; MuseScore mag lokaal meer
+voor cues), lyric-clearance **0.1** (SA/TB dichter), boven-/ondermarge
+**5** mm, maat-spreiding **1.6**. Daarnaast zetten partituur-nabewerking
+en SVG-export een **trailing spatie** op woord-einde-lyrics zodat MuseScore
+woorden niet als «desheils» aan elkaar plakt. Style wordt ook naar
 `score_style.mss` gesynchroniseerd (MuseScore 4). **Andere Style-opties
-winnen van `--compact`** (per sleutel). Voorbeeld: meer lucht tussen
+winnen van `--compact`** (per sleutel). Voorbeeld: nog meer lucht tussen
 systemen met behoud van de rest van compact:
 
 ```cmd
-mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
 ```
 
 Niet bij `--layout plain`.

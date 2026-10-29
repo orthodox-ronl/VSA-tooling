@@ -306,6 +306,7 @@ def export_mscz_to_svg(
     import shutil
 
     from .mscz_partituur import (
+        pad_mscz_lyric_word_gaps,
         patch_mscz_style,
         strip_mscz_sheet_chrome,
         tall_compact_svg_style_overrides,
@@ -335,6 +336,7 @@ def export_mscz_to_svg(
         shutil.copy2(mscz, tmp_mscz)
         try:
             strip_mscz_sheet_chrome(tmp_mscz)
+            pad_mscz_lyric_word_gaps(tmp_mscz)
             patch_mscz_style(tmp_mscz, tall_compact_svg_style_overrides())
         except MsczPartituurError as exc:
             raise MvsaMsczError(str(exc)) from exc
@@ -364,16 +366,20 @@ def export_mscz_to_svg(
             first.replace(out)
             written = [out]
 
-    if trim:
-        for path in written:
+    from .svg_lyric_gaps import enforce_svg_lyric_word_gaps
+
+    for path in written:
+        text = path.read_text(encoding="utf-8")
+        text = enforce_svg_lyric_word_gaps(text)
+        if trim:
             try:
-                trimmed = trim_musescore_svg(
-                    path.read_text(encoding="utf-8"),
+                text = trim_musescore_svg(
+                    text,
                     white_background=white_background,
                 )
             except SvgTrimError as exc:
                 raise MvsaMsczError(str(exc)) from exc
-            path.write_text(trimmed, encoding="utf-8", newline="\n")
+        path.write_text(text, encoding="utf-8", newline="\n")
     return written
 
 
