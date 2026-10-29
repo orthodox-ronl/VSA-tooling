@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-28 23:07 CET.
+  , gebouwd 2026-10-29 15:44 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5479,7 +5479,11 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>P3</td>
-<td>Verticaal: pagina niet vullen; default <code>minSystemDistance</code>/<code>maxSystemDistance</code> 8/14 (niet “spread”). Override: <code>--min-system-distance</code> / <code>--max-system-distance</code>, of <code>--compact</code> (baseline 2/2 + lyric 0.1 + marge 5 mm; andere Style-opties winnen). Balken: <code>--staff-distance</code>. Op <code>mvsa mscz</code>/<code>pdf</code>/<code>svg</code>.</td>
+<td>Verticaal: pagina niet vullen; default <code>minSystemDistance</code>/<code>maxSystemDistance</code> 8/14 (niet “spread”). Override: <code>--min-system-distance</code> / <code>--max-system-distance</code>, of <code>--compact</code> (baseline 7/7 + lyric 0.1 + marge 5 mm + <code>measureSpacing</code> 1.6; andere Style-opties winnen). Balken: <code>--staff-distance</code>. Op <code>mvsa mscz</code>/<code>pdf</code>/<code>svg</code>.</td>
+</tr>
+<tr>
+<td>P3a</td>
+<td>Horizontaal: MuseScore plakt lyric-bboxes tot ~0,1 sp tegen elkaar («desheils»). Mitigatie: trailing NBSP op woord-einde-lyrics in <code>.mscx</code>, plus SVG-nabewerking (<code>enforce_svg_lyric_word_gaps</code>, min. ~0,45 sp tussen opeenvolgende lyric-paths). Hyphen-lettergrepen (<code>syllabic</code> begin/middle) zonder NBSP.</td>
 </tr>
 <tr>
 <td>P4</td>
@@ -5595,7 +5599,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-10-29
         
       </p>
       

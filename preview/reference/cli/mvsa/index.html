@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-10-28 23:07 CET.
+  , gebouwd 2026-10-29 15:44 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -8269,20 +8269,20 @@ standaard Windows-pad
 <tr>
 <td><code>--compact</code></td>
 <td>Nee</td>
-<td>Dichtste Style-baseline (systeem 2/2, lyric 0.1, marge 5 mm); andere Style-opties winnen; niet bij <code>plain</code>.</td>
+<td>Dichtste Style-baseline (systeem 7/7, lyric 0.1, marge 5 mm, maat-spreiding 1.6); andere Style-opties winnen; niet bij <code>plain</code>.</td>
 <td>uit</td>
 </tr>
 <tr>
 <td><code>--min-system-distance SP</code></td>
 <td>Nee</td>
 <td>Min. afstand tussen systemen (Style spatium); niet bij <code>plain</code>.</td>
-<td><code>8</code> (bij <code>--compact</code>: <code>2</code>)</td>
+<td><code>8</code> (bij <code>--compact</code>: <code>7</code>)</td>
 </tr>
 <tr>
 <td><code>--max-system-distance SP</code></td>
 <td>Nee</td>
 <td>Max. afstand tussen systemen (Style spatium); niet bij <code>plain</code>.</td>
-<td><code>14</code> (bij <code>--compact</code>: <code>2</code>)</td>
+<td><code>14</code> (bij <code>--compact</code>: <code>7</code>)</td>
 </tr>
 <tr>
 <td><code>--staff-distance SP</code></td>
@@ -8330,7 +8330,7 @@ standaard Windows-pad
 <td><code>--measure-spacing F</code></td>
 <td>Nee</td>
 <td>Horizontale maat-spreiding (Style); niet bij <code>plain</code>.</td>
-<td><code>1.2</code></td>
+<td><code>1.2</code> (bij <code>--compact</code>: <code>1.6</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -8366,7 +8366,7 @@ mvsa mscz lied.mvsa -o out.mscz --layout partituur --bibliotheek-id zangstuk/var
 mvsa mscz lied.mvsa -o raw.mscz --layout plain
 mvsa mscz lied.mvsa -o out.mscz --min-system-distance 10 --max-system-distance 18
 mvsa mscz lied.mvsa -o out.mscz --compact
-mvsa mscz lied.mvsa -o out.mscz --compact --min-system-distance 4 --max-system-distance 4
+mvsa mscz lied.mvsa -o out.mscz --compact --min-system-distance 9 --max-system-distance 9
 mvsa mscz lied.mvsa -o out.mscz --staff-distance 4.5
 mvsa mscz lied.mvsa -o out.mscz --page-margin-top 5 --page-margin-bottom 5
 mvsa mscz lied.mvsa -o out.mscz --lyrics-font-size 14 --cue-font-size 11
@@ -8534,7 +8534,7 @@ dezelfde A4-eis P6).</p>
 <td><code>--measure-spacing F</code></td>
 <td>Nee</td>
 <td>Maat-spreiding (zie <code>mscz</code>).</td>
-<td><code>1.2</code></td>
+<td><code>1.2</code> (compact: <code>1.6</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -8544,7 +8544,7 @@ mvsa pdf lied.mvsa -o generated\lied.pdf --keep-mscz generated\lied.mscz
 mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
 mvsa pdf lied.mvsa --compact
-mvsa pdf lied.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
 mscz pdf lied.mscz -o lied.pdf
 </code></pre></div>
 <hr />
@@ -8640,11 +8640,11 @@ geldig. Heb je al een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz 
 </tr>
 <tr>
 <td><code>--min-system-distance SP</code></td>
-<td>Min. systeemafstand (SVG-default compact <code>2</code>).</td>
+<td>Min. systeemafstand (SVG-default compact <code>7</code>).</td>
 </tr>
 <tr>
 <td><code>--max-system-distance SP</code></td>
-<td>Max. systeemafstand (SVG-default compact <code>2</code>).</td>
+<td>Max. systeemafstand (SVG-default compact <code>7</code>).</td>
 </tr>
 <tr>
 <td><code>--staff-distance SP</code></td>
@@ -8676,7 +8676,7 @@ geldig. Heb je al een <code>.mscz</code>: gebruik <a href="../mscz/"><code>mscz 
 </tr>
 <tr>
 <td><code>--measure-spacing F</code></td>
-<td>Maat-spreiding (default <code>1.2</code>).</td>
+<td>Maat-spreiding (default <code>1.2</code>; SVG-compact <code>1.6</code>).</td>
 </tr>
 </tbody>
 </table>
@@ -8687,7 +8687,7 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.sv
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --lyrics-font-size 14 --cue-font-size 11
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --measure-spacing 1.8
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 4 --max-system-distance 4
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 9 --max-system-distance 9
 mscz svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 </code></pre></div>
 <h3 id="exit-status_4">Exit status<a class="headerlink" href="#exit-status_4" title="Permanent link">&para;</a></h3>
@@ -9251,7 +9251,7 @@ mvsa products examples\mvsa --dry-run --skip-svg
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-28
+        Bijgewerkt: 2026-10-29
         
       </p>
       
