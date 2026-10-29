@@ -22,7 +22,7 @@ PARALLEL = (EXAMPLES / "hulptekst-parallel-l1-mini.mvsa").read_text(
 
 def test_ksl_partituur_lyric_number_2() -> None:
     xml = export_mvsa_to_musicxml(
-        KSL_MINI, layout="partituur", hulptekst=True
+        KSL_MINI, layout="partituur", translit=True
     )
     assert 'lyric number="1"' in xml
     assert 'lyric number="2"' in xml
@@ -33,7 +33,7 @@ def test_ksl_partituur_lyric_number_2() -> None:
 
 
 def test_nl_playback_lyric_number_2() -> None:
-    xml = export_mvsa_to_musicxml(NL_MINI, layout="playback", hulptekst=True)
+    xml = export_mvsa_to_musicxml(NL_MINI, layout="playback", translit=True)
     assert 'lyric number="2"' in xml
     assert "<text>Хиир</text>" in xml
     assert "<text>онт</text>" in xml
@@ -41,28 +41,29 @@ def test_nl_playback_lyric_number_2() -> None:
     assert "<text>У</text>" in xml
 
 
-def test_hulptekst_as_parts_playback() -> None:
+def test_translit_as_parts_playback() -> None:
     xml = export_mvsa_to_musicxml(
-        KSL_MINI, layout="playback", hulptekst_as_parts=True
+        KSL_MINI, layout="playback", translit_as_parts=True
     )
     assert 'id="P5"' in xml
     assert "Soprano (ksl)" in xml
     assert "Soprano (nl)" in xml
+    assert "Soprano (translit)" not in xml
     assert "Soprano (hulptekst)" not in xml
     assert "<volume>0</volume>" in xml
     # Bronparts behouden lyric 1 + 2; hulptekst-parts hebben Svja als number 1.
     assert xml.count("Svja") >= 2
 
 
-def test_hulptekst_as_parts_nl_labels() -> None:
+def test_translit_as_parts_nl_labels() -> None:
     xml = export_mvsa_to_musicxml(
-        NL_MINI, layout="playback", hulptekst_as_parts=True
+        NL_MINI, layout="playback", translit_as_parts=True
     )
     assert "Soprano (nl)" in xml
     assert "Bass (ksl)" in xml
 
 
-def test_hulptekst_as_parts_custom_ids() -> None:
+def test_translit_as_parts_custom_ids() -> None:
     text = (
         ROOT / "examples" / "mvsa" / "hulptekst-coria-custom-ids-mini.mvsa"
     ).read_text(encoding="utf-8")
@@ -74,7 +75,7 @@ def test_hulptekst_as_parts_custom_ids() -> None:
     assert systems[0].context.taal_for("Lap") == "aap"
     assert systems[0].context.taal_for("Lus") == "noot"
     xml = export_mvsa_to_musicxml(
-        text, layout="playback", hulptekst_as_parts=True
+        text, layout="playback", translit_as_parts=True
     )
     assert "Sop (aap)" in xml
     assert "Sop (noot)" in xml
@@ -83,14 +84,14 @@ def test_hulptekst_as_parts_custom_ids() -> None:
     assert 'id="P4"' in xml
 
 
-def test_hulptekst_as_parts_parallel_l_prime() -> None:
+def test_translit_as_parts_parallel_l_prime() -> None:
     doc = parse_mvsa(PARALLEL)
     systems = [sys for sec in doc.sections for sys in sec.systems]
     assert systems[0].context.taal_for("L") == "ksl"
     assert systems[0].context.taal_for("L1") == "nl"
     assert systems[0].context.taal_for("L'") == "nl"
     xml = export_mvsa_to_musicxml(
-        PARALLEL, layout="playback", hulptekst_as_parts=True
+        PARALLEL, layout="playback", translit_as_parts=True
     )
     assert "Alto (ksl)" in xml
     assert "Alto (nl)" in xml
@@ -102,13 +103,26 @@ def test_taal_assign_invalid_stem() -> None:
     assert any(d.code == "MVSA-TAAL" for d in diags)
 
 
-def test_hulptekst_as_parts_rejects_partituur() -> None:
+def test_translit_as_parts_rejects_partituur() -> None:
     with pytest.raises(MvsaExportError, match="playback"):
         export_mvsa_to_musicxml(
-            KSL_MINI, layout="partituur", hulptekst_as_parts=True
+            KSL_MINI, layout="partituur", translit_as_parts=True
         )
 
 
 def test_without_flag_no_lyric_2() -> None:
     xml = export_mvsa_to_musicxml(KSL_MINI, layout="playback")
     assert 'lyric number="2"' not in xml
+
+
+def test_cli_translit_flags_on_mxl_mscz_pdf_svg() -> None:
+    from vsa.cli import _build_mvsa_parser
+
+    p = _build_mvsa_parser()
+    mxl = p.parse_args(["mxl", "x.mvsa", "--translit-as-parts"])
+    assert mxl.translit_as_parts is True
+    for sub in ("mscz", "pdf", "svg"):
+        ns = p.parse_args([sub, "x.mvsa", "--translit"])
+        assert ns.translit is True
+    with pytest.raises(SystemExit):
+        p.parse_args(["mxl", "x.mvsa", "--hulptekst"])
