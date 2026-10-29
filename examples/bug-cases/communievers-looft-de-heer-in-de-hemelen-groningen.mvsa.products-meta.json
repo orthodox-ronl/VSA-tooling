@@ -2,7 +2,7 @@
   "schema": 2,
   "bron": "communievers-looft-de-heer-in-de-hemelen-groningen.mvsa",
   "bron_sha256": "0b169beec58d8027aaf2149fc21dcf60ec063bc18a1ecd128e2cca6fafd25c8b",
-  "generated_at": "2026-10-29T15:20:32+00:00",
+  "generated_at": "2026-10-29T19:13:41+00:00",
   "products": {
     "lyrics": {
       "file": "communievers-looft-de-heer-in-de-hemelen-groningen.mvsa.lyrics.txt",
@@ -11,8 +11,8 @@
     },
     "mxl": {
       "file": "communievers-looft-de-heer-in-de-hemelen-groningen.mvsa.mxl",
-      "sha256": "de0f1445f794e13fdddfc0eddd30be534e50af8b11c07f991153fb6127c39280",
-      "generated_at": "2026-10-29T15:20:32+00:00"
+      "sha256": "51a73034cf88b3f902ca2f8d2e977bfbfa97902d5e68f6161f73a7f68aba9dcf",
+      "generated_at": "2026-10-29T19:13:41+00:00"
     }
   }
 }

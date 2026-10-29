@@ -119,8 +119,8 @@ CUE_GAP_NOTE_TYPE = "16th"
 PAUSE_LYRIC = "[PAUZE]"
 PAUSE_DURATION_DIVS = 16  # whole @ divisions=4
 
-# Extra Coria-parts voor hulptekst (volume 0; geen dubbel geluid by default).
-_HULPTEKST_VOLUME = "0"
+# Extra Coria-parts voor translit (volume 0; geen dubbel geluid by default).
+_TRANSLIT_VOLUME = "0"
 
 _CLEF_BY_SATB = {
     "S": ("G", "2"),
@@ -295,7 +295,7 @@ def _build_playback_part_list(
                         _satb_display_name(v), label
                     )
                     if label
-                    else f"{_satb_display_name(v)} (hulptekst)",
+                    else f"{_satb_display_name(v)} (translit)",
                     "abbr": _part_display_abbr(
                         _satb_abbr(v), label, hulp=True
                     ),
@@ -343,7 +343,7 @@ def _clone_notes_for_lyric_number(
     return cloned
 
 
-def _attach_hulptekst_parts(
+def _attach_translit_parts(
     voice_measures: dict[str, list[list[NoteEvent]]],
     voice_ids: list[str],
     lyric_numbers: list[int],
@@ -380,7 +380,7 @@ def _direction_from_sticky_taal(taal: str | None):
     return None
 
 
-def _apply_hulptekst_to_notes(
+def _apply_translit_to_notes(
     notes: list[NoteEvent],
     *,
     direction: str | None,
@@ -411,13 +411,13 @@ def _apply_hulptekst_to_notes(
         ev.lyrics.extend(extras)
 
 
-def _apply_hulptekst_lyric_layer(
+def _apply_translit_lyric_layer(
     voice_measures: dict[str, list[list[NoteEvent]]],
 ) -> None:
     """Fallback zonder sticky ``@taal`` (auto per lettergreep)."""
     for measures in voice_measures.values():
         for measure in measures:
-            _apply_hulptekst_to_notes(measure, direction=None)
+            _apply_translit_to_notes(measure, direction=None)
 
 
 
@@ -429,23 +429,23 @@ def export_mvsa_to_musicxml(
     layout: MvsaLayout = "playback",
     source_path: Path | None = None,
     bibliotheek_id: str | None = None,
-    hulptekst: bool = False,
-    hulptekst_as_parts: bool = False,
+    translit: bool = False,
+    translit_as_parts: bool = False,
 ) -> str:
     """Validate + export. Raises MvsaValidationError or MvsaExportError.
 
-    *hulptekst*: tweede lyric-laag (``number=\"2\"``) via
+    *translit*: tweede lyric-laag (``number=\"2\"``) via
     :mod:`vsa.transliterate` (ksl→Latijn / nl→Cyrillisch per lettergreep).
-    *hulptekst_as_parts*: alleen zinvol bij ``layout=\"playback\"`` — extra
-    SATB-parts met alleen hulptekst (volume 0; speler kan solo zetten).
+    *translit_as_parts*: alleen zinvol bij ``layout=\"playback\"`` — extra
+    SATB-parts met alleen translit (volume 0; speler kan solo zetten).
     """
     if layout not in ("playback", "partituur"):
         raise MvsaExportError(f"onbekende layout {layout!r}")
-    if hulptekst_as_parts and not hulptekst:
-        hulptekst = True
-    if hulptekst_as_parts and layout != "playback":
+    if translit_as_parts and not translit:
+        translit = True
+    if translit_as_parts and layout != "playback":
         raise MvsaExportError(
-            "hulptekst_as_parts is alleen voor layout=playback (Coria)"
+            "translit_as_parts is alleen voor layout=playback (Coria)"
         )
     doc = parse_mvsa(text)
     errors = [d for d in doc.diagnostics if d.severity == "error"]
@@ -487,7 +487,7 @@ def export_mvsa_to_musicxml(
             events_by_voice, pitch_carry = _system_to_events(
                 system,
                 layout=layout,
-                hulptekst=hulptekst,
+                translit=translit,
                 pitch_carry=pitch_carry,
             )
             for voice, measures in events_by_voice.items():
@@ -648,7 +648,7 @@ def export_mvsa_to_musicxml(
         layer_labels = _resolve_layer_labels(
             systems_flat, voice_measures, lyric_nums
         )
-        if hulptekst_as_parts:
+        if translit_as_parts:
             if len(lyric_nums) < 2:
                 # Genereer-laag ontbreekt → toch labels voor bron only.
                 pass
@@ -658,7 +658,7 @@ def export_mvsa_to_musicxml(
                 with_extra_layers=len(lyric_nums) > 1,
             )
             if len(lyric_nums) > 1:
-                voice_measures = _attach_hulptekst_parts(
+                voice_measures = _attach_translit_parts(
                     voice_measures, voice_ids, lyric_nums
                 )
         else:
@@ -696,8 +696,8 @@ def export_mvsa_path(
     section_id: str | None = None,
     layout: MvsaLayout = "playback",
     bibliotheek_id: str | None = None,
-    hulptekst: bool = False,
-    hulptekst_as_parts: bool = False,
+    translit: bool = False,
+    translit_as_parts: bool = False,
 ) -> None:
     path = Path(path)
     if path.suffix.lower() != ".mvsa":
@@ -719,8 +719,8 @@ def export_mvsa_path(
         layout=layout,
         source_path=path,
         bibliotheek_id=bibliotheek_id,
-        hulptekst=hulptekst,
-        hulptekst_as_parts=hulptekst_as_parts,
+        translit=translit,
+        translit_as_parts=translit_as_parts,
     )
     write_musicxml_output(out, xml)
 
@@ -833,7 +833,7 @@ def _system_to_events(
     system,
     *,
     layout: MvsaLayout = "playback",
-    hulptekst: bool = False,
+    translit: bool = False,
     pitch_carry: dict[str, Pitch] | None = None,
 ) -> tuple[dict[str, list[list[NoteEvent]]], dict[str, Pitch]]:
     ctx: StickyContext = system.context
@@ -844,7 +844,7 @@ def _system_to_events(
     parallel_lyrics = lyric_markers[1:]
     hulp_direction = (
         _direction_from_sticky_taal(ctx.taal_for(primary_lyric))
-        if hulptekst
+        if translit
         else None
     )
 
@@ -930,8 +930,8 @@ def _system_to_events(
                     include_directions=(layout == "playback" or key == "S"),
                     include_jump_nav=(layout == "partituur" and key == "S"),
                 )
-                if hulptekst:
-                    _apply_hulptekst_to_notes(notes, direction=hulp_direction)
+                if translit:
+                    _apply_translit_to_notes(notes, direction=hulp_direction)
                 measure_events[key].extend(notes)
 
         for key, evs in measure_events.items():
@@ -2465,7 +2465,7 @@ def _emit_score_playback(
         out.append(f"<part-name>{part['name']}</part-name>")
         out.append(f"<part-abbreviation>{part['abbr']}</part-abbreviation>")
         vol = (
-            _HULPTEKST_VOLUME
+            _TRANSLIT_VOLUME
             if re.search(r"h\d+$", str(part.get("voice", "")))
             else _PLAYBACK_MIDI_VOLUME
         )

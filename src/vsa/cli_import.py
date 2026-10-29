@@ -219,7 +219,7 @@ def _mscz_from_mvsa(ns: argparse.Namespace) -> int:
                 keep_mxl=keep_mxl,
                 layout=getattr(ns, "layout", None),
                 bibliotheek_id=getattr(ns, "bibliotheek_id", None),
-                hulptekst=bool(getattr(ns, "hulptekst", False)),
+                translit=bool(getattr(ns, "translit", False)),
                 **style,
             )
         except MvsaValidationError as exc:
@@ -325,7 +325,7 @@ def add_mscz_import_parser(
         help="Alleen bij .mvsa + layout partituur: colofon-id.",
     )
     p.add_argument(
-        "--hulptekst",
+        "--translit",
         action="store_true",
         help="Alleen bij .mvsa: tweede lyric-laag in partituur-MXL.",
     )

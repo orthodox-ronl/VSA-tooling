@@ -25,14 +25,14 @@ enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
 ```text
 mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products} …
 mvsa validate [-h] path
-mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
-              [--hulptekst-as-parts] [--bibliotheek-id ID]
+mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
+              [--translit-as-parts] [--bibliotheek-id ID]
               [--musescore PATH] path
 mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
               [--musicxml [PATH]] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
-          [--hulptekst] [--compact]
+          [--translit] [--compact]
           [--min-system-distance SP] [--max-system-distance SP]
           [--staff-distance SP]
           [--page-margin-top MM] [--page-margin-bottom MM]
@@ -40,15 +40,15 @@ mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
           [--cue-font FACE] [--cue-font-size PT] path
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
-         [--layout PROFILE] [--bibliotheek-id ID] [--compact]
+         [--layout PROFILE] [--bibliotheek-id ID] [--translit] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
          [--lyrics-font FACE] [--lyrics-font-size PT]
          [--cue-font FACE] [--cue-font-size PT] path
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-         [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim] [--transparent]
-         [--compact]
+         [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
+         [--transparent] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
@@ -163,8 +163,8 @@ Voor alleen vullen/checken van `zoektekst` zonder overige validate:
 ### Synopsis
 
 ```text
-mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--hulptekst]
-                  [--hulptekst-as-parts] [--bibliotheek-id ID]
+mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
+                  [--translit-as-parts] [--bibliotheek-id ID]
                   [--musescore PATH] path
 ```
 
@@ -174,7 +174,7 @@ Schrijft een **Coria-playback-``.mxl``** (of `.musicxml`/`.xml`). Bron:
 
 | Bron                          | Gedrag                                                                      |
 | ----------------------------- | --------------------------------------------------------------------------- |
-| `.mvsa`                       | SATB-export (vier parts). Optioneel `--section` / hulptekst-vlaggen.        |
+| `.mvsa`                       | SATB-export (vier parts). Optioneel `--section` / translit-vlaggen.         |
 | `.mscz`                       | MuseScore → playback-normalisatie (zelfde keten als [`mscz mxl`](mscz.md)). |
 | `.mxl` / `.musicxml` / `.xml` | Normaliseer naar playback (SATB-explode, Coria-sanitize).                   |
 
@@ -198,8 +198,8 @@ pad als part-namen gebruikt (SATB-letters → Soprano/Alto/Tenor/Bass).
 
 | Vlag                   | Wie               | Effect                                                                                                                                                                                                                   |
 | ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--hulptekst`          | Blad én Coria-MXL | Lyric number 2 onder dezelfde noten (transliteratie). Handmatige `L1` wint als lyric 2 al bestaat.                                                                                                                       |
-| `--hulptekst-as-parts` | Alleen Coria-MXL  | Extra parts: zelfde pitches, lyrics van laag 2; part-namen `{stem} ({label})`. Labels uit `@taal` (zie [keywords — @taal](../../specification-mvsa/keywords.md#taal)). Volume 0 op hulp-parts. Impliceert `--hulptekst`. |
+| `--translit`           | Blad én Coria-MXL | Lyric number 2 onder dezelfde noten (transliteratie). Handmatige `L1` wint als lyric 2 al bestaat.                                                                                                                       |
+| `--translit-as-parts`  | Alleen Coria-MXL  | Extra parts: zelfde pitches, lyrics van laag 2; part-namen `{stem} ({label})`. Labels uit `@taal` (zie [keywords — @taal](../../specification-mvsa/keywords.md#taal)). Volume 0 op hulp-parts. Impliceert `--translit`.  |
 
 Richting en Coria-labels sturen met sticky `@taal` (`nl` / `ksl` / `auto`, of
 `Lap=aap Lus=noot` op lyrics-ids). Zie
@@ -216,8 +216,8 @@ VSA).
 | `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<bronnaam>.mxl` (bijv. `lied.mvsa.mxl`)     | Alleen bij één bron; anders → `.mxl`. |
 | `--section SECTION`    | Nee       | Alleen bij `.mvsa`: deze `@sectie`-id.                                    | Alle secties                                 | Id moet in het bestand voorkomen.     |
 | `--bibliotheek-id ID`  | Nee       | Alleen bij `.mvsa`: bibliotheek-id in identification/rights.              | pad-sniff onder `content-source/bibliotheek` | Optioneel.                            |
-| `--hulptekst`          | Nee       | Alleen bij `.mvsa`: tweede lyric-laag (number=2).                         | uit                                          | Zie beschrijving hierboven.           |
-| `--hulptekst-as-parts` | Nee       | Alleen bij `.mvsa`: Coria-extra parts met hulptekst (volume 0).           | uit                                          | Impliceert `--hulptekst`.             |
+| `--translit`           | Nee       | Alleen bij `.mvsa`: tweede lyric-laag (number=2).                         | uit                                          | Zie beschrijving hierboven.           |
+| `--translit-as-parts`  | Nee       | Alleen bij `.mvsa`: Coria-extra parts met translit (volume 0).            | uit                                          | Impliceert `--translit`.              |
 | `--musescore PATH`     | Nee       | Alleen bij `.mscz`: pad naar MuseScore.                                   | auto-detectie                                | —                                     |
 | `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                           | —                                            | —                                     |
 
@@ -251,7 +251,7 @@ mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bla
 Coria met keuze tussen lyrics-lagen (trisagion, kerkslavische sectie):
 
 ```cmd
-mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --hulptekst-as-parts -o generated\trisagion-ksl-coria.mxl
+mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --translit-as-parts -o generated\trisagion-ksl-coria.mxl
 ```
 
 Vanuit MuseScore-partituur (zelfde resultaat als `mscz mxl`):
@@ -260,10 +260,10 @@ Vanuit MuseScore-partituur (zelfde resultaat als `mscz mxl`):
 mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o generated\bug-cases\cherubijnen.mxl
 ```
 
-Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mscz --hulptekst`):
+Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mscz --translit`):
 
 ```cmd
-mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --hulptekst -o generated\hulptekst-ksl.mscz
+mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --translit -o generated\hulptekst-ksl.mscz
 ```
 
 ### Voorbeelden — falen
@@ -340,7 +340,7 @@ mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-b
 ```text
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
               [--keep-mxl PATH] [--layout PROFILE] [--bibliotheek-id ID]
-              [--hulptekst] [--compact] [--min-system-distance SP]
+              [--translit] [--compact] [--min-system-distance SP]
               [--max-system-distance SP] [--staff-distance SP]
               [--page-margin-top MM] [--page-margin-bottom MM]
               [--lyrics-font FACE] [--lyrics-font-size PT]
@@ -383,27 +383,27 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam                         | Verplicht | Betekenis                                                                                                   | Default                                    |
-| ---------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `path`                       | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                                                          | —                                          |
-| `-o`, `--output`             | Nee       | Uitvoer-`.mscz` (alleen bij precies één bronbestand).                                                       | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
-| `--section SECTION`          | Nee       | Alleen deze `@sectie`-id.                                                                                   | Alle secties                               |
-| `--musescore PATH`           | Nee       | Pad naar MuseScore-executable.                                                                              | Auto-detectie                              |
-| `--keep-mxl PATH`            | Nee       | Bewaar ook het tussenliggende `.mxl`.                                                                       | temp (wordt verwijderd)                    |
-| `--layout PROFILE`           | Nee       | `partituur`, `muziek` of `plain`.                                                                           | `partituur`                                |
-| `--bibliotheek-id ID`        | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback.                                                      | pad-sniff / geen                           |
-| `--hulptekst`                | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»).                                                      | uit                                        |
+| Naam                         | Verplicht | Betekenis                                                                                                                       | Default                                    |
+| ---------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `path`                       | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                                                                              | —                                          |
+| `-o`, `--output`             | Nee       | Uitvoer-`.mscz` (alleen bij precies één bronbestand).                                                                           | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
+| `--section SECTION`          | Nee       | Alleen deze `@sectie`-id.                                                                                                       | Alle secties                               |
+| `--musescore PATH`           | Nee       | Pad naar MuseScore-executable.                                                                                                  | Auto-detectie                              |
+| `--keep-mxl PATH`            | Nee       | Bewaar ook het tussenliggende `.mxl`.                                                                                           | temp (wordt verwijderd)                    |
+| `--layout PROFILE`           | Nee       | `partituur`, `muziek` of `plain`.                                                                                               | `partituur`                                |
+| `--bibliotheek-id ID`        | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback.                                                                          | pad-sniff / geen                           |
+| `--translit`                 | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»).                                                                          | uit                                        |
 | `--compact`                  | Nee       | Dichtste Style-baseline (systeem 7/7, lyric 0.1, marge 5 mm, maat-spreiding 1.6); andere Style-opties winnen; niet bij `plain`. | uit                                        |
-| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `8` (bij `--compact`: `7`)                 |
-| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `14` (bij `--compact`: `7`)                |
-| `--staff-distance SP`        | Nee       | Afstand tussen balken in één systeem (+ accolade); niet bij `plain`.                                        | MuseScore + lyrics                         |
-| `--page-margin-top MM`       | Nee       | Bovenmarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
-| `--page-margin-bottom MM`    | Nee       | Ondermarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
-| `--lyrics-font FACE`         | Nee       | Lettertype zangtekst; niet bij `plain`.                                                                     | `Source Sans 3`                            |
-| `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst; niet bij `plain`.                                                                    | `13`                                       |
-| `--cue-font FACE`            | Nee       | Lettertype cues (`@tekst`); niet bij `plain`.                                                               | `Source Sans 3`                            |
-| `--cue-font-size PT`         | Nee       | Puntgrootte cues; niet bij `plain`.                                                                         | `12`                                       |
-| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                                                       | `1.2` (bij `--compact`: `1.6`)             |
+| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.                                                                 | `8` (bij `--compact`: `7`)                 |
+| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.                                                                 | `14` (bij `--compact`: `7`)                |
+| `--staff-distance SP`        | Nee       | Afstand tussen balken in één systeem (+ accolade); niet bij `plain`.                                                            | MuseScore + lyrics                         |
+| `--page-margin-top MM`       | Nee       | Bovenmarge in mm (Style); niet bij `plain`.                                                                                     | `15`                                       |
+| `--page-margin-bottom MM`    | Nee       | Ondermarge in mm (Style); niet bij `plain`.                                                                                     | `15`                                       |
+| `--lyrics-font FACE`         | Nee       | Lettertype zangtekst; niet bij `plain`.                                                                                         | `Source Sans 3`                            |
+| `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst; niet bij `plain`.                                                                                        | `13`                                       |
+| `--cue-font FACE`            | Nee       | Lettertype cues (`@tekst`); niet bij `plain`.                                                                                   | `Source Sans 3`                            |
+| `--cue-font-size PT`         | Nee       | Puntgrootte cues; niet bij `plain`.                                                                                             | `12`                                       |
+| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                                                                           | `1.2` (bij `--compact`: `1.6`)             |
 
 ### Output
 
@@ -447,7 +447,7 @@ geschreven (MuseScore 4). Details: [`.mscz`](../../formats/mscz.md).
 ```text
 mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH]
-             [--layout PROFILE] [--bibliotheek-id ID] [--compact]
+             [--layout PROFILE] [--bibliotheek-id ID] [--translit] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
              [--page-margin-top MM] [--page-margin-bottom MM]
@@ -464,9 +464,11 @@ Alleen bron **`.mvsa`**. Voor een bestaand `.mscz`: [`mscz pdf`](mscz.md).
 | ------- | ------------------------------------------------------------------------ |
 | `.mvsa` | Keten: partituur-`.mxl` → `.mscz` (`--layout`) → `.pdf`                  |
 
-`--layout` / `--bibliotheek-id` / Style-opties (`--compact`, systeem-/stafafstand,
-pagina-marges, fonts) hebben dezelfde betekenis als bij
+`--layout` / `--bibliotheek-id` / `--translit` / Style-opties (`--compact`,
+systeem-/stafafstand, pagina-marges, fonts) hebben dezelfde betekenis als bij
 [`mscz`](#mvsa-mscz); andere Style-vlaggen winnen van `--compact`.
+Met `--translit`: tweede tekstregel (lyric 2) in de PDF — zie
+[productbesluiten](../../plans/kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu).
 
 **Canoniek:** A4 staand (checklist
 [PDF P6](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz));
@@ -487,6 +489,7 @@ dezelfde A4-eis P6).
 | `--keep-mxl`                 | Nee       | Bewaar tussenliggende `.mxl`.                                                  | niet                                     |
 | `--layout PROFILE`           | Nee       | `partituur` of `plain`.                                                        | `partituur`                              |
 | `--bibliotheek-id ID`        | Nee       | Bij `partituur`: colofon-id.                                                   | pad-sniff / geen                         |
+| `--translit`                 | Nee       | Tweede lyric-laag in tussen-MXL/MSCZ (blad «met translit»).                    | uit                                      |
 | `--compact`                  | Nee       | Dichtste Style-baseline; andere Style-opties winnen (zie `mscz`).              | uit                                      |
 | `--min-system-distance SP`   | Nee       | Min. systeemafstand (zie `mscz`).                                              | `8`                                      |
 | `--max-system-distance SP`   | Nee       | Max. systeemafstand (zie `mscz`).                                              | `14`                                     |
@@ -508,6 +511,7 @@ mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
 mvsa pdf lied.mvsa --compact
 mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
+mvsa pdf examples\mvsa\hulptekst-nl-mini.mvsa --translit -o generated\nl-translit.pdf
 mscz pdf lied.mscz -o lied.pdf
 ```
 
@@ -526,7 +530,7 @@ voor gedeelde schermrenderer. Formaatpagina:
 
 ```text
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-             [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim]
+             [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
              [--transparent] [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
@@ -547,7 +551,8 @@ bibliotheek `index.md.pdf` — zie
 [mvsa-svg](../../formats/mvsa-svg.md) en
 [kale-muziek-svg-en-uitgaven](../../plans/kale-muziek-svg-en-uitgaven.md).
 Na trim: **witte achtergrond** (default); ``--transparent`` voor geen
-achtergrondvlak.
+achtergrondvlak. Met ``--translit``: tweede tekstregel (lyric 2) — zie
+[productbesluiten](../../plans/kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu).
 
 Style: compact is default; andere Style-vlaggen winnen. ``--compact`` blijft
 geldig. Heb je al een `.mscz`: gebruik [`mscz svg`](mscz.md).
@@ -562,6 +567,7 @@ geldig. Heb je al een `.mscz`: gebruik [`mscz svg`](mscz.md).
 | `--musescore`                | MuseScore-executable.                                                                     |
 | `--keep-mscz`                | Bewaar tussenliggende ``.mscz``.                                                          |
 | `--keep-mxl`                 | Bewaar tussenliggende partituur-``.mxl``.                                                 |
+| `--translit`                 | Tweede lyric-laag in tussen-MXL/MSCZ (koormap «met translit»).                            |
 | `--no-trim`                  | Sla viewBox-trim over.                                                                    |
 | `--transparent`              | Geen witte achtergrond na trim (default is wit).                                          |
 | `--bibliotheek-id`           | Genegeerd voor layout ``muziek``.                                                         |

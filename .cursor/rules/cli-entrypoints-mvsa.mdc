@@ -2,19 +2,21 @@
 
 **Nooit** `vsa mvsa …` — dat bestaat niet.
 
-| Bron        | Commando (console-script)                                      |
-| ----------- | -------------------------------------------------------------- |
-| `.mvsa`     | `mvsa validate` / `mvsa mxl` / `mvsa mscz` / `mvsa pdf` / …    |
-| `.mscz`     | `mscz …`                                                       |
-| `.mxl`      | `mxl …`                                                        |
-| `.vsa`      | `vsa validate` / `vsa svg` / `vsa musicxml` / …                |
+| Bron    | Commando (console-script)                                   |
+| ------- | ----------------------------------------------------------- |
+| `.mvsa` | `mvsa validate` / `mvsa mxl` / `mvsa mscz` / `mvsa pdf` / … |
+| `.mscz` | `mscz …`                                                    |
+| `.mxl`  | `mxl …`                                                     |
+| `.vsa`  | `vsa validate` / `vsa svg` / `vsa musicxml` / …             |
 
-Hulptekst (alleen `.mvsa`):
+Translit (productbesluiten: `docs/plans/kerkslavisch-transliteratie.md` §5a):
 
 ```cmd
-mvsa mxl pad\lied.mvsa --hulptekst
-mvsa mxl pad\lied.mvsa --hulptekst-as-parts
-mvsa mscz pad\lied.mvsa --hulptekst
+mvsa mxl pad\lied.mvsa --translit
+mvsa mxl pad\lied.mvsa --translit-as-parts
+mvsa mscz pad\lied.mvsa --translit
+mvsa pdf pad\lied.mvsa --translit
+mvsa svg pad\lied.mvsa --translit
 ```
 
-Sibling-uitvoer (default): `lied.mvsa.mxl`, `lied.mvsa.mscz`, enz.
+`--translit-as-parts` alleen op `mvsa mxl` (Coria). Sibling-uitvoer: `lied.mvsa.mxl`, enz.

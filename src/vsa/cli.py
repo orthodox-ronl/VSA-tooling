@@ -193,7 +193,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     m_musicxml.add_argument(
-        "--hulptekst",
+        "--translit",
         action="store_true",
         help=(
             "Alleen bij .mvsa: tweede lyric-laag (number=2): ksl→Latijn / "
@@ -201,13 +201,13 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     m_musicxml.add_argument(
-        "--hulptekst-as-parts",
+        "--translit-as-parts",
         action="store_true",
-        dest="hulptekst_as_parts",
+        dest="translit_as_parts",
         help=(
-            "Alleen bij .mvsa: Coria-extra SATB-parts met hulptekst (volume 0). "
+            "Alleen bij .mvsa: Coria-extra SATB-parts met translit (volume 0). "
             "Part-namen: Soprano (ksl)/(nl) via @taal. "
-            "Impliceert --hulptekst. Alleen playback-layout."
+            "Impliceert --translit. Alleen playback-layout."
         ),
     )
     m_musicxml.add_argument(
@@ -288,7 +288,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     m_mscz.add_argument(
-        "--hulptekst",
+        "--translit",
         action="store_true",
         help=(
             "Tweede lyric-laag (number=2) in partituur-MXL: ksl→Latijn / "
@@ -366,6 +366,14 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         dest="bibliotheek_id",
         help="Bij .mvsa + layout partituur: expliciete bibliotheek-id voor colofon.",
     )
+    m_pdf.add_argument(
+        "--translit",
+        action="store_true",
+        help=(
+            "Tweede lyric-laag (number=2) in de tussen-MXL/MSCZ: "
+            "ksl→Latijn / nl→Cyrillisch."
+        ),
+    )
     _add_partituur_style_args(m_pdf)
     m_svg = mvsa_sub.add_parser(
         "svg",
@@ -430,6 +438,14 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         default=None,
         dest="bibliotheek_id",
         help="Alleen bij .mvsa; genegeerd voor layout muziek (geen colofon).",
+    )
+    m_svg.add_argument(
+        "--translit",
+        action="store_true",
+        help=(
+            "Tweede lyric-laag (number=2) in de tussen-MXL/MSCZ: "
+            "ksl→Latijn / nl→Cyrillisch."
+        ),
     )
     m_svg.add_argument(
         "--no-trim",
@@ -2488,9 +2504,9 @@ def _cmd_mvsa_musicxml(args) -> int:
                 out,
                 section_id=args.section,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                hulptekst=bool(getattr(args, "hulptekst", False)),
-                hulptekst_as_parts=bool(
-                    getattr(args, "hulptekst_as_parts", False)
+                translit=bool(getattr(args, "translit", False)),
+                translit_as_parts=bool(
+                    getattr(args, "translit_as_parts", False)
                 ),
             )
         except MvsaValidationError as exc:
@@ -2538,7 +2554,7 @@ def _cmd_mvsa_mscz(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=getattr(args, "layout", None),
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                hulptekst=bool(getattr(args, "hulptekst", False)),
+                translit=bool(getattr(args, "translit", False)),
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:
@@ -2734,6 +2750,7 @@ def _cmd_mvsa_pdf(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=args.layout,
                 bibliotheek_id=args.bibliotheek_id,
+                translit=bool(getattr(args, "translit", False)),
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:
@@ -2796,6 +2813,7 @@ def _cmd_mvsa_svg(args) -> int:
                 keep_mscz=keep_mscz,
                 keep_mxl=keep_mxl,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                translit=bool(getattr(args, "translit", False)),
                 trim=trim,
                 white_background=white_background,
                 **_partituur_style_kwargs(args),
