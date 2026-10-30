@@ -5302,27 +5302,36 @@ en <a href="../../guides/parochie-lokaal-vsa/">parochie-lokaal-vsa.md</a>.</p>
 [inhoud die bij afdrukken bij elkaar gehouden wordt]
 :::end-keep-together:::
 
+:::keep-together size="1.1":::
+[inhoud; VSA-letters 1,1× de omliggende tekstgrootte]
+:::end-keep-together:::
+
 :::keep-together scale="70%":::
-[inhoud met verkleinde SVGs]
+[legacy: kolom/wrapper op 70% van de paginabreedte]
 :::end-keep-together:::
 </code></pre>
 <ul>
-<li>In browser: geen zichtbaar effect</li>
+<li>In browser: geen zichtbaar effect op paginering; <code>size</code> beïnvloedt wel de
+  weergavegrootte van <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notaties</a> via CSS <code>--vsa-size</code></li>
 <li>Bij afdrukken: CSS voorkomt een paginabreuk binnen het blok
   (<code>break-inside: avoid</code>)</li>
 <li>Als de inhoud groter is dan één pagina, verplaatst de browser het hele blok
   naar de volgende pagina; past het dan nog steeds niet, dan wordt de
   <code>avoid</code>-instructie genegeerd</li>
-<li>De optionele parameter <code>scale="&lt;waarde&gt;"</code> schaalt alle <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notaties</a> binnen
-  het blok naar de opgegeven breedte (bijv. <code>"70%"</code>); de hoogte schaalt
-  proportioneel mee omdat de SVGs een <code>viewBox</code> hebben. Gebruik dit wanneer
-  twee of meer SVGs samen op één pagina moeten passen.</li>
+<li><strong><code>size="&lt;factor&gt;"</code></strong> (aanbevolen) — unitless factor t.o.v. <code>1em</code> van de
+  omliggende markdown (site-default <code>1.25</code> via <code>rendering.svg.relative-size</code>).
+  Alle VSA-blokken in de wrapper houden dezelfde lettergrootte.</li>
+<li><strong><code>scale="&lt;waarde&gt;"</code></strong> (legacy) — zet de <strong>wrapperbreedte</strong> (bijv. <code>"70%"</code>
+  van de kolom). Geschikt om een hele sectie smaller te maken voor print;
+  niet bedoeld om korte Amen-blokken te “verkleinen” (die worden dan juist
+  opgerekt als ze smaller zijn dan de kolom).</li>
 </ul>
 <p>Blok-directives worden Hugo-shortcodes (<code>{{&lt; web-only &gt;}}</code>, enz.). De
 shortcode-templates renderen de innerlijke markdown via <code>Page.RenderString</code>
 (zonder extra lege regels in de bron). Witruimte in content-source is daarmee
-<strong>niet</strong> van invloed op de afdruk-layout; alleen expliciete HTML/CSS (zoals
-<code>scale</code> op <code>keep-together</code>) beïnvloedt paginering.</p>
+<strong>niet</strong> van invloed op de afdruk-layout; expliciete HTML/CSS (<code>size</code> /
+legacy <code>scale</code> op <code>keep-together</code>) beïnvloedt weergave en paginering.
+Zie ook <a href="../../guides/svg-export/">SVG exporteren</a> (sectie weergavegrootte).</p>
 <hr />
 <h2 id="sluitingstags">Sluitingstags<a class="headerlink" href="#sluitingstags" title="Permanent link">&para;</a></h2>
 <p>Elk blok-directive eindigt met een <strong>directief-specifieke sluitingstag</strong>:</p>
@@ -5417,9 +5426,9 @@ hoofdstuk-1.md (in submap hoofdstuk-1/) :::pagebreak::: :::include "melodie.vsa"
 <span class="w">        </span><span class="k">page-break-inside</span><span class="p">:</span><span class="w"> </span><span class="kc">avoid</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="c">/* Schaling van SVGs binnen keep-together (via scale-parameter) */</span>
-<span class="w">    </span><span class="p">.</span><span class="nc">keep-together</span><span class="w"> </span><span class="p">.</span><span class="nc">vsa-notation</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--vsa-scale</span><span class="p">,</span><span class="w"> </span><span class="kc">auto</span><span class="p">);</span>
+<span class="w">    </span><span class="c">/* Optioneel: site-default voor em-relatieve VSA-grootte */</span>
+<span class="w">    </span><span class="p">:</span><span class="nd">root</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">--vsa-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.25</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 
@@ -5516,7 +5525,7 @@ in bron-docs; korte samenvatting blijft in sectie 3 en 3b hierboven.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-03
+        Bijgewerkt: 2026-10-30
         
       </p>
       
