@@ -97,7 +97,7 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/vsa-em-relative-size</code>
+   — branch <code>development</code>
   , gebouwd 2026-10-30 15:28 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
@@ -9162,7 +9162,7 @@ mscz mvsa lied.mscz
 <hr />
 <h2 id="mvsa-products"><code>mvsa products</code><a class="headerlink" href="#mvsa-products" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_12">Synopsis<a class="headerlink" href="#synopsis_12" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>mvsa products [-h] [--force] [--dry-run] [--skip-svg] [--musescore PATH] path
+<div class="highlight"><pre><span></span><code>mvsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
 </code></pre></div>
 <h3 id="beschrijving_9">Beschrijving<a class="headerlink" href="#beschrijving_9" title="Permanent link">&para;</a></h3>
 <p>Schrijft voor elke <code>.mvsa</code> onder <code>path</code>:</p>
@@ -9197,7 +9197,8 @@ mscz mvsa lied.mscz
 </tbody>
 </table>
 <p>Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
-(<code>--force</code> regenereert). Kaal: geen bibliotheek-stamps.
+(<code>--force</code> regenereert). <code>--quiet</code> onderdrukt voortgangsregels op stdout
+(fouten blijven op stderr). Kaal: geen bibliotheek-stamps.
 <a href="../../../formats/contract-index/">contract-index</a> ·
 <a href="../../../formats/products-meta/">products-meta</a>.</p>
 <h3 id="voorbeelden_10">Voorbeelden<a class="headerlink" href="#voorbeelden_10" title="Permanent link">&para;</a></h3>
@@ -9251,7 +9252,7 @@ mvsa products examples\mvsa --dry-run --skip-svg
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-29
+        Bijgewerkt: 2026-10-30
         
       </p>
       
