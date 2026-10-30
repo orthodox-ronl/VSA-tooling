@@ -305,6 +305,7 @@ def _cmd_md_svg(ns: argparse.Namespace) -> int:
                 max_line_width=width,
                 output_mode="img",
                 bron_root=bron,
+                config=config,
             )
         except (IncludeError, DirectiveError, ProcessValidationError) as exc:
             print(f"{path}: ERROR: {exc}", file=sys.stderr)

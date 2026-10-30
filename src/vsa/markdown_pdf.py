@@ -16,6 +16,7 @@ from .markdown_builder import prepare_markdown_document
 from .markdown_directives import DirectiveError
 from .markdown_include import IncludeError
 from .markdown_processor import ProcessValidationError
+from .svg_display import DEFAULT_RELATIVE_SIZE
 from .validation_runner import validate_file
 from .yaml_frontmatter import parse_vsa_frontmatter
 
@@ -39,8 +40,11 @@ _A4_PAGE_CSS = (
     "@page { size: 210mm 297mm; margin: 1cm 2cm; }"
 )
 
-_PRINT_CSS = f"""
+def _print_css(*, relative_size: float = DEFAULT_RELATIVE_SIZE) -> str:
+    size_default = f"{relative_size:g}"
+    return f"""
 {_A4_PAGE_CSS}
+:root {{ --vsa-size: {size_default}; }}
 html {{ font-size: 18px; }}
 body {{
   font-family: Arial, sans-serif;
@@ -68,7 +72,6 @@ img, .vsa-notation {{ max-width: 100%; height: auto; }}
   padding: 0;
   background: #fff;
 }}
-.keep-together .vsa-notation {{ width: var(--vsa-scale, auto); }}
 """
 
 
@@ -133,6 +136,7 @@ def write_markdown_pdf(
                 max_line_width=width,
                 output_mode="img",
                 bron_root=bron,
+                config=config,
             )
         except IncludeError as exc:
             raise PdfError(
@@ -153,7 +157,11 @@ def write_markdown_pdf(
             ) from exc
         html_path = tmp_dir / "page.html"
         html_path.write_text(
-            markdown_to_print_html(rewritten, title=_document_title(rewritten, input_path)),
+            markdown_to_print_html(
+                rewritten,
+                title=_document_title(rewritten, input_path),
+                relative_size=config.rendering.svg.relative_size,
+            ),
             encoding="utf-8",
         )
         html_file_to_pdf(html_path, output_path, chrome_command=chrome_command)
@@ -161,7 +169,12 @@ def write_markdown_pdf(
     return output_path
 
 
-def markdown_to_print_html(source: str, *, title: str) -> str:
+def markdown_to_print_html(
+    source: str,
+    *,
+    title: str,
+    relative_size: float = DEFAULT_RELATIVE_SIZE,
+) -> str:
     meta, body = parse_vsa_frontmatter(source)
     if not title:
         title = str(meta.get("title") or "VSA")
@@ -170,7 +183,7 @@ def markdown_to_print_html(source: str, *, title: str) -> str:
     return (
         "<!DOCTYPE html>\n<html lang=\"nl\">\n<head>\n"
         f"<meta charset=\"utf-8\">\n<title>{escape(title)}</title>\n"
-        f"<style>{_PRINT_CSS}</style>\n</head>\n<body>\n"
+        f"<style>{_print_css(relative_size=relative_size)}</style>\n</head>\n<body>\n"
         f"{body_html}\n</body>\n</html>\n"
     )
 
@@ -220,8 +233,7 @@ def expand_print_shortcodes(text: str) -> str:
             keep_stack.append(name)
             if name == "keep-together":
                 attrs = _parse_attrs(raw_attrs)
-                scale = attrs.get("scale")
-                style = f' style="width: {escape(scale, quote=True)}"' if scale else ""
+                style = _keep_together_style(attrs)
                 parts.append(f'\n<div class="keep-together"{style}>\n')
             else:
                 parts.append('\n<div class="print-only">\n')
@@ -344,11 +356,29 @@ def _parse_attrs(raw: str) -> dict[str, str]:
     return {match.group(1).lower(): match.group(2) for match in _ATTR_RE.finditer(raw)}
 
 
+def _keep_together_style(attrs: dict[str, str]) -> str:
+    """Inline style for keep-together: ``size`` → ``--vsa-size``; legacy ``scale`` → width."""
+    decls: list[str] = []
+    size = attrs.get("size")
+    scale = attrs.get("scale")
+    if size:
+        decls.append(f"--vsa-size: {escape(size, quote=True)}")
+    if scale:
+        decls.append(f"width: {escape(scale, quote=True)}")
+    if not decls:
+        return ""
+    return f' style="{"; ".join(decls)}"'
+
+
 def _vsa_img_html(attrs: dict[str, str]) -> str:
     src = attrs.get("src") or ""
     alt = attrs.get("alt") or "VSA notatie"
     scale = attrs.get("scale")
-    style = f' style="width: {escape(scale, quote=True)}"' if scale else ""
+    style = (
+        f' style="width: {escape(scale, quote=True)}; height: auto"'
+        if scale
+        else ""
+    )
     return (
         '\n<div class="vsa-container">'
         f'<img class="vsa-notation" src="{escape(src, quote=True)}" '

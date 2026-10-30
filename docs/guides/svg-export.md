@@ -105,17 +105,34 @@ een verwijzing naar de gegenereerde SVG. Bron-Markdown:
 :::
 ```
 
-wordt, met `--output-mode img` (default), een gewone `<img>`-tag:
+wordt, met `--output-mode img` (default), een gewone `<img>`-tag. De breedte
+is gekoppeld aan de lettergrootte van de omliggende tekst (`1em`), zodat
+korte Amen-blokken en lange tropaars **dezelfde** VSA-lettergrootte houden:
 
 ```html
-<img class="vsa-notation" src="/vsa/smoke-block-1.svg" alt="VSA notatie">
+<img class="vsa-notation" src="/vsa/smoke-block-1.svg" alt="VSA notatie"
+  style="width: calc(… * var(--vsa-size, 1.25) * 1em); height: auto">
 ```
 
-of, met `--output-mode shortcode`, een Hugo-shortcode:
+of, met `--output-mode shortcode`, een Hugo-shortcode waarvan de `scale`-parameter
+dezelfde CSS-breedte draagt (bestaande `vsa.html`-shortcodes werken zo verder).
 
-```go-html-template
-{{< vsa src="/vsa/smoke-block-1.svg" >}}
-```
+### Weergavegrootte t.o.v. markdown (`size` / `--vsa-size`)
+
+| Niveau                         | Voorbeeld                                              | Effect                                                |
+| ------------------------------ | ------------------------------------------------------ | ----------------------------------------------------- |
+| Site-default                   | `rendering.svg.relative-size = 1.25` in `vsa.toml`     | Factor t.o.v. `1em` voor alle blokken zonder override |
+| Omliggend                      | `:::keep-together size="1.1":::` …                     | Zet CSS `--vsa-size` op de wrapper                    |
+| Eén VSA-blok                   | `size="1.0"` in de blokmetadata                        | Vaste factor voor dat blok                            |
+| Absolute uitzondering (oud)    | `scale="50%"` op blok of include                       | Vaste pixelbreedte; wint van `size`                   |
+
+Defaultfactor is **1.25** (VSA-letters iets groter dan lopende tekst). Zet in
+de consumer-CSS desgewenst `:root { --vsa-size: 1.25; }` zodat wrappers zonder
+inline default hetzelfde doen. `max-width: 100%` blijft: te breed voor het
+scherm → alles schaalt uniform mee; de **onderlinge** lettergrootte blijft gelijk.
+
+`size` wijzigt **geen** regelafbreking in de notatie. Daarvoor blijft
+`--max-line-width` / `rendering.max-line-width` gelden.
 
 Kies `shortcode` als je in de consumer-site meer controle wilt over hoe de
 SVG wordt ingebed (bijv. lazy-loading, wrapper-`<div>`, of print-specifieke
