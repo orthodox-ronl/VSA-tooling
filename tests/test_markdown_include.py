@@ -219,7 +219,7 @@ def test_include_scale_on_svg(tmp_path):
 
     result = resolve_includes(text, source)
 
-    assert 'style="width: 60px"' in result
+    assert 'style="width: 60px; height: auto"' in result
 
 
 def test_include_scale_on_svg_with_assets_dir_uses_shortcode(tmp_path):
@@ -266,7 +266,7 @@ def test_include_alt_and_scale_together(tmp_path):
 
     assert 'src="foto.jpg"' in result
     assert 'alt="Beschrijving"' in result
-    assert 'scale="80%"' in result or 'style="width: 80%"' in result
+    assert 'style="width: 80%; height: auto"' in result
 
 
 def test_recursive_include(tmp_path):
