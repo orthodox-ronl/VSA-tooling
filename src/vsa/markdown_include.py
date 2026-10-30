@@ -18,6 +18,12 @@ from .markdown_coria import (
     parse_coria_label,
     parse_coria_mode,
 )
+from .svg_display import (
+    DEFAULT_RELATIVE_SIZE,
+    notation_style_attr,
+    svg_natural_width,
+    vsa_shortcode,
+)
 from .yaml_frontmatter import frontmatter_to_block_metadata, parse_vsa_frontmatter
 
 try:
@@ -50,6 +56,7 @@ INCLUDE_UNKNOWN_EXPORT_PATTERN = re.compile(
 
 _ALT_ATTR = re.compile(r'alt="([^"]*)"')
 _SCALE_ATTR = re.compile(r'scale="([^"]*)"')
+_SIZE_ATTR = re.compile(r'size="([^"]*)"')
 
 _RASTER_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 _DOCUMENT_SUFFIXES = {".pdf"}
@@ -70,6 +77,8 @@ def resolve_includes(
     mxl_url_prefix: str = DEFAULT_MXL_URL_PREFIX,
     native_mxl_url_prefix: str = DEFAULT_NATIVE_MXL_URL_PREFIX,
     coria_html_url_prefix: str = DEFAULT_CORIA_HTML_URL_PREFIX,
+    design_font_size: float = 20.0,
+    relative_size: float = DEFAULT_RELATIVE_SIZE,
 ) -> str:
     """Resolve :::include [exporttype] path [params]::: directives recursively.
 
@@ -164,6 +173,7 @@ def resolve_includes(
 
         alt = _parse_alt(params_str)
         scale = _parse_scale(params_str)
+        size = _parse_size(params_str)
 
         if suffix in (".md", ".markdown"):
             raw = included_path.read_text(encoding="utf-8")
@@ -178,6 +188,8 @@ def resolve_includes(
                 mxl_url_prefix=mxl_url_prefix,
                 native_mxl_url_prefix=native_mxl_url_prefix,
                 coria_html_url_prefix=coria_html_url_prefix,
+                design_font_size=design_font_size,
+                relative_size=relative_size,
             )
             result_lines.extend(expanded.splitlines())
 
@@ -187,6 +199,7 @@ def resolve_includes(
                 included_path,
                 alt=alt,
                 scale=scale,
+                size=size,
             )
 
         elif suffix == ".mvsa":
@@ -199,7 +212,7 @@ def resolve_includes(
         elif suffix in {".svg"} | _RASTER_SUFFIXES:
             alt_val = alt if alt is not None else ""
             natural_width = (
-                _svg_natural_width(included_path.read_text(encoding="utf-8"))
+                svg_natural_width(included_path.read_text(encoding="utf-8"))
                 if suffix == ".svg"
                 else None
             )
@@ -210,10 +223,27 @@ def resolve_includes(
                 shutil.copy2(included_path, dest)
                 url = f"{svg_assets_url_prefix.rstrip('/')}/{asset_name}"
                 result_lines.append(
-                    _vsa_shortcode(url, alt_val or None, scale, natural_width)
+                    vsa_shortcode(
+                        url,
+                        alt_val or None,
+                        natural_width=natural_width,
+                        design_font_size=design_font_size,
+                        relative_size=relative_size,
+                        scale=scale,
+                        size=size,
+                    )
                 )
             else:
-                style_attr = _scale_style(scale, natural_width)
+                style_attr = notation_style_attr(
+                    natural_width=natural_width,
+                    design_font_size=design_font_size,
+                    relative_size=relative_size,
+                    scale=scale,
+                    size=size,
+                )
+                # Rasters without natural SVG width: keep legacy % width if given.
+                if not style_attr and scale and suffix != ".svg":
+                    style_attr = f' style="width: {scale}"'
                 alt_attr = f' alt="{alt_val}"' if alt is not None else ' alt=""'
                 result_lines.append(
                     f'<img src="{rel_path}" class="vsa-notation"{alt_attr}{style_attr} />'
@@ -352,6 +382,7 @@ def _resolve_export_include(
             included_path,
             alt=_parse_alt(params_str),
             scale=_parse_scale(params_str),
+            size=_parse_size(params_str),
         )
         return
 
@@ -404,6 +435,7 @@ def _append_vsa_notation_block(
     *,
     alt: str | None,
     scale: str | None,
+    size: str | None = None,
 ) -> None:
     raw = included_path.read_text(encoding="utf-8")
     frontmatter, vsa_body = parse_vsa_frontmatter(raw)
@@ -415,6 +447,8 @@ def _append_vsa_notation_block(
         result_lines.append(f"# alt: {alt}")
     if scale:
         result_lines.append(f"# scale: {scale}")
+    if size:
+        result_lines.append(f"# size: {size}")
     if vsa_body:
         result_lines.extend(vsa_body.splitlines())
     result_lines.append(":::")
@@ -447,6 +481,13 @@ def _parse_scale(params_str: str | None) -> str | None:
     if not params_str:
         return None
     m = _SCALE_ATTR.search(params_str)
+    return m.group(1) if m else None
+
+
+def _parse_size(params_str: str | None) -> str | None:
+    if not params_str:
+        return None
+    m = _SIZE_ATTR.search(params_str)
     return m.group(1) if m else None
 
 
@@ -500,58 +541,3 @@ def _opening_or_closing_fence(stripped: str) -> str:
 
 def _closes_fence(stripped: str, fence_marker: str) -> bool:
     return stripped.startswith(fence_marker)
-
-
-_SVG_WIDTH_RE = re.compile(r"<svg\b[^>]*\bwidth=\"(\d+(?:\.\d+)?)\"")
-
-
-def _svg_natural_width(svg_text: str) -> float | None:
-    """Extract the natural pixel width from an SVG string."""
-    m = _SVG_WIDTH_RE.search(svg_text)
-    return float(m.group(1)) if m else None
-
-
-def _scale_style(scale: str | None, natural_width: float | None) -> str:
-    """Return an inline style attribute for the given scale, or empty string.
-
-    Uses absolute pixels (natural_width × scale%) so that the visual font size
-    stays consistent regardless of SVG content width. Falls back to percentage
-    when natural_width is unavailable.
-    """
-    if not scale:
-        return ""
-    if natural_width is not None:
-        try:
-            pct = float(scale.rstrip("%"))
-            px = round(natural_width * pct / 100)
-            return f' style="width: {px}px"'
-        except ValueError:
-            pass
-    return f' style="width: {scale}"'
-
-
-def _scale_px(scale: str | None, natural_width: float | None) -> str | None:
-    if not scale:
-        return None
-    if natural_width is not None:
-        try:
-            pct = float(scale.rstrip("%"))
-            return f"{round(natural_width * pct / 100)}px"
-        except ValueError:
-            pass
-    return scale
-
-
-def _vsa_shortcode(
-    src: str,
-    alt: str | None,
-    scale: str | None,
-    natural_width: float | None = None,
-) -> str:
-    """Emit Hugo vsa shortcode; relURL in the shortcode adds the site baseURL."""
-    alt_val = alt if alt is not None else "VSA notatie"
-    scale_param = ""
-    px = _scale_px(scale, natural_width)
-    if px:
-        scale_param = f' scale="{px}"'
-    return f'{{{{< vsa src="{src}" alt="{alt_val}"{scale_param} >}}}}'

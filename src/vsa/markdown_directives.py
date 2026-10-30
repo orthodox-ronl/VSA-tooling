@@ -32,6 +32,7 @@ _SHORTCODE = {
 
 _KEEP_TOGETHER_OPEN = re.compile(r"^:::keep-together(?:\s+(.+?))?:::$")
 _SCALE_ATTR = re.compile(r'scale="([^"]+)"')
+_SIZE_ATTR = re.compile(r'size="([^"]+)"')
 
 
 def process_directives(text: str) -> str:
@@ -41,11 +42,11 @@ def process_directives(text: str) -> str:
     :::web-only:::      ... :::end-web-only:::         → {{< web-only >}} ... {{< /web-only >}}
     :::print-only:::    ... :::end-print-only:::       → {{< print-only >}} ... {{< /print-only >}}
     :::keep-together::: ... :::end-keep-together:::    → {{< keep-together >}} ... {{< /keep-together >}}
+    :::keep-together size="1.1"::: ...                 → {{< keep-together size="1.1" >}} ...
     :::keep-together scale="70%"::: ...                → {{< keep-together scale="70%" >}} ...
 
-    The optional scale parameter on keep-together controls the print width of
-    .vsa-notation elements within the block (e.g. scale="70%" renders SVGs at
-    70% of the page width, proportionally reducing their height).
+    ``size`` sets CSS ``--vsa-size`` (em-factor vs surrounding text) for VSA
+    images inside the block. Legacy ``scale`` sets wrapper/column width.
 
     Code fences are respected: directives inside fences are not processed.
     Raises DirectiveError for unclosed blocks, mismatched end markers, or stray
@@ -103,9 +104,9 @@ def process_directives(text: str) -> str:
                 )
             state = _State.KEEP_TOGETHER
             open_line = line_no
-            scale = _parse_scale(kt_match.group(1))
-            if scale:
-                result_lines.append(_opening_shortcode("keep-together", f'scale="{scale}"'))
+            params = _keep_together_shortcode_params(kt_match.group(1))
+            if params:
+                result_lines.append(_opening_shortcode("keep-together", params))
             else:
                 result_lines.append(_opening_shortcode("keep-together"))
             continue
@@ -145,6 +146,25 @@ def _parse_scale(params_str: str | None) -> str | None:
         return None
     m = _SCALE_ATTR.search(params_str)
     return m.group(1) if m else None
+
+
+def _parse_size(params_str: str | None) -> str | None:
+    if not params_str:
+        return None
+    m = _SIZE_ATTR.search(params_str)
+    return m.group(1) if m else None
+
+
+def _keep_together_shortcode_params(params_str: str | None) -> str:
+    """Build shortcode attrs for keep-together (``size`` and/or legacy ``scale``)."""
+    parts: list[str] = []
+    size = _parse_size(params_str)
+    scale = _parse_scale(params_str)
+    if size:
+        parts.append(f'size="{size}"')
+    if scale:
+        parts.append(f'scale="{scale}"')
+    return " ".join(parts)
 
 
 def _opening_shortcode(name: str, params: str = "") -> str:
