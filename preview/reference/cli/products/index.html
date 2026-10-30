@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-30 10:56 CET.
+   — branch <code>feat/vsa-em-relative-size</code>
+  , gebouwd 2026-10-30 15:28 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5240,7 +5240,7 @@ muziek-<code>.svg</code>, en <code>{stam}.vsa.products-meta.json</code> voor her
 Contract-matrix: <a href="../../../formats/contract-index/">contract-index</a>. Straatplan:
 <a href="../../../plans/straat-clis/">straat-CLIs</a>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>vsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] path
+<div class="highlight"><pre><span></span><code>vsa products [-h] [--force] [--dry-run] path
 </code></pre></div>
 <h2 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h2>
 <p>Voor elke <code>.vsa</code> onder <code>path</code> (bestand of map, recursief):</p>
@@ -5314,20 +5314,6 @@ er zijn. <code>--force</code> regenereert altijd.</p>
 <td>Geen bestanden.</td>
 </tr>
 <tr>
-<td><code>--quiet</code></td>
-<td>Nee</td>
-<td>Geen voortgangsregels op stdout (<code>mxl</code>/<code>Meta</code>).</td>
-<td>Uit</td>
-<td>Fouten op stderr.</td>
-</tr>
-<tr>
-<td><code>--skip-svg</code></td>
-<td>Nee</td>
-<td>Sla native SVG over.</td>
-<td>Uit</td>
-<td>—</td>
-</tr>
-<tr>
 <td><code>-h</code>, <code>--help</code></td>
 <td>Nee</td>
 <td>Toon hulp.</td>
@@ -5339,8 +5325,7 @@ er zijn. <code>--force</code> regenereert altijd.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>stdout</strong>: regels per product (<code>mxl</code> / <code>svg</code>) en <code>Meta: …</code> bij schrijven;
-  of <code>ok (meta): …</code> / <code>dry-run: …</code> wanneer er niets verandert.
-  Met <code>--quiet</code> blijft stdout leeg (fouten blijven op stderr).</li>
+  of <code>ok (meta): …</code> / <code>dry-run: …</code> wanneer er niets verandert.</li>
 <li><strong>Bestanden</strong>: siblings naast de bron (zie tabel).</li>
 <li><strong>stderr</strong>: include-/exportfouten.</li>
 </ul>
@@ -5413,7 +5398,7 @@ vsa products examples\minimal\valid-demo.vsa --force
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-30
+        Bijgewerkt: 2026-10-25
         
       </p>
       

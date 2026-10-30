@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-30 10:56 CET.
+   — branch <code>feat/vsa-em-relative-size</code>
+  , gebouwd 2026-10-30 15:28 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5383,7 +5383,8 @@ terechtkomt). Bijvoorbeeld:</p>
 :::
 </code></pre></div>
 <p>Gegenereerde Markdown met <code>--output-mode img</code> (default):</p>
-<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">img</span> <span class="na">class</span><span class="o">=</span><span class="s">"vsa-notation"</span> <span class="na">src</span><span class="o">=</span><span class="s">"/vsa/smoke-block-1.svg"</span> <span class="na">alt</span><span class="o">=</span><span class="s">"VSA notatie"</span><span class="p">&gt;</span>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">img</span> <span class="na">class</span><span class="o">=</span><span class="s">"vsa-notation"</span> <span class="na">src</span><span class="o">=</span><span class="s">"/vsa/smoke-block-1.svg"</span> <span class="na">alt</span><span class="o">=</span><span class="s">"VSA notatie"</span>
+  <span class="na">style</span><span class="o">=</span><span class="s">"width: calc(… * var(--vsa-size, 1.25) * 1em); height: auto"</span><span class="p">&gt;</span>
 </code></pre></div>
 <p>Gegenereerde Markdown met <code>--output-mode shortcode</code>:</p>
 <div class="highlight"><pre><span></span><code>{{&lt; vsa src="/vsa/smoke-block-1.svg" &gt;}}
@@ -5524,7 +5525,7 @@ do="F4"
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-09-29
+        Bijgewerkt: 2026-10-30
         
       </p>
       
