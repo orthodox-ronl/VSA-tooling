@@ -2141,6 +2141,27 @@ def _resolve_slot(
         ) from exc
 
 
+# NBSP: MuseScore/OSMD trimmen leidende/eindspaties en comprimeren runs;
+# single spaties tussen woorden blijven ASCII (S19).
+_CUE_SPACE = "\u00a0"
+
+
+def cue_text_for_score(text: str) -> str:
+    """Bewaar leidende/eind-/meervoudige spaties als NBSP; single spaties intact."""
+    if not text or " " not in text:
+        return text
+    i = 0
+    while i < len(text) and text[i] == " ":
+        i += 1
+    j = len(text)
+    while j > i and text[j - 1] == " ":
+        j -= 1
+    mid = text[i:j]
+    # Runs van 2+ spaties middenin → NBSP (zelfde breedte, niet gecomprimeerd).
+    mid = re.sub(r" {2,}", lambda m: _CUE_SPACE * len(m.group(0)), mid)
+    return (_CUE_SPACE * i) + mid + (_CUE_SPACE * (len(text) - j))
+
+
 def wrap_tekst_at_ellipsis(text: str) -> str:
     """Lange cue: vanaf eerste ``...`` een nieuwe regel (``...`` op regel 2)."""
     idx = text.find("...")
@@ -2242,8 +2263,9 @@ def _emit_staff_text_directions(
     for text in texts:
         out.append('<direction placement="above">')
         out.append("<direction-type>")
-        # Escape per regel; behoud echte newlines in de XML-tekstnode.
-        escaped = escape(text)
+        # Escape per regel; behoud echte newlines. Spaties → NBSP (S19):
+        # MuseScore/OSMD trimmen of comprimeren anders gewone spaties.
+        escaped = escape(cue_text_for_score(text))
         if osmd:
             # Tenths vanaf maatbegin / systeembegin: voorbij sleutel of maatstreep.
             dx = "110" if system_start else "28"

@@ -905,7 +905,7 @@ mscz mvsa lied.mscz
 ### Synopsis
 
 ```text
-mvsa products [-h] [--force] [--dry-run] [--skip-svg] [--musescore PATH] path
+mvsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
 ```
 
 ### Beschrijving
@@ -921,7 +921,8 @@ Schrijft voor elke `.mvsa` onder `path`:
 | Meta                      | `{stam}.mvsa.products-meta.json` (key `svg`; zie products-meta)         |
 
 Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
-(`--force` regenereert). Kaal: geen bibliotheek-stamps.
+(`--force` regenereert). `--quiet` onderdrukt voortgangsregels op stdout
+(fouten blijven op stderr). Kaal: geen bibliotheek-stamps.
 [contract-index](../../formats/contract-index.md) ·
 [products-meta](../../formats/products-meta.md).
 

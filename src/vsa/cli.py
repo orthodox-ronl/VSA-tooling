@@ -1158,6 +1158,7 @@ def _run(args):
             force=bool(args.force),
             dry_run=bool(args.dry_run),
             skip_svg=bool(getattr(args, "skip_svg", False)),
+            quiet=bool(getattr(args, "quiet", False)),
             musescore=musescore,
         )
 
@@ -1312,9 +1313,11 @@ def _cmd_svg(args, config):
             text = input_path.read_text(encoding="utf-8")
             body, _ = prepare_vsa_body(text, input_path)
             document = Parser(preserve_vsa_source_newlines(body)).parse()
+            from .atomic_io import write_text
+
             svg = renderer.render_document(document)
             out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(svg, encoding="utf-8")
+            write_text(out, svg, encoding="utf-8")
         except IncludeVsaError as exc:
             print(f"{input_path}: {exc.message_nl}", file=sys.stderr)
             exit_code = 1
@@ -2229,6 +2232,7 @@ def _cmd_mvsa(args) -> int:
             force=bool(args.force),
             dry_run=bool(args.dry_run),
             skip_svg=bool(getattr(args, "skip_svg", False)),
+            quiet=bool(getattr(args, "quiet", False)),
             musescore=musescore,
         )
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.

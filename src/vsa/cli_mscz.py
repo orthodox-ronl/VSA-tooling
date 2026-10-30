@@ -38,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
             force=bool(ns.force),
             dry_run=bool(ns.dry_run),
             skip_svg=bool(getattr(ns, "skip_svg", False)),
+            quiet=bool(getattr(ns, "quiet", False)),
             musescore=musescore,
         )
     if ns.mscz_command == "mxl":

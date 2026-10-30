@@ -351,7 +351,9 @@ def export_mscz_to_svg(
     if out.is_file() and not pages:
         written = [out]
     elif len(pages) == 1 and not out.exists():
-        pages[0].replace(out)
+        from .atomic_io import replace_into
+
+        replace_into(out, pages[0])
         written = [out]
     elif pages:
         for path in pages:
@@ -363,9 +365,12 @@ def export_mscz_to_svg(
     else:
         written = [first]
         if first.resolve() != out.resolve() and first.is_file():
-            first.replace(out)
+            from .atomic_io import replace_into
+
+            replace_into(out, first)
             written = [out]
 
+    from .atomic_io import write_text
     from .svg_lyric_gaps import enforce_svg_lyric_word_gaps
 
     for path in written:
@@ -379,7 +384,7 @@ def export_mscz_to_svg(
                 )
             except SvgTrimError as exc:
                 raise MvsaMsczError(str(exc)) from exc
-        path.write_text(text, encoding="utf-8", newline="\n")
+        write_text(path, text, encoding="utf-8", newline="\n")
     return written
 
 
