@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>translit</code>
-  , gebouwd 2026-10-29 21:06 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-10-30 10:56 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5505,7 +5505,9 @@ koorantwoord.</p>
 <p><strong>Vorm.</strong> <code>@tekst</code> + spatie + een string tussen <strong>dubbele</strong> aanhalingstekens:</p>
 <div class="highlight"><pre><span></span><code>@tekst "P: Gezegend … der eeuwen"
 </code></pre></div>
-<p>Binnen de string: <code>\"</code> voor een aanhalingsteken, <code>\\</code> voor een backslash.</p>
+<p>Binnen de string: <code>\"</code> voor een aanhalingsteken, <code>\\</code> voor een backslash.
+<strong>Leidende, eind- en meervoudige spaties</strong> in de aanhalingstekens zijn
+significant en blijven op het blad zichtbaar (S19).</p>
 <p><strong>Wel gebruiken</strong> voor korte cues die op het blad bij dat systeem horen
 (litanie: “P: …”, “D: …”, een korte rubriek). Zet de regel <strong>direct boven</strong> het
 LSATB-blok waarop de tekst moet verschijnen.</p>
@@ -5783,7 +5785,7 @@ zet. De keys zijn dezelfde <strong>lyrics-identifiers</strong> als op de lyrics-
 <thead>
 <tr>
 <th>Waarde (richting)</th>
-<th>Effect bij <code>--translit</code></th>
+<th>Effect bij <code>--hulptekst</code></th>
 </tr>
 </thead>
 <tbody>
@@ -5805,7 +5807,7 @@ zet. De keys zijn dezelfde <strong>lyrics-identifiers</strong> als op de lyrics-
 </tr>
 </tbody>
 </table>
-<p><strong>Coria-partnamen</strong> (<code>--translit-as-parts</code>): één MusicXML-part per
+<p><strong>Coria-partnamen</strong> (<code>--hulptekst-as-parts</code>): één MusicXML-part per
 <strong>stem × lyrics-laag</strong>, genaamd <code>{stemidentifier} ({label})</code> — bijvoorbeeld
 <code>Sop (aap)</code>, <code>Zeep (noot)</code>. Stemidentifiers die precies <code>S</code>/<code>A</code>/<code>T</code>/<code>B</code> zijn
 (eventueel met cijfer) krijgen de bekende namen Soprano/Alto/Tenor/Bass. Ontbreekt
@@ -5902,7 +5904,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-29
+        Bijgewerkt: 2026-10-30
         
       </p>
       
