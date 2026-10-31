@@ -47,16 +47,17 @@ Vergelijkings-PNG’s (raster van ref + OSMD, cloud-run 2026-10-31):
 | alleluia-toon-2   | idem                                   | idem                                                                         | **PASS**\* |
 | derde-antifoon    | ref aanwezig                           | zelfde A1-pad; handmatig steekproef spacers                                  | **PASS**†  |
 
-\*Pixel-pariteit MuseScore↔OSMD is geen eis. OSMD tekent de breve niet als
-MuseScore-`\|\|O\|\|`-glyph; wél: geen zichtbare spacer-koppen, lyrics op
-die posities, stokloze breve-markering (`data-osmd-breve`).
+\*Pixel-pariteit MuseScore↔OSMD is geen eis. S8-eisen wél: geen zichtbare
+spacer-koppen; lyrics op die posities; breve als ``||O||``-glyph
+(`data-osmd-breve-glyph`, holle ovaal + dubbele strepen links/rechts).
 †Machinecheck: `node scripts/osmd-svg/check-s8-a1.mjs <from-ir.musicxml>`.
 
 ### Fix (2026-10-31)
 
 `scripts/osmd-svg/render.mjs` draait na OSMD-render de A1-adapter
-(`s8-a1-adapter.js`) — zelfde marker-contract als bibliotheek
-`score-osmd.js` ([osmd-s8-recite](../../../docs/plans/osmd-s8-recite.md)).
+(`s8-a1-adapter.js`) — spacer-hide + ``||O||``-breve; zelfde marker-contract
+als bibliotheek `score-osmd.js`
+([osmd-s8-recite](../../../docs/plans/osmd-s8-recite.md)).
 Maatsoort uit (`drawTimeSignatures: false`).
 
 ```cmd

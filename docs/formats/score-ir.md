@@ -35,9 +35,10 @@ als blad-SVG, geen MuseScore-paginamodel). Details:
 noot). Dat is een **stabiele marker** voor de scherm-OSMD-adapter, geen
 belofte dat OSMD/VexFlow de kop zelf verbergt (peiling:
 [osmd-s8-recite](../plans/osmd-s8-recite.md)). Productpad
-`mvsa svg --engine osmd` past de A1-hide toe in
-[`scripts/osmd-svg`](../../scripts/osmd-svg/) (`s8-a1-adapter.js`);
-bibliotheek-embed via `score-osmd.js`. Breve-midden:
+`mvsa svg --engine osmd` past A1 toe in
+[`scripts/osmd-svg`](../../scripts/osmd-svg/) (`s8-a1-adapter.js`):
+spacer-hide én ``||O||``-glyph op breve-midden; bibliotheek-embed via
+`score-osmd.js`. Breve-midden in from-ir:
 `notehead breve` + `stem none` (geen `type=breve`).
 
 | Onderwerp                         | Waar                                                                                 |

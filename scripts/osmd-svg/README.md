@@ -3,10 +3,11 @@
 Node-hulp voor partituur-SVG **zonder MuseScore**: MusicXML (uit Score-IR)
 → OpenSheetMusicDisplay → S8 A1-adapter → `.svg`.
 
-**S8 (contract A1):** from-ir markeert spacers met `<notehead>none</notehead>`.
-OSMD tekent die koppen wél; `s8-a1-adapter.js` verbergt ze na render
-(lyrics blijven). Zelfde contract als bibliotheek `score-osmd.js`
-([osmd-s8-recite](../../docs/plans/osmd-s8-recite.md)).
+**S8 (contract A1):** from-ir markeert spacers met `<notehead>none</notehead>`
+en het recite-midden met `<notehead>breve</notehead>`. Na OSMD-render:
+`s8-a1-adapter.js` verbergt spacer-koppen (lyrics blijven) en zet de breve
+om naar een leesbare ``||O||``-glyph. Zelfde marker-contract als bibliotheek
+`score-osmd.js` ([osmd-s8-recite](../../docs/plans/osmd-s8-recite.md)).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg

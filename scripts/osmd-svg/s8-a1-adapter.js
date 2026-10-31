@@ -203,6 +203,90 @@
     );
   }
 
+  /**
+   * Vervang OSMD's gevulde breve-kop door een leesbare ``||O||``-glyph
+   * (dubbele verticale strepen + holle ovale kop), zoals MuseScore headType
+   * breve / checklist S8. Coördinaten in dezelfde user-space als de nootkop.
+   */
+  function drawBrevePipeOGlyph(staveNoteEl) {
+    var ns = "http://www.w3.org/2000/svg";
+    if (staveNoteEl.querySelector("[data-osmd-breve-glyph='1']")) {
+      return;
+    }
+    var head =
+      staveNoteEl.querySelector(".vf-notehead") ||
+      staveNoteEl.querySelector("path.vf-notehead") ||
+      staveNoteEl.querySelector(".vf-note");
+    if (!head) {
+      return;
+    }
+    var bb;
+    try {
+      bb = head.getBBox();
+    } catch (e) {
+      return;
+    }
+    if (bb.width < 0.5 && bb.height < 0.5) {
+      return;
+    }
+    // Verberg OSMD-kop (stok was al weg); glyph komt ervoor in de plaats.
+    Array.prototype.forEach.call(
+      staveNoteEl.querySelectorAll(
+        ".vf-notehead, path.vf-notehead, .vf-note path, .vf-note circle, .vf-note ellipse, .vf-note rect"
+      ),
+      function (el) {
+        if (el.closest && el.closest(".vf-stem, .vf-flag")) {
+          return;
+        }
+        osmdHideSvgEl(el);
+      }
+    );
+
+    var cx = bb.x + bb.width / 2;
+    var cy = bb.y + bb.height / 2;
+    var ss = Math.max(bb.height, bb.width * 0.85, 8);
+    var stroke = Math.max(ss * 0.12, 1.1);
+    var barH = ss * 1.05;
+    var inner = ss * 0.78;
+    var gap = ss * 0.2;
+    var rx = ss * 0.52;
+    var ry = ss * 0.4;
+
+    var g = document.createElementNS(ns, "g");
+    g.setAttribute("class", "vsa-breve-glyph");
+    g.setAttribute("data-osmd-breve-glyph", "1");
+    g.setAttribute("pointer-events", "none");
+
+    function addLine(x) {
+      var line = document.createElementNS(ns, "line");
+      line.setAttribute("x1", String(x));
+      line.setAttribute("y1", String(cy - barH / 2));
+      line.setAttribute("x2", String(x));
+      line.setAttribute("y2", String(cy + barH / 2));
+      line.setAttribute("stroke", "#000000");
+      line.setAttribute("stroke-width", String(stroke));
+      line.setAttribute("stroke-linecap", "square");
+      line.setAttribute("fill", "none");
+      g.appendChild(line);
+    }
+
+    addLine(cx - inner - gap);
+    addLine(cx - inner);
+    var oval = document.createElementNS(ns, "ellipse");
+    oval.setAttribute("cx", String(cx));
+    oval.setAttribute("cy", String(cy));
+    oval.setAttribute("rx", String(rx));
+    oval.setAttribute("ry", String(ry));
+    oval.setAttribute("stroke", "#000000");
+    oval.setAttribute("stroke-width", String(stroke));
+    oval.setAttribute("fill", "none");
+    g.appendChild(oval);
+    addLine(cx + inner);
+    addLine(cx + inner + gap);
+
+    staveNoteEl.appendChild(g);
+  }
+
   function markBreveStaveNotes(notes) {
     for (var i = 0; i < notes.length; i += 1) {
       notes[i].setAttribute("data-osmd-breve", "1");
@@ -210,6 +294,7 @@
         notes[i].querySelectorAll(".vf-stem, .vf-flag"),
         osmdHideSvgEl
       );
+      drawBrevePipeOGlyph(notes[i]);
     }
   }
 
@@ -357,12 +442,14 @@
     var spacerMarked = 0;
     var keepVisible = 0;
     var breveMarked = 0;
+    var breveGlyphs = 0;
     if (!m) {
       return {
         spacerVisibleHeads: 0,
         spacerMarked: 0,
         keepVisibleHeads: 0,
         breveMarked: 0,
+        breveGlyphs: 0,
         expectSpacers: expectSpacers,
       };
     }
@@ -382,6 +469,9 @@
         }
         if (n.getAttribute("data-osmd-breve") === "1") {
           breveMarked += 1;
+          if (n.querySelector("[data-osmd-breve-glyph='1']")) {
+            breveGlyphs += 1;
+          }
         }
       }
     }
@@ -390,6 +480,7 @@
       spacerMarked: spacerMarked,
       keepVisibleHeads: keepVisible,
       breveMarked: breveMarked,
+      breveGlyphs: breveGlyphs,
       expectSpacers: expectSpacers,
     };
   }
@@ -403,12 +494,16 @@
     var bas = diagnoseStaff(mount, xmlText, 1);
     var hasMarkers =
       xmlText.indexOf("<notehead>none</notehead>") !== -1;
+    var hasBreve =
+      xmlText.indexOf("<notehead>breve</notehead>") !== -1;
     var ok =
       (boven.spacerVisibleHeads || 0) === 0 &&
       (bas.spacerVisibleHeads || 0) === 0 &&
       (boven.keepVisibleHeads || 0) > 0 &&
       (!hasMarkers ||
-        ((boven.spacerMarked || 0) > 0 && (bas.spacerMarked || 0) > 0));
+        ((boven.spacerMarked || 0) > 0 && (bas.spacerMarked || 0) > 0)) &&
+      (!hasBreve ||
+        ((boven.breveGlyphs || 0) > 0 && (bas.breveGlyphs || 0) > 0));
     return {
       ok: ok,
       staven: { boven: boven, bas: bas },
