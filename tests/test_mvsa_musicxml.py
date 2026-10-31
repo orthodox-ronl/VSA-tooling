@@ -1407,6 +1407,20 @@ def test_tekst_spaces_emitted_as_nbsp():
     assert ">  hello<" not in blob
 
 
+def test_estimate_cue_width_milder_cap():
+    """C6: lange cues → capped width (niet max_len×14 zonder plafond)."""
+    from vsa.mvsa_musicxml import estimate_cue_width_tenths
+
+    assert estimate_cue_width_tenths(["x"]) == 80
+    short = estimate_cue_width_tenths(["P: kort"])
+    assert 80 <= short <= 240
+    long = "P: " + ("woord " * 20)
+    wide = estimate_cue_width_tenths([long])
+    assert wide == 240
+    # Oude formule (len×14) zou ver boven de cap liggen.
+    assert len(long) * 14 > 240
+
+
 def test_tekst_wraps_at_ellipsis_and_sets_width():
     from vsa.mvsa_musicxml import wrap_tekst_at_ellipsis, estimate_cue_width_tenths
 
@@ -1435,7 +1449,14 @@ B: re ||
     assert "P: Onze Alheilige" in xml
     assert "... ons leven aan" in xml
     assert "width=" in xml
-    assert estimate_cue_width_tenths([wrapped]) >= 80
+    w = estimate_cue_width_tenths([wrapped])
+    assert 80 <= w <= 240
+    # Geëxporteerde width volgt de milde schatting (langste regel).
+    import re
+
+    widths = [int(x) for x in re.findall(r'width="(\d+)"', xml)]
+    assert widths
+    assert max(widths) <= 240
 
 
 _SPEELPLAN_DEMO = """\

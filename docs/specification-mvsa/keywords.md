@@ -295,7 +295,7 @@ tweede pauze. Herhaalstrepen (`:|`) blijven intact. Stemrust `r`/`R` binnen
 een frase (lege recite + rusten) is iets anders; zie
 [Rusten op de stemregel](semantics.md#rusten-op-de-stemregel).
 
-Lange cues met `...` worden op **twee regels** gezet: de tweede regel begint bij `...`. Is de cue breder dan de maat, dan krijgt die maat minstens die breedte (MusicXML `width` / MuseScore-maat).
+Lange cues met `...` worden op **twee regels** gezet: de tweede regel begint bij `...`. Is de cue breder dan de maat, dan krijgt die maat een **milde** MusicXML-`width` (floor/cap; zie [leesbaarheid C6](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade)) — genoeg hint voor MuseScore, zonder een holle maat waar noten links blijven hangen.
 
 ```text
 @mscz-newline

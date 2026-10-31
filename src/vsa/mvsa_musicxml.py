@@ -2174,13 +2174,26 @@ def wrap_tekst_at_ellipsis(text: str) -> str:
     return f"{before}\n{after}"
 
 
+# Cue-maatbreedte (MusicXML ``width``, tenths). Milder dan *14/char zonder
+# plafond: lange ``@tekst`` blies maten op → noten links geclusterd (C3b).
+_CUE_WIDTH_FLOOR = 80
+_CUE_WIDTH_CAP = 240
+_CUE_WIDTH_BASE = 40
+_CUE_WIDTH_PER_CHAR = 9
+
+
 def estimate_cue_width_tenths(texts: list[str]) -> int:
-    """MusicXML measure ``width`` in tenths — ruim genoeg voor de cue-regels."""
+    """MusicXML measure ``width`` in tenths for ``@tekst`` cues.
+
+    Floor/cap so the measure is wide enough for short cues but long cues do
+    not force a cavernous bar (notes stuck left). Multi-line: longest line.
+    """
     lines: list[str] = []
     for t in texts:
         lines.extend(t.splitlines() or [t])
     max_len = max((len(line) for line in lines), default=0)
-    return max(80, max_len * 14)
+    raw = _CUE_WIDTH_BASE + max_len * _CUE_WIDTH_PER_CHAR
+    return max(_CUE_WIDTH_FLOOR, min(_CUE_WIDTH_CAP, raw))
 
 
 def _prepare_partituur_tekst_frames(
