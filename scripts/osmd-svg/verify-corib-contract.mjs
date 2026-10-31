@@ -5,6 +5,7 @@
  * - maatnummer 1 aanwezig (S10)
  * - @tekst-cues (indien aanwezig): binnen maatstrepen (C6/S15);
  *   wrap op ``...`` als twee regels óf één regel die past (S19 / §4.2)
+ * - S21: eerste zichtbare nootkoppen SA↔TB per maat-id in één kolom
  *
  * Usage:
  *   node verify-corib-contract.mjs path/to/a.osmd.svg [more…]
@@ -21,6 +22,7 @@ const puppeteer = require(path.join(__dirname, "node_modules", "puppeteer"));
 
 const MIN_LYRIC_GAP_PX = 1.5;
 const MID_SYSTEM_X_SLACK = 40;
+const S21_COLUMN_SLACK_PX = 3;
 
 async function checkSvg(browser, svgPath) {
   const svgText = fs.readFileSync(svgPath, "utf8");
@@ -32,7 +34,7 @@ async function checkSvg(browser, svgPath) {
       { waitUntil: "domcontentloaded" }
     );
     return await page.evaluate(
-      (minGap, midSlack) => {
+      (minGap, midSlack, s21Slack) => {
         const root = document.querySelector("svg");
         if (!root) return { ok: false, errors: ["geen <svg>"] };
 
@@ -230,6 +232,63 @@ async function checkSvg(browser, svgPath) {
           }
         }
 
+        // S21: per maat-id eerste zichtbare nootkoppen op alle balken
+        // (SA/TB) delen ongeveer dezelfde scherm-x (één kolom).
+        const s21Fails = [];
+        const measuresById = {};
+        for (const m of root.querySelectorAll(".vf-measure[id]")) {
+          const id = String(m.id || "").trim();
+          if (!/^\d+$/.test(id)) continue;
+          if (!measuresById[id]) measuresById[id] = [];
+          measuresById[id].push(m);
+        }
+        function firstVisibleHeadX(measureEl) {
+          const notes = [...measureEl.querySelectorAll(".vf-stavenote")];
+          let best = null;
+          for (const n of notes) {
+            // Alleen noteheads (geen stem/accidental) — anders valse Δx.
+            const heads = n.querySelectorAll(".vf-notehead path");
+            const paths = heads.length
+              ? heads
+              : n.querySelectorAll("[data-osmd-breve-glyph='1'] path");
+            for (const p of paths) {
+              const st = getComputedStyle(p);
+              if (st.visibility === "hidden" || st.display === "none") {
+                continue;
+              }
+              let bb;
+              try {
+                bb = p.getBBox();
+              } catch {
+                continue;
+              }
+              if (!(bb.width > 0.5 && bb.height > 0.5)) continue;
+              const ctm = p.getScreenCTM();
+              if (!ctm) continue;
+              const pt = p.ownerSVGElement.createSVGPoint();
+              pt.x = bb.x;
+              pt.y = bb.y;
+              const screen = pt.matrixTransform(ctm);
+              if (best == null || screen.x < best) best = screen.x;
+            }
+          }
+          return best;
+        }
+        for (const [id, els] of Object.entries(measuresById)) {
+          if (els.length < 2) continue;
+          const xs = els
+            .map(firstVisibleHeadX)
+            .filter((x) => Number.isFinite(x));
+          if (xs.length < 2) continue;
+          const lo = Math.min(...xs);
+          const hi = Math.max(...xs);
+          if (hi - lo > s21Slack) {
+            s21Fails.push(
+              `m${id}: Δx=${Math.round((hi - lo) * 10) / 10}px`
+            );
+          }
+        }
+
         const errors = [];
         if (overlaps.length) {
           errors.push(
@@ -261,6 +320,11 @@ async function checkSvg(browser, svgPath) {
         if (wrapFails.length) {
           errors.push(`S19/§4.2 wrap: ` + wrapFails.slice(0, 4).join(" | "));
         }
+        if (s21Fails.length) {
+          errors.push(
+            `S21 stemkolom: ` + s21Fails.slice(0, 6).join(" | ")
+          );
+        }
         return {
           ok: errors.length === 0,
           errors,
@@ -274,7 +338,8 @@ async function checkSvg(browser, svgPath) {
         };
       },
       MIN_LYRIC_GAP_PX,
-      MID_SYSTEM_X_SLACK
+      MID_SYSTEM_X_SLACK,
+      S21_COLUMN_SLACK_PX
     );
   } finally {
     await page.close();

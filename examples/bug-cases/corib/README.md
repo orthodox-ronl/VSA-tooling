@@ -125,3 +125,6 @@ OSMD-default lettergreep-afstanden + `VoiceSpacing` 0.85/3.0 (compacttight
 bibliotheek `score-osmd.js` / schermpartituur §4.2) — maat-`WidthFactor`
 zodat `@tekst` in de maat past; wrap op `...`; inklappen naar één regel
 alleen als die past; cue-X op eerste noot.
+
+**S21 stemkolom:** `centerMeasureContents` verschuift SA én TB met dezelfde
+`dx` (maat-id-kolom); verify meet eerste notehead-x per balk.

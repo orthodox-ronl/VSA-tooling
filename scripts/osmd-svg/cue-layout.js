@@ -467,6 +467,10 @@
     resolveCueOverlaps(mount, cues, layout);
   }
 
+  /**
+   * Centreer noten+lyrics in de maatbreedte. S21: zelfde ``dx`` op alle
+   * balken van het maat-id (SA én TB) — nooit alleen de bovenbalk.
+   */
   function centerMeasureContents(mount) {
     var byId = {};
     Array.prototype.forEach.call(
@@ -501,66 +505,112 @@
             /* keep */
           }
         }
-        var entry = {
+        if (!byId[id]) {
+          byId[id] = [];
+        }
+        byId[id].push({
           el: m,
           x: b.x,
           y: b.y,
-          w: b.width,
           musicStart: musicStart,
           right: b.x + b.width,
-        };
-        if (!byId[id] || entry.y < byId[id].y) {
-          byId[id] = entry;
-        }
+        });
       }
     );
-    Object.keys(byId).forEach(function (id) {
-      var m = byId[id];
-      var notes = m.el.querySelectorAll(
-        ".vf-stavenote, .vf-text.lyrics, .vf-text.dash"
-      );
-      if (!notes.length) {
-        return;
-      }
-      var minX = Infinity;
-      var maxX = -Infinity;
-      Array.prototype.forEach.call(notes, function (n) {
-        try {
-          var nb = n.getBBox();
-          minX = Math.min(minX, nb.x);
-          maxX = Math.max(maxX, nb.x + nb.width);
-        } catch (e) {
-          /* skip */
+
+    var lyricGs = Array.prototype.slice.call(
+      mount.querySelectorAll("g.vf-text.lyrics, g.vf-text.dash")
+    );
+
+    Object.keys(byId)
+      .sort(function (a, b) {
+        return Number(a) - Number(b);
+      })
+      .forEach(function (id) {
+        var col = byId[id];
+        col.sort(function (a, b) {
+          return a.y - b.y;
+        });
+        // Bounds vanaf treble (bovenste); extent over alle balken (S21).
+        var treble = col[0];
+        var left = treble.musicStart;
+        var right = treble.right - 8;
+        var cMin = Infinity;
+        var cMax = -Infinity;
+        for (var c = 0; c < col.length; c += 1) {
+          var notes = col[c].el.querySelectorAll(".vf-stavenote");
+          for (var n = 0; n < notes.length; n += 1) {
+            try {
+              var bb = notes[n].getBBox();
+              if (!(bb.width > 0 || bb.height > 0)) {
+                continue;
+              }
+              cMin = Math.min(cMin, bb.x);
+              cMax = Math.max(cMax, bb.x + bb.width);
+            } catch (e) {
+              /* skip */
+            }
+          }
         }
-      });
-      if (!(maxX > minX)) {
-        return;
-      }
-      var roomLeft = minX - m.musicStart;
-      var roomRight = m.right - 6 - maxX;
-      if (roomLeft < 8 || roomRight < 8) {
-        return;
-      }
-      var dx = (roomRight - roomLeft) / 2;
-      if (!(Math.abs(dx) > 2)) {
-        return;
-      }
-      Array.prototype.forEach.call(notes, function (n) {
-        var g =
-          n.classList && n.classList.contains("vf-text")
-            ? n
-            : n.closest(".vf-stavenote") || n;
-        if (!g || g.getAttribute("data-osmd-center") === "1") {
+        if (!(cMax > cMin)) {
           return;
         }
-        var prev = g.getAttribute("transform") || "";
-        g.setAttribute(
-          "transform",
-          (prev + " translate(" + dx.toFixed(2) + ", 0)").trim()
-        );
-        g.setAttribute("data-osmd-center", "1");
+        var padL = cMin - left;
+        var padR = right - cMax;
+        var dx = (padR - padL) / 2;
+        if (padR + padL < 24 || Math.abs(dx) < 6) {
+          return;
+        }
+        if (cMin + dx < left) {
+          dx = left - cMin;
+        }
+        if (cMax + dx > right) {
+          dx = right - cMax;
+        }
+        if (Math.abs(dx) < 6) {
+          return;
+        }
+        var dxStr = dx.toFixed(2);
+        for (var c2 = 0; c2 < col.length; c2 += 1) {
+          var moveEls = col[c2].el.querySelectorAll(
+            ".vf-stavenote, .vf-ledgers"
+          );
+          for (var e = 0; e < moveEls.length; e += 1) {
+            var el = moveEls[e];
+            if (el.getAttribute("data-osmd-center") === "1") {
+              continue;
+            }
+            var prev = el.getAttribute("transform") || "";
+            el.setAttribute(
+              "transform",
+              (prev ? prev + " " : "") + "translate(" + dxStr + ", 0)"
+            );
+            el.setAttribute("data-osmd-center", "1");
+          }
+        }
+        for (var li = 0; li < lyricGs.length; li += 1) {
+          var g = lyricGs[li];
+          if (g.getAttribute("data-osmd-center") === "1") {
+            continue;
+          }
+          var gb;
+          try {
+            gb = g.getBBox();
+          } catch (e4) {
+            continue;
+          }
+          var mid = gb.x + gb.width / 2;
+          if (mid < treble.x || mid >= treble.right) {
+            continue;
+          }
+          var gPrev = g.getAttribute("transform") || "";
+          g.setAttribute(
+            "transform",
+            (gPrev ? gPrev + " " : "") + "translate(" + dxStr + ", 0)"
+          );
+          g.setAttribute("data-osmd-center", "1");
+        }
       });
-    });
   }
 
   function renderAndLayout(osmd, mount, xmlText) {
