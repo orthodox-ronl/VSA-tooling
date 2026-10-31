@@ -53,7 +53,7 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 9 --max-syste
 **Brug:** default `--engine musescore` tekent de tall-SVG (scherm-fallback +
 print-bouwsteen voor `index.md.pdf`). Optioneel `--engine osmd` schrijft een
 SVG via headless OSMD uit Score-IR (geen MuseScore; vereist Node +
-`scripts/osmd-svg`). S8-recite: na render past de A1-adapter spacer-hide toe
+`scripts/osmd-svg`). Headless OSMD graveert met profiel `coribCompact`: dichtere balkafstand en lyrics dichter onder de balk, lettertype Source Sans 3, zonder pixel-pariteit met MuseScore (S8/S13). S8-recite: na render past de A1-adapter spacer-hide toe
 (`notehead none`) en tekent ``||O||`` op breve-midden; zie
 [osmd-s8-recite](../plans/osmd-s8-recite.md) en
 [score-ir](score-ir.md). Scherm-hoofdpad op de site blijft Score-IR/OSMD-embed

@@ -25,6 +25,53 @@ const FONT_FAMILY = "Source Sans 3";
 const FONTS_DIR = path.join(__dirname, "fonts");
 const ADAPTER_PATH = path.join(__dirname, "s8-a1-adapter.js");
 
+/**
+ * coribCompact — graveerprofiel voor het CoriB-scherm (OSMD).
+ *
+ * Startpunt is ``drawingParameters: "compacttight"``. Daarna deze
+ * afstanden. OSMD-eenheid = 1 balkspatie (ongeveer 10 px).
+ *
+ * Doel: dichtere leesbaarheid dan de kale compacttight-stand, in de
+ * buurt van de MuseScore-referentie (balkafstand). Geen pixel-pariteit
+ * (corib-mvp). Contract S8/S13 blijft in from-ir + A1-adapter; dit
+ * profiel verplaatst geen noten of melisma.
+ *
+ * MeasureWidthFactor blijft 1. Lager trekken pakt meer maten op een
+ * regel en laat lettergrepen van een S8-recite overlappen (gemeten op
+ * derde-antifoon-zondag-hemelum). De bladbreedte is de container;
+ * een stuk dat korter is dan die breedte wordt na het tekenen
+ * bijgesneden op de inkt (geen lege rechterpagina).
+ */
+const CORIB_COMPACT = {
+  name: "coribCompact",
+  sheetWidthPx: 900,
+  contentPadPx: 10,
+  // (a) verticaal — skyline-marge hoort erbij, anders wint die van StaffDistance
+  StaffDistance: 4.0,
+  BetweenStaffDistance: 3.0,
+  MinimumDistanceBetweenSystems: 3.0,
+  MinSkyBottomDistBetweenStaves: 0.5,
+  LyricsYOffsetToStaffHeight: -1.05,
+  LyricsYMarginToBottomLine: 0.1,
+  // (b) horizontaal
+  MeasureWidthFactor: 1.0,
+  // (c) lettergreep / streepje
+  BetweenSyllableMinimumDistance: 0.4,
+  BetweenSyllableMaximumDistance: 8,
+  HorizontalBetweenLyricsDistance: 0.15,
+  MinimumDistanceBetweenDashes: 8,
+};
+
+function coribCompactRuleEntries() {
+  const skip = new Set([
+    "name",
+    "sheetWidthPx",
+    "contentPadPx",
+    "MeasureWidthFactor",
+  ]);
+  return Object.entries(CORIB_COMPACT).filter(([key]) => !skip.has(key));
+}
+
 /** Lokale WOFF2 → @font-face (geen Google Fonts-afhankelijkheid in de VM). */
 function buildSourceSansFaceCss() {
   const faces = [
@@ -189,7 +236,7 @@ async function main() {
   <style>${fontFaceCss}</style>
 </head>
 <body>
-  <div id="osmd" style="width: 900px;"></div>
+  <div id="osmd" style="width: ${CORIB_COMPACT.sheetWidthPx}px;"></div>
   <script src="${OSMD_CDN}"></script>
 </body>
 </html>`,
@@ -208,7 +255,7 @@ async function main() {
     await page.addScriptTag({ content: adapterJs });
 
     const pageCount = await page.evaluate(
-      async (xml, fontFamily) => {
+      async (xml, fontFamily, ruleEntries, measureWidthFactor, contentPadPx) => {
         const mount = document.getElementById("osmd");
         const osmd = new window.opensheetmusicdisplay.OpenSheetMusicDisplay(
           mount,
@@ -225,16 +272,43 @@ async function main() {
             drawingParameters: "compacttight",
           }
         );
+        // Regels vóór load: OSMD meet lyrics al bij het inlezen.
+        const rules = osmd.EngravingRules;
+        for (const [key, value] of ruleEntries) {
+          rules[key] = value;
+        }
         osmd.setOptions({ pageFormat: "Endless" });
         await osmd.load(xml);
+        if (osmd.Sheet && measureWidthFactor != null) {
+          osmd.Sheet.MeasureWidthFactor = measureWidthFactor;
+        }
         osmd.render();
         if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
           window.__vsaOsmdS8FinalizePrint(mount, xml);
         }
+        // Blad bijsnijden op de inkt. Korte stukken vullen de
+        // container niet; zonder dit blijft een lege rechterpagina.
+        const svg = mount.querySelector("svg");
+        if (svg && typeof svg.getBBox === "function") {
+          const bb = svg.getBBox();
+          const pad = contentPadPx;
+          if (bb && bb.width > 32 && bb.height > 32) {
+            const x = Math.min(0, bb.x - 2);
+            const y = Math.min(0, bb.y - 2);
+            const w = Math.ceil(bb.x + bb.width + pad - x);
+            const h = Math.ceil(bb.y + bb.height + pad - y);
+            svg.setAttribute("viewBox", `${x} ${y} ${w} ${h}`);
+            svg.setAttribute("width", String(w));
+            svg.setAttribute("height", String(h));
+          }
+        }
         return document.querySelectorAll("#osmd svg").length;
       },
       musicxml,
-      FONT_FAMILY
+      FONT_FAMILY,
+      coribCompactRuleEntries(),
+      CORIB_COMPACT.MeasureWidthFactor,
+      CORIB_COMPACT.contentPadPx
     );
 
     if (!pageCount) {
