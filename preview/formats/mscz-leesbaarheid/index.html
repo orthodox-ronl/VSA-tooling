@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>corib</code>
-  , gebouwd 2026-10-31 16:54 CET.
+   — branch <code>cursor/osmd-layout-contract-91fb</code>
+  , gebouwd 2026-10-31 17:33 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5239,6 +5239,14 @@ Ownership (wie kiest, wie handhaaft):
 <li>Noten die <strong>dezelfde lettergreep</strong> dragen (één anker per stem) vormen
     <strong>één verticale kolom</strong> over SA én TB — niet lateraal uit elkaar
     getrokken (S21 / P3b).</li>
+<li>Lettergreep-slot (eerste melisma-noot of S8-breve + lyric) is
+    <strong>horizontaal gecentreerd</strong> in de slot-ruimte, niet links geplakt
+    (S22 / P3e).</li>
+<li>OSMD-scherm: lyrics/cues in <strong>Source Sans 3</strong> (zelfde als MuseScore-ref /
+    L2); binnen het systeem <strong>compacte</strong> balkafstand (P3c); tussen systemen
+    genoeg lucht voor S10-nummers en <code>@tekst</code> (P3d).</li>
+<li>Eenregelige <code>@tekst</code> deelt de baseline van regel 2 van een twee-regelige
+    cue (C7).</li>
 </ol>
 <hr />
 <h2 id="r-recite-tekst-model-a-spacers">R — Recite-tekst (model A: spacers)<a class="headerlink" href="#r-recite-tekst-model-a-spacers" title="Permanent link">&para;</a></h2>
@@ -5327,7 +5335,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>L2</td>
-<td>Standaard gecentreerd op de nootkop; Source Sans 3, 13 pt (Style). Override: <code>--lyrics-font</code> / <code>--lyrics-font-size</code> op <code>mvsa mscz</code>/<code>pdf</code>/<code>svg</code>. Cues (<code>@tekst</code>): <code>--cue-font</code> / <code>--cue-font-size</code> (default 12 pt).</td>
+<td>Standaard gecentreerd op de nootkop; <strong>Source Sans 3</strong>, 13 pt (Style). Override: <code>--lyrics-font</code> / <code>--lyrics-font-size</code> op <code>mvsa mscz</code>/<code>pdf</code>/<code>svg</code>. Cues (<code>@tekst</code>): <code>--cue-font</code> / <code>--cue-font-size</code> (default 12 pt). <strong>OSMD-scherm</strong> (from-ir → OSMD / <code>mvsa svg --engine osmd</code>): lyrics én cues gebruiken <strong>hetzelfde</strong> Source Sans 3 als de MuseScore-ref (geen ander product-schermfont).</td>
 </tr>
 <tr>
 <td>L3</td>
@@ -5425,7 +5433,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </table>
 <hr />
 <h2 id="c-cues-gaps-hbox-accolade">C — Cues, gaps, HBox, accolade<a class="headerlink" href="#c-cues-gaps-hbox-accolade" title="Permanent link">&para;</a></h2>
-<p>Contract: checklist MSCZ <strong>S14–S21</strong>. MuseScore-gedrag dat we vermijden:</p>
+<p>Contract: checklist MSCZ <strong>S14–S22</strong>. MuseScore-gedrag dat we vermijden:</p>
 <table>
 <thead>
 <tr>
@@ -5494,6 +5502,10 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 <td>C6</td>
 <td>Cue-maatbreedte (MusicXML <code>width</code>): mild — floor 80 / cap 240 tenths, <code>40 + 9×</code> langste regel. Lange cues mogen iets overstekken i.p.v. een holle maat met noten links.</td>
 </tr>
+<tr>
+<td>C7</td>
+<td><strong>Eenregel-cue-baseline (OSMD-scherm):</strong> een <code>@tekst</code>-cue die <strong>één</strong> regel beslaat (geen <code>...</code>-wrap naar regel 2) deelt de <strong>zelfde baseline-y</strong> als de <strong>tweede</strong> regel van een twee-regelige <code>@tekst</code>-cue in hetzelfde schermlayout. Eenregelige cues staan dus lager dan regel 1 van een twee-regelige cue — niet op de hoogte van die eerste regel. Voorbeeldtoets: ektinia-vrede-hemelum maat 5 t.o.v. twee-regelige cues. Checklist: <a href="../canonical-checklists/#checklist-mscz-partituur-musescore">S19</a>.</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -5525,6 +5537,18 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 <tr>
 <td>P3b</td>
 <td><strong>Stemkolom (S21):</strong> waar S/A/T/B op dezelfde lettergreep elk één nootkop-anker hebben, delen die ankers <strong>één x-kolom</strong> over de SA- én de TB-balk. Post-layout (o.a. OSMD-centreren in de maat) mag die kolom niet per balk apart verschuiven. Overtreding: bovenbalk-noten onder een andere lettergreep dan de onderbalk.</td>
+</tr>
+<tr>
+<td>P3c</td>
+<td><strong>Compacte balkafstand (OSMD-scherm):</strong> binnen één systeem staan SA- en TB-balk dichter bij elkaar dan een “spread”-layout; de lyric-laag tussen de balken blijft leesbaar (geen overlap met nootkoppen of stokken). Doelbeeld: dichter dan OSMD-default, in de buurt van het MuseScore-ref-balkgat zonder lyrics te knellen.</td>
+</tr>
+<tr>
+<td>P3d</td>
+<td><strong>Systeemafstand / lucht (OSMD-scherm):</strong> tussen opeenvolgende systemen is genoeg verticale ruimte zodat (a) S10-maatnummers van het nieuwe systeem de accolade/bracket van het vorige systeem <strong>niet raken</strong>, en (b) er zichtbare lucht is tussen de onderkant van een systeem en een <code>@tekst</code>-cue die bij het volgende maatblok hoort. Systeemafstand mag daardoor <strong>iets groter</strong> zijn dan de minimale balkafstand binnen het systeem (P3c).</td>
+</tr>
+<tr>
+<td>P3e</td>
+<td><strong>Lettergreep-slot centreren (S22):</strong> voor elk lettergreep-slot (gewone noot, <strong>eerste</strong> noot van een melisma, of S8-<code>\|\|O\|\|</code>-breve) staan de S21-stemkolom én de lyric van dat slot <strong>horizontaal gecentreerd</strong> in de horizontale ruimte die dat slot in de maat krijgt — niet links tegen de vorige gebeurtenis of maatstreep geplakt terwijl rechts wit blijft. Voorbeeldtoets: derde-antifoon-zondag-hemelum maat 16 «want». De stokloze breve is gecentreerd op de <strong>eerste</strong> midden-lettergreep van de recite (de lettergreep die de breve draagt), niet op een latere spacer-lettergreep.</td>
 </tr>
 <tr>
 <td>P4</td>
