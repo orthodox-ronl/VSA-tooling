@@ -301,84 +301,63 @@
     }
   }
 
+  /**
+   * Groepeer OSMD-maten op measure-id (zelfde nummer = treble+bas).
+   * Geen y-drempel: bij compacte CoriB-layout is de tussen-systeem-
+   * afstand (~40 px) kleiner dan treble→bas binnen een systeem (~120 px),
+   * dus een vaste y-split (oude 150) mengt alle systemen en mist S8-slots.
+   */
+  function measuresByIdSortedByStaff(mount) {
+    var byId = {};
+    Array.prototype.forEach.call(
+      mount.querySelectorAll(".vf-measure"),
+      function (m) {
+        var id = m.getAttribute("id");
+        if (!id) {
+          return;
+        }
+        if (!byId[id]) {
+          byId[id] = [];
+        }
+        byId[id].push(m);
+      }
+    );
+    Object.keys(byId).forEach(function (id) {
+      byId[id].sort(function (a, b) {
+        return a.getBBox().y - b.getBBox().y;
+      });
+    });
+    return byId;
+  }
+
   function hideNoteheadNoneGraphics(mount, xmlText) {
     var byPart = s8PrintSlotsByPartMeasure(xmlText);
     if (!byPart.length) {
       return;
     }
-    var raw = Array.prototype.map.call(
-      mount.querySelectorAll(".vf-measure"),
-      function (m) {
-        var b = m.getBBox();
-        return {
-          el: m,
-          id: m.getAttribute("id"),
-          x: b.x,
-          y: b.y,
-        };
-      }
-    );
-    raw.sort(function (a, b) {
-      return a.y - b.y || a.x - b.x;
-    });
-    var systems = [];
-    for (var i = 0; i < raw.length; i += 1) {
-      var mm = raw[i];
-      var sys = systems[systems.length - 1];
-      if (!sys || mm.y - sys.lastY > 150) {
-        systems.push({ lastY: mm.y, ms: [mm] });
-      } else {
-        sys.ms.push(mm);
-        sys.lastY = mm.y;
-      }
-    }
-    for (var si = 0; si < systems.length; si += 1) {
-      var ms = systems[si].ms.slice();
-      ms.sort(function (a, b) {
-        return a.x - b.x || a.y - b.y;
-      });
-      var colStart = 0;
-      for (var j = 1; j <= ms.length; j += 1) {
-        if (j < ms.length && Math.abs(ms[j].x - ms[colStart].x) < 8) {
+    var byId = measuresByIdSortedByStaff(mount);
+    Object.keys(byId).forEach(function (measureNum) {
+      var col = byId[measureNum];
+      var pi;
+      for (pi = 0; pi < col.length && pi < byPart.length; pi += 1) {
+        var slots = byPart[pi][String(measureNum)];
+        if (!slots || !slots.length) {
           continue;
         }
-        var col = ms.slice(colStart, j);
-        colStart = j;
-        col.sort(function (a, b) {
-          return a.y - b.y;
-        });
-        for (var pi = 0; pi < col.length && pi < byPart.length; pi += 1) {
-          var measureNum = col[pi].id;
-          if (!measureNum) {
-            continue;
-          }
-          var slots = byPart[pi][String(measureNum)];
-          if (!slots || !slots.length) {
-            continue;
-          }
-          var notes = Array.prototype.slice.call(
-            col[pi].el.querySelectorAll(".vf-stavenote")
-          );
-          hideS8SlotsInMeasure(col[pi].el, slots, notes);
-        }
+        var notes = Array.prototype.slice.call(
+          col[pi].querySelectorAll(".vf-stavenote")
+        );
+        hideS8SlotsInMeasure(col[pi], slots, notes);
       }
-    }
+    });
     if (xmlText.indexOf("<notehead>none</notehead>") !== -1) {
+      // Alleen melisma-lijnen/paden onder lyrics verbergen — niet de
+      // lettergreepstreepjes (g.vf-text.dash / tekst "-"). Die hoort de
+      // lezer te zien tussen lettergrepen van één woord (S8-recite ook).
       Array.prototype.forEach.call(
-        mount.querySelectorAll(
-          "g.vf-text.dash, g.vf-text.lyrics line, g.vf-text.lyrics path"
-        ),
+        mount.querySelectorAll("g.vf-text.lyrics line, g.vf-text.lyrics path"),
         osmdHideSvgEl
       );
-      Array.prototype.forEach.call(mount.querySelectorAll("text"), function (t) {
-        if (String(t.textContent || "").trim() !== "-") {
-          return;
-        }
-        osmdHideSvgEl(t);
-        if (t.parentElement) {
-          osmdHideSvgEl(t.parentElement);
-        }
-      });
       Array.prototype.forEach.call(
         mount.querySelectorAll(".vf-ledgers"),
         function (g) {
@@ -396,8 +375,7 @@
   }
 
   function diagnoseStaff(mount, xmlText, partIndex) {
-    // Na hide hebben spacer-noten vaak lege bbox; tel daarom op
-    // data-osmd-* attributen i.p.v. opnieuw te clusteren op x-positie.
+    // Tel over alle maten van deze partij (id-groep, stave = partIndex).
     var byPart = s8PrintSlotsByPartMeasure(xmlText);
     var slotsMap = byPart[partIndex] || {};
     var expectSpacers = 0;
@@ -408,52 +386,41 @@
         }
       });
     });
-    var measures = Array.prototype.slice.call(
-      mount.querySelectorAll(".vf-measure")
-    );
-    // Twee staven delen measure-id; pak de stave die bij partIndex hoort
-    // (sorteer op y: 0 = boven, 1 = bas).
-    measures.sort(function (a, b) {
-      return a.getBBox().y - b.getBBox().y;
-    });
-    var m = measures[partIndex];
+    var byId = measuresByIdSortedByStaff(mount);
     var spacerVisible = 0;
     var spacerMarked = 0;
     var keepVisible = 0;
     var breveMarked = 0;
     var breveGlyphs = 0;
-    if (!m) {
-      return {
-        spacerVisibleHeads: 0,
-        spacerMarked: 0,
-        keepVisibleHeads: 0,
-        breveMarked: 0,
-        breveGlyphs: 0,
-        expectSpacers: expectSpacers,
-      };
-    }
-    var notes = Array.prototype.slice.call(
-      m.querySelectorAll(".vf-stavenote")
-    );
-    for (var i = 0; i < notes.length; i += 1) {
-      var n = notes[i];
-      if (n.getAttribute("data-osmd-spacer") === "1") {
-        spacerMarked += 1;
-        if (staveNoteHasVisibleNotehead(n)) {
-          spacerVisible += 1;
-        }
-      } else {
-        if (staveNoteHasVisibleNotehead(n)) {
-          keepVisible += 1;
-        }
-        if (n.getAttribute("data-osmd-breve") === "1") {
-          breveMarked += 1;
-          if (n.querySelector("[data-osmd-breve-glyph='1']")) {
-            breveGlyphs += 1;
+    Object.keys(byId).forEach(function (id) {
+      var col = byId[id];
+      if (partIndex >= col.length) {
+        return;
+      }
+      var notes = Array.prototype.slice.call(
+        col[partIndex].querySelectorAll(".vf-stavenote")
+      );
+      var i;
+      for (i = 0; i < notes.length; i += 1) {
+        var n = notes[i];
+        if (n.getAttribute("data-osmd-spacer") === "1") {
+          spacerMarked += 1;
+          if (staveNoteHasVisibleNotehead(n)) {
+            spacerVisible += 1;
+          }
+        } else {
+          if (staveNoteHasVisibleNotehead(n)) {
+            keepVisible += 1;
+          }
+          if (n.getAttribute("data-osmd-breve") === "1") {
+            breveMarked += 1;
+            if (n.querySelector("[data-osmd-breve-glyph='1']")) {
+              breveGlyphs += 1;
+            }
           }
         }
       }
-    }
+    });
     return {
       spacerVisibleHeads: spacerVisible,
       spacerMarked: spacerMarked,

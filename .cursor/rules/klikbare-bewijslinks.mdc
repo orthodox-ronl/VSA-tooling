@@ -1,0 +1,48 @@
+---
+description: Bij “kijk hiernaar” altijd klikbare links of plakbare open-commando’s geven
+alwaysApply: true
+---
+
+# Klikbare bewijslinks (geen impliciete huiswerk)
+
+De lezer is een mens met beperkt werkgeheugen. Noem **nooit** een bestand,
+PNG, SVG, PDF, PR-diff, CI-log of schermbeeld met de bedoeling dat de lezer
+ernaar kijkt — tenzij je in **dezelfde zin of de zin erna** een **directe
+handeling** geeft.
+
+## Verplicht bij elke “kijk / check / vergelijk”-zin
+
+Geef minstens één van deze, volledig en klikbaar of plakbaar:
+
+1. **HTTPS-URL** naar GitHub (of andere host) die het artifact **opent**
+   (blob/raw van de juiste branch of commit; of PR «Files changed»).
+2. **Lokaal open-commando** in één kopieerbaar `cmd`-blok
+   (Windows-paden; zie `copy-pasteable-cli-commands.mdc`), bv. `start ""`
+   op het concrete pad.
+3. In Cloud Agent-runs: **walkthrough-/artifact-URL** die de UI al toont,
+   als die beschikbaar is — plus alsnog de repo-URL als fallback.
+
+## Verboden formuleringen (zonder link of open-commando)
+
+- «pas na een blik op …»
+- «open de toets-png’s»
+- «vergelijk *.osmd ↔ *.ref»
+- «zie generated/…» of alleen een relatief pad zonder open-URL/`start`
+
+Relatieve paden mogen **als label**, maar nooit als enige aanwijzing.
+
+## Wat je levert bij beeldtoetsen
+
+Voor PNG/SVG-toets (bijv. CoriB `toets-png/`):
+
+- Per genoemd beeld: volledige URL op de **branch of commit van deze run**
+  (niet alleen «de PNG in de repo»).
+- Bij vóór/na: URL van **vóór** (parent/development-commit) én **na**
+  (feature-branch), of één PR-Files-URL waar GitHub beide toont.
+- Optioneel daaronder één plakblok dat alle relevante bestanden lokaal opent.
+
+## Scope
+
+Geldt in chatantwoorden, PR-bodies, walkthrough-teksten en afrondende
+«volgende stap»-voorstellen — in **elke** chat (nieuw en bestaand) via
+`alwaysApply`.

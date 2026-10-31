@@ -7,6 +7,9 @@
  * S8 (contract A1): na OSMD-render draait ``s8-a1-adapter.js`` zodat
  * spacer-koppen (``notehead none``) verdwijnen; lyrics blijven.
  *
+ * Cues (S15/S19/C6 / schermpartituur §4.2): ``cue-layout.js`` zet
+ * maat-WidthFactor, wrap/``...``, cue-X op eerste noot, centreren.
+ *
  * Usage:
  *   npm install
  *   node render.mjs INPUT.musicxml OUTPUT.svg
@@ -24,6 +27,73 @@ const OSMD_CDN =
 const FONT_FAMILY = "Source Sans 3";
 const FONTS_DIR = path.join(__dirname, "fonts");
 const ADAPTER_PATH = path.join(__dirname, "s8-a1-adapter.js");
+const CUE_LAYOUT_PATH = path.join(__dirname, "cue-layout.js");
+
+/**
+ * coribCompact — graveerprofiel voor het CoriB-scherm (OSMD).
+ *
+ * Startpunt is ``drawingParameters: "compacttight"``. Daarna deze
+ * afstanden. OSMD-eenheid = 1 balkspatie (ongeveer 10 px).
+ *
+ * Doel: dichtere leesbaarheid dan de kale compacttight-stand, in de
+ * buurt van de MuseScore-referentie (balkafstand). Geen pixel-pariteit
+ * (corib-mvp). Contract S8/S13 blijft in from-ir + A1-adapter; dit
+ * profiel verplaatst geen noten of melisma.
+ *
+ * MeasureWidthFactor blijft 1. Lager trekken pakt meer maten op een
+ * regel en laat lettergrepen van een S8-recite overlappen (gemeten op
+ * derde-antifoon-zondag-hemelum). De bladbreedte is de container;
+ * een stuk dat korter is dan die breedte wordt na het tekenen
+ * bijgesneden op de inkt (geen lege rechterpagina).
+ */
+const CORIB_COMPACT = {
+  name: "coribCompact",
+  // Iets breder dan 900: minder maten per regel → geen lyric-overlap
+  // bij S8-recite (mscz-leesbaarheid §2 / P3a; gemeten derde-antifoon).
+  sheetWidthPx: 1000,
+  contentPadPx: 10,
+  // (a) verticaal — lyrics tussen de balken (geen negatieve Y: dat plakt
+  //    ze tegen de bovenbalk).
+  StaffDistance: 4.5,
+  BetweenStaffDistance: 3.5,
+  MinimumDistanceBetweenSystems: 3.0,
+  MinSkyBottomDistBetweenStaves: 0.6,
+  LyricsYOffsetToStaffHeight: 2.0,
+  LyricsYMarginToBottomLine: 0.35,
+  // (b) horizontaal — MeasureWidthFactor 1 (lager: S8-lettergrepen
+  //    overlappen). FixedMeasureWidth niet: die trekt élke maat tot de
+  //    breedste → blad veel te hoog voor CoriB-scherm.
+  //    compacttight zet VoiceSpacing op 0.65/2.0; dat knelt lettergrepen
+  //    (maat 2 «neer|gij»). Terug naar OSMD-default 0.85/3.0.
+  MeasureWidthFactor: 1.0,
+  VoiceSpacingMultiplierVexflow: 0.85,
+  VoiceSpacingAddendVexflow: 3.0,
+  // (c) lettergreep / streepje — OSMD-defaults (lager elongation/padding
+  //    gaf overlap in maat 2 van derde-antifoon).
+  BetweenSyllableMinimumDistance: 0.5,
+  BetweenSyllableMaximumDistance: 10,
+  HorizontalBetweenLyricsDistance: 0.2,
+  MinimumDistanceBetweenDashes: 10,
+  MaximumLyricsElongationFactor: 2.5,
+  LyricsUseXPaddingForLongLyrics: true,
+  LyricsXPaddingFactorForLongLyrics: 1.0,
+  // (d) S10 — maatnummers alleen aan systeembegin (canonical-checklists).
+  RenderMeasureNumbersOnlyAtSystemStart: true,
+  // (e) stokken iets korter dan OSMD-default (3.0 / 2.5–4.5)
+  IdealStemLength: 2.6,
+  StemMinLength: 2.2,
+  StemMaxLength: 3.6,
+};
+
+function coribCompactRuleEntries() {
+  const skip = new Set([
+    "name",
+    "sheetWidthPx",
+    "contentPadPx",
+    "MeasureWidthFactor",
+  ]);
+  return Object.entries(CORIB_COMPACT).filter(([key]) => !skip.has(key));
+}
 
 /** Lokale WOFF2 → @font-face (geen Google Fonts-afhankelijkheid in de VM). */
 function buildSourceSansFaceCss() {
@@ -164,9 +234,14 @@ async function main() {
     console.error(`S8 A1-adapter niet gevonden: ${ADAPTER_PATH}`);
     process.exit(1);
   }
+  if (!fs.existsSync(CUE_LAYOUT_PATH)) {
+    console.error(`Cue-layout niet gevonden: ${CUE_LAYOUT_PATH}`);
+    process.exit(1);
+  }
 
   const musicxml = fs.readFileSync(inputPath, "utf8");
   const adapterJs = fs.readFileSync(ADAPTER_PATH, "utf8");
+  const cueLayoutJs = fs.readFileSync(CUE_LAYOUT_PATH, "utf8");
   const fontFaceCss = buildSourceSansFaceCss();
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
@@ -189,7 +264,7 @@ async function main() {
   <style>${fontFaceCss}</style>
 </head>
 <body>
-  <div id="osmd" style="width: 900px;"></div>
+  <div id="osmd" style="width: ${CORIB_COMPACT.sheetWidthPx}px;"></div>
   <script src="${OSMD_CDN}"></script>
 </body>
 </html>`,
@@ -205,10 +280,11 @@ async function main() {
         await document.fonts.ready;
       }
     }, FONT_FAMILY);
+    await page.addScriptTag({ content: cueLayoutJs });
     await page.addScriptTag({ content: adapterJs });
 
     const pageCount = await page.evaluate(
-      async (xml, fontFamily) => {
+      async (xml, fontFamily, ruleEntries, measureWidthFactor, contentPadPx) => {
         const mount = document.getElementById("osmd");
         const osmd = new window.opensheetmusicdisplay.OpenSheetMusicDisplay(
           mount,
@@ -223,18 +299,247 @@ async function main() {
             drawTimeSignatures: false,
             defaultFontFamily: fontFamily,
             drawingParameters: "compacttight",
+            // S10: alleen systeembegin (EngravingRules hieronder bevestigt).
+            drawMeasureNumbers: true,
+            drawMeasureNumbersOnlyAtSystemStart: true,
           }
         );
+        // Regels vóór load: OSMD meet lyrics al bij het inlezen.
+        const rules = osmd.EngravingRules;
+        for (const [key, value] of ruleEntries) {
+          rules[key] = value;
+        }
         osmd.setOptions({ pageFormat: "Endless" });
         await osmd.load(xml);
-        osmd.render();
+        if (osmd.Sheet && measureWidthFactor != null) {
+          osmd.Sheet.MeasureWidthFactor = measureWidthFactor;
+        }
+        // Cues §4.2 / S15/S19/C6: WidthFactor + wrap + X op eerste noot
+        // (rendert zelf; geen kale osmd.render() hierna vóór S8).
+        if (typeof window.__vsaOsmdCueLayout === "function") {
+          window.__vsaOsmdCueLayout(osmd, mount, xml);
+        } else {
+          osmd.render();
+        }
         if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
           window.__vsaOsmdS8FinalizePrint(mount, xml);
+        }
+        // OSMD hangt lyrics aan de skyline van de bovenbalk; bij een
+        // groter balkgat blijven ze te hoog. Verschuif lyrics+streepjes
+        // per systeem naar het midden van treble-onder ↔ bas-boven.
+        (function centerLyricsBetweenStaves() {
+          const staffs = Array.from(mount.querySelectorAll(".staffline"));
+          if (staffs.length < 2) return;
+          // Alleen de vijf notenbalklijnen (niet de hele stave-bbox met
+          // stokken/lyrics) — anders valt het «gat» al over de lyrics heen.
+          const bands = staffs
+            .map((el) => {
+              const ys = [];
+              for (const p of el.querySelectorAll("path")) {
+                const d = p.getAttribute("d") || "";
+                const m = d.match(
+                  /^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/
+                );
+                if (!m) continue;
+                if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+                if (Number(m[3]) - Number(m[1]) < 200) continue;
+                ys.push(Number(m[2]));
+              }
+              if (ys.length < 4) return null;
+              return { el, y: Math.min(...ys), bottom: Math.max(...ys) };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.y - b.y);
+          for (let i = 0; i + 1 < bands.length; i += 2) {
+            const treble = bands[i];
+            const bass = bands[i + 1];
+            const gapTop = treble.bottom;
+            const gapBot = bass.y;
+            if (!(gapBot > gapTop + 20)) continue;
+            const nodes = [];
+            for (const sel of [
+              ".vf-text.lyrics text",
+              ".vf-text.dash text",
+              ".vf-text.lyrics",
+              ".vf-text.dash",
+            ]) {
+              for (const el of mount.querySelectorAll(sel)) {
+                let bb;
+                try {
+                  bb = el.getBBox();
+                } catch {
+                  continue;
+                }
+                if (bb.y > gapTop - 2 && bb.y < gapBot + 2) {
+                  nodes.push(el);
+                }
+              }
+            }
+            // Uniek op element
+            const seen = new Set();
+            const uniq = [];
+            for (const el of nodes) {
+              if (seen.has(el)) continue;
+              seen.add(el);
+              uniq.push(el);
+            }
+            if (!uniq.length) continue;
+            let minY = Infinity;
+            let maxY = -Infinity;
+            for (const el of uniq) {
+              try {
+                const b = el.getBBox();
+                minY = Math.min(minY, b.y);
+                maxY = Math.max(maxY, b.y + b.height);
+              } catch {
+                /* skip */
+              }
+            }
+            if (!Number.isFinite(minY) || !Number.isFinite(maxY)) continue;
+            // Alleen omlaag schuiven als er onder meer lucht is dan boven
+            // (OSMD plakt lyrics aan de bovenbalk). Nooit omhoog.
+            const roomAbove = minY - gapTop;
+            const roomBelow = gapBot - maxY;
+            const dy = (roomBelow - roomAbove) / 2;
+            if (!(dy > 3)) continue;
+            // Alleen groepen verschuiven (tekst zit erin); voorkom dubbel.
+            const groups = new Set();
+            for (const el of uniq) {
+              const g =
+                el.classList && el.classList.contains("vf-text")
+                  ? el
+                  : el.closest(".vf-text");
+              if (g) groups.add(g);
+            }
+            for (const g of groups) {
+              const prev = g.getAttribute("transform") || "";
+              g.setAttribute(
+                "transform",
+                `${prev} translate(0, ${dy.toFixed(2)})`.trim()
+              );
+            }
+          }
+        })();
+        // S10-veiligheidsnet: mid-systeem-maatnummers weg (OSMD interval
+        // kan ondanks OnlyAtSystemStart soms nog een nummer zetten).
+        (function stripMidSystemMeasureNumbers() {
+          const texts = Array.from(
+            mount.querySelectorAll("g.vf-text text")
+          ).filter((t) =>
+            /^\d{1,3}$/.test(String(t.textContent || "").trim())
+          );
+          const byY = new Map();
+          for (const t of texts) {
+            let b;
+            try {
+              b = t.getBBox();
+            } catch {
+              continue;
+            }
+            const yKey = Math.round(b.y / 40) * 40;
+            if (!byY.has(yKey)) byY.set(yKey, []);
+            byY.get(yKey).push({ t, x: b.x });
+          }
+          for (const group of byY.values()) {
+            group.sort((a, b) => a.x - b.x);
+            const left = group[0].x;
+            for (const g of group) {
+              if (g.x > left + 35) {
+                const el = g.t.closest("g.vf-text") || g.t;
+                el.remove();
+              }
+            }
+          }
+        })();
+        // OSMD tekent maatnummer 1 standaard niet (S10: wél aan
+        // systeembegin). Zet «1» boven de eerste treble-maat.
+        (function injectMeasureNumberOne() {
+          const hasOne = Array.from(mount.querySelectorAll("text")).some(
+            (t) => String(t.textContent || "").trim() === "1"
+          );
+          if (hasOne) return;
+          const m1 = mount.querySelector('.vf-measure[id="1"]');
+          if (!m1) return;
+          let bb;
+          try {
+            bb = m1.getBBox();
+          } catch {
+            return;
+          }
+          const sample = Array.from(
+            mount.querySelectorAll("g.vf-text text")
+          ).find((t) =>
+            /^\d{1,3}$/.test(String(t.textContent || "").trim())
+          );
+          const ns = "http://www.w3.org/2000/svg";
+          const g = document.createElementNS(ns, "g");
+          g.setAttribute("class", "vf-text");
+          g.setAttribute("data-vsa-measure-number", "1");
+          const text = document.createElementNS(ns, "text");
+          text.textContent = "1";
+          text.setAttribute("font-family", fontFamily);
+          text.setAttribute("font-size", "15");
+          text.setAttribute("font-weight", "bold");
+          text.setAttribute("fill", "#000000");
+          text.setAttribute("x", String(bb.x + 6.5));
+          let y = bb.y - 9;
+          if (sample) {
+            const sampleY = Number(sample.getAttribute("y"));
+            const sampleStaff = sample.closest(".staffline");
+            const sampleMeasure =
+              (sampleStaff && sampleStaff.querySelector(".vf-measure")) ||
+              sample.closest(".vf-measure");
+            if (sampleMeasure && Number.isFinite(sampleY)) {
+              try {
+                const smb = sampleMeasure.getBBox();
+                y = bb.y + (sampleY - smb.y);
+              } catch {
+                /* keep default */
+              }
+            }
+            for (const attr of [
+              "font-family",
+              "font-size",
+              "font-weight",
+              "font-style",
+              "fill",
+            ]) {
+              const v = sample.getAttribute(attr);
+              if (v) text.setAttribute(attr, v);
+            }
+          }
+          text.setAttribute("y", String(y));
+          g.appendChild(text);
+          const staff = m1.closest(".staffline") || m1.parentElement;
+          if (staff && staff.parentElement) {
+            staff.parentElement.insertBefore(g, staff);
+          } else {
+            m1.parentElement.insertBefore(g, m1);
+          }
+        })();
+        // Blad bijsnijden op de inkt. Korte stukken vullen de
+        // container niet; zonder dit blijft een lege rechterpagina.
+        const svg = mount.querySelector("svg");
+        if (svg && typeof svg.getBBox === "function") {
+          const bb = svg.getBBox();
+          const pad = contentPadPx;
+          if (bb && bb.width > 32 && bb.height > 32) {
+            const x = Math.min(0, bb.x - 2);
+            const y = Math.min(0, bb.y - 2);
+            const w = Math.ceil(bb.x + bb.width + pad - x);
+            const h = Math.ceil(bb.y + bb.height + pad - y);
+            svg.setAttribute("viewBox", `${x} ${y} ${w} ${h}`);
+            svg.setAttribute("width", String(w));
+            svg.setAttribute("height", String(h));
+          }
         }
         return document.querySelectorAll("#osmd svg").length;
       },
       musicxml,
-      FONT_FAMILY
+      FONT_FAMILY,
+      coribCompactRuleEntries(),
+      CORIB_COMPACT.MeasureWidthFactor,
+      CORIB_COMPACT.contentPadPx
     );
 
     if (!pageCount) {

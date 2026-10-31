@@ -285,7 +285,7 @@ maat af met een **dubbele maatstreep** (behalve als daar al een herhaalstreep
 Geen mid-systeem-HBox en geen spacermaat: MuseScore tekent daar een accolade
 middenin het systeem of een leeg stuk notenbalk. Wil je wél een duidelijke
 regelsprong, gebruik `@mscz-newline`. Canonieke MSCZ-eisen:
-[checklist S14–S20](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
+[checklist S14–S21](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
 en [leesbaarheid — cues](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade).
 Op het **playback/MXL**-pad (Coria): vóór
 elke mid-flow `@tekst` (niet de eerste maat van het stuk) komt dezelfde
