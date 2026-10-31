@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-31 07:22 CET.
+   — branch <code>cursor/osmd-s10-lyric-overlap-91fb</code>
+  , gebouwd 2026-10-31 15:07 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4920,6 +4920,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../plans/corib-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoriB MVP (plan)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5179,9 +5207,9 @@ Sans 3 / 13 pt) en <code>--cue-font</code> / <code>--cue-font-size</code> (cues/
 zelfde font / 12 pt). Fontnaam moet op de machine in MuseScore beschikbaar
 zijn. Niet bij <code>--layout plain</code>.</p>
 <p><strong>Maat-spreiding:</strong> <code>--measure-spacing</code> (MuseScore Style <code>measureSpacing</code>,
-default <code>1.2</code>; hoger = meer ruimte tussen noten in de maat). Dit is geen
-volledige “centreer in brede cue-maat”; die breedte komt uit MusicXML
-<code>width</code> bij cues — dat is een apart onderwerp.</p>
+default <code>1.2</code>; hoger = meer ruimte tussen noten in de maat). Cue-maten
+krijgen een milde MusicXML-<code>width</code> (<a href="../mscz-leesbaarheid/#c--cues-gaps-hbox-accolade">leesbaarheid C6</a>);
+dat vermindert “noten links in een holle maat” bij lange <code>@tekst</code>.</p>
 <p><strong>Bibliotheek-id:</strong> consumer bepaalt de waarde; geef die met
 <code>--bibliotheek-id</code> (colofon bij <code>partituur</code>). Pad-afleiding is alleen een
 fallback.</p>
@@ -5250,7 +5278,7 @@ scripts\mvsa.cmd mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.m
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-29
+        Bijgewerkt: 2026-10-31
         
       </p>
       

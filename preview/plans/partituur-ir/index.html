@@ -93,8 +93,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-10-31 07:22 CET.
+   — branch <code>cursor/osmd-s10-lyric-overlap-91fb</code>
+  , gebouwd 2026-10-31 15:07 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4814,6 +4814,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../corib-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoriB MVP (plan)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5285,7 +5313,7 @@ from-ir emitteert de navigatiemarkeringen voor OSMD.</p>
 <h3 id="44-voiceevent">4.4 VoiceEvent<a class="headerlink" href="#44-voiceevent" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>VoiceEvent
   pitch: { step, alter?, octave } | "rest" | "hold"
-  duration: { elm }                       # canonieke ELM-token
+  duration: { elm }                       # canonieke ELM-token (incl. ``__.`` / ``__..`` voor S13 gestipte whole)
   lyricIndex?: number                     # index in measure.lyrics (eerste noot van melisma)
   melisma?: {
     extend?: bool
@@ -5304,7 +5332,15 @@ from-ir MusicXML: spacers → <code>notehead none</code> + <code>stem none</code
 is scherm-<strong>marker</strong> voor de OSMD-adapter; OSMD tekent die kop niet vanzelf
 weg — zie <a href="../osmd-s8-recite/">osmd-s8-recite</a>.</p>
 <p><strong>S13 in IR:</strong> same-pitch melisma al als compacte (gestipte) noot waar
-representeerbaar — OSMD-eindvorm, niet de MuseScore-import I1-tie-keten.</p>
+representeerbaar — OSMD-eindvorm, niet de MuseScore-import I1-tie-keten.
+Gestipte whole = ELM <code>__.</code> (dubbelgepunt <code>__..</code>); die tokens zijn
+Score-IR/from-ir-only (niet als gewone <code>.mvsa</code>-invoer). Zonder die
+mapping viel de serializer terug op <code>~</code> (gevulde kwart) — regressie
+op o.a. T «lu» in alleluia-toon-2.</p>
+<p><strong>lyricIndex:</strong> per stem het <em>n</em>-de lyric-dragende event ↔
+<code>measure.lyrics[n]</code> (zelfde L-regel). Niet de event-index van S
+hergebruiken: na S13-collapse zijn stemmen korter en zouden «lu»/«ja»
+anders kwijt raken of op de verkeerde noot landen.</p>
 <h3 id="45-meta-mag-wel-mag-niet">4.5 meta (mag wel / mag niet)<a class="headerlink" href="#45-meta-mag-wel-mag-niet" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -5427,9 +5463,10 @@ mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a-vrede
 mvsa score-ir lied.mvsa --musicxml
 mvsa score-ir map-met-mvsa --musicxml
 </code></pre></div>
-<p><strong>Bewijs (spike, geen product-UI):</strong> <code>examples/spikes/partituur-browser/</code>
-(OSMD in de browser); optioneel headless SVG:
-<code>examples/spikes/partituur-osmd-svg/</code>.</p>
+<p><strong>Bewijs (spike + optionele CLI):</strong> <code>examples/spikes/partituur-browser/</code>
+(OSMD in de browser); headless SVG:
+<code>examples/spikes/partituur-osmd-svg/</code> / <code>scripts/osmd-svg/</code>;
+<code>mvsa svg --engine osmd</code> (Score-IR → from-ir MusicXML → OSMD-bestand).</p>
 <p><strong>Non-goals van deze brug:</strong></p>
 <ul>
 <li>Geen MuseScore-paginamodel op de site; geen tall MuseScore-scherm-SVG als
@@ -5453,7 +5490,9 @@ catalogus-MXL of MuseScore-SVG.</p>
    <a href="../kale-muziek-svg-en-uitgaven/">kale-muziek §4</a>)</li>
 <li>~~<strong>Productiescherm</strong> (mvsa / S8)~~ — bibliotheek from-ir → OSMD; S8 A1
    (<a href="../osmd-s8-recite/">osmd-s8-recite</a>); rest kale-muziek §4 (<code>.vsa</code>, CoriB, …)</li>
-<li>CoriB-MVP (speler op §7-brug) — later</li>
+<li>~~Optionele OSMD-SVG CLI~~ (<code>mvsa svg --engine osmd</code>; D2-vergelijking in
+   <code>examples/spikes/partituur-osmd-svg/README.md</code>)</li>
+<li>CoriB-MVP (speler op §7-brug) — plan: <a href="../corib-mvp/">corib-mvp.md</a> (M1–M4; branch <code>corib</code>)</li>
 </ol>
 <hr />
 <h2 id="9-open-punten">9. Open punten<a class="headerlink" href="#9-open-punten" title="Permanent link">&para;</a></h2>
@@ -5500,7 +5539,7 @@ catalogus-MXL of MuseScore-SVG.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-10-31
         
       </p>
       
