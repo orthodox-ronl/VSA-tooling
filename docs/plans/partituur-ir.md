@@ -269,7 +269,7 @@ catalogus-MXL of MuseScore-SVG.
    ([osmd-s8-recite](osmd-s8-recite.md)); rest kale-muziek §4 (`.vsa`, CoriB, …)
 8. ~~Optionele OSMD-SVG CLI~~ (`mvsa svg --engine osmd`; D2-vergelijking in
    `examples/spikes/partituur-osmd-svg/README.md`)
-9. CoriB-MVP (speler op §7-brug) — later
+9. CoriB-MVP (speler op §7-brug) — plan: [corib-mvp.md](corib-mvp.md) (M1–M4; branch `corib`)
 
 ---
 
