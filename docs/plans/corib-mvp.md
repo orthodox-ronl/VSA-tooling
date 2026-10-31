@@ -4,7 +4,7 @@
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Status**      | werkplan; **niet normatief**; stap 0 (inventaris + dit document) klaar; M1–M4 nog open                                                                                                        |
 | **Doel**        | Coria-vervanger / oefenspeler (**CoriB**): partij mute/solo, cursor, tempo — op dezelfde schermbrug als koormap                                                                               |
-| **Branch**      | Productwerk op **`corib`** ([branch-afstemming](../../.cursor/rules/branch-afstemming.mdc)); PR-richting → `development`                                                                      |
+| **Branch**      | Productwerk op **`corib`** (Cursor-regel `.cursor/rules/branch-afstemming.mdc`); PR-richting → `development`                                                                                  |
 | **Gerelateerd** | [partituur-ir](partituur-ir.md) §7–§8, [kale-muziek §4](kale-muziek-svg-en-uitgaven.md), [osmd-s8-recite](osmd-s8-recite.md) (afgerond), [gebruikseisen-dragers](gebruikseisen-dragers.md) §5 |
 
 ---
