@@ -142,7 +142,7 @@ LyricPos
 ```text
 VoiceEvent
   pitch: { step, alter?, octave } | "rest" | "hold"
-  duration: { elm }                       # canonieke ELM-token
+  duration: { elm }                       # canonieke ELM-token (incl. ``__.`` / ``__..`` voor S13 gestipte whole)
   lyricIndex?: number                     # index in measure.lyrics (eerste noot van melisma)
   melisma?: {
     extend?: bool
@@ -165,6 +165,15 @@ weg — zie [osmd-s8-recite](osmd-s8-recite.md).
 
 **S13 in IR:** same-pitch melisma al als compacte (gestipte) noot waar
 representeerbaar — OSMD-eindvorm, niet de MuseScore-import I1-tie-keten.
+Gestipte whole = ELM ``__.`` (dubbelgepunt ``__..``); die tokens zijn
+Score-IR/from-ir-only (niet als gewone ``.mvsa``-invoer). Zonder die
+mapping viel de serializer terug op ``~`` (gevulde kwart) — regressie
+op o.a. T «lu» in alleluia-toon-2.
+
+**lyricIndex:** per stem het *n*-de lyric-dragende event ↔
+`measure.lyrics[n]` (zelfde L-regel). Niet de event-index van S
+hergebruiken: na S13-collapse zijn stemmen korter en zouden «lu»/«ja»
+anders kwijt raken of op de verkeerde noot landen.
 
 ### 4.5 meta (mag wel / mag niet)
 

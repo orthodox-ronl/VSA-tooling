@@ -9,13 +9,20 @@ The default mapping is specified in VSA-spec §8.2.5::
     -    → kwartnoot  (quarter)
     -.   → gepunteerde kwartnoot (dotted quarter)
     ~.   → gepunteerde kwartnoot (dotted quarter)
+    ~..  → dubbelgepunteerde kwart (S13-pack)
     _    → halve noot (half)
     _.   → gepunteerde halve noot (dotted half)
+    _..  → dubbelgepunteerde halve (S13-pack)
     __   → hele noot  (whole)
+    __.  → gepunteerde hele noot (dotted whole; Score-IR/S13-eindvorm)
+    __.. → dubbelgepunteerde hele noot (double-dotted whole; S13-pack ≤28)
     .    → achtste noot (eighth)
     ..   → zestiende noot (16th)
 
 Additional ``duration-model`` values may be registered in the future.
+
+``__.`` / ``__..`` / ``~..`` / ``_..`` zijn vooral voor Score-IR ↔ from-ir
+(S13 compacte same-pitch); ze horen niet in gewone ``.mvsa``-invoer.
 """
 
 from __future__ import annotations
@@ -29,9 +36,13 @@ _DEFAULT_MODEL: dict[str, Duration] = {
     "-":  Duration(note_type="quarter", dots=0),
     "-.": Duration(note_type="quarter", dots=1),
     "~.": Duration(note_type="quarter", dots=1),
+    "~..": Duration(note_type="quarter", dots=2),
     "_":  Duration(note_type="half",    dots=0),
     "_.": Duration(note_type="half",    dots=1),
+    "_..": Duration(note_type="half",   dots=2),
     "__": Duration(note_type="whole",   dots=0),
+    "__.": Duration(note_type="whole",  dots=1),
+    "__..": Duration(note_type="whole", dots=2),
     ".":  Duration(note_type="eighth",  dots=0),
     "..": Duration(note_type="16th",    dots=0),
 }

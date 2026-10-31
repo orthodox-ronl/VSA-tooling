@@ -25,9 +25,11 @@ Schrijf beide met ``{straat} score-ir … --musicxml`` (zonder pad; werkt
 ook op een map). Alleen de eigen bronextensie per straat.
 
 **Print-eindvorm (S8/S13):** Score-IR bewaart recite-spacers
-(`print.spacer` / `print.breveHead`) en compacte same-pitch melisma’s;
-from-ir MusicXML emitteert die voor het schermpad (zelfde informatiedichtheid
-als blad-SVG, geen MuseScore-paginamodel). Details:
+(`print.spacer` / `print.breveHead`) en compacte same-pitch melisma’s
+(ELM o.a. ``__.`` voor gestipte whole); from-ir MusicXML emitteert die
+voor het schermpad (zelfde informatiedichtheid als blad-SVG, geen
+MuseScore-paginamodel). `lyricIndex` volgt per stem de volgorde van
+lyric-dragende noten, niet de event-index van S. Details:
 [partituur-ir §4.4](../plans/partituur-ir.md).
 
 **S8 / OSMD (contract A1):** `print.spacer` → from-ir

@@ -34,12 +34,18 @@ SCORE_IR_VERSION = "0.1"
 SCORE_IR_PROFILE = "partituur"
 
 # Reverse of duration_model default (same keys as mvsa_import._DURATION_TO_ELM).
+# S13-eindvorm: gestipte whole (24/28 div) als ``__.`` / ``__..`` — nooit stil
+# terugvallen op ``~`` (dat gaf gevulde kwartkoppen i.p.v. open hele noten).
 _DURATION_TO_ELM: dict[tuple[str, int], str] = {
     ("quarter", 0): "~",
     ("quarter", 1): "~.",
+    ("quarter", 2): "~..",
     ("half", 0): "_",
     ("half", 1): "_.",
+    ("half", 2): "_..",
     ("whole", 0): "__",
+    ("whole", 1): "__.",
+    ("whole", 2): "__..",
     ("eighth", 0): ".",
     ("16th", 0): "..",
 }
@@ -59,7 +65,13 @@ _BAR_STYLE_TO_IR: dict[str, str] = {
 
 
 def _duration_to_elm(dur: Duration) -> str:
-    return _DURATION_TO_ELM.get((dur.note_type, dur.dots), "~")
+    key = (dur.note_type, dur.dots)
+    try:
+        return _DURATION_TO_ELM[key]
+    except KeyError as exc:
+        raise MvsaExportError(
+            f"Score-IR: geen ELM voor duration {dur.note_type!r} dots={dur.dots}"
+        ) from exc
 
 
 def _pitch_to_ir(pitch: Pitch) -> dict[str, Any]:
@@ -172,27 +184,25 @@ def _measure_from_voices(
 ) -> dict[str, Any]:
     # Shared lyrics from soprano (same L-line on all singing voices).
     lyrics: list[dict[str, Any]] = []
-    lyric_index_by_s_event: list[int | None] = []
     for ev in voice_events.get("S", []):
         pos = _lyric_pos_from_event(ev)
         if pos is not None:
-            lyric_index_by_s_event.append(len(lyrics))
             lyrics.append(pos)
-        else:
-            lyric_index_by_s_event.append(None)
 
     voices_out: dict[str, list[dict[str, Any]]] = {}
     for letter in ("S", "A", "T", "B"):
         events = voice_events.get(letter, [])
         serialized: list[dict[str, Any]] = []
-        for i, ev in enumerate(events):
-            # lyricIndex only on the event that carries layer-1 text; index
-            # aligned to the shared lyrics list built from S.
+        # Per stem: n-de lyric-dragende noot ↔ lyrics[n]. Niet event-index
+        # gelijkstellen aan S — na S13-collapse verschillen stemlengtes
+        # (T/A/B korter) en dan kreeg «lu»/«ja» een verkeerde of geen index.
+        lyric_n = 0
+        for ev in events:
             li: int | None = None
-            if _lyric_pos_from_event(ev) is not None and i < len(
-                lyric_index_by_s_event
-            ):
-                li = lyric_index_by_s_event[i]
+            if _lyric_pos_from_event(ev) is not None:
+                if lyric_n < len(lyrics):
+                    li = lyric_n
+                lyric_n += 1
             serialized.append(_serialize_voice_event(ev, lyric_index=li))
         voices_out[letter] = serialized
 

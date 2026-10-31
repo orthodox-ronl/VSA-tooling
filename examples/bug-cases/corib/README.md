@@ -60,6 +60,11 @@ via lokale WOFF2 + `@font-face` in de SVG. Contract:
 [osmd-s8-recite](../../../docs/plans/osmd-s8-recite.md).
 Maatsoort uit (`drawTimeSignatures: false`).
 
+**S13 / T «lu» (alleluia-toon-2):** gestipte whole uit same-pitch-collapse
+kreeg in Score-IR per ongeluk ELM ``~`` (gevulde kwart in OSMD). Fix:
+ELM ``__.`` (+ ``lyricIndex`` per stem-volgorde, niet S-event-index).
+Zie [score-ir](../../../docs/formats/score-ir.md) / [partituur-ir §4.4](../../../docs/plans/partituur-ir.md).
+
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
 npm run check-s8-a1 -- ..\..\generated\corib-s8-toets\from-ir\alleluia-toon-8.from-ir.musicxml
