@@ -54,7 +54,7 @@ def export_mvsa_to_mscz(
     keep_mxl: Path | None = None,
     layout: str | None = None,
     bibliotheek_id: str | None = None,
-    hulptekst: bool = False,
+    translit: bool = False,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
     staff_distance: float | None = None,
@@ -74,7 +74,7 @@ def export_mvsa_to_mscz(
     Intermediate MusicXML uses **partituur** layout (twee balken SA/TB).
     Post-process follows *layout* (default ``partituur``). *bibliotheek_id*
     is preferred over path sniffing for the colofon (``partituur`` only).
-    *hulptekst*: tweede lyric-laag in het tussen-MXL (blad «tweede couplet»).
+    *translit*: tweede lyric-laag in het tussen-MXL (blad «tweede couplet»).
     Style-overrides (systeem-/stafafstand, pagina-marges, lyric-clearance,
     fonts, measureSpacing): not valid with layout ``plain``.
 
@@ -146,7 +146,7 @@ def export_mvsa_to_mscz(
                 mxl_path,
                 section_id=section_id,
                 layout="partituur",
-                hulptekst=hulptekst,
+                translit=translit,
             )
         except (MvsaValidationError, MvsaExportError):
             raise
@@ -221,6 +221,7 @@ def export_mvsa_to_pdf(
     keep_mxl: Path | None = None,
     layout: str | None = None,
     bibliotheek_id: str | None = None,
+    translit: bool = False,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
     staff_distance: float | None = None,
@@ -239,6 +240,7 @@ def export_mvsa_to_pdf(
 
     Returns ``out`` (``.pdf``). Intermediate ``.mscz`` is kept when
     ``keep_mscz`` is set; otherwise a temp file is used.
+    *translit*: tweede lyric-laag in de tussen-MXL/MSCZ (blad «tweede regel»).
     """
     path = Path(path)
     out = Path(out)
@@ -266,6 +268,7 @@ def export_mvsa_to_pdf(
             keep_mxl=keep_mxl,
             layout=layout,
             bibliotheek_id=bibliotheek_id,
+            translit=translit,
             min_system_distance=min_system_distance,
             max_system_distance=max_system_distance,
             staff_distance=staff_distance,
@@ -397,6 +400,7 @@ def export_mvsa_to_svg(
     keep_mscz: Path | None = None,
     keep_mxl: Path | None = None,
     bibliotheek_id: str | None = None,
+    translit: bool = False,
     trim: bool = True,
     white_background: bool = True,
     engine: str | None = None,
@@ -416,9 +420,11 @@ def export_mvsa_to_svg(
 ) -> list[Path]:
     """Export ``.mvsa`` to één kale tall-SVG.
 
-    Default ``engine=musescore``: partituur-MXL → MSCZ → MuseScore → trim.
+Default ``engine=musescore``: partituur-MXL → MSCZ → MuseScore → trim.
     ``engine=osmd``: Score-IR → from-ir MusicXML → headless OSMD (geen MuseScore).
-    Style-kwargs gelden alleen voor MuseScore. Return: altijd ``[out]``.
+    Style-kwargs gelden alleen voor MuseScore.
+    *translit*: tweede lyric-laag in de tussen-MXL/MSCZ (koormap «met translit»).
+    Return: altijd ``[out]``.
     """
     from .mscz_partituur import apply_compact_style_preset
     from .osmd_svg import OsmdSvgError, export_mvsa_to_osmd_svg, normalize_svg_engine
@@ -492,6 +498,7 @@ def export_mvsa_to_svg(
             keep_mxl=keep_mxl,
             layout="muziek",
             bibliotheek_id=bibliotheek_id,
+            translit=translit,
             min_system_distance=style.get("min_system_distance"),
             max_system_distance=style.get("max_system_distance"),
             staff_distance=style.get("staff_distance"),

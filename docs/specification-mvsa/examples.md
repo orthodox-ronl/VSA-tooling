@@ -15,7 +15,7 @@ mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bla
 | [`alleluia-toon-1.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/alleluia-toon-1.mvsa)                             | Vrije SATB, relatief                                                          |
 | [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa) | Omzetting uit MusicXML; absolute octaafcijfers (`S:` zonder EHM)              |
 | [`trisagion-8a-slav-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/trisagion-8a-slav-hemelum.mvsa)         | ELM’s, melisma, recite; experimenteel blokhergebruik (nog **niet** normatief) |
-| [`hulptekst-*-mini.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)                                                 | Hulptekst-export (`--hulptekst`, `@taal`, Coria `--hulptekst-as-parts`)       |
+| [`hulptekst-*-mini.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)                                                 | Hulptekst-export (`--translit`, `@taal`, Coria `--translit-as-parts`)       |
 
 Regelidentifiers (`L:`, `S:`, optioneel `S-:` / `T\6:`): zie
 [Syntax — regelidentifier](syntax.md#regelidentifier).

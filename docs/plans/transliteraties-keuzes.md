@@ -1,5 +1,24 @@
 # Keuzes voor de transliteraties
 
+| Veld       | Waarde                                                                 |
+| ---------- | ---------------------------------------------------------------------- |
+| **Status** | **v1 bevroren** (branch `translit`); expert-antwoorden hieronder       |
+| **Code**   | `src/vsa/transliterate.py` (schema `parochie`)                         |
+| **Intern** | apostrof `'`; `Иисусе` → `Iesusje`; bron-hoofdletter volgen            |
+
+**Samenvatting v1 (wat de tooling doet):**
+
+- Ksl→Latijn: default `е`→`je`, uitzonderingen `це`/`пре`/`ге`/`ец` en na
+  `ж ш щ ч ц г`; `ь`→`'`; `-ий`/`-ый`→`iej`; overrides o.a. `Nynje`,
+  `Djevo`, `Marieje`, `Trisvjatoje`, `Voskresje`, `Gospod'`, `Iesusje`.
+- Nl→Cyrillisch: `Heer`→`Хиир`; `en`/`den`→`эн`/`дэн`; `Eer`→`Ир`;
+  `ee`→`ей` (uitz. `eeuwen`→`эувен`); `ij`→`ей`; `ui` begin→`ау`, midden→`ёй`;
+  `g`→`х`; overrides `Amen`→`Аминь`, `Christus`→`Христус`, enz.
+
+Open: expert stuurt later meer `е`/`e`-patronen → kleine tabelupdate.
+
+---
+
 ## Keuze 1 — Letter е in het kerkslavisch (Latijnse hulptekst)
 
 Jij schreef: bij ныне hoor je duidelijk nynje, maar bij Богородице / Царице meer een gewone è (Bogoroditse, niet “Bogoroditsje”).

@@ -34,8 +34,8 @@ def test_parallel_l_l1_export_lyric_numbers() -> None:
 
 
 def test_parallel_l1_blocks_auto_hulptekst() -> None:
-    """Handmatige L1 wint: --hulptekst voegt geen tweede number=2 toe."""
-    xml = export_mvsa_to_musicxml(PARALLEL, layout="playback", hulptekst=True)
+    """Handmatige L1 wint: --translit voegt geen tweede number=2 toe."""
+    xml = export_mvsa_to_musicxml(PARALLEL, layout="playback", translit=True)
     # L1 blijft Svja; geen gegenereerde dubbele laag over L1 heen.
     assert xml.count("Svja") >= 1
     # Gegenereerd uit Свя zou ook Svja zijn — controleer dat number=2 Svja is,
@@ -44,6 +44,6 @@ def test_parallel_l1_blocks_auto_hulptekst() -> None:
 
 
 def test_hulptekst_still_works_without_l1() -> None:
-    xml = export_mvsa_to_musicxml(KSL_MINI, layout="partituur", hulptekst=True)
+    xml = export_mvsa_to_musicxml(KSL_MINI, layout="partituur", translit=True)
     assert 'lyric number="2"' in xml
     assert "<text>Svja</text>" in xml

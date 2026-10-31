@@ -31,16 +31,18 @@ Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 | `3-eerste-kleine-litanie.mvsa`         | Korte litanie, antwoorden één keer uitgeschreven                                       |
 | `kleine-intocht-zondag-hemelum.mvsa`   | Omzetting VSA-demo MusicXML; absolute `bb4`/`g3`                                       |
 | `trisagion-8a-slav-hemelum.mvsa`       | `@speelplan` → Segno / Fine / D.S. al Fine                                             |
-| `hulptekst-ksl-mini.mvsa`              | Kerkslavisch; export met `--hulptekst` → Latijn als lyric number 2                     |
-| `hulptekst-nl-mini.mvsa`               | Nederlands; export met `--hulptekst` → Cyrillisch als lyric number 2                   |
+| `hulptekst-ksl-mini.mvsa`              | Kerkslavisch; export met `--translit` → Latijn als lyric number 2                     |
+| `hulptekst-nl-mini.mvsa`               | Nederlands; export met `--translit` → Cyrillisch als lyric number 2                   |
 | `hulptekst-parallel-l1-mini.mvsa`      | `L` + `L1` → lyric number 1 + 2 (handmatige parallelle laag)                           |
-| `hulptekst-gemengd-taal-mini.mvsa`     | `@taal nl` / `@taal ksl` + `--hulptekst` (gemengde passages)                           |
-| `hulptekst-coria-custom-ids-mini.mvsa` | Vrije ids (`Lap`/`Sop`/`Zeep`) + `@taal`/`@oct`; Coria `--hulptekst-as-parts`          |
+| `hulptekst-gemengd-taal-mini.mvsa`     | `@taal nl` / `@taal ksl` + `--translit` (gemengde passages)                           |
+| `hulptekst-coria-custom-ids-mini.mvsa` | Vrije ids (`Lap`/`Sop`/`Zeep`) + `@taal`/`@oct`; Coria `--translit-as-parts`          |
 | `uitvoeraanwijzingen-demo.mvsa`        | Kort oefenstuk: `[p]`/`[f]`, cresc/dim, `@tempo`, `[rit]`/`[atempo]`, cesuur/adem/ferm |
 
-**Hulptekst exporteren:** `--hulptekst` = lyric 2 op dezelfde noten (blad/MSCZ).
-`--hulptekst-as-parts` = Coria-keuze-parts `{stem} ({label})`. Zie
-[`docs/reference/cli/mvsa.md`](../../docs/reference/cli/mvsa.md#mvsa-mxl)
+**Translit exporteren:** `--translit` = lyric 2 op dezelfde noten
+(`mvsa mxl` / `mscz` / `pdf` / `svg`). `--translit-as-parts` = Coria-keuze-parts
+`{stem} ({label})` (alleen `mvsa mxl`). Zie
+[`docs/reference/cli/mvsa.md`](../../docs/reference/cli/mvsa.md#mvsa-mxl),
+[productbesluiten](../../docs/plans/kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu)
 en [`@taal`](../../docs/specification-mvsa/keywords.md#taal).
 
 **Speelplan vs `|:…:|`:** vaste klinkende volgorde → één `@speelplan` per
