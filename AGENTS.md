@@ -263,16 +263,17 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 
 - **Coria-vervanger (CoriB):** productwerk op branch **`corib`** — niet stil
   op `development`/`main` mixen.
-- **Branch-afstemming** met lokale chats: zie
-  `.cursor/rules/branch-afstemming.mdc` (expliciete branch in het bericht;
-  anders alleen current checkout; named ≠ current → stop + vraag OK).
+- **Gebruikersbranch is leidend:** de branch die jij noemt (of vast `corib`
+  voor CoriB) is waar commits zichtbaar moeten zijn. Agent-`cursor/…`-
+  branches mogen voor PR’s, maar **niet** als enige plek waar jij moet
+  kijken. Zie `.cursor/rules/branch-afstemming.mdc`.
 
 ## Cursor-regels
 
 | Regel                                 | Doel                                                              |
 | ------------------------------------- | ----------------------------------------------------------------- |
 | `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                                  |
-| `branch-afstemming.mdc`               | Geen stille branch-wissel; CoriB → `corib`                        |
+| `branch-afstemming.mdc`               | Gebruikersbranch leidend; CoriB → `corib`; geen «kijk op cursor/…» |
 | `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                        |
 | `klikbare-bewijslinks.mdc`            | «Kijk hiernaar» altijd met klikbare URL of plakbaar open-commando |
 | `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                                  |
