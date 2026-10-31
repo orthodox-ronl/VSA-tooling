@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>corib</code>
-  , gebouwd 2026-10-31 16:24 CET.
+  , gebouwd 2026-10-31 16:41 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5223,7 +5223,8 @@ Ownership (wie kiest, wie handhaaft):
 <li>Geen frase-slurs die als melisma ogen.</li>
 <li>Maatnummers alleen aan het begin van elk systeem.</li>
 <li>Melisma: lyric-extender (streep) na de lettergreep op de eerste noot, plus
-   melisma-boog (slur) over de noten van die lettergreep.</li>
+   melisma-boog (slur) die op de <strong>eerste</strong> noot van die lettergreep begint
+   en op de <strong>laatste</strong> eindigt (leesbaarheid S2).</li>
 <li><strong>Geen</strong> accolade/bracket middenin een systeem (alleen bij systeembegin).</li>
 <li><strong>Geen</strong> leeg stuk notenbalk (spacermaat) of mid-systeem-HBox vóór een
    <code>@tekst</code>-cue; scheiding = dubbele streep + SystemText (of
@@ -5334,7 +5335,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>L4</td>
-<td>Melisma: tekst op eerste noot; <strong>lyric-extender</strong> + <strong>melisma-slur</strong> (S2/S4). Geen extender onder recite (R4).</td>
+<td>Melisma: tekst op eerste noot; <strong>lyric-extender</strong> + <strong>melisma-slur</strong> van eerste tot laatste noot (leesbaarheid S2/S4). Geen extender onder recite (R4).</td>
 </tr>
 <tr>
 <td>L5</td>
@@ -5358,7 +5359,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>S2</td>
-<td>Melisma-slur alleen waar één lettergreep over meerdere noten hoort.</td>
+<td>Melisma-slur alleen waar één lettergreep over meerdere noten hoort. De slur <strong>begint op de eerste</strong> noot van die lettergreep en <strong>eindigt op de laatste</strong> — geen start op de tweede noot, geen vroegtijdig einde. Post-layout (o.a. OSMD-centreren) mag slur en nootkoppen niet uit elkaar trekken.</td>
 </tr>
 <tr>
 <td>S3</td>
