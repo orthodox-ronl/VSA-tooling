@@ -288,7 +288,8 @@ bron. Spike: `examples/spikes/partituur-browser/`. Brugcontract:
 
 S8-recite in from-ir: spacers krijgen ``<notehead>none</notehead>`` als
 **marker** voor de scherm-OSMD-adapter (contract A1). OSMD verbergt die kop
-niet uit XML alleen — zie
+niet uit XML alleen; `mvsa svg --engine osmd` en de bibliotheek-embed
+passen A1-hide toe na render — zie
 [osmd-s8-recite](../../plans/osmd-s8-recite.md) en
 [score-ir](../../formats/score-ir.md).
 
@@ -517,8 +518,8 @@ mscz pdf lied.mscz -o lied.pdf
 
 Exporteer **`.mvsa`** naar partituur-SVG voor koormap-pagina’s. Voor bron
 `.mscz`: [`mscz svg`](mscz.md). Default: MuseScore tall-SVG (print/fallback).
-Optioneel `--engine osmd`: Score-IR → from-ir MusicXML → headless OSMD
-([`scripts/osmd-svg`](../../../scripts/osmd-svg/)). Formaatpagina:
+Optioneel `--engine osmd`: Score-IR → from-ir MusicXML → headless OSMD +
+S8 A1-adapter ([`scripts/osmd-svg`](../../../scripts/osmd-svg/)). Formaatpagina:
 [mvsa-svg](../../formats/mvsa-svg.md).
 
 ### Synopsis

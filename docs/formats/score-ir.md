@@ -34,7 +34,10 @@ als blad-SVG, geen MuseScore-paginamodel). Details:
 `<stem>none</stem>` + `<notehead>none</notehead>` (lyrics blijven op de
 noot). Dat is een **stabiele marker** voor de scherm-OSMD-adapter, geen
 belofte dat OSMD/VexFlow de kop zelf verbergt (peiling:
-[osmd-s8-recite](../plans/osmd-s8-recite.md)). Breve-midden:
+[osmd-s8-recite](../plans/osmd-s8-recite.md)). Productpad
+`mvsa svg --engine osmd` past de A1-hide toe in
+[`scripts/osmd-svg`](../../scripts/osmd-svg/) (`s8-a1-adapter.js`);
+bibliotheek-embed via `score-osmd.js`. Breve-midden:
 `notehead breve` + `stem none` (geen `type=breve`).
 
 | Onderwerp                         | Waar                                                                                 |

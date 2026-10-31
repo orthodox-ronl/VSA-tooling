@@ -99,7 +99,7 @@ Coria-app.
 | ----------------- | ---------------------------------------------- | --------------------------------------------- |
 | IR + from-ir      | **VSA-tooling** (bestaand)                     | Contract + export; geen speler-UI             |
 | Oefen-spike M1–M3 | **VSA-tooling** `examples/spikes/…`            | Bewijs mute/solo/cursor/tempo                 |
-| S8 A1-adapter     | **bibliotheek** (bestaand)                     | Spacer-koppen verbergen; hergebruik in CoriB  |
+| S8 A1-adapter     | **bibliotheek** + `scripts/osmd-svg`           | Spacer-koppen verbergen; product-CLI én embed |
 | Product-host M4   | **open** (bibliotheek / aparte pagina / embed) | Keuze na werkende spike                       |
 
 Versiepoort: onbekende `format` / major `version` weigeren (partituur-ir §7).

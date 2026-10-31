@@ -4,6 +4,9 @@
  * Productpad: ``mvsa svg --engine osmd`` (Python start dit script).
  * Spike: ``examples/spikes/partituur-osmd-svg/`` wijst hierheen.
  *
+ * S8 (contract A1): na OSMD-render draait ``s8-a1-adapter.js`` zodat
+ * spacer-koppen (``notehead none``) verdwijnen; lyrics blijven.
+ *
  * Usage:
  *   npm install
  *   node render.mjs INPUT.musicxml OUTPUT.svg
@@ -16,7 +19,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OSMD_CDN =
-  "https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.3/build/opensheetmusicdisplay.min.js";
+  "https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.9.3/build/opensheetmusicdisplay.min.js";
+const ADAPTER_PATH = path.join(__dirname, "s8-a1-adapter.js");
 
 async function loadPuppeteer() {
   const require = createRequire(import.meta.url);
@@ -70,8 +74,13 @@ async function main() {
     console.error(`MusicXML niet gevonden: ${inputPath}`);
     process.exit(1);
   }
+  if (!fs.existsSync(ADAPTER_PATH)) {
+    console.error(`S8 A1-adapter niet gevonden: ${ADAPTER_PATH}`);
+    process.exit(1);
+  }
 
   const musicxml = fs.readFileSync(inputPath, "utf8");
+  const adapterJs = fs.readFileSync(ADAPTER_PATH, "utf8");
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
   const puppeteer = await loadPuppeteer();
@@ -99,10 +108,12 @@ async function main() {
     await page.waitForFunction(
       () => typeof window.opensheetmusicdisplay !== "undefined"
     );
+    await page.addScriptTag({ content: adapterJs });
 
     const pageCount = await page.evaluate(async (xml) => {
+      const mount = document.getElementById("osmd");
       const osmd = new window.opensheetmusicdisplay.OpenSheetMusicDisplay(
-        "osmd",
+        mount,
         {
           autoResize: false,
           backend: "svg",
@@ -110,12 +121,17 @@ async function main() {
           drawSubtitle: false,
           drawComposer: false,
           drawLyricist: false,
+          drawPartNames: false,
+          drawTimeSignatures: false,
           drawingParameters: "compacttight",
         }
       );
       osmd.setOptions({ pageFormat: "Endless" });
       await osmd.load(xml);
       osmd.render();
+      if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
+        window.__vsaOsmdS8FinalizePrint(mount, xml);
+      }
       return document.querySelectorAll("#osmd svg").length;
     }, musicxml);
 

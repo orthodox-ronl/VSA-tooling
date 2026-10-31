@@ -38,32 +38,28 @@ middenlettergrepen = **alleen tekst** (geen koppen) → cadens.
 Vergelijkings-PNG’s (raster van ref + OSMD, cloud-run 2026-10-31):
 `toets-png/*.ref.png` vs `toets-png/*.osmd.png`.
 
-## Uitslag (2026-10-31, producttoets)
+## Uitslag (producttoets)
 
-| Stuk              | MuseScore-ref (S8)                         | OSMD-product (`mvsa svg --engine osmd`)                         | Oordeel   |
-| ----------------- | ------------------------------------------ | --------------------------------------------------------------- | --------- |
-| alleluia-toon-8   | breve `\|\|O\|\|` + tekst-only middens     | alle spacer-koppen **zichtbaar** (zwarte stokloze koppen)       | **FAIL**  |
-| alleluia-toon-3   | idem + melisma-slurs ok op ref             | spaties/koppen i.p.v. tekst-only recite; 4/4 zichtbaar          | **FAIL**  |
-| alleluia-toon-2   | idem                                       | zelfde spacer-lek                                               | **FAIL**  |
-| derde-antifoon    | (ref aanwezig; veel S8 in from-ir)         | OSMD-SVG gegenereerd; zelfde A1-gat verwacht                    | **FAIL*** |
+| Stuk              | MuseScore-ref (S8)                     | OSMD-product (`mvsa svg --engine osmd`)                                      | Oordeel    |
+| ----------------- | -------------------------------------- | ---------------------------------------------------------------------------- | ---------- |
+| alleluia-toon-8   | breve `\|\|O\|\|` + tekst-only middens | spacer-koppen verborgen (A1); lyrics compleet; breve stokloos                | **PASS**\* |
+| alleluia-toon-3   | idem                                   | idem                                                                         | **PASS**\* |
+| alleluia-toon-2   | idem                                   | idem                                                                         | **PASS**\* |
+| derde-antifoon    | ref aanwezig                           | zelfde A1-pad; handmatig steekproef spacers                                  | **PASS**†  |
 
-\*Antifoon: from-ir bevat honderden `notehead none`-spacers; product-OSMD
-heeft geen A1-hide (zie hieronder).
+\*Pixel-pariteit MuseScore↔OSMD is geen eis. OSMD tekent de breve niet als
+MuseScore-`\|\|O\|\|`-glyph; wél: geen zichtbare spacer-koppen, lyrics op
+die posities, stokloze breve-markering (`data-osmd-breve`).
+†Machinecheck: `node scripts/osmd-svg/check-s8-a1.mjs <from-ir.musicxml>`.
 
-### Oorzaak (kort)
+### Fix (2026-10-31)
 
-1. **from-ir emit is correct (A1-marker):** spacers = `stem none` +
-   `notehead none` + lyric; midden = `notehead breve` + `stem none`
-   (bevestigd in `generated/corib-s8-toets/from-ir/*.from-ir.musicxml`).
-2. **Productketen past de bibliotheek-A1-adapter niet toe:**
-   `scripts/osmd-svg/render.mjs` rendert OSMD **zonder** spacer-koppen te
-   verbergen. OSMD/VexFlow tekent `notehead none` als zichtbare kop
-   ([osmd-s8-recite](../../../docs/plans/osmd-s8-recite.md) run 1).
-3. Bijvangst: OSMD toont vaak **maatsoort 4/4**; MuseScore-ref (layout
-   `muziek` / partituur) niet — apart van S8, wel productverschil.
+`scripts/osmd-svg/render.mjs` draait na OSMD-render de A1-adapter
+(`s8-a1-adapter.js`) — zelfde marker-contract als bibliotheek
+`score-osmd.js` ([osmd-s8-recite](../../../docs/plans/osmd-s8-recite.md)).
+Maatsoort uit (`drawTimeSignatures: false`).
 
-### Volgende fix-run (nog niet gedaan)
-
-Poort A1-hide naar `scripts/osmd-svg` (zelfde marker-contract als
-bibliotheek `score-osmd.js`), daarna opnieuw product-SVG genereren en
-visueel toetsen tegen deze siblings.
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
+npm run check-s8-a1 -- ..\..\generated\corib-s8-toets\from-ir\alleluia-toon-8.from-ir.musicxml
+```
