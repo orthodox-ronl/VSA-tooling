@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>corib</code>
-  , gebouwd 2026-10-31 15:26 CET.
+  , gebouwd 2026-10-31 15:47 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5235,6 +5235,9 @@ Ownership (wie kiest, wie handhaaft):
 <li><strong>Geen</strong> zichtbare metronoom/tempo-tekst op het blad of in de PDF; afspelen
     gebruikt wel <code>@tempo</code> / default 130 via <code>sound tempo</code> (MSCZ: Tempo
     <code>visible=0</code>).</li>
+<li>Noten die <strong>dezelfde lettergreep</strong> dragen (één anker per stem) vormen
+    <strong>één verticale kolom</strong> over SA én TB — niet lateraal uit elkaar
+    getrokken (S21 / P3b).</li>
 </ol>
 <hr />
 <h2 id="r-recite-tekst-model-a-spacers">R — Recite-tekst (model A: spacers)<a class="headerlink" href="#r-recite-tekst-model-a-spacers" title="Permanent link">&para;</a></h2>
@@ -5421,7 +5424,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </table>
 <hr />
 <h2 id="c-cues-gaps-hbox-accolade">C — Cues, gaps, HBox, accolade<a class="headerlink" href="#c-cues-gaps-hbox-accolade" title="Permanent link">&para;</a></h2>
-<p>Contract: checklist MSCZ <strong>S14–S20</strong>. MuseScore-gedrag dat we vermijden:</p>
+<p>Contract: checklist MSCZ <strong>S14–S21</strong>. MuseScore-gedrag dat we vermijden:</p>
 <table>
 <thead>
 <tr>
@@ -5517,6 +5520,10 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 <tr>
 <td>P3a</td>
 <td>Horizontaal: MuseScore plakt lyric-bboxes tot ~0,1 sp tegen elkaar («desheils»). Mitigatie: trailing NBSP op woord-einde-lyrics in <code>.mscx</code>, plus SVG-nabewerking (<code>enforce_svg_lyric_word_gaps</code>, min. ~0,45 sp tussen opeenvolgende lyric-paths). Hyphen-lettergrepen (<code>syllabic</code> begin/middle) zonder NBSP.</td>
+</tr>
+<tr>
+<td>P3b</td>
+<td><strong>Stemkolom (S21):</strong> waar S/A/T/B op dezelfde lettergreep elk één nootkop-anker hebben, delen die ankers <strong>één x-kolom</strong> over de SA- én de TB-balk. Post-layout (o.a. OSMD-centreren in de maat) mag die kolom niet per balk apart verschuiven. Overtreding: bovenbalk-noten onder een andere lettergreep dan de onderbalk.</td>
 </tr>
 <tr>
 <td>P4</td>
