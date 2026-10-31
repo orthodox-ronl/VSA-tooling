@@ -593,6 +593,35 @@
             el.setAttribute("data-osmd-center", "1");
           }
         }
+        // Melisma-slurs / ties (leesbaarheid S2): zelfde dx als de noten,
+        // anders beginnen/eindigen bogen visueel op de verkeerde noot.
+        var curves = mount.querySelectorAll(".vf-curve, .vf-stavetie");
+        for (var ci = 0; ci < curves.length; ci += 1) {
+          var cg = curves[ci];
+          if (cg.getAttribute("data-osmd-center") === "1") {
+            continue;
+          }
+          var cb;
+          try {
+            cb = cg.getBBox();
+          } catch (e5) {
+            continue;
+          }
+          var cMid = cb.x + cb.width / 2;
+          var cY = cb.y + cb.height / 2;
+          if (cMid < treble.x || cMid >= treble.right) {
+            continue;
+          }
+          if (cY < colY0 || cY > colY1) {
+            continue;
+          }
+          var cPrev = cg.getAttribute("transform") || "";
+          cg.setAttribute(
+            "transform",
+            (cPrev ? cPrev + " " : "") + "translate(" + dxStr + ", 0)"
+          );
+          cg.setAttribute("data-osmd-center", "1");
+        }
         for (var li = 0; li < lyricGs.length; li += 1) {
           var g = lyricGs[li];
           if (g.getAttribute("data-osmd-center") === "1") {

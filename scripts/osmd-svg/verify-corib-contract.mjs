@@ -7,6 +7,7 @@
  *   wrap op ``...`` als twee regels óf één regel die past (S19 / §4.2)
  * - S21: eerste zichtbare nootkoppen SA↔TB per maat-id in één kolom
  * - lyrics horen bij een nootkolom (geen «Heer» boven lege balk na centreren)
+ * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij nootkoppen
  *
  * Usage:
  *   node verify-corib-contract.mjs path/to/a.osmd.svg [more…]
@@ -25,6 +26,7 @@ const MIN_LYRIC_GAP_PX = 1.5;
 const MID_SYSTEM_X_SLACK = 40;
 const S21_COLUMN_SLACK_PX = 3;
 const LYRIC_NOTE_SLACK_PX = 28;
+const SLUR_NOTE_SLACK_PX = 22;
 
 async function checkSvg(browser, svgPath) {
   const svgText = fs.readFileSync(svgPath, "utf8");
@@ -36,7 +38,7 @@ async function checkSvg(browser, svgPath) {
       { waitUntil: "domcontentloaded" }
     );
     return await page.evaluate(
-      (minGap, midSlack, s21Slack, lyricNoteSlack) => {
+      (minGap, midSlack, s21Slack, lyricNoteSlack, slurNoteSlack) => {
         const root = document.querySelector("svg");
         if (!root) return { ok: false, errors: ["geen <svg>"] };
 
@@ -442,6 +444,73 @@ async function checkSvg(browser, svgPath) {
           );
         }
 
+        // Leesbaarheid S2: melisma-slur-uiteinden dicht bij nootkoppen
+        // (na centreren mogen bogen niet achterblijven).
+        const slurFails = [];
+        const headCenters = [];
+        for (const n of root.querySelectorAll(".vf-stavenote")) {
+          if (n.getAttribute("data-osmd-spacer") === "1") continue;
+          const breve = n.getAttribute("data-osmd-breve") === "1";
+          const paths = breve
+            ? n.querySelectorAll("[data-osmd-breve-glyph='1'] path")
+            : n.querySelectorAll(".vf-notehead path");
+          for (const p of paths) {
+            const st = getComputedStyle(p);
+            if (st.visibility === "hidden" || st.display === "none") {
+              continue;
+            }
+            let bb;
+            try {
+              bb = p.getBBox();
+            } catch {
+              continue;
+            }
+            if (!(bb.width > 0.5)) continue;
+            const ctm = p.getScreenCTM();
+            if (!ctm) continue;
+            const pt = p.ownerSVGElement.createSVGPoint();
+            pt.x = bb.x + bb.width / 2;
+            pt.y = bb.y + bb.height / 2;
+            const s = pt.matrixTransform(ctm);
+            headCenters.push({ cx: s.x, cy: s.y });
+          }
+        }
+        for (const g of root.querySelectorAll(".vf-curve")) {
+          let bb;
+          try {
+            bb = g.getBBox();
+          } catch {
+            continue;
+          }
+          if (!(bb.width > 20)) continue;
+          const ctm = g.getScreenCTM();
+          if (!ctm) continue;
+          const pt = g.ownerSVGElement.createSVGPoint();
+          pt.x = bb.x;
+          pt.y = bb.y + bb.height / 2;
+          const left = pt.matrixTransform(ctm);
+          pt.x = bb.x + bb.width;
+          const right = pt.matrixTransform(ctm);
+          const midY = (left.y + right.y) / 2;
+          let sd = Infinity;
+          let ed = Infinity;
+          for (const h of headCenters) {
+            if (Math.abs(h.cy - midY) > 70) continue;
+            sd = Math.min(sd, Math.abs(h.cx - left.x));
+            ed = Math.min(ed, Math.abs(h.cx - right.x));
+          }
+          if (sd > slurNoteSlack || ed > slurNoteSlack) {
+            slurFails.push(
+              `boog@${Math.round(left.x)}–${Math.round(right.x)} Δstart=${
+                Number.isFinite(sd) ? Math.round(sd) : "?"
+              } Δend=${Number.isFinite(ed) ? Math.round(ed) : "?"}`
+            );
+          }
+        }
+        if (slurFails.length) {
+          errors.push(`S2 slur↔noot: ` + slurFails.slice(0, 4).join(" | "));
+        }
+
         return {
           ok: errors.length === 0,
           errors,
@@ -457,7 +526,8 @@ async function checkSvg(browser, svgPath) {
       MIN_LYRIC_GAP_PX,
       MID_SYSTEM_X_SLACK,
       S21_COLUMN_SLACK_PX,
-      LYRIC_NOTE_SLACK_PX
+      LYRIC_NOTE_SLACK_PX,
+      SLUR_NOTE_SLACK_PX
     );
   } finally {
     await page.close();

@@ -35,7 +35,8 @@ Bij review van `.mscz` / MuseScore-PDF:
 5. Geen frase-slurs die als melisma ogen.
 6. Maatnummers alleen aan het begin van elk systeem.
 7. Melisma: lyric-extender (streep) na de lettergreep op de eerste noot, plus
-   melisma-boog (slur) over de noten van die lettergreep.
+   melisma-boog (slur) die op de **eerste** noot van die lettergreep begint
+   en op de **laatste** eindigt (leesbaarheid S2).
 8. **Geen** accolade/bracket middenin een systeem (alleen bij systeembegin).
 9. **Geen** leeg stuk notenbalk (spacermaat) of mid-systeem-HBox vóór een
    `@tekst`-cue; scheiding = dubbele streep + SystemText (of
@@ -94,19 +95,19 @@ lettergreep een klinkende noot. Same-pitch **melisma** wél samentrekken
 | L1  | Eén lyric-laag onder de bovenste balk (tussen SA en TB).                                                                                                                                                           |
 | L2  | Standaard gecentreerd op de nootkop; Source Sans 3, 13 pt (Style). Override: `--lyrics-font` / `--lyrics-font-size` op `mvsa mscz`/`pdf`/`svg`. Cues (`@tekst`): `--cue-font` / `--cue-font-size` (default 12 pt). |
 | L3  | Hyphen (`Va-der`) ≠ melisma.                                                                                                                                                                                       |
-| L4  | Melisma: tekst op eerste noot; **lyric-extender** + **melisma-slur** (S2/S4). Geen extender onder recite (R4).                                                                                                     |
+| L4  | Melisma: tekst op eerste noot; **lyric-extender** + **melisma-slur** van eerste tot laatste noot (leesbaarheid S2/S4). Geen extender onder recite (R4).                                                            |
 | L5  | Maatbreedte volgt tekst; laatste systeem vol (`lastSystemFillLimit=0`).                                                                                                                                            |
 
 ---
 
 ## S — Slurs
 
-| #   | Regel                                                                                                                    |
-| --  | ------------------------------------------------------------------------------------------------                         |
-| S1  | Capella-/import-frasebogen: standaard niet als melisma; weg of genegeerd bij normalisatie.                               |
-| S2  | Melisma-slur alleen waar één lettergreep over meerdere noten hoort.                                                      |
-| S3  | Geen decoratieve slurs over hele systemen.                                                                               |
-| S4  | Echt melisma: **slur (S2) én** lyric-extender (L4). Geen frase-slur zonder melisma; geen slur + extender “voor de sier”. |
+| #   | Regel                                                                                                                                                                                                                                                                                               |
+| --  | ------------------------------------------------------------------------------------------------                                                                                                                                                                                                    |
+| S1  | Capella-/import-frasebogen: standaard niet als melisma; weg of genegeerd bij normalisatie.                                                                                                                                                                                                          |
+| S2  | Melisma-slur alleen waar één lettergreep over meerdere noten hoort. De slur **begint op de eerste** noot van die lettergreep en **eindigt op de laatste** — geen start op de tweede noot, geen vroegtijdig einde. Post-layout (o.a. OSMD-centreren) mag slur en nootkoppen niet uit elkaar trekken. |
+| S3  | Geen decoratieve slurs over hele systemen.                                                                                                                                                                                                                                                          |
+| S4  | Echt melisma: **slur (S2) én** lyric-extender (L4). Geen frase-slur zonder melisma; geen slur + extender “voor de sier”.                                                                                                                                                                            |
 
 ---
 
