@@ -571,6 +571,11 @@
           return;
         }
         var dxStr = dx.toFixed(2);
+        // Y-band van deze maatkolom (SA↔TB), zodat lyrics van een
+        // ánder systeem met hetzelfde x-bereik (bijv. m1 vs m4) geen
+        // verkeerde dx krijgen — dat brak lyric↔noot op ektinia sys2.
+        var colY0 = treble.y - 30;
+        var colY1 = col[col.length - 1].y + 200;
         for (var c2 = 0; c2 < col.length; c2 += 1) {
           var moveEls = col[c2].el.querySelectorAll(
             ".vf-stavenote, .vf-ledgers"
@@ -600,7 +605,11 @@
             continue;
           }
           var mid = gb.x + gb.width / 2;
+          var cy = gb.y + gb.height / 2;
           if (mid < treble.x || mid >= treble.right) {
+            continue;
+          }
+          if (cy < colY0 || cy > colY1) {
             continue;
           }
           var gPrev = g.getAttribute("transform") || "";

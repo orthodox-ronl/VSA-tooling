@@ -6,6 +6,7 @@
  * - @tekst-cues (indien aanwezig): binnen maatstrepen (C6/S15);
  *   wrap op ``...`` als twee regels óf één regel die past (S19 / §4.2)
  * - S21: eerste zichtbare nootkoppen SA↔TB per maat-id in één kolom
+ * - lyrics horen bij een nootkolom (geen «Heer» boven lege balk na centreren)
  *
  * Usage:
  *   node verify-corib-contract.mjs path/to/a.osmd.svg [more…]
@@ -23,6 +24,7 @@ const puppeteer = require(path.join(__dirname, "node_modules", "puppeteer"));
 const MIN_LYRIC_GAP_PX = 1.5;
 const MID_SYSTEM_X_SLACK = 40;
 const S21_COLUMN_SLACK_PX = 3;
+const LYRIC_NOTE_SLACK_PX = 28;
 
 async function checkSvg(browser, svgPath) {
   const svgText = fs.readFileSync(svgPath, "utf8");
@@ -34,7 +36,7 @@ async function checkSvg(browser, svgPath) {
       { waitUntil: "domcontentloaded" }
     );
     return await page.evaluate(
-      (minGap, midSlack, s21Slack) => {
+      (minGap, midSlack, s21Slack, lyricNoteSlack) => {
         const root = document.querySelector("svg");
         if (!root) return { ok: false, errors: ["geen <svg>"] };
 
@@ -325,6 +327,121 @@ async function checkSvg(browser, svgPath) {
             `S21 stemkolom: ` + s21Fails.slice(0, 6).join(" | ")
           );
         }
+
+        // Lyrics ↔ dichtstbijzijnde noot-/spacer-kolom. S8-spacers kort
+        // zichtbaar maken voor getBBox (anders 0×0).
+        const noteCols = [];
+        for (const n of root.querySelectorAll(".vf-stavenote")) {
+          const spacer = n.getAttribute("data-osmd-spacer") === "1";
+          const breve = n.getAttribute("data-osmd-breve") === "1";
+          const restored = [];
+          if (spacer) {
+            n.querySelectorAll("g, path").forEach((el) => {
+              const cs = getComputedStyle(el);
+              if (cs.visibility !== "hidden" && cs.display !== "none") {
+                return;
+              }
+              restored.push([
+                el,
+                el.getAttribute("visibility"),
+                el.getAttribute("display"),
+                el.style.visibility,
+                el.style.display,
+              ]);
+              el.setAttribute("visibility", "visible");
+              el.removeAttribute("display");
+              el.style.visibility = "visible";
+              el.style.display = "";
+            });
+          }
+          try {
+            if (spacer) {
+              const bb = n.getBBox();
+              const ctm = n.getScreenCTM();
+              if (ctm && bb.width + bb.height > 0) {
+                const pt = n.ownerSVGElement.createSVGPoint();
+                pt.x = bb.x + bb.width / 2;
+                pt.y = bb.y;
+                noteCols.push(pt.matrixTransform(ctm).x);
+              }
+            } else {
+              const paths = breve
+                ? n.querySelectorAll("[data-osmd-breve-glyph='1'] path")
+                : n.querySelectorAll(".vf-notehead path");
+              for (const p of paths) {
+                const st = getComputedStyle(p);
+                if (st.visibility === "hidden" || st.display === "none") {
+                  continue;
+                }
+                let bb;
+                try {
+                  bb = p.getBBox();
+                } catch {
+                  continue;
+                }
+                const ctm = p.getScreenCTM();
+                if (!ctm) continue;
+                const pt = p.ownerSVGElement.createSVGPoint();
+                pt.x = bb.x + bb.width / 2;
+                pt.y = bb.y;
+                noteCols.push(pt.matrixTransform(ctm).x);
+              }
+            }
+          } finally {
+            for (const [el, vis, disp, sVis, sDisp] of restored) {
+              if (vis == null) el.removeAttribute("visibility");
+              else el.setAttribute("visibility", vis);
+              if (disp == null) el.removeAttribute("display");
+              else el.setAttribute("display", disp);
+              el.style.visibility = sVis;
+              el.style.display = sDisp;
+            }
+          }
+        }
+        noteCols.sort((a, b) => a - b);
+        const uniqCols = [];
+        for (const x of noteCols) {
+          if (
+            !uniqCols.length ||
+            Math.abs(x - uniqCols[uniqCols.length - 1]) > 5
+          ) {
+            uniqCols.push(x);
+          }
+        }
+        const lyricNoteFails = [];
+        for (const t of root.querySelectorAll(
+          ".vf-text.lyrics text, g.vf-text.lyrics text"
+        )) {
+          const s = String(t.textContent || "").trim();
+          if (!s || s === "-" || s === "–") continue;
+          let bb;
+          try {
+            bb = t.getBBox();
+          } catch {
+            continue;
+          }
+          const ctm = t.getScreenCTM();
+          if (!ctm) continue;
+          const pt = t.ownerSVGElement.createSVGPoint();
+          pt.x = bb.x + bb.width / 2;
+          pt.y = bb.y;
+          const sx = pt.matrixTransform(ctm).x;
+          let best = Infinity;
+          for (const cx of uniqCols) {
+            best = Math.min(best, Math.abs(cx - sx));
+          }
+          if (best > lyricNoteSlack) {
+            lyricNoteFails.push(
+              `${s}@${Math.round(sx)} Δ=${Math.round(best)}`
+            );
+          }
+        }
+        if (lyricNoteFails.length) {
+          errors.push(
+            `lyric↔noot: ` + lyricNoteFails.slice(0, 6).join(", ")
+          );
+        }
+
         return {
           ok: errors.length === 0,
           errors,
@@ -339,7 +456,8 @@ async function checkSvg(browser, svgPath) {
       },
       MIN_LYRIC_GAP_PX,
       MID_SYSTEM_X_SLACK,
-      S21_COLUMN_SLACK_PX
+      S21_COLUMN_SLACK_PX,
+      LYRIC_NOTE_SLACK_PX
     );
   } finally {
     await page.close();
