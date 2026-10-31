@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "render": "node render.mjs",
+    "check-s8-a1": "node check-s8-a1.mjs",
     "postinstall": "npx puppeteer browsers install chrome || true"
   },
   "dependencies": {

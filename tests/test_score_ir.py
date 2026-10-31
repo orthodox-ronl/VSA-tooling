@@ -161,6 +161,62 @@ def test_score_ir_s13_same_pitch_compact() -> None:
     assert sounding[0]["duration"]["elm"] in {"__", "_.", "_"}
 
 
+def test_score_ir_s13_dotted_whole_elm() -> None:
+    """S13: whole+half same-pitch → ELM ``__.`` (niet stil ``~`` / gevulde kwart)."""
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=-1 T=-1 B=-1
+
+L: a__&_ ||
+S: g&-   ||
+A: d&-   ||
+T: -&-   ||
+B: g&-   ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    for voice in ("S", "A", "T", "B"):
+        sounding = [
+            ev for ev in doc["measures"][0]["voices"][voice] if ev.get("pitch")
+        ]
+        assert len(sounding) == 1, f"{voice}: {sounding}"
+        assert sounding[0]["duration"]["elm"] == "__.", (
+            f"{voice}: verwacht ``__.``, kreeg {sounding[0]['duration']}"
+        )
+
+
+def test_score_ir_lyric_index_follows_voice_not_s_event_index() -> None:
+    """lyricIndex = n-de lyric-noot per stem; S-event-index faalt na S13-collapse.
+
+    Regressie alleluia-toon-2: T korter dan S → «lu»/«ja» kregen verkeerde index.
+    """
+    path = ROOT / "examples" / "bug-cases" / "corib" / "alleluia-toon-2.mvsa"
+    doc = export_mvsa_to_score_ir(path.read_text(encoding="utf-8"))
+    m0 = doc["measures"][0]
+    texts = [
+        "".join(s["text"] for s in ly.get("syllables", []))
+        for ly in m0["lyrics"]
+    ]
+    assert "lu" in texts and texts.count("lu") >= 2
+
+    ten = m0["voices"]["T"]
+    assert len(ten) < len(m0["voices"]["S"]), "preconditie: T korter na S13"
+
+    for voice in ("S", "A", "T", "B"):
+        idxs = [
+            ev["lyricIndex"]
+            for ev in m0["voices"][voice]
+            if ev.get("lyricIndex") is not None
+        ]
+        assert idxs == list(range(len(texts))), f"{voice}: lyricIndex {idxs}"
+
+    last_lu = max(i for i, t in enumerate(texts) if t == "lu")
+    t_lu = next(ev for ev in ten if ev.get("lyricIndex") == last_lu)
+    assert t_lu["duration"]["elm"] == "__.", (
+        f"T laatste «lu» moet ``__.`` zijn, kreeg {t_lu['duration']}"
+    )
+
+
 def test_score_ir_s13_pitch_change_melisma_closes_slur() -> None:
     """S13/S2: melisma met toonwissel + trailing hold → slurStart én slurStop (K3).
 

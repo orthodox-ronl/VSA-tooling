@@ -1,7 +1,15 @@
 # OSMD → SVG (headless) voor `mvsa svg --engine osmd`
 
 Node-hulp voor partituur-SVG **zonder MuseScore**: MusicXML (uit Score-IR)
-→ OpenSheetMusicDisplay → `.svg`.
+→ OpenSheetMusicDisplay → S8 A1-adapter → `.svg`.
+
+**S8 (contract A1):** from-ir markeert spacers met `<notehead>none</notehead>`
+en het recite-midden met `<notehead>breve</notehead>`. Na OSMD-render:
+`s8-a1-adapter.js` verbergt spacer-koppen (lyrics blijven) en zet de breve
+om naar de MuseScore-``||O||``-path (uit de referentie-SVG). Lyrics:
+**Source Sans 3** (lokale WOFF2 in `fonts/`, `@font-face` in de uitvoer-SVG).
+Zelfde marker-contract als bibliotheek `score-osmd.js`
+([osmd-s8-recite](../../docs/plans/osmd-s8-recite.md)).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
@@ -14,6 +22,13 @@ Handmatig:
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
 node render.mjs ..\..\examples\spikes\partituur-browser\score.musicxml out\score.svg
+```
+
+S8-check op from-ir MusicXML:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
+npm run check-s8-a1 -- ..\..\generated\corib-s8-toets\from-ir\alleluia-toon-8.from-ir.musicxml
 ```
 
 Via CLI (na `npm install` hierboven):
@@ -29,3 +44,4 @@ Scherm-hoofdpad blijft Score-IR → OSMD in de site; deze CLI is optioneel
 bestandsexport. Print/fallback blijft MuseScore (`--engine musescore`, default).
 Zie [partituur-ir §7](../../docs/plans/partituur-ir.md) en
 [kale-muziek §4](../../docs/plans/kale-muziek-svg-en-uitgaven.md).
+Corpus: `examples/bug-cases/corib/`.

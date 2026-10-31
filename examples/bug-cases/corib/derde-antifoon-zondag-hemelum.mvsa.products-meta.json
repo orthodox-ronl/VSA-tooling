@@ -1,0 +1,18 @@
+{
+  "schema": 2,
+  "bron": "derde-antifoon-zondag-hemelum.mvsa",
+  "bron_sha256": "4087068b749ec4334ef0eff2126c0f4e64b816dc392e0d06e226666f2db6f47d",
+  "generated_at": "2026-10-31T09:57:34+00:00",
+  "products": {
+    "pdf": {
+      "file": "derde-antifoon-zondag-hemelum.mvsa.pdf",
+      "sha256": "6b5e24df347992dcd6b69d755110686e68c15db9f25fbba75d6fe1faf8e2e3af",
+      "generated_at": "2026-10-31T09:57:34+00:00"
+    },
+    "svg": {
+      "file": "derde-antifoon-zondag-hemelum.mvsa.svg",
+      "sha256": "c50430b3775d4df03be4e15b85303c5e166dace6a3edba283966af1d9123e479",
+      "generated_at": "2026-10-31T09:57:22+00:00"
+    }
+  }
+}
