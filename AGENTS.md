@@ -269,16 +269,17 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 
 ## Cursor-regels
 
-| Regel                                 | Doel                                                          |
-| ------------------------------------- | ------------------------------------------------------------- |
-| `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                              |
-| `branch-afstemming.mdc`               | Geen stille branch-wissel; CoriB → `corib`                    |
-| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                    |
-| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                              |
-| `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                 |
-| `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken        |
-| `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                           |
-| `contracten-eerst.mdc`                | Altijd [contract-index](docs/formats/contract-index.md) eerst |
+| Regel                                 | Doel                                                              |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                                  |
+| `branch-afstemming.mdc`               | Geen stille branch-wissel; CoriB → `corib`                        |
+| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                        |
+| `klikbare-bewijslinks.mdc`            | «Kijk hiernaar» altijd met klikbare URL of plakbaar open-commando |
+| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                                  |
+| `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                     |
+| `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken            |
+| `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                               |
+| `contracten-eerst.mdc`                | Altijd [contract-index](docs/formats/contract-index.md) eerst     |
 
 Na bulk-tabellen: `python scripts/align_markdown_tables.py <pad>`.
 
