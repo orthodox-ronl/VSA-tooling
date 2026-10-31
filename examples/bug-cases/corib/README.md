@@ -9,9 +9,9 @@ brug [partituur-ir §7](../../../docs/plans/partituur-ir.md), plan
 [osmd-s8-recite](../../../docs/plans/osmd-s8-recite.md), CoriB
 [corib-mvp](../../../docs/plans/corib-mvp.md).
 
-**Branch:** productwerk op `corib`; toets-artifacts (`toets-png/` +
-`toets-svg/`) moeten **up-to-date op `development`** staan na elke
-OSMD/S8/S13-wijziging die het schermbeeld raakt.
+**Branch:** productwerk op **`corib`**. Toets-artifacts in `toets/` moeten
+**up-to-date op `corib`** staan na elke OSMD/S8/S13-wijziging die het
+schermbeeld raakt.
 
 ## Corpus
 
@@ -27,14 +27,17 @@ Referentie-SVG/PDF: door de beheerder gegenereerd met `mvsa svg` / `mvsa pdf`
 
 ## Vastgelegde toetsbestanden
 
-| Map          | Inhoud                                                                 |
-| ------------ | ---------------------------------------------------------------------- |
-| `toets-svg/` | `{stuk}.ref.svg` (= kopie MuseScore-sibling) + `{stuk}.osmd.svg`       |
-| `toets-png/` | Raster van die SVG’s: `{stuk}.ref.png` vs `{stuk}.osmd.png`            |
+Alles in **één** map `toets/` — per stuk vier bestanden naast elkaar:
 
-Na elke wijziging aan from-ir / OSMD-adapter / S8/S13: **beide mappen
-opnieuw vullen en committen** (zie hieronder). Anders kijkt de toets naar
-verouderde beelden.
+| Bestand                 | Inhoud                                      |
+| ----------------------- | ------------------------------------------- |
+| `{stuk}.ref.svg`        | MuseScore-sibling (bladreferentie)          |
+| `{stuk}.ref.png`        | Raster van die referentie-SVG               |
+| `{stuk}.osmd.svg`       | OSMD-product (`mvsa svg --engine osmd`)     |
+| `{stuk}.osmd.png`       | Raster van die OSMD-SVG                     |
+
+Na elke wijziging aan from-ir / OSMD-adapter / S8/S13: **deze map opnieuw
+vullen en committen**. Anders kijkt de toets naar verouderde beelden.
 
 ## Producten regenereren (OSMD + toetsbestanden)
 
@@ -47,21 +50,21 @@ mvsa svg examples\bug-cases\corib\alleluia-toon-3.mvsa -o generated\corib-s8-toe
 mvsa svg examples\bug-cases\corib\alleluia-toon-2.mvsa -o generated\corib-s8-toets\osmd\alleluia-toon-2.osmd.svg --engine osmd
 mvsa svg examples\bug-cases\corib\derde-antifoon-zondag-hemelum.mvsa -o generated\corib-s8-toets\osmd\derde-antifoon-zondag-hemelum.osmd.svg --engine osmd
 
-REM Vastleggen in toets-svg (ref = MuseScore-sibling; osmd = product)
-copy /Y generated\corib-s8-toets\osmd\*.osmd.svg examples\bug-cases\corib\toets-svg\
-copy /Y examples\bug-cases\corib\alleluia-toon-8.mvsa.svg examples\bug-cases\corib\toets-svg\alleluia-toon-8.ref.svg
-copy /Y examples\bug-cases\corib\alleluia-toon-3.mvsa.svg examples\bug-cases\corib\toets-svg\alleluia-toon-3.ref.svg
-copy /Y examples\bug-cases\corib\alleluia-toon-2.mvsa.svg examples\bug-cases\corib\toets-svg\alleluia-toon-2.ref.svg
-copy /Y examples\bug-cases\corib\derde-antifoon-zondag-hemelum.mvsa.svg examples\bug-cases\corib\toets-svg\derde-antifoon-zondag-hemelum.ref.svg
+REM Vastleggen in toets\ (ref = MuseScore-sibling; osmd = product)
+copy /Y generated\corib-s8-toets\osmd\*.osmd.svg examples\bug-cases\corib\toets\
+copy /Y examples\bug-cases\corib\alleluia-toon-8.mvsa.svg examples\bug-cases\corib\toets\alleluia-toon-8.ref.svg
+copy /Y examples\bug-cases\corib\alleluia-toon-3.mvsa.svg examples\bug-cases\corib\toets\alleluia-toon-3.ref.svg
+copy /Y examples\bug-cases\corib\alleluia-toon-2.mvsa.svg examples\bug-cases\corib\toets\alleluia-toon-2.ref.svg
+copy /Y examples\bug-cases\corib\derde-antifoon-zondag-hemelum.mvsa.svg examples\bug-cases\corib\toets\derde-antifoon-zondag-hemelum.ref.svg
 ```
 
 PNG’s: open de SVG’s in de browser of rasteriseer (Puppeteer in
-`scripts\osmd-svg`) naar `toets-png\*.ref.png` / `*.osmd.png`. Cloud-agents
+`scripts\osmd-svg`) naar `toets\*.ref.png` / `*.osmd.png`. Cloud-agents
 doen dat in dezelfde ronde als de SVG-update.
 
-Toets: open `toets-svg\*.ref.svg` naast `*.osmd.svg` (of de PNG’s).
-Eindbeeld S8: Al = gewone noot → le = stokloze `||O||` (breve) →
-middenlettergrepen = **alleen tekst** (geen koppen) → cadens.
+Toets: open in `toets\` naast elkaar `{stuk}.ref.png` en `{stuk}.osmd.png`
+(of de SVG’s). Eindbeeld S8: Al = gewone noot → le = stokloze `||O||`
+(breve) → middenlettergrepen = **alleen tekst** (geen koppen) → cadens.
 
 ## Uitslag (producttoets)
 
@@ -100,4 +103,5 @@ Zie [score-ir](../../../docs/formats/score-ir.md) / [partituur-ir §4.4](../../.
 **CoriB-dichtheid + S8 op lange stukken:** graveerprofiel `coribCompact`;
 A1-adapter groepeert op measure-id (y-drempel 150 px mengde systemen en
 liet breve/spacers als zwarte koppen staan); lettergreepstreepjes niet
-meer verbergen; maatnummer 1 nagetekend.
+meer verbergen; maatnummer 1 nagetekend. Toetsbestanden staan in
+`examples/bug-cases/corib/toets/`.
