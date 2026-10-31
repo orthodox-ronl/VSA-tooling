@@ -259,16 +259,25 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 
 ---
 
+## Branches (CoriB / parallel werk)
+
+- **Coria-vervanger (CoriB):** productwerk op branch **`corib`** — niet stil
+  op `development`/`main` mixen.
+- **Branch-afstemming** met lokale chats: zie
+  `.cursor/rules/branch-afstemming.mdc` (expliciete branch in het bericht;
+  anders alleen current checkout; named ≠ current → stop + vraag OK).
+
 ## Cursor-regels
 
-| Regel                                 | Doel                                                         |
-| ------------------------------------- | ------------------------------------------------------------ |
-| `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                             |
-| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                   |
-| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                             |
-| `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                |
-| `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken       |
-| `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                          |
+| Regel                                 | Doel                                                          |
+| ------------------------------------- | ------------------------------------------------------------- |
+| `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                              |
+| `branch-afstemming.mdc`               | Geen stille branch-wissel; CoriB → `corib`                    |
+| `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                    |
+| `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                              |
+| `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                 |
+| `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken        |
+| `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                           |
 | `contracten-eerst.mdc`                | Altijd [contract-index](docs/formats/contract-index.md) eerst |
 
 Na bulk-tabellen: `python scripts/align_markdown_tables.py <pad>`.

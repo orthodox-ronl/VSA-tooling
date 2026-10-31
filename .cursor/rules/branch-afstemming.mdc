@@ -1,0 +1,38 @@
+---
+description: Branch-afstemming — geen stille checkout; CoriB op corib; named≠current → vraag OK
+alwaysApply: true
+---
+
+# Branch-afstemming (lokaal + agent)
+
+Voorkomt dat agent-commits en jouw lokale commits op **dezelfde** branch
+door elkaar lopen zonder dat je dat zo bedoelde.
+
+## Kern
+
+1. **Expliciete branch in dit bericht wint** — bv. «op `corib`», «branch X».
+2. **Anders: alleen de current checkout** — commit/push alleen op de branch
+   die `git branch --show-current` toont. Geen stille `checkout`/`switch`.
+3. **Named ≠ current → STOP** — in **één korte reactie**: huidige branch,
+   gevraagde branch, «Wil je hier wisselen naar \<branch\>?» — **wacht op OK**.
+4. **Geen vermenging zonder afspraak** — niet “even” op `development`/`main`
+   committen terwijl de gebruiker daar lokaal ook werkt, tenzij dit bericht
+   dat zo zegt.
+
+## Coria-vervanger (CoriB)
+
+Productwerk voor de Coria-vervanger / oefenspeler hoort op branch **`corib`**.
+Andere branches alleen na expliciete OK in dit bericht.
+
+## Goedkoper / veiliger patroon
+
+- **Eén chat ≈ één branch** wanneer jij en de agent parallel werken.
+- Formuleer bv.: *«op corib — alleen X; niet development»*.
+- Agent mag wél **read-only** kijken naar andere branches (`git show`,
+  `git log`) zonder te wisselen.
+
+## Niet
+
+- Stil `git checkout` / nieuwe branch zonder gevraagde naam of OK.
+- PR/push naar een andere branch dan afgesproken in dit bericht.
+- «De sibling-checkout is bereikbaar» als vrijbrief om daar te committen.

@@ -295,7 +295,7 @@ tweede pauze. Herhaalstrepen (`:|`) blijven intact. Stemrust `r`/`R` binnen
 een frase (lege recite + rusten) is iets anders; zie
 [Rusten op de stemregel](semantics.md#rusten-op-de-stemregel).
 
-Lange cues met `...` worden op **twee regels** gezet: de tweede regel begint bij `...`. Is de cue breder dan de maat, dan krijgt die maat minstens die breedte (MusicXML `width` / MuseScore-maat).
+Lange cues met `...` worden op **twee regels** gezet: de tweede regel begint bij `...`. Is de cue breder dan de maat, dan krijgt die maat een **milde** MusicXML-`width` (floor/cap; zie [leesbaarheid C6](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade)) — genoeg hint voor MuseScore, zonder een holle maat waar noten links blijven hangen.
 
 ```text
 @mscz-newline
@@ -488,14 +488,14 @@ zet. De keys zijn dezelfde **lyrics-identifiers** als op de lyrics-regels
 | `@taal L=ksl, L'=nl`                    | Zelfde; `L'` is alias voor `L1`                                                          |
 | `@taal "nl"`                            | Document-metadata (quoted); als de string `nl` of `ksl` is, ook sticky voor `L`          |
 
-| Waarde (richting) | Effect bij `--hulptekst`                                      |
+| Waarde (richting) | Effect bij `--translit`                                      |
 | ----------------- | ------------------------------------------------------------- |
 | `ksl`             | Hulptekst = Latijn (uit kerkslavische bronletters)            |
 | `nl`              | Hulptekst = Cyrillisch (uit Nederlandse bronletters)          |
 | `auto`            | Per lettergreep detecteren (default als je `@taal` weglaat)   |
 | ander label       | Alleen Coria-naam (bv. `aap`); richting blijft auto/detect    |
 
-**Coria-partnamen** (`--hulptekst-as-parts`): één MusicXML-part per
+**Coria-partnamen** (`--translit-as-parts`): één MusicXML-part per
 **stem × lyrics-laag**, genaamd `{stemidentifier} ({label})` — bijvoorbeeld
 `Sop (aap)`, `Zeep (noot)`. Stemidentifiers die precies `S`/`A`/`T`/`B` zijn
 (eventueel met cijfer) krijgen de bekende namen Soprano/Alto/Tenor/Bass. Ontbreekt

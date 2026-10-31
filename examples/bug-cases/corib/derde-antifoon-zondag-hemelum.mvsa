@@ -1,0 +1,115 @@
+# (6b) Zaligsprekingen
+
+@do F4
+@mode major
+@tempo 180
+@oct S=0 A=0 T=0 B=-1
+
+@sectie import
+L: (In Uw ko-nink-rijk ge)-denk_ ons, O Heer,_ |
+S: a4                      c5    a4   - Bb4    |
+A: f4                      a4    f4   - g4     |
+T: c4                      -     -    - -      |
+B: f3                      -     -    - c3     |
+
+L: (wan-neer gij in Uw ko-nink-rijk ge)-ko_-men zijt_ |
+S: -                                    a4  -   -     |
+A: -                                    f4  -   -     |
+T: -                                    -   -   -     |
+B: -                                    f3  -   -     |
+
+L: (Za-lig de) ar_-men van geest,_ |
+S: -           c5  a4  -   Bb4     |
+A: -           a4  f4  -   g4      |
+T: -           -   -   -   -       |
+B: -           -   -   -   c3      |
+
+L: (want van hen is het ko-nink-rijk der) he_-me-len_ |
+S: -                                      a4  -  -    |
+A: -                                      f4  -  -    |
+T: -                                      -   -  -    |
+B: -                                      f3  -  -    |
+
+L: (Za-lig de) treu_-ren_-den_ | (want zij zul-len wor-den ver)-troost_ |
+S: -           c5    a4   Bb4  | -                              a4      |
+A: -           a4    f4   g4   | -                              f4      |
+T: -           -     -    -    | -                              -       |
+B: -           -     -    c3   | -                              f3      |
+
+L: (Za-lig de zacht)-moe_-di_-gen,_ | (want zij zul-len de aar-de be)-er_-ven_ |
+S: -                 c5   a4  Bb4   | -                               a4  -    |
+A: -                 a4   f4  g4    | -                               f4  -    |
+T: -                 -    -   -     | -                               -   -    |
+B: -                 -    -   c3    | -                               f3  -    |
+
+L: (Za-lig die hon-ge-ren en dors-ten naar ge)-rech_-tig_-heid,_ |
+S: -                                           c5    a4   Bb4    |
+A: -                                           a4    f4   g4     |
+T: -                                           -     -    -      |
+B: -                                           -     -    c3     |
+
+L: (want zij zul-len wor-den ver)-za_-digd_ | (Za-lig de barm)-har_-ti_-gen,_ |
+S: -                              a4  -     | -                c5   a4  Bb4   |
+A: -                              f4  -     | -                a4   f4  g4    |
+T: -                              -   -     | -                -    -   -     |
+B: -                              f3  -     | -                -    -   c3    |
+
+L: (want hun zal barm-har-tig-heid ge)-schie_-den_ |
+S: -                                   a4     -    |
+A: -                                   f4     -    |
+T: -                                   -      -    |
+B: -                                   f3     -    |
+
+L: (Za-lig de) rei_-nen van hart,_ | (want zij zul-len God aan)-schou_-wen_ |
+S: -           c5   a4  -   Bb4    | -                          a4     -    |
+A: -           a4   f4  -   g4     | -                          f4     -    |
+T: -           -    -   -   -      | -                          -      -    |
+B: -           -    -   -   c3     | -                          f3     -    |
+
+L: (Za-lig de vre-de)-stich_&_-ters_ |
+S: -                  c5&a4    Bb4   |
+A: -                  a4&f4    g4    |
+T: -                  -&-      -     |
+B: -                  -&-      c3    |
+
+L: (want zij zul-len kin-de-ren) Gods_ (wor-den ge)-noemd_ |
+S: -                             a4    -            -      |
+A: -                             f4    -            -      |
+T: -                             -     -            -      |
+B: -                             f3    -            -      |
+
+L: (Za-lig die ver-volgd wor-den om de ge)-recht_-tig_-heid,_ |
+S: -                                       c5     a4   Bb4    |
+A: -                                       a4     f4   g4     |
+T: -                                       -      -    -      |
+B: -                                       -      -    c3     |
+
+L: (want van hen is het ko-nink-rijk der) he_-me-len_ |
+S: -                                      a4  -  -    |
+A: -                                      f4  -  -    |
+T: -                                      -   -  -    |
+B: -                                      f3  -  -    |
+
+L: (Za-lig wan-neer men u) smaadt_ en ver-volgt,_ |
+S: -                       c5      a4 -   Bb4     |
+A: -                       a4      f4 -   g4      |
+T: -                       -       -  -   -       |
+B: -                       -       -  -   c3      |
+
+L: (en las-ter-lijk al-ler-lei kwaad van u spreekt) | om mij_-nent-wil_ |
+S: -                                                | -  a4   -    -    |
+A: -                                                | -  f4   -    -    |
+T: -                                                | -  -    -    -    |
+B: -                                                | -  f3   -    -    |
+
+L: (Ver-heugt en ver)-blijdt_&_ u,_ |
+S: -                  c5&a4     Bb4 |
+A: -                  a4&f4     g4  |
+T: -                  -&-       -   |
+B: -                  -&-       c3  |
+
+L: (want uw loon is) groot_ in de he_-me-len_ ||
+S: -                 -      -  -  a4  -  -    ||
+A: -                 -      -  -  f4  -  -    ||
+T: -                 -      -  -  -   -  -    ||
+B: -                 -      -  -  f3  -  -    ||
