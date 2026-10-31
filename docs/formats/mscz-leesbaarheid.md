@@ -47,6 +47,9 @@ Bij review van `.mscz` / MuseScore-PDF:
 12. **Geen** zichtbare metronoom/tempo-tekst op het blad of in de PDF; afspelen
     gebruikt wel `@tempo` / default 130 via `sound tempo` (MSCZ: Tempo
     `visible=0`).
+13. Noten die **dezelfde lettergreep** dragen (één anker per stem) vormen
+    **één verticale kolom** over SA én TB — niet lateraal uit elkaar
+    getrokken (S21 / P3b).
 
 ---
 
@@ -126,7 +129,7 @@ lettergreep een klinkende noot. Same-pitch **melisma** wél samentrekken
 
 ## C — Cues, gaps, HBox, accolade
 
-Contract: checklist MSCZ **S14–S20**. MuseScore-gedrag dat we vermijden:
+Contract: checklist MSCZ **S14–S21**. MuseScore-gedrag dat we vermijden:
 
 | Foutbeeld                                    | Oorzaak (typisch)                                      | Canonieke vorm                                                 |
 | -------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
@@ -155,6 +158,7 @@ Contract: checklist MSCZ **S14–S20**. MuseScore-gedrag dat we vermijden:
 | P2  | Geen inspring eerste systeem.                                                                                                                                                                                                                                                                                                        |
 | P3  | Verticaal: pagina niet vullen; default `minSystemDistance`/`maxSystemDistance` 8/14 (niet “spread”). Override: `--min-system-distance` / `--max-system-distance`, of `--compact` (baseline 7/7 + lyric 0.1 + marge 5 mm + `measureSpacing` 1.6; andere Style-opties winnen). Balken: `--staff-distance`. Op `mvsa mscz`/`pdf`/`svg`. |
 | P3a | Horizontaal: MuseScore plakt lyric-bboxes tot ~0,1 sp tegen elkaar («desheils»). Mitigatie: trailing NBSP op woord-einde-lyrics in `.mscx`, plus SVG-nabewerking (`enforce_svg_lyric_word_gaps`, min. ~0,45 sp tussen opeenvolgende lyric-paths). Hyphen-lettergrepen (`syllabic` begin/middle) zonder NBSP.                         |
+| P3b | **Stemkolom (S21):** waar S/A/T/B op dezelfde lettergreep elk één nootkop-anker hebben, delen die ankers **één x-kolom** over de SA- én de TB-balk. Post-layout (o.a. OSMD-centreren in de maat) mag die kolom niet per balk apart verschuiven. Overtreding: bovenbalk-noten onder een andere lettergreep dan de onderbalk.          |
 | P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                                                                                                                                                                                                                             |
 | P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                                                                                                                                                                                                                         |
 | P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                                                                                                                                                                                                                            |
