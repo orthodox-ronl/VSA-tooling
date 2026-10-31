@@ -522,6 +522,11 @@
       mount.querySelectorAll("g.vf-text.lyrics, g.vf-text.dash")
     );
 
+    // Eerst dx per maat-id (S21: zelfde dx op SA én TB), dan pas
+    // lyrics/curves toewijzen via dichtstbijzijnde balk — anders claimt
+    // de vorige maatkolom met overlapping y-band de slur van de volgende
+    // (bijv. «stich» SA-slur dx van m14 i.p.v. m15).
+    var columns = [];
     Object.keys(byId)
       .sort(function (a, b) {
         return Number(a) - Number(b);
@@ -552,103 +557,149 @@
             }
           }
         }
-        if (!(cMax > cMin)) {
-          return;
-        }
-        var padL = cMin - left;
-        var padR = right - cMax;
-        var dx = (padR - padL) / 2;
-        if (padR + padL < 24 || Math.abs(dx) < 6) {
-          return;
-        }
-        if (cMin + dx < left) {
-          dx = left - cMin;
-        }
-        if (cMax + dx > right) {
-          dx = right - cMax;
-        }
-        if (Math.abs(dx) < 6) {
-          return;
-        }
-        var dxStr = dx.toFixed(2);
-        // Y-band van deze maatkolom (SA↔TB), zodat lyrics van een
-        // ánder systeem met hetzelfde x-bereik (bijv. m1 vs m4) geen
-        // verkeerde dx krijgen — dat brak lyric↔noot op ektinia sys2.
-        var colY0 = treble.y - 30;
-        var colY1 = col[col.length - 1].y + 200;
-        for (var c2 = 0; c2 < col.length; c2 += 1) {
-          var moveEls = col[c2].el.querySelectorAll(
-            ".vf-stavenote, .vf-ledgers"
-          );
-          for (var e = 0; e < moveEls.length; e += 1) {
-            var el = moveEls[e];
-            if (el.getAttribute("data-osmd-center") === "1") {
-              continue;
+        var staves = [];
+        for (var s = 0; s < col.length; s += 1) {
+          var sm = col[s];
+          var sh = 90;
+          try {
+            var sb = sm.el.getBBox();
+            if (sb.height > 0) {
+              sh = sb.height;
             }
-            var prev = el.getAttribute("transform") || "";
-            el.setAttribute(
-              "transform",
-              (prev ? prev + " " : "") + "translate(" + dxStr + ", 0)"
-            );
-            el.setAttribute("data-osmd-center", "1");
+          } catch (eStaff) {
+            /* default */
+          }
+          staves.push({
+            x: sm.x,
+            right: sm.right,
+            midY: sm.y + sh / 2,
+          });
+        }
+        var dx = 0;
+        if (cMax > cMin) {
+          var padL = cMin - left;
+          var padR = right - cMax;
+          dx = (padR - padL) / 2;
+          if (padR + padL < 24 || Math.abs(dx) < 6) {
+            dx = 0;
+          } else {
+            if (cMin + dx < left) {
+              dx = left - cMin;
+            }
+            if (cMax + dx > right) {
+              dx = right - cMax;
+            }
+            if (Math.abs(dx) < 6) {
+              dx = 0;
+            }
           }
         }
-        // Melisma-slurs / ties (leesbaarheid S2): zelfde dx als de noten,
-        // anders beginnen/eindigen bogen visueel op de verkeerde noot.
-        var curves = mount.querySelectorAll(".vf-curve, .vf-stavetie");
-        for (var ci = 0; ci < curves.length; ci += 1) {
-          var cg = curves[ci];
-          if (cg.getAttribute("data-osmd-center") === "1") {
-            continue;
-          }
-          var cb;
-          try {
-            cb = cg.getBBox();
-          } catch (e5) {
-            continue;
-          }
-          var cMid = cb.x + cb.width / 2;
-          var cY = cb.y + cb.height / 2;
-          if (cMid < treble.x || cMid >= treble.right) {
-            continue;
-          }
-          if (cY < colY0 || cY > colY1) {
-            continue;
-          }
-          var cPrev = cg.getAttribute("transform") || "";
-          cg.setAttribute(
-            "transform",
-            (cPrev ? cPrev + " " : "") + "translate(" + dxStr + ", 0)"
-          );
-          cg.setAttribute("data-osmd-center", "1");
-        }
-        for (var li = 0; li < lyricGs.length; li += 1) {
-          var g = lyricGs[li];
-          if (g.getAttribute("data-osmd-center") === "1") {
-            continue;
-          }
-          var gb;
-          try {
-            gb = g.getBBox();
-          } catch (e4) {
-            continue;
-          }
-          var mid = gb.x + gb.width / 2;
-          var cy = gb.y + gb.height / 2;
-          if (mid < treble.x || mid >= treble.right) {
-            continue;
-          }
-          if (cy < colY0 || cy > colY1) {
-            continue;
-          }
-          var gPrev = g.getAttribute("transform") || "";
-          g.setAttribute(
-            "transform",
-            (gPrev ? gPrev + " " : "") + "translate(" + dxStr + ", 0)"
-          );
-          g.setAttribute("data-osmd-center", "1");
-        }
+        columns.push({
+          id: id,
+          dx: dx,
+          x: treble.x,
+          right: treble.right,
+          staves: staves,
+          els: col,
+        });
       });
+
+    function nearestColumnDx(midX, midY) {
+      var bestDx = null;
+      var bestDist = Infinity;
+      for (var i = 0; i < columns.length; i += 1) {
+        var col = columns[i];
+        if (midX < col.x || midX >= col.right) {
+          continue;
+        }
+        for (var j = 0; j < col.staves.length; j += 1) {
+          var st = col.staves[j];
+          if (midX < st.x || midX >= st.right) {
+            continue;
+          }
+          var dist = Math.abs(midY - st.midY);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestDx = col.dx;
+          }
+        }
+      }
+      // Geen match verder dan ±1 systeemhoogte (~220 px) — voorkomt
+      // dat een boog aan een verre maat hangt.
+      if (bestDx === null || bestDist > 220) {
+        return null;
+      }
+      return bestDx;
+    }
+
+    function applyDx(el, dx) {
+      if (!(Math.abs(dx) >= 6)) {
+        return;
+      }
+      if (el.getAttribute("data-osmd-center") === "1") {
+        return;
+      }
+      var prev = el.getAttribute("transform") || "";
+      el.setAttribute(
+        "transform",
+        (prev ? prev + " " : "") + "translate(" + dx.toFixed(2) + ", 0)"
+      );
+      el.setAttribute("data-osmd-center", "1");
+    }
+
+    for (var ci = 0; ci < columns.length; ci += 1) {
+      var column = columns[ci];
+      if (!(Math.abs(column.dx) >= 6)) {
+        continue;
+      }
+      for (var c2 = 0; c2 < column.els.length; c2 += 1) {
+        var moveEls = column.els[c2].el.querySelectorAll(
+          ".vf-stavenote, .vf-ledgers"
+        );
+        for (var e = 0; e < moveEls.length; e += 1) {
+          applyDx(moveEls[e], column.dx);
+        }
+      }
+    }
+
+    // Melisma-slurs / ties (leesbaarheid S2): zelfde dx als noten van de
+    // dichtstbijzijnde balk (niet first-wins over losse y-band).
+    var curves = mount.querySelectorAll(".vf-curve, .vf-stavetie");
+    for (var cj = 0; cj < curves.length; cj += 1) {
+      var cg = curves[cj];
+      var cb;
+      try {
+        cb = cg.getBBox();
+      } catch (e5) {
+        continue;
+      }
+      var curveDx = nearestColumnDx(
+        cb.x + cb.width / 2,
+        cb.y + cb.height / 2
+      );
+      if (curveDx === null) {
+        continue;
+      }
+      applyDx(cg, curveDx);
+    }
+
+    for (var li = 0; li < lyricGs.length; li += 1) {
+      var g = lyricGs[li];
+      var gb;
+      try {
+        gb = g.getBBox();
+      } catch (e4) {
+        continue;
+      }
+      var lyricDx = nearestColumnDx(
+        gb.x + gb.width / 2,
+        gb.y + gb.height / 2
+      );
+      if (lyricDx === null) {
+        continue;
+      }
+      applyDx(g, lyricDx);
+    }
   }
 
   function renderAndLayout(osmd, mount, xmlText) {

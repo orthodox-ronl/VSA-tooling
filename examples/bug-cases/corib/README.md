@@ -127,6 +127,7 @@ zodat `@tekst` in de maat past; wrap op `...`; inklappen naar één regel
 alleen als die past; cue-X op eerste noot.
 
 **S21 stemkolom:** `centerMeasureContents` verschuift SA én TB met dezelfde
-`dx` (maat-id-kolom); lyrics én melisma-slurs (`.vf-curve`) alleen in de
-y-band van die kolom. Verify: notehead-x SA↔TB, lyric↔noot, slur↔noot
-(leesbaarheid S2).
+`dx` (maat-id-kolom); lyrics én melisma-slurs (`.vf-curve`) krijgen de `dx`
+van de **dichtstbijzijnde balk** in die kolom (niet first-wins over een
+ruime y-band — dat verschool o.a. de «stich»-slur). Verify: notehead-x
+SA↔TB, lyric↔noot, slur↔noot (leesbaarheid S2).
