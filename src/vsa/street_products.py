@@ -40,9 +40,17 @@ MP3_KEY = "mp3"
 MSCZ_PRODUCT_KEY = "mscz"
 
 
-def _log(msg: str, *, dry_run: bool) -> None:
+def _log(msg: str, *, dry_run: bool, quiet: bool = False) -> None:
+    if quiet:
+        return
     prefix = "dry-run: " if dry_run else ""
     print(f"{prefix}{msg}", flush=True)
+
+
+def _log_meta(meta_name: str, *, quiet: bool = False) -> None:
+    if quiet:
+        return
+    print(f"Meta: {meta_name}", flush=True)
 
 
 def _assign_svg_products(products: dict[str, Path], written: list[Path]) -> None:
@@ -131,7 +139,11 @@ def _plan_universal_paths(
 
 
 def _log_universal_plan(
-    bron: Path, products: dict[str, Path], *, dry_run: bool
+    bron: Path,
+    products: dict[str, Path],
+    *,
+    dry_run: bool,
+    quiet: bool = False,
 ) -> None:
     order = (
         "mxl",
@@ -146,7 +158,11 @@ def _log_universal_plan(
     for key in order:
         path = products.get(key)
         if path is not None:
-            _log(f"{key:9} {bron.name} -> {path.name}", dry_run=dry_run)
+            _log(
+                f"{key:9} {bron.name} -> {path.name}",
+                dry_run=dry_run,
+                quiet=quiet,
+            )
 
 
 def products_mvsa_one(
@@ -155,6 +171,7 @@ def products_mvsa_one(
     force: bool = False,
     dry_run: bool = False,
     skip_svg: bool = False,
+    quiet: bool = False,
     musescore: Path | None = None,
 ) -> int:
     """Universele producten voor één ``.mvsa``."""
@@ -175,11 +192,11 @@ def products_mvsa_one(
 
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
-        _log(f"ok (meta): {bron}", dry_run=dry_run)
+        _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
         return 0
 
     products = _plan_universal_paths(bron, skip_svg=skip_svg)
-    _log_universal_plan(bron, products, dry_run=dry_run)
+    _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
     if dry_run:
         return 0
 
@@ -226,7 +243,7 @@ def products_mvsa_one(
         return 1
 
     meta = write_meta(bron, products)
-    print(f"Meta: {meta.name}", flush=True)
+    _log_meta(meta.name, quiet=quiet)
     return 0
 
 
@@ -236,6 +253,7 @@ def products_mscz_one(
     force: bool = False,
     dry_run: bool = False,
     skip_svg: bool = False,
+    quiet: bool = False,
     musescore: Path | None = None,
 ) -> int:
     """Universele producten voor één ``.mscz``."""
@@ -254,11 +272,11 @@ def products_mscz_one(
 
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
-        _log(f"ok (meta): {bron}", dry_run=dry_run)
+        _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
         return 0
 
     products = _plan_universal_paths(bron, skip_svg=skip_svg)
-    _log_universal_plan(bron, products, dry_run=dry_run)
+    _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
     if dry_run:
         return 0
 
@@ -300,7 +318,7 @@ def products_mscz_one(
         return 1
 
     meta = write_meta(bron, products)
-    print(f"Meta: {meta.name}", flush=True)
+    _log_meta(meta.name, quiet=quiet)
     return 0
 
 
@@ -310,6 +328,7 @@ def products_vsa_one(
     force: bool = False,
     dry_run: bool = False,
     skip_svg: bool = False,
+    quiet: bool = False,
     musescore: Path | None = None,
 ) -> int:
     """Universele producten voor één ``.vsa``."""
@@ -334,11 +353,11 @@ def products_vsa_one(
 
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
-        _log(f"ok (meta): {bron}", dry_run=dry_run)
+        _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
         return 0
 
     products = _plan_universal_paths(bron, skip_svg=skip_svg)
-    _log_universal_plan(bron, products, dry_run=dry_run)
+    _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
     if dry_run:
         return 0
 
@@ -369,9 +388,11 @@ def products_vsa_one(
             svg_renderer = SVGRenderer(svg_config=config.rendering.svg)
             svg_renderer.max_line_width = config.rendering.max_line_width
             svg_text = svg_renderer.render_document(document)
+            from .atomic_io import write_text
+
             svg_path = products["svg"]
             svg_path.parent.mkdir(parents=True, exist_ok=True)
-            svg_path.write_text(svg_text, encoding="utf-8", newline="\n")
+            write_text(svg_path, svg_text, encoding="utf-8", newline="\n")
     except IncludeVsaError as exc:
         print(f"{bron}: {exc.message_nl}", file=sys.stderr)
         return 1
@@ -390,7 +411,7 @@ def products_vsa_one(
         return 1
 
     meta = write_meta(bron, products)
-    print(f"Meta: {meta.name}", flush=True)
+    _log_meta(meta.name, quiet=quiet)
     return 0
 
 
@@ -401,6 +422,7 @@ def run_street_products(
     force: bool = False,
     dry_run: bool = False,
     skip_svg: bool = False,
+    quiet: bool = False,
     musescore: Path | None = None,
 ) -> int:
     """Run ``products`` for all sources under *path* for *street*."""
@@ -425,6 +447,7 @@ def run_street_products(
                 force=force,
                 dry_run=dry_run,
                 skip_svg=skip_svg,
+                quiet=quiet,
                 musescore=musescore,
             )
         elif street == "mscz":
@@ -433,6 +456,7 @@ def run_street_products(
                 force=force,
                 dry_run=dry_run,
                 skip_svg=skip_svg,
+                quiet=quiet,
                 musescore=musescore,
             )
         else:
@@ -441,6 +465,7 @@ def run_street_products(
                 force=force,
                 dry_run=dry_run,
                 skip_svg=skip_svg,
+                quiet=quiet,
                 musescore=musescore,
             )
         if code:
@@ -482,6 +507,14 @@ def add_products_parser(
         "--dry-run",
         action="store_true",
         help="Alleen tonen wat er zou gebeuren.",
+    )
+    p.add_argument(
+        "--quiet",
+        action="store_true",
+        help=(
+            "Geen voortgangsregels op stdout (mxl/svg/Meta). "
+            "Fouten blijven op stderr."
+        ),
     )
     if with_skip_svg:
         p.add_argument(

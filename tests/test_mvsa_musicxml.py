@@ -1390,6 +1390,23 @@ B: re ||
 
 
 
+def test_tekst_spaces_emitted_as_nbsp():
+    """S19: leidende/meervoudige spaties in ``@tekst`` → NBSP in ``<words>``."""
+    from vsa.mvsa_musicxml import (
+        _CUE_SPACE,
+        _emit_staff_text_directions,
+        cue_text_for_score,
+    )
+
+    assert cue_text_for_score("P: cue") == "P: cue"
+    assert cue_text_for_score("  a  b") == f"{_CUE_SPACE * 2}a{_CUE_SPACE * 2}b"
+    out: list[str] = []
+    _emit_staff_text_directions(out, ["  hello"])
+    blob = "".join(out)
+    assert f">{_CUE_SPACE * 2}hello</words>" in blob
+    assert ">  hello<" not in blob
+
+
 def test_tekst_wraps_at_ellipsis_and_sets_width():
     from vsa.mvsa_musicxml import wrap_tekst_at_ellipsis, estimate_cue_width_tenths
 

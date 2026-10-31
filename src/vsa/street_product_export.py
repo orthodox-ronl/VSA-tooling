@@ -32,9 +32,11 @@ def write_lyrics_product(
 
     dest = Path(out) if out is not None else lyrics_output_path(bron)
     text = plain_text_from_path(bron, musescore=musescore)
+    from .atomic_io import write_text
+
     dest.parent.mkdir(parents=True, exist_ok=True)
     payload = text if text.endswith("\n") or text == "" else text + "\n"
-    dest.write_text(payload, encoding="utf-8", newline="\n")
+    write_text(dest, payload, encoding="utf-8", newline="\n")
     return dest
 
 

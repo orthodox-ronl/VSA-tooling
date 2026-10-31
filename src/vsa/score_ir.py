@@ -456,6 +456,8 @@ def export_mvsa_path_to_score_ir(
         bibliotheek_id=bibliotheek_id,
         allow_import_sync_errors=allow_import_sync_errors,
     )
+    from .atomic_io import write_text
+
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(payload, encoding="utf-8", newline="\n")
+    write_text(out, payload, encoding="utf-8", newline="\n")

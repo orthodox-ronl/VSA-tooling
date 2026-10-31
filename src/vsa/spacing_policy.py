@@ -25,10 +25,11 @@ def whitespace_width(text: str, font_size: float, font_family: str = "DejaVu San
 
 
 def scope_safety_margin(font_size: float) -> float:
-    """Small extra width for sung text scopes.
+    """Small extra width for sung text scopes on word edges (C).
 
     Pillow measurements are better than heuristics, but SVG/browser rendering,
-    hinting and glyph overlays still need a modest safety margin.
+    hinting and glyph overlays still need a modest safety margin — applied only
+    toward word boundaries, not where a word continues into the next unit.
     """
 
     return round(font_size * 0.10, 2)

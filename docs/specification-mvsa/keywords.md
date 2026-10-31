@@ -258,6 +258,8 @@ koorantwoord.
 ```
 
 Binnen de string: `\"` voor een aanhalingsteken, `\\` voor een backslash.
+**Leidende, eind- en meervoudige spaties** in de aanhalingstekens zijn
+significant en blijven op het blad zichtbaar (S19).
 
 **Wel gebruiken** voor korte cues die op het blad bij dat systeem horen
 (litanie: “P: …”, “D: …”, een korte rubriek). Zet de regel **direct boven** het
