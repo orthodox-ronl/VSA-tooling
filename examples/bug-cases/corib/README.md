@@ -74,8 +74,10 @@ middenlettergrepen = **alleen tekst** (geen koppen) → cadens.
 
 \*Pixel-pariteit MuseScore↔OSMD is geen eis. S8-eisen wél: geen zichtbare
 spacer-koppen; lyrics op die posities; breve als MuseScore-``||O||``-path
-(`data-osmd-breve-glyph`); lyrics in **Source Sans 3**; OSMD-SVG met witte
-`rect.vsa-page-bg` (zelfde idee als MuseScore-sibling).
+(`data-osmd-breve-glyph`); lettergreepstreepjes zichtbaar; lyrics in
+**Source Sans 3**; OSMD-SVG met witte `rect.vsa-page-bg` (zelfde idee als
+MuseScore-sibling). A1-adapter koppelt spacer/breve per measure-id (niet via
+een y-systeemdrempel).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
@@ -94,3 +96,8 @@ Maatsoort uit (`drawTimeSignatures: false`).
 kreeg in Score-IR per ongeluk ELM ``~`` (gevulde kwart in OSMD). Fix:
 ELM ``__.`` (+ ``lyricIndex`` per stem-volgorde, niet S-event-index).
 Zie [score-ir](../../../docs/formats/score-ir.md) / [partituur-ir §4.4](../../../docs/plans/partituur-ir.md).
+
+**CoriB-dichtheid + S8 op lange stukken:** graveerprofiel `coribCompact`;
+A1-adapter groepeert op measure-id (y-drempel 150 px mengde systemen en
+liet breve/spacers als zwarte koppen staan); lettergreepstreepjes niet
+meer verbergen; maatnummer 1 nagetekend.

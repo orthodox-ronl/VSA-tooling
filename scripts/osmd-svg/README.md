@@ -13,13 +13,19 @@ idee als MuseScore-trim). Zelfde marker-contract als bibliotheek
 `score-osmd.js` ([osmd-s8-recite](../../docs/plans/osmd-s8-recite.md)).
 
 Graveerprofiel **`coribCompact`** (in `render.mjs`, na OSMD-`compacttight`)
-zet de schermafstanden: balk- en systeemafstand, lyrics dichter onder de
-balk, en iets kortere lettergreep- en streepjesafstand. Het lettertype blijft
-Source Sans 3. `MeasureWidthFactor` blijft 1, omdat een lagere factor op een
-S8-recite lettergrepen over elkaar trekt. Een stuk dat korter is dan de
-bladbreedte (900 px) wordt bijgesneden op de inkt. Pixel-pariteit met
-MuseScore is geen eis ([corib-mvp](../../docs/plans/corib-mvp.md)); S8/S13
-blijven het contract voor recite en melisma.
+zet de schermafstanden: balk- en systeemafstand, lyrics naar het midden
+van het balkgat (na-render verschuiving), iets kortere stokken, en
+matigere lyric-elongatie. Het lettertype blijft Source Sans 3.
+`MeasureWidthFactor` blijft 1 (lager laat S8-recite-lettergrepen
+overlappen). Maatnummer **1** wordt nagetekend (OSMD slaat die
+standaard over). Een stuk dat korter is dan de bladbreedte (900 px)
+wordt bijgesneden op de inkt.
+
+S8 A1-adapter (`s8-a1-adapter.js`) koppelt spacer/breve per **measure-id**
+(geen y-systeemdrempel — die brak bij compacte CoriB-layout). Lettergreep-
+streepjes (`vf-text dash`) blijven zichtbaar. Pixel-pariteit met MuseScore
+is geen eis ([corib-mvp](../../docs/plans/corib-mvp.md)); S8/S13 blijven
+het contract voor recite en melisma.
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
