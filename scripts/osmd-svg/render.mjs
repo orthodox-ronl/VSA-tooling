@@ -66,6 +66,48 @@ function injectFontFaceIntoSvg(svgMarkup, faceCss) {
   return out.slice(0, insertAt) + style + out.slice(insertAt);
 }
 
+/**
+ * Witte pagina-achtergrond (zelfde idee als MuseScore ``vsa-page-bg``).
+ * Zonder rect is de SVG transparant → grijze/donkere viewers tonen “zwart”.
+ */
+function injectWhitePageBackground(svgMarkup) {
+  if (/class="vsa-page-bg"/.test(svgMarkup)) {
+    return svgMarkup;
+  }
+  const m = svgMarkup.match(/<svg\b([^>]*)>/);
+  if (!m) {
+    return svgMarkup;
+  }
+  const attrs = m[1];
+  let x = 0;
+  let y = 0;
+  let w = null;
+  let h = null;
+  const vb = attrs.match(/\bviewBox="([^"]+)"/);
+  if (vb) {
+    const parts = vb[1].trim().split(/[\s,]+/).map(Number);
+    if (parts.length === 4 && parts.every((n) => Number.isFinite(n))) {
+      [x, y, w, h] = parts;
+    }
+  }
+  if (w == null || h == null) {
+    const wm = attrs.match(/\bwidth="([0-9.]+)/);
+    const hm = attrs.match(/\bheight="([0-9.]+)/);
+    if (wm && hm) {
+      w = Number(wm[1]);
+      h = Number(hm[1]);
+    }
+  }
+  if (w == null || h == null || !(w > 0) || !(h > 0)) {
+    return svgMarkup;
+  }
+  const rect =
+    `<rect class="vsa-page-bg" x="${x}" y="${y}" width="${w}" height="${h}" fill="#ffffff"/>`;
+  const insertAt = m.index + m[0].length;
+  // Achtergrond vóór defs/muziek, zodat noten eroverheen liggen.
+  return svgMarkup.slice(0, insertAt) + rect + svgMarkup.slice(insertAt);
+}
+
 async function loadPuppeteer() {
   const require = createRequire(import.meta.url);
   const candidates = [
@@ -227,6 +269,7 @@ async function main() {
         `${bodies}\n</svg>\n`;
     }
     outText = injectFontFaceIntoSvg(outText, fontFaceCss);
+    outText = injectWhitePageBackground(outText);
 
     fs.writeFileSync(outputPath, outText, "utf8");
     // Machine-readable line for Python callers.

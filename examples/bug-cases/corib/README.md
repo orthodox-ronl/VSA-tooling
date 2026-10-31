@@ -74,7 +74,8 @@ middenlettergrepen = **alleen tekst** (geen koppen) → cadens.
 
 \*Pixel-pariteit MuseScore↔OSMD is geen eis. S8-eisen wél: geen zichtbare
 spacer-koppen; lyrics op die posities; breve als MuseScore-``||O||``-path
-(`data-osmd-breve-glyph`); lyrics in **Source Sans 3**.
+(`data-osmd-breve-glyph`); lyrics in **Source Sans 3**; OSMD-SVG met witte
+`rect.vsa-page-bg` (zelfde idee als MuseScore-sibling).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
