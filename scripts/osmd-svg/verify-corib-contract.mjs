@@ -25,11 +25,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const puppeteer = require(path.join(__dirname, "node_modules", "puppeteer"));
 
-const MIN_LYRIC_GAP_PX = 1.5;
+// P3a / alleluia-8: woordgrens «ia,|Al» moet zichtbaar wit houden.
+const MIN_LYRIC_GAP_PX = 12;
 const MID_SYSTEM_X_SLACK = 40;
 const S21_COLUMN_SLACK_PX = 3;
 const LYRIC_NOTE_SLACK_PX = 28;
-const SLUR_NOTE_SLACK_PX = 22;
+const SLUR_NOTE_SLACK_PX = 26;
 
 async function checkSvg(browser, svgPath) {
   const svgText = fs.readFileSync(svgPath, "utf8");
@@ -45,19 +46,18 @@ async function checkSvg(browser, svgPath) {
         const root = document.querySelector("svg");
         if (!root) return { ok: false, errors: ["geen <svg>"] };
 
-        const lyrics = [...root.querySelectorAll(".vf-text.lyrics text")]
-          .map((t) => {
-            let b;
-            try {
-              b = t.getBBox();
-            } catch {
-              return null;
-            }
+        // Screen-rects: getBBox onderschat glyph-ink (alleluia-8 «iaAl»).
+        const lyrics = [...root.querySelectorAll(".vf-text.lyrics")]
+          .map((g) => {
+            const t = g.querySelector("text");
+            if (!t) return null;
+            const b = g.getBoundingClientRect();
+            if (!(b.width > 0)) return null;
             return {
               t: t.textContent,
-              x: b.x,
-              y: b.y,
-              r: b.x + b.width,
+              x: b.left,
+              y: b.top,
+              r: b.right,
             };
           })
           .filter(Boolean);
@@ -524,13 +524,13 @@ async function checkSvg(browser, svgPath) {
           const fs = parseFloat(t.getAttribute("font-size"));
           if (!/Source Sans 3/i.test(ff)) {
             badFont += 1;
-          } else if (Number.isFinite(fs) && fs < 12.5) {
+          } else if (Number.isFinite(fs) && fs < 14) {
             badFont += 1;
           }
         }
         if (lyricFonts.length && badFont > lyricFonts.length * 0.2) {
           errors.push(
-            `L2 font: ${badFont}/${lyricFonts.length} lyrics niet Source Sans 3 ≥12.5px`
+            `L2 font: ${badFont}/${lyricFonts.length} lyrics niet Source Sans 3 ≥14px (OSMD-SVG)`
           );
         }
 

@@ -1061,14 +1061,9 @@
               lyricUnion.mid += dx;
             }
           }
-          // L2 / S22: lyric-midden op de nootkolom (alle stemmen delen
-          // slot.mid). Breve/melisma-eerste: zelfde anker.
-          if (lyricUnion && Math.abs(lyricUnion.mid - slot.mid) >= 3) {
-            var ldx = slot.mid - lyricUnion.mid;
-            for (var lj = 0; lj < lyricUnion.els.length; lj += 1) {
-              shiftEl(lyricUnion.els[lj], ldx, null);
-            }
-          }
+          // Geen aparte lyric-only-nudge naar de noot: bij brede lettergrepen
+          // (alleluia-8 «ia,|Al») trok dat de volgende lyric over de vorige.
+          // Slot-dx hierboven centreert noot+lyric als geheel (S22/P3e).
         }
       });
   }
