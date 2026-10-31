@@ -1,3 +1,8 @@
+---
+description: Branch-afstemming — geen stille checkout; CoriB op coriab; named≠current → vraag OK
+alwaysApply: true
+---
+
 # Branch-afstemming (lokaal + agent)
 
 Voorkomt dat agent-commits en jouw lokale commits op **dezelfde** branch
