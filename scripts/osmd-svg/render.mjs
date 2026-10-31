@@ -44,7 +44,9 @@ const ADAPTER_PATH = path.join(__dirname, "s8-a1-adapter.js");
  */
 const CORIB_COMPACT = {
   name: "coribCompact",
-  sheetWidthPx: 900,
+  // Iets breder dan 900: minder maten per regel → geen lyric-overlap
+  // bij S8-recite (mscz-leesbaarheid §2 / P3a; gemeten derde-antifoon).
+  sheetWidthPx: 1000,
   contentPadPx: 10,
   // (a) verticaal — lyrics tussen de balken (geen negatieve Y: dat plakt
   //    ze tegen de bovenbalk).
@@ -57,16 +59,23 @@ const CORIB_COMPACT = {
   // (b) horizontaal — MeasureWidthFactor 1 (lager: S8-lettergrepen
   //    overlappen). FixedMeasureWidth niet: die trekt élke maat tot de
   //    breedste → blad veel te hoog voor CoriB-scherm.
+  //    compacttight zet VoiceSpacing op 0.65/2.0; dat knelt lettergrepen
+  //    (maat 2 «neer|gij»). Terug naar OSMD-default 0.85/3.0.
   MeasureWidthFactor: 1.0,
-  // (c) lettergreep / streepje — iets minder elongatie dan default 2.5,
-  //    zodat maten met weinig tekst niet zo ver uitrekken t.o.v. buren.
-  BetweenSyllableMinimumDistance: 0.4,
-  BetweenSyllableMaximumDistance: 8,
-  HorizontalBetweenLyricsDistance: 0.15,
-  MinimumDistanceBetweenDashes: 8,
-  MaximumLyricsElongationFactor: 1.8,
-  LyricsXPaddingFactorForLongLyrics: 0.65,
-  // (d) stokken iets korter dan OSMD-default (3.0 / 2.5–4.5)
+  VoiceSpacingMultiplierVexflow: 0.85,
+  VoiceSpacingAddendVexflow: 3.0,
+  // (c) lettergreep / streepje — OSMD-defaults (lager elongation/padding
+  //    gaf overlap in maat 2 van derde-antifoon).
+  BetweenSyllableMinimumDistance: 0.5,
+  BetweenSyllableMaximumDistance: 10,
+  HorizontalBetweenLyricsDistance: 0.2,
+  MinimumDistanceBetweenDashes: 10,
+  MaximumLyricsElongationFactor: 2.5,
+  LyricsUseXPaddingForLongLyrics: true,
+  LyricsXPaddingFactorForLongLyrics: 1.0,
+  // (d) S10 — maatnummers alleen aan systeembegin (canonical-checklists).
+  RenderMeasureNumbersOnlyAtSystemStart: true,
+  // (e) stokken iets korter dan OSMD-default (3.0 / 2.5–4.5)
   IdealStemLength: 2.6,
   StemMinLength: 2.2,
   StemMaxLength: 3.6,
@@ -280,6 +289,9 @@ async function main() {
             drawTimeSignatures: false,
             defaultFontFamily: fontFamily,
             drawingParameters: "compacttight",
+            // S10: alleen systeembegin (EngravingRules hieronder bevestigt).
+            drawMeasureNumbers: true,
+            drawMeasureNumbersOnlyAtSystemStart: true,
           }
         );
         // Regels vóór load: OSMD meet lyrics al bij het inlezen.
@@ -392,43 +404,92 @@ async function main() {
             }
           }
         })();
-        // OSMD tekent maatnummer 1 standaard niet. Zet «1» boven de
-        // eerste treble-maat, in dezelfde stijl als de overige nummers.
+        // S10-veiligheidsnet: mid-systeem-maatnummers weg (OSMD interval
+        // kan ondanks OnlyAtSystemStart soms nog een nummer zetten).
+        (function stripMidSystemMeasureNumbers() {
+          const texts = Array.from(
+            mount.querySelectorAll("g.vf-text text")
+          ).filter((t) =>
+            /^\d{1,3}$/.test(String(t.textContent || "").trim())
+          );
+          const byY = new Map();
+          for (const t of texts) {
+            let b;
+            try {
+              b = t.getBBox();
+            } catch {
+              continue;
+            }
+            const yKey = Math.round(b.y / 40) * 40;
+            if (!byY.has(yKey)) byY.set(yKey, []);
+            byY.get(yKey).push({ t, x: b.x });
+          }
+          for (const group of byY.values()) {
+            group.sort((a, b) => a.x - b.x);
+            const left = group[0].x;
+            for (const g of group) {
+              if (g.x > left + 35) {
+                const el = g.t.closest("g.vf-text") || g.t;
+                el.remove();
+              }
+            }
+          }
+        })();
+        // OSMD tekent maatnummer 1 standaard niet (S10: wél aan
+        // systeembegin). Zet «1» boven de eerste treble-maat.
         (function injectMeasureNumberOne() {
           const hasOne = Array.from(mount.querySelectorAll("text")).some(
             (t) => String(t.textContent || "").trim() === "1"
           );
           if (hasOne) return;
-          const sample = Array.from(mount.querySelectorAll("g.vf-text text")).find(
-            (t) => /^\d{1,2}$/.test(String(t.textContent || "").trim())
-          );
           const m1 = mount.querySelector('.vf-measure[id="1"]');
-          if (!sample || !m1) return;
+          if (!m1) return;
           let bb;
           try {
             bb = m1.getBBox();
           } catch {
             return;
           }
+          const sample = Array.from(
+            mount.querySelectorAll("g.vf-text text")
+          ).find((t) =>
+            /^\d{1,3}$/.test(String(t.textContent || "").trim())
+          );
           const ns = "http://www.w3.org/2000/svg";
           const g = document.createElementNS(ns, "g");
           g.setAttribute("class", "vf-text");
           g.setAttribute("data-vsa-measure-number", "1");
-          const text = sample.cloneNode(false);
+          const text = document.createElementNS(ns, "text");
           text.textContent = "1";
-          const sampleY = Number(sample.getAttribute("y"));
+          text.setAttribute("font-family", fontFamily);
+          text.setAttribute("font-size", "15");
+          text.setAttribute("font-weight", "bold");
+          text.setAttribute("fill", "#000000");
           text.setAttribute("x", String(bb.x + 6.5));
           let y = bb.y - 9;
-          const sampleStaff = sample.closest(".staffline");
-          const sampleMeasure =
-            (sampleStaff && sampleStaff.querySelector(".vf-measure")) ||
-            sample.closest(".vf-measure");
-          if (sampleMeasure && Number.isFinite(sampleY)) {
-            try {
-              const smb = sampleMeasure.getBBox();
-              y = bb.y + (sampleY - smb.y);
-            } catch {
-              /* keep default */
+          if (sample) {
+            const sampleY = Number(sample.getAttribute("y"));
+            const sampleStaff = sample.closest(".staffline");
+            const sampleMeasure =
+              (sampleStaff && sampleStaff.querySelector(".vf-measure")) ||
+              sample.closest(".vf-measure");
+            if (sampleMeasure && Number.isFinite(sampleY)) {
+              try {
+                const smb = sampleMeasure.getBBox();
+                y = bb.y + (sampleY - smb.y);
+              } catch {
+                /* keep default */
+              }
+            }
+            for (const attr of [
+              "font-family",
+              "font-size",
+              "font-weight",
+              "font-style",
+              "fill",
+            ]) {
+              const v = sample.getAttribute(attr);
+              if (v) text.setAttribute(attr, v);
             }
           }
           text.setAttribute("y", String(y));

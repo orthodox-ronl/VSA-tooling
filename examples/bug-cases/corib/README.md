@@ -21,6 +21,7 @@ schermbeeld raakt.
 | `alleluia-toon-3.mvsa`               | idem                      | Korte recite + zelfde-toon-vervolg → S8 |
 | `alleluia-toon-2.mvsa`               | idem                      | Extra lange `()`-recite                 |
 | `derde-antifoon-zondag-hemelum.mvsa` | idem                      | Langere praktijkcasus (veel recite)     |
+| `ektinia-vrede-hemelum.mvsa`         | idem                      | Korte litanie; S10 + lyric-spacing      |
 
 Referentie-SVG/PDF: door de beheerder gegenereerd met `mvsa svg` / `mvsa pdf`
 (MuseScore). OSMD-product: `mvsa svg --engine osmd`.
@@ -49,6 +50,7 @@ mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa -o generated\corib-s8-toe
 mvsa svg examples\bug-cases\corib\alleluia-toon-3.mvsa -o generated\corib-s8-toets\osmd\alleluia-toon-3.osmd.svg --engine osmd
 mvsa svg examples\bug-cases\corib\alleluia-toon-2.mvsa -o generated\corib-s8-toets\osmd\alleluia-toon-2.osmd.svg --engine osmd
 mvsa svg examples\bug-cases\corib\derde-antifoon-zondag-hemelum.mvsa -o generated\corib-s8-toets\osmd\derde-antifoon-zondag-hemelum.osmd.svg --engine osmd
+mvsa svg examples\bug-cases\corib\ektinia-vrede-hemelum.mvsa -o generated\corib-s8-toets\osmd\ektinia-vrede-hemelum.osmd.svg --engine osmd
 
 REM Vastleggen in toets\ (ref = MuseScore-sibling; osmd = product)
 copy /Y generated\corib-s8-toets\osmd\*.osmd.svg examples\bug-cases\corib\toets\
@@ -56,6 +58,11 @@ copy /Y examples\bug-cases\corib\alleluia-toon-8.mvsa.svg examples\bug-cases\cor
 copy /Y examples\bug-cases\corib\alleluia-toon-3.mvsa.svg examples\bug-cases\corib\toets\alleluia-toon-3.ref.svg
 copy /Y examples\bug-cases\corib\alleluia-toon-2.mvsa.svg examples\bug-cases\corib\toets\alleluia-toon-2.ref.svg
 copy /Y examples\bug-cases\corib\derde-antifoon-zondag-hemelum.mvsa.svg examples\bug-cases\corib\toets\derde-antifoon-zondag-hemelum.ref.svg
+copy /Y examples\bug-cases\corib\ektinia-vrede-hemelum.mvsa.svg examples\bug-cases\corib\toets\ektinia-vrede-hemelum.ref.svg
+
+REM Contract-check (geen lyric-overlap; S10 alleen systeembegin + maat 1)
+cd scripts\osmd-svg
+node verify-corib-contract.mjs ..\..\examples\bug-cases\corib\toets\*.osmd.svg
 ```
 
 PNG’s: open de SVG’s in de browser of rasteriseer (Puppeteer in
@@ -73,14 +80,17 @@ Toets: open in `toets\` naast elkaar `{stuk}.ref.png` en `{stuk}.osmd.png`
 | alleluia-toon-8 | breve `\|\|O\|\|` + tekst-only middens | spacer-koppen verborgen (A1); lyrics compleet; breve stokloos | **PASS**\* |
 | alleluia-toon-3 | idem                                   | idem                                                          | **PASS**\* |
 | alleluia-toon-2 | idem                                   | idem                                                          | **PASS**\* |
-| derde-antifoon  | idem                                   | idem (A1 machinecheck)                                        | **PASS**\* |
+| derde-antifoon  | idem                                   | idem; geen lyric-overlap; S10                                 | **PASS**\* |
+| ektinia-vrede   | idem                                   | idem; S10                                                     | **PASS**\* |
 
 \*Pixel-pariteit MuseScore↔OSMD is geen eis. S8-eisen wél: geen zichtbare
 spacer-koppen; lyrics op die posities; breve als MuseScore-``||O||``-path
 (`data-osmd-breve-glyph`); lettergreepstreepjes zichtbaar; lyrics in
 **Source Sans 3**; OSMD-SVG met witte `rect.vsa-page-bg` (zelfde idee als
-MuseScore-sibling). A1-adapter koppelt spacer/breve per measure-id (niet via
-een y-systeemdrempel).
+MuseScore-sibling). Daarnaast: geen lettergreep-overlap
+([mscz-leesbaarheid](../../../docs/formats/mscz-leesbaarheid.md) §2) en
+maatnummers alleen aan systeembegin (**S10**). A1-adapter koppelt
+spacer/breve per measure-id (niet via een y-systeemdrempel).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg
@@ -105,3 +115,8 @@ A1-adapter groepeert op measure-id (y-drempel 150 px mengde systemen en
 liet breve/spacers als zwarte koppen staan); lettergreepstreepjes niet
 meer verbergen; maatnummer 1 nagetekend. Toetsbestanden staan in
 `examples/bug-cases/corib/toets/`.
+
+**S10 + geen lyric-overlap (2026-10-31):** `RenderMeasureNumbersOnlyAtSystemStart`;
+OSMD-default lettergreep-afstanden + `VoiceSpacing` 0.85/3.0 (compacttight
+0.65 kneelde maat 2); blad 1000 px. Check:
+`scripts/osmd-svg/verify-corib-contract.mjs`.
