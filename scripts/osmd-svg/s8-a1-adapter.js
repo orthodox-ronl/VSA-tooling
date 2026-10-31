@@ -204,10 +204,12 @@
   }
 
   /**
-   * Vervang OSMD's gevulde breve-kop door een leesbare ``||O||``-glyph
-   * (dubbele verticale strepen + holle ovale kop), zoals MuseScore headType
-   * breve / checklist S8. Coördinaten in dezelfde user-space als de nootkop.
+   * Vervang OSMD's gevulde breve-kop door de MuseScore ``||O||``-glyph
+   * (path uit alleluia-toon-8.mvsa.svg, unit height=1, centrum 0,0).
    */
+  var MUSESCORE_BREVE_UNIT_PATH = "M-0.68906 -0.50000C-0.70031 -0.50000 -0.70310 -0.50000 -0.71419 -0.50000C-0.73670 -0.50000 -0.75345 -0.48320 -0.75345 -0.46073C-0.75345 -0.43838 -0.75345 0.44110 -0.75345 0.46074C-0.75345 0.48028 -0.73670 0.50000 -0.71419 0.50000C-0.70310 0.50000 -0.70031 0.50000 -0.68906 0.50000C-0.66934 0.50000 -0.64979 0.47749 -0.64979 0.46074C-0.64979 0.44390 -0.64979 -0.43838 -0.64979 -0.46073C-0.64979 -0.48320 -0.66663 -0.50000 -0.68906 -0.50000M0.50975 -0.50000C0.49849 -0.50000 0.49570 -0.50000 0.48453 -0.50000C0.46211 -0.50000 0.44535 -0.48320 0.44535 -0.46073C0.44535 -0.45518 0.44535 -0.36276 0.44535 -0.24230C0.36124 -0.32348 0.21849 -0.37954 0.00279 -0.37954C-0.21570 -0.37954 -0.35853 -0.32348 -0.44264 -0.24230C-0.44264 -0.36276 -0.44264 -0.45518 -0.44264 -0.46073C-0.44264 -0.48320 -0.45940 -0.50000 -0.48174 -0.50000C-0.49299 -0.50000 -0.49579 -0.50000 -0.50704 -0.50000C-0.52938 -0.50000 -0.54613 -0.48320 -0.54613 -0.46073C-0.54613 -0.43838 -0.54613 0.44110 -0.54613 0.46074C-0.54613 0.48028 -0.52938 0.50000 -0.50704 0.50000C-0.49579 0.50000 -0.49299 0.50000 -0.48174 0.50000C-0.46219 0.50000 -0.44264 0.47749 -0.44264 0.46074C-0.44264 0.45515 -0.44264 0.36275 -0.44264 0.23954C-0.35853 0.32348 -0.21570 0.37950 0.00279 0.37950C0.21849 0.37950 0.36124 0.32348 0.44535 0.23954C0.44535 0.36275 0.44535 0.45515 0.44535 0.46074C0.44535 0.48028 0.46211 0.50000 0.48453 0.50000C0.49570 0.50000 0.49849 0.50000 0.50975 0.50000C0.52930 0.50000 0.54884 0.47749 0.54884 0.46074C0.54884 0.44390 0.54884 -0.43838 0.54884 -0.46073C0.54884 -0.48320 0.53209 -0.50000 0.50975 -0.50000M0.14563 0.27305C0.11204 0.28143 0.06719 0.28989 0.02513 0.28989C-0.05323 0.28989 -0.10654 0.26459 -0.14292 0.19749C-0.17922 0.12738 -0.22974 -0.05469 -0.23253 -0.13031C-0.23253 -0.13587 -0.23253 -0.14142 -0.23253 -0.14710C-0.23253 -0.21150 -0.20453 -0.25076 -0.14292 -0.27311C-0.10933 -0.28157 -0.06448 -0.28990 -0.01963 -0.28990C0.05593 -0.28990 0.10637 -0.27033 0.14563 -0.19749C0.18489 -0.12185 0.23803 0.05743 0.23803 0.13015C0.23803 0.20299 0.21282 0.25063 0.14563 0.27305M0.71419 -0.50000C0.70293 -0.50000 0.70014 -0.50000 0.68906 -0.50000C0.66655 -0.50000 0.64979 -0.48320 0.64979 -0.46073C0.64979 -0.43838 0.64979 0.44110 0.64979 0.46074C0.64979 0.48028 0.66655 0.50000 0.68906 0.50000C0.70014 0.50000 0.70293 0.50000 0.71419 0.50000C0.73374 0.50000 0.75345 0.47749 0.75345 0.46074C0.75345 0.44390 0.75345 -0.43838 0.75345 -0.46073C0.75345 -0.48320 0.73661 -0.50000 0.71419 -0.50000";
+  var MUSESCORE_BREVE_ASPECT = 1.50690504;
+
   function drawBrevePipeOGlyph(staveNoteEl) {
     var ns = "http://www.w3.org/2000/svg";
     if (staveNoteEl.querySelector("[data-osmd-breve-glyph='1']")) {
@@ -229,7 +231,6 @@
     if (bb.width < 0.5 && bb.height < 0.5) {
       return;
     }
-    // Verberg OSMD-kop (stok was al weg); glyph komt ervoor in de plaats.
     Array.prototype.forEach.call(
       staveNoteEl.querySelectorAll(
         ".vf-notehead, path.vf-notehead, .vf-note path, .vf-note circle, .vf-note ellipse, .vf-note rect"
@@ -244,46 +245,24 @@
 
     var cx = bb.x + bb.width / 2;
     var cy = bb.y + bb.height / 2;
-    var ss = Math.max(bb.height, bb.width * 0.85, 8);
-    var stroke = Math.max(ss * 0.12, 1.1);
-    var barH = ss * 1.05;
-    var inner = ss * 0.78;
-    var gap = ss * 0.2;
-    var rx = ss * 0.52;
-    var ry = ss * 0.4;
+    // Iets groter dan OSMD-kop; MuseScore-breve is ~1.3× heelnoothoogte.
+    var scale = Math.max(bb.height, 8) * 1.35;
 
     var g = document.createElementNS(ns, "g");
     g.setAttribute("class", "vsa-breve-glyph");
     g.setAttribute("data-osmd-breve-glyph", "1");
     g.setAttribute("pointer-events", "none");
+    g.setAttribute(
+      "transform",
+      "translate(" + cx + "," + cy + ") scale(" + scale + ")"
+    );
 
-    function addLine(x) {
-      var line = document.createElementNS(ns, "line");
-      line.setAttribute("x1", String(x));
-      line.setAttribute("y1", String(cy - barH / 2));
-      line.setAttribute("x2", String(x));
-      line.setAttribute("y2", String(cy + barH / 2));
-      line.setAttribute("stroke", "#000000");
-      line.setAttribute("stroke-width", String(stroke));
-      line.setAttribute("stroke-linecap", "square");
-      line.setAttribute("fill", "none");
-      g.appendChild(line);
-    }
-
-    addLine(cx - inner - gap);
-    addLine(cx - inner);
-    var oval = document.createElementNS(ns, "ellipse");
-    oval.setAttribute("cx", String(cx));
-    oval.setAttribute("cy", String(cy));
-    oval.setAttribute("rx", String(rx));
-    oval.setAttribute("ry", String(ry));
-    oval.setAttribute("stroke", "#000000");
-    oval.setAttribute("stroke-width", String(stroke));
-    oval.setAttribute("fill", "none");
-    g.appendChild(oval);
-    addLine(cx + inner);
-    addLine(cx + inner + gap);
-
+    var path = document.createElementNS(ns, "path");
+    path.setAttribute("d", MUSESCORE_BREVE_UNIT_PATH);
+    path.setAttribute("fill", "#000000");
+    path.setAttribute("fill-rule", "evenodd");
+    path.setAttribute("stroke", "none");
+    g.appendChild(path);
     staveNoteEl.appendChild(g);
   }
 

@@ -20,7 +20,51 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OSMD_CDN =
   "https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.9.3/build/opensheetmusicdisplay.min.js";
+/** Zelfde lyric-font als MuseScore Style / bibliotheek-scherm (Source Sans 3). */
+const FONT_FAMILY = "Source Sans 3";
+const FONTS_DIR = path.join(__dirname, "fonts");
 const ADAPTER_PATH = path.join(__dirname, "s8-a1-adapter.js");
+
+/** Lokale WOFF2 → @font-face (geen Google Fonts-afhankelijkheid in de VM). */
+function buildSourceSansFaceCss() {
+  const faces = [
+    ["source-sans-3-400.woff2", "400", "normal"],
+    ["source-sans-3-400-italic.woff2", "400", "italic"],
+    ["source-sans-3-600.woff2", "600", "normal"],
+  ];
+  const parts = [];
+  for (const [file, weight, style] of faces) {
+    const fp = path.join(FONTS_DIR, file);
+    if (!fs.existsSync(fp)) {
+      throw new Error(
+        `Font ontbreekt: ${fp}. Zie scripts/osmd-svg/fonts/README.md`
+      );
+    }
+    const b64 = fs.readFileSync(fp).toString("base64");
+    parts.push(
+      `@font-face{font-family:'${FONT_FAMILY}';font-style:${style};` +
+        `font-weight:${weight};font-display:swap;` +
+        `src:url(data:font/woff2;base64,${b64}) format('woff2');}`
+    );
+  }
+  return parts.join("");
+}
+
+function injectFontFaceIntoSvg(svgMarkup, faceCss) {
+  // OSMD schrijft font-family="Source Sans 3" zonder quotes; SVG parseert
+  // dat als drie families (Source, Sans, 3) → fallback Times. Quote verplicht.
+  let out = svgMarkup.replaceAll(
+    `font-family="${FONT_FAMILY}"`,
+    `font-family="'${FONT_FAMILY}'"`
+  );
+  const style = `<defs><style type="text/css"><![CDATA[${faceCss}]]></style></defs>`;
+  const m = out.match(/<svg\b[^>]*>/);
+  if (!m) {
+    return out;
+  }
+  const insertAt = m.index + m[0].length;
+  return out.slice(0, insertAt) + style + out.slice(insertAt);
+}
 
 async function loadPuppeteer() {
   const require = createRequire(import.meta.url);
@@ -81,6 +125,7 @@ async function main() {
 
   const musicxml = fs.readFileSync(inputPath, "utf8");
   const adapterJs = fs.readFileSync(ADAPTER_PATH, "utf8");
+  const fontFaceCss = buildSourceSansFaceCss();
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
   const puppeteer = await loadPuppeteer();
@@ -96,7 +141,11 @@ async function main() {
     await page.setContent(
       `<!DOCTYPE html>
 <html lang="nl">
-<head><meta charset="utf-8" /><title>osmd-svg</title></head>
+<head>
+  <meta charset="utf-8" />
+  <title>osmd-svg</title>
+  <style>${fontFaceCss}</style>
+</head>
 <body>
   <div id="osmd" style="width: 900px;"></div>
   <script src="${OSMD_CDN}"></script>
@@ -108,32 +157,43 @@ async function main() {
     await page.waitForFunction(
       () => typeof window.opensheetmusicdisplay !== "undefined"
     );
+    await page.evaluate(async (fontFamily) => {
+      if (document.fonts && document.fonts.load) {
+        await document.fonts.load('13px "' + fontFamily + '"');
+        await document.fonts.ready;
+      }
+    }, FONT_FAMILY);
     await page.addScriptTag({ content: adapterJs });
 
-    const pageCount = await page.evaluate(async (xml) => {
-      const mount = document.getElementById("osmd");
-      const osmd = new window.opensheetmusicdisplay.OpenSheetMusicDisplay(
-        mount,
-        {
-          autoResize: false,
-          backend: "svg",
-          drawTitle: false,
-          drawSubtitle: false,
-          drawComposer: false,
-          drawLyricist: false,
-          drawPartNames: false,
-          drawTimeSignatures: false,
-          drawingParameters: "compacttight",
+    const pageCount = await page.evaluate(
+      async (xml, fontFamily) => {
+        const mount = document.getElementById("osmd");
+        const osmd = new window.opensheetmusicdisplay.OpenSheetMusicDisplay(
+          mount,
+          {
+            autoResize: false,
+            backend: "svg",
+            drawTitle: false,
+            drawSubtitle: false,
+            drawComposer: false,
+            drawLyricist: false,
+            drawPartNames: false,
+            drawTimeSignatures: false,
+            defaultFontFamily: fontFamily,
+            drawingParameters: "compacttight",
+          }
+        );
+        osmd.setOptions({ pageFormat: "Endless" });
+        await osmd.load(xml);
+        osmd.render();
+        if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
+          window.__vsaOsmdS8FinalizePrint(mount, xml);
         }
-      );
-      osmd.setOptions({ pageFormat: "Endless" });
-      await osmd.load(xml);
-      osmd.render();
-      if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
-        window.__vsaOsmdS8FinalizePrint(mount, xml);
-      }
-      return document.querySelectorAll("#osmd svg").length;
-    }, musicxml);
+        return document.querySelectorAll("#osmd svg").length;
+      },
+      musicxml,
+      FONT_FAMILY
+    );
 
     if (!pageCount) {
       throw new Error("OSMD renderde geen SVG (0 elementen in #osmd)");
@@ -166,6 +226,7 @@ async function main() {
         `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n` +
         `${bodies}\n</svg>\n`;
     }
+    outText = injectFontFaceIntoSvg(outText, fontFaceCss);
 
     fs.writeFileSync(outputPath, outText, "utf8");
     // Machine-readable line for Python callers.
