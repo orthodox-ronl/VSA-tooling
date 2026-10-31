@@ -261,7 +261,7 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 
 ## Branches (CoriB / parallel werk)
 
-- **Coria-vervanger (CoriB):** productwerk op branch **`coriab`** — niet stil
+- **Coria-vervanger (CoriB):** productwerk op branch **`corib`** — niet stil
   op `development`/`main` mixen.
 - **Branch-afstemming** met lokale chats: zie
   `.cursor/rules/branch-afstemming.mdc` (expliciete branch in het bericht;
@@ -272,7 +272,7 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 | Regel                                 | Doel                                                          |
 | ------------------------------------- | ------------------------------------------------------------- |
 | `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                              |
-| `branch-afstemming.mdc`               | Geen stille branch-wissel; CoriB → `coriab`                   |
+| `branch-afstemming.mdc`               | Geen stille branch-wissel; CoriB → `corib`                    |
 | `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                    |
 | `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                              |
 | `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                 |
