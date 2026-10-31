@@ -40,6 +40,35 @@ Alles in **één** map `toets/` — per stuk vier bestanden naast elkaar:
 Na elke wijziging aan from-ir / OSMD-adapter / S8/S13: **deze map opnieuw
 vullen en committen**. Anders kijkt de toets naar verouderde beelden.
 
+### Bekijk op GitHub (branch `corib`)
+
+Klikbare PNG’s (OSMD-product). Raw opent het beeld direct in de browser.
+
+| Stuk            | OSMD PNG                                                                                                                                                                                                                         | MuseScore-ref PNG                                                                                                                                                                                                              |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| alleluia-toon-8 | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/alleluia-toon-8.osmd.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/alleluia-toon-8.osmd.png) | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/alleluia-toon-8.ref.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/alleluia-toon-8.ref.png) |
+| alleluia-toon-3 | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/alleluia-toon-3.osmd.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/alleluia-toon-3.osmd.png) | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/alleluia-toon-3.ref.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/alleluia-toon-3.ref.png) |
+| alleluia-toon-2 | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/alleluia-toon-2.osmd.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/alleluia-toon-2.osmd.png) | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/alleluia-toon-2.ref.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/alleluia-toon-2.ref.png) |
+| ektinia-vrede   | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/ektinia-vrede-hemelum.osmd.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/ektinia-vrede-hemelum.osmd.png) | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/ektinia-vrede-hemelum.ref.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/ektinia-vrede-hemelum.ref.png) |
+| derde-antifoon  | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/derde-antifoon-zondag-hemelum.osmd.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/derde-antifoon-zondag-hemelum.osmd.png) | [blob](https://github.com/orthodox-ronl/VSA-tooling/blob/corib/examples/bug-cases/corib/toets/derde-antifoon-zondag-hemelum.ref.png) · [raw](https://github.com/orthodox-ronl/VSA-tooling/raw/corib/examples/bug-cases/corib/toets/derde-antifoon-zondag-hemelum.ref.png) |
+
+Map op GitHub:
+[examples/bug-cases/corib/toets/](https://github.com/orthodox-ronl/VSA-tooling/tree/corib/examples/bug-cases/corib/toets).
+
+Lokaal openen (na `git pull` op `corib`):
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+git fetch origin corib
+git checkout corib
+git pull origin corib
+start "" examples\bug-cases\corib\toets\alleluia-toon-8.osmd.png
+start "" examples\bug-cases\corib\toets\alleluia-toon-3.osmd.png
+start "" examples\bug-cases\corib\toets\alleluia-toon-2.osmd.png
+start "" examples\bug-cases\corib\toets\ektinia-vrede-hemelum.osmd.png
+start "" examples\bug-cases\corib\toets\derde-antifoon-zondag-hemelum.osmd.png
+```
+
 ## Producten regenereren (OSMD + toetsbestanden)
 
 ```cmd
