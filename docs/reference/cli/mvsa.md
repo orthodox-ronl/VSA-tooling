@@ -288,8 +288,8 @@ bron. Spike: `examples/spikes/partituur-browser/`. Brugcontract:
 
 S8-recite in from-ir: spacers krijgen ``<notehead>none</notehead>`` als
 **marker** voor de scherm-OSMD-adapter (contract A1). OSMD verbergt die kop
-niet uit XML alleen; `mvsa svg --engine osmd` en de bibliotheek-embed
-passen A1-hide toe na render — zie
+niet uit XML alleen; `mvsa svg --engine osmd` past A1 toe (spacer-hide +
+``||O||``-breve); bibliotheek-embed idem via `score-osmd.js` — zie
 [osmd-s8-recite](../../plans/osmd-s8-recite.md) en
 [score-ir](../../formats/score-ir.md).
 
