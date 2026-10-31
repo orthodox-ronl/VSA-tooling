@@ -561,7 +561,7 @@ Score-IR/OSMD in de browser.
 | `--keep-mscz`                | Bewaar tussenliggende ``.mscz`` (alleen `musescore`).                                     |
 | `--keep-mxl`                 | `musescore`: partituur-``.mxl``; `osmd`: from-ir ``.musicxml``.                           |
 | `--no-trim`                  | Sla viewBox-trim over (alleen `musescore`).                                               |
-| `--transparent`              | Geen witte achtergrond na trim (alleen `musescore`).                                      |
+| `--transparent`              | Geen witte achtergrond na trim (alleen `musescore`). `osmd` schrijft altijd witte `vsa-page-bg`. |
 | `--bibliotheek-id`           | Genegeerd voor layout ``muziek`` / OSMD-chrome.                                           |
 | `--compact`                  | Compact-baseline (alleen `musescore`; default voor die engine).                           |
 | `--min-system-distance SP`   | Min. systeemafstand (alleen `musescore`).                                                 |

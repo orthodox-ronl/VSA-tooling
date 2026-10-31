@@ -8,8 +8,9 @@ en het recite-midden met `<notehead>breve</notehead>`. Na OSMD-render:
 `s8-a1-adapter.js` verbergt spacer-koppen (lyrics blijven) en zet de breve
 om naar de MuseScore-``||O||``-path (uit de referentie-SVG). Lyrics:
 **Source Sans 3** (lokale WOFF2 in `fonts/`, `@font-face` in de uitvoer-SVG).
-Zelfde marker-contract als bibliotheek `score-osmd.js`
-([osmd-s8-recite](../../docs/plans/osmd-s8-recite.md)).
+Uitvoer-SVG krijgt een witte pagina-achtergrond (`rect.vsa-page-bg`, zelfde
+idee als MuseScore-trim). Zelfde marker-contract als bibliotheek
+`score-osmd.js` ([osmd-s8-recite](../../docs/plans/osmd-s8-recite.md)).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg

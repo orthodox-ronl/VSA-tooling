@@ -18,7 +18,7 @@ in het SVG-product.
 | CLI (``.mvsa``)              | [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                                                             |
 | CLI (``.mscz``)              | [`mscz svg`](../reference/cli/mscz.md)                                                                      |
 | MSCZ-layout ``muziek``       | [`.mscz` layoutprofielen](mscz.md#layoutprofielen---layout)                                                 |
-| `--engine osmd`              | Score-IR → from-ir MusicXML → headless OSMD + S8 A1-adapter ([`scripts/osmd-svg`](../../scripts/osmd-svg/)) |
+| `--engine osmd`              | Score-IR → from-ir MusicXML → headless OSMD + S8 A1-adapter ([`scripts/osmd-svg`](../../scripts/osmd-svg/)); witte `vsa-page-bg` |
 | Score-IR / schermpad         | [score-ir](score-ir.md) · [partituur-ir](../plans/partituur-ir.md) §7                                       |
 
 ```cmd
