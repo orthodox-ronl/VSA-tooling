@@ -7,6 +7,9 @@
  * S8 (contract A1): na OSMD-render draait ``s8-a1-adapter.js`` zodat
  * spacer-koppen (``notehead none``) verdwijnen; lyrics blijven.
  *
+ * Cues (S15/S19/C6 / schermpartituur §4.2): ``cue-layout.js`` zet
+ * maat-WidthFactor, wrap/``...``, cue-X op eerste noot, centreren.
+ *
  * Usage:
  *   npm install
  *   node render.mjs INPUT.musicxml OUTPUT.svg
@@ -24,6 +27,7 @@ const OSMD_CDN =
 const FONT_FAMILY = "Source Sans 3";
 const FONTS_DIR = path.join(__dirname, "fonts");
 const ADAPTER_PATH = path.join(__dirname, "s8-a1-adapter.js");
+const CUE_LAYOUT_PATH = path.join(__dirname, "cue-layout.js");
 
 /**
  * coribCompact — graveerprofiel voor het CoriB-scherm (OSMD).
@@ -230,9 +234,14 @@ async function main() {
     console.error(`S8 A1-adapter niet gevonden: ${ADAPTER_PATH}`);
     process.exit(1);
   }
+  if (!fs.existsSync(CUE_LAYOUT_PATH)) {
+    console.error(`Cue-layout niet gevonden: ${CUE_LAYOUT_PATH}`);
+    process.exit(1);
+  }
 
   const musicxml = fs.readFileSync(inputPath, "utf8");
   const adapterJs = fs.readFileSync(ADAPTER_PATH, "utf8");
+  const cueLayoutJs = fs.readFileSync(CUE_LAYOUT_PATH, "utf8");
   const fontFaceCss = buildSourceSansFaceCss();
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
@@ -271,6 +280,7 @@ async function main() {
         await document.fonts.ready;
       }
     }, FONT_FAMILY);
+    await page.addScriptTag({ content: cueLayoutJs });
     await page.addScriptTag({ content: adapterJs });
 
     const pageCount = await page.evaluate(
@@ -304,7 +314,13 @@ async function main() {
         if (osmd.Sheet && measureWidthFactor != null) {
           osmd.Sheet.MeasureWidthFactor = measureWidthFactor;
         }
-        osmd.render();
+        // Cues §4.2 / S15/S19/C6: WidthFactor + wrap + X op eerste noot
+        // (rendert zelf; geen kale osmd.render() hierna vóór S8).
+        if (typeof window.__vsaOsmdCueLayout === "function") {
+          window.__vsaOsmdCueLayout(osmd, mount, xml);
+        } else {
+          osmd.render();
+        }
         if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
           window.__vsaOsmdS8FinalizePrint(mount, xml);
         }

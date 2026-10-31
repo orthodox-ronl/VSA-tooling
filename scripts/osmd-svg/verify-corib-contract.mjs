@@ -3,6 +3,8 @@
  * - geen lyric-overlap (mscz-leesbaarheid §2 / P3a)
  * - maatnummers alleen aan systeembegin (S10)
  * - maatnummer 1 aanwezig (S10)
+ * - @tekst-cues (indien aanwezig): binnen maatstrepen (C6/S15);
+ *   wrap op ``...`` als twee regels óf één regel die past (S19 / §4.2)
  *
  * Usage:
  *   node verify-corib-contract.mjs path/to/a.osmd.svg [more…]
@@ -102,6 +104,132 @@ async function checkSvg(browser, svgPath) {
         }
 
         const hasOne = nums.some((n) => n.n === "1");
+
+        // Cues (P: … / …): bbox mag niet voorbij de maatstreep van de
+        // dichtstbijzijnde treble-maat (C6 / S15).
+        const byId = {};
+        for (const m of root.querySelectorAll(".vf-measure[id]")) {
+          const id = String(m.id || "").trim();
+          if (!/^\d+$/.test(id)) continue;
+          let b;
+          try {
+            b = m.getBBox();
+          } catch {
+            continue;
+          }
+          if (!byId[id] || b.y < byId[id].y) {
+            byId[id] = { id, x: b.x, y: b.y, r: b.x + b.width };
+          }
+        }
+        const measures = Object.values(byId).sort(
+          (a, b) => Number(a.id) - Number(b.id)
+        );
+        const cueOverflow = [];
+        const cueTexts = [...root.querySelectorAll("text")].filter((t) =>
+          /^(P:|\.\.\.)/.test(String(t.textContent || "").trim())
+        );
+        const seenCue = new Set();
+        for (const t of cueTexts) {
+          const s = String(t.textContent || "").trim();
+          let b;
+          try {
+            b = t.getBBox();
+          } catch {
+            continue;
+          }
+          const key = `${s}@${Math.round(b.x)},${Math.round(b.y)}`;
+          if (seenCue.has(key)) continue;
+          seenCue.add(key);
+          // Maat waarin de cue begint (zelfde y-band); anders dichtstbijzijnde
+          // linker maatrand — niet centrum (lange cues starten links in m2).
+          let best = null;
+          for (const m of measures) {
+            if (b.y > m.y + 8 || b.y < m.y - 160) continue;
+            if (b.x >= m.x - 4 && b.x < m.r - 4) {
+              best = m;
+              break;
+            }
+          }
+          if (!best) {
+            let bestDist = Infinity;
+            for (const m of measures) {
+              if (b.y > m.y + 8 || b.y < m.y - 160) continue;
+              const d = Math.abs(b.x - m.x);
+              if (d < bestDist) {
+                bestDist = d;
+                best = m;
+              }
+            }
+          }
+          if (!best) continue;
+          const pad = 12;
+          if (b.x + b.width > best.r + pad) {
+            cueOverflow.push(
+              `${s.slice(0, 28)}… m${best.id} (cueR=${Math.round(
+                b.x + b.width
+              )} maatR=${Math.round(best.r)})`
+            );
+          }
+        }
+        // S19 / §4.2: bij `...` in de bron óf wrap (twee DOM-regels) óf
+        // één regel die in de maat past (OSMD-inklappen). Losse `...`-
+        // regel zonder bijbehorende eerste regel = fout.
+        const cueByMeasure = new Map();
+        for (const t of cueTexts) {
+          let b;
+          try {
+            b = t.getBBox();
+          } catch {
+            continue;
+          }
+          const s = String(t.textContent || "").trim();
+          let mid = null;
+          for (const m of measures) {
+            if (b.y > m.y + 8 || b.y < m.y - 160) continue;
+            if (b.x >= m.x - 4 && b.x < m.r - 4) {
+              mid = m;
+              break;
+            }
+          }
+          if (!mid) continue;
+          if (!cueByMeasure.has(mid.id)) cueByMeasure.set(mid.id, []);
+          cueByMeasure.get(mid.id).push({ s, x: b.x, r: b.x + b.width });
+        }
+        const wrapFails = [];
+        for (const [mid, parts] of cueByMeasure) {
+          const uniq = [];
+          const seen = new Set();
+          for (const p of parts) {
+            const k = p.s;
+            if (seen.has(k)) continue;
+            seen.add(k);
+            uniq.push(p);
+          }
+          const hasEllipsisLine = uniq.some((p) => p.s.startsWith("..."));
+          const hasInlineEllipsis = uniq.some(
+            (p) => p.s.includes("...") && !p.s.startsWith("...")
+          );
+          const hasLead = uniq.some(
+            (p) => p.s.startsWith("P:") && !p.s.includes("...")
+          );
+          if (hasEllipsisLine && !hasLead && !hasInlineEllipsis) {
+            wrapFails.push(`m${mid}: '...'-regel zonder eerste regel`);
+          }
+          if (hasInlineEllipsis) {
+            const m = measures.find((x) => x.id === mid);
+            const long = uniq.find(
+              (p) => p.s.includes("...") && !p.s.startsWith("...")
+            );
+            if (m && long && long.r > m.r + 12) {
+              wrapFails.push(
+                `m${mid}: ingeklapte cue past niet (cueR=${Math.round(
+                  long.r
+                )} maatR=${Math.round(m.r)})`
+              );
+            }
+          }
+        }
+
         const errors = [];
         if (overlaps.length) {
           errors.push(
@@ -125,12 +253,21 @@ async function checkSvg(browser, svgPath) {
         if (!hasOne) {
           errors.push("S10: maatnummer 1 ontbreekt");
         }
+        if (cueOverflow.length) {
+          errors.push(
+            `C6 cue buiten maat: ` + cueOverflow.slice(0, 4).join(" | ")
+          );
+        }
+        if (wrapFails.length) {
+          errors.push(`S19/§4.2 wrap: ` + wrapFails.slice(0, 4).join(" | "));
+        }
         return {
           ok: errors.length === 0,
           errors,
           nLyrics: lyrics.length,
           nNums: nums.length,
           nums: nums.map((n) => n.n),
+          nCues: seenCue.size,
           minLyricGap: Number.isFinite(minLyricGap)
             ? Math.round(minLyricGap * 10) / 10
             : null,
@@ -168,7 +305,7 @@ async function main() {
       const r = await checkSvg(browser, p);
       if (r.ok) {
         console.log(
-          `PASS\t${path.basename(p)}\tlyrics=${r.nLyrics}\tnums=${r.nums.join(",")}\tminGap=${r.minLyricGap}`
+          `PASS\t${path.basename(p)}\tlyrics=${r.nLyrics}\tcues=${r.nCues}\tnums=${r.nums.join(",")}\tminGap=${r.minLyricGap}`
         );
       } else {
         failed++;

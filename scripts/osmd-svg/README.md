@@ -25,9 +25,12 @@ bijgesneden op de inkt. Contract-check: `node verify-corib-contract.mjs`.
 
 S8 A1-adapter (`s8-a1-adapter.js`) koppelt spacer/breve per **measure-id**
 (geen y-systeemdrempel — die brak bij compacte CoriB-layout). Lettergreep-
-streepjes (`vf-text dash`) blijven zichtbaar. Pixel-pariteit met MuseScore
-is geen eis ([corib-mvp](../../docs/plans/corib-mvp.md)); S8/S13 blijven
-het contract voor recite en melisma.
+streepjes (`vf-text dash`) blijven zichtbaar. **Cues** (`cue-layout.js`,
+zelfde regels als bibliotheek `score-osmd.js`): maat-`WidthFactor` zodat
+`@tekst` in de maat past (C6); wrap op `...` (S19); inklappen naar één
+regel alleen als die past; cue-X op eerste noot. Pixel-pariteit met
+MuseScore is geen eis ([corib-mvp](../../docs/plans/corib-mvp.md));
+S8/S13/S15/S19 blijven het contract.
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\scripts\osmd-svg

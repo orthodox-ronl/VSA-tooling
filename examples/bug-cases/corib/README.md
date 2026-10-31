@@ -81,7 +81,7 @@ Toets: open in `toets\` naast elkaar `{stuk}.ref.png` en `{stuk}.osmd.png`
 | alleluia-toon-3 | idem                                   | idem                                                          | **PASS**\* |
 | alleluia-toon-2 | idem                                   | idem                                                          | **PASS**\* |
 | derde-antifoon  | idem                                   | idem; geen lyric-overlap; S10                                 | **PASS**\* |
-| ektinia-vrede   | idem                                   | idem; S10                                                     | **PASS**\* |
+| ektinia-vrede   | idem                                   | idem; S10; cues §4.2/S15/S19/C6                               | **PASS**\* |
 
 \*Pixel-pariteit MuseScore↔OSMD is geen eis. S8-eisen wél: geen zichtbare
 spacer-koppen; lyrics op die posities; breve als MuseScore-``||O||``-path
@@ -120,3 +120,8 @@ meer verbergen; maatnummer 1 nagetekend. Toetsbestanden staan in
 OSMD-default lettergreep-afstanden + `VoiceSpacing` 0.85/3.0 (compacttight
 0.65 kneelde maat 2); blad 1000 px. Check:
 `scripts/osmd-svg/verify-corib-contract.mjs`.
+
+**Cues S15/S19/C6 (ektinia-vrede):** `cue-layout.js` (zelfde regels als
+bibliotheek `score-osmd.js` / schermpartituur §4.2) — maat-`WidthFactor`
+zodat `@tekst` in de maat past; wrap op `...`; inklappen naar één regel
+alleen als die past; cue-X op eerste noot.
