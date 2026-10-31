@@ -7,8 +7,9 @@
  * S8 (contract A1): na OSMD-render draait ``s8-a1-adapter.js`` zodat
  * spacer-koppen (``notehead none``) verdwijnen; lyrics blijven.
  *
- * Cues (S15/S19/C6 / schermpartituur §4.2): ``cue-layout.js`` zet
- * maat-WidthFactor, wrap/``...``, cue-X op eerste noot, centreren.
+ * Cues (S15/S19/C6/C7 / schermpartituur §4.2): ``cue-layout.js`` zet
+ * maat-WidthFactor, wrap/``...``, cue-X op eerste noot, centreren,
+ * eenregel-cue-baseline (C7). Graveerprofiel: P3c/P3d/L2/S22.
  *
  * Usage:
  *   npm install
@@ -52,14 +53,14 @@ const CORIB_COMPACT = {
   // bij S8-recite (mscz-leesbaarheid §2 / P3a; gemeten derde-antifoon).
   sheetWidthPx: 1000,
   contentPadPx: 10,
-  // (a) verticaal — lyrics tussen de balken (geen negatieve Y: dat plakt
-  //    ze tegen de bovenbalk).
-  StaffDistance: 4.5,
-  BetweenStaffDistance: 3.5,
-  MinimumDistanceBetweenSystems: 3.0,
-  MinSkyBottomDistBetweenStaves: 0.6,
-  LyricsYOffsetToStaffHeight: 2.0,
-  LyricsYMarginToBottomLine: 0.35,
+  // (a) verticaal — P3c: dichtere balkafstand (lyrics blijven leesbaar);
+  //    P3d: ruimere systeemafstand (S10-nummers / @tekst raken vorig systeem niet).
+  StaffDistance: 3.6,
+  BetweenStaffDistance: 2.8,
+  MinimumDistanceBetweenSystems: 5.0,
+  MinSkyBottomDistBetweenStaves: 0.5,
+  LyricsYOffsetToStaffHeight: 1.7,
+  LyricsYMarginToBottomLine: 0.3,
   // (b) horizontaal — MeasureWidthFactor 1 (lager: S8-lettergrepen
   //    overlappen). FixedMeasureWidth niet: die trekt élke maat tot de
   //    breedste → blad veel te hoog voor CoriB-scherm.
@@ -324,6 +325,27 @@ async function main() {
         if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
           window.__vsaOsmdS8FinalizePrint(mount, xml);
         }
+        // L2 — Source Sans 3 op leesbare pt (MuseScore-ref: lyrics 13 / cues 12).
+        (function enforceLyricCueFontSizes() {
+          for (const t of mount.querySelectorAll(
+            ".vf-text.lyrics text, .vf-text.dash text"
+          )) {
+            const fs = parseFloat(t.getAttribute("font-size"));
+            if (!Number.isFinite(fs) || fs < 12.5) {
+              t.setAttribute("font-size", "13");
+            }
+            t.setAttribute("font-family", "'" + fontFamily + "'");
+          }
+          for (const t of mount.querySelectorAll("text")) {
+            const s = String(t.textContent || "").trim();
+            if (!(/^P:/.test(s) || s.startsWith("..."))) continue;
+            const fs = parseFloat(t.getAttribute("font-size"));
+            if (!Number.isFinite(fs) || fs < 11.5) {
+              t.setAttribute("font-size", "12");
+            }
+            t.setAttribute("font-family", "'" + fontFamily + "'");
+          }
+        })();
         // OSMD hangt lyrics aan de skyline van de bovenbalk; bij een
         // groter balkgat blijven ze te hoog. Verschuif lyrics+streepjes
         // per systeem naar het midden van treble-onder ↔ bas-boven.

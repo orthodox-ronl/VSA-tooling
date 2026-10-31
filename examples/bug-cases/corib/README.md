@@ -131,3 +131,9 @@ alleen als die past; cue-X op eerste noot.
 van de **dichtstbijzijnde balk** in die kolom (niet first-wins over een
 ruime y-band — dat verschool o.a. de «stich»-slur). Verify: notehead-x
 SA↔TB, lyric↔noot, slur↔noot (leesbaarheid S2).
+
+**OSMD-schermlayout (P3c/P3d/P3e/S22/C7/L2):** compacte balkafstand binnen
+het systeem; ruimere systeemafstand (S10/`@tekst`); lettergreep-slot
+centreren; eenregel-`@tekst` op baseline van regel 2; Source Sans 3.
+Canonieke hub: [mscz-leesbaarheid](../../../docs/formats/mscz-leesbaarheid.md)
+P3c–P3e / C7 / L2 · checklist S22.

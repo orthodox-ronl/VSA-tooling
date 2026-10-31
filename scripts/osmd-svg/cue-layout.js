@@ -1,5 +1,5 @@
 /**
- * Cue-layout voor headless OSMD (schermpartituur §4.2 / S15 / S19 / C6).
+ * Cue-layout voor headless OSMD (schermpartituur §4.2 / S15 / S19 / C6 / C7).
  *
  * Port van bibliotheek ``score-osmd.js`` (applyInitialWidthFactors,
  * redistribute, collapse wrap, layoutCues, centerMeasureContents) — zodat
@@ -10,6 +10,8 @@
  * - Maatbreedte via SourceMeasure.WidthFactor zodat de cue binnen de
  *   maatstrepen past (C6-intentie voor OSMD; MusicXML ``width`` negeert OSMD).
  * - Cue X op eerste noot van de maat; niet meeschuiven bij centreren.
+ * - C7: eenregelige cues delen baseline met regel 2 van twee-regelige cues.
+ * - S22 / P3e: lettergreep-slot (nootkolom + lyric) centreren in de slot-ruimte.
  */
 (function (global) {
   var CUE_GAP_PX = 10;
@@ -580,7 +582,9 @@
           var padL = cMin - left;
           var padR = right - cMax;
           dx = (padR - padL) / 2;
-          if (padR + padL < 24 || Math.abs(dx) < 6) {
+          // Drempel laag genoeg voor S22-achtige maten met weinig restwit
+          // (anders blijft de eerste lettergreep links kleven).
+          if (padR + padL < 12 || Math.abs(dx) < 3) {
             dx = 0;
           } else {
             if (cMin + dx < left) {
@@ -589,7 +593,7 @@
             if (cMax + dx > right) {
               dx = right - cMax;
             }
-            if (Math.abs(dx) < 6) {
+            if (Math.abs(dx) < 3) {
               dx = 0;
             }
           }
@@ -633,7 +637,7 @@
     }
 
     function applyDx(el, dx) {
-      if (!(Math.abs(dx) >= 6)) {
+      if (!(Math.abs(dx) >= 3)) {
         return;
       }
       if (el.getAttribute("data-osmd-center") === "1") {
@@ -649,7 +653,7 @@
 
     for (var ci = 0; ci < columns.length; ci += 1) {
       var column = columns[ci];
-      if (!(Math.abs(column.dx) >= 6)) {
+      if (!(Math.abs(column.dx) >= 3)) {
         continue;
       }
       for (var c2 = 0; c2 < column.els.length; c2 += 1) {
@@ -727,7 +731,346 @@
     // regels bestaan niet meer in de DOM na inklappen). Zelfde volgorde
     // als bibliotheek ``score-osmd.js`` fullLayout.
     collapseWrappedCuesIfTheyFit(mount, xmlText);
+    // C7 ná inklappen: eenregel-cues (ook na collapse) op baseline van
+    // regel 2 van twee-regelige cues in hetzelfde systeem.
+    alignOneLineCueBaselines(mount, xmlText);
     centerMeasureContents(mount);
+    // S22 / P3e: per lettergreep-slot nootkolom+lyric centreren.
+    centerSyllableSlots(mount);
+  }
+
+  /**
+   * C7 — eenregelige ``@tekst`` deelt baseline met regel 2 van twee-regelige
+   * cues in hetzelfde systeem (ektinia maat 5 t.o.v. «Want van U»).
+   */
+  function alignOneLineCueBaselines(mount, xmlText) {
+    var cues = cueTextsPerMeasure(xmlText);
+    var layout = measureLayout(mount);
+    if (!cues.length || !layout.staffTops.length) {
+      return;
+    }
+    var allText = Array.prototype.slice.call(mount.querySelectorAll("text"));
+    // Per afgeronde staffTop: verzamel cue-glyphs.
+    var bands = {};
+    for (var mi = 0; mi < cues.length && mi < layout.staffTops.length; mi += 1) {
+      if (!cues[mi]) {
+        continue;
+      }
+      var lines = cueLines(cues[mi]);
+      if (!lines.length) {
+        continue;
+      }
+      var staffTop = layout.staffTops[mi];
+      var key = String(Math.round(staffTop / 40) * 40);
+      if (!bands[key]) {
+        bands[key] = { staffTop: staffTop, els: [] };
+      }
+      // Gebruik de laagste staffTop in de band (echte balklijn).
+      if (staffTop < bands[key].staffTop) {
+        bands[key].staffTop = staffTop;
+      }
+      for (var li = 0; li < lines.length; li += 1) {
+        for (var j = 0; j < allText.length; j += 1) {
+          var el = allText[j];
+          if (textContentTrim(el) !== lines[li] && textContentTrim(el) !== lines.join(" ")) {
+            continue;
+          }
+          var box;
+          try {
+            box = el.getBBox();
+          } catch (e) {
+            continue;
+          }
+          if (box.y > staffTop + 8 || box.y < staffTop - 160) {
+            continue;
+          }
+          bands[key].els.push({
+            el: el,
+            box: box,
+            lineCount: lines.length,
+            isCollapsedSingle: lines.length >= 2 && textContentTrim(el) === lines.join(" "),
+          });
+        }
+      }
+    }
+
+    Object.keys(bands).forEach(function (key) {
+      var band = bands[key];
+      var els = band.els;
+      if (!els.length) {
+        return;
+      }
+      // Uniek op element.
+      var seen = [];
+      var uniq = [];
+      for (var i = 0; i < els.length; i += 1) {
+        if (seen.indexOf(els[i].el) >= 0) {
+          continue;
+        }
+        seen.push(els[i].el);
+        uniq.push(els[i]);
+      }
+      // Baseline van regel 2 = laagste glyph-bottom onder de cues die tot
+      // een twee-regelige cue behoren (of staffTop - gap als fallback).
+      var line2Bottom = -Infinity;
+      for (var u = 0; u < uniq.length; u += 1) {
+        if (uniq[u].lineCount >= 2 && !uniq[u].isCollapsedSingle) {
+          line2Bottom = Math.max(
+            line2Bottom,
+            uniq[u].box.y + uniq[u].box.height
+          );
+        }
+      }
+      if (!(line2Bottom > -Infinity)) {
+        line2Bottom = band.staffTop - CUE_GAP_PX;
+      }
+      for (var v = 0; v < uniq.length; v += 1) {
+        var item = uniq[v];
+        // Eenregel (origineel of na collapse): snap glyph-bottom naar line2.
+        if (item.lineCount === 1 || item.isCollapsedSingle) {
+          var yAttr = parseFloat(item.el.getAttribute("y"));
+          if (!isFinite(yAttr)) {
+            continue;
+          }
+          var curBottom = item.box.y + item.box.height;
+          var dy = line2Bottom - curBottom;
+          if (Math.abs(dy) < 0.5) {
+            continue;
+          }
+          item.el.setAttribute("y", String(yAttr + dy));
+        }
+      }
+    });
+  }
+
+  /**
+   * S22 / P3e — per lettergreep-slot: S21-nootkolom + lyric horizontaal
+   * centreren in de ruimte tussen vorige en volgende kolom (of maatrand).
+   */
+  function centerSyllableSlots(mount) {
+    var measures = Array.prototype.slice.call(
+      mount.querySelectorAll(".vf-measure[id]")
+    );
+    // Groepeer treble-maten (bovenste per id) als slot-anker.
+    var byId = {};
+    for (var i = 0; i < measures.length; i += 1) {
+      var m = measures[i];
+      var id = String(m.id || "").trim();
+      if (!/^\d+$/.test(id)) {
+        continue;
+      }
+      var mb;
+      try {
+        mb = m.getBBox();
+      } catch (e) {
+        continue;
+      }
+      if (!byId[id] || mb.y < byId[id].y) {
+        byId[id] = { el: m, x: mb.x, y: mb.y, right: mb.x + mb.width, staffs: [] };
+      }
+    }
+    Object.keys(byId).forEach(function (id) {
+      byId[id].staffs = measures.filter(function (m) {
+        return String(m.id) === id;
+      });
+    });
+
+    var lyricGs = Array.prototype.slice.call(
+      mount.querySelectorAll("g.vf-text.lyrics, g.vf-text.dash")
+    );
+
+    Object.keys(byId)
+      .sort(function (a, b) {
+        return Number(a) - Number(b);
+      })
+      .forEach(function (id) {
+        var info = byId[id];
+        // Nootkolommen: cluster mid-x over alle balken van dit maat-id.
+        var heads = [];
+        for (var s = 0; s < info.staffs.length; s += 1) {
+          var notes = info.staffs[s].querySelectorAll(".vf-stavenote");
+          for (var n = 0; n < notes.length; n += 1) {
+            if (notes[n].getAttribute("data-osmd-spacer") === "1") {
+              continue;
+            }
+            var nb;
+            try {
+              nb = notes[n].getBBox();
+            } catch (e2) {
+              continue;
+            }
+            if (!(nb.width > 0)) {
+              continue;
+            }
+            heads.push({
+              el: notes[n],
+              mid: nb.x + nb.width / 2,
+              x: nb.x,
+              right: nb.x + nb.width,
+            });
+          }
+        }
+        if (heads.length < 1) {
+          return;
+        }
+        heads.sort(function (a, b) {
+          return a.mid - b.mid;
+        });
+        // Cluster binnen 8 px = één stemkolom.
+        var cols = [];
+        for (var h = 0; h < heads.length; h += 1) {
+          var hd = heads[h];
+          var col = cols.length ? cols[cols.length - 1] : null;
+          if (!col || Math.abs(hd.mid - col.mid) > 8) {
+            col = {
+              mid: hd.mid,
+              x: hd.x,
+              right: hd.right,
+              notes: [],
+              sum: 0,
+              n: 0,
+            };
+            cols.push(col);
+          }
+          col.notes.push(hd.el);
+          col.x = Math.min(col.x, hd.x);
+          col.right = Math.max(col.right, hd.right);
+          col.sum += hd.mid;
+          col.n += 1;
+          col.mid = col.sum / col.n;
+        }
+        // musicStart: voorbij clef/key in treble.
+        var musicStart = info.x + 6;
+        var clef = info.el.querySelector(".vf-clef");
+        var key = info.el.querySelector(".vf-keysignature");
+        try {
+          if (clef) {
+            var cb = clef.getBBox();
+            musicStart = Math.max(musicStart, cb.x + cb.width + 4);
+          }
+          if (key) {
+            var kb = key.getBBox();
+            musicStart = Math.max(musicStart, kb.x + kb.width + 4);
+          }
+        } catch (e3) {
+          /* keep */
+        }
+        var musicEnd = info.right - 8;
+
+        for (var c = 0; c < cols.length; c += 1) {
+          var slot = cols[c];
+          var leftBound = c === 0 ? musicStart : (cols[c - 1].mid + slot.mid) / 2;
+          var rightBound =
+            c === cols.length - 1
+              ? musicEnd
+              : (slot.mid + cols[c + 1].mid) / 2;
+          if (!(rightBound > leftBound + 10)) {
+            continue;
+          }
+          // Lyric in deze kolom (zelfde x-band, y tussen SA/TB van deze maat).
+          var colY0 = info.y - 20;
+          var colY1 = info.y + 280;
+          var lyricUnion = null;
+          for (var li = 0; li < lyricGs.length; li += 1) {
+            var g = lyricGs[li];
+            var gb;
+            try {
+              gb = g.getBBox();
+            } catch (e4) {
+              continue;
+            }
+            var gmid = gb.x + gb.width / 2;
+            var gy = gb.y + gb.height / 2;
+            if (gy < colY0 || gy > colY1) {
+              continue;
+            }
+            if (Math.abs(gmid - slot.mid) > 28) {
+              continue;
+            }
+            if (!lyricUnion) {
+              lyricUnion = {
+                x: gb.x,
+                right: gb.x + gb.width,
+                mid: gmid,
+                els: [g],
+              };
+            } else {
+              lyricUnion.x = Math.min(lyricUnion.x, gb.x);
+              lyricUnion.right = Math.max(
+                lyricUnion.right,
+                gb.x + gb.width
+              );
+              lyricUnion.els.push(g);
+              lyricUnion.mid =
+                (lyricUnion.x + lyricUnion.right) / 2;
+            }
+          }
+          var contentLeft = slot.x;
+          var contentRight = slot.right;
+          if (lyricUnion) {
+            contentLeft = Math.min(contentLeft, lyricUnion.x);
+            contentRight = Math.max(contentRight, lyricUnion.right);
+          }
+          var contentMid = (contentLeft + contentRight) / 2;
+          var slotMid = (leftBound + rightBound) / 2;
+          var dx = slotMid - contentMid;
+          // Niet voorbij slotgrenzen duwen.
+          if (Math.abs(dx) >= 4) {
+            if (contentLeft + dx < leftBound) {
+              dx = leftBound - contentLeft;
+            }
+            if (contentRight + dx > rightBound) {
+              dx = rightBound - contentRight;
+            }
+          } else {
+            dx = 0;
+          }
+          function shiftEl(el, amount, mark) {
+            if (!(Math.abs(amount) >= 3)) {
+              return;
+            }
+            if (mark && el.getAttribute(mark) === "1") {
+              return;
+            }
+            var prev = el.getAttribute("transform") || "";
+            el.setAttribute(
+              "transform",
+              (prev ? prev + " " : "") +
+                "translate(" +
+                amount.toFixed(2) +
+                ", 0)"
+            );
+            if (mark) {
+              el.setAttribute(mark, "1");
+            }
+          }
+          if (Math.abs(dx) >= 4) {
+            // Alleen noten + lyrics hier; melisma-slurs blijven op de
+            // measure-dx uit centerMeasureContents (S2) — slot-shift op
+            // boog-start brak slur↔noot.
+            for (var ni = 0; ni < slot.notes.length; ni += 1) {
+              shiftEl(slot.notes[ni], dx, "data-osmd-slot");
+            }
+            if (lyricUnion) {
+              for (var lei = 0; lei < lyricUnion.els.length; lei += 1) {
+                shiftEl(lyricUnion.els[lei], dx, "data-osmd-slot");
+              }
+            }
+            slot.mid += dx;
+            if (lyricUnion) {
+              lyricUnion.mid += dx;
+            }
+          }
+          // L2 / S22: lyric-midden op de nootkolom (alle stemmen delen
+          // slot.mid). Breve/melisma-eerste: zelfde anker.
+          if (lyricUnion && Math.abs(lyricUnion.mid - slot.mid) >= 3) {
+            var ldx = slot.mid - lyricUnion.mid;
+            for (var lj = 0; lj < lyricUnion.els.length; lj += 1) {
+              shiftEl(lyricUnion.els[lj], ldx, null);
+            }
+          }
+        }
+      });
   }
 
   global.__vsaOsmdCueLayout = runCueLayout;

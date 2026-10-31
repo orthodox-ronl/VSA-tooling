@@ -8,6 +8,9 @@
  * - S21: eerste zichtbare nootkoppen SA↔TB per maat-id in één kolom
  * - lyrics horen bij een nootkolom (geen «Heer» boven lege balk na centreren)
  * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij nootkoppen
+ * - L2: lyrics in Source Sans 3 (≥12.5 px)
+ * - C7: eenregel-``@tekst`` deelt baseline met regel 2 van twee-regelige cues
+ *   (zelfde systeem-y-band)
  *
  * Usage:
  *   node verify-corib-contract.mjs path/to/a.osmd.svg [more…]
@@ -509,6 +512,93 @@ async function checkSvg(browser, svgPath) {
         }
         if (slurFails.length) {
           errors.push(`S2 slur↔noot: ` + slurFails.slice(0, 4).join(" | "));
+        }
+
+        // L2 — Source Sans 3 op lyrics (leesbaarheid).
+        const lyricFonts = [
+          ...root.querySelectorAll(".vf-text.lyrics text"),
+        ];
+        let badFont = 0;
+        for (const t of lyricFonts) {
+          const ff = String(t.getAttribute("font-family") || "");
+          const fs = parseFloat(t.getAttribute("font-size"));
+          if (!/Source Sans 3/i.test(ff)) {
+            badFont += 1;
+          } else if (Number.isFinite(fs) && fs < 12.5) {
+            badFont += 1;
+          }
+        }
+        if (lyricFonts.length && badFont > lyricFonts.length * 0.2) {
+          errors.push(
+            `L2 font: ${badFont}/${lyricFonts.length} lyrics niet Source Sans 3 ≥12.5px`
+          );
+        }
+
+        // C7 — eenregel-cue-baseline ≈ regel-2 van twee-regelige cues
+        // in dezelfde y-band (boven de balk).
+        const cueLike = [...root.querySelectorAll("text")]
+          .map((t) => {
+            const s = String(t.textContent || "").trim();
+            if (!(/^P:/.test(s) || s.startsWith("..."))) return null;
+            let b;
+            try {
+              b = t.getBBox();
+            } catch {
+              return null;
+            }
+            return { s, y: b.y, bottom: b.y + b.height, x: b.x };
+          })
+          .filter(Boolean);
+        if (cueLike.length >= 2) {
+          // Cluster op y-band (~systeem).
+          const bands = [];
+          const sorted = [...cueLike].sort((a, b) => a.y - b.y);
+          for (const c of sorted) {
+            let band = bands.find((b) => Math.abs(b.y0 - c.y) < 80);
+            if (!band) {
+              band = { y0: c.y, items: [] };
+              bands.push(band);
+            }
+            band.items.push(c);
+          }
+          const C7_SLACK = 10;
+          for (const band of bands) {
+            const items = band.items;
+            // Twee-regel: paar met Δy in [14, 30] en overlappende x.
+            let line2Bottom = null;
+            for (let i = 0; i < items.length; i += 1) {
+              for (let j = i + 1; j < items.length; j += 1) {
+                const dy = Math.abs(items[i].y - items[j].y);
+                if (dy < 14 || dy > 32) continue;
+                if (Math.abs(items[i].x - items[j].x) > 40) continue;
+                const lower =
+                  items[i].bottom > items[j].bottom ? items[i] : items[j];
+                line2Bottom = lower.bottom;
+              }
+            }
+            if (line2Bottom == null) continue;
+            // Eenregel: geen partner in Δy-band; bottom ≈ line2.
+            for (const c of items) {
+              const hasPartner = items.some(
+                (o) =>
+                  o !== c &&
+                  Math.abs(o.y - c.y) >= 14 &&
+                  Math.abs(o.y - c.y) <= 32 &&
+                  Math.abs(o.x - c.x) < 40
+              );
+              if (hasPartner) continue;
+              // Lange één-regel (of gecollapte twee-regel).
+              if (c.s.length < 12 && !c.s.startsWith("...")) continue;
+              if (Math.abs(c.bottom - line2Bottom) > C7_SLACK) {
+                errors.push(
+                  `C7 baseline: «${c.s.slice(0, 28)}» Δ=${Math.round(
+                    c.bottom - line2Bottom
+                  )}px t.o.v. regel-2`
+                );
+                break;
+              }
+            }
+          }
         }
 
         return {
