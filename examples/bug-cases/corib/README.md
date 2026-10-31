@@ -127,4 +127,6 @@ zodat `@tekst` in de maat past; wrap op `...`; inklappen naar één regel
 alleen als die past; cue-X op eerste noot.
 
 **S21 stemkolom:** `centerMeasureContents` verschuift SA én TB met dezelfde
-`dx` (maat-id-kolom); verify meet eerste notehead-x per balk.
+`dx` (maat-id-kolom); lyrics alleen in de y-band van die kolom (niet per
+ongeluk dx van een andere systeem-maat met hetzelfde x-bereik). Verify:
+notehead-x SA↔TB + lyric↔noot-afstand.
