@@ -1,38 +1,47 @@
 ---
-description: Branch-afstemming — geen stille checkout; CoriB op corib; named≠current → vraag OK
+description: Gebruikersbranch is leidend — agent-cursor-branches niet voor de gebruiker
 alwaysApply: true
 ---
 
 # Branch-afstemming (lokaal + agent)
 
-Voorkomt dat agent-commits en jouw lokale commits op **dezelfde** branch
-door elkaar lopen zonder dat je dat zo bedoelde.
+De gebruiker kijkt in VS Code **alleen** naar de echte repo-branches
+(`corib`, `development`, `main`, …). Agent-branches (`cursor/…`) mag de
+agent intern gebruiken voor PR’s — **niet** als plek waar de gebruiker
+moet gaan kijken of waarover we met de gebruiker praten.
 
-## Kern
+## Harde regel (ELKE chat, nieuw en bestaand)
 
-1. **Expliciete branch in dit bericht wint** — bv. «op `corib`», «branch X».
-2. **Anders: alleen de current checkout** — commit/push alleen op de branch
-   die `git branch --show-current` toont. Geen stille `checkout`/`switch`.
-3. **Named ≠ current → STOP** — in **één korte reactie**: huidige branch,
-   gevraagde branch, «Wil je hier wisselen naar \<branch\>?» — **wacht op OK**.
-4. **Geen vermenging zonder afspraak** — niet “even” op `development`/`main`
-   committen terwijl de gebruiker daar lokaal ook werkt, tenzij dit bericht
-   dat zo zegt.
+1. **De branch die de gebruiker noemt, is de werkbranch** — bv. «op
+   `corib`», «branch X», of vast CoriB-productwerk → **`corib`**.
+2. **Commit + push van productwerk eindigt op die branch** (direct, of
+   merge/cherry-pick naar die branch **vóór** je resultaten bespreekt).
+3. **Nooit** de gebruiker vragen om `cursor/…` te checken «om het te
+   zien». Geen «haal even mijn agent-branch op» als enige pad.
+4. Als de cloud-/PR-flow een `cursor/…`-branch verplicht: die mag bestaan,
+   maar **dezelfde commits moeten ook op de gebruikersbranch staan**
+   (of de PR is al gemerged) **vóór** je in chat over beelden/diffs praat.
+5. Links en open-commando’s wijzen naar bestanden **op de
+   gebruikersbranch** (of op de commit die daar al op staat).
 
 ## Coria-vervanger (CoriB)
 
-Productwerk voor de Coria-vervanger / oefenspeler hoort op branch **`corib`**.
-Andere branches alleen na expliciete OK in dit bericht.
+Productwerk voor CoriB → branch **`corib`**. Altijd. Geen stille omweg via
+`development` / `main` / `cursor/…` zonder dat de gebruiker dat in *dit*
+bericht vraagt.
 
-## Goedkoper / veiliger patroon
+## Named ≠ current
 
-- **Eén chat ≈ één branch** wanneer jij en de agent parallel werken.
-- Formuleer bv.: *«op corib — alleen X; niet development»*.
-- Agent mag wél **read-only** kijken naar andere branches (`git show`,
-  `git log`) zonder te wisselen.
+Als de gevraagde branch ≠ `git branch --show-current`:
+
+- **STOP** in één korte reactie: huidige branch, gevraagde branch,
+  «Ik wissel naar \<branch\> en werk daar.» — tenzij dit bericht al
+  expliciet die branch noemt (dan **meteen** wisselen, niet vragen).
+- CoriB / «op corib» in het bericht = meteen `corib`, geen vraagrondje.
 
 ## Niet
 
-- Stil `git checkout` / nieuwe branch zonder gevraagde naam of OK.
-- PR/push naar een andere branch dan afgesproken in dit bericht.
-- «De sibling-checkout is bereikbaar» als vrijbrief om daar te committen.
+- Resultaten bespreken die alleen op `cursor/…` staan terwijl de
+  gebruiker op `corib` (of een andere genoemde branch) kijkt.
+- Stil op `development`/`main` committen voor CoriB-werk.
+- «De sibling-checkout is bereikbaar» als vrijbrief voor een andere branch.
