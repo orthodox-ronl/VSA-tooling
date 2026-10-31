@@ -16,6 +16,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..", "..");
 const OSMD_CDN =
   "https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.9.3/build/opensheetmusicdisplay.min.js";
+const FONT_FAMILY = "Source Sans 3";
+const FONT_CSS =
+  "https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap";
 const ADAPTER_PATH = path.join(__dirname, "s8-a1-adapter.js");
 
 async function loadPuppeteer() {
@@ -51,6 +54,7 @@ async function main() {
     const page = await browser.newPage();
     await page.setContent(
       `<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="${FONT_CSS}">
 <script src="${OSMD_CDN}"></script></head>
 <body><div id="osmd" style="width:960px"></div></body></html>`,
       { waitUntil: "networkidle0" }
@@ -58,23 +62,34 @@ async function main() {
     await page.waitForFunction(
       () => typeof window.opensheetmusicdisplay !== "undefined"
     );
+    await page.evaluate(async (fontFamily) => {
+      if (document.fonts && document.fonts.load) {
+        await document.fonts.load('13px "' + fontFamily + '"');
+        await document.fonts.ready;
+      }
+    }, FONT_FAMILY);
     await page.addScriptTag({ content: adapterJs });
-    const result = await page.evaluate(async (xml) => {
-      const mount = document.getElementById("osmd");
-      const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(mount, {
-        autoResize: false,
-        backend: "svg",
-        drawTitle: false,
-        drawPartNames: false,
-        drawTimeSignatures: false,
-        drawingParameters: "compacttight",
-      });
-      osmd.setOptions({ pageFormat: "Endless" });
-      await osmd.load(xml);
-      osmd.render();
-      window.__vsaOsmdS8FinalizePrint(mount, xml);
-      return window.__vsaOsmdS8Diagnose(mount, xml);
-    }, xmlText);
+    const result = await page.evaluate(
+      async (xml, fontFamily) => {
+        const mount = document.getElementById("osmd");
+        const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(mount, {
+          autoResize: false,
+          backend: "svg",
+          drawTitle: false,
+          drawPartNames: false,
+          drawTimeSignatures: false,
+          defaultFontFamily: fontFamily,
+          drawingParameters: "compacttight",
+        });
+        osmd.setOptions({ pageFormat: "Endless" });
+        await osmd.load(xml);
+        osmd.render();
+        window.__vsaOsmdS8FinalizePrint(mount, xml);
+        return window.__vsaOsmdS8Diagnose(mount, xml);
+      },
+      xmlText,
+      FONT_FAMILY
+    );
 
     if (!result.ok) {
       console.error("S8 A1 adapter check FAILED");
