@@ -399,6 +399,7 @@ def export_mvsa_to_svg(
     bibliotheek_id: str | None = None,
     trim: bool = True,
     white_background: bool = True,
+    engine: str | None = None,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
     staff_distance: float | None = None,
@@ -413,19 +414,44 @@ def export_mvsa_to_svg(
     cue_font_size: float | None = None,
     measure_spacing: float | None = None,
 ) -> list[Path]:
-    """Export ``.mvsa`` to één kale tall-SVG (layout ``muziek``, compact).
+    """Export ``.mvsa`` to één kale tall-SVG.
 
-    Chain: partituur-MXL → MSCZ → MuseScore tall-SVG → trim.
-    Style-baseline is ``--compact`` (expliciete kwargs winnen).
-    Default: witte achtergrond na trim; ``white_background=False`` = transparant.
-    Return: altijd ``[out]`` (geen bladreeks).
+    Default ``engine=musescore``: partituur-MXL → MSCZ → MuseScore → trim.
+    ``engine=osmd``: Score-IR → from-ir MusicXML → headless OSMD (geen MuseScore).
+    Style-kwargs gelden alleen voor MuseScore. Return: altijd ``[out]``.
     """
     from .mscz_partituur import apply_compact_style_preset
+    from .osmd_svg import OsmdSvgError, export_mvsa_to_osmd_svg, normalize_svg_engine
 
     path = Path(path)
     out = Path(out)
     if out.suffix.lower() != ".svg":
         out = out.with_suffix(".svg")
+
+    try:
+        eng = normalize_svg_engine(engine)
+    except OsmdSvgError as exc:
+        raise MvsaMsczError(str(exc)) from exc
+
+    if eng == "osmd":
+        if keep_mscz is not None:
+            raise MvsaMsczError(
+                "--keep-mscz geldt niet bij --engine osmd (geen MSCZ-keten)"
+            )
+        try:
+            return export_mvsa_to_osmd_svg(
+                path,
+                out,
+                section_id=section_id,
+                bibliotheek_id=bibliotheek_id,
+                keep_musicxml=keep_mxl,
+            )
+        except OsmdSvgError as exc:
+            raise MvsaMsczError(str(exc)) from exc
+        except MvsaExportError:
+            raise
+        except Exception as exc:
+            raise MvsaMsczError(f"OSMD-SVG mislukt: {exc}") from exc
 
     style = apply_compact_style_preset(
         {

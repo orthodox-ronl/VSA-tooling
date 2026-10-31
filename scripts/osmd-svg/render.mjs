@@ -1,0 +1,165 @@
+/**
+ * MusicXML → SVG via OpenSheetMusicDisplay in headless Chromium.
+ *
+ * Productpad: ``mvsa svg --engine osmd`` (Python start dit script).
+ * Spike: ``examples/spikes/partituur-osmd-svg/`` wijst hierheen.
+ *
+ * Usage:
+ *   npm install
+ *   node render.mjs INPUT.musicxml OUTPUT.svg
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const OSMD_CDN =
+  "https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.3/build/opensheetmusicdisplay.min.js";
+
+async function loadPuppeteer() {
+  const require = createRequire(import.meta.url);
+  const candidates = [
+    path.join(__dirname, "node_modules", "puppeteer"),
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "examples",
+      "spikes",
+      "partituur-osmd-svg",
+      "node_modules",
+      "puppeteer"
+    ),
+  ];
+  for (const c of candidates) {
+    try {
+      if (fs.existsSync(c)) {
+        return require(c);
+      }
+    } catch {
+      /* try next */
+    }
+  }
+  try {
+    return require("puppeteer");
+  } catch {
+    throw new Error(
+      "puppeteer niet gevonden. Draai: cd scripts/osmd-svg && npm install " +
+        "&& npx puppeteer browsers install chrome"
+    );
+  }
+}
+
+function usage() {
+  console.error("Gebruik: node render.mjs INPUT.musicxml OUTPUT.svg");
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.includes("-h") || args.includes("--help") || args.length < 2) {
+    usage();
+    process.exit(args.includes("-h") || args.includes("--help") ? 0 : 1);
+  }
+
+  const inputPath = path.resolve(args[0]);
+  const outputPath = path.resolve(args[1]);
+
+  if (!fs.existsSync(inputPath)) {
+    console.error(`MusicXML niet gevonden: ${inputPath}`);
+    process.exit(1);
+  }
+
+  const musicxml = fs.readFileSync(inputPath, "utf8");
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
+  const puppeteer = await loadPuppeteer();
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
+  try {
+    const page = await browser.newPage();
+    page.setDefaultTimeout(120_000);
+
+    await page.setContent(
+      `<!DOCTYPE html>
+<html lang="nl">
+<head><meta charset="utf-8" /><title>osmd-svg</title></head>
+<body>
+  <div id="osmd" style="width: 900px;"></div>
+  <script src="${OSMD_CDN}"></script>
+</body>
+</html>`,
+      { waitUntil: "networkidle0" }
+    );
+
+    await page.waitForFunction(
+      () => typeof window.opensheetmusicdisplay !== "undefined"
+    );
+
+    const pageCount = await page.evaluate(async (xml) => {
+      const osmd = new window.opensheetmusicdisplay.OpenSheetMusicDisplay(
+        "osmd",
+        {
+          autoResize: false,
+          backend: "svg",
+          drawTitle: false,
+          drawSubtitle: false,
+          drawComposer: false,
+          drawLyricist: false,
+          drawingParameters: "compacttight",
+        }
+      );
+      osmd.setOptions({ pageFormat: "Endless" });
+      await osmd.load(xml);
+      osmd.render();
+      return document.querySelectorAll("#osmd svg").length;
+    }, musicxml);
+
+    if (!pageCount) {
+      throw new Error("OSMD renderde geen SVG (0 elementen in #osmd)");
+    }
+
+    const markupParts = await page.evaluate(() => {
+      const nodes = document.querySelectorAll("#osmd svg");
+      return Array.from(nodes).map((svg, i) => {
+        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        if (!svg.getAttribute("xmlns:xlink")) {
+          svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+        }
+        if (!svg.id) svg.id = `osmdSvgPage${i + 1}`;
+        return svg.outerHTML;
+      });
+    });
+
+    let outText;
+    if (markupParts.length === 1) {
+      outText = `<?xml version="1.0" encoding="UTF-8"?>\n${markupParts[0]}\n`;
+    } else {
+      const bodies = markupParts
+        .map(
+          (m, i) =>
+            `<g id="page${i + 1}" transform="translate(0, ${i * 1200})">${m}</g>`
+        )
+        .join("\n");
+      outText =
+        `<?xml version="1.0" encoding="UTF-8"?>\n` +
+        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n` +
+        `${bodies}\n</svg>\n`;
+    }
+
+    fs.writeFileSync(outputPath, outText, "utf8");
+    // Machine-readable line for Python callers.
+    console.log(`OSMD_SVG_OK\t${pathToFileURL(outputPath).href}`);
+  } finally {
+    await browser.close();
+  }
+}
+
+main().catch((err) => {
+  console.error(err && err.stack ? err.stack : err);
+  process.exit(1);
+});

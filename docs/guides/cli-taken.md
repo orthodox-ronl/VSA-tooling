@@ -28,7 +28,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | mvsa → SATB MusicXML (draft)                            | [`mvsa mxl <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#mvsa-mxl)                                                                            |
 | mvsa → Score-IR JSON (partituur; scherm/CoriB)          | [`mvsa score-ir <pad> [-o …]`](../reference/cli/mvsa.md#mvsa-score-ir)                                                                                |
 | Score-IR + MusicXML-siblings (OSMD-brug)                | [`mvsa score-ir <pad> --musicxml`](../reference/cli/mvsa.md#mvsa-score-ir) (siblings ``.score-ir.json`` + ``.from-ir.musicxml``)                      |
-| mvsa → partituur-SVG (koormap; MuseScore-brug)          | [`mvsa svg <pad.mvsa> [-o …]`](../reference/cli/mvsa.md#mvsa-svg) (dicht: `--compact`)                                                                |
+| mvsa → partituur-SVG (koormap; MuseScore of OSMD)       | [`mvsa svg <pad.mvsa> [-o …]`](../reference/cli/mvsa.md#mvsa-svg) (`--engine osmd` optioneel)                                                         |
 | mscz → kale muziek-SVG / print-PDF                      | [`mscz svg`](../reference/cli/mscz.md) / [`mscz pdf`](../reference/cli/mscz.md)                                                                       |
 | mscz → layout/leesbaarheid opnieuw                      | [`mscz normalize`](../reference/cli/mscz.md) (`--layout partituur`/`muziek`/`plain`)                                                                  |
 | mvsa → Coria met hulptekst-keuze                        | [`mvsa mxl … --hulptekst-as-parts`](../reference/cli/mvsa.md#mvsa-mxl) + [`@taal`](../specification-mvsa/keywords.md#taal)                            |

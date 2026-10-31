@@ -1,0 +1,14 @@
+{
+  "name": "vsa-osmd-svg",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Headless OSMD MusicXML → SVG for mvsa svg --engine osmd",
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "postinstall": "npx puppeteer browsers install chrome || true"
+  },
+  "dependencies": {
+    "puppeteer": "^24.2.0"
+  }
+}

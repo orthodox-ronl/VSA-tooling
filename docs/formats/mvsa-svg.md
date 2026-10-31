@@ -13,12 +13,13 @@ Style — geen A4-bladreeks (`stem-N.svg`). Die sibling voedt scherm-fallback
 én `index.md.pdf` (systeemsnee naar A4). A4-paginering zit in de PDF, niet
 in het SVG-product.
 
-| Onderwerp                    | Waar                                                               |
-| ---------------------------- | ------------------------------------------------------------------ |
-| CLI (``.mvsa``)              | [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                    |
-| CLI (``.mscz``)              | [`mscz svg`](../reference/cli/mscz.md)                             |
-| MSCZ-layout ``muziek``       | [`.mscz` layoutprofielen](mscz.md#layoutprofielen---layout)        |
-| Score-IR (later schermpad)   | [score-ir](score-ir.md) · [partituur-ir](../plans/partituur-ir.md) |
+| Onderwerp                    | Waar                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------- |
+| CLI (``.mvsa``)              | [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                                             |
+| CLI (``.mscz``)              | [`mscz svg`](../reference/cli/mscz.md)                                                      |
+| MSCZ-layout ``muziek``       | [`.mscz` layoutprofielen](mscz.md#layoutprofielen---layout)                                 |
+| `--engine osmd`              | Score-IR → from-ir MusicXML → headless OSMD ([`scripts/osmd-svg`](../../scripts/osmd-svg/)) |
+| Score-IR / schermpad         | [score-ir](score-ir.md) · [partituur-ir](../plans/partituur-ir.md) §7                       |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -49,7 +50,15 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 9 --max-system-distance 9
 ```
 
-**Brug:** MuseScore tekent de tall-SVG. Scherm-hoofdpad blijft Score-IR/OSMD
-([kale-muziek-svg-en-uitgaven](../plans/kale-muziek-svg-en-uitgaven.md) §4);
-deze sibling is scherm-fallback en print-bouwsteen voor bibliotheek
-`index.md.pdf`.
+**Brug:** default `--engine musescore` tekent de tall-SVG (scherm-fallback +
+print-bouwsteen voor `index.md.pdf`). Optioneel `--engine osmd` schrijft een
+SVG via headless OSMD uit Score-IR (geen MuseScore; vereist Node +
+`scripts/osmd-svg`). Scherm-hoofdpad op de site blijft Score-IR/OSMD-embed
+([kale-muziek-svg-en-uitgaven](../plans/kale-muziek-svg-en-uitgaven.md) §4).
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+cd scripts\osmd-svg && npm install && npx puppeteer browsers install chrome
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
+```

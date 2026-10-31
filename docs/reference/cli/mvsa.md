@@ -48,7 +48,7 @@ mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--cue-font FACE] [--cue-font-size PT] path
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim] [--transparent]
-         [--compact]
+         [--engine {musescore,osmd}] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
@@ -383,27 +383,27 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam                         | Verplicht | Betekenis                                                                                                   | Default                                    |
-| ---------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `path`                       | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                                                          | —                                          |
-| `-o`, `--output`             | Nee       | Uitvoer-`.mscz` (alleen bij precies één bronbestand).                                                       | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
-| `--section SECTION`          | Nee       | Alleen deze `@sectie`-id.                                                                                   | Alle secties                               |
-| `--musescore PATH`           | Nee       | Pad naar MuseScore-executable.                                                                              | Auto-detectie                              |
-| `--keep-mxl PATH`            | Nee       | Bewaar ook het tussenliggende `.mxl`.                                                                       | temp (wordt verwijderd)                    |
-| `--layout PROFILE`           | Nee       | `partituur`, `muziek` of `plain`.                                                                           | `partituur`                                |
-| `--bibliotheek-id ID`        | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback.                                                      | pad-sniff / geen                           |
-| `--hulptekst`                | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»).                                                      | uit                                        |
+| Naam                         | Verplicht | Betekenis                                                                                                                       | Default                                    |
+| ---------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `path`                       | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                                                                              | —                                          |
+| `-o`, `--output`             | Nee       | Uitvoer-`.mscz` (alleen bij precies één bronbestand).                                                                           | `<bronnaam>.mscz` (bijv. `lied.mvsa.mscz`) |
+| `--section SECTION`          | Nee       | Alleen deze `@sectie`-id.                                                                                                       | Alle secties                               |
+| `--musescore PATH`           | Nee       | Pad naar MuseScore-executable.                                                                                                  | Auto-detectie                              |
+| `--keep-mxl PATH`            | Nee       | Bewaar ook het tussenliggende `.mxl`.                                                                                           | temp (wordt verwijderd)                    |
+| `--layout PROFILE`           | Nee       | `partituur`, `muziek` of `plain`.                                                                                               | `partituur`                                |
+| `--bibliotheek-id ID`        | Nee       | Colofon-id (profiel `partituur`); anders pad-fallback.                                                                          | pad-sniff / geen                           |
+| `--hulptekst`                | Nee       | Tweede lyric-laag in tussen-MXL (blad «tweede regel»).                                                                          | uit                                        |
 | `--compact`                  | Nee       | Dichtste Style-baseline (systeem 7/7, lyric 0.1, marge 5 mm, maat-spreiding 1.6); andere Style-opties winnen; niet bij `plain`. | uit                                        |
-| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `8` (bij `--compact`: `7`)                 |
-| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.                                             | `14` (bij `--compact`: `7`)                |
-| `--staff-distance SP`        | Nee       | Afstand tussen balken in één systeem (+ accolade); niet bij `plain`.                                        | MuseScore + lyrics                         |
-| `--page-margin-top MM`       | Nee       | Bovenmarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
-| `--page-margin-bottom MM`    | Nee       | Ondermarge in mm (Style); niet bij `plain`.                                                                 | `15`                                       |
-| `--lyrics-font FACE`         | Nee       | Lettertype zangtekst; niet bij `plain`.                                                                     | `Source Sans 3`                            |
-| `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst; niet bij `plain`.                                                                    | `13`                                       |
-| `--cue-font FACE`            | Nee       | Lettertype cues (`@tekst`); niet bij `plain`.                                                               | `Source Sans 3`                            |
-| `--cue-font-size PT`         | Nee       | Puntgrootte cues; niet bij `plain`.                                                                         | `12`                                       |
-| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                                                       | `1.2` (bij `--compact`: `1.6`)             |
+| `--min-system-distance SP`   | Nee       | Min. afstand tussen systemen (Style spatium); niet bij `plain`.                                                                 | `8` (bij `--compact`: `7`)                 |
+| `--max-system-distance SP`   | Nee       | Max. afstand tussen systemen (Style spatium); niet bij `plain`.                                                                 | `14` (bij `--compact`: `7`)                |
+| `--staff-distance SP`        | Nee       | Afstand tussen balken in één systeem (+ accolade); niet bij `plain`.                                                            | MuseScore + lyrics                         |
+| `--page-margin-top MM`       | Nee       | Bovenmarge in mm (Style); niet bij `plain`.                                                                                     | `15`                                       |
+| `--page-margin-bottom MM`    | Nee       | Ondermarge in mm (Style); niet bij `plain`.                                                                                     | `15`                                       |
+| `--lyrics-font FACE`         | Nee       | Lettertype zangtekst; niet bij `plain`.                                                                                         | `Source Sans 3`                            |
+| `--lyrics-font-size PT`      | Nee       | Puntgrootte zangtekst; niet bij `plain`.                                                                                        | `13`                                       |
+| `--cue-font FACE`            | Nee       | Lettertype cues (`@tekst`); niet bij `plain`.                                                                                   | `Source Sans 3`                            |
+| `--cue-font-size PT`         | Nee       | Puntgrootte cues; niet bij `plain`.                                                                                             | `12`                                       |
+| `--measure-spacing F`        | Nee       | Horizontale maat-spreiding (Style); niet bij `plain`.                                                                           | `1.2` (bij `--compact`: `1.6`)             |
 
 ### Output
 
@@ -515,11 +515,10 @@ mscz pdf lied.mscz -o lied.pdf
 
 ## `mvsa svg`
 
-Exporteer **`.mvsa`** naar partituur-SVG voor koormap-pagina’s
-(shortcode `muziek` later in bibliotheek). Voor bron `.mscz`:
-[`mscz svg`](mscz.md). SVG-hoogte ≈ inhoud (viewBox-trim, inclusief
-MuseScore-``transform`` op glyphs). MuseScore-brug — Score-IR/OSMD later
-voor gedeelde schermrenderer. Formaatpagina:
+Exporteer **`.mvsa`** naar partituur-SVG voor koormap-pagina’s. Voor bron
+`.mscz`: [`mscz svg`](mscz.md). Default: MuseScore tall-SVG (print/fallback).
+Optioneel `--engine osmd`: Score-IR → from-ir MusicXML → headless OSMD
+([`scripts/osmd-svg`](../../../scripts/osmd-svg/)). Formaatpagina:
 [mvsa-svg](../../formats/mvsa-svg.md).
 
 ### Synopsis
@@ -527,7 +526,8 @@ voor gedeelde schermrenderer. Formaatpagina:
 ```text
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH] [--no-trim]
-             [--transparent] [--bibliotheek-id ID] [--compact]
+             [--transparent] [--engine {musescore,osmd}]
+             [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
              [--page-margin-top MM] [--page-margin-bottom MM]
@@ -537,20 +537,16 @@ mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 
 ### Keten
 
-| Bron    | Pad                                                                              |
-| ------- | -------------------------------------------------------------------------------- |
-| `.mvsa` | partituur-MXL → MSCZ (layout ``muziek``, Style-opties) → MuseScore SVG → trim    |
+| Engine       | Pad                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------- |
+| `musescore`  | partituur-MXL → MSCZ (layout ``muziek``) → MuseScore SVG → trim (**default**)               |
+| `osmd`       | Score-IR → from-ir MusicXML → headless OSMD (Node; geen MuseScore/Style-CLI)                |
 
-Altijd **één tall-SVG** (compact Style + hoge `pageHeight`): sibling
-``.svg`` / ``-o``. Geen A4-bladreeks. Scherm-fallback én bouwsteen voor
-bibliotheek `index.md.pdf` — zie
-[mvsa-svg](../../formats/mvsa-svg.md) en
+Bij `musescore`: **één tall-SVG** (compact Style) — scherm-fallback én
+bouwsteen voor `index.md.pdf`. Zie
 [kale-muziek-svg-en-uitgaven](../../plans/kale-muziek-svg-en-uitgaven.md).
-Na trim: **witte achtergrond** (default); ``--transparent`` voor geen
-achtergrondvlak.
-
-Style: compact is default; andere Style-vlaggen winnen. ``--compact`` blijft
-geldig. Heb je al een `.mscz`: gebruik [`mscz svg`](mscz.md).
+Bij `osmd`: optioneel bestand voor inspectie/scherm; site-embed blijft
+Score-IR/OSMD in de browser.
 
 ### Argumenten
 
@@ -559,23 +555,24 @@ geldig. Heb je al een `.mscz`: gebruik [`mscz svg`](mscz.md).
 | `path`                       | Bron-``.mvsa``, of map met ``.mvsa``-bestanden.                                           |
 | `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg``. Alleen bij één bron.                |
 | `--section`                  | Deze ``@sectie``-id.                                                                      |
-| `--musescore`                | MuseScore-executable.                                                                     |
-| `--keep-mscz`                | Bewaar tussenliggende ``.mscz``.                                                          |
-| `--keep-mxl`                 | Bewaar tussenliggende partituur-``.mxl``.                                                 |
-| `--no-trim`                  | Sla viewBox-trim over.                                                                    |
-| `--transparent`              | Geen witte achtergrond na trim (default is wit).                                          |
-| `--bibliotheek-id`           | Genegeerd voor layout ``muziek``.                                                         |
-| `--compact`                  | Compact-baseline (default voor SVG; expliciete Style-opties winnen).                      |
-| `--min-system-distance SP`   | Min. systeemafstand (SVG-default compact ``7``).                                          |
-| `--max-system-distance SP`   | Max. systeemafstand (SVG-default compact ``7``).                                          |
-| `--staff-distance SP`        | Stafafstand in één systeem (+ accolade).                                                  |
-| `--page-margin-top MM`       | Bovenmarge in mm (SVG-default compact ``5``).                                             |
-| `--page-margin-bottom MM`    | Ondermarge in mm (SVG-default compact ``5``).                                             |
-| `--lyrics-font FACE`         | Lettertype zangtekst.                                                                     |
-| `--lyrics-font-size PT`      | Puntgrootte zangtekst (default ``13``).                                                   |
-| `--cue-font FACE`            | Lettertype cues/`@tekst`.                                                                 |
-| `--cue-font-size PT`         | Puntgrootte cues (default ``12``).                                                        |
-| `--measure-spacing F`        | Maat-spreiding (default ``1.2``; SVG-compact ``1.6``).                                    |
+| `--engine`                   | `musescore` (default) of `osmd`.                                                          |
+| `--musescore`                | MuseScore-executable (alleen `musescore`-engine).                                         |
+| `--keep-mscz`                | Bewaar tussenliggende ``.mscz`` (alleen `musescore`).                                     |
+| `--keep-mxl`                 | `musescore`: partituur-``.mxl``; `osmd`: from-ir ``.musicxml``.                           |
+| `--no-trim`                  | Sla viewBox-trim over (alleen `musescore`).                                               |
+| `--transparent`              | Geen witte achtergrond na trim (alleen `musescore`).                                      |
+| `--bibliotheek-id`           | Genegeerd voor layout ``muziek`` / OSMD-chrome.                                           |
+| `--compact`                  | Compact-baseline (alleen `musescore`; default voor die engine).                           |
+| `--min-system-distance SP`   | Min. systeemafstand (alleen `musescore`).                                                 |
+| `--max-system-distance SP`   | Max. systeemafstand (alleen `musescore`).                                                 |
+| `--staff-distance SP`        | Stafafstand in één systeem (alleen `musescore`).                                          |
+| `--page-margin-top MM`       | Bovenmarge in mm (alleen `musescore`).                                                    |
+| `--page-margin-bottom MM`    | Ondermarge in mm (alleen `musescore`).                                                    |
+| `--lyrics-font FACE`         | Lettertype zangtekst (alleen `musescore`).                                                |
+| `--lyrics-font-size PT`      | Puntgrootte zangtekst (alleen `musescore`).                                               |
+| `--cue-font FACE`            | Lettertype cues/`@tekst` (alleen `musescore`).                                            |
+| `--cue-font-size PT`         | Puntgrootte cues (alleen `musescore`).                                                    |
+| `--measure-spacing F`        | Maat-spreiding (alleen `musescore`).                                                      |
 
 ### Voorbeelden
 
@@ -586,16 +583,18 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-muziek.sv
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --lyrics-font-size 14 --cue-font-size 11
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --measure-spacing 1.8
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
-mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact --min-system-distance 9 --max-system-distance 9
+cd scripts\osmd-svg && npm install && npx puppeteer browsers install chrome
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
 mscz svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 ```
 
 ### Exit status
 
-| Exitcode | Betekenis                                              |
-| -------- | ------------------------------------------------------ |
-| `0`      | SVG succesvol geschreven.                              |
-| `1`      | Bestand ontbreekt, validatie-, MuseScore- of trimfout. |
+| Exitcode | Betekenis                                                              |
+| -------- | ---------------------------------------------------------------------- |
+| `0`      | SVG succesvol geschreven.                                              |
+| `1`      | Bestand ontbreekt, validatie-, MuseScore-/OSMD- of trimfout.           |
 
 ---
 

@@ -1,10 +1,10 @@
 # Score-IR / partituur-IR — contract (stap 1)
 
-| Veld            | Waarde                                                                                                                                                           |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**      | werkplan; **niet normatief**; stap 1–5 + schermbrug-contract (§7) gedaan; CoriB-MVP en site-embed nog open                                                       |
-| **Doel**        | Vastleggen wat het JSON-achtige tussenmodel bevat dat schermrenderer (koormap-SVG) én CoriB voedt — zonder MuseScore als schermmotor                             |
-| **Eigenaar**    | Export uit `.mvsa` → IR: [VSA-tooling](@bron); consumptie: bibliotheek (shortcode `muziek`) + CoriB                                                              |
+| Veld            | Waarde                                                                                                                                                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**      | werkplan; **niet normatief**; stap 1–5 + schermbrug-contract (§7) gedaan; CoriB-MVP en site-embed nog open                                                                                                       |
+| **Doel**        | Vastleggen wat het JSON-achtige tussenmodel bevat dat schermrenderer (koormap-SVG) én CoriB voedt — zonder MuseScore als schermmotor                                                                             |
+| **Eigenaar**    | Export uit `.mvsa` → IR: [VSA-tooling](@bron); consumptie: bibliotheek (shortcode `muziek`) + CoriB                                                                                                              |
 | **Gerelateerd** | [contract-index](../formats/contract-index.md), [canonical-checklists](../formats/canonical-checklists.md) (S-reeks = layoutdoel), [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md), `@tekst` |
 
 Contract + [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir). Schema-validator en schermrenderer: later.
@@ -237,9 +237,10 @@ mvsa score-ir lied.mvsa --musicxml
 mvsa score-ir map-met-mvsa --musicxml
 ```
 
-**Bewijs (spike, geen product-UI):** `examples/spikes/partituur-browser/`
-(OSMD in de browser); optioneel headless SVG:
-`examples/spikes/partituur-osmd-svg/`.
+**Bewijs (spike + optionele CLI):** `examples/spikes/partituur-browser/`
+(OSMD in de browser); headless SVG:
+`examples/spikes/partituur-osmd-svg/` / `scripts/osmd-svg/`;
+`mvsa svg --engine osmd` (Score-IR → from-ir MusicXML → OSMD-bestand).
 
 **Non-goals van deze brug:**
 
@@ -266,7 +267,9 @@ catalogus-MXL of MuseScore-SVG.
    [kale-muziek §4](kale-muziek-svg-en-uitgaven.md))
 7. ~~**Productiescherm** (mvsa / S8)~~ — bibliotheek from-ir → OSMD; S8 A1
    ([osmd-s8-recite](osmd-s8-recite.md)); rest kale-muziek §4 (`.vsa`, CoriB, …)
-8. CoriB-MVP (speler op §7-brug) — later
+8. ~~Optionele OSMD-SVG CLI~~ (`mvsa svg --engine osmd`; D2-vergelijking in
+   `examples/spikes/partituur-osmd-svg/README.md`)
+9. CoriB-MVP (speler op §7-brug) — later
 
 ---
 
