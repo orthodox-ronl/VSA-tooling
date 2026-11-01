@@ -69,9 +69,4 @@ echo make mscz %SRC%
 mvsa mscz "%SRC%" -o "%SRC%.mscz"
 if errorlevel 1 exit /b 1
 
-echo.
-echo make pdf %SRC% ^(zangers / MuseScore-partituur^)
-mvsa pdf "%SRC%.mscz" -o "%SRC%.pdf"
-if errorlevel 1 exit /b 1
-
 exit /b 0

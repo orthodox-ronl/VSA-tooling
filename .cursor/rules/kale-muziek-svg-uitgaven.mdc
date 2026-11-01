@@ -24,8 +24,9 @@ Afspraak: `docs/plans/kale-muziek-svg-en-uitgaven.md`.
   (layout ``muziek``).
 - **Scherm** vs **blad**: productieschermrichting = Score-IR → MusicXML →
   OSMD; print = blad-SVG-fragmenten ≤ één A4-blad (MuseScore).
-- **Catalogus-PDF** ≠ bouwsteen voor koormap-`index.pagina.pdf` — die PDF
-  komt uit Markdown-layout + kale blad-SVG’s.
+- **Pagina-PDF** (`index.md.pdf`) komt uit Markdown-layout + kale
+  blad-SVG’s. `.vsa.pdf` / `.mvsa.pdf` / `.mscz.pdf` zijn geen
+  standaardproduct en geen download, print of navigatie.
 
 ## Gefaseerd (niet alles tegelijk)
 

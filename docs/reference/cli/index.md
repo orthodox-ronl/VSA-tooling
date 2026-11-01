@@ -77,7 +77,7 @@ echo %ERRORLEVEL%
 | [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).                                  |
 | [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).                                 |
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`); playback + Coria-finalize; optioneel `--syllabify`. |
-| [`products`](products.md)                        | Standaardproducten + `*.products-meta.json` (MXL met syllabify+finalize + SVG); ook `mvsa`/`mscz products`.   |
+| [`products`](products.md)                        | Standaardproducten + `*.products-meta.json` (geen partituur-PDF); ook `mvsa`/`mscz products`.                 |
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                                       |
 | [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3 (`mvsa`).                                 |
 | [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: `mxl mvsa`; `mxl mscz`; validate/normalize.                                          |
@@ -92,16 +92,22 @@ overzichtspagina herhaalt die details niet.
 
 ## Scripts
 
-De onderstaande scripts gebruik je rond `vsa` zelf (installatie, testen,
-docs). Zie [`scripts/README.md`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/scripts/README.md)
-voor het volledige overzicht.
+De gereedschappen zijn de `.cmd`-bestanden in `scripts\`. Volledige lijst,
+in gewone taal, voor wie af en toe een commando plakt:
+[Scripts (cmd)](../../formats/scripts.md).
 
-| Script                    | Doel                                                       |
-| ------------------------- | ---------------------------------------------------------- |
-| `test`                    | Installeert de lokale omgeving (`.venv`, `vsa`, pytest).   |
-| `scripts\test.cmd`        | Draait de pytest-suite.                                    |
-| `scripts\ci.cmd`          | Draait de volledige lokale CI (pytest + consumer-minimal). |
-| `serve`                   | Serveert deze MkDocs-documentatie lokaal.                  |
+Kort:
+
+| Script                  | Doel                                              |
+| ----------------------- | ------------------------------------------------- |
+| `mvsa` / `mxl` / `mscz` | Werken met een `.mvsa` / `.mxl` / `.mscz`         |
+| `markdown`              | Pagina-Markdown: pdf (`index.md.pdf`), svg, tekst |
+| `test`                  | Tests draaien                                     |
+| `check`                 | Zelfde controle als de automatische bouw          |
+| `serve`                 | Deze documentatie in de browser                   |
+
+`test` installeert de omgeving niet als aparte stap: elk script zet die
+zelf klaar. `ci` is een oude naam voor `check`.
 
 ## Diagnosevolgorde
 

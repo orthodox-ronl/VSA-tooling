@@ -97,7 +97,7 @@ def _build_parser() -> argparse.ArgumentParser:
             "  import PATH …\n"
             "      .mvsa/.mxl → .mscz (catalogus-vrij; = mvsa mscz / mxl mscz).\n"
             "  products PATH [--force] [--dry-run] [--skip-svg]\n"
-            "      Universele standaardproducten + products-meta.json.\n"
+            "      Universele standaardproducten + products-meta.json (geen pdf).\n"
             "  mxl|svg|pdf|mp3|ogg|wav|score-ir|mscz|text PATH …\n"
             "      Individuele producten (alleen .mscz).\n"
             "  normalize PATH …\n"

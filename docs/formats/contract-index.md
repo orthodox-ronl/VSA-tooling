@@ -14,54 +14,62 @@ aanraakt. Normatieve regels staan **alleen** in de hubs hieronder. Elders
    per kanaal verschillen als de hub dat zo scheidt (bijv. M10 vs R5).
 4. `normalize` / `products` / `import` **implementeren** deze hubs; ze
    definiëren geen parallelle norm.
-5. Een **product** heeft één contract. De **bronstraat** (`vsa` / `mvsa` /
-   `mscz`) bepaalt alleen de CLI-prefix en toegestane invoerextensie — niet
-   of het product bestaat. Elk standaardproduct moet uit elke notatiebron
+5. Een **standaardproduct** heeft één contract. De **bronstraat** (`vsa` /
+   `mvsa` / `mscz`) bepaalt alleen de CLI-prefix en toegestane
+   invoerextensie. Elk standaardproduct moet uit elke notatiebron
    (`.vsa` / `.mvsa` / `.mscz`) genereerbaar zijn volgens dat productcontract.
+   Partituur-PDF (P*) is **geen** standaardproduct: alleen los gereedschap.
 
 Agent-regel in de repo: `.cursor/rules/contracten-eerst.mdc` (en voor
 mvsa-export: `mvsa-export-contracten.mdc`).
 
 ## Hubs (onderwerp → canonieke plek)
 
-| Id / onderwerp                                                           | Canonieke hub                                                                                                                                                        | Typische CLI / keten                                          |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Kern + M-reeks (Coria / playback-`.mxl`)                                 | [canonical-checklists.md](canonical-checklists.md) §MXL                                                                                                              | `mvsa mxl` / `mxl normalize` / `mscz mxl`                     |
-| S-reeks (partituur-`.mscz`)                                              | [canonical-checklists.md](canonical-checklists.md) §MSCZ                                                                                                             | `mvsa mscz` / layout `partituur`                              |
-| P-reeks (PDF A4 e.d.)                                                    | [canonical-checklists.md](canonical-checklists.md) §PDF                                                                                                              | `mvsa pdf` / `mscz pdf` (partituur); `markdown pdf` (site-Markdown) |
-| Bestandsnaamgeving `{stam}.{bron}.{doel}`                                | [canonical-checklists.md](canonical-checklists.md)#bestandsnaamgeving-conventie                                                                                      | alle exports zonder `-o`                                      |
-| MSCZ-leesbaarheid (R*/L*/S* print: melisma, breve, spacers, slurs, cues) | [mscz-leesbaarheid.md](mscz-leesbaarheid.md)                                                                                                                         | layoutprofiel `partituur` / `muziek`                          |
-| Layoutprofielen `partituur` / `muziek` / `plain`                         | [mscz.md](mscz.md)#layoutprofielen---layout                                                                                                                          | `mvsa mscz` / `mvsa svg` / `mvsa pdf`                         |
-| `.mvsa`-syntax                                                           | [specification-mvsa](../specification-mvsa/README.md)                                                                                                                | `mvsa validate`                                               |
-| `.mvsa` normaliseren (spelling / pitch-opties)                           | man-page [`mvsa normalize`](../reference/cli/mvsa.md#mvsa-normalize) + conversieplan                                                                                 | `mvsa normalize`                                              |
-| Conversiematrix bron↔doel                                                | [mvsa-conversions](../plans/mvsa-conversions.md) · [formats-overzicht](index.md)                                                                                     | `mxl mvsa`, `mscz mvsa`, …                                    |
-| Score-IR / from-ir (bedoelde printvorm)                                  | [score-ir.md](score-ir.md) · [partituur-ir](../plans/partituur-ir.md)                                                                                                | `{straat} score-ir` (uit `.vsa`/`.mvsa`/`.mscz`)              |
-| OSMD-scherm (S8 e.d.; emit, zelfde bedoeling)                            | [osmd-s8-recite](../plans/osmd-s8-recite.md) → checklists S8/R3                                                                                                      | from-ir → OSMD                                                |
-| Kale muziek-SVG / scherm vs blad                                         | [mvsa-svg.md](mvsa-svg.md) · [kale-muziek-svg-en-uitgaven](../plans/kale-muziek-svg-en-uitgaven.md)                                                                  | `{straat} svg`                                                |
-| Eenstemmig `.vsa`                                                        | [vsa.md](vsa.md) · [specification](../specification/README.md)                                                                                                       | `vsa …`                                                       |
-| MusicXML-exportprofielen (playback e.d.)                                 | [rendering — MusicXML](../specification/rendering.md#musicxml-exportprofielen)                                                                                       | `vsa musicxml` / `vsa mxl`                                    |
-| Zoektekst (YAML in bron) / lyrics-product (sibling)                      | [zoektekst.md](zoektekst.md) · [`vsa text`](../reference/cli/text.md)                                                                                                | `{straat} text` → `*.lyrics.txt`                              |
-| Audio-preview                                                            | [audio.md](audio.md)                                                                                                                                                 | `{straat} mp3` / `ogg` / `wav`                                |
-| Scherm/Download in de **bibliotheek**-site                               | bibliotheek [`schermpartituur.md`](https://github.com/orthodox-ronl/bibliotheek/blob/main/docs/specs/schermpartituur.md) — **linkt** hierheen, geen tweede checklist | Hugo / shortcode `muziek`                                     |
-| Products-meta (herkomst-sidecar, schema 2)                               | [products-meta.md](products-meta.md)                                                                                                                                 | `vsa`/`mvsa`/`mscz products`                                  |
+| Id / onderwerp                                                           | Canonieke hub                                                                                                                                                        | Typische CLI / keten                                                |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Kern + M-reeks (Coria / playback-`.mxl`)                                 | [canonical-checklists.md](canonical-checklists.md) §MXL                                                                                                              | `mvsa mxl` / `mxl normalize` / `mscz mxl`                           |
+| S-reeks (partituur-`.mscz`)                                              | [canonical-checklists.md](canonical-checklists.md) §MSCZ                                                                                                             | `mvsa mscz` / layout `partituur`                                    |
+| P-reeks (PDF A4 e.d.)                                                    | [canonical-checklists.md](canonical-checklists.md) §PDF                                                                                                              | los: `mvsa pdf` / `mscz pdf`; site: `markdown pdf` → `index.md.pdf` |
+| Bestandsnaamgeving `{stam}.{bron}.{doel}`                                | [canonical-checklists.md](canonical-checklists.md)#bestandsnaamgeving-conventie                                                                                      | alle exports zonder `-o`                                            |
+| MSCZ-leesbaarheid (R*/L*/S* print: melisma, breve, spacers, slurs, cues) | [mscz-leesbaarheid.md](mscz-leesbaarheid.md)                                                                                                                         | layoutprofiel `partituur` / `muziek`                                |
+| Layoutprofielen `partituur` / `muziek` / `plain`                         | [mscz.md](mscz.md)#layoutprofielen---layout                                                                                                                          | `mvsa mscz` / `mvsa svg` / `mvsa pdf`                               |
+| `.mvsa`-syntax                                                           | [specification-mvsa](../specification-mvsa/README.md)                                                                                                                | `mvsa validate`                                                     |
+| `.mvsa` normaliseren (spelling / pitch-opties)                           | man-page [`mvsa normalize`](../reference/cli/mvsa.md#mvsa-normalize) + conversieplan                                                                                 | `mvsa normalize`                                                    |
+| Conversiematrix bron↔doel                                                | [mvsa-conversions](../plans/mvsa-conversions.md) · [formats-overzicht](index.md)                                                                                     | `mxl mvsa`, `mscz mvsa`, …                                          |
+| Score-IR / from-ir (bedoelde printvorm)                                  | [score-ir.md](score-ir.md) · [partituur-ir](../plans/partituur-ir.md)                                                                                                | `{straat} score-ir` (uit `.vsa`/`.mvsa`/`.mscz`)                    |
+| OSMD-scherm (S8 e.d.; emit, zelfde bedoeling)                            | [osmd-s8-recite](../plans/osmd-s8-recite.md) → checklists S8/R3                                                                                                      | from-ir → OSMD                                                      |
+| Kale muziek-SVG / scherm vs blad                                         | [mvsa-svg.md](mvsa-svg.md) · [kale-muziek-svg-en-uitgaven](../plans/kale-muziek-svg-en-uitgaven.md)                                                                  | `{straat} svg`                                                      |
+| Eenstemmig `.vsa`                                                        | [vsa.md](vsa.md) · [specification](../specification/README.md)                                                                                                       | `vsa …`                                                             |
+| MusicXML-exportprofielen (playback e.d.)                                 | [rendering — MusicXML](../specification/rendering.md#musicxml-exportprofielen)                                                                                       | `vsa musicxml` / `vsa mxl`                                          |
+| Zoektekst (YAML in bron) / lyrics-product (sibling)                      | [zoektekst.md](zoektekst.md) · [`vsa text`](../reference/cli/text.md)                                                                                                | `{straat} text` → `*.lyrics.txt`                                    |
+| Audio-preview                                                            | [audio.md](audio.md)                                                                                                                                                 | `{straat} mp3` / `ogg` / `wav`                                      |
+| Scherm/Download in de **bibliotheek**-site                               | bibliotheek [`schermpartituur.md`](https://github.com/orthodox-ronl/bibliotheek/blob/main/docs/specs/schermpartituur.md) — **linkt** hierheen, geen tweede checklist | Hugo / shortcode `muziek`                                           |
+| Products-meta (herkomst-sidecar, schema 2)                               | [products-meta.md](products-meta.md)                                                                                                                                 | `vsa`/`mvsa`/`mscz products`                                        |
 
 ## Universele productcatalogus
 
-Product = afgeleid bestand met **één** contract. De consumer (o.a.
-bibliotheek) mag per bron selecteren wat zij nodig heeft; tooling
-genereert de **volledige** standaardset uit elke notatiebron.
+Een standaardproduct is een afgeleid bestand met **één** contract.
+`{straat} products` schrijft de **volledige** standaardset uit elke
+notatiebron. De bibliotheek mag per bron kiezen wat zij publiceert.
 Straat-CLI’s: [straat-CLIs (plan)](../plans/straat-clis.md).
 
-| Meta-key         | Sibling (voorbeeld)           | Contract (hub)                                      |
-| ---------------- | ----------------------------- | --------------------------------------------------- |
-| `mxl`            | `lied.mvsa.mxl`               | checklists M* (Coria / playback)                    |
-| `svg`            | `lied.mscz.svg`               | kale tall compacte SVG — [mvsa-svg](mvsa-svg.md)   |
-| `pdf`            | `lied.vsa.pdf`                | checklists P* / partituur-print                     |
-| `mp3`            | `lied.mscz.mp3`               | [audio.md](audio.md) (ogg/wav alleen los)           |
-| `lyrics`         | `lied.mscz.lyrics.txt`        | platte tekst — [zoektekst](zoektekst.md) / text     |
-| `score-ir`       | `lied.mvsa.score-ir.json`     | [score-ir.md](score-ir.md) / partituur-ir           |
-| `from-ir`        | `lied.mvsa.from-ir.musicxml`  | MusicXML uit IR → OSMD                              |
-| `mscz`           | `lied.vsa.mscz`               | checklists S* / leesbaarheid (partituur-`.mscz`)    |
+| Meta-key   | Sibling (voorbeeld)          | Contract (hub)                                   |
+| ---------- | ---------------------------- | ------------------------------------------------ |
+| `mxl`      | `lied.mvsa.mxl`              | checklists M* (Coria / playback)                 |
+| `svg`      | `lied.mscz.svg`              | kale tall compacte SVG — [mvsa-svg](mvsa-svg.md) |
+| `mp3`      | `lied.mscz.mp3`              | [audio.md](audio.md) (ogg/wav alleen los)        |
+| `lyrics`   | `lied.mscz.lyrics.txt`       | platte tekst — [zoektekst](zoektekst.md) / text  |
+| `score-ir` | `lied.mvsa.score-ir.json`    | [score-ir.md](score-ir.md) / partituur-ir        |
+| `from-ir`  | `lied.mvsa.from-ir.musicxml` | MusicXML uit IR → OSMD                           |
+| `mscz`     | `lied.vsa.mscz`              | checklists S* / leesbaarheid (partituur-`.mscz`) |
+
+**Geen standaardproduct:** partituur-PDF (P*, sibling `{stam}.{bron}.pdf`).
+Scherm, download, print en navigatie gebruiken die PDF niet.
+Publicatiecontrole eist `.vsa.pdf`, `.mvsa.pdf` en `.mscz.pdf` niet.
+Los maken kan nog wel: `mvsa pdf` of `mscz pdf` (checklist P*).
+`products` schrijft die bestanden niet en haalt een oude meta-key `pdf`
+uit de sidecar. Het pdf-bestand op schijf blijft staan tot je het zelf
+wist.
 
 CLI: `{straat} {product}` met alleen de eigen bronextensie
 (`.vsa` / `.mvsa` / `.mscz`). Voorbeeld: `mscz score-ir`, `vsa mp3`,
@@ -81,10 +89,11 @@ format-CLI `mxl …`.
 **Geen product (wel straat-actie):** `normalize`, `import`, `validate`,
 `transpose`, `kuiser`, `compare` — geen meta-keys in `products`.
 
-**Site-Markdown-PDF:** `markdown pdf` (verouderd: `vsa pdf`) en
-bibliotheek-`scripts\pdf.cmd` → `index.md.pdf` zijn **geen**
-notatie-product `pdf` (P*). Partituur-PDF volgt P* via `mvsa pdf` /
-`mscz pdf`. Man-pagina: [`markdown`](../reference/cli/markdown.md).
+**Pagina-PDF (wel voor download en print):** `markdown pdf` (verouderd
+alias: `vsa pdf`) schrijft `index.md.pdf` naast de site-Markdown.
+Dat is geen notatie-product en geen checklist P*. In de bibliotheek
+doet `scripts\pdf.cmd` hetzelfde. Man-pagina:
+[`markdown`](../reference/cli/markdown.md).
 
 | Actie (niet-product) | Straat / CLI                                                                 |
 | -------------------- | ---------------------------------------------------------------------------- |
@@ -102,7 +111,7 @@ street-`products` of individuele product-subs (merge).
 
 | CLI                               | Standaardkeys (universeel)                                                                         |
 | --------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `vsa`/`mvsa`/`mscz products`      | `mxl`, `score-ir`, `from-ir`, `mscz`, `pdf`, `mp3`, `lyrics` + `svg` (tenzij `--skip-svg`) |
+| `vsa`/`mvsa`/`mscz products`      | `mxl`, `score-ir`, `from-ir`, `mscz`, `mp3`, `lyrics` + `svg` (tenzij `--skip-svg`). Geen `pdf`.   |
 | Individuele `{straat} {product}`  | merge van de bijbehorende key(s) in dezelfde sidecar                                               |
 
 Flags: `--force`, `--dry-run`. Geen tweede inhoudsnorm in meta.
@@ -113,10 +122,10 @@ SVG uit de ongewijzigde bron. Man-pagina:
 
 ## PDF-namen (afspraak)
 
-| Context                           | Commando            | Uitvoernaam                                |
-| --------------------------------- | ------------------- | ------------------------------------------ |
-| Uit notatiebron (product `pdf`)   | `{straat} pdf`      | `{stam}.{bron}.pdf` (naamgevingsconventie) |
-| Uit site-`index.md` (bibliotheek) | `scripts\pdf.cmd`   | **`index.md.pdf`**                         |
+| Context                                  | Commando                            | Uitvoernaam                                |
+| ---------------------------------------- | ----------------------------------- | ------------------------------------------ |
+| Losse partituur-PDF (niet in `products`) | `mvsa pdf` / `mscz pdf`             | `{stam}.{bron}.pdf` (niet verplicht)       |
+| Uit site-`index.md` (bibliotheek)        | `markdown pdf` of `scripts\pdf.cmd` | **`index.md.pdf`**                         |
 
 ## Bibliotheek-docs (volgt)
 

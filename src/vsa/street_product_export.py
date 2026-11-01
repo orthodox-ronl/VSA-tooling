@@ -141,7 +141,11 @@ def export_bron_to_partituur_pdf(
     *,
     musescore: Path | None = None,
 ) -> Path:
-    """Print-PDF (P*) uit notatiebron."""
+    """Print-PDF (P*) uit notatiebron.
+
+    Niet aangeroepen door ``{straat} products``. Losse CLI: ``mvsa pdf`` /
+    ``mscz pdf`` (``.vsa`` heeft geen eigen partituur-pdf-commando).
+    """
     from .mvsa_mscz import export_mscz_to_pdf, export_mvsa_to_pdf
 
     bron = Path(bron)

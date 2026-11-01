@@ -23,7 +23,7 @@ enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products} …
+mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,text,normalize,transpose,kuiser,import,products} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
               [--translit-as-parts] [--bibliotheek-id ID]
@@ -73,14 +73,15 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 | [`mxl`](#mvsa-mxl)                     | Exporteer `.mvsa` / `.mscz` / `.mxl` naar playback-``.mxl``. Bij bron `.mvsa`: merget key `mxl` in products-meta. |
 | [`score-ir`](#mvsa-score-ir)           | Exporteer `.mvsa` naar Score-IR JSON (partituur; scherm/CoriB). Merget `score-ir` (+ `from-ir` bij `--musicxml`). |
 | [`mscz`](#mvsa-mscz)                   | Exporteer `.mvsa` naar MuseScore (`.mscz`).                                                                       |
-| [`pdf`](#mvsa-pdf)                     | Exporteer `.mvsa` naar print-PDF (zangers). Merget key `pdf`. Bron `.mscz`: [`mscz pdf`](mscz.md).                |
+| [`pdf`](#mvsa-pdf)                     | Losse print-PDF (P*). Niet via `products`. Bron `.mscz`: [`mscz pdf`](mscz.md).                                   |
 | [`svg`](#mvsa-svg)                     | Exporteer `.mvsa` naar muziek-only partituur-SVG (koormap). Merget `svg` / `svg-N`.                               |
 | [`mp3`](#mvsa-mp3) / `ogg` / `wav`     | Exporteer naar preview-audio (``.mp3`` / ``.ogg`` / ``.wav``).                                                    |
 | [`normalize`](#mvsa-normalize)         | Canoniseer `.mvsa` (default: behoud noteernamen).                                                                 |
 | [`transpose`](#mvsa-transpose)         | Transponeer naar een andere tonica (`@do`); `@mode` blijft.                                                       |
 | [`kuiser`](#mvsa-kuiser)               | Authoring-kuiser: strepen syncen, woordstreep, align.                                                             |
 | [`import`](#mvsa-import)               | Score/MusicXML → werkbank-`.mvsa` (catalogus-vrij; = `mscz`/`mxl mvsa`).                                          |
-| [`products`](#mvsa-products)           | Standaardproducten + `*.products-meta.json` (versheid).                                                           |
+| [`text`](#mvsa-text)                   | Gezongen tekst → `{stam}.mvsa.lyrics.txt` (key `lyrics`). Alleen `.mvsa`.                                         |
+| [`products`](#mvsa-products)           | Standaardproducten + meta (geen pdf).                                                                             |
 
 Hulp op de commandoregel:
 
@@ -95,6 +96,7 @@ mvsa svg -h
 mvsa mp3 -h
 mvsa ogg -h
 mvsa wav -h
+mvsa text -h
 mvsa normalize -h
 mvsa transpose -h
 mvsa kuiser -h
@@ -561,30 +563,30 @@ Style: compact is default; andere Style-vlaggen winnen. Heb je al een
 
 ### Argumenten
 
-| Naam                         | Betekenis                                                                                 |
-| ---------------------------- | ----------------------------------------------------------------------------------------- |
-| `path`                       | Bron-``.mvsa``, of map met ``.mvsa``-bestanden.                                           |
-| `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg``. Alleen bij één bron.                |
-| `--section`                  | Deze ``@sectie``-id.                                                                      |
-| `--engine`                   | `musescore` (default) of `osmd`.                                                          |
-| `--musescore`                | MuseScore-executable (alleen `musescore`-engine).                                         |
-| `--keep-mscz`                | Bewaar tussenliggende ``.mscz`` (alleen `musescore`).                                     |
-| `--keep-mxl`                 | `musescore`: partituur-``.mxl``; `osmd`: from-ir ``.musicxml``.                           |
-| `--translit`                 | Tweede lyric-laag in tussen-MXL/MSCZ (koormap «met translit»; alleen `musescore`).        |
-| `--no-trim`                  | Sla viewBox-trim over (alleen `musescore`).                                               |
+| Naam                         | Betekenis                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `path`                       | Bron-``.mvsa``, of map met ``.mvsa``-bestanden.                                                  |
+| `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg``. Alleen bij één bron.                       |
+| `--section`                  | Deze ``@sectie``-id.                                                                             |
+| `--engine`                   | `musescore` (default) of `osmd`.                                                                 |
+| `--musescore`                | MuseScore-executable (alleen `musescore`-engine).                                                |
+| `--keep-mscz`                | Bewaar tussenliggende ``.mscz`` (alleen `musescore`).                                            |
+| `--keep-mxl`                 | `musescore`: partituur-``.mxl``; `osmd`: from-ir ``.musicxml``.                                  |
+| `--translit`                 | Tweede lyric-laag in tussen-MXL/MSCZ (koormap «met translit»; alleen `musescore`).               |
+| `--no-trim`                  | Sla viewBox-trim over (alleen `musescore`).                                                      |
 | `--transparent`              | Geen witte achtergrond na trim (alleen `musescore`). `osmd` schrijft altijd witte `vsa-page-bg`. |
-| `--bibliotheek-id`           | Genegeerd voor layout ``muziek`` / OSMD-chrome.                                           |
-| `--compact`                  | Compact-baseline (alleen `musescore`; default voor die engine).                           |
-| `--min-system-distance SP`   | Min. systeemafstand (alleen `musescore`).                                                 |
-| `--max-system-distance SP`   | Max. systeemafstand (alleen `musescore`).                                                 |
-| `--staff-distance SP`        | Stafafstand in één systeem (alleen `musescore`).                                          |
-| `--page-margin-top MM`       | Bovenmarge in mm (alleen `musescore`).                                                    |
-| `--page-margin-bottom MM`    | Ondermarge in mm (alleen `musescore`).                                                    |
-| `--lyrics-font FACE`         | Lettertype zangtekst (alleen `musescore`).                                                |
-| `--lyrics-font-size PT`      | Puntgrootte zangtekst (alleen `musescore`).                                               |
-| `--cue-font FACE`            | Lettertype cues/`@tekst` (alleen `musescore`).                                            |
-| `--cue-font-size PT`         | Puntgrootte cues (alleen `musescore`).                                                    |
-| `--measure-spacing F`        | Maat-spreiding (alleen `musescore`).                                                      |
+| `--bibliotheek-id`           | Genegeerd voor layout ``muziek`` / OSMD-chrome.                                                  |
+| `--compact`                  | Compact-baseline (alleen `musescore`; default voor die engine).                                  |
+| `--min-system-distance SP`   | Min. systeemafstand (alleen `musescore`).                                                        |
+| `--max-system-distance SP`   | Max. systeemafstand (alleen `musescore`).                                                        |
+| `--staff-distance SP`        | Stafafstand in één systeem (alleen `musescore`).                                                 |
+| `--page-margin-top MM`       | Bovenmarge in mm (alleen `musescore`).                                                           |
+| `--page-margin-bottom MM`    | Ondermarge in mm (alleen `musescore`).                                                           |
+| `--lyrics-font FACE`         | Lettertype zangtekst (alleen `musescore`).                                                       |
+| `--lyrics-font-size PT`      | Puntgrootte zangtekst (alleen `musescore`).                                                      |
+| `--cue-font FACE`            | Lettertype cues/`@tekst` (alleen `musescore`).                                                   |
+| `--cue-font-size PT`         | Puntgrootte cues (alleen `musescore`).                                                           |
+| `--measure-spacing F`        | Maat-spreiding (alleen `musescore`).                                                             |
 
 ### Voorbeelden
 
@@ -911,6 +913,22 @@ mscz mvsa lied.mscz
 
 ---
 
+## `mvsa text`
+
+Platte gezongen tekst uit één `.mvsa` of een map met `.mvsa`-bestanden.
+Standaard komt het bestand naast de bron: `lied.mvsa` wordt
+`lied.mvsa.lyrics.txt`. De meta-key is `lyrics`.
+
+`.vsa` gaat via [`vsa text`](text.md). `.mscz` via [`mscz text`](mscz.md).
+`mvsa text` weigert die andere extensies.
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa text examples\mvsa\alleluia-toon-1.mvsa
+```
+
+---
+
 ## `mvsa products`
 
 ### Synopsis
@@ -923,13 +941,21 @@ mvsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PAT
 
 Schrijft voor elke `.mvsa` onder `path`:
 
-| Product                   | Bestand                                                                 |
-| ------------------------- | ----------------------------------------------------------------------- |
-| Coria-`.mxl`              | `{stam}.mvsa.mxl`                                                       |
-| Score-IR                  | `{stam}.mvsa.score-ir.json`                                             |
-| from-ir MusicXML          | `{stam}.mvsa.from-ir.musicxml`                                          |
-| SVG (tenzij `--skip-svg`) | `{stam}.mvsa.svg` (tall, compact)                                       |
-| Meta                      | `{stam}.mvsa.products-meta.json` (key `svg`; zie products-meta)         |
+| Product                   | Bestand                                                          |
+| ------------------------- | ---------------------------------------------------------------- |
+| Coria-`.mxl`              | `{stam}.mvsa.mxl`                                                |
+| Score-IR                  | `{stam}.mvsa.score-ir.json`                                      |
+| from-ir MusicXML          | `{stam}.mvsa.from-ir.musicxml`                                   |
+| Partituur-`.mscz`         | `{stam}.mvsa.mscz`                                               |
+| Preview-mp3               | `{stam}.mvsa.mp3`                                                |
+| Gezongen tekst            | `{stam}.mvsa.lyrics.txt`                                         |
+| SVG (tenzij `--skip-svg`) | `{stam}.mvsa.svg` (tall, compact)                                |
+| Meta                      | `{stam}.mvsa.products-meta.json`                                 |
+
+Geen `{stam}.mvsa.pdf`. Die maak je alleen met [`mvsa pdf`](#mvsa-pdf)
+als je zelf een partituur-PDF wilt. `products` haalt een oude key `pdf`
+uit de meta. De site-pagina gebruikt `index.md.pdf`
+([`markdown pdf`](markdown.md)).
 
 Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
 (`--force` regenereert). `--quiet` onderdrukt voortgangsregels op stdout
@@ -953,4 +979,4 @@ mvsa products examples\mvsa --dry-run --skip-svg
 - Invoer bestand of map: [input-pad.md](input-pad.md)
 - Voorbeelden: [examples/mvsa](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)
 - Eenstemmig: [`vsa validate`](validate.md), [`vsa musicxml`](musicxml.md)
-- Platte gezongen tekst: [`vsa text`](text.md) (ook op `.mvsa` / MusicXML / `.mscz`)
+- Platte gezongen tekst: [`mvsa text`](#mvsa-text) (`.vsa`: [`vsa text`](text.md); `.mscz`: [`mscz text`](mscz.md))

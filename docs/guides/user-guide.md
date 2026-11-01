@@ -20,21 +20,24 @@ VSA-notatie  →  validate  →  SVG / MusicXML / Hugo-Markdown
 
 ## Welke taak → welke pagina?
 
-| Ik wil …                                           | Ga naar                                                                                                                                      |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lokaal installeren en eerste `OK`                  | [Starten](../getting-started/README.md)                                                                                                      |
-| `.mvsa` leren typen (L, stemmen, octaven)          | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                  |
+| Ik wil …                                           | Ga naar                                                                                                                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Lokaal installeren en eerste `OK`                  | [Starten](../getting-started/README.md)                                                                                                                            |
+| `.mvsa` leren typen (L, stemmen, octaven)          | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                                        |
 | Bladmuziek → `.mvsa` (**werkbank**-import)         | [mvsa schrijven 101 — bladmuziek](mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa) · [`mxl mvsa`](../reference/cli/mxl.md) / [`mscz mvsa`](../reference/cli/mscz.md) |
-| Score ↔ `.mvsa` controleren (na import)            | [`mscz compare`](../reference/cli/mscz.md#mscz-compare) |
-| `.mvsa` naar andere tonica                         | [Toonsoort verzetten](mvsa-schrijven-101.md#toonsoort-verzetten-transpose) · [`mvsa transpose`](../reference/cli/mvsa.md#mvsa-transpose) |
-| Het juiste commando kiezen                         | [CLI-taken](cli-taken.md)                                                                                                                    |
-| Begrijpen waarom validate faalt                    | [Validatie](validation.md) · [`vsa validate`](../reference/cli/validate.md)                                                                  |
-| Eén bestand of site als SVG                        | [SVG exporteren](svg-export.md)                                                                                                              |
-| MusicXML / Coria                                   | [MusicXML-export](musicxml-export.md)                                                                                                        |
-| Platte gezongen tekst (zoek / lyrics)              | [`vsa text`](../reference/cli/text.md) · [CLI-taken](cli-taken.md)                                                                           |
-| Hugo-consumer / waar hoort wat                     | [Consumer-site](../manuals/consumer-site.md)                                                                                                 |
-| Tool in een andere repo of CI                      | [Integratie](../integratie/index.md)                                                                                                         |
-| Formele taalregels                                 | [Specificaties](../specification/README.md)                                                                                                  |
+| Score ↔ `.mvsa` controleren (na import)            | [`mscz compare`](../reference/cli/mscz.md#mscz-compare)                                                                                                            |
+| `.mvsa` naar andere tonica                         | [Toonsoort verzetten](mvsa-schrijven-101.md#toonsoort-verzetten-transpose) · [`mvsa transpose`](../reference/cli/mvsa.md#mvsa-transpose)                           |
+| Het juiste commando kiezen                         | [CLI-taken](cli-taken.md)                                                                                                                                          |
+| Begrijpen waarom validate faalt                    | [Validatie](validation.md) · [`vsa validate`](../reference/cli/validate.md)                                                                                        |
+| Eén bestand of site als SVG                        | [SVG exporteren](svg-export.md)                                                                                                                                    |
+| MusicXML / Coria                                   | [MusicXML-export](musicxml-export.md)                                                                                                                              |
+| Standaardproducten naast een lied                  | [`vsa` / `mvsa` / `mscz products`](cli-taken.md) — geen partituur-PDF                                                                                              |
+| Pagina afdrukken (`index.md.pdf`)                  | [`markdown pdf`](../reference/cli/markdown.md)                                                                                                                     |
+| Welk `.cmd`-script                                 | [Scripts (cmd)](../formats/scripts.md)                                                                                                                             |
+| Platte gezongen tekst (zoek / lyrics)              | [`vsa text`](../reference/cli/text.md) · [CLI-taken](cli-taken.md)                                                                                                 |
+| Hugo-consumer / waar hoort wat                     | [Consumer-site](../manuals/consumer-site.md)                                                                                                                       |
+| Tool in een andere repo of CI                      | [Integratie](../integratie/index.md)                                                                                                                               |
+| Formele taalregels                                 | [Specificaties](../specification/README.md)                                                                                                                        |
 
 ## Klaar als …
 

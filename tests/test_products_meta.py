@@ -232,10 +232,6 @@ def test_mvsa_products_skip_svg_writes_meta(tmp_path: Path) -> None:
         out.write_bytes(b"PK")
         return out
 
-    def _pdf(_b: Path, out: Path, **_k: object) -> Path:
-        out.write_bytes(b"%PDF")
-        return out
-
     def _mp3(_b: Path, out: Path, **_k: object) -> Path:
         out.write_bytes(b"ID3")
         return out
@@ -255,10 +251,6 @@ def test_mvsa_products_skip_svg_writes_meta(tmp_path: Path) -> None:
         patch(
             "vsa.street_product_export.export_bron_to_mscz_product",
             side_effect=_mscz,
-        ),
-        patch(
-            "vsa.street_product_export.export_bron_to_partituur_pdf",
-            side_effect=_pdf,
         ),
         patch("vsa.audio_export.export_to_audio", side_effect=_mp3),
         patch(
@@ -316,10 +308,6 @@ def test_vsa_products_minimal(tmp_path: Path) -> None:
         out.write_bytes(b"PK")
         return out
 
-    def _pdf(_b: Path, out: Path, **_k: object) -> Path:
-        out.write_bytes(b"%PDF")
-        return out
-
     def _mp3(_b: Path, out: Path, **_k: object) -> Path:
         out.write_bytes(b"ID3")
         return out
@@ -339,10 +327,6 @@ def test_vsa_products_minimal(tmp_path: Path) -> None:
         patch(
             "vsa.street_product_export.export_bron_to_mscz_product",
             side_effect=_mscz,
-        ),
-        patch(
-            "vsa.street_product_export.export_bron_to_partituur_pdf",
-            side_effect=_pdf,
         ),
         patch("vsa.audio_export.export_to_audio", side_effect=_mp3),
         patch(
@@ -427,7 +411,7 @@ def _fake_single_svg(_src: Path, dest: Path, **_kwargs: object) -> list[Path]:
 
 
 def _fake_universal_rest():
-    """Mocks for mscz/pdf/mp3/lyrics/score-ir beyond mxl+svg."""
+    """Mocks for mscz/mp3/lyrics/score-ir beyond mxl+svg."""
 
     def _ir(_b: Path, out: Path, **_k: object) -> None:
         out.write_text("{}", encoding="utf-8")
@@ -437,10 +421,6 @@ def _fake_universal_rest():
 
     def _mscz(_b: Path, out: Path, **_k: object) -> Path:
         out.write_bytes(b"PK")
-        return out
-
-    def _pdf(_b: Path, out: Path, **_k: object) -> Path:
-        out.write_bytes(b"%PDF")
         return out
 
     def _mp3(_b: Path, out: Path, **_k: object) -> Path:
@@ -469,10 +449,6 @@ def _fake_universal_rest():
             "vsa.street_product_export.export_bron_to_mscz_product",
             side_effect=_mscz,
         ),
-        patch(
-            "vsa.street_product_export.export_bron_to_partituur_pdf",
-            side_effect=_pdf,
-        ),
         patch("vsa.audio_export.export_to_audio", side_effect=_mp3),
         patch(
             "vsa.street_product_export.write_lyrics_product",
@@ -493,7 +469,7 @@ def test_mscz_products_tall_svg_meta_drops_bladreeks(tmp_path: Path) -> None:
     ctx = list(_fake_universal_rest()) + [
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
     ]
-    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
+    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
         assert products_mscz_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
@@ -514,7 +490,7 @@ def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
     ctx = list(_fake_universal_rest()) + [
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
     ]
-    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
+    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
         assert products_mscz_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert "svg" in data["products"]
@@ -529,7 +505,7 @@ def test_mvsa_products_tall_svg_meta_key(tmp_path: Path) -> None:
     ctx = list(_fake_universal_rest()) + [
         patch("vsa.mvsa_mscz.export_mvsa_to_svg", side_effect=_fake_single_svg),
     ]
-    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
+    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
         assert products_mvsa_one(bron, force=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
@@ -537,3 +513,21 @@ def test_mvsa_products_tall_svg_meta_key(tmp_path: Path) -> None:
     assert "svg" in keys
     assert "svg-1" not in keys
     assert {"mxl", "score-ir", "from-ir", "mp3", "lyrics"}.issubset(keys)
+    assert "pdf" not in keys
+
+
+def test_strip_retired_pdf_key_keeps_file(tmp_path: Path) -> None:
+    """products haalt key pdf uit de sidecar; het bestand zelf blijft staan."""
+    from vsa.products_meta import strip_retired_product_keys
+
+    bron = tmp_path / "lied.mvsa"
+    bron.write_text("x", encoding="utf-8")
+    pdf = tmp_path / "lied.mvsa.pdf"
+    mxl = tmp_path / "lied.mvsa.mxl"
+    pdf.write_bytes(b"%PDF")
+    mxl.write_text("<score/>", encoding="utf-8")
+    write_meta(bron, {"mxl": mxl, "pdf": pdf})
+    assert strip_retired_product_keys(bron) == ["pdf"]
+    data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
+    assert set(data["products"]) == {"mxl"}
+    assert pdf.is_file()

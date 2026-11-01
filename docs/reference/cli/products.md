@@ -1,7 +1,12 @@
 # `vsa products` — standaardproducten + meta
 
-Genereer de standaard siblings bij een `.vsa`-bron: Coria-playback-`.mxl`,
-muziek-`.svg`, en `{stam}.vsa.products-meta.json` voor herkomst/versheid.
+Genereer de standaard siblings bij een `.vsa`-bron, plus
+`{stam}.vsa.products-meta.json` voor herkomst en versheid.
+
+Geen partituur-PDF. Download en print van een pagina gaan via
+[`markdown pdf`](markdown.md) (`index.md.pdf`). Een losse partituur-PDF
+maak je met [`mvsa pdf`](mvsa.md#mvsa-pdf) of [`mscz pdf`](mscz.md), niet
+met `products`.
 
 Herkomst-sidecar (schema, invariante): [products-meta](../../formats/products-meta.md).
 Contract-matrix: [contract-index](../../formats/contract-index.md). Straatplan:
@@ -10,7 +15,7 @@ Contract-matrix: [contract-index](../../formats/contract-index.md). Straatplan:
 ## Synopsis
 
 ```text
-vsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] path
+vsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
 ```
 
 ## Beschrijving
@@ -20,8 +25,16 @@ Voor elke `.vsa` onder `path` (bestand of map, recursief):
 | Product                         | Bestand                         |
 | ------------------------------- | ------------------------------- |
 | Coria-playback-`.mxl`           | `{stam}.vsa.mxl`                |
+| Score-IR                        | `{stam}.vsa.score-ir.json`      |
+| MusicXML uit Score-IR           | `{stam}.vsa.from-ir.musicxml`   |
+| Partituur-`.mscz`               | `{stam}.vsa.mscz`               |
+| Preview-mp3                     | `{stam}.vsa.mp3`                |
+| Gezongen tekst                  | `{stam}.vsa.lyrics.txt`         |
 | Muziek-SVG (native renderer)    | `{stam}.vsa.svg`                |
 | Versheid-meta                   | `{stam}.vsa.products-meta.json` |
+
+Geen `{stam}.vsa.pdf`. MuseScore is nodig voor `.mscz`, `.mp3` en de
+Score-IR-keten. De SVG komt uit de VSA-renderer zelf.
 
 **MXL-keten** (gelijk aan wat bibliotheek-sync eerder zelf deed):
 
@@ -47,13 +60,14 @@ er zijn. `--force` regenereert altijd.
 | `path`         | Ja        | `.vsa`-bestand of map (recursief).              | —       | Moet bestaan.      |
 | `--force`      | Nee       | Regenereer ook als meta zegt dat alles vers is. | Uit     | —                  |
 | `--dry-run`    | Nee       | Alleen tonen wat er zou gebeuren.               | Uit     | Geen bestanden.    |
-| `--quiet`      | Nee       | Geen voortgangsregels op stdout (`mxl`/`Meta`). | Uit     | Fouten op stderr.  |
+| `--quiet`      | Nee       | Geen voortgangsregels op stdout.                | Uit     | Fouten op stderr.  |
 | `--skip-svg`   | Nee       | Sla native SVG over.                            | Uit     | —                  |
+| `--musescore`  | Nee       | Pad naar MuseScore (mscz, mp3, Score-IR).       | auto    | —                  |
 | `-h`, `--help` | Nee       | Toon hulp.                                      | —       | —                  |
 
 ## Output
 
-- **stdout**: regels per product (`mxl` / `svg`) en `Meta: …` bij schrijven;
+- **stdout**: een regel per product en `Meta: …` bij schrijven;
   of `ok (meta): …` / `dry-run: …` wanneer er niets verandert.
   Met `--quiet` blijft stdout leeg (fouten blijven op stderr).
 - **Bestanden**: siblings naast de bron (zie tabel).

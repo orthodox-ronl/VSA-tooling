@@ -12,17 +12,18 @@ from pathlib import Path
 
 from .derived_path import derived_output_path
 from .input_paths import InputPathError, collect_cli_sources
-from .products_meta import freshness, load_meta, write_meta
+from .products_meta import freshness, load_meta, strip_retired_product_keys, write_meta
 
 # Universele standaardkeys (zelfde set voor vsa / mvsa / mscz products).
 # ``svg`` = één tall compacte sibling; ``--skip-svg`` laat svg weg.
 # Oude meta met ``svg-N`` (bladreeks) wordt bij schrijven gedropt.
+# ``pdf`` hoort hier niet: los gereedschap (``mvsa pdf`` / ``mscz pdf`` /
+# ``markdown pdf``). Contract: docs/formats/contract-index.md.
 UNIVERSAL_PRODUCT_KEYS = (
     "mxl",
     "score-ir",
     "from-ir",
     "mscz",
-    "pdf",
     "mp3",
     "lyrics",
 )
@@ -114,6 +115,20 @@ def _need_regen(bron: Path, *, force: bool, required_keys: set[str]) -> bool:
     return status != "ok"
 
 
+def _retire_standard_meta(
+    bron: Path, *, dry_run: bool, quiet: bool
+) -> None:
+    """Haal keys die geen standaardproduct meer zijn uit de sidecar."""
+    dropped = strip_retired_product_keys(bron, dry_run=dry_run)
+    if not dropped:
+        return
+    _log(
+        f"meta: geen standaardproduct meer: {', '.join(dropped)} ({bron.name})",
+        dry_run=dry_run,
+        quiet=quiet,
+    )
+
+
 def _required_keys(*, skip_svg: bool) -> set[str]:
     keys = set(UNIVERSAL_PRODUCT_KEYS)
     if not skip_svg:
@@ -129,7 +144,6 @@ def _plan_universal_paths(
         "score-ir": derived_output_path(bron, ".score-ir.json"),
         "from-ir": derived_output_path(bron, ".from-ir.musicxml"),
         "mscz": derived_output_path(bron, ".mscz"),
-        "pdf": derived_output_path(bron, ".pdf"),
         "mp3": derived_output_path(bron, ".mp3"),
         "lyrics": derived_output_path(bron, ".lyrics.txt"),
     }
@@ -150,7 +164,6 @@ def _log_universal_plan(
         "score-ir",
         "from-ir",
         "mscz",
-        "pdf",
         "mp3",
         "lyrics",
         "svg",
@@ -185,11 +198,11 @@ def products_mvsa_one(
         StreetProductExportError,
         export_bron_to_mxl,
         export_bron_to_mscz_product,
-        export_bron_to_partituur_pdf,
         export_bron_to_score_ir,
         write_lyrics_product,
     )
 
+    _retire_standard_meta(bron, dry_run=dry_run, quiet=quiet)
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
         _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
@@ -210,9 +223,6 @@ def products_mvsa_one(
         )
         export_bron_to_mscz_product(
             bron, products["mscz"], musescore=musescore
-        )
-        export_bron_to_partituur_pdf(
-            bron, products["pdf"], musescore=musescore
         )
         export_to_audio(
             bron, products["mp3"], format_name="mp3", musescore=musescore
@@ -265,11 +275,11 @@ def products_mscz_one(
         StreetProductExportError,
         export_bron_to_mxl,
         export_bron_to_mscz_product,
-        export_bron_to_partituur_pdf,
         export_bron_to_score_ir,
         write_lyrics_product,
     )
 
+    _retire_standard_meta(bron, dry_run=dry_run, quiet=quiet)
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
         _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
@@ -290,9 +300,6 @@ def products_mscz_one(
         )
         export_bron_to_mscz_product(
             bron, products["mscz"], musescore=musescore
-        )
-        export_bron_to_partituur_pdf(
-            bron, products["pdf"], musescore=musescore
         )
         export_to_audio(
             bron, products["mp3"], format_name="mp3", musescore=musescore
@@ -342,7 +349,6 @@ def products_vsa_one(
         StreetProductExportError,
         export_bron_to_mxl,
         export_bron_to_mscz_product,
-        export_bron_to_partituur_pdf,
         export_bron_to_score_ir,
         write_lyrics_product,
     )
@@ -351,6 +357,7 @@ def products_vsa_one(
     from .yaml_frontmatter import parse_vsa_frontmatter
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
 
+    _retire_standard_meta(bron, dry_run=dry_run, quiet=quiet)
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
         _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
@@ -371,9 +378,6 @@ def products_vsa_one(
         )
         export_bron_to_mscz_product(
             bron, products["mscz"], musescore=musescore
-        )
-        export_bron_to_partituur_pdf(
-            bron, products["pdf"], musescore=musescore
         )
         export_to_audio(
             bron, products["mp3"], format_name="mp3", musescore=musescore
@@ -481,7 +485,8 @@ def add_products_parser(
 ) -> None:
     help_txt = (
         "Universele standaardproducten (mxl, score-ir, from-ir, mscz, "
-        "pdf, mp3, lyrics, svg) + products-meta"
+        "mp3, lyrics, svg) + products-meta. Geen pdf "
+        "(los: mvsa pdf / mscz pdf / markdown pdf)."
     )
     p = sub.add_parser(
         "products",
@@ -512,7 +517,7 @@ def add_products_parser(
         "--quiet",
         action="store_true",
         help=(
-            "Geen voortgangsregels op stdout (mxl/svg/Meta). "
+            "Geen voortgangsregels op stdout. "
             "Fouten blijven op stderr."
         ),
     )
@@ -528,7 +533,7 @@ def add_products_parser(
             help="Pad naar MuseScore-executable (default: auto).",
         )
     else:
-        # vsa: native svg, maar mp3/mscz/pdf/score-ir kunnen MuseScore nodig hebben
+        # vsa: native svg; mp3/mscz/score-ir kunnen MuseScore nodig hebben
         p.add_argument(
             "--skip-svg",
             action="store_true",

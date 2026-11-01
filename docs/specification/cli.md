@@ -497,12 +497,16 @@ default
 
 ## Scripts
 
-| Script                         | Wat doet het?               |
-| ------------------------------ | --------------------------- |
-| `test`                         | installeert lokale omgeving |
-| `scripts\test.cmd`             | draait tests                |
-| `scripts\ci.cmd`               | draait lokale CI            |
-| `serve`                        | MkDocs docs lokaal serveren |
+| Script     | Wat doet het?                                              |
+| ---------- | ---------------------------------------------------------- |
+| `test`     | Draait de tests. Zet de omgeving zelf klaar.               |
+| `check`    | Tests plus het kleine consumer-voorbeeld (CI-spiegel).     |
+| `serve`    | Deze documentatie in de browser, zonder term-hover.        |
+| `mvsa`     | Commando’s voor een `.mvsa`-bron.                          |
+| `markdown` | Pagina-Markdown, onder andere `index.md.pdf`.              |
+
+De volledige lijst staat in [Scripts (cmd)](../formats/scripts.md).
+`scripts\ci.cmd` is een oude naam die `check` start.
 
 ## Diagnosevolgorde
 
@@ -554,24 +558,20 @@ exitcode `1`.
 
 ### Doel
 
-Haal platte gezongen tekst uit `.vsa`, `.mvsa`, MusicXML (`.mxl` /
-`.musicxml` / `.xml`) of `.mscz` — zonder notatie, voor zoekindex,
-lyrics-producten, of als referentie voor het veld
-[`zoektekst`](../formats/zoektekst.md). Schrijft geen `.mvsa`-sibling.
-Op `.vsa` / `.mvsa` negeert extractie een bestaand `zoektekst`-veld.
+Haal platte gezongen tekst uit een `.vsa` (alleen die extensie) en
+schrijf `{stam}.vsa.lyrics.txt` naast de bron. Voor een `.mvsa`:
+`mvsa text`. Voor een `.mscz`: `mscz text`.
 
-Volledige regel (MusicXML-lyrics, stemkeuze, `-o`): man-pagina
+Volledige regel: man-pagina
 [reference/cli/text.md](../reference/cli/text.md).
 
 ### Gebruik
 
 ```cmd
 vsa text examples\minimal\001_plain_text.vsa
-vsa text lied.mscz.mxl -o generated\lied.mscz.lyrics.txt
-vsa text lied.mscz -o generated\lied.mscz.lyrics.txt
+mvsa text examples\mvsa\alleluia-toon-1.mvsa
+mscz text lied.mscz -o generated\lied.mscz.lyrics.txt
 ```
-
-Alias voor alleen `.mscz`: `mscz text` (zelfde extractie via temp-`.mxl`).
 
 ## `vsa zoektekst <pad>…`
 

@@ -29,7 +29,9 @@ markdown pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
 ## Wat is dit niet?
 
 - **Partituur-PDF** uit `.mvsa` / `.mscz`: [`mvsa pdf`](mvsa.md#mvsa-pdf) /
-  [`mscz pdf`](mscz.md) (MuseScore; checklist P*).
+  [`mscz pdf`](mscz.md) (MuseScore; checklist P*). Dat is geen
+  standaardproduct: `products` maakt `.mvsa.pdf` / `.mscz.pdf` niet, en
+  de publicatiecontrole eist ze niet.
 - **Notatie-SVG** uit `.vsa`: [`vsa svg`](svg.md).
 
 ## Zie ook
