@@ -934,9 +934,9 @@ def _system_to_events(
                     _apply_hulptekst_to_notes(notes, direction=hulp_direction)
                 measure_events[key].extend(notes)
 
+        if layout == "partituur":
+            measure_events = _apply_recite_print_collapse_gated(measure_events)
         for key, evs in measure_events.items():
-            if layout == "partituur":
-                evs = _apply_recite_print_collapse_to_measure(evs)
             result[key].append(evs)
 
     if layout == "partituur":
@@ -1732,13 +1732,61 @@ def _extend_recite_run_for_print(notes: list[NoteEvent], start: int) -> int:
     return end
 
 
+def _measure_has_s8_eligible_run(notes: list[NoteEvent]) -> bool:
+    """True als deze stem in de maat minstens één S8-collapse zou krijgen.
+
+    Telt reeds ge-collapse'de breve/spacers mee, én verse recite-runs na
+    zelfde-toon-vervolg (``_extend_recite_run_for_print``).
+    """
+    if not notes:
+        return False
+    i = 0
+    while i < len(notes):
+        cur = notes[i]
+        if cur.spacer or cur.breve_head:
+            return True
+        if not cur.recite:
+            i += 1
+            continue
+        end = _extend_recite_run_for_print(notes, i)
+        if end - i >= RECITE_PRINT_COLLAPSE_MIN:
+            return True
+        i = end
+    return False
+
+
+def _apply_recite_print_collapse_gated(
+    measure_by_voice: dict[str, list[NoteEvent]],
+) -> dict[str, list[NoteEvent]]:
+    """S8-breve alleen als **alle** klinkende stemmen S8-geschikt zijn.
+
+    Contract S8 stemmen-sync: heeft één stem géén (lange) recite — bijv.
+    toonwissels terwijl een andere stem doorhoudt en via zelfde-toon-vervolg
+    wél ``n ≥ 6`` haalt — dan géén breve; elke stem houdt één noot per
+    lettergreep (zelfde aantallen als de stemmen zonder collapse).
+    """
+    sounding = {
+        key: evs
+        for key, evs in measure_by_voice.items()
+        if any(ev.pitch is not None for ev in evs)
+    }
+    if sounding and not all(
+        _measure_has_s8_eligible_run(evs) for evs in sounding.values()
+    ):
+        return measure_by_voice
+    return {
+        key: _apply_recite_print_collapse_to_measure(evs)
+        for key, evs in measure_by_voice.items()
+    }
+
+
 def _apply_recite_print_collapse_to_measure(
     notes: list[NoteEvent],
 ) -> list[NoteEvent]:
     """S8 op maatniveau: korte recite + zelfde-toon-vervolg → 1-(n-2)-1.
 
     Reeds ge-collapse'de S8 (breve/spacers) blijft onaangeroerd. Alleen
-    partituur-layout roept dit aan.
+    partituur-layout roept dit aan (via ``_apply_recite_print_collapse_gated``).
     """
     if not notes:
         return notes
