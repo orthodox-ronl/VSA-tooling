@@ -1045,11 +1045,29 @@
             }
           }
           if (Math.abs(dx) >= 4) {
-            // Alleen noten + lyrics hier; melisma-slurs blijven op de
-            // measure-dx uit centerMeasureContents (S2) — slot-shift op
-            // boog-start brak slur↔noot.
+            // Noten + bijbehorende hulplijnen (.vf-ledgers) + lyrics.
+            // Zonder ledgers blijven streepjes naast C/D boven de TB-balk
+            // (S22/P3e; toets derde-antifoon T-stem). Melisma-slurs blijven
+            // op measure-dx (S2) — slot-shift op boog-start brak slur↔noot.
             for (var ni = 0; ni < slot.notes.length; ni += 1) {
-              shiftEl(slot.notes[ni], dx, "data-osmd-slot");
+              var noteEl = slot.notes[ni];
+              shiftEl(noteEl, dx, "data-osmd-slot");
+              var nid = noteEl.id || "";
+              if (nid) {
+                var doc = mount.ownerDocument || document;
+                var ledById = doc.getElementById(nid + "ledgers");
+                if (ledById) {
+                  shiftEl(ledById, dx, "data-osmd-slot");
+                }
+              }
+              var prevLed = noteEl.previousElementSibling;
+              if (
+                prevLed &&
+                prevLed.classList &&
+                prevLed.classList.contains("vf-ledgers")
+              ) {
+                shiftEl(prevLed, dx, "data-osmd-slot");
+              }
             }
             if (lyricUnion) {
               for (var lei = 0; lei < lyricUnion.els.length; lei += 1) {

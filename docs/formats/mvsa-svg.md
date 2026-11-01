@@ -54,7 +54,8 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 9 --max-syste
 print-bouwsteen voor `index.md.pdf`). Optioneel `--engine osmd` schrijft een
 SVG via headless OSMD uit Score-IR (geen MuseScore; vereist Node +
 `scripts/osmd-svg`). Headless OSMD graveert met profiel `coribCompact`:
-dichtere balkafstand, lyrics tussen de balken, Source Sans 3, S10
+dichtere balkafstand (P3c) mét S5-bogen dicht bij de balk, lyrics tussen de
+balken, Source Sans 3, S10, hulplijnen op de nootkop (M11),
 (maatnummers alleen aan systeembegin), zonder pixel-pariteit met
 MuseScore (S8/S13). Lettergrepen mogen niet overlappen
 ([mscz-leesbaarheid](mscz-leesbaarheid.md) §2). S8-recite: na render past

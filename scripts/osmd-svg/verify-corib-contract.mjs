@@ -601,6 +601,109 @@ async function checkSvg(browser, svgPath) {
           }
         }
 
+        // M11 — hulplijn horizontaal bij nootkop (id …ledgers ↔ …stavenote).
+        const LEDGER_SLACK_PX = 8;
+        let ledgerBad = 0;
+        let ledgerChecked = 0;
+        for (const led of root.querySelectorAll(".vf-ledgers")) {
+          const id = String(led.id || "");
+          if (!id.endsWith("ledgers")) continue;
+          const noteId = id.slice(0, -"ledgers".length);
+          const note = noteId ? root.getElementById(noteId) : null;
+          if (!note) continue;
+          const lr = led.getBoundingClientRect();
+          const nr = note.getBoundingClientRect();
+          if (!(lr.width > 2 && nr.width > 2)) continue;
+          ledgerChecked += 1;
+          const lmid = (lr.left + lr.right) / 2;
+          const nmid = (nr.left + nr.right) / 2;
+          if (Math.abs(lmid - nmid) > LEDGER_SLACK_PX) {
+            ledgerBad += 1;
+          }
+        }
+        if (ledgerChecked >= 3 && ledgerBad > 0) {
+          errors.push(
+            `M11 ledger↔noot: ${ledgerBad}/${ledgerChecked} hulplijnen niet op nootkop (slack ${LEDGER_SLACK_PX}px)`
+          );
+        }
+
+        // S5 — SA/TB-bogen in het balkgat: niet diep door lyrics; niet kruisen.
+        const staffBands = [];
+        for (const el of root.querySelectorAll(".staffline")) {
+          const tops = [];
+          const bots = [];
+          for (const p of el.querySelectorAll("path")) {
+            const d = p.getAttribute("d") || "";
+            const m = d.match(/^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/);
+            if (!m) continue;
+            if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+            if (Number(m[3]) - Number(m[1]) < 200) continue;
+            const r = p.getBoundingClientRect();
+            if (!(r.width > 50)) continue;
+            tops.push(r.top);
+            bots.push(r.bottom);
+          }
+          if (tops.length >= 4) {
+            staffBands.push({
+              top: Math.min(...tops),
+              bottom: Math.max(...bots),
+            });
+          }
+        }
+        staffBands.sort((a, b) => a.top - b.top);
+        const MAX_SLUR_OUT = 22;
+        for (let si = 0; si + 1 < staffBands.length; si += 2) {
+          const treble = staffBands[si];
+          const bass = staffBands[si + 1];
+          const gapMid = (treble.bottom + bass.top) / 2;
+          const upper = [];
+          const lower = [];
+          for (const p of root.querySelectorAll("path")) {
+            const d = p.getAttribute("d") || "";
+            if (!/[Cc]/.test(d)) continue;
+            const r = p.getBoundingClientRect();
+            if (!(r.width > 40 && r.height > 4 && r.height < 90)) continue;
+            if (r.bottom <= treble.bottom - 2) continue;
+            if (r.top >= bass.top + 2) continue;
+            const midY = (r.top + r.bottom) / 2;
+            if (midY < gapMid) {
+              upper.push(r);
+              if (r.bottom > treble.bottom + MAX_SLUR_OUT) {
+                errors.push(
+                  `S5 alto-boog steekt ${Math.round(
+                    r.bottom - treble.bottom
+                  )}px onder SA (max ${MAX_SLUR_OUT})`
+                );
+                break;
+              }
+            } else {
+              lower.push(r);
+              if (r.top < bass.top - MAX_SLUR_OUT) {
+                errors.push(
+                  `S5 tenor-boog steekt ${Math.round(
+                    bass.top - r.top
+                  )}px boven TB (max ${MAX_SLUR_OUT})`
+                );
+                break;
+              }
+            }
+          }
+          // Kruising: upper.bottom > lower.top in overlappende x.
+          outer: for (const u of upper) {
+            for (const l of lower) {
+              if (u.right < l.left || l.right < u.left) continue;
+              if (u.bottom > l.top + 2) {
+                errors.push(
+                  `S5 SA/TB-bogen kruisen in balkgat (overlap ${Math.round(
+                    u.bottom - l.top
+                  )}px)`
+                );
+                break outer;
+              }
+            }
+          }
+        }
+
         return {
           ok: errors.length === 0,
           errors,

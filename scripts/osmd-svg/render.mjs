@@ -349,11 +349,10 @@ async function main() {
           await document.fonts.ready;
         }
         // P3c — balkgat comprimeren. Meet op balk*lijnen* (niet `.staffline`-
-        // groep: die omvat stokken én lyrics). Stokken mogen verticaal met de
-        // lyric-band overlappen (zoals MuseScore-ref); alleen de bas-groep
-        // omhoog tot een kleine marge onder de lyrics.
+        // groep: die omvat stokken én lyrics). Ruimte houden voor S5-bogen
+        // + lyrics; alleen de bas-groep omhoog. S5-pull volgt ná compressie.
         (function compressStaffGapScreen() {
-          const PAD = 8;
+          const PAD = 14;
           const svgEl = mount.querySelector("svg");
           const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
           const sy = ctm && ctm.d ? ctm.d : 1;
@@ -435,6 +434,76 @@ async function main() {
             if (Math.abs(centerDy) >= 2) {
               const dySvg = centerDy / sy;
               for (const g of lyricGs) appendTranslateY(g, dySvg);
+            }
+          }
+        })();
+        // S5 — ná P3c: melisma-bogen dichter tegen hun balk (alto niet diep
+        // in het gat; tenor niet door lyrics / niet kruisend met alto).
+        // Toets: alleluia-toon-2 eerste melisma.
+        (function pullSlursTowardStaff() {
+          const MAX_OUT_PX = 14;
+          const svgEl = mount.querySelector("svg");
+          const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
+          const sy = ctm && ctm.d ? ctm.d : 1;
+          function staffLineBand(el) {
+            const tops = [];
+            const bots = [];
+            for (const p of el.querySelectorAll("path")) {
+              const d = p.getAttribute("d") || "";
+              const m = d.match(
+                /^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/
+              );
+              if (!m) continue;
+              if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+              if (Number(m[3]) - Number(m[1]) < 200) continue;
+              const r = p.getBoundingClientRect();
+              if (!(r.width > 50)) continue;
+              tops.push(r.top);
+              bots.push(r.bottom);
+            }
+            if (tops.length < 4) return null;
+            return { top: Math.min(...tops), bottom: Math.max(...bots) };
+          }
+          const bands = Array.from(mount.querySelectorAll(".staffline"))
+            .map(staffLineBand)
+            .filter(Boolean)
+            .sort((a, b) => a.top - b.top);
+          if (bands.length < 2) return;
+          const curves = [];
+          for (const p of mount.querySelectorAll("path")) {
+            const d = p.getAttribute("d") || "";
+            if (!/[Cc]/.test(d)) continue;
+            const r = p.getBoundingClientRect();
+            if (!(r.width > 40 && r.height > 4 && r.height < 90)) continue;
+            curves.push(p);
+          }
+          for (let i = 0; i + 1 < bands.length; i += 2) {
+            const treble = bands[i];
+            const bass = bands[i + 1];
+            const gapMid = (treble.bottom + bass.top) / 2;
+            for (const p of curves) {
+              const r = p.getBoundingClientRect();
+              if (r.bottom <= treble.bottom - 2) continue;
+              if (r.top >= bass.top + 2) continue;
+              const midY = (r.top + r.bottom) / 2;
+              let dyPx = 0;
+              if (midY < gapMid) {
+                const limit = treble.bottom + MAX_OUT_PX;
+                if (r.bottom > limit) dyPx = limit - r.bottom;
+              } else {
+                const limit = bass.top - MAX_OUT_PX;
+                if (r.top < limit) dyPx = limit - r.top;
+              }
+              if (!(Math.abs(dyPx) >= 1)) continue;
+              const host =
+                p.closest("g.vf-curve, g.vf-stavetie") || p.parentElement || p;
+              // Als de boog in de bas-groep zit, is dy al deels meebewogen;
+              // screen-dy → SVG via CTM blijft correct.
+              const prev = host.getAttribute("transform") || "";
+              host.setAttribute(
+                "transform",
+                `${prev} translate(0, ${(dyPx / sy).toFixed(2)})`.trim()
+              );
             }
           }
         })();
