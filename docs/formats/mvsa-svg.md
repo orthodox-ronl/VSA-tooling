@@ -63,7 +63,10 @@ lyric-extenders tot de laatste melisma-noot ([L4](mscz-leesbaarheid.md#l--lyrics
 zet ontbrekende lettergreepstreepjes ([L3](mscz-leesbaarheid.md#l--lyrics-algemeen))
 op basis van MusicXML-``syllabic``, en centreert lettergreep-slots inclusief
 S8-spacers ([S22](mscz-leesbaarheid.md#p--pagina--systeem-a4) / P3e).
-Lettergrepen mogen niet overlappen
+S22 koppelt lyrics volgorde-behoudend aan nootkolommen (niet op mid-x-
+voronoi) en snapt elke lettergreep onder die kolom zolang de
+minimum-lettergreepafstand blijft; zo blijft o.a. derde-antifoon maat 16
+«Gods…ge-noemd» onder de juiste noten. Lettergrepen mogen niet overlappen
 ([mscz-leesbaarheid](mscz-leesbaarheid.md) §2). S8-recite: na render past
 de A1-adapter spacer-hide toe (`notehead none`) en tekent ``||O||`` op
 breve-midden; zie [osmd-s8-recite](../plans/osmd-s8-recite.md) en
