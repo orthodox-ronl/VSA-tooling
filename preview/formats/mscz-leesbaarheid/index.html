@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/osmd-alleluia8-layout-91fb</code>
-  , gebouwd 2026-11-01 10:05 CET.
+  , gebouwd 2026-11-01 10:06 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5222,9 +5222,9 @@ Ownership (wie kiest, wie handhaaft):
 <li>Geen lege derde balk; G boven / F onder.</li>
 <li>Geen frase-slurs die als melisma ogen.</li>
 <li>Maatnummers alleen aan het begin van elk systeem.</li>
-<li>Melisma: lyric-extender (streep) na de lettergreep op de eerste noot, plus
-   melisma-boog (slur) die op de <strong>eerste</strong> noot van die lettergreep begint
-   en op de <strong>laatste</strong> eindigt (leesbaarheid S2).</li>
+<li>Melisma: lyric-extender van de eerste lettergreep <strong>tot onder de laatste</strong>
+   melisma-noot (L4); melisma-boog van eerste tot laatste noot met
+   stem-juiste ankers (leesbaarheid S2).</li>
 <li><strong>Geen</strong> accolade/bracket middenin een systeem (alleen bij systeembegin).</li>
 <li><strong>Geen</strong> leeg stuk notenbalk (spacermaat) of mid-systeem-HBox vóór een
    <code>@tekst</code>-cue; scheiding = dubbele streep + SystemText (of
@@ -5240,8 +5240,8 @@ Ownership (wie kiest, wie handhaaft):
     <strong>één verticale kolom</strong> over SA én TB — niet lateraal uit elkaar
     getrokken (S21 / P3b).</li>
 <li>Lettergreep-slot (eerste melisma-noot of S8-breve + lyric) is
-    <strong>horizontaal gecentreerd</strong> in de slot-ruimte, niet links geplakt
-    (S22 / P3e).</li>
+    <strong>horizontaal gecentreerd</strong> in de slot-ruimte en staat onder de
+    <strong>juiste</strong> nootkolom — niet onder een buur-lettergreep (S22 / P3e / S21).</li>
 <li>OSMD-scherm: lyrics/cues in <strong>Source Sans 3</strong> (zelfde als MuseScore-ref /
     L2); binnen het systeem <strong>compacte</strong> balkafstand (P3c) mét ruimte zodat
     melisma-bogen niet kruisen of door lyrics lopen (S5); tussen systemen
@@ -5341,11 +5341,11 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>L3</td>
-<td>Hyphen (<code>Va-der</code>) ≠ melisma.</td>
+<td>Hyphen (<code>Va-der</code>) ≠ melisma. Lettergreepstreepjes horen <strong>tussen</strong> opeenvolgende lettergrepen van <strong>hetzelfde</strong> woord (begin/middle syllabic) — zichtbaar, op de juiste x tussen die lettergrepen, niet ontbrekend, niet in een woordgrens-gap (<code>ia, | Al</code>), niet door een lettergreep heen. Toets: alleluia-toon-8, derde-antifoon.</td>
 </tr>
 <tr>
 <td>L4</td>
-<td>Melisma: tekst op eerste noot; <strong>lyric-extender</strong> + <strong>melisma-slur</strong> van eerste tot laatste noot (leesbaarheid S2/S4). Geen extender onder recite (R4).</td>
+<td>Melisma: tekst op de <strong>eerste</strong> noot van de lettergreep; <strong>lyric-extender</strong> loopt van die lettergreep <strong>door tot onder de laatste</strong> noot van het melisma (één lange streep of herhaalde korte streepjes die samen dat bereik vullen — geen enkel kort streepje met daarna alleen wit tot de cadens). Plus <strong>melisma-slur</strong> (S2/S4). Geen extender onder recite (R4). Toets: alleluia-toon-3 (laatste «lu…ja»), alleluia-toon-2 (herhaalde streepjes).</td>
 </tr>
 <tr>
 <td>L5</td>
@@ -5369,7 +5369,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>S2</td>
-<td>Melisma-slur alleen waar één lettergreep over meerdere noten hoort. De slur <strong>begint op de eerste</strong> noot van die lettergreep en <strong>eindigt op de laatste</strong> — geen start op de tweede noot, geen vroegtijdig einde. Post-layout (o.a. OSMD-centreren) mag slur en nootkoppen niet uit elkaar trekken.</td>
+<td>Melisma-slur alleen waar één lettergreep over meerdere noten hoort. De slur <strong>begint op de eerste</strong> noot van die lettergreep en <strong>eindigt op de laatste</strong> — geen start op de tweede noot, geen vroegtijdig einde, geen einde op een verkeerd anker. <strong>Aanhechting per stem (partituur / OSMD-scherm):</strong> A (stok omlaag) — van <strong>onderkant nootkop</strong> naar <strong>onderkant nootkop</strong>; T (stok omhoog) — van <strong>bovenkant nootkop</strong> naar <strong>bovenkant nootkop</strong>; S (stok omhoog) — van <strong>bovenkant stok</strong> naar <strong>bovenkant stok</strong>; B (stok omlaag) — van <strong>onderkant stok</strong> naar <strong>onderkant stok</strong>. Post-layout mag slur en ankers niet uit elkaar trekken. Toets: alleluia-toon-2 (eerste vs tweede melisma).</td>
 </tr>
 <tr>
 <td>S3</td>
@@ -5558,7 +5558,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>P3e</td>
-<td><strong>Lettergreep-slot centreren (S22):</strong> voor elk lettergreep-slot (gewone noot, <strong>eerste</strong> noot van een melisma, of S8-<code>\|\|O\|\|</code>-breve) staan de S21-stemkolom én de lyric van dat slot <strong>horizontaal gecentreerd</strong> in de horizontale ruimte die dat slot in de maat krijgt — niet links tegen de vorige gebeurtenis of maatstreep geplakt terwijl rechts wit blijft. Hulplijnen horen mee (<a href="#m--maten-nummers-sleutels-maatstrepen">M11</a>). Voorbeeldtoets: derde-antifoon-zondag-hemelum maat 16 «want». De stokloze breve is gecentreerd op de <strong>eerste</strong> midden-lettergreep van de recite (de lettergreep die de breve draagt), niet op een latere spacer-lettergreep.</td>
+<td><strong>Lettergreep-slot centreren (S22):</strong> voor elk lettergreep-slot (gewone noot, <strong>eerste</strong> noot van een melisma, of S8-<code>\|\|O\|\|</code>-breve) staan de S21-stemkolom én de lyric van dat slot <strong>horizontaal gecentreerd</strong> in de horizontale ruimte die dat slot in de maat krijgt — niet links tegen de vorige gebeurtenis of maatstreep geplakt terwijl rechts wit blijft. De lyric hoort onder <strong>dezelfde</strong> nootkolom als het slot (geen «Gods word-den ge-» onder verkeerde noten). Melisma: lyric + extender starten op het <strong>eerste</strong> slot; latere melisma-noten krijgen geen eigen lettergreep-centrering die de tekst verschuift. Hulplijnen horen mee (<a href="#m--maten-nummers-sleutels-maatstrepen">M11</a>). Voorbeeldtoetsen: derde-antifoon-zondag-hemelum maat 16 «want» / «Gods…»; alleluia melisma-slots.</td>
 </tr>
 <tr>
 <td>P4</td>
