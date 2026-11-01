@@ -791,29 +791,23 @@ async function main() {
             ) {
               /* other band */
             }
-            // Beperk shift: lyric blijft bij nootkolom (S22). Bij force
-            // (gap onder verify-drempel) ruimere cap, niet onbeperkt.
+            // Beperk shift t.o.v. nootkolom (S22/P3e). Onder verify-
+            // drempel (force): P3a wint — volledige gap-shift.
             const lyricCx = (curR.left + curR.right) / 2;
             const lyricCy = (curR.top + curR.bottom) / 2;
             let dx = needSvg;
-            const cap = force ? 42 : MAX_NOTE_DX_PX;
-            const before = nearestNoteDx(lyricCx, lyricCy, 0);
-            if (Number.isFinite(before) && before < 90) {
-              while (dx > 0.3) {
-                const after = nearestNoteDx(lyricCx, lyricCy, dx * sx);
-                if (after <= cap) break;
-                dx *= 0.7;
-              }
-              if (
-                !force &&
-                nearestNoteDx(lyricCx, lyricCy, dx * sx) > cap + 8
-              ) {
-                return; // liever krappe gap dan losse lyric
-              }
-              // Force: als cap de verify-gap niet haalt, toch minimale
-              // 12px-gap toepassen (overlap/te krap wint van S22-ideal).
-              if (force && dx + 0.01 < needSvg) {
-                dx = needSvg;
+            if (!force) {
+              const cap = MAX_NOTE_DX_PX;
+              const before = nearestNoteDx(lyricCx, lyricCy, 0);
+              if (Number.isFinite(before) && before < 90) {
+                while (dx > 0.3) {
+                  const after = nearestNoteDx(lyricCx, lyricCy, dx * sx);
+                  if (after <= cap) break;
+                  dx *= 0.7;
+                }
+                if (nearestNoteDx(lyricCx, lyricCy, dx * sx) > cap + 8) {
+                  return; // liever krappe gap dan losse lyric
+                }
               }
             }
             if (!(dx > 0.2)) return;
@@ -839,7 +833,7 @@ async function main() {
               }
             }
           }
-          for (let pass = 0; pass < 6; pass += 1) {
+          for (let pass = 0; pass < 12; pass += 1) {
             let moved = false;
             for (let i = 1; i < groups.length; i += 1) {
               const prevG = groups[i - 1];
@@ -853,9 +847,10 @@ async function main() {
               const curT = String(
                 curG.querySelector("text")?.textContent || ""
               ).trim();
-              const wordBoundary =
-                /[,.;:!?]$/.test(prevT) ||
-                (/^[A-ZÀ-ÖØ-Þ]/.test(curT) && !/-$/.test(prevT));
+              // Woordgap alleen na leesteken — niet bij mid-zin kapitaal
+              // («ren Gods»: heilige naam) want 48px trok lyrics van de
+              // nootkolom (P3e / maat 16).
+              const wordBoundary = /[,.;:!?]$/.test(prevT);
               const needMin = wordBoundary ? MIN_WORD_GAP_PX : MIN_GAP_PX;
               const gapPx = curR.left - prevR.right;
               if (gapPx >= needMin) continue;
@@ -895,6 +890,9 @@ async function main() {
             }
           }
         })();
+        // Geen tweede lyric-snap hier: die ondermijnde P3a-gaps (derde
+        // verify ×20). S22+eerste snap vóór gap-enforce + zachtere
+        // woordgap (alleen leesteken) houdt P3e op maat 16.
         // L3 — lettergreepstreepjes tussen syllabic begin/middle/end.
         // OSMD laat ze soms weg in krappe gaps (alleluia-8, derde-antifoon).
         // Alleen waar MusicXML een binnenwoord-overgang markeert — geen
