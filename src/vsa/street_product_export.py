@@ -143,8 +143,8 @@ def export_bron_to_partituur_pdf(
 ) -> Path:
     """Print-PDF (P*) uit notatiebron.
 
-    Niet aangeroepen door ``{straat} products``. Losse CLI: ``mvsa pdf`` /
-    ``mscz pdf`` (``.vsa`` heeft geen eigen partituur-pdf-commando).
+    Niet aangeroepen door ``{straat} products``. Losse CLI: ``vsa pdf`` /
+    ``mvsa pdf`` / ``mscz pdf``. Pagina-PDF: ``markdown pdf``.
     """
     from .mvsa_mscz import export_mscz_to_pdf, export_mvsa_to_pdf
 

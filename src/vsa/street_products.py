@@ -486,7 +486,7 @@ def add_products_parser(
     help_txt = (
         "Universele standaardproducten (mxl, score-ir, from-ir, mscz, "
         "mp3, lyrics, svg) + products-meta. Geen pdf "
-        "(los: mvsa pdf / mscz pdf / markdown pdf)."
+        "(los: vsa/mvsa/mscz pdf; pagina: markdown pdf)."
     )
     p = sub.add_parser(
         "products",

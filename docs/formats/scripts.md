@@ -28,7 +28,7 @@ door `mscz`, en een `.mscz` niet door `mvsa`.
 | `mxl`      | `.mxl` / `.musicxml` | Controleren, normaliseren, omzetten naar `.mvsa` of `.mscz`                  |
 | `mscz`     | `.mscz`              | Controleren via import, standaardproducten, losse export                     |
 | `markdown` | `.md`                | Pagina-PDF, SVG’s uit de pagina, platte tekst                                |
-| `vsa`      | `.vsa`               | Controleren, SVG, standaardproducten (geen apart `.cmd`; het commando `vsa`) |
+| `vsa`      | `.vsa`               | Controleren, SVG, standaardproducten, losse `pdf` (geen `scripts\vsa.cmd`)   |
 
 `vsa` is het commando na installatie. Er is geen `scripts\vsa.cmd`.
 
@@ -73,22 +73,21 @@ markdown pdf examples\consumer-minimal\content-source\index.md
 ```
 
 Zonder `-o` wordt de PDF `index.md.pdf` naast `index.md`.
-`vsa pdf` doet hetzelfde, maar is de oude naam; gebruik `markdown pdf`.
 In de bibliotheek heet het script `scripts\pdf.cmd`.
 
 **Losse partituur-PDF van één lied.** Die heb je niet nodig voor de
 site, voor download of voor de publicatiecontrole. De controle eist
-`.vsa.pdf`, `.mvsa.pdf` en `.mscz.pdf` niet. Wil je zo’n PDF toch,
-bijvoorbeeld om in MuseScore-vorm op papier te kijken:
+`.vsa.pdf`, `.mvsa.pdf` en `.mscz.pdf` niet. Wil je zo’n PDF toch:
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa pdf examples\minimal\valid-demo.vsa -o generated\demo.pdf
 mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf
 mscz pdf generated\alleluia.mscz -o generated\alleluia-uit-mscz.pdf
 ```
 
-`mvsa pdf` leest alleen een `.mvsa`. `mscz pdf` leest alleen een
-`.mscz`. MuseScore 4 moet geïnstalleerd zijn.
+Elk commando leest alleen de eigen bronextensie. MuseScore 4 moet
+geïnstalleerd zijn voor `vsa` / `mvsa` / `mscz pdf`.
 
 ## De repository bijhouden
 

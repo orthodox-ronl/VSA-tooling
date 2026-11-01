@@ -1,41 +1,44 @@
-# `vsa pdf` — verouderd (gebruik `markdown pdf`)
+# `vsa pdf` — partituur-PDF uit `.vsa`
 
-`vsa pdf` blijft werken als **alias** voor
-[`markdown pdf`](markdown.md#markdown-pdf): Markdown met VSA → A4-PDF via Edge/Chrome.
+Maak een print-PDF van een eenstemmige `.vsa`-bron via MuseScore
+(checklist P*). Dit is **los gereedschap**: geen standaardproduct.
+`vsa products` schrijft geen `.vsa.pdf`.
 
-Bij elke aanroep schrijft de CLI een waarschuwing naar stderr:
+Pagina-afdruk van site-Markdown (`index.md.pdf`) gaat via
+[`markdown pdf`](markdown.md#markdown-pdf), niet via dit commando.
 
-```text
-Let op: `vsa pdf` is verouderd; gebruik `markdown pdf` (zelfde opties; default sibling *.md.pdf).
-```
-
-## Synopsis (alias)
+## Synopsis
 
 ```text
-vsa pdf [-h] [--config CONFIG] [--content-root CONTENT_ROOT]
-         [--bron-root BRON_ROOT] [--max-line-width MAX_LINE_WIDTH]
-         [--chrome CHROME] [-o OUTPUT]
-         input
+vsa pdf [-h] [-o OUTPUT] [--musescore PATH] path
 ```
 
-Argumenten en gedrag zijn gelijk aan [`markdown pdf`](markdown.md#markdown-pdf), inclusief
-default sibling-naam (`index.md` → `index.md.pdf`).
+| Argument / optie   | Betekenis                                                              |
+| ------------------ | ---------------------------------------------------------------------- |
+| `path`             | Eén `.vsa` of een map (recursief alle `.vsa`).                         |
+| `-o`, `--output`   | Uitvoer-PDF. Alleen bij precies één bron. Default: sibling `.vsa.pdf`. |
+| `--musescore PATH` | Pad naar MuseScore (default: auto).                                    |
+
+Andere extensies worden geweigerd met een tip naar de juiste straat:
+`.md` → `markdown pdf`, `.mvsa` → `mvsa pdf`, `.mscz` → `mscz pdf`.
+
+## Voorbeelden
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-markdown pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
+vsa pdf examples\minimal\valid-demo.vsa
+vsa pdf examples\minimal\valid-demo.vsa -o generated\demo.pdf
 ```
 
 ## Wat is dit niet?
 
+- **Pagina-PDF** uit Markdown: [`markdown pdf`](markdown.md#markdown-pdf)
+  (`index.md.pdf`).
 - **Partituur-PDF** uit `.mvsa` / `.mscz`: [`mvsa pdf`](mvsa.md#mvsa-pdf) /
-  [`mscz pdf`](mscz.md) (MuseScore; checklist P*). Dat is geen
-  standaardproduct: `products` maakt `.mvsa.pdf` / `.mscz.pdf` niet, en
-  de publicatiecontrole eist ze niet.
-- **Notatie-SVG** uit `.vsa`: [`vsa svg`](svg.md).
+  [`mscz pdf`](mscz.md).
+- **Standaardproducten**: [`vsa products`](products.md) (geen pdf).
 
 ## Zie ook
 
-- [`markdown`](markdown.md) — canonieke Markdown-straat (`pdf` / `svg` / `text`)
-- [`vsa build-markdown`](build-markdown.md)
-- [contract-index — site-Markdown-PDF](../../formats/contract-index.md)
+- [contract-index — PDF](../../formats/contract-index.md)
+- [`vsa mscz`](index.md) — tussenstap partituur-`.mscz`

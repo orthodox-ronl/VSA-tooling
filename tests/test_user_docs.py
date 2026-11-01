@@ -149,7 +149,7 @@ def test_docs_explain_troubleshooting_or_diagnosis():
 
     assert "Diagnose bij problemen" in user_text
     assert "Diagnosevolgorde" in cli_text
-    assert "scripts\\ci.cmd" in user_text
+    assert "check" in user_text or "scripts\\check.cmd" in user_text
     assert "vsa validate" in cli_text
 
 

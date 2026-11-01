@@ -5,8 +5,8 @@ Genereer de standaard siblings bij een `.vsa`-bron, plus
 
 Geen partituur-PDF. Download en print van een pagina gaan via
 [`markdown pdf`](markdown.md) (`index.md.pdf`). Een losse partituur-PDF
-maak je met [`mvsa pdf`](mvsa.md#mvsa-pdf) of [`mscz pdf`](mscz.md), niet
-met `products`.
+maak je met [`vsa pdf`](pdf.md), [`mvsa pdf`](mvsa.md#mvsa-pdf) of
+[`mscz pdf`](mscz.md), niet met `products`.
 
 Herkomst-sidecar (schema, invariante): [products-meta](../../formats/products-meta.md).
 Contract-matrix: [contract-index](../../formats/contract-index.md). Straatplan:

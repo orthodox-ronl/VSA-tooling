@@ -7,10 +7,11 @@ CLI en repo-wrapper: `markdown` / `scripts\markdown.cmd`.
 Er is **geen** `md`-commando of `md.cmd`: op Windows is `md` het
 ingebouwde *makedir*.
 
-Dit is **niet** de notatie-PDF uit `.mvsa` / `.mscz`
-([`mvsa pdf`](mvsa.md#mvsa-pdf) / [`mscz pdf`](mscz.md)). Die volgt
-checklist P* via MuseScore. `markdown pdf` is de **site-Markdown-PDF**
-(browser/Chrome; print-CSS A4). Contract:
+Dit is **niet** de partituur-PDF uit `.vsa` / `.mvsa` / `.mscz`
+([`vsa pdf`](pdf.md) / [`mvsa pdf`](mvsa.md#mvsa-pdf) /
+[`mscz pdf`](mscz.md)). Die volgt checklist P* via MuseScore.
+`markdown pdf` is de **site-Markdown-PDF** (browser/Chrome; print-CSS A4),
+typisch `index.md.pdf`. Contract:
 [contract-index — site-Markdown-PDF](../../formats/contract-index.md).
 
 Er is geen `markdown validate`, `markdown kuiser` of `markdown normalize`.
@@ -58,9 +59,6 @@ scripts\markdown.cmd pdf index.md -o index.md.pdf
 ```
 
 Stdout bij succes: `PDF geschreven naar: <pad>`.
-
-**Verouderd alias:** [`vsa pdf`](pdf.md) roept dezelfde keten aan en schrijft
-een waarschuwing naar stderr. Gebruik voortaan `markdown pdf`.
 
 ## `markdown svg`
 
@@ -114,7 +112,6 @@ Stdout: `Geschreven: <pad>`.
 
 ## Zie ook
 
-- [`vsa pdf`](pdf.md) — verouderd alias naar `markdown pdf`
+- [`vsa pdf`](pdf.md) / [`mvsa pdf`](mvsa.md#mvsa-pdf) / [`mscz pdf`](mscz.md) — partituur-PDF (P*)
 - [`vsa build-markdown`](build-markdown.md) — hele site-Markdown + SVG-assets
-- [`mvsa pdf`](mvsa.md#mvsa-pdf) / [`mscz pdf`](mscz.md) — partituur-PDF (P*)
 - [CLI-overzicht](index.md) · [Straat-CLIs](../../plans/straat-clis.md)

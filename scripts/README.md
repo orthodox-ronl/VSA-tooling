@@ -18,11 +18,11 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 
 | Commando   | Bron                 | Doel                                                                  |
 | ---------- | -------------------- | --------------------------------------------------------------------- |
-| `mvsa`     | `.mvsa`              | valideren, `products`, losse export (`pdf` is geen standaardproduct)  |
+| `mvsa`     | `.mvsa`              | valideren, `products`, losse `pdf` (geen standaardproduct)            |
 | `mxl`      | `.mxl` / `.musicxml` | valideren, normaliseren, omzetten                                     |
-| `mscz`     | `.mscz`              | `products`, losse export (`mscz pdf` alleen als je zelf een PDF wilt) |
+| `mscz`     | `.mscz`              | `products`, losse `pdf`                                               |
 | `markdown` | `.md`                | `pdf` → `index.md.pdf`, plus `svg` en `text`                          |
-| `vsa`      | `.vsa`               | valideren, `products` (geen `scripts\vsa.cmd`)                        |
+| `vsa`      | `.vsa`               | valideren, `products`, losse `pdf` (geen `scripts\vsa.cmd`)           |
 
 `products` schrijft geen `.vsa.pdf` / `.mvsa.pdf` / `.mscz.pdf`.
 Pagina-afdruk: `markdown pdf …` → `index.md.pdf`.

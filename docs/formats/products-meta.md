@@ -70,7 +70,7 @@ Voorbeelden: `lied.vsa.products-meta.json`, `lied.mvsa.products-meta.json`,
 
 Key `pdf` is geen standaardproduct. `{straat} products` haalt die key
 uit een bestaande sidecar (het pdf-bestand zelf wordt niet gewist).
-Alleen een losse `mvsa pdf` of `mscz pdf` zet de key weer.
+Alleen een losse `vsa pdf`, `mvsa pdf` of `mscz pdf` zet de key weer.
 Publicatiecontrole eist het bijbehorende `.vsa.pdf` / `.mvsa.pdf` /
 `.mscz.pdf` niet.
 

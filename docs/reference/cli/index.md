@@ -71,7 +71,7 @@ echo %ERRORLEVEL%
 | [`process`](process.md)                          | Genereer SVG-bestanden uit [VSA-blokken](@) in Markdown (zonder Markdown te herschrijven).                    |
 | [`build-markdown`](build-markdown.md)            | Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.                                            |
 | [`markdown`](markdown.md)                        | Markdown-straat: `markdown pdf` / `markdown svg` / `markdown text` (site-PDF, VSA-SVG’s, platte tekst).       |
-| [`pdf`](pdf.md)                                  | Verouderd alias voor [`markdown pdf`](markdown.md#markdown-pdf) (Markdown → A4-PDF).                          |
+| [`pdf`](pdf.md)                                  | Partituur-PDF uit `.vsa` (MuseScore). Pagina-PDF: [`markdown pdf`](markdown.md#markdown-pdf).                 |
 | [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).                                  |
 | [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).                          |
 | [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).                                  |

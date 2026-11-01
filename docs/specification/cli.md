@@ -426,14 +426,14 @@ Betekenis:
 | shortcode zichtbaar als tekst | controleer Hugo shortcode-bestand     |
 | oude output blijft zichtbaar  | verwijder `generated` en bouw opnieuw |
 
-## `markdown pdf <bestand.md>` (verouderd: `vsa pdf`)
+## `markdown pdf <bestand.md>`
 
 ### Doel
 
 Maak een A4-PDF van één Markdownbestand: VSA-blokken, includes en pagebreaks
 worden net als bij `build-markdown` opgelost; daarna print Edge/Chrome.
-Canonieke CLI: `markdown pdf` (wrapper: `scripts\markdown.cmd`). `vsa pdf`
-blijft als verouderd alias met stderr-waarschuwing.
+Wrapper: `scripts\markdown.cmd`. Partituur-PDF uit notatiebronnen:
+`vsa pdf` / `mvsa pdf` / `mscz pdf` (niet dit commando).
 
 ### Gebruik
 
@@ -446,12 +446,26 @@ Default zonder `-o`: sibling `<bronnaam>.pdf` (bijv. `index.md.pdf`).
 
 ### Output
 
-| Output | Voorbeeld        |
-| ------ | ---------------- |
-| PDF    | `index.md.pdf`   |
+| Output | Voorbeeld      |
+| ------ | -------------- |
+| PDF    | `index.md.pdf` |
 
 Fouten (validatie) gebruiken hetzelfde formaat als `vsa validate`.
 Man-pagina: [`markdown`](../reference/cli/markdown.md).
+
+## `vsa pdf <pad.vsa>`
+
+### Doel
+
+Maak een partituur-PDF uit een `.vsa` via MuseScore (checklist P*).
+Los gereedschap; geen standaardproduct. Man-pagina: [`pdf`](../reference/cli/pdf.md).
+
+### Gebruik
+
+```cmd
+vsa pdf examples\minimal\valid-demo.vsa
+vsa pdf lied.vsa -o generated\lied.pdf
+```
 
 ## `vsa.toml`
 

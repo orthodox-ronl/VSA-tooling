@@ -29,7 +29,7 @@ mvsa-export: `mvsa-export-contracten.mdc`).
 | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | Kern + M-reeks (Coria / playback-`.mxl`)                                 | [canonical-checklists.md](canonical-checklists.md) §MXL                                                                                                              | `mvsa mxl` / `mxl normalize` / `mscz mxl`                           |
 | S-reeks (partituur-`.mscz`)                                              | [canonical-checklists.md](canonical-checklists.md) §MSCZ                                                                                                             | `mvsa mscz` / layout `partituur`                                    |
-| P-reeks (PDF A4 e.d.)                                                    | [canonical-checklists.md](canonical-checklists.md) §PDF                                                                                                              | los: `mvsa pdf` / `mscz pdf`; site: `markdown pdf` → `index.md.pdf` |
+| P-reeks (PDF A4 e.d.)                                                    | [canonical-checklists.md](canonical-checklists.md) §PDF                                                                                                              | los: `vsa`/`mvsa`/`mscz pdf`; site: `markdown pdf` → `index.md.pdf` |
 | Bestandsnaamgeving `{stam}.{bron}.{doel}`                                | [canonical-checklists.md](canonical-checklists.md)#bestandsnaamgeving-conventie                                                                                      | alle exports zonder `-o`                                            |
 | MSCZ-leesbaarheid (R*/L*/S* print: melisma, breve, spacers, slurs, cues) | [mscz-leesbaarheid.md](mscz-leesbaarheid.md)                                                                                                                         | layoutprofiel `partituur` / `muziek`                                |
 | Layoutprofielen `partituur` / `muziek` / `plain`                         | [mscz.md](mscz.md)#layoutprofielen---layout                                                                                                                          | `mvsa mscz` / `mvsa svg` / `mvsa pdf`                               |
@@ -66,7 +66,7 @@ Straat-CLI’s: [straat-CLIs (plan)](../plans/straat-clis.md).
 **Geen standaardproduct:** partituur-PDF (P*, sibling `{stam}.{bron}.pdf`).
 Scherm, download, print en navigatie gebruiken die PDF niet.
 Publicatiecontrole eist `.vsa.pdf`, `.mvsa.pdf` en `.mscz.pdf` niet.
-Los maken kan nog wel: `mvsa pdf` of `mscz pdf` (checklist P*).
+Los maken kan nog wel: `vsa pdf`, `mvsa pdf` of `mscz pdf` (checklist P*).
 `products` schrijft die bestanden niet en haalt een oude meta-key `pdf`
 uit de sidecar. Het pdf-bestand op schijf blijft staan tot je het zelf
 wist.
@@ -89,11 +89,11 @@ format-CLI `mxl …`.
 **Geen product (wel straat-actie):** `normalize`, `import`, `validate`,
 `transpose`, `kuiser`, `compare` — geen meta-keys in `products`.
 
-**Pagina-PDF (wel voor download en print):** `markdown pdf` (verouderd
-alias: `vsa pdf`) schrijft `index.md.pdf` naast de site-Markdown.
-Dat is geen notatie-product en geen checklist P*. In de bibliotheek
-doet `scripts\pdf.cmd` hetzelfde. Man-pagina:
-[`markdown`](../reference/cli/markdown.md).
+**Pagina-PDF (wel voor download en print):** `markdown pdf` schrijft
+`index.md.pdf` naast de site-Markdown. Dat is geen notatie-product en
+geen checklist P*. In de bibliotheek doet `scripts\pdf.cmd` hetzelfde.
+Man-pagina: [`markdown`](../reference/cli/markdown.md). Partituur-PDF
+uit `.vsa`: [`vsa pdf`](../reference/cli/pdf.md).
 
 | Actie (niet-product) | Straat / CLI                                                                 |
 | -------------------- | ---------------------------------------------------------------------------- |
@@ -124,7 +124,7 @@ SVG uit de ongewijzigde bron. Man-pagina:
 
 | Context                                  | Commando                            | Uitvoernaam                                |
 | ---------------------------------------- | ----------------------------------- | ------------------------------------------ |
-| Losse partituur-PDF (niet in `products`) | `mvsa pdf` / `mscz pdf`             | `{stam}.{bron}.pdf` (niet verplicht)       |
+| Losse partituur-PDF (niet in `products`) | `vsa` / `mvsa` / `mscz pdf`         | `{stam}.{bron}.pdf` (niet verplicht)       |
 | Uit site-`index.md` (bibliotheek)        | `markdown pdf` of `scripts\pdf.cmd` | **`index.md.pdf`**                         |
 
 ## Bibliotheek-docs (volgt)
