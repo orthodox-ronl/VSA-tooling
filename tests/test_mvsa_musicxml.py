@@ -441,6 +441,25 @@ def test_export_playback_no_recite_collapse():
     assert "<extend" in body
 
 
+def test_export_partituur_s8_stemmen_sync_no_solo_breve():
+    """S8 stemmen-sync: gemengde recite (S/T wisselen, A/B houden) → geen breve."""
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: Die he_-mel,_ (aar-de en zee) heeft ge-maakt,_ ||
+S: -   g4  a4     f4             g4    a4 Bb4     ||
+A: -   e4  f4     -              -     -  -       ||
+T: -   c4  -      a3             Bb3   c4 d4      ||
+B: -   c3  f3     -              -     -  Bb2     ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    # ||O|| in partituur-MusicXML = notehead breve; spacers = notehead none.
+    assert "<notehead>breve</notehead>" not in xml
+    assert "<notehead>none</notehead>" not in xml
+
+
 def test_export_empty_recite_melisma_keeps_all_slots_and_full_measure():
     """``()~&~&.&.&~`` + multi-slot stem: all pitches, full 4/4 — not one quarter.
 
