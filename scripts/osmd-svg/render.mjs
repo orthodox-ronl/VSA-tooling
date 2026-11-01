@@ -82,7 +82,9 @@ const CORIB_COMPACT = {
   LyricOverlapAllowedIntoNextMeasure: false,
   // (d) S10 — maatnummers alleen aan systeembegin (canonical-checklists).
   RenderMeasureNumbersOnlyAtSystemStart: true,
-  // (e) kortere stokken: minder inbraak in het lyric-balkgat (P3c/alleluia-8).
+  // (e) stoklengte — OSMD 1.9.3/VexFlow negeert IdealStemLength in de
+  // praktijk (altijd ~35 px). P3c-klaring A↓/T↑↔lyrics gebeurt post-layout
+  // (trimStemsClearOfLyricsScreen na balkgat-compressie).
   IdealStemLength: 2.2,
   StemMinLength: 1.8,
   StemMaxLength: 2.8,
@@ -439,6 +441,121 @@ async function main() {
             if (Math.abs(centerDy) >= 2) {
               const dySvg = centerDy / sy;
               for (const g of lyricGs) appendTranslateY(g, dySvg);
+            }
+          }
+        })();
+        // P3c — A↓/T↑-stokken inkorten zodat ze de lyric-band niet snijden.
+        // OSMD/VexFlow houdt IdealStemLength ~35 px; in een compact balkgat
+        // steken die stokken door de lettergrepen (dichte maten / derde).
+        (function trimStemsClearOfLyricsScreen() {
+          // CLEAR: lucht tussen stokpunt en lyric-bbox; MIN: leesbare stok
+          // (VexFlow-default ~35 px; bij dichte balkgat tot ~10 px inkorten).
+          const CLEAR_PX = 6;
+          const MIN_STEM_PX = 10;
+          const svgEl = mount.querySelector("svg");
+          const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
+          const sy = ctm && ctm.d ? ctm.d : 1;
+          function staffLineBand(el) {
+            const tops = [];
+            const bots = [];
+            for (const p of el.querySelectorAll("path")) {
+              const d = p.getAttribute("d") || "";
+              const m = d.match(
+                /^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/
+              );
+              if (!m) continue;
+              if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+              if (Number(m[3]) - Number(m[1]) < 200) continue;
+              const r = p.getBoundingClientRect();
+              if (!(r.width > 50)) continue;
+              tops.push(r.top);
+              bots.push(r.bottom);
+            }
+            if (tops.length < 4) return null;
+            return {
+              top: Math.min(...tops),
+              bottom: Math.max(...bots),
+            };
+          }
+          const bands = Array.from(mount.querySelectorAll(".staffline"))
+            .map(staffLineBand)
+            .filter(Boolean)
+            .sort((a, b) => a.top - b.top);
+          if (bands.length < 2) return;
+          for (let i = 0; i + 1 < bands.length; i += 2) {
+            const treble = bands[i];
+            const bass = bands[i + 1];
+            const lyricGs = [];
+            for (const g of mount.querySelectorAll(".vf-text.lyrics")) {
+              const r = g.getBoundingClientRect();
+              if (!(r.width > 0 || r.height > 0)) continue;
+              if (r.bottom <= treble.bottom - 2) continue;
+              if (r.top >= bass.top + 2) continue;
+              lyricGs.push(r);
+            }
+            if (!lyricGs.length) continue;
+            let lyricTop = Infinity;
+            let lyricBot = -Infinity;
+            for (const r of lyricGs) {
+              lyricTop = Math.min(lyricTop, r.top);
+              lyricBot = Math.max(lyricBot, r.bottom);
+            }
+            const limitDown = lyricTop - CLEAR_PX;
+            const limitUp = lyricBot + CLEAR_PX;
+            for (const stemG of mount.querySelectorAll("g.vf-stem")) {
+              const p = stemG.querySelector("path");
+              if (!p) continue;
+              const d = p.getAttribute("d") || "";
+              const m = d.match(
+                /^M([-\d.]+)\s+([-\d.]+)L([-\d.]+)\s+([-\d.]+)$/
+              );
+              if (!m) continue;
+              const x1 = Number(m[1]);
+              const y1 = Number(m[2]);
+              const x2 = Number(m[3]);
+              const y2 = Number(m[4]);
+              if (Math.abs(x2 - x1) > 0.5) continue;
+              const r = p.getBoundingClientRect();
+              if (!(r.height >= 8)) continue;
+              // Alleen stokken die dit SA↔TB-balkgat raken.
+              if (r.bottom <= treble.bottom - 2 || r.top >= bass.top + 2) {
+                continue;
+              }
+              // Tip = uiteinde weg van de nootkop (y2 in VexFlow-pad).
+              const stemDown = y2 > y1;
+              const stemUp = y2 < y1;
+              // A↓: tip (r.bottom) niet in de lyric-band.
+              if (stemDown && r.bottom > limitDown) {
+                const tipScreen = Math.max(
+                  r.top + MIN_STEM_PX,
+                  Math.min(r.bottom, limitDown)
+                );
+                const dyScreen = tipScreen - r.bottom;
+                if (dyScreen < -0.5) {
+                  const tipLocal = y2 + dyScreen / sy;
+                  p.setAttribute(
+                    "d",
+                    `M${x1} ${y1}L${x2} ${tipLocal.toFixed(3)}`
+                  );
+                }
+                continue;
+              }
+              // T↑: tip (r.top) niet in de lyric-band (ook als hele stok
+              // boven bass.top in het gat hangt).
+              if (stemUp && r.top < limitUp) {
+                const tipScreen = Math.min(
+                  r.bottom - MIN_STEM_PX,
+                  Math.max(r.top, limitUp)
+                );
+                const dyScreen = tipScreen - r.top;
+                if (dyScreen > 0.5) {
+                  const tipLocal = y2 + dyScreen / sy;
+                  p.setAttribute(
+                    "d",
+                    `M${x1} ${y1}L${x2} ${tipLocal.toFixed(3)}`
+                  );
+                }
+              }
             }
           }
         })();
