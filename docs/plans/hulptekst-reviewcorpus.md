@@ -2,7 +2,7 @@
 
 | Veld       | Waarde                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------ |
-| **Status** | werkdocument voor review (niet normatief)                                                        |
+| **Status** | review + **v1 bevroren** (`translit`); *Huidige tool* = huidige module                           |
 | **Doel**   | Beoordeling van het **parochieschema** voor bidirectionele hulptekst (uitspraak, geen vertaling) |
 | **Schema** | `parochie` in `vsa.transliterate`                                                                |
 | **Plan**   | [kerkslavisch-transliteratie.md](kerkslavisch-transliteratie.md)                                 |
@@ -46,38 +46,38 @@ zachte tekens, en bekende liturgische woorden.
 | ----------- | ------------- | ------------- | ----------- |
 | Господи     | Gospodi       |               |             |
 | помилуй     | pomiloej      |               |             |
-| Святый      | Svjatyj       |               |             |
+| Святый      | Svjatiej      |               |             |
 | Боже        | Bozje         |               |             |
-| Крепкий     | Krepkij       |               |             |
-| Безсмертный | Bezsmertnyj   |               |             |
+| Крепкий     | Krepkiej      |               |             |
+| Безсмертный | Bezsmertniej  |               |             |
 | Аллилуиа    | Alliloeia     |               |             |
-| Аминь       | Amin          |               |             |
+| Аминь       | Amin'         |               |             |
 | Слава       | Slava         |               |             |
 | Отцу        | Ottsoe        |               |             |
 | Сыну        | Synoe         |               |             |
 | Христе      | Christe       |               |             |
 | Христос     | Christos      |               |             |
 | Богородице  | Bogoroditse   |               |             |
-| Дево        | Devo          |               |             |
+| Дево        | Djevo         |               |             |
 | радуйся     | radoejsja     |               |             |
 | благодатная | blagodatnaja  |               |             |
-| Марие       | Marie         |               |             |
+| Марие       | Marieje       |               |             |
 | Царю        | Tsarjoe       |               |             |
-| Небесный    | Nebesnyj      |               |             |
+| Небесный    | Njebesniej    |               |             |
 | Утешителю   | Oetesjiteljoe |               |             |
 | Иже         | Izje          |               |             |
-| сый         | syj           |               |             |
+| сый         | siej          |               |             |
 | исполняяй   | ispolnjajaj   |               |             |
 | Пресвятая   | Presvjataja   |               |             |
 | Троице      | Troitse       |               |             |
-| Иисусе      | Iisoese       |               |             |
-| Божий       | Bozjij        |               |             |
-| церковь     | tserkov       |               |             |
+| Иисусе      | Iesusje       |               |             |
+| Божий       | Bozjiej       |               |             |
+| церковь     | tserkov'      |               |             |
 | человеки    | tsjeloveki    |               |             |
-| жизнь       | zjizn         |               |             |
+| жизнь       | zjizn'        |               |             |
 | земля       | zemlja        |               |             |
 | дух         | doech         |               |             |
-| Трисвятое   | Trisvjatoe    |               |             |
+| Трисвятое   | Trisvjatoje   |               |             |
 | херувимы    | cheroevimy    |               |             |
 | Серафимы    | Serafimy      |               |             |
 
@@ -110,25 +110,25 @@ Hier zitten bekende knelpunten: Nederlandse **g** (nu → `х`), digraphen
 
 | Bron (nl)      | Huidige tool   | Jouw voorstel | Toelichting |
 | -------------- | -------------- | ------------- | ----------- |
-| Heer           | Хер            |               |             |
+| Heer           | Хиир           |               |             |
 | ontferm        | онтферм        |               |             |
 | U              | У              |               |             |
-| Amen           | Амен           |               |             |
+| Amen           | Аминь          |               |             |
 | Glorie         | Хлори          |               |             |
 | God            | Ход            |               |             |
 | Vader          | Вадер          |               |             |
 | Zoon           | Зон            |               |             |
 | Heilige        | Хейлихе        |               |             |
-| Geest          | Хест           |               |             |
+| Geest          | Хейст          |               |             |
 | wereld         | верелд         |               |             |
 | zondaars       | зондарс        |               |             |
 | barmhartigheid | бармхартиххейд |               |             |
 | koninkrijk     | конинкрейк     |               |             |
 | hemelen        | хемелен        |               |             |
 | brood          | брод           |               |             |
-| vergeef        | верхеф         |               |             |
+| vergeef        | верхейф        |               |             |
 | schulden       | схулден        |               |             |
-| eeuwen         | еувен          |               |             |
+| eeuwen         | эувен          |               |             |
 | Christus       | Христус        |               |             |
 | opgestaan      | опхестан       |               |             |
 | waarlijk       | варлейк        |               |             |
@@ -139,7 +139,7 @@ Hier zitten bekende knelpunten: Nederlandse **g** (nu → `х`), digraphen
 | goed           | худ            |               |             |
 | dag            | дах            |               |             |
 | nacht          | нахт           |               |             |
-| alleluia       | аллелёйа       |               |             |
+| alleluia       | аллелуиа       |               |             |
 
 ---
 

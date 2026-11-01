@@ -96,9 +96,9 @@ zelfde font / 12 pt). Fontnaam moet op de machine in MuseScore beschikbaar
 zijn. Niet bij `--layout plain`.
 
 **Maat-spreiding:** `--measure-spacing` (MuseScore Style `measureSpacing`,
-default `1.2`; hoger = meer ruimte tussen noten in de maat). Dit is geen
-volledige “centreer in brede cue-maat”; die breedte komt uit MusicXML
-`width` bij cues — dat is een apart onderwerp.
+default `1.2`; hoger = meer ruimte tussen noten in de maat). Cue-maten
+krijgen een milde MusicXML-`width` ([leesbaarheid C6](mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade));
+dat vermindert “noten links in een holle maat” bij lange `@tekst`.
 
 **Bibliotheek-id:** consumer bepaalt de waarde; geef die met
 `--bibliotheek-id` (colofon bij `partituur`). Pad-afleiding is alleen een

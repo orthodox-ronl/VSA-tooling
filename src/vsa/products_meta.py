@@ -16,6 +16,10 @@ from typing import Any, Literal
 SCHEMA_VERSION = 2
 META_SUFFIX = ".products-meta.json"
 
+# Geen standaardproduct meer. ``{straat} products`` haalt deze keys uit de
+# sidecar. Een losse ``mvsa pdf`` / ``mscz pdf`` mag ``pdf`` daarna weer mergen.
+RETIRED_FROM_PRODUCTS = frozenset({"pdf"})
+
 Freshness = Literal["ok", "missing", "stale", "no_meta"]
 
 
@@ -173,6 +177,41 @@ def write_meta(
         newline="\n",
     )
     return dest
+
+
+def strip_retired_product_keys(
+    bron: Path, *, dry_run: bool = False
+) -> list[str]:
+    """Drop keys that are no longer part of ``{straat} products``.
+
+    Does not delete product files. An empty ``products`` object is left
+    untouched so a following products-run can replace the sidecar.
+    """
+    existing = load_meta(bron)
+    if not existing or existing.get("schema") != SCHEMA_VERSION:
+        return []
+    products = existing.get("products")
+    if not isinstance(products, dict):
+        return []
+    dropped = [key for key in list(products) if key in RETIRED_FROM_PRODUCTS]
+    if not dropped:
+        return []
+    if dry_run:
+        return dropped
+    for key in dropped:
+        products.pop(key, None)
+    if not products:
+        return dropped
+    dest = meta_path_for(bron)
+    from .atomic_io import write_text
+
+    write_text(
+        dest,
+        json.dumps(existing, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return dropped
 
 
 def load_meta(bron: Path) -> dict[str, Any] | None:

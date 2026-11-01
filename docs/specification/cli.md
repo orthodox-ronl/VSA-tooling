@@ -426,14 +426,14 @@ Betekenis:
 | shortcode zichtbaar als tekst | controleer Hugo shortcode-bestand     |
 | oude output blijft zichtbaar  | verwijder `generated` en bouw opnieuw |
 
-## `markdown pdf <bestand.md>` (verouderd: `vsa pdf`)
+## `markdown pdf <bestand.md>`
 
 ### Doel
 
 Maak een A4-PDF van één Markdownbestand: VSA-blokken, includes en pagebreaks
 worden net als bij `build-markdown` opgelost; daarna print Edge/Chrome.
-Canonieke CLI: `markdown pdf` (wrapper: `scripts\markdown.cmd`). `vsa pdf`
-blijft als verouderd alias met stderr-waarschuwing.
+Wrapper: `scripts\markdown.cmd`. Partituur-PDF uit notatiebronnen:
+`vsa pdf` / `mvsa pdf` / `mscz pdf` (niet dit commando).
 
 ### Gebruik
 
@@ -446,12 +446,26 @@ Default zonder `-o`: sibling `<bronnaam>.pdf` (bijv. `index.md.pdf`).
 
 ### Output
 
-| Output | Voorbeeld        |
-| ------ | ---------------- |
-| PDF    | `index.md.pdf`   |
+| Output | Voorbeeld      |
+| ------ | -------------- |
+| PDF    | `index.md.pdf` |
 
 Fouten (validatie) gebruiken hetzelfde formaat als `vsa validate`.
 Man-pagina: [`markdown`](../reference/cli/markdown.md).
+
+## `vsa pdf <pad.vsa>`
+
+### Doel
+
+Maak een partituur-PDF uit een `.vsa` via MuseScore (checklist P*).
+Los gereedschap; geen standaardproduct. Man-pagina: [`pdf`](../reference/cli/pdf.md).
+
+### Gebruik
+
+```cmd
+vsa pdf examples\minimal\valid-demo.vsa
+vsa pdf lied.vsa -o generated\lied.pdf
+```
 
 ## `vsa.toml`
 
@@ -497,12 +511,16 @@ default
 
 ## Scripts
 
-| Script                         | Wat doet het?               |
-| ------------------------------ | --------------------------- |
-| `test`                         | installeert lokale omgeving |
-| `scripts\test.cmd`             | draait tests                |
-| `scripts\ci.cmd`               | draait lokale CI            |
-| `serve`                        | MkDocs docs lokaal serveren |
+| Script     | Wat doet het?                                              |
+| ---------- | ---------------------------------------------------------- |
+| `test`     | Draait de tests. Zet de omgeving zelf klaar.               |
+| `check`    | Tests plus het kleine consumer-voorbeeld (CI-spiegel).     |
+| `serve`    | Deze documentatie in de browser, zonder term-hover.        |
+| `mvsa`     | Commando’s voor een `.mvsa`-bron.                          |
+| `markdown` | Pagina-Markdown, onder andere `index.md.pdf`.              |
+
+De volledige lijst staat in [Scripts (cmd)](../formats/scripts.md).
+`scripts\ci.cmd` is een oude naam die `check` start.
 
 ## Diagnosevolgorde
 
@@ -554,24 +572,20 @@ exitcode `1`.
 
 ### Doel
 
-Haal platte gezongen tekst uit `.vsa`, `.mvsa`, MusicXML (`.mxl` /
-`.musicxml` / `.xml`) of `.mscz` — zonder notatie, voor zoekindex,
-lyrics-producten, of als referentie voor het veld
-[`zoektekst`](../formats/zoektekst.md). Schrijft geen `.mvsa`-sibling.
-Op `.vsa` / `.mvsa` negeert extractie een bestaand `zoektekst`-veld.
+Haal platte gezongen tekst uit een `.vsa` (alleen die extensie) en
+schrijf `{stam}.vsa.lyrics.txt` naast de bron. Voor een `.mvsa`:
+`mvsa text`. Voor een `.mscz`: `mscz text`.
 
-Volledige regel (MusicXML-lyrics, stemkeuze, `-o`): man-pagina
+Volledige regel: man-pagina
 [reference/cli/text.md](../reference/cli/text.md).
 
 ### Gebruik
 
 ```cmd
 vsa text examples\minimal\001_plain_text.vsa
-vsa text lied.mscz.mxl -o generated\lied.mscz.lyrics.txt
-vsa text lied.mscz -o generated\lied.mscz.lyrics.txt
+mvsa text examples\mvsa\alleluia-toon-1.mvsa
+mscz text lied.mscz -o generated\lied.mscz.lyrics.txt
 ```
-
-Alias voor alleen `.mscz`: `mscz text` (zelfde extractie via temp-`.mxl`).
 
 ## `vsa zoektekst <pad>…`
 

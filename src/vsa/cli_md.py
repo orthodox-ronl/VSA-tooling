@@ -1,9 +1,10 @@
 """Top-level ``markdown`` CLI (bron: ``.md`` / ``.markdown``).
 
-Producten: pdf (pagina-A4), svg (VSA-blokken), text (platte pagina-tekst).
-Geen validate/kuiser/normalize. Geen ``md``-entrypoint: op Windows is ``md``
-makedir. Contract: docs/formats/contract-index.md (site-Markdown vs
-notatie-product pdf).
+Producten: pdf (pagina-A4 / ``index.md.pdf``), svg (VSA-blokken), text
+(platte pagina-tekst). Geen validate/kuiser/normalize. Geen
+``md``-entrypoint: op Windows is ``md`` makedir. Contract:
+docs/formats/contract-index.md (site-Markdown-PDF vs losse partituur-PDF
+via ``vsa``/``mvsa``/``mscz pdf``).
 """
 
 from __future__ import annotations
@@ -47,7 +48,7 @@ def run_markdown_pdf_cli(
     max_line_width: float | None,
     chrome: str | None,
 ) -> int:
-    """Gedeelde implementatie voor ``markdown pdf`` en verouderd ``vsa pdf``."""
+    """Implementatie voor ``markdown pdf`` (site-Markdown → A4-PDF)."""
     from .config import load_config
     from .markdown_pdf import PdfError, write_markdown_pdf
     from .markdown_processor import ProcessValidationError

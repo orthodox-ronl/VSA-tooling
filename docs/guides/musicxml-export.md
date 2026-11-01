@@ -8,7 +8,7 @@ Deze pagina is de workflow-uitleg (profielen, Coria, mappen, opties). Voor de
 volledige CLI-syntax, alle argumenten en foutgevallen: zie de man-pagina
 [`vsa musicxml`](../reference/cli/musicxml.md). Voor siblings + meta in één
 keer: [`vsa products`](../reference/cli/products.md) (tijdelijke syllabify +
-Coria-finalize op de MXL; SVG uit de ongewijzigde bron).
+Coria-finalize op de MXL; SVG uit de ongewijzigde bron; geen `.vsa.pdf`).
 
 Bij het **`playback`**-profiel schrijft `vsa musicxml` altijd Coria-klare
 MusicXML (finalize: sanitize + voortekens, geen DOCTYPE). Optioneel

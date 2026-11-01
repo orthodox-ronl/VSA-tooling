@@ -27,6 +27,10 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 - **Zoektekst / lyrics:** YAML-`zoektekst` in canonieke `.vsa`/`.mvsa`
   ([zoektekst](zoektekst.md)); sibling-product `*.lyrics.txt` via
   `{straat} text` / `{straat} products` (meta-key `lyrics`).
+- **PDF:** pagina-afdruk is `index.md.pdf` (`markdown pdf`).
+  Partituur-PDF’s (`.vsa.pdf` / `.mvsa.pdf` / `.mscz.pdf`) maak je los
+  met `vsa pdf` / `mvsa pdf` / `mscz pdf`; ze zijn geen standaardproduct
+  ([contract-index](contract-index.md#universele-productcatalogus)).
 - Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 - **Score → `.mvsa`** (`.mxl` / `.mscz`): **werkbank-bewerkvorm** (niet
   catalogus-klaar); soft-wrap, holds, recite; default `--pitch ag-vsa` (a–g

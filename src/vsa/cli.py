@@ -193,7 +193,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     m_musicxml.add_argument(
-        "--hulptekst",
+        "--translit",
         action="store_true",
         help=(
             "Alleen bij .mvsa: tweede lyric-laag (number=2): ksl→Latijn / "
@@ -201,13 +201,13 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     m_musicxml.add_argument(
-        "--hulptekst-as-parts",
+        "--translit-as-parts",
         action="store_true",
-        dest="hulptekst_as_parts",
+        dest="translit_as_parts",
         help=(
-            "Alleen bij .mvsa: Coria-extra SATB-parts met hulptekst (volume 0). "
+            "Alleen bij .mvsa: Coria-extra SATB-parts met translit (volume 0). "
             "Part-namen: Soprano (ksl)/(nl) via @taal. "
-            "Impliceert --hulptekst. Alleen playback-layout."
+            "Impliceert --translit. Alleen playback-layout."
         ),
     )
     m_musicxml.add_argument(
@@ -288,7 +288,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     m_mscz.add_argument(
-        "--hulptekst",
+        "--translit",
         action="store_true",
         help=(
             "Tweede lyric-laag (number=2) in partituur-MXL: ksl→Latijn / "
@@ -366,14 +366,23 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         dest="bibliotheek_id",
         help="Bij .mvsa + layout partituur: expliciete bibliotheek-id voor colofon.",
     )
+    m_pdf.add_argument(
+        "--translit",
+        action="store_true",
+        help=(
+            "Tweede lyric-laag (number=2) in de tussen-MXL/MSCZ: "
+            "ksl→Latijn / nl→Cyrillisch."
+        ),
+    )
     _add_partituur_style_args(m_pdf)
     m_svg = mvsa_sub.add_parser(
         "svg",
         help="Exporteer .mvsa naar partituur-SVG (koormap).",
         description=(
-            "Bron .mvsa: kale muziek-SVG via MuseScore "
-            "(geen titel/colofon/footer; layout muziek-chrome), "
-            "daarna viewBox-trim. Vereist MuseScore 4. "
+            "Bron .mvsa: kale muziek-SVG. Default --engine musescore "
+            "(geen titel/colofon; layout muziek; viewBox-trim; MuseScore 4). "
+            "--engine osmd: Score-IR → from-ir MusicXML → headless OSMD "
+            "(Node + scripts/osmd-svg; geen MuseScore). "
             "Bron .mscz: gebruik mscz svg."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -382,6 +391,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "  mvsa svg examples\\mvsa\\1a-vredeslitanie.mvsa\n"
             "  mvsa svg lied.mvsa -o generated\\lied.mvsa.svg\n"
             "  mvsa svg lied.mvsa --lyrics-font-size 14 --cue-font-size 11\n"
+            "  mvsa svg lied.mvsa -o generated\\lied-osmd.svg --engine osmd\n"
             "  mscz svg generated\\lied.mscz -o generated\\lied.svg\n"
             "  mvsa svg lied.mvsa --section schets1 --keep-mscz generated\\lied.mscz"
         ),
@@ -432,6 +442,14 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         help="Alleen bij .mvsa; genegeerd voor layout muziek (geen colofon).",
     )
     m_svg.add_argument(
+        "--translit",
+        action="store_true",
+        help=(
+            "Tweede lyric-laag (number=2) in de tussen-MXL/MSCZ: "
+            "ksl→Latijn / nl→Cyrillisch."
+        ),
+    )
+    m_svg.add_argument(
         "--no-trim",
         action="store_true",
         help="Laat MuseScore-A4-SVG ongewijzigd (geen viewBox-trim).",
@@ -441,7 +459,18 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "Geen witte achtergrond na trim (transparant). "
-            "Default: witte rechthoek achter de notatie."
+            "Default: witte rechthoek achter de notatie. "
+            "Alleen bij --engine musescore."
+        ),
+    )
+    m_svg.add_argument(
+        "--engine",
+        metavar="NAME",
+        choices=["musescore", "osmd"],
+        default="musescore",
+        help=(
+            "SVG-engine: musescore (default; print/fallback) of osmd "
+            "(Score-IR → headless OSMD; vereist Node + scripts/osmd-svg)."
         ),
     )
     _add_partituur_style_args(m_svg)
@@ -1089,37 +1118,39 @@ def _build_parser():
 
     pdf = subparsers.add_parser(
         "pdf",
-        help=(
-            "Verouderd: Markdown → A4-PDF. Gebruik ``markdown pdf`` "
-            "(zelfde keten; default sibling *.md.pdf)."
+        help="Print-PDF uit .vsa (partituur via MuseScore).",
+        description=(
+            "Partituur-PDF via MuseScore. Alleen .vsa. "
+            "Pagina-Markdown (index.md.pdf): markdown pdf. "
+            "Bron .mvsa: mvsa pdf; bron .mscz: mscz pdf."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa pdf examples\\minimal\\valid-demo.vsa\n"
+            "  vsa pdf lied.vsa -o generated\\lied.pdf\n"
+            "  markdown pdf index.md\n"
+            "  mvsa pdf lied.mvsa\n"
+            "  mscz pdf lied.mscz"
         ),
     )
-    pdf.add_argument("input", help="Markdownbestand (.md) met VSA-blokken en/of includes.")
+    pdf.add_argument(
+        "path",
+        help=".vsa-bestand of map met .vsa-bestanden (recursief).",
+    )
     pdf.add_argument(
         "-o",
         "--output",
         default=None,
         help=(
-            "Uitvoer-PDF (default: sibling <bronnaam>.pdf, bv. index.md.pdf). "
-            "Zie markdown pdf."
+            "Uitvoer-.pdf (default: sibling <bronnaam>.pdf). "
+            "Alleen bij precies één bronbestand."
         ),
     )
-    pdf.add_argument("--config", default=None)
     pdf.add_argument(
-        "--content-root",
+        "--musescore",
         default=None,
-        help="Content-root voor includes (default: map met lokaal/, anders de map van het bestand).",
-    )
-    pdf.add_argument(
-        "--bron-root",
-        default=None,
-        help="Bron-repo root (default: auto via vendor/bron of ../bron).",
-    )
-    pdf.add_argument("--max-line-width", type=float, default=None)
-    pdf.add_argument(
-        "--chrome",
-        default=None,
-        help="Pad naar Edge/Chrome/Chromium (anders CHROME_PATH of auto-detectie).",
+        help="Pad naar MuseScore-executable (default: auto).",
     )
 
     return parser
@@ -1391,23 +1422,63 @@ def _cmd_build_markdown(args, config):
 
 
 def _cmd_pdf(args, config):
-    """Verouderd alias voor ``markdown pdf`` (site-Markdown → A4-PDF)."""
-    from .cli_md import run_markdown_pdf_cli
+    """``vsa pdf``: alleen ``.vsa`` → partituur-PDF (los gereedschap, niet products)."""
+    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
+    from .street_product_export import (
+        StreetProductExportError,
+        export_bron_to_partituur_pdf,
+    )
+    from .street_products import MSCZ_PDF_KEY, merge_street_product_meta
 
-    print(
-        "Let op: `vsa pdf` is verouderd; gebruik `markdown pdf` "
-        "(zelfde opties; default sibling *.md.pdf).",
-        file=sys.stderr,
-    )
-    return run_markdown_pdf_cli(
-        input_path=Path(args.input),
-        output=Path(args.output) if args.output else None,
-        config_path=getattr(args, "config", None),
-        content_root=args.content_root,
-        bron_root=args.bron_root,
-        max_line_width=args.max_line_width,
-        chrome=args.chrome,
-    )
+    del config  # partituur-PDF gebruikt geen vsa.toml-renderconfig
+    if _reject_wrong_street_source(
+        "vsa", "pdf", args.path, wrong_suffix=".md", hint_street="markdown"
+    ):
+        return 1
+    if _reject_wrong_street_source(
+        "vsa", "pdf", args.path, wrong_suffix=".markdown", hint_street="markdown"
+    ):
+        return 1
+    if _reject_wrong_street_source("vsa", "pdf", args.path, wrong_suffix=".mvsa"):
+        return 1
+    if _reject_wrong_street_source("vsa", "pdf", args.path, wrong_suffix=".mscz"):
+        return 1
+    if _reject_non_street_file("vsa", "pdf", args.path, allowed=(".vsa",)):
+        return 1
+    files = _cli_collect_sources(args.path, (".vsa",))
+    if files is None:
+        return 1
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
+    musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(args.output)
+            if getattr(args, "output", None)
+            else derived_output_path(path, ".pdf")
+        )
+        try:
+            written = export_bron_to_partituur_pdf(
+                path, out, musescore=musescore
+            )
+        except (
+            StreetProductExportError,
+            MuseScoreNotFoundError,
+            MuseScoreConvertError,
+        ) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+        meta = merge_street_product_meta(path, {MSCZ_PDF_KEY: written})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
 
 
 def _cmd_text(args) -> int:
@@ -2492,9 +2563,9 @@ def _cmd_mvsa_musicxml(args) -> int:
                 out,
                 section_id=args.section,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                hulptekst=bool(getattr(args, "hulptekst", False)),
-                hulptekst_as_parts=bool(
-                    getattr(args, "hulptekst_as_parts", False)
+                translit=bool(getattr(args, "translit", False)),
+                translit_as_parts=bool(
+                    getattr(args, "translit_as_parts", False)
                 ),
             )
         except MvsaValidationError as exc:
@@ -2542,7 +2613,7 @@ def _cmd_mvsa_mscz(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=getattr(args, "layout", None),
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                hulptekst=bool(getattr(args, "hulptekst", False)),
+                translit=bool(getattr(args, "translit", False)),
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:
@@ -2738,6 +2809,7 @@ def _cmd_mvsa_pdf(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=args.layout,
                 bibliotheek_id=args.bibliotheek_id,
+                translit=bool(getattr(args, "translit", False)),
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:
@@ -2779,6 +2851,23 @@ def _cmd_mvsa_svg(args) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mscz", "keep_mxl"):
         return 1
+    engine = getattr(args, "engine", "musescore") or "musescore"
+    if engine == "osmd":
+        if args.keep_mscz or args.musescore or args.no_trim or args.transparent:
+            print(
+                "mvsa svg --engine osmd: --keep-mscz/--musescore/--no-trim/"
+                "--transparent gelden niet (alleen MuseScore-keten)",
+                file=sys.stderr,
+            )
+            return 1
+        if _has_partituur_style_cli(args):
+            print(
+                "mvsa svg --engine osmd: Style-opties (afstand/fonts/spacing) "
+                "gelden niet; die zijn MuseScore-Style. "
+                "OSMD gebruikt Score-IR/from-ir MusicXML.",
+                file=sys.stderr,
+            )
+            return 1
     musescore = Path(args.musescore) if args.musescore else None
     trim = not bool(getattr(args, "no_trim", False))
     white_background = not bool(getattr(args, "transparent", False))
@@ -2800,8 +2889,10 @@ def _cmd_mvsa_svg(args) -> int:
                 keep_mscz=keep_mscz,
                 keep_mxl=keep_mxl,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                translit=bool(getattr(args, "translit", False)),
                 trim=trim,
                 white_background=white_background,
+                engine=engine,
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:

@@ -67,10 +67,6 @@ def test_vsa_products_mxl_is_coria_finalized(tmp_path: Path) -> None:
         out.write_bytes(b"PK")
         return out
 
-    def _pdf(_b: Path, out: Path, **_k: object) -> Path:
-        out.write_bytes(b"%PDF")
-        return out
-
     def _mp3(_b: Path, out: Path, **_k: object) -> Path:
         out.write_bytes(b"ID3")
         return out
@@ -92,10 +88,6 @@ def test_vsa_products_mxl_is_coria_finalized(tmp_path: Path) -> None:
         patch(
             "vsa.street_product_export.export_bron_to_mscz_product",
             side_effect=_mscz,
-        ),
-        patch(
-            "vsa.street_product_export.export_bron_to_partituur_pdf",
-            side_effect=_pdf,
         ),
         patch("vsa.audio_export.export_to_audio", side_effect=_mp3),
         patch(

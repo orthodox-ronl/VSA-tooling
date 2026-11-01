@@ -36,10 +36,10 @@ npm install -g @tno-terminology-design/trrt @tno-terminology-design/hrgt @tno-te
 
 | Script                        | Doel                                                                 |
 | ----------------------------- | -------------------------------------------------------------------- |
-| `serve`      | Snelle preview **zonder** TermRef-hover                              |
-| `serve-tev2` | Preview **met** TEv2 (staging `generated/`, zoals CI)                |
-| `scripts\docs-build.cmd`      | Alleen `mkdocs build --strict`                                       |
-| `build` | Volledige keten + TermRef-check + MkDocs (= CI-parity)               |
+| `serve`                       | Snelle preview **zonder** TermRef-hover                              |
+| `serve-tev2`                  | Preview **met** TEv2 (staging `generated/`, zoals CI)                |
+| `build --no-tev2`             | Documentatie bouwen zonder de term-pipeline                          |
+| `build`                       | Volledige keten + TermRef-check + MkDocs (= CI-parity)               |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling

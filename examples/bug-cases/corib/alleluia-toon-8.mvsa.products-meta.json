@@ -1,0 +1,13 @@
+{
+  "schema": 2,
+  "bron": "alleluia-toon-8.mvsa",
+  "bron_sha256": "bf2373f1382344031fa84ee9d1f493ab1914facf2ed5fd00e34cff761ed31bed",
+  "generated_at": "2026-10-31T09:54:27+00:00",
+  "products": {
+    "svg": {
+      "file": "alleluia-toon-8.mvsa.svg",
+      "sha256": "8a59b89d955c43bab3f14f07ef35b750c289b0024f412a887370bc31e31fd29c",
+      "generated_at": "2026-10-31T09:53:57+00:00"
+    }
+  }
+}

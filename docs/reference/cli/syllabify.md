@@ -38,8 +38,8 @@ de grens tussen tekst en `{…}`, en tussen opeenvolgende scopes. Zo wordt
   SVG tonen een gewoon streepje. Zachte `-` verdwijnen in zoektekst, `=`
   niet (wordt `-`).
 - Dit is **geen** automatische stap bij `vsa musicxml`: bron en product
-  blijven voorspelbaar. Na schrijven vernieuw je `.vsa.mxl` via
-  `scripts\vsa-products.cmd` of `scripts\check.cmd`.
+  blijven voorspelbaar. Na schrijven vernieuw je de standaard siblings
+  met `vsa products` (er is geen script `vsa-products.cmd`).
 
 `path` mag één `.vsa`-bestand zijn of een **map**. Bij een map zoekt het
 commando recursief alle `*.vsa`-bestanden (zoals [`vsa validate`](validate.md)

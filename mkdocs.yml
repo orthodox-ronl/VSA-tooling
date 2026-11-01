@@ -222,6 +222,7 @@ nav:
     - mvsa-conversies (mxl/mscz/normalize): plans/mvsa-conversions.md
     - Straat-CLIs (plan): plans/straat-clis.md
     - OSMD S8-recite (plan): plans/osmd-s8-recite.md
+    - CoriB MVP (plan): plans/corib-mvp.md
     - plans/vsa-polyphony-proposal.md
 
 extra_css:

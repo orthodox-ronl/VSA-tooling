@@ -64,9 +64,15 @@ Voorbeelden: `lied.vsa.products-meta.json`, `lied.mvsa.products-meta.json`,
 | `products.*.generated_at`    | Ja        | UTC-tijdstip waarop **dit** productbestand geschreven werd (informatief). |
 
 **Universele standaardkeys** (zelfde set voor `vsa` / `mvsa` / `mscz`
-`products`): `mxl`, `score-ir`, `from-ir`, `mscz`, `pdf`, `mp3`,
-`lyrics`, `svg`. Zie
+`products`): `mxl`, `score-ir`, `from-ir`, `mscz`, `mp3`,
+`lyrics`, `svg`. Geen `pdf`. Zie
 [contract-index — universele productcatalogus](contract-index.md#universele-productcatalogus).
+
+Key `pdf` is geen standaardproduct. `{straat} products` haalt die key
+uit een bestaande sidecar (het pdf-bestand zelf wordt niet gewist).
+Alleen een losse `vsa pdf`, `mvsa pdf` of `mscz pdf` zet de key weer.
+Publicatiecontrole eist het bijbehorende `.vsa.pdf` / `.mvsa.pdf` /
+`.mscz.pdf` niet.
 
 SVG-product: altijd key `svg` (één tall compacte sibling `stem.svg`).
 Oude bladreeks-keys `svg-1`…`svg-N` worden bij schrijven gedropt.

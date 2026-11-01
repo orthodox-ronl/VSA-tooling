@@ -136,27 +136,28 @@ Contract: checklist MSCZ **S14–S20**. MuseScore-gedrag dat we vermijden:
 | Cue alleen op één balk / verkeerde plaats    | `StaffText` i.p.v. `SystemText`; `<br/>` matcht niet   | Promote naar SystemText; match ook `<br/>` (S19)               |
 | Herhaalpunten weg na mid-flow `@tekst`       | `:\|` “opgewaardeerd” naar `light-light` zonder repeat | `:\|` blijft `light-heavy` + backward (S16, M10)               |
 
-| #   | Regel                                                                                                                                                                 |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| C1  | Mid-flow `@tekst` (niet begin van MuseScore-systeem): vorige maat **dubbele streep**, cue = **SystemText**. Geen HBox, geen spacermaat.                               |
-| C2  | `@tekst` forceert **geen** systeembreuk; gebruik `@mscz-newline` voor een nieuwe regel op het blad.                                                                   |
-| C3  | Korte rust-only / `print-object=no`-maten: **strippen** in MSCZ-postprocess; niet vervangen door mid-systeem-HBox.                                                    |
-| C4  | Trailing HBox aan staff-eind (vóór `</Staff>` / colofon-VBox): weg.                                                                                                   |
-| C5  | Accolade/bracket alleen bij systeembegin.                                                                                                                             |
+| #   | Regel                                                                                                                                                                       |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C1  | Mid-flow `@tekst` (niet begin van MuseScore-systeem): vorige maat **dubbele streep**, cue = **SystemText**. Geen HBox, geen spacermaat.                                     |
+| C2  | `@tekst` forceert **geen** systeembreuk; gebruik `@mscz-newline` voor een nieuwe regel op het blad.                                                                         |
+| C3  | Korte rust-only / `print-object=no`-maten: **strippen** in MSCZ-postprocess; niet vervangen door mid-systeem-HBox.                                                          |
+| C4  | Trailing HBox aan staff-eind (vóór `</Staff>` / colofon-VBox): weg.                                                                                                         |
+| C5  | Accolade/bracket alleen bij systeembegin.                                                                                                                                   |
+| C6  | Cue-maatbreedte (MusicXML ``width``): mild — floor 80 / cap 240 tenths, ``40 + 9×`` langste regel. Lange cues mogen iets overstekken i.p.v. een holle maat met noten links. |
 
 ---
 
 ## P — Pagina / systeem (A4)
 
-| #   | Regel                                                                                                                                                                                                                                                                                                         |
-| --  | ----------------------------------------------------------------------                                                                                                                                                                                                                                        |
-| P1  | Papier A4 staand; default-marges 15 mm. Override boven/onder: `--page-margin-top` / `--page-margin-bottom` (mm) op `mvsa mscz`/`pdf`/`svg`. (Canoniek ook: checklist [PDF P6](canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).)                                                                     |
-| P2  | Geen inspring eerste systeem.                                                                                                                                                                                                                                                                                 |
+| #   | Regel                                                                                                                                                                                                                                                                                                                                |
+| --  | ----------------------------------------------------------------------                                                                                                                                                                                                                                                               |
+| P1  | Papier A4 staand; default-marges 15 mm. Override boven/onder: `--page-margin-top` / `--page-margin-bottom` (mm) op `mvsa mscz`/`pdf`/`svg`. (Canoniek ook: checklist [PDF P6](canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).)                                                                                            |
+| P2  | Geen inspring eerste systeem.                                                                                                                                                                                                                                                                                                        |
 | P3  | Verticaal: pagina niet vullen; default `minSystemDistance`/`maxSystemDistance` 8/14 (niet “spread”). Override: `--min-system-distance` / `--max-system-distance`, of `--compact` (baseline 7/7 + lyric 0.1 + marge 5 mm + `measureSpacing` 1.6; andere Style-opties winnen). Balken: `--staff-distance`. Op `mvsa mscz`/`pdf`/`svg`. |
-| P3a | Horizontaal: MuseScore plakt lyric-bboxes tot ~0,1 sp tegen elkaar («desheils»). Mitigatie: trailing NBSP op woord-einde-lyrics in `.mscx`, plus SVG-nabewerking (`enforce_svg_lyric_word_gaps`, min. ~0,45 sp tussen opeenvolgende lyric-paths). Hyphen-lettergrepen (`syllabic` begin/middle) zonder NBSP. |
-| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                                                                                                                                                                                                      |
-| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                                                                                                                                                                                                  |
-| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                                                                                                                                                                                                     |
+| P3a | Horizontaal: MuseScore plakt lyric-bboxes tot ~0,1 sp tegen elkaar («desheils»). Mitigatie: trailing NBSP op woord-einde-lyrics in `.mscx`, plus SVG-nabewerking (`enforce_svg_lyric_word_gaps`, min. ~0,45 sp tussen opeenvolgende lyric-paths). Hyphen-lettergrepen (`syllabic` begin/middle) zonder NBSP.                         |
+| P4  | Systeembreuk op frase-/ademgrens, niet midden in recite.                                                                                                                                                                                                                                                                             |
+| P5  | Titel/componist in VBox; `frameSystemDistance=14`; cues als **SystemText** (niet StaffText).                                                                                                                                                                                                                                         |
+| P6  | Copyright-footer + colofon: checklist PDF P4 (**later**).                                                                                                                                                                                                                                                                            |
 
 ---
 

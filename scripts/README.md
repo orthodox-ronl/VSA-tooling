@@ -1,34 +1,55 @@
 # Scripts voor VSA Tooling
 
-Uitvoerbare commando's in `scripts/` (PATH: `.\scripts`). Org-conventie:
+Uitvoerbare commando's in `scripts/` (op het zoekpad als `.\scripts`).
+De leesbare handleiding voor beheerders staat op de documentatiesite:
+[Scripts (cmd)](../docs/formats/scripts.md). Org-conventie:
 https://github.com/orthodox-ronl/bron/blob/main/docs/specs/repo-scripts.md
 
 Scripts mogen redactionele `content-source` niet herschrijven.
 CI gebruikt `examples\consumer-minimal\content-source`.
 
-## Commando's
+Start altijd vanuit de repo-map:
 
-| Commando | Doel |
-| -------- | ---- |
-| `test` | pytest (`test -v` i.p.v. test-verbose) |
-| `check` | CI-spiegel: pytest + consumer-minimal validate/build-markdown |
-| `serve` | MkDocs preview zonder TEv2 |
-| `serve-tev2` | MkDocs preview met TEv2 |
-| `build` | TEv2 + MkDocs `--strict` (CI-pariteit) |
-| `build --no-tev2` | MkDocs zonder TEv2 |
-| `clean` | tijdelijke bestanden weg |
-| `import` | zip uit Downloads uitpakken |
-| `run-example` | `vsa` op een voorbeeld-`.vsa` |
-| `mvsa` | top-level CLI; bron `.mvsa` |
-| `mxl` | top-level `mxl` (import / mscz; bron `.mxl`) |
-| `mscz` | top-level `mscz` (import / mxl; bron `.mscz`) |
-| `markdown` | top-level `markdown` (pdf / svg / text; bron `.md`) |
-| `check-docs` | docs-hygiene |
-| `migrate-metadata` | dry-run/`--apply`: zet `@toon` (uit titel/pad) en optioneel `--tempo` (`@tempo 130`) op `.mvsa` |
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+```
 
-Python-helpers blijven in `scripts/`. Oude namen (`docs-serve`, `ci`, `bootstrap`) zijn aliases.
+## Notatie
 
-**Content-migratie metadata** (bibliotheek of tooling-voorbeelden), eerst dry-run:
+| Commando   | Bron                 | Doel                                                                  |
+| ---------- | -------------------- | --------------------------------------------------------------------- |
+| `mvsa`     | `.mvsa`              | valideren, `products`, losse `pdf` (geen standaardproduct)            |
+| `mxl`      | `.mxl` / `.musicxml` | valideren, normaliseren, omzetten                                     |
+| `mscz`     | `.mscz`              | `products`, losse `pdf`                                               |
+| `markdown` | `.md`                | `pdf` → `index.md.pdf`, plus `svg` en `text`                          |
+| `vsa`      | `.vsa`               | valideren, `products`, losse `pdf` (geen `scripts\vsa.cmd`)           |
+
+`products` schrijft geen `.vsa.pdf` / `.mvsa.pdf` / `.mscz.pdf`.
+Pagina-afdruk: `markdown pdf …` → `index.md.pdf`.
+
+## Repository
+
+| Commando                 | Doel                                                             |
+| ------------------------ | ---------------------------------------------------------------- |
+| `test`                   | pytest (`test -v` voor meer detail; niet `test-verbose`)         |
+| `check`                  | CI-spiegel: pytest + consumer-minimal validate/build-markdown    |
+| `serve`                  | MkDocs-preview zonder TEv2                                       |
+| `serve-tev2`             | MkDocs-preview met TEv2                                          |
+| `build`                  | TEv2 + MkDocs `--strict`                                         |
+| `build --no-tev2`        | MkDocs zonder TEv2                                               |
+| `check-docs`             | docs-hygiëne + vaste voorbeeld-SVG’s                             |
+| `clean`                  | tijdelijke Python-bestanden weg                                  |
+| `import`                 | zip uit Downloads uitpakken in de repo                           |
+| `run-example`            | `vsa` op één voorbeeld-`.vsa`                                    |
+| `migrate-metadata`       | dry-run; met `--apply` `@toon` en optioneel `--tempo` op `.mvsa` |
+| `install-rendering-deps` | controle of het SVG-lettertype werkt                             |
+
+Oude namen die alleen doorverwijzen: `ci` → `check`, `docs-serve` →
+`serve`, `docs-build` → `build --no-tev2`, `bootstrap` → geen aparte
+stap. Geen `vsa-products.cmd`.
+
+**Content-migratie metadata** (bibliotheek of tooling-voorbeelden), eerst
+zonder `--apply`:
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\bibliotheek
@@ -40,5 +61,3 @@ scripts\migrate-metadata.cmd examples\mvsa --apply
 
 Alleen `@toon` als die uit `@title` (`Toon N`) of pad (`toon-N`) volgt.
 Met `--tempo` ook `@tempo 130` als die ontbreekt (export-default is al 130).
-
-Geen aparte bootstrap-stap: `_ensure` checkt PATH (Python 3.14, optioneel Node) en pip't packages.

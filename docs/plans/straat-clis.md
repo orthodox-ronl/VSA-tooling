@@ -28,6 +28,9 @@ Per straat:
    hoort, via `{straat} {product}` (bijv. `mscz svg`, `mscz pdf`,
    `mvsa svg`). Geen cross-street omweg (`mvsa svg` op `.mscz` is fout).
 2. **`products`** — alle standaardproducten van die straat + sidecar-meta.
+   Partituur-PDF hoort daar niet bij (los: `vsa`/`mvsa`/`mscz pdf`;
+   pagina: `markdown pdf` → `index.md.pdf`). Zie
+   [contract-index](../formats/contract-index.md#universele-productcatalogus).
 3. **`normalize`** / **`import`** waar het contract dat vraagt
    (`{doel} import bron.{ext}` ≡ `{bron} {doel}`).
 

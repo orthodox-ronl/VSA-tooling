@@ -2,7 +2,8 @@
 
 | Veld            | Waarde                                                                                                                                                                                                                                       |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**      | werkplan; **fase 1–3 gedaan**; expert-review: [hulptekst-reviewcorpus](hulptekst-reviewcorpus.md)                                                                                                                                            |
+| **Status**      | werkplan; **fase 1–3 gedaan**; schema **v1 bevroren**; **productbesluiten vast** (§5a); keuzes: [transliteraties-keuzes](transliteraties-keuzes.md); review: [hulptekst-reviewcorpus](hulptekst-reviewcorpus.md)                             |
+| **CLI-vlaggen** | `--translit` / `--translit-as-parts` (niet `--hulptekst`)                                                                                                                                                                                    |
 | **Doel**        | Bidirectionele hulptekst (ksl → Latijn én nl → Cyrillisch) in blad- en Coria-export, zonder echte tweede melodiestem                                                                                                                         |
 | **Eigenaar**    | Transliterator + export: [VSA-tooling](@bron); catalogus-id/map: bibliotheek (handover 1); org-termen: [bron glossary](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)                                           |
 | **Gerelateerd** | [mvsa-conversions](mvsa-conversions.md), [mvsa-v0-syntax §11](mvsa-v0-syntax.md#11-blokhergebruik-en-parallelle-l-schets), [specification-mvsa](../specification-mvsa/README.md), [canonieke checklists](../formats/canonical-checklists.md) |
@@ -21,7 +22,7 @@ hoort als aparte kleine follow-up; die staat niet in deze taak.
 ### Doelen
 
 Koorleden lezen niet allemaal hetzelfde schrift. De toolchain moet daarom
-**hulptekst** kunnen tonen naast de brontekst: dezelfde noten, andere
+**translit** kunnen tonen naast de brontekst: dezelfde noten, andere
 lettertekens, dezelfde lettergreepdeling (zelfde event-telling).
 
 Twee richtingen zijn kernvereiste:
@@ -178,6 +179,43 @@ implementatiefase; dit plan herschrijft die checklists nog niet.
 
 ---
 
+## 5a. Besluiten productmodel (nu)
+
+Vastgelegd voor tooling + bibliotheek-UI. Wijzigen alleen via bewuste herziening.
+
+### Doelen → producten
+
+| Doel                    | Wat de gebruiker nodig heeft                                | Productvorm (nu)                                                                                                                                                           |
+| ----------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Oefenen (Coria)**  | Per stem de bron **of** de getranslitereerde tekst kiezen   | **Eén** playback-`.mxl` met `--translit-as-parts` (extra parts, volume 0). Geen tweede MXL, geen aan/uit-bestandsschakelaar.                                               |
+| **2. Koormap-pagina**   | Soms met, soms zonder translit tonen / downloaden / printen | **Twee** afgeleiden van dezelfde uitvoeringsvorm: zonder lyric 2, en met lyric 2 (bron + translit onder dezelfde noten). UI-schakelaar wisselt welk bestand getoond wordt. |
+| **3. Catalogus-pagina** | Idem                                                        | Zelfde model als koormap: aparte PDF/SVG/(MSCZ) met en zonder `--translit`.                                                                                                |
+
+### CLI-vlaggen (VSA-tooling)
+
+| Vlag                  | Commando’s                                                     | Effect                                               |
+| --------------------- | -------------------------------------------------------------- | ---------------------------------------------------- |
+| `--translit`          | `mvsa mxl`, `mvsa mscz`, `mscz import`, `mvsa pdf`, `mvsa svg` | Lyric number 2 = transliteratie (blad/scherm-keten). |
+| `--translit-as-parts` | **alleen** `mvsa mxl`                                          | Coria-extra parts; impliceert `--translit`.          |
+
+**Geen** `--translit` op: `mvsa text` / lyrics (alleen bron voor zoekindex), `mvsa mp3` (klank wijzigt niet), standaard `mvsa products` (bouwt de variant zonder; “met translit” blijft aparte exportaanroep of later apart productbeleid in de bibliotheek).
+
+### Wat de bibliotheek beslist
+
+- Welke uitvoeringsvormen **beide** blad/scherm-varianten krijgen (niet verplicht overal).
+- Standaardstand van de UI-schakelaar (bijv. KSL vaker “met”, NL vaker “zonder”).
+- Stabiele [representatie](@bron)-namen / bestandsnamen voor met vs zonder.
+- Of Score-IR/OSMD-scherm dezelfde met/zonder-split volgt (zodra dat het toonpad is).
+
+### Bewust later
+
+- Apart product “alleen translit” als enige lyric-regel (nu niet).
+- `--translit` op `products` als standaard meta-key.
+- Eenstemmig `.vsa`-straat met dezelfde vlaggen (aparte follow-up als de bibliotheek dat nodig heeft).
+- Handmatige `L1` blijft winnen van auto-`--translit`; UI mag dan geen dubbele belofte doen.
+
+---
+
 ## 6. Converter-ketens en MVP-prioriteit
 
 ```mermaid
@@ -193,7 +231,7 @@ flowchart TD
 
 | Fase        | Wat bouwen                                                                                                                                                                                                                                     | Wat niet verplicht is                                                   |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| **1 — MVP** | Transliterator-module (beide richtingen) + export `.vsa` / `.mvsa` → mxl/mscz met lyric number 2; optioneel Coria-dubbelpart (vlag zoals `--hulptekst-as-parts`). Minstens één geïntegreerd voorbeeld **ksl→Latijn** én één **nl→Cyrillisch**. | `vsa→mvsa` als tussenstap alleen als die nuttig is — niet voor elk pad. |
+| **1 — MVP** | Transliterator-module (beide richtingen) + export `.vsa` / `.mvsa` → mxl/mscz met lyric number 2; optioneel Coria-dubbelpart (vlag zoals `--translit-as-parts`). Minstens één geïntegreerd voorbeeld **ksl→Latijn** én één **nl→Cyrillisch**.  | `vsa→mvsa` als tussenstap alleen als die nuttig is — niet voor elk pad. |
 | **2**       | Parallelle L in mvsa (`L:` / `L1:` of schets `L'`) exporteren naar lyric numbers. Nu nog «buiten v0» in [validation](../specification-mvsa/validation.md) en [mvsa-conversions §6](mvsa-conversions.md#6-bewust-later--buiten-slice).          | Volledige blokhergebruik-semantiek (`@voices`, deelbereiken).           |
 | **3**       | Gemengd nl+ksl in één [uitvoeringsvorm](@bron) (bijv. cherubijnenhymne): per gemarkeerde passage de juiste richting.                                                                                                                           | Automatische taaldetectie zonder markering.                             |
 
@@ -282,22 +320,27 @@ Coria-MXL of print-MSCZ genereert.
 cd /d C:\Git\orthodox-ronl\bibliotheek
 python -m pip install "vsa-tool[rendering] @ git+https://github.com/orthodox-ronl/VSA-tooling.git@main"
 mvsa validate content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa
-mvsa mxl content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa --hulptekst-as-parts -o generated\coria\<representatie-id>.mxl --bibliotheek-id <zangstuk>/<variant>/<uitvoeringsvorm>
+mvsa mxl content-source\bibliotheek\<zangstuk>\<variant>\<uitvoeringsvorm>\bron.mvsa --translit-as-parts -o generated\coria\<representatie-id>.mxl --bibliotheek-id <zangstuk>/<variant>/<uitvoeringsvorm>
 ```
 
    Vervang paden door jullie echte mapconventie. In het `.mvsa`: `@taal` zetten
    waar nl en ksl door elkaar lopen; optioneel `@taal Lap=aap Lus=noot` voor
    vrije Coria-labels.
 
-3. **Print voor zangers** (tweede tekstregel op het blad):
+3. **Print / koormap met translit** (tweede tekstregel; apart product naast
+   de variant zonder `--translit`):
 
 ```cmd
-mvsa mscz …\bron.mvsa --hulptekst -o generated\print\….mscz --bibliotheek-id …
+mvsa mscz …\bron.mvsa --translit -o generated\print\….mscz --bibliotheek-id …
+mvsa pdf …\bron.mvsa --translit -o generated\print\….pdf --bibliotheek-id …
+mvsa svg …\bron.mvsa --translit -o generated\koormap\….svg
 ```
 
 4. **Wat de bibliotheek zelf beslist:** welke representatie een Coria-MXL krijgt,
-   of hulptekst verplicht is, en freshness/sync — dat blijft consumer-beleid
-   ([reuse-vsa-tooling](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer)).
+   of beide blad/scherm-varianten (met/zonder translit) worden gebouwd, en
+   freshness/sync — dat blijft consumer-beleid
+   ([reuse-vsa-tooling](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer);
+   productmodel §5a).
 
 Transliterator-kwaliteit (parochieschema) is een **apart** traject via
 [hulptekst-reviewcorpus](hulptekst-reviewcorpus.md); export werkt al met het

@@ -165,7 +165,7 @@ sluiten.
 ## Zie ook
 
 - Volledige workflow, profielen, Coria-integratie en frontmatter-instellingen: [musicxml-export.md](../../guides/musicxml-export.md)
-- [`vsa products`](products.md) — MXL + SVG + products-meta (syllabify + finalize)
+- [`vsa products`](products.md) — standaardproducten + products-meta (geen `.vsa.pdf`)
 - [`vsa syllabify`](syllabify.md) — lettergreepstreepjes in de bron zelf
 - [`vsa validate`](validate.md) — controleer [VSA-notatie](@bron) vóór export.
 - Outputreferentie: [outputs.md](../outputs.md)
