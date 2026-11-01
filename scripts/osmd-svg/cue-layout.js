@@ -1123,11 +1123,13 @@
           }
         })();
 
-        function shiftEl(el, amount, mark) {
-          if (!(Math.abs(amount) >= 3)) {
+        function shiftEl(el, amount, mark, force) {
+          if (!(Math.abs(amount) >= 0.5)) {
             return;
           }
-          if (mark && el.getAttribute(mark) === "1") {
+          // Eerste center-pass: één shift per noot (mark). Gap/S22 mag
+          // force=true om opnieuw te stapelen.
+          if (!force && mark && el.getAttribute(mark) === "1") {
             return;
           }
           var prev = el.getAttribute("transform") || "";
@@ -1143,16 +1145,16 @@
           }
         }
 
-        function shiftNoteAndLedgers(slot, dx) {
+        function shiftNoteAndLedgers(slot, dx, force) {
           for (var ni = 0; ni < slot.notes.length; ni += 1) {
             var noteEl = slot.notes[ni];
-            shiftEl(noteEl, dx, "data-osmd-slot");
+            shiftEl(noteEl, dx, "data-osmd-slot", force);
             var nid = noteEl.id || "";
             if (nid) {
               var doc = mount.ownerDocument || document;
               var ledById = doc.getElementById(nid + "ledgers");
               if (ledById) {
-                shiftEl(ledById, dx, "data-osmd-slot");
+                shiftEl(ledById, dx, "data-osmd-slot", force);
               }
             }
             var prevLed = noteEl.previousElementSibling;
@@ -1161,7 +1163,7 @@
               prevLed.classList &&
               prevLed.classList.contains("vf-ledgers")
             ) {
-              shiftEl(prevLed, dx, "data-osmd-slot");
+              shiftEl(prevLed, dx, "data-osmd-slot", force);
             }
           }
         }
@@ -1213,9 +1215,50 @@
           }
         }
 
+        // 1b) S22+P3a: kolommen uit elkaar zodat lyrics op noteMid minGap
+        //     12 houden. Alleen bij weinig kolommen (recite); dichte
+        //     partituur (>16 cols) overslaan — daar breekt M11/S22.
+        if (!lyricsOnly && cols.length <= 16) {
+          var minGapCols = 12;
+          for (var passCol = 0; passCol < 6; passCol += 1) {
+            var movedCol = false;
+            for (var ci = 0; ci + 1 < cols.length; ci += 1) {
+              var lyA = lyricsForCols[ci];
+              var lyB = lyricsForCols[ci + 1];
+              if (!lyA.length || !lyB.length) {
+                continue;
+              }
+              var halfA = 0;
+              var halfB = 0;
+              for (var ha = 0; ha < lyA.length; ha += 1) {
+                halfA = Math.max(halfA, lyA[ha].half);
+              }
+              for (var hb = 0; hb < lyB.length; hb += 1) {
+                halfB = Math.max(halfB, lyB[hb].half);
+              }
+              var needDist = halfA + minGapCols + halfB;
+              var haveDist = cols[ci + 1].mid - cols[ci].mid;
+              if (!(haveDist < needDist - 0.5)) {
+                continue;
+              }
+              var pushN = needDist - haveDist;
+              for (var cj = ci + 1; cj < cols.length; cj += 1) {
+                shiftNoteAndLedgers(cols[cj], pushN, true);
+                cols[cj].mid += pushN;
+                cols[cj].x += pushN;
+                cols[cj].right += pushN;
+              }
+              movedCol = true;
+            }
+            if (!movedCol) {
+              break;
+            }
+          }
+        }
+
         // 2) Lyric zo dicht mogelijk bij nootkolom (P3e), zonder P3a te
         //    breken: eerst ideale mid=noteMid, daarna iteratief minGap 12
-        //    afdwingen (brede «Gods»/«noemd» mogen iets naast de noot).
+        //    — bij push ook de nootkolom meeschuiven (S22 houdt Δ≈0).
         var snapped = [];
         for (var c2 = 0; c2 < cols.length; c2 += 1) {
           var lyCol = lyricsForCols[c2];
@@ -1230,6 +1273,7 @@
               half: ly.half,
               w: ly.right - ly.x,
               noteMid: target,
+              colIndex: c2,
             });
           }
         }
@@ -1260,72 +1304,128 @@
           item.right += dx;
           item.el.setAttribute("data-osmd-lyric-slot", "1");
         }
-        // Ideale snap. lyricsOnly (na gap-enforce): sla over — alleen
-        // hard-cap hieronder trekt Δ>28 bij.
-        if (!lyricsOnly) {
-          for (var s0 = 0; s0 < snapped.length; s0 += 1) {
-            var it = snapped[s0];
-            var ideal = it.noteMid;
-            var dx0 = ideal - it.mid;
-            if (dx0 > 72) {
-              ideal = it.mid + 72;
-            }
-            if (dx0 < -72) {
-              ideal = it.mid - 72;
-            }
-            applySnapTo(it, ideal);
+        function shiftColNotes(colIndex, amount) {
+          if (!(Math.abs(amount) >= 0.5)) {
+            return;
           }
-          // P3a: minGap 12 (verify-corib-contract). P3e wijkt bij conflict.
-          var minGap = 12;
-          for (var pass = 0; pass < 8; pass += 1) {
-            var moved = false;
-            for (var si = 0; si + 1 < snapped.length; si += 1) {
-              var a = snapped[si];
-              var b = snapped[si + 1];
-              var need = a.right + minGap - b.x;
-              if (!(need > 0)) {
-                continue;
-              }
-              var push = need / 2;
-              var dA = -push;
-              var dB = push;
-              // Brede eindlettergreep al rechts van noot: duw vooral de
-              // vorige naar links (anders «heid,» Δ>28 na gap-enforce).
-              if (b.mid >= b.noteMid - 1) {
-                dA = -need;
-                dB = 0;
-              }
-              if (appendTx(a.el, dA)) {
-                a.mid += dA;
-                a.x += dA;
-                a.right += dA;
-                moved = true;
-              }
-              if (appendTx(b.el, dB)) {
-                b.mid += dB;
-                b.x += dB;
-                b.right += dB;
-                moved = true;
-              }
-            }
-            if (!moved) {
-              break;
+          if (colIndex < 0 || colIndex >= cols.length) {
+            return;
+          }
+          shiftNoteAndLedgers(cols[colIndex], amount, true);
+          cols[colIndex].mid += amount;
+          cols[colIndex].x += amount;
+          cols[colIndex].right += amount;
+          for (var ui = 0; ui < snapped.length; ui += 1) {
+            if (snapped[ui].colIndex === colIndex) {
+              snapped[ui].noteMid += amount;
             }
           }
         }
-        // Hard cap: binnen verify lyric↔noot slack (28 px); 27 voor afronding.
-        var noteSlack = 27;
+        // Ideale snap (ook lyricsOnly na gap-enforce — S22 Δ≤2).
+        for (var s0 = 0; s0 < snapped.length; s0 += 1) {
+          applySnapTo(snapped[s0], snapped[s0].noteMid);
+        }
+        // P3a: minGap 12. Bij conflict: lyrics én nootkolom samen.
+        var minGap = 12;
+        for (var pass = 0; pass < 8; pass += 1) {
+          var moved = false;
+          for (var si = 0; si + 1 < snapped.length; si += 1) {
+            var a = snapped[si];
+            var b = snapped[si + 1];
+            var need = a.right + minGap - b.x;
+            if (!(need > 0)) {
+              continue;
+            }
+            var push = need / 2;
+            var dA = -push;
+            var dB = push;
+            if (b.mid >= b.noteMid - 1) {
+              dA = -need;
+              dB = 0;
+            }
+            if (appendTx(a.el, dA)) {
+              a.mid += dA;
+              a.x += dA;
+              a.right += dA;
+              shiftColNotes(a.colIndex, dA);
+              moved = true;
+            }
+            if (appendTx(b.el, dB)) {
+              b.mid += dB;
+              b.x += dB;
+              b.right += dB;
+              shiftColNotes(b.colIndex, dB);
+              moved = true;
+            }
+          }
+          if (!moved) {
+            break;
+          }
+        }
+        // Opnieuw dichter bij noot na gap-push (S22), zonder P3a te breken.
+        for (var s1 = 0; s1 < snapped.length; s1 += 1) {
+          var it2 = snapped[s1];
+          var ideal2 = it2.noteMid;
+          if (s1 > 0) {
+            var minMid =
+              snapped[s1 - 1].right + minGap + it2.half;
+            if (ideal2 < minMid) {
+              ideal2 = minMid;
+            }
+          }
+          if (s1 + 1 < snapped.length) {
+            var maxMid =
+              snapped[s1 + 1].x - minGap - it2.half;
+            if (ideal2 > maxMid) {
+              ideal2 = maxMid;
+            }
+          }
+          applySnapTo(it2, ideal2);
+          // Noot mee als lyric niet tot noteMid mocht.
+          var dNote = it2.mid - it2.noteMid;
+          if (Math.abs(dNote) > 2) {
+            shiftColNotes(it2.colIndex, dNote > 0 ? dNote - 2 : dNote + 2);
+          }
+        }
+        // Hard cap: S22 — lyric op noteMid (±2). Zo nodig noot meeschuiven
+        // i.p.v. P3a te breken.
+        var noteSlack = 2;
+        var minGapCap = 12;
         for (var fi = 0; fi < snapped.length; fi += 1) {
           var f = snapped[fi];
           var away = f.mid - f.noteMid;
           if (!(Math.abs(away) > noteSlack)) {
             continue;
           }
+          // Trek lyric naar noot; als P3a dat blokkeert, schuif de noot
+          // naar de lyric (binnen slack).
           var pull = away > 0 ? away - noteSlack : away + noteSlack;
-          if (appendTx(f.el, -pull)) {
+          var newMid = f.mid - pull;
+          var blocked = false;
+          if (fi > 0) {
+            var prev = snapped[fi - 1];
+            if (newMid < prev.right + minGapCap + f.half) {
+              blocked = true;
+            }
+          }
+          if (fi + 1 < snapped.length) {
+            var next = snapped[fi + 1];
+            if (newMid > next.x - minGapCap - f.half) {
+              blocked = true;
+            }
+          }
+          if (!blocked && appendTx(f.el, -pull)) {
             f.mid -= pull;
             f.x -= pull;
             f.right -= pull;
+            continue;
+          }
+          // Noot naar lyric toe.
+          var notePull = f.mid - f.noteMid;
+          if (Math.abs(notePull) > noteSlack) {
+            var nMove =
+              notePull > 0 ? notePull - noteSlack : notePull + noteSlack;
+            shiftColNotes(f.colIndex, nMove);
           }
         }
       });

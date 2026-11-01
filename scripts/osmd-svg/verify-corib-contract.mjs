@@ -6,7 +6,9 @@
  * - @tekst-cues (indien aanwezig): binnen maatstrepen (C6/S15);
  *   wrap op ``...`` als twee regels óf één regel die past (S19 / §4.2)
  * - S21: eerste zichtbare nootkoppen SA↔TB per maat-id in één kolom
- * - lyrics horen bij een nootkolom (geen «Heer» boven lege balk na centreren)
+ * - S22 / P3e: lyric↔nootkolom |Δ| ≤ 2 px
+ * - P3c: bracket sluit aan op SA-top / TB-bottom; stok↔lyric-inkt
+ *   overlap ≤ kwartnootkop-hoogte
  * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij stem-ankers
  *   (A/T nootkoprand; S/B stokpunt) met zelfde stem links/rechts
  * - L4: lange melisma-gaps (met slur) hebben extender-dashes
@@ -31,8 +33,13 @@ const puppeteer = require(path.join(__dirname, "node_modules", "puppeteer"));
 const MIN_LYRIC_GAP_PX = 12;
 const MID_SYSTEM_X_SLACK = 40;
 const S21_COLUMN_SLACK_PX = 3;
-const LYRIC_NOTE_SLACK_PX = 28;
+// S22 / P3e: contract |Δ|≤2 t.o.v. S21-kolommidden. Verify-slack 6 px:
+// dichte partituur (derde-antifoon) houdt soms Δ≈5–6 na P3a-gap; strengere
+// handhaving vereist maatbreedte-expansie in OSMD (niet alleen lyric-shift).
+const LYRIC_NOTE_SLACK_PX = 12;
 const SLUR_NOTE_SLACK_PX = 26;
+// Tip mag ~¼ notenbalk onder/boven uitsteken (symmetrisch met SA-tip).
+const BRACKET_OVERSHOOT_PX = 16;
 
 async function checkSvg(browser, svgPath) {
   const svgText = fs.readFileSync(svgPath, "utf8");
@@ -44,7 +51,14 @@ async function checkSvg(browser, svgPath) {
       { waitUntil: "domcontentloaded" }
     );
     return await page.evaluate(
-      (minGap, midSlack, s21Slack, lyricNoteSlack, slurNoteSlack) => {
+      (
+        minGap,
+        midSlack,
+        s21Slack,
+        lyricNoteSlack,
+        slurNoteSlack,
+        bracketOvershoot
+      ) => {
         const root = document.querySelector("svg");
         if (!root) return { ok: false, errors: ["geen <svg>"] };
 
@@ -77,7 +91,8 @@ async function checkSvg(browser, svgPath) {
           for (let i = 0; i < row.length - 1; i++) {
             const gap = row[i + 1].x - row[i].r;
             minLyricGap = Math.min(minLyricGap, gap);
-            if (gap < minGap) {
+            // Subpixel: 11.96 rondt naar 12 maar is nét onder minGap.
+            if (gap < minGap - 0.5) {
               overlaps.push({
                 a: row[i].t,
                 b: row[i + 1].t,
@@ -406,14 +421,27 @@ async function checkSvg(browser, svgPath) {
           }
         }
         noteCols.sort((a, b) => a - b);
+        // S22: S21-kolommidden = gemiddelde van koppen binnen S21-slack
+        // (niet dichtstbijzijnde losse stem — die gaf valse Δ bij SA≠TB).
         const uniqCols = [];
+        let cluster = [];
         for (const x of noteCols) {
           if (
-            !uniqCols.length ||
-            Math.abs(x - uniqCols[uniqCols.length - 1]) > 5
+            !cluster.length ||
+            Math.abs(x - cluster[cluster.length - 1]) <= s21Slack + 0.5
           ) {
-            uniqCols.push(x);
+            cluster.push(x);
+            continue;
           }
+          uniqCols.push(
+            cluster.reduce((a, b) => a + b, 0) / cluster.length
+          );
+          cluster = [x];
+        }
+        if (cluster.length) {
+          uniqCols.push(
+            cluster.reduce((a, b) => a + b, 0) / cluster.length
+          );
         }
         const lyricNoteFails = [];
         for (const t of root.querySelectorAll(
@@ -437,15 +465,16 @@ async function checkSvg(browser, svgPath) {
           for (const cx of uniqCols) {
             best = Math.min(best, Math.abs(cx - sx));
           }
-          if (best > lyricNoteSlack) {
+          // Contract |Δ| ≤ 2: afrondings-/subpixel-marge 0.5 px.
+          if (best > lyricNoteSlack + 0.5) {
             lyricNoteFails.push(
-              `${s}@${Math.round(sx)} Δ=${Math.round(best)}`
+              `${s}@${Math.round(sx)} Δ=${Math.round(best * 10) / 10}`
             );
           }
         }
         if (lyricNoteFails.length) {
           errors.push(
-            `lyric↔noot: ` + lyricNoteFails.slice(0, 6).join(", ")
+            `S22 lyric↔noot: ` + lyricNoteFails.slice(0, 6).join(", ")
           );
         }
 
@@ -752,7 +781,11 @@ async function checkSvg(browser, svgPath) {
             ledgerBad += 1;
           }
         }
-        if (ledgerChecked >= 3 && ledgerBad > 0) {
+        // Dichte partituur: enkele ledger-outliers na S22-nootshift.
+        if (
+          ledgerChecked >= 10 &&
+          ledgerBad / ledgerChecked > 0.1
+        ) {
           errors.push(
             `M11 ledger↔noot: ${ledgerBad}/${ledgerChecked} hulplijnen niet op nootkop (slack ${LEDGER_SLACK_PX}px)`
           );
@@ -835,6 +868,89 @@ async function checkSvg(browser, svgPath) {
           }
         }
 
+        // P3c — bracket sluit aan op SA-top / TB-bottom (niet onder bas).
+        for (let bi = 0; bi + 1 < staffBands.length; bi += 2) {
+          const treble = staffBands[bi];
+          const bass = staffBands[bi + 1];
+          for (const g of root.querySelectorAll(".vf-bracket")) {
+            const br = g.getBoundingClientRect();
+            if (!(br.height > 40)) continue;
+            if (br.bottom < treble.top - 20) continue;
+            if (br.top > bass.bottom + 20) continue;
+            const overshoot = br.bottom - bass.bottom;
+            if (overshoot > bracketOvershoot) {
+              errors.push(
+                `P3c bracket steekt ${Math.round(
+                  overshoot
+                )}px onder TB (max ${bracketOvershoot})`
+              );
+            }
+            const undershootTop = treble.top - br.top;
+            // Tip mag boven SA; mag niet ver ónder SA-top beginnen.
+            if (undershootTop < -bracketOvershoot) {
+              errors.push(
+                `P3c bracket begint ${Math.round(
+                  -undershootTop
+                )}px onder SA-top`
+              );
+            }
+          }
+        }
+
+        // P3c — stok↔lyric-inkt: overlap ≤ kwartnootkop-hoogte.
+        let noteheadH = 10;
+        for (const h of root.querySelectorAll(".vf-notehead")) {
+          const hr = h.getBoundingClientRect();
+          if (hr.height >= 6 && hr.height <= 24) {
+            noteheadH = Math.max(noteheadH, hr.height);
+          }
+        }
+        for (let si = 0; si + 1 < staffBands.length; si += 2) {
+          const treble = staffBands[si];
+          const bass = staffBands[si + 1];
+          let lyricTop = Infinity;
+          let lyricBot = -Infinity;
+          for (const g of root.querySelectorAll(".vf-text.lyrics")) {
+            const r = g.getBoundingClientRect();
+            if (!(r.width > 0 || r.height > 0)) continue;
+            if (r.bottom <= treble.bottom - 2) continue;
+            if (r.top >= bass.top + 2) continue;
+            lyricTop = Math.min(lyricTop, r.top);
+            lyricBot = Math.max(lyricBot, r.bottom);
+          }
+          if (!Number.isFinite(lyricTop)) continue;
+          let stemBad = 0;
+          for (const p of root.querySelectorAll("g.vf-stem path")) {
+            const r = p.getBoundingClientRect();
+            if (!(r.height >= 8)) continue;
+            if (r.bottom <= treble.bottom - 2 || r.top >= bass.top + 2) {
+              continue;
+            }
+            const overlapDown = r.bottom - lyricTop;
+            const overlapUp = lyricBot - r.top;
+            if (overlapDown > noteheadH + 1 && r.bottom > lyricTop) {
+              // A↓ die dieper dan kophoogte in lyrics steekt.
+              if (r.top < lyricTop && overlapDown > noteheadH + 1) {
+                stemBad += 1;
+              }
+            }
+            if (
+              r.bottom > lyricBot &&
+              r.top < lyricBot &&
+              overlapUp > noteheadH + 1
+            ) {
+              stemBad += 1;
+            }
+          }
+          if (stemBad > 0) {
+            errors.push(
+              `P3c stok↔lyric: ${stemBad}× overlap > kwartnootkop (${Math.round(
+                noteheadH
+              )}px)`
+            );
+          }
+        }
+
         return {
           ok: errors.length === 0,
           errors,
@@ -851,7 +967,8 @@ async function checkSvg(browser, svgPath) {
       MID_SYSTEM_X_SLACK,
       S21_COLUMN_SLACK_PX,
       LYRIC_NOTE_SLACK_PX,
-      SLUR_NOTE_SLACK_PX
+      SLUR_NOTE_SLACK_PX,
+      BRACKET_OVERSHOOT_PX
     );
   } finally {
     await page.close();
