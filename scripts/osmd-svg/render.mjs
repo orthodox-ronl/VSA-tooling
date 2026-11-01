@@ -1334,16 +1334,34 @@ async function main() {
                 Math.min(c.right, inkR) - Math.max(c.left, inkL);
               return overlap > Math.min(60, gap * 0.25);
             });
-            // Binnenwoord: L3 = vaste korte hyphen gecentreerd; L6/melisma
-            // = één uitgerekt streepje over de gap (zelfde y, geen text-«-»).
+            // Binnenwoord: L3 = vaste korte hyphen gecentreerd. L6 alleen
+            // als de *eerste* lettergreep een melisma heeft (= zichtbare
+            // nootkoppen in de gap). Grote witruimte zonder melisma → kort
+            // streepje laten, witruimte groeit (alleluia-8 eerste Al–le).
             if (hyphen && !wordBoundary) {
-              if (gap > 36) {
+              let notesInGap = 0;
+              for (const n of mount.querySelectorAll(".vf-stavenote")) {
+                if (n.getAttribute("data-osmd-spacer") === "1") continue;
+                const head = n.querySelector(
+                  ".vf-notehead path, [data-osmd-breve-glyph=\"1\"] path, .vsa-breve-glyph path"
+                );
+                if (!head) continue;
+                const hs = getComputedStyle(head);
+                if (hs.visibility === "hidden" || hs.display === "none") {
+                  continue;
+                }
+                const hr = head.getBoundingClientRect();
+                if (!(hr.width > 0.5 && hr.height > 0.5)) continue;
+                const cx = (hr.left + hr.right) / 2;
+                if (cx > ar.right + 2 && cx < br.left - 2) notesInGap += 1;
+              }
+              if (notesInGap >= 1) {
                 placeLine(a, ar, br, inkL, inkR, "l6");
               } else {
                 const mid = (ar.right + br.left) / 2;
                 const room = inkR - inkL;
-                if (room < 6) continue;
-                // Vaste hyphen ≈10 px, krimpt alleen als de gap te krap is.
+                if (room < 3) continue;
+                // Vaste hyphen ≈10 px, krimpt als de gap te krap is.
                 const half = Math.min(5, room / 2);
                 placeLine(a, ar, br, mid - half, mid + half, "l3");
               }
@@ -1397,6 +1415,23 @@ async function main() {
             const t = d.querySelector("text");
             if (t && /^[-–—]$/.test(String(t.textContent || "").trim())) {
               d.remove();
+            }
+          }
+          // OSMD/VexFlow lyric-extender als .vf-line (losse path onder de
+          // lyric-baseline) — dubbel met onze L4; weg (alleluia-8 «lu»).
+          const lyricBand = lyrics.map((g) => g.getBoundingClientRect());
+          if (lyricBand.length) {
+            const bandTop = Math.min(...lyricBand.map((r) => r.top)) - 8;
+            const bandBot = Math.max(...lyricBand.map((r) => r.bottom)) + 24;
+            for (const g of Array.from(
+              mount.querySelectorAll(".vf-line")
+            )) {
+              const r = g.getBoundingClientRect();
+              if (r.height > 4) continue;
+              if (r.width < 20) continue;
+              if (r.top < bandTop || r.top > bandBot) continue;
+              g.setAttribute("visibility", "hidden");
+              g.setAttribute("data-osmd-vf-line-hide", "1");
             }
           }
         })();
@@ -1513,7 +1548,63 @@ async function main() {
             svg.setAttribute("height", String(h));
           }
         }
-        return document.querySelectorAll("#osmd svg").length;
+        // Bron↔papier: elke klinkende non-spacer-noot uit de MusicXML moet
+        // als zichtbare nootkop (of S8-breve-glyph) op het scherm staan.
+        // Spacers (notehead none) tellen niet mee. Altijd controleren.
+        let sourceNotes = 0;
+        {
+          const re =
+            /<note\b[\s\S]*?<\/note>/g;
+          let nm;
+          while ((nm = re.exec(xml))) {
+            const block = nm[0];
+            if (/<rest[\s/>]/.test(block)) continue;
+            if (/<notehead>\s*none\s*<\/notehead>/.test(block)) continue;
+            sourceNotes += 1;
+          }
+        }
+        let visibleNotes = 0;
+        for (const n of mount.querySelectorAll(".vf-stavenote")) {
+          if (n.getAttribute("data-osmd-spacer") === "1") continue;
+          const heads = n.querySelectorAll(
+            ".vf-notehead path, .vsa-breve-glyph path, [data-osmd-breve-glyph='1'] path"
+          );
+          let ok = false;
+          for (const h of heads) {
+            const st = getComputedStyle(h);
+            if (st.visibility === "hidden" || st.display === "none") continue;
+            const hr = h.getBoundingClientRect();
+            if (hr.width > 0.5 && hr.height > 0.5) {
+              ok = true;
+              break;
+            }
+          }
+          // Breve-glyph kan sibling zijn van de stavenote.
+          if (!ok && n.getAttribute("data-osmd-breve") === "1") {
+            const sib = n.parentElement
+              ? n.parentElement.querySelector(
+                  `.vsa-breve-glyph[data-osmd-breve-glyph="1"]`
+                )
+              : null;
+            if (sib) {
+              const hp = sib.querySelector("path");
+              if (hp) {
+                const hr = hp.getBoundingClientRect();
+                if (hr.width > 0.5) ok = true;
+              }
+            }
+          }
+          if (ok) visibleNotes += 1;
+        }
+        if (svg) {
+          svg.setAttribute("data-osmd-source-notes", String(sourceNotes));
+          svg.setAttribute("data-osmd-visible-notes", String(visibleNotes));
+        }
+        return {
+          pageCount: document.querySelectorAll("#osmd svg").length,
+          sourceNotes,
+          visibleNotes,
+        };
       },
       musicxml,
       FONT_FAMILY,
@@ -1522,8 +1613,18 @@ async function main() {
       CORIB_COMPACT.contentPadPx
     );
 
-    if (!pageCount) {
+    if (!pageCount || !pageCount.pageCount) {
       throw new Error("OSMD renderde geen SVG (0 elementen in #osmd)");
+    }
+    if (
+      Number(pageCount.sourceNotes) > 0 &&
+      Number(pageCount.visibleNotes) < Number(pageCount.sourceNotes)
+    ) {
+      throw new Error(
+        `Bron↔papier: ${pageCount.visibleNotes} zichtbare nootkoppen < ` +
+          `${pageCount.sourceNotes} klinkende non-spacer-noten in MusicXML ` +
+          `(elke bron-noot moet op papier komen)`
+      );
     }
 
     const markupParts = await page.evaluate(() => {

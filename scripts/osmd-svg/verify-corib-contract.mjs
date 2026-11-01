@@ -11,10 +11,13 @@
  *   overlap ≤ kwartnootkop-hoogte
  * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij stem-ankers
  *   (A/T nootkoprand; S/B stokpunt) met zelfde stem links/rechts
- * - L4: lange melisma-gaps (met slur) hebben extender-dashes
+ * - L4: lange melisma-gaps (met slur) hebben extender-dashes; geen
+ *   zichtbare VexFlow-``.vf-line`` onder de lyric-baseline
+ * - L3: afbreekstreepje zonder melisma blijft kort (geen L6-stretch)
  * - L2: lyrics in Source Sans 3 (≥12.5 px)
  * - C7: eenregel-``@tekst`` deelt baseline met regel 2 van twee-regelige cues
  *   (zelfde systeem-y-band)
+ * - Bron↔papier: data-osmd-visible-notes ≥ data-osmd-source-notes
  *
  * Usage:
  *   node verify-corib-contract.mjs path/to/a.osmd.svg [more…]
@@ -968,6 +971,88 @@ async function checkSvg(browser, svgPath) {
           }
         }
 
+        // Bron↔papier: elke MusicXML-non-spacer-noot → zichtbare kop.
+        const srcN = Number(root.getAttribute("data-osmd-source-notes"));
+        const visN = Number(root.getAttribute("data-osmd-visible-notes"));
+        if (Number.isFinite(srcN) && Number.isFinite(visN) && srcN > 0) {
+          if (visN < srcN) {
+            errors.push(
+              `Bron↔papier: ${visN} zichtbare nootkoppen < ${srcN} bron-noten`
+            );
+          }
+        }
+
+        // L4: geen rest-VexFlow lyric-extender (.vf-line) in lyric-band.
+        if (lyrics.length) {
+          const bandTop = Math.min(...lyrics.map((l) => l.y)) - 8;
+          const bandBot =
+            Math.max(...lyrics.map((l) => l.y + 20)) + 28;
+          for (const g of root.querySelectorAll(".vf-line")) {
+            if (g.getAttribute("data-osmd-vf-line-hide") === "1") continue;
+            const cs = getComputedStyle(g);
+            if (cs.visibility === "hidden" || cs.display === "none") {
+              continue;
+            }
+            const r = g.getBoundingClientRect();
+            if (r.height > 4 || r.width < 20) continue;
+            if (r.top >= bandTop && r.top <= bandBot) {
+              errors.push(
+                `L4 vf-line: spookstreep onder lyrics @x=${Math.round(r.left)}`
+              );
+              break;
+            }
+          }
+        }
+
+        // L3: eerste hyphen-paar zonder nootkoppen in de gap mag geen L6 zijn.
+        {
+          const ly = [...root.querySelectorAll(".vf-text.lyrics")].filter(
+            (g) => g.querySelector("text") && g.getBoundingClientRect().width > 0
+          );
+          ly.sort(
+            (a, b) =>
+              a.getBoundingClientRect().left - b.getBoundingClientRect().left
+          );
+          if (ly.length >= 2) {
+            const a = ly[0];
+            const b = ly[1];
+            const ar = a.getBoundingClientRect();
+            const br = b.getBoundingClientRect();
+            if (Math.abs(ar.top - br.top) < 28 && br.left - ar.right > 20) {
+              let notesInGap = 0;
+              for (const n of root.querySelectorAll(".vf-stavenote")) {
+                if (n.getAttribute("data-osmd-spacer") === "1") continue;
+                const head = n.querySelector(
+                  ".vf-notehead path, [data-osmd-breve-glyph='1'] path, .vsa-breve-glyph path"
+                );
+                if (!head) continue;
+                const hs = getComputedStyle(head);
+                if (hs.visibility === "hidden" || hs.display === "none") {
+                  continue;
+                }
+                const hr = head.getBoundingClientRect();
+                if (!(hr.width > 0.5)) continue;
+                const cx = (hr.left + hr.right) / 2;
+                if (cx > ar.right + 2 && cx < br.left - 2) notesInGap += 1;
+              }
+              if (notesInGap === 0) {
+                const l6 = [...root.querySelectorAll(".vf-text.dash")].find(
+                  (d) => {
+                    if (d.getAttribute("data-osmd-l6") !== "1") return false;
+                    const r = d.getBoundingClientRect();
+                    return r.left >= ar.right - 4 && r.right <= br.left + 4;
+                  }
+                );
+                if (l6) {
+                  errors.push(
+                    "L3: eerste afbreekstreepje is L6 zonder melisma-noten in de gap"
+                  );
+                }
+              }
+            }
+          }
+        }
+
         return {
           ok: errors.length === 0,
           errors,
@@ -978,6 +1063,8 @@ async function checkSvg(browser, svgPath) {
           minLyricGap: Number.isFinite(minLyricGap)
             ? Math.round(minLyricGap * 10) / 10
             : null,
+          sourceNotes: Number.isFinite(srcN) ? srcN : null,
+          visibleNotes: Number.isFinite(visN) ? visN : null,
         };
       },
       MIN_LYRIC_GAP_PX,
@@ -1015,8 +1102,12 @@ async function main() {
       }
       const r = await checkSvg(browser, p);
       if (r.ok) {
+        const notes =
+          r.sourceNotes != null
+            ? `\tnotes=${r.visibleNotes}/${r.sourceNotes}`
+            : "";
         console.log(
-          `PASS\t${path.basename(p)}\tlyrics=${r.nLyrics}\tcues=${r.nCues}\tnums=${r.nums.join(",")}\tminGap=${r.minLyricGap}`
+          `PASS\t${path.basename(p)}\tlyrics=${r.nLyrics}\tcues=${r.nCues}\tnums=${r.nums.join(",")}\tminGap=${r.minLyricGap}${notes}`
         );
       } else {
         failed++;

@@ -21,14 +21,23 @@ instaat**:
    corpus; geen verouderde beelden van een eerdere commit laten liggen).
 2. **Contracten** — elk gegenereerd bestand toetsen tegen **alle** relevante
    contract-ids (hub via [contract-index](docs/formats/contract-index.md):
-   o.a. S2/S5/S8/S10/S21/S22, L2/L4, P3a–P3e, M11, C7, …). Automatische
+   o.a. S2/S5/S8/S10/S21/S22, L2/L3/L4/L6, P3a–P3e, M11, C7, …). Automatische
    verify (`verify-corib-contract.mjs` e.d.) **én** handmatige checks waar
    de verifier geen regel dekt.
-3. **Visueel** — **zelf** elk gegenereerd PNG/SVG openen (Read/screenshot)
-   en beoordelen: lyrics, hyphens, extenders, bogen, hulplijnen, kolommen.
-   «Verify PASS» alleen is **onvoldoende**. Gevonden fouten **corrigeren**
-   (of expliciet als bekende contractgap registreren) vóór je meldt.
-4. **Ref-diff** — zodra de corpus aan de contracten voldoet: elk
+3. **Bron↔papier (altijd)** — tel klinkende non-spacer-noten in de bron
+   (from-ir MusicXML / Score-IR) tegen zichtbare nootkoppen op het OSMD-blad.
+   Elke bron-noot moet op papier staan. S8-spacers horen onzichtbaar;
+   same-pitch-collapse (S13) telt als één langere noot. Geen pixel-excuus:
+   dit is een inventarisatie, geen bbox-slack. Render schrijft
+   `data-osmd-source-notes` / `data-osmd-visible-notes`; verify faalt bij
+   tekort. Zelf ook steekproef: geen lege kolommen waar de bron wél een
+   (non-spacer) noot heeft.
+4. **Visueel** — **zelf** elk gegenereerd PNG/SVG openen (Read/screenshot)
+   en beoordelen: lyrics, hyphens, extenders, bogen, hulplijnen, kolommen,
+   **én** of alle bron-noten er staan. «Verify PASS» alleen is
+   **onvoldoende**. Gevonden fouten **corrigeren** (of expliciet als bekende
+   contractgap registreren) vóór je meldt.
+5. **Ref-diff** — zodra de corpus aan de contracten voldoet: elk
    `{stuk}.osmd.*` vergelijken met `{stuk}.ref.*` waar die bestaat;
    **verschillen inventariseren** (kort, per stuk/maat/symptoom) en die
    lijst in het eindbericht zetten zodat contracten aangescherpt kunnen
@@ -40,14 +49,17 @@ instaat**:
   zijn gegenereerd.
 - Alleen één steekproef-PNG bekijken terwijl andere toetsen ook geraakt
   zijn.
+- Layout «OK» noemen zonder bron↔papier-telling (noten missen is geen
+  pixelkwestie).
 - De gebruiker vragen om jouw visuele QA of ref-vergelijking te doen.
-- Contractregels (S22/P3e centreren, S2 bogen, L4 extender, …) als
+- Contractregels (S22/P3e centreren, S2 bogen, L3/L4 extender, …) als
   «gedaan» claimen zonder dat de gegenereerde beelden dat tonen.
 
 ## Eindbericht (minimaal)
 
 1. Welke toetsen geregenereerd (lijst).
-2. Welke verify/contract-checks groen zijn (ids noemen).
+2. Welke verify/contract-checks groen zijn (ids noemen), inclusief
+   bron↔papier (`notes=zichtbaar/bron`).
 3. Dat je **alle** PNG’s zelf hebt bekeken (kort: geen open restfout, of
    gefixte restfout).
 4. Ref-diff-inventaris (of «geen ref aanwezig voor …»).

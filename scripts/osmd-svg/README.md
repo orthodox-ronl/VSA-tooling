@@ -18,15 +18,19 @@ van het balkgat (na-render verschuiving). **P3c:** na balkgat-compressie
 wordt de accolade/bracket herschaald op SA-bovenkant ↔ TB-onderkant;
 A↓/T↑-stokken mogen lyric-**inkt** tot max. één **kwartnootkop-hoogte**
 overlappen (daarboven inkorten; OSMD negeert `IdealStemLength`).
-**S22:** lyric↔nootkolom \|Δ\| ≤ 2 px. **L3/L6:** één (uitgerekt)
-afbreekstreepje tussen lettergrepen — geen reeks losse `-`.
-Lettergreep-afstanden volgen OSMD-defaults (geen lagere elongatie:
-die liet S8-recite overlappen, o.a. maat 2 van derde-antifoon).
+**S22:** lyric↔nootkolom \|Δ\| ≤ 2 px. **L3/L6:** één afbreekstreepje tussen lettergrepen — kort (L3) tenzij
+de eerste lettergreep een melisma heeft (L6 uitgerekt); grote witruimte
+zonder melisma laat het streepje kort. Geen reeks losse `-`.
+**L4:** eigen SVG-lijn; VexFlow-`.vf-line`-extender onder lyrics wordt
+verborgen. Lettergreep-afstanden volgen OSMD-defaults (geen lagere
+elongatie: die liet S8-recite overlappen, o.a. maat 2 van derde-antifoon).
 `VoiceSpacing` terug naar 0.85/3.0 (compacttight knelde op 0.65/2.0).
 Bladbreedte 1000 px; `MeasureWidthFactor` 1. **S10:** maatnummers alleen
 aan systeembegin (`RenderMeasureNumbersOnlyAtSystemStart`); maatnummer
 **1** wordt nagetekend. Een stuk dat korter is dan de bladbreedte wordt
-bijgesneden op de inkt. Contract-check: `node verify-corib-contract.mjs`.
+bijgesneden op de inkt. **Bron↔papier:** render telt MusicXML-non-spacer-
+noten tegen zichtbare nootkoppen en faalt bij tekort. Contract-check:
+`node verify-corib-contract.mjs`.
 
 S8 A1-adapter (`s8-a1-adapter.js`) koppelt spacer/breve per **measure-id**
 (geen y-systeemdrempel — die brak bij compacte CoriB-layout). Lettergreep-
