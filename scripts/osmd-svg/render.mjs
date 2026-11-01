@@ -10,6 +10,7 @@
  * Cues (S15/S19/C6/C7 / schermpartituur §4.2): ``cue-layout.js`` zet
  * maat-WidthFactor, wrap/``...``, cue-X op eerste noot, centreren,
  * eenregel-cue-baseline (C7). Graveerprofiel: P3c/P3d/L2/S22.
+ * Post-layout: S2/S5 melisma-boogankers; L4 extender-dashes.
  *
  * Usage:
  *   npm install
@@ -437,14 +438,11 @@ async function main() {
             }
           }
         })();
-        // S5 — ná P3c: melisma-bogen dichter tegen hun balk (alto niet diep
-        // in het gat; tenor niet door lyrics / niet kruisend met alto).
-        // Toets: alleluia-toon-2 eerste melisma.
-        (function pullSlursTowardStaff() {
-          const MAX_OUT_PX = 14;
-          const svgEl = mount.querySelector("svg");
-          const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
-          const sy = ctm && ctm.d ? ctm.d : 1;
+        // S2 (+ S5) — melisma-bogen herankeren op stem-juiste punten:
+        // A: onderkant nootkop→nootkop; T: bovenkant nootkop→nootkop;
+        // S: bovenkant stok→stok; B: onderkant stok→stok. Boog blijft
+        // dicht bij de balk (kleine bulge). Toets: alleluia-toon-2.
+        (function reanchorMelismaSlursS2() {
           function staffLineBand(el) {
             const tops = [];
             const bots = [];
@@ -464,25 +462,210 @@ async function main() {
             if (tops.length < 4) return null;
             return { top: Math.min(...tops), bottom: Math.max(...bots) };
           }
+          function parseCubicStartEnd(d) {
+            const m = d.match(
+              /M([-\d.]+)\s+([-\d.]+)C([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+)/
+            );
+            if (!m) return null;
+            return {
+              x0: Number(m[1]),
+              y0: Number(m[2]),
+              x3: Number(m[7]),
+              y3: Number(m[8]),
+            };
+          }
+          function toScreen(el, x, y) {
+            const ctm = el.getScreenCTM();
+            if (!ctm) return null;
+            const pt = el.ownerSVGElement.createSVGPoint();
+            pt.x = x;
+            pt.y = y;
+            const s = pt.matrixTransform(ctm);
+            return { x: s.x, y: s.y };
+          }
+          function toLocal(el, x, y) {
+            const ctm = el.getScreenCTM();
+            if (!ctm) return null;
+            const inv = ctm.inverse();
+            const pt = el.ownerSVGElement.createSVGPoint();
+            pt.x = x;
+            pt.y = y;
+            const s = pt.matrixTransform(inv);
+            return { x: s.x, y: s.y };
+          }
           const bands = Array.from(mount.querySelectorAll(".staffline"))
             .map(staffLineBand)
             .filter(Boolean)
             .sort((a, b) => a.top - b.top);
-          if (bands.length < 2) return;
-          const curves = [];
-          for (const p of mount.querySelectorAll("path")) {
-            const d = p.getAttribute("d") || "";
-            if (!/[Cc]/.test(d)) continue;
-            const r = p.getBoundingClientRect();
-            if (!(r.width > 40 && r.height > 4 && r.height < 90)) continue;
-            curves.push(p);
+          const notes = [];
+          for (const n of mount.querySelectorAll(".vf-stavenote")) {
+            if (n.getAttribute("data-osmd-spacer") === "1") continue;
+            const head = n.querySelector(
+              ".vf-notehead path, [data-osmd-breve-glyph='1'] path"
+            );
+            if (!head) continue;
+            const hb = head.getBoundingClientRect();
+            if (!(hb.width > 0.5)) continue;
+            const stem = n.querySelector(".vf-stem path");
+            let stemUp = null;
+            let tip = null;
+            if (stem) {
+              const sb = stem.getBoundingClientRect();
+              stemUp =
+                sb.top + sb.height / 2 < hb.top + hb.height / 2;
+              tip = stemUp
+                ? { x: sb.left + sb.width / 2, y: sb.top }
+                : { x: sb.left + sb.width / 2, y: sb.bottom };
+            }
+            notes.push({
+              id: n.id,
+              head: {
+                cx: (hb.left + hb.right) / 2,
+                cy: (hb.top + hb.bottom) / 2,
+                top: hb.top,
+                bottom: hb.bottom,
+              },
+              stemUp,
+              tip,
+            });
           }
+          function bandIndex(y) {
+            let best = -1;
+            let bd = Infinity;
+            for (let i = 0; i < bands.length; i += 1) {
+              const mid = (bands[i].top + bands[i].bottom) / 2;
+              const d = Math.abs(mid - y);
+              if (d < bd) {
+                bd = d;
+                best = i;
+              }
+            }
+            return best;
+          }
+          function roleFor(note, bIdx, preferRole, preferCy) {
+            // Even index = SA (boven); oneven = TB.
+            const sa = bIdx % 2 === 0;
+            if (note.stemUp === true) return sa ? "S" : "T";
+            if (note.stemUp === false) return sa ? "A" : "B";
+            // Stokloos: niet via balkmidden (S én A zitten vaak beide
+            // onder de middellijn). Bij bekende startstem: zelfde stem als
+            // |cy−preferCy| klein is, anders de tegenstem.
+            if (preferRole && preferCy != null) {
+              if (Math.abs(note.head.cy - preferCy) <= 8) {
+                return preferRole;
+              }
+              if (sa) return preferRole === "S" ? "A" : "S";
+              return preferRole === "T" ? "B" : "T";
+            }
+            return sa ? "S" : "T";
+          }
+          function anchorFor(note, role) {
+            if (role === "A") {
+              return { x: note.head.cx, y: note.head.bottom };
+            }
+            if (role === "T") {
+              return { x: note.head.cx, y: note.head.top };
+            }
+            if (role === "S") {
+              return note.tip
+                ? { x: note.tip.x, y: note.tip.y }
+                : { x: note.head.cx, y: note.head.top };
+            }
+            if (role === "B") {
+              return note.tip
+                ? { x: note.tip.x, y: note.tip.y }
+                : { x: note.head.cx, y: note.head.bottom };
+            }
+            return { x: note.head.cx, y: note.head.cy };
+          }
+          function pickNote(px, py, preferRole, preferCy) {
+            let best = null;
+            let bestScore = Infinity;
+            for (const n of notes) {
+              const bIdx = bandIndex(n.head.cy);
+              const role = roleFor(n, bIdx, preferRole, preferCy);
+              const useRole = preferRole || role;
+              const anc = anchorFor(n, useRole);
+              const dx = Math.abs(anc.x - px);
+              const dy = Math.abs(anc.y - py);
+              if (dx > 60) continue;
+              let score = dx + dy * 0.35;
+              if (preferRole && role !== preferRole) score += 45;
+              if (
+                preferCy != null &&
+                Math.abs(n.head.cy - preferCy) > 6
+              ) {
+                score += Math.abs(n.head.cy - preferCy) * 0.8;
+              }
+              if (score < bestScore) {
+                bestScore = score;
+                best = { note: n, role: useRole, bIdx, score };
+              }
+            }
+            return best;
+          }
+          for (const g of mount.querySelectorAll(".vf-curve")) {
+            const pathEl = g.querySelector("path");
+            if (!pathEl) continue;
+            const d0 = pathEl.getAttribute("d") || "";
+            const ends = parseCubicStartEnd(d0);
+            if (!ends) continue;
+            const p0 = toScreen(pathEl, ends.x0, ends.y0);
+            const p3 = toScreen(pathEl, ends.x3, ends.y3);
+            if (!p0 || !p3) continue;
+            if (Math.abs(p3.x - p0.x) < 24) continue;
+            const startHit = pickNote(p0.x, p0.y, null, null);
+            if (!startHit) continue;
+            const role = startHit.role;
+            const endHit = pickNote(
+              p3.x,
+              p3.y,
+              role,
+              startHit.note.head.cy
+            );
+            if (!endHit) continue;
+            const a0 = anchorFor(startHit.note, role);
+            const a3 = anchorFor(endHit.note, role);
+            const loc0 = toLocal(pathEl, a0.x, a0.y);
+            const loc3 = toLocal(pathEl, a3.x, a3.y);
+            if (!loc0 || !loc3) continue;
+            const span = Math.abs(loc3.x - loc0.x);
+            // S5: kleine bulge; A/T (richting balkgat) strakker dan S/B.
+            const above = role === "S" || role === "T";
+            const intoGap = role === "A" || role === "T";
+            const bulge = intoGap
+              ? Math.min(7, Math.max(3, span * 0.055))
+              : Math.min(12, Math.max(5, span * 0.09));
+            const by = above ? -bulge : bulge;
+            const thick = 0.55;
+            const ty = above ? -thick : thick;
+            const c1x = loc0.x + span * 0.28 * Math.sign(loc3.x - loc0.x || 1);
+            const c2x = loc3.x - span * 0.28 * Math.sign(loc3.x - loc0.x || 1);
+            const c1y = loc0.y + by;
+            const c2y = loc3.y + by;
+            const d =
+              `M${loc0.x} ${loc0.y}` +
+              `C${c1x} ${c1y},${c2x} ${c2y},${loc3.x} ${loc3.y}` +
+              `L${loc3.x} ${loc3.y + ty}` +
+              `C${c2x} ${c2y + ty},${c1x} ${c1y + ty},${loc0.x} ${loc0.y + ty}` +
+              `L${loc0.x} ${loc0.y}Z`;
+            pathEl.setAttribute("d", d);
+            g.setAttribute("data-osmd-s2", role);
+          }
+          // S5-clamp: restant-uitsteek in het balkgat terugduwen (na ankers).
+          const MAX_OUT_PX = 18;
+          const svgEl = mount.querySelector("svg");
+          const sy =
+            svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM()
+              ? svgEl.getScreenCTM().d || 1
+              : 1;
           for (let i = 0; i + 1 < bands.length; i += 2) {
             const treble = bands[i];
             const bass = bands[i + 1];
             const gapMid = (treble.bottom + bass.top) / 2;
-            for (const p of curves) {
-              const r = p.getBoundingClientRect();
+            for (const g of mount.querySelectorAll(".vf-curve")) {
+              const r = g.getBoundingClientRect();
+              if (!(r.width > 24)) continue;
               if (r.bottom <= treble.bottom - 2) continue;
               if (r.top >= bass.top + 2) continue;
               const midY = (r.top + r.bottom) / 2;
@@ -495,12 +678,8 @@ async function main() {
                 if (r.top < limit) dyPx = limit - r.top;
               }
               if (!(Math.abs(dyPx) >= 1)) continue;
-              const host =
-                p.closest("g.vf-curve, g.vf-stavetie") || p.parentElement || p;
-              // Als de boog in de bas-groep zit, is dy al deels meebewogen;
-              // screen-dy → SVG via CTM blijft correct.
-              const prev = host.getAttribute("transform") || "";
-              host.setAttribute(
+              const prev = g.getAttribute("transform") || "";
+              g.setAttribute(
                 "transform",
                 `${prev} translate(0, ${(dyPx / sy).toFixed(2)})`.trim()
               );
@@ -628,6 +807,124 @@ async function main() {
               if (mid > prevR.right - 2 && mid < curR.left + 2) {
                 d.remove();
               }
+            }
+          }
+        })();
+        // L4 — melisma-extender vullen tot onder de laatste melisma-noot.
+        // OSMD tekent soms één kort streepje of niets in een lang melisma
+        // (alleluia-3 «lu…ja»). Herhaalde «-» in de gap; geen woordgrens.
+        (function fillMelismaExtendersL4() {
+          const DASH_STEP_PX = 22;
+          const MIN_GAP_PX = 72;
+          const svgEl = mount.querySelector("svg");
+          if (!svgEl) return;
+          const lyrics = Array.from(
+            mount.querySelectorAll(".vf-text.lyrics")
+          ).filter((g) => {
+            const t = g.querySelector("text");
+            const r = g.getBoundingClientRect();
+            return t && r.width > 0;
+          });
+          lyrics.sort((a, b) => {
+            const ra = a.getBoundingClientRect();
+            const rb = b.getBoundingClientRect();
+            return ra.top - rb.top || ra.left - rb.left;
+          });
+          const curves = Array.from(
+            mount.querySelectorAll(".vf-curve")
+          ).map((g) => g.getBoundingClientRect());
+          const ns = "http://www.w3.org/2000/svg";
+          for (let i = 0; i + 1 < lyrics.length; i += 1) {
+            const a = lyrics[i];
+            const b = lyrics[i + 1];
+            const ar = a.getBoundingClientRect();
+            const br = b.getBoundingClientRect();
+            if (Math.abs(ar.top - br.top) > 28) continue;
+            const aText = a.querySelector("text");
+            const aT = String(aText?.textContent || "").trim();
+            const bT = String(
+              b.querySelector("text")?.textContent || ""
+            ).trim();
+            const wordBoundary =
+              /[,.;:!?]$/.test(aT) ||
+              (/^[A-ZÀ-ÖØ-Þ]/.test(bT) && !/-$/.test(aT));
+            if (wordBoundary) continue;
+            const gapPx = br.left - ar.right;
+            if (gapPx < MIN_GAP_PX) continue;
+            const gapL = ar.right + 4;
+            const gapR = br.left - 4;
+            const midY = (ar.top + ar.bottom) / 2;
+            const slurHits = curves.some((c) => {
+              if (!(c.width > 40)) return false;
+              if (Math.abs((c.top + c.bottom) / 2 - midY) > 120) {
+                return false;
+              }
+              const overlap =
+                Math.min(c.right, gapR) - Math.max(c.left, gapL);
+              return overlap > Math.min(60, gapPx * 0.25);
+            });
+            const existing = Array.from(
+              mount.querySelectorAll(".vf-text.dash")
+            ).filter((d) => {
+              const r = d.getBoundingClientRect();
+              if (!(r.width > 0)) return false;
+              if (Math.abs(r.top - ar.top) > 28) return false;
+              const cx = (r.left + r.right) / 2;
+              return cx >= gapL - 2 && cx <= gapR + 2;
+            });
+            if (!slurHits && existing.length === 0) continue;
+            const covered = new Set(
+              existing.map((d) =>
+                Math.round(
+                  ((d.getBoundingClientRect().left +
+                    d.getBoundingClientRect().right) /
+                    2) /
+                    DASH_STEP_PX
+                )
+              )
+            );
+            const aCtm = a.getScreenCTM();
+            if (!aCtm) continue;
+            const inv = aCtm.inverse();
+            const parent = a.parentElement || mount;
+            const baseY = aText?.getAttribute("y") || "0";
+            const tpl = mount.querySelector(".vf-text.dash text");
+            for (
+              let xPx = gapL + DASH_STEP_PX * 0.4;
+              xPx < gapR - 2;
+              xPx += DASH_STEP_PX
+            ) {
+              const bucket = Math.round(xPx / DASH_STEP_PX);
+              if (covered.has(bucket)) continue;
+              covered.add(bucket);
+              const pt = svgEl.createSVGPoint();
+              pt.x = xPx;
+              pt.y = ar.top + ar.height * 0.7;
+              const loc = pt.matrixTransform(inv);
+              const g = document.createElementNS(ns, "g");
+              g.setAttribute("class", "vf-text dash");
+              g.setAttribute("data-osmd-l4", "1");
+              g.setAttribute("transform", a.getAttribute("transform") || "");
+              const text = document.createElementNS(ns, "text");
+              text.textContent = "-";
+              for (const attr of [
+                "font-family",
+                "font-size",
+                "font-weight",
+                "font-style",
+                "fill",
+                "stroke",
+                "stroke-width",
+              ]) {
+                const v =
+                  (tpl && tpl.getAttribute(attr)) ||
+                  (aText && aText.getAttribute(attr));
+                if (v) text.setAttribute(attr, v);
+              }
+              text.setAttribute("x", String(loc.x));
+              text.setAttribute("y", baseY);
+              g.appendChild(text);
+              parent.appendChild(g);
             }
           }
         })();

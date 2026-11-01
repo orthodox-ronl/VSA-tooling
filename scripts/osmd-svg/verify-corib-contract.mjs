@@ -7,7 +7,9 @@
  *   wrap op ``...`` als twee regels óf één regel die past (S19 / §4.2)
  * - S21: eerste zichtbare nootkoppen SA↔TB per maat-id in één kolom
  * - lyrics horen bij een nootkolom (geen «Heer» boven lege balk na centreren)
- * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij nootkoppen
+ * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij stem-ankers
+ *   (A/T nootkoprand; S/B stokpunt) met zelfde stem links/rechts
+ * - L4: lange melisma-gaps (met slur) hebben extender-dashes
  * - L2: lyrics in Source Sans 3 (≥12.5 px)
  * - C7: eenregel-``@tekst`` deelt baseline met regel 2 van twee-regelige cues
  *   (zelfde systeem-y-band)
@@ -447,71 +449,200 @@ async function checkSvg(browser, svgPath) {
           );
         }
 
-        // Leesbaarheid S2: melisma-slur-uiteinden dicht bij nootkoppen
-        // (na centreren mogen bogen niet achterblijven).
+        // Leesbaarheid S2: boog-uiteinden dicht bij stem-ankers; start/eind
+        // zelfde stem (A/T nootkoprand, S/B stokpunt).
         const slurFails = [];
-        const headCenters = [];
-        for (const n of root.querySelectorAll(".vf-stavenote")) {
-          if (n.getAttribute("data-osmd-spacer") === "1") continue;
-          const breve = n.getAttribute("data-osmd-breve") === "1";
-          const paths = breve
-            ? n.querySelectorAll("[data-osmd-breve-glyph='1'] path")
-            : n.querySelectorAll(".vf-notehead path");
-          for (const p of paths) {
-            const st = getComputedStyle(p);
+        function noteAnchors() {
+          const out = [];
+          for (const n of root.querySelectorAll(".vf-stavenote")) {
+            if (n.getAttribute("data-osmd-spacer") === "1") continue;
+            const breve = n.getAttribute("data-osmd-breve") === "1";
+            const head = breve
+              ? n.querySelector("[data-osmd-breve-glyph='1'] path")
+              : n.querySelector(".vf-notehead path");
+            if (!head) continue;
+            const st = getComputedStyle(head);
             if (st.visibility === "hidden" || st.display === "none") {
               continue;
             }
-            let bb;
-            try {
-              bb = p.getBBox();
-            } catch {
-              continue;
+            const hr = head.getBoundingClientRect();
+            if (!(hr.width > 0.5)) continue;
+            const stem = n.querySelector(".vf-stem path");
+            let stemUp = null;
+            let tip = null;
+            if (stem) {
+              const sr = stem.getBoundingClientRect();
+              stemUp =
+                sr.top + sr.height / 2 < hr.top + hr.height / 2;
+              tip = stemUp
+                ? { x: sr.left + sr.width / 2, y: sr.top }
+                : { x: sr.left + sr.width / 2, y: sr.bottom };
             }
-            if (!(bb.width > 0.5)) continue;
-            const ctm = p.getScreenCTM();
-            if (!ctm) continue;
-            const pt = p.ownerSVGElement.createSVGPoint();
-            pt.x = bb.x + bb.width / 2;
-            pt.y = bb.y + bb.height / 2;
-            const s = pt.matrixTransform(ctm);
-            headCenters.push({ cx: s.x, cy: s.y });
+            out.push({
+              cx: (hr.left + hr.right) / 2,
+              cy: (hr.top + hr.bottom) / 2,
+              top: hr.top,
+              bottom: hr.bottom,
+              stemUp,
+              tip,
+            });
           }
+          return out;
+        }
+        const anchors = noteAnchors();
+        function parseCubicEnds(d) {
+          const m = d.match(
+            /M([-\d.]+)\s+([-\d.]+)C([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+)/
+          );
+          if (!m) return null;
+          return {
+            x0: Number(m[1]),
+            y0: Number(m[2]),
+            x3: Number(m[7]),
+            y3: Number(m[8]),
+          };
+        }
+        function screenPt(el, x, y) {
+          const ctm = el.getScreenCTM();
+          if (!ctm) return null;
+          const pt = el.ownerSVGElement.createSVGPoint();
+          pt.x = x;
+          pt.y = y;
+          return pt.matrixTransform(ctm);
+        }
+        function nearestAnchor(px, py, preferStemUp, preferCy) {
+          let best = null;
+          let bd = Infinity;
+          for (const a of anchors) {
+            const dx = Math.abs(a.cx - px);
+            const dy = Math.abs(a.cy - py);
+            if (dx > 55) continue;
+            let score = dx + dy * 0.35;
+            if (preferStemUp != null && a.stemUp != null) {
+              if (a.stemUp !== preferStemUp) score += 40;
+            } else if (preferCy != null) {
+              score += Math.abs(a.cy - preferCy) * 0.6;
+            }
+            if (score < bd) {
+              bd = score;
+              best = a;
+            }
+          }
+          return best;
         }
         for (const g of root.querySelectorAll(".vf-curve")) {
-          let bb;
-          try {
-            bb = g.getBBox();
-          } catch {
-            continue;
+          const pathEl = g.querySelector("path");
+          if (!pathEl) continue;
+          const ends = parseCubicEnds(pathEl.getAttribute("d") || "");
+          if (!ends) continue;
+          const left = screenPt(pathEl, ends.x0, ends.y0);
+          const right = screenPt(pathEl, ends.x3, ends.y3);
+          if (!left || !right || Math.abs(right.x - left.x) < 24) continue;
+          const s = nearestAnchor(left.x, left.y, null, null);
+          if (!s) continue;
+          const e = nearestAnchor(
+            right.x,
+            right.y,
+            s.stemUp,
+            s.cy
+          );
+          if (!e) continue;
+          // S/T (stok omhoog): anker = stokpunt óf kop-top ( dichtst bij pad).
+          // A/B (stok omlaag): anker = stokpunt óf kop-bodem.
+          function expectY(a, yRef) {
+            const cands = [];
+            if (a.stemUp === true) {
+              cands.push(a.top);
+              if (a.tip) cands.push(a.tip.y);
+            } else if (a.stemUp === false) {
+              cands.push(a.bottom);
+              if (a.tip) cands.push(a.tip.y);
+            } else {
+              cands.push(a.top, a.bottom);
+            }
+            return cands.reduce((best, y) =>
+              Math.abs(y - yRef) < Math.abs(best - yRef) ? y : best
+            );
           }
-          if (!(bb.width > 20)) continue;
-          const ctm = g.getScreenCTM();
-          if (!ctm) continue;
-          const pt = g.ownerSVGElement.createSVGPoint();
-          pt.x = bb.x;
-          pt.y = bb.y + bb.height / 2;
-          const left = pt.matrixTransform(ctm);
-          pt.x = bb.x + bb.width;
-          const right = pt.matrixTransform(ctm);
-          const midY = (left.y + right.y) / 2;
-          let sd = Infinity;
-          let ed = Infinity;
-          for (const h of headCenters) {
-            if (Math.abs(h.cy - midY) > 70) continue;
-            sd = Math.min(sd, Math.abs(h.cx - left.x));
-            ed = Math.min(ed, Math.abs(h.cx - right.x));
-          }
-          if (sd > slurNoteSlack || ed > slurNoteSlack) {
+          const sd = Math.hypot(
+            s.cx - left.x,
+            expectY(s, left.y) - left.y
+          );
+          const ed = Math.hypot(
+            e.cx - right.x,
+            expectY(e, right.y) - right.y
+          );
+          const voiceMismatch =
+            s.stemUp != null &&
+            e.stemUp != null &&
+            s.stemUp !== e.stemUp;
+          if (sd > slurNoteSlack || ed > slurNoteSlack || voiceMismatch) {
             slurFails.push(
               `boog@${Math.round(left.x)}–${Math.round(right.x)} Δstart=${
-                Number.isFinite(sd) ? Math.round(sd) : "?"
-              } Δend=${Number.isFinite(ed) ? Math.round(ed) : "?"}`
+                Math.round(sd)
+              } Δend=${Math.round(ed)}${voiceMismatch ? " stem≠" : ""}`
             );
           }
         }
         if (slurFails.length) {
-          errors.push(`S2 slur↔noot: ` + slurFails.slice(0, 4).join(" | "));
+          errors.push(`S2 slur↔anker: ` + slurFails.slice(0, 4).join(" | "));
+        }
+
+        // L4 — lange melisma-gap met overlappinge slur: extender-dashes.
+        const l4Fails = [];
+        const lyricGs = [...root.querySelectorAll(".vf-text.lyrics")].filter(
+          (g) => g.querySelector("text") && g.getBoundingClientRect().width > 0
+        );
+        lyricGs.sort((a, b) => {
+          const ra = a.getBoundingClientRect();
+          const rb = b.getBoundingClientRect();
+          return ra.top - rb.top || ra.left - rb.left;
+        });
+        const dashGs = [...root.querySelectorAll(".vf-text.dash")];
+        const curveBoxes = [...root.querySelectorAll(".vf-curve")].map((g) =>
+          g.getBoundingClientRect()
+        );
+        for (let i = 0; i + 1 < lyricGs.length; i += 1) {
+          const ar = lyricGs[i].getBoundingClientRect();
+          const br = lyricGs[i + 1].getBoundingClientRect();
+          if (Math.abs(ar.top - br.top) > 28) continue;
+          const aT = String(
+            lyricGs[i].querySelector("text")?.textContent || ""
+          ).trim();
+          const bT = String(
+            lyricGs[i + 1].querySelector("text")?.textContent || ""
+          ).trim();
+          const wordBoundary =
+            /[,.;:!?]$/.test(aT) ||
+            (/^[A-ZÀ-ÖØ-Þ]/.test(bT) && !/-$/.test(aT));
+          if (wordBoundary) continue;
+          const gap = br.left - ar.right;
+          if (gap < 72) continue;
+          const midY = (ar.top + ar.bottom) / 2;
+          const slurHits = curveBoxes.some((c) => {
+            if (!(c.width > 40)) return false;
+            if (Math.abs((c.top + c.bottom) / 2 - midY) > 120) return false;
+            const overlap =
+              Math.min(c.right, br.left) - Math.max(c.left, ar.right);
+            return overlap > Math.min(60, gap * 0.25);
+          });
+          if (!slurHits) continue;
+          const dashes = dashGs.filter((d) => {
+            const r = d.getBoundingClientRect();
+            if (!(r.width > 0)) return false;
+            if (Math.abs(r.top - ar.top) > 28) return false;
+            const cx = (r.left + r.right) / 2;
+            return cx > ar.right && cx < br.left;
+          });
+          const need = Math.max(2, Math.floor(gap / 40));
+          if (dashes.length < need) {
+            l4Fails.push(
+              `«${aT}…${bT}» gap=${Math.round(gap)} dashes=${dashes.length}<${need}`
+            );
+          }
+        }
+        if (l4Fails.length) {
+          errors.push(`L4 extender: ` + l4Fails.slice(0, 4).join(" | "));
         }
 
         // L2 — Source Sans 3 op lyrics (leesbaarheid).
