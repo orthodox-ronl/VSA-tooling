@@ -439,13 +439,23 @@ async function main() {
           }
         })();
         // P3a — glyph-overlap herstellen. Screen-px → SVG-user units via CTM.
-        // Woordgrens (ia,|Al) strenger dan hyphen-gaps: voldoende wit.
+        // Woordgrens (ia,|Al / ja,|Al) strenger. Dashes mee verschuiven —
+        // anders blijft «-» op oude x en snijdt door de volgende lettergreep
+        // (alleluia-2/3).
         (function enforceScreenLyricGaps() {
           const MIN_GAP_PX = 16;
-          const MIN_WORD_GAP_PX = 36;
+          const MIN_WORD_GAP_PX = 48;
           const svgEl = mount.querySelector("svg");
           const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
           const sx = ctm && ctm.a ? ctm.a : 1;
+          function appendTranslateX(el, dxSvg) {
+            if (!(dxSvg > 0.2)) return;
+            const prev = el.getAttribute("transform") || "";
+            el.setAttribute(
+              "transform",
+              `${prev} translate(${dxSvg.toFixed(2)}, 0)`.trim()
+            );
+          }
           const groups = Array.from(
             mount.querySelectorAll(".vf-text.lyrics")
           ).filter((g) => {
@@ -458,6 +468,47 @@ async function main() {
             const rb = b.getBoundingClientRect();
             return ra.top - rb.top || ra.left - rb.left;
           });
+          const dashes = Array.from(
+            mount.querySelectorAll(".vf-text.dash")
+          ).filter((g) => g.getBoundingClientRect().width > 0);
+          function shiftLyricWithDashes(i, needSvg) {
+            const curG = groups[i];
+            const curR = curG.getBoundingClientRect();
+            const nextR =
+              i + 1 < groups.length
+                ? groups[i + 1].getBoundingClientRect()
+                : null;
+            const prevR =
+              i > 0 ? groups[i - 1].getBoundingClientRect() : null;
+            if (
+              prevR &&
+              nextR &&
+              Math.abs(curR.top - prevR.top) > 28
+            ) {
+              /* other band */
+            }
+            appendTranslateX(curG, needSvg);
+            // Dashes die bij deze lettergreep horen: tussen prev en next,
+            // dichter bij cur dan bij de buur.
+            for (const d of dashes) {
+              const dr = d.getBoundingClientRect();
+              if (Math.abs(dr.top - curR.top) > 28) continue;
+              const mid = (dr.left + dr.right) / 2;
+              const leftBound = prevR ? prevR.right - 4 : -Infinity;
+              const rightBound = nextR ? nextR.left + 4 : Infinity;
+              if (mid < leftBound || mid > rightBound) continue;
+              const distCur = Math.abs(mid - (curR.left + curR.right) / 2);
+              const distPrev = prevR
+                ? Math.abs(mid - (prevR.left + prevR.right) / 2)
+                : Infinity;
+              const distNext = nextR
+                ? Math.abs(mid - (nextR.left + nextR.right) / 2)
+                : Infinity;
+              if (distCur <= distPrev && distCur <= distNext) {
+                appendTranslateX(d, needSvg);
+              }
+            }
+          }
           for (let pass = 0; pass < 6; pass += 1) {
             let moved = false;
             for (let i = 1; i < groups.length; i += 1) {
@@ -480,14 +531,35 @@ async function main() {
               if (gapPx >= needMin) continue;
               const needSvg = (needMin - gapPx) / sx;
               if (!(needSvg > 0.2)) continue;
-              const prevTf = curG.getAttribute("transform") || "";
-              curG.setAttribute(
-                "transform",
-                `${prevTf} translate(${needSvg.toFixed(2)}, 0)`.trim()
-              );
+              shiftLyricWithDashes(i, needSvg);
               moved = true;
             }
             if (!moved) break;
+          }
+          // Woordgrens: streepjes in de gap tussen woorden weg (geen
+          // «ja, - Al»); hyphen hoort tussen lettergrepen van één woord.
+          for (let i = 1; i < groups.length; i += 1) {
+            const prevR = groups[i - 1].getBoundingClientRect();
+            const curR = groups[i].getBoundingClientRect();
+            if (Math.abs(curR.top - prevR.top) > 28) continue;
+            const prevT = String(
+              groups[i - 1].querySelector("text")?.textContent || ""
+            ).trim();
+            const curT = String(
+              groups[i].querySelector("text")?.textContent || ""
+            ).trim();
+            const wordBoundary =
+              /[,.;:!?]$/.test(prevT) ||
+              (/^[A-ZÀ-ÖØ-Þ]/.test(curT) && !/-$/.test(prevT));
+            if (!wordBoundary) continue;
+            for (const d of dashes) {
+              const dr = d.getBoundingClientRect();
+              if (Math.abs(dr.top - curR.top) > 28) continue;
+              const mid = (dr.left + dr.right) / 2;
+              if (mid > prevR.right - 2 && mid < curR.left + 2) {
+                d.remove();
+              }
+            }
           }
         })();
         // S10-veiligheidsnet: mid-systeem-maatnummers weg (OSMD interval
