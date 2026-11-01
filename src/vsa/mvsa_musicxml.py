@@ -775,9 +775,9 @@ def _add_lyric_layer_to_notes(
     n = len(notes)
     primary_syl = _syllabic_for_position(lpos, opens_hyphen=opens_hyphen)
     if len(lpos.syllables) == 1:
+        # K4/L3: begin/middle/end alleen voor woordstreepjes (`-`), niet voor
+        # melisma (`_`/`&`) — melisma gebruikt ``extend`` (K3).
         syl = primary_syl
-        if n > 1 and syl == "single":
-            syl = "begin"
         text = lpos.syllables[0]
         extend = n > 1
     else:
@@ -1215,9 +1215,8 @@ def _position_to_notes(
         lyrics: list[LyricSyllable] = []
         if si == 0 and lpos.syllables:
             if len(lpos.syllables) == 1:
+                # K4/L3: ``syllabic`` volgt woordstreepjes; melisma → extend.
                 syl = primary_syl
-                if n > 1 and syl == "single":
-                    syl = "begin"
                 lyrics.append(
                     LyricSyllable(
                         text=lpos.syllables[0],
@@ -1450,27 +1449,15 @@ def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
     n = len(packed)
     if n == 1:
         only = packed[0]
-        # Enkele noot in deze pitch-run: behoud extend/slur van multi-pitch-
-        # melisma (gezet in ``_position_to_notes``). Same-pitch-collapse heeft
-        # extend al uitgezet in ``_pack_same_pitch_run``.
-        lyrics = [
-            LyricSyllable(
-                text=ly.text,
-                syllabic=(
-                    "single"
-                    if ly.syllabic == "begin" and not ly.extend
-                    else ly.syllabic
-                ),
-                number=ly.number,
-                extend=ly.extend,
-            )
-            for ly in only.lyrics
-        ]
+        # Enkele noot in deze pitch-run: behoud syllabic (L3 woordstreepje
+        # begin/middle) én extend/slur van multi-pitch-melisma. Nooit
+        # begin→single demoten: maat-niveau-collapse (score-IR) zou anders
+        # ``ar_-men`` breken terwijl per-positie-collapse begin wel hield.
         return [
             NoteEvent(
                 pitch=only.pitch,
                 duration=only.duration,
-                lyrics=lyrics,
+                lyrics=list(only.lyrics),
                 recite=only.recite,
                 spacer=only.spacer,
                 breve_head=only.breve_head,
@@ -1497,15 +1484,8 @@ def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
             lyrics = [
                 LyricSyllable(
                     text=ly.text,
-                    syllabic=(
-                        "begin"
-                        if n_sounding > 1 and ly.syllabic == "single"
-                        else (
-                            "single"
-                            if n_sounding <= 1 and ly.syllabic == "begin"
-                            else ly.syllabic
-                        )
-                    ),
+                    # K4: geen single↔begin voor melisma; alleen extend/slur.
+                    syllabic=ly.syllabic,
                     number=ly.number,
                     # Geen extender over rustslots.
                     extend=n_sounding > 1,
@@ -1620,14 +1600,11 @@ def _apply_melisma_slurs_by_syllable(notes: list[NoteEvent]) -> list[NoteEvent]:
     for i, note in enumerate(notes):
         lyrics = list(note.lyrics)
         if force_extend[i] and lyrics:
+            # K3/K4: melisma-slur zet ``extend``, niet begin (dat is L3-hyphen).
             lyrics = [
                 LyricSyllable(
                     text=ly.text,
-                    syllabic=(
-                        "begin"
-                        if ly.syllabic == "single"
-                        else ly.syllabic
-                    ),
+                    syllabic=ly.syllabic,
                     number=ly.number,
                     extend=True,
                 )

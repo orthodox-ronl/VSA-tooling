@@ -61,7 +61,8 @@ op stem-juiste ankers (leesbaarheid [S2](mscz-leesbaarheid.md#s--slurs) /
 [S5](mscz-leesbaarheid.md#s--slurs): A/T nootkoprand, S/B stokpunt), vult
 lyric-extenders tot de laatste melisma-noot ([L4](mscz-leesbaarheid.md#l--lyrics-algemeen)),
 zet ontbrekende lettergreepstreepjes ([L3](mscz-leesbaarheid.md#l--lyrics-algemeen))
-op basis van MusicXML-``syllabic``, en centreert lettergreep-slots inclusief
+op basis van MusicXML-``syllabic`` (from-ir behoudt woordstreepje-``begin``/
+``end`` na same-pitch-collapse — K4), en centreert lettergreep-slots inclusief
 S8-spacers ([S22](mscz-leesbaarheid.md#p--pagina--systeem-a4) / P3e).
 S22 koppelt lyrics volgorde-behoudend aan nootkolommen (niet op mid-x-
 voronoi) en snapt elke lettergreep onder die kolom zolang de
