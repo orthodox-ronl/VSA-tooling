@@ -14,7 +14,9 @@ idee als MuseScore-trim). Zelfde marker-contract als bibliotheek
 
 Graveerprofiel **`coribCompact`** (in `render.mjs`, na OSMD-`compacttight`)
 zet de schermafstanden: balk- en systeemafstand, lyrics naar het midden
-van het balkgat (na-render verschuiving), iets kortere stokken.
+van het balkgat (na-render verschuiving). A↓/T↑-stokken die de
+lyric-band snijden worden post-layout ingekort (P3c; OSMD negeert
+`IdealStemLength`).
 Lettergreep-afstanden volgen OSMD-defaults (geen lagere elongatie:
 die liet S8-recite overlappen, o.a. maat 2 van derde-antifoon).
 `VoiceSpacing` terug naar 0.85/3.0 (compacttight knelde op 0.65/2.0).
