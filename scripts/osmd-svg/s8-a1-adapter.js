@@ -116,6 +116,21 @@
   }
 
   function hideStaveNoteheadGraphics(staveNoteEl) {
+    // S22: bewaar layout-x vóór hide — na hide is getBBox vaak 0 en
+    // centerSyllableSlots mist spacer-kolommen (derde-antifoon maat 16).
+    if (!staveNoteEl.getAttribute("data-osmd-anchor-x")) {
+      try {
+        var abb = staveNoteEl.getBBox();
+        if (abb.width > 0.5) {
+          staveNoteEl.setAttribute(
+            "data-osmd-anchor-x",
+            String(abb.x + abb.width / 2)
+          );
+        }
+      } catch (eAnchor) {
+        /* ignore */
+      }
+    }
     staveNoteEl.setAttribute("data-osmd-spacer", "1");
     Array.prototype.forEach.call(
       staveNoteEl.querySelectorAll(".vf-stem, .vf-flag, .vf-beam"),

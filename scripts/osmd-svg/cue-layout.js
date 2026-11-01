@@ -735,8 +735,10 @@
     // regel 2 van twee-regelige cues in hetzelfde systeem.
     alignOneLineCueBaselines(mount, xmlText);
     centerMeasureContents(mount);
-    // S22 / P3e: per lettergreep-slot nootkolom+lyric centreren.
-    centerSyllableSlots(mount);
+    // S22 / P3e: níet hier — spacers hebben nog geen data-osmd-anchor-x
+    // (S8-hide volgt later). render.mjs roept
+    // __vsaOsmdCenterSyllableSlots ná S8-finalize.
+
   }
 
   /**
@@ -886,27 +888,43 @@
       .forEach(function (id) {
         var info = byId[id];
         // Nootkolommen: cluster mid-x over alle balken van dit maat-id.
+        // Spacers meenemen via data-osmd-anchor-x (S8-hide maakt bbox 0).
         var heads = [];
         for (var s = 0; s < info.staffs.length; s += 1) {
           var notes = info.staffs[s].querySelectorAll(".vf-stavenote");
           for (var n = 0; n < notes.length; n += 1) {
-            if (notes[n].getAttribute("data-osmd-spacer") === "1") {
-              continue;
-            }
-            var nb;
-            try {
-              nb = notes[n].getBBox();
-            } catch (e2) {
-              continue;
-            }
-            if (!(nb.width > 0)) {
+            var noteEl = notes[n];
+            var isSpacer = noteEl.getAttribute("data-osmd-spacer") === "1";
+            var mid = null;
+            var x0 = null;
+            var x1 = null;
+            var anchor = noteEl.getAttribute("data-osmd-anchor-x");
+            if (anchor != null && anchor !== "" && Number.isFinite(Number(anchor))) {
+              mid = Number(anchor);
+              x0 = mid - 6;
+              x1 = mid + 6;
+            } else if (!isSpacer) {
+              var nb;
+              try {
+                nb = noteEl.getBBox();
+              } catch (e2) {
+                continue;
+              }
+              if (!(nb.width > 0)) {
+                continue;
+              }
+              mid = nb.x + nb.width / 2;
+              x0 = nb.x;
+              x1 = nb.x + nb.width;
+            } else {
               continue;
             }
             heads.push({
-              el: notes[n],
-              mid: nb.x + nb.width / 2,
-              x: nb.x,
-              right: nb.x + nb.width,
+              el: noteEl,
+              mid: mid,
+              x: x0,
+              right: x1,
+              spacer: isSpacer,
             });
           }
         }
@@ -957,6 +975,50 @@
         }
         var musicEnd = info.right - 8;
 
+        // Eerst lyrics aan dichtstbijzijnde kolom koppelen (voronoi),
+        // niet vaste 28px — anders zweven lettergrepen naast spacers
+        // of raken ze de verkeerde noot (maat 16 «Gods…ge-»).
+        var colY0 = info.y - 20;
+        var colY1 = info.y + 280;
+        var lyricsForCols = cols.map(function () {
+          return [];
+        });
+        for (var li = 0; li < lyricGs.length; li += 1) {
+          var g = lyricGs[li];
+          var gb;
+          try {
+            gb = g.getBBox();
+          } catch (e4) {
+            continue;
+          }
+          var gmid = gb.x + gb.width / 2;
+          var gy = gb.y + gb.height / 2;
+          if (gy < colY0 || gy > colY1) {
+            continue;
+          }
+          if (gmid < musicStart - 20 || gmid > musicEnd + 40) {
+            continue;
+          }
+          var bestC = -1;
+          var bestD = Infinity;
+          for (var ci = 0; ci < cols.length; ci += 1) {
+            var d = Math.abs(gmid - cols[ci].mid);
+            if (d < bestD) {
+              bestD = d;
+              bestC = ci;
+            }
+          }
+          if (bestC < 0 || bestD > 90) {
+            continue;
+          }
+          lyricsForCols[bestC].push({
+            el: g,
+            x: gb.x,
+            right: gb.x + gb.width,
+            mid: gmid,
+          });
+        }
+
         for (var c = 0; c < cols.length; c += 1) {
           var slot = cols[c];
           var leftBound = c === 0 ? musicStart : (cols[c - 1].mid + slot.mid) / 2;
@@ -967,42 +1029,22 @@
           if (!(rightBound > leftBound + 10)) {
             continue;
           }
-          // Lyric in deze kolom (zelfde x-band, y tussen SA/TB van deze maat).
-          var colY0 = info.y - 20;
-          var colY1 = info.y + 280;
           var lyricUnion = null;
-          for (var li = 0; li < lyricGs.length; li += 1) {
-            var g = lyricGs[li];
-            var gb;
-            try {
-              gb = g.getBBox();
-            } catch (e4) {
-              continue;
-            }
-            var gmid = gb.x + gb.width / 2;
-            var gy = gb.y + gb.height / 2;
-            if (gy < colY0 || gy > colY1) {
-              continue;
-            }
-            if (Math.abs(gmid - slot.mid) > 28) {
-              continue;
-            }
+          var lyCol = lyricsForCols[c];
+          for (var lj = 0; lj < lyCol.length; lj += 1) {
+            var ly = lyCol[lj];
             if (!lyricUnion) {
               lyricUnion = {
-                x: gb.x,
-                right: gb.x + gb.width,
-                mid: gmid,
-                els: [g],
+                x: ly.x,
+                right: ly.right,
+                mid: ly.mid,
+                els: [ly.el],
               };
             } else {
-              lyricUnion.x = Math.min(lyricUnion.x, gb.x);
-              lyricUnion.right = Math.max(
-                lyricUnion.right,
-                gb.x + gb.width
-              );
-              lyricUnion.els.push(g);
-              lyricUnion.mid =
-                (lyricUnion.x + lyricUnion.right) / 2;
+              lyricUnion.x = Math.min(lyricUnion.x, ly.x);
+              lyricUnion.right = Math.max(lyricUnion.right, ly.right);
+              lyricUnion.els.push(ly.el);
+              lyricUnion.mid = (lyricUnion.x + lyricUnion.right) / 2;
             }
           }
           var contentLeft = slot.x;
@@ -1014,6 +1056,15 @@
           var contentMid = (contentLeft + contentRight) / 2;
           var slotMid = (leftBound + rightBound) / 2;
           var dx = slotMid - contentMid;
+          // Cap: voorkom dat laatste kolom (noemd) tientallen px wegschuift
+          // terwijl buur-lettergrepen (ge) achterblijven.
+          var maxDx = Math.min(36, (rightBound - leftBound) * 0.35);
+          if (dx > maxDx) {
+            dx = maxDx;
+          }
+          if (dx < -maxDx) {
+            dx = -maxDx;
+          }
           // Niet voorbij slotgrenzen duwen.
           if (Math.abs(dx) >= 4) {
             if (contentLeft + dx < leftBound) {
@@ -1087,4 +1138,7 @@
   }
 
   global.__vsaOsmdCueLayout = runCueLayout;
+  // Na S8-spacer-hide opnieuw aanroepen: spacers hebben dan
+  // data-osmd-anchor-x (anders mist S22 spacer-kolommen).
+  global.__vsaOsmdCenterSyllableSlots = centerSyllableSlots;
 })(typeof window !== "undefined" ? window : globalThis);

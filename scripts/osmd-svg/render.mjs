@@ -327,6 +327,10 @@ async function main() {
         if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
           window.__vsaOsmdS8FinalizePrint(mount, xml);
         }
+        // S22 / P3e — ná S8 zodat spacer-kolommen data-osmd-anchor-x hebben.
+        if (typeof window.__vsaOsmdCenterSyllableSlots === "function") {
+          window.__vsaOsmdCenterSyllableSlots(mount);
+        }
         // L2 — Source Sans 3; grootte volgt EngravingRules.LyricsHeight
         // (niet post-hoc vergroten: dat veroorzaakte «iaAl»-overlap).
         (function enforceLyricCueFontFamily() {
@@ -693,6 +697,8 @@ async function main() {
         (function enforceScreenLyricGaps() {
           const MIN_GAP_PX = 16;
           const MIN_WORD_GAP_PX = 48;
+          // S22: gap-shift mag lyric niet >MAX_NOTE_DX_PX van nootkolom trekken.
+          const MAX_NOTE_DX_PX = 28;
           const svgEl = mount.querySelector("svg");
           const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
           const sx = ctm && ctm.a ? ctm.a : 1;
@@ -703,6 +709,56 @@ async function main() {
               "transform",
               `${prev} translate(${dxSvg.toFixed(2)}, 0)`.trim()
             );
+          }
+          // Nootkolommen (screen): zichtbare koppen + breve-glyphs + spacer-
+          // ankers via tijdelijke probe-cirkel op data-osmd-anchor-x.
+          const noteCols = [];
+          for (const n of mount.querySelectorAll(".vf-stavenote")) {
+            const glyph = n.querySelector("[data-osmd-breve-glyph='1']");
+            const head = n.querySelector(".vf-notehead path");
+            const el = glyph || head;
+            if (el) {
+              const r = el.getBoundingClientRect();
+              if (r.width > 0.5) {
+                noteCols.push({
+                  cx: (r.left + r.right) / 2,
+                  cy: (r.top + r.bottom) / 2,
+                });
+                continue;
+              }
+            }
+            const anchor = n.getAttribute("data-osmd-anchor-x");
+            if (anchor == null || !Number.isFinite(Number(anchor))) continue;
+            const ns = "http://www.w3.org/2000/svg";
+            const probe = document.createElementNS(ns, "circle");
+            probe.setAttribute("cx", String(Number(anchor)));
+            probe.setAttribute("cy", "0");
+            probe.setAttribute("r", "0.01");
+            probe.setAttribute("fill", "none");
+            n.appendChild(probe);
+            // cy=0 is verkeerd; gebruik staf-y van een sibling-noot.
+            let staffY = null;
+            const sib = n.parentElement && n.parentElement.querySelector(
+              ".vf-stavenote .vf-notehead path, .vf-stavenote [data-osmd-breve-glyph='1']"
+            );
+            if (sib) {
+              staffY = sib.getBoundingClientRect().top;
+            }
+            const pr = probe.getBoundingClientRect();
+            n.removeChild(probe);
+            if (!(pr.width >= 0) && !(pr.left || pr.right)) continue;
+            noteCols.push({
+              cx: (pr.left + pr.right) / 2 || pr.x,
+              cy: staffY != null ? staffY + 5 : pr.top,
+            });
+          }
+          function nearestNoteDx(lyricCx, lyricCy, extraDxPx) {
+            let best = Infinity;
+            for (const c of noteCols) {
+              if (Math.abs(c.cy - lyricCy) > 100) continue;
+              best = Math.min(best, Math.abs(c.cx - (lyricCx + extraDxPx)));
+            }
+            return best;
           }
           const groups = Array.from(
             mount.querySelectorAll(".vf-text.lyrics")
@@ -719,7 +775,7 @@ async function main() {
           const dashes = Array.from(
             mount.querySelectorAll(".vf-text.dash")
           ).filter((g) => g.getBoundingClientRect().width > 0);
-          function shiftLyricWithDashes(i, needSvg) {
+          function shiftLyricWithDashes(i, needSvg, force) {
             const curG = groups[i];
             const curR = curG.getBoundingClientRect();
             const nextR =
@@ -735,7 +791,33 @@ async function main() {
             ) {
               /* other band */
             }
-            appendTranslateX(curG, needSvg);
+            // Beperk shift: lyric blijft bij nootkolom (S22). Bij force
+            // (gap onder verify-drempel) ruimere cap, niet onbeperkt.
+            const lyricCx = (curR.left + curR.right) / 2;
+            const lyricCy = (curR.top + curR.bottom) / 2;
+            let dx = needSvg;
+            const cap = force ? 42 : MAX_NOTE_DX_PX;
+            const before = nearestNoteDx(lyricCx, lyricCy, 0);
+            if (Number.isFinite(before) && before < 90) {
+              while (dx > 0.3) {
+                const after = nearestNoteDx(lyricCx, lyricCy, dx * sx);
+                if (after <= cap) break;
+                dx *= 0.7;
+              }
+              if (
+                !force &&
+                nearestNoteDx(lyricCx, lyricCy, dx * sx) > cap + 8
+              ) {
+                return; // liever krappe gap dan losse lyric
+              }
+              // Force: als cap de verify-gap niet haalt, toch minimale
+              // 12px-gap toepassen (overlap/te krap wint van S22-ideal).
+              if (force && dx + 0.01 < needSvg) {
+                dx = needSvg;
+              }
+            }
+            if (!(dx > 0.2)) return;
+            appendTranslateX(curG, dx);
             // Dashes die bij deze lettergreep horen: tussen prev en next,
             // dichter bij cur dan bij de buur.
             for (const d of dashes) {
@@ -753,7 +835,7 @@ async function main() {
                 ? Math.abs(mid - (nextR.left + nextR.right) / 2)
                 : Infinity;
               if (distCur <= distPrev && distCur <= distNext) {
-                appendTranslateX(d, needSvg);
+                appendTranslateX(d, dx);
               }
             }
           }
@@ -779,7 +861,10 @@ async function main() {
               if (gapPx >= needMin) continue;
               const needSvg = (needMin - gapPx) / sx;
               if (!(needSvg > 0.2)) continue;
-              shiftLyricWithDashes(i, needSvg);
+              // Onder verify-drempel (12px) of echte overlap: forceer shift
+              // (S22-cap mag dan wijken).
+              const force = gapPx < 12;
+              shiftLyricWithDashes(i, needSvg, force);
               moved = true;
             }
             if (!moved) break;
@@ -808,6 +893,114 @@ async function main() {
                 d.remove();
               }
             }
+          }
+        })();
+        // L3 — lettergreepstreepjes tussen syllabic begin/middle/end.
+        // OSMD laat ze soms weg in krappe gaps (alleluia-8, derde-antifoon).
+        // Alleen waar MusicXML een binnenwoord-overgang markeert — geen
+        // streepjes tussen losse woorden («want van»).
+        (function ensureSyllableHyphensL3() {
+          const svgEl = mount.querySelector("svg");
+          if (!svgEl) return;
+          const ns = "http://www.w3.org/2000/svg";
+          // Geordende lyric-syllabes uit MusicXML (lyric number 1).
+          const syls = [];
+          const re =
+            /<lyric\b[^>]*>\s*<syllabic>([^<]*)<\/syllabic>\s*<text>([^<]*)<\/text>/g;
+          let m;
+          while ((m = re.exec(xml))) {
+            syls.push({
+              syl: String(m[1]).trim().toLowerCase(),
+              text: String(m[2])
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .replace(/&amp;/g, "&")
+                .replace(/&quot;/g, '"')
+                .trim(),
+            });
+          }
+          const needHyphen = new Set();
+          for (let i = 0; i + 1 < syls.length; i += 1) {
+            const a = syls[i].syl;
+            const b = syls[i + 1].syl;
+            const join =
+              (a === "begin" || a === "middle") &&
+              (b === "middle" || b === "end");
+            if (!join) continue;
+            needHyphen.add(syls[i].text + "\0" + syls[i + 1].text);
+          }
+          if (!needHyphen.size) return;
+          const lyrics = Array.from(
+            mount.querySelectorAll(".vf-text.lyrics")
+          ).filter((g) => {
+            const t = g.querySelector("text");
+            const r = g.getBoundingClientRect();
+            return t && r.width > 0;
+          });
+          lyrics.sort((a, b) => {
+            const ra = a.getBoundingClientRect();
+            const rb = b.getBoundingClientRect();
+            return ra.top - rb.top || ra.left - rb.left;
+          });
+          const tpl = mount.querySelector(".vf-text.dash text");
+          for (let i = 0; i + 1 < lyrics.length; i += 1) {
+            const a = lyrics[i];
+            const b = lyrics[i + 1];
+            const ar = a.getBoundingClientRect();
+            const br = b.getBoundingClientRect();
+            if (Math.abs(ar.top - br.top) > 28) continue;
+            const aT = String(
+              a.querySelector("text")?.textContent || ""
+            ).trim();
+            const bT = String(
+              b.querySelector("text")?.textContent || ""
+            ).trim();
+            if (!needHyphen.has(aT + "\0" + bT)) continue;
+            const gap = br.left - ar.right;
+            if (gap < 6 || gap > 100) continue;
+            const midX = (ar.right + br.left) / 2;
+            const hasDash = Array.from(
+              mount.querySelectorAll(".vf-text.dash")
+            ).some((d) => {
+              const r = d.getBoundingClientRect();
+              if (!(r.width > 0)) return false;
+              if (Math.abs(r.top - ar.top) > 28) return false;
+              const cx = (r.left + r.right) / 2;
+              return cx > ar.right - 2 && cx < br.left + 2;
+            });
+            if (hasDash) continue;
+            const aCtm = a.getScreenCTM();
+            if (!aCtm) continue;
+            const inv = aCtm.inverse();
+            const pt = svgEl.createSVGPoint();
+            pt.x = midX;
+            pt.y = ar.top + ar.height * 0.7;
+            const loc = pt.matrixTransform(inv);
+            const aText = a.querySelector("text");
+            const g = document.createElementNS(ns, "g");
+            g.setAttribute("class", "vf-text dash");
+            g.setAttribute("data-osmd-l3", "1");
+            g.setAttribute("transform", a.getAttribute("transform") || "");
+            const text = document.createElementNS(ns, "text");
+            text.textContent = "-";
+            for (const attr of [
+              "font-family",
+              "font-size",
+              "font-weight",
+              "font-style",
+              "fill",
+              "stroke",
+              "stroke-width",
+            ]) {
+              const v =
+                (tpl && tpl.getAttribute(attr)) ||
+                (aText && aText.getAttribute(attr));
+              if (v) text.setAttribute(attr, v);
+            }
+            text.setAttribute("x", String(loc.x));
+            text.setAttribute("y", aText?.getAttribute("y") || "0");
+            g.appendChild(text);
+            (a.parentElement || mount).appendChild(g);
           }
         })();
         // L4 — melisma-extender vullen tot onder de laatste melisma-noot.
