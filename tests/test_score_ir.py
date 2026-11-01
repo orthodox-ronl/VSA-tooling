@@ -138,6 +138,37 @@ B:  g          \\2 ||
     assert not any((ev.get("print") or {}).get("breveHead") for ev in sop)
 
 
+_S8_STEMMEN_SYNC = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: Die he_-mel,_ (aar-de en zee) heeft ge-maakt,_ ||
+S: -   g4  a4     f4             g4    a4 Bb4     ||
+A: -   e4  f4     -              -     -  -       ||
+T: -   c4  -      a3             Bb3   c4 d4      ||
+B: -   c3  f3     -              -     -  Bb2     ||
+"""
+
+
+def test_score_ir_s8_stemmen_sync_no_solo_breve() -> None:
+    """S8 stemmen-sync: A/B houden door, S/T wisselen → geen solo-breve (maat 13-patroon)."""
+    doc = export_mvsa_to_score_ir(_S8_STEMMEN_SYNC)
+    m1 = doc["measures"][0]
+    for letter in ("S", "A", "T", "B"):
+        evs = m1["voices"][letter]
+        prints = [ev.get("print") or {} for ev in evs]
+        assert not any(p.get("breveHead") for p in prints), (
+            f"stem {letter}: onverwachte ||O||-breve bij gemengde recite"
+        )
+        assert not any(p.get("spacer") for p in prints), (
+            f"stem {letter}: onverwachte recite-spacers bij gemengde recite"
+        )
+        assert len(evs) == len(m1["voices"]["S"]), (
+            f"stem {letter}: noot-aantal moet gelijk zijn aan S (geen collapse)"
+        )
+
+
 _S13_MELISMA = """\
 @do F4
 @mode major
