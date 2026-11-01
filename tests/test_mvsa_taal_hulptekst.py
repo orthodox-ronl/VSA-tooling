@@ -31,9 +31,9 @@ def test_taal_invalid_value() -> None:
 
 
 def test_gemengd_hulptekst_respects_taal() -> None:
-    xml = export_mvsa_to_musicxml(GEMENGD, layout="playback", hulptekst=True)
+    xml = export_mvsa_to_musicxml(GEMENGD, layout="playback", translit=True)
     # NL-passage → Cyrillisch
-    assert "<text>Хер</text>" in xml
+    assert "<text>Хиир</text>" in xml
     assert "<text>онт</text>" in xml
     assert "<text>Heer</text>" in xml
     # KSL-passage → Latijn

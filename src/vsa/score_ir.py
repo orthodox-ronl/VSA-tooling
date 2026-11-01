@@ -295,7 +295,7 @@ def export_mvsa_to_score_ir(
             events_by_voice, pitch_carry = _system_to_events(
                 system,
                 layout="partituur",
-                hulptekst=False,
+                translit=False,
                 pitch_carry=pitch_carry,
             )
             for voice, measures in events_by_voice.items():
