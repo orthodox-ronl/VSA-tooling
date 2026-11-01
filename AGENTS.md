@@ -78,6 +78,11 @@ Before implementing:
 
 Define verifiable success criteria (tests, validate, build) and loop until they pass.
 
+**CoriB / OSMD-toetsen:** niet «klaar» melden vóór regen van het hele
+corpus, contract-check op **alle** relevante ids, **eigen** visuele QA van
+alle PNG’s, en daarna ref-diff-inventaris. Zie
+`.cursor/rules/corib-toets-qa.mdc`.
+
 ### 5. Documentatie synchroon met code
 
 Bij gedragswijzigingen: in **dezelfde** ronde man-pagina’s, handleidingen
@@ -276,6 +281,7 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 | `branch-afstemming.mdc`               | Gebruikersbranch leidend; CoriB → `corib`; geen «kijk op cursor/…» |
 | `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                        |
 | `klikbare-bewijslinks.mdc`            | «Kijk hiernaar» altijd met klikbare URL of plakbaar open-commando |
+| `corib-toets-qa.mdc`                  | CoriB/OSMD: regen → alle contracten → zelf visueel → ref-diff     |
 | `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                                  |
 | `documentatie-duidelijkheid.mdc`      | Leesbare docs                                                     |
 | `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken            |
