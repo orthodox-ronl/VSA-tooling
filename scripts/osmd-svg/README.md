@@ -14,14 +14,27 @@ idee als MuseScore-trim). Zelfde marker-contract als bibliotheek
 
 Graveerprofiel **`coribCompact`** (in `render.mjs`, na OSMD-`compacttight`)
 zet de schermafstanden: balk- en systeemafstand, lyrics naar het midden
-van het balkgat (na-render verschuiving), iets kortere stokken.
-Lettergreep-afstanden volgen OSMD-defaults (geen lagere elongatie:
-die liet S8-recite overlappen, o.a. maat 2 van derde-antifoon).
+van het balkgat (na-render verschuiving). **P3c:** na balkgat-compressie
+wordt de accolade/bracket herschaald op SA-bovenkant ↔ TB-onderkant;
+A↓/T↑-stokken mogen lyric-**inkt** tot max. één **kwartnootkop-hoogte**
+overlappen (daarboven inkorten; OSMD negeert `IdealStemLength`).
+**S22:** lyric↔nootkolom \|Δ\| ≤ 2 px. Gap-enforce (woordgap na `,`) mag
+een lettergreep **niet** naar een andere noot-/spacer-kolom trekken —
+anders slaat S8-recite slots over (`ja,|Al` in alleluia-toon-2). Komma
+tussen spacer-lyrics gebruikt de gewone lettergreep-gap, geen 48 px.
+**L3/L6:** één afbreekstreepje tussen lettergrepen — kort (L3) tenzij
+de eerste lettergreep een melisma heeft (L6 uitgerekt); grote witruimte
+zonder melisma laat het streepje kort. Geen reeks losse `-`.
+**L4:** eigen SVG-lijn; VexFlow-`.vf-line`-extender onder lyrics wordt
+verborgen. Lettergreep-afstanden volgen OSMD-defaults (geen lagere
+elongatie: die liet S8-recite overlappen, o.a. maat 2 van derde-antifoon).
 `VoiceSpacing` terug naar 0.85/3.0 (compacttight knelde op 0.65/2.0).
 Bladbreedte 1000 px; `MeasureWidthFactor` 1. **S10:** maatnummers alleen
 aan systeembegin (`RenderMeasureNumbersOnlyAtSystemStart`); maatnummer
 **1** wordt nagetekend. Een stuk dat korter is dan de bladbreedte wordt
-bijgesneden op de inkt. Contract-check: `node verify-corib-contract.mjs`.
+bijgesneden op de inkt. **Bron↔papier:** render telt MusicXML-non-spacer-
+noten tegen zichtbare nootkoppen en faalt bij tekort. Contract-check:
+`node verify-corib-contract.mjs`.
 
 S8 A1-adapter (`s8-a1-adapter.js`) koppelt spacer/breve per **measure-id**
 (geen y-systeemdrempel — die brak bij compacte CoriB-layout). Lettergreep-

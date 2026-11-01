@@ -735,8 +735,10 @@
     // regel 2 van twee-regelige cues in hetzelfde systeem.
     alignOneLineCueBaselines(mount, xmlText);
     centerMeasureContents(mount);
-    // S22 / P3e: per lettergreep-slot nootkolom+lyric centreren.
-    centerSyllableSlots(mount);
+    // S22 / P3e: níet hier — spacers hebben nog geen data-osmd-anchor-x
+    // (S8-hide volgt later). render.mjs roept
+    // __vsaOsmdCenterSyllableSlots ná S8-finalize.
+
   }
 
   /**
@@ -847,7 +849,9 @@
    * S22 / P3e — per lettergreep-slot: S21-nootkolom + lyric horizontaal
    * centreren in de ruimte tussen vorige en volgende kolom (of maatrand).
    */
-  function centerSyllableSlots(mount) {
+  function centerSyllableSlots(mount, opts) {
+    opts = opts || {};
+    var lyricsOnly = !!opts.lyricsOnly;
     var measures = Array.prototype.slice.call(
       mount.querySelectorAll(".vf-measure[id]")
     );
@@ -886,27 +890,86 @@
       .forEach(function (id) {
         var info = byId[id];
         // Nootkolommen: cluster mid-x over alle balken van dit maat-id.
+        // Visuele SVG-x (screen→svg) — getBBox negeert translate() op de
+        // stavenote (OSMD ~56px + S21), waardoor S22 «want» de verkeerde
+        // kant op duwde (maat 16: Δ≈26 px rechts van slotmidden).
+        var svgRoot =
+          (info.el && info.el.ownerSVGElement) ||
+          mount.querySelector("svg");
+        var invScreen = null;
+        try {
+          if (svgRoot && svgRoot.getScreenCTM) {
+            invScreen = svgRoot.getScreenCTM().inverse();
+          }
+        } catch (eInv) {
+          invScreen = null;
+        }
+        function screenToSvgX(clientX) {
+          if (!invScreen) {
+            return clientX;
+          }
+          return clientX * invScreen.a + invScreen.e;
+        }
+        function visualNoteBox(noteEl, isSpacer) {
+          var anchor = noteEl.getAttribute("data-osmd-anchor-x");
+          if (
+            isSpacer &&
+            anchor != null &&
+            anchor !== "" &&
+            Number.isFinite(Number(anchor))
+          ) {
+            // anchor = getBBox-mid vóór hide (lokaal); × note CTM → svg.
+            var am = Number(anchor);
+            var actm = null;
+            try {
+              actm = noteEl.getCTM();
+            } catch (eA) {
+              actm = null;
+            }
+            var vx = actm ? am * actm.a + actm.e : am;
+            return { mid: vx, x: vx - 6, right: vx + 6 };
+          }
+          if (isSpacer) {
+            return null;
+          }
+          var head =
+            noteEl.querySelector("[data-osmd-breve-glyph='1']") ||
+            noteEl.querySelector(".vf-notehead") ||
+            noteEl;
+          var hr;
+          try {
+            hr = head.getBoundingClientRect();
+          } catch (e2) {
+            return null;
+          }
+          if (!(hr.width > 0.5)) {
+            return null;
+          }
+          var xL = screenToSvgX(hr.left);
+          var xR = screenToSvgX(hr.right);
+          if (xR < xL) {
+            var tmp = xL;
+            xL = xR;
+            xR = tmp;
+          }
+          return { mid: (xL + xR) / 2, x: xL, right: xR };
+        }
         var heads = [];
         for (var s = 0; s < info.staffs.length; s += 1) {
           var notes = info.staffs[s].querySelectorAll(".vf-stavenote");
           for (var n = 0; n < notes.length; n += 1) {
-            if (notes[n].getAttribute("data-osmd-spacer") === "1") {
-              continue;
-            }
-            var nb;
-            try {
-              nb = notes[n].getBBox();
-            } catch (e2) {
-              continue;
-            }
-            if (!(nb.width > 0)) {
+            var noteEl = notes[n];
+            var isSpacer = noteEl.getAttribute("data-osmd-spacer") === "1";
+            var box = visualNoteBox(noteEl, isSpacer);
+            if (!box) {
               continue;
             }
             heads.push({
-              el: notes[n],
-              mid: nb.x + nb.width / 2,
-              x: nb.x,
-              right: nb.x + nb.width,
+              el: noteEl,
+              mid: box.mid,
+              x: box.x,
+              right: box.right,
+              spacer: isSpacer,
             });
           }
         }
@@ -916,12 +979,16 @@
         heads.sort(function (a, b) {
           return a.mid - b.mid;
         });
-        // Cluster binnen 8 px = één stemkolom.
+        // Cluster binnen 8 px = één stemkolom (SA/TB). Spacer nooit
+        // samenvoegen met gewone/breve-kop — anders valt «zij»+«zul»
+        // samen en raakt de lettergreep-telling zoek (maat 16).
         var cols = [];
         for (var h = 0; h < heads.length; h += 1) {
           var hd = heads[h];
           var col = cols.length ? cols[cols.length - 1] : null;
-          if (!col || Math.abs(hd.mid - col.mid) > 8) {
+          var sameKind =
+            col && !!col.spacer === !!hd.spacer;
+          if (!col || Math.abs(hd.mid - col.mid) > 8 || !sameKind) {
             col = {
               mid: hd.mid,
               x: hd.x,
@@ -929,6 +996,7 @@
               notes: [],
               sum: 0,
               n: 0,
+              spacer: !!hd.spacer,
             };
             cols.push(col);
           }
@@ -957,121 +1025,426 @@
         }
         var musicEnd = info.right - 8;
 
-        for (var c = 0; c < cols.length; c += 1) {
-          var slot = cols[c];
-          var leftBound = c === 0 ? musicStart : (cols[c - 1].mid + slot.mid) / 2;
-          var rightBound =
-            c === cols.length - 1
-              ? musicEnd
-              : (slot.mid + cols[c + 1].mid) / 2;
-          if (!(rightBound > leftBound + 10)) {
+        // Lyrics → kolommen: volgorde-behoudend (niet losse voronoi op
+        // mid-x). Brede lettergrepen («Gods», «noemd») hebben hun
+        // zwaartepunt naast de buur-noot; voronoi koppelde ze daardoor
+        // één slot te ver (maat 16 «Gods word-den ge-» onder verkeerde
+        // noten — leek alsof «ge» geen kop had).
+        var colY0 = info.y - 20;
+        var colY1 = info.y + 280;
+        var measureLyrics = [];
+        for (var li = 0; li < lyricGs.length; li += 1) {
+          var g = lyricGs[li];
+          // Geen dashes hier: die volgen later (L3) of blijven tussen
+          // lettergrepen; meenemen scheefde de slot-inhoud.
+          // Alleen lettergreep-groepen; dashes (g.vf-text.dash) skippen.
+          if (g.classList && g.classList.contains("dash")) {
             continue;
           }
-          // Lyric in deze kolom (zelfde x-band, y tussen SA/TB van deze maat).
-          var colY0 = info.y - 20;
-          var colY1 = info.y + 280;
-          var lyricUnion = null;
-          for (var li = 0; li < lyricGs.length; li += 1) {
-            var g = lyricGs[li];
-            var gb;
-            try {
-              gb = g.getBBox();
-            } catch (e4) {
-              continue;
-            }
-            var gmid = gb.x + gb.width / 2;
-            var gy = gb.y + gb.height / 2;
-            if (gy < colY0 || gy > colY1) {
-              continue;
-            }
-            if (Math.abs(gmid - slot.mid) > 28) {
-              continue;
-            }
-            if (!lyricUnion) {
-              lyricUnion = {
-                x: gb.x,
-                right: gb.x + gb.width,
-                mid: gmid,
-                els: [g],
-              };
-            } else {
-              lyricUnion.x = Math.min(lyricUnion.x, gb.x);
-              lyricUnion.right = Math.max(
-                lyricUnion.right,
-                gb.x + gb.width
-              );
-              lyricUnion.els.push(g);
-              lyricUnion.mid =
-                (lyricUnion.x + lyricUnion.right) / 2;
-            }
+          var gr;
+          try {
+            gr = g.getBoundingClientRect();
+          } catch (e4) {
+            continue;
           }
-          var contentLeft = slot.x;
-          var contentRight = slot.right;
-          if (lyricUnion) {
-            contentLeft = Math.min(contentLeft, lyricUnion.x);
-            contentRight = Math.max(contentRight, lyricUnion.right);
+          if (!(gr.width > 0.5)) {
+            continue;
           }
-          var contentMid = (contentLeft + contentRight) / 2;
-          var slotMid = (leftBound + rightBound) / 2;
-          var dx = slotMid - contentMid;
-          // Niet voorbij slotgrenzen duwen.
-          if (Math.abs(dx) >= 4) {
-            if (contentLeft + dx < leftBound) {
-              dx = leftBound - contentLeft;
-            }
-            if (contentRight + dx > rightBound) {
-              dx = rightBound - contentRight;
-            }
-          } else {
-            dx = 0;
+          var gx0 = screenToSvgX(gr.left);
+          var gx1 = screenToSvgX(gr.right);
+          if (gx1 < gx0) {
+            var gswap = gx0;
+            gx0 = gx1;
+            gx1 = gswap;
           }
-          function shiftEl(el, amount, mark) {
-            if (!(Math.abs(amount) >= 3)) {
-              return;
-            }
-            if (mark && el.getAttribute(mark) === "1") {
-              return;
-            }
-            var prev = el.getAttribute("transform") || "";
-            el.setAttribute(
-              "transform",
-              (prev ? prev + " " : "") +
-                "translate(" +
-                amount.toFixed(2) +
-                ", 0)"
-            );
-            if (mark) {
-              el.setAttribute(mark, "1");
-            }
+          var gmid = (gx0 + gx1) / 2;
+          // y-band in svg-ruimte (zelfde als info.y uit measure getBBox).
+          var gy = invScreen
+            ? gr.top * invScreen.d + invScreen.f
+            : gr.top;
+          if (gy < colY0 || gy > colY1) {
+            continue;
           }
-          if (Math.abs(dx) >= 4) {
-            // Alleen noten + lyrics hier; melisma-slurs blijven op de
-            // measure-dx uit centerMeasureContents (S2) — slot-shift op
-            // boog-start brak slur↔noot.
-            for (var ni = 0; ni < slot.notes.length; ni += 1) {
-              shiftEl(slot.notes[ni], dx, "data-osmd-slot");
+          if (gmid < musicStart - 20 || gmid > musicEnd + 40) {
+            continue;
+          }
+          measureLyrics.push({
+            el: g,
+            x: gx0,
+            right: gx1,
+            mid: gmid,
+            half: (gx1 - gx0) / 2,
+          });
+        }
+        measureLyrics.sort(function (a, b) {
+          return a.mid - b.mid;
+        });
+        var lyricsForCols = cols.map(function () {
+          return [];
+        });
+        (function assignLyricsOrderPreserving() {
+          var nL = measureLyrics.length;
+          var nC = cols.length;
+          if (!nL || !nC) {
+            return;
+          }
+          if (nL === nC) {
+            for (var ai = 0; ai < nL; ai += 1) {
+              lyricsForCols[ai].push(measureLyrics[ai]);
             }
-            if (lyricUnion) {
-              for (var lei = 0; lei < lyricUnion.els.length; lei += 1) {
-                shiftEl(lyricUnion.els[lei], dx, "data-osmd-slot");
+            return;
+          }
+          // nL < nC (melisma-vervolgnoten) of nL > nC (zeldzaam,
+          // bijv. breve+spacer te dicht): non-crossing nearest.
+          var prevCol = 0;
+          for (var aj = 0; aj < nL; aj += 1) {
+            var remain = nL - aj - 1;
+            var maxCol =
+              nL <= nC
+                ? Math.max(prevCol, nC - 1 - remain)
+                : nC - 1;
+            if (maxCol < prevCol) {
+              maxCol = prevCol;
+            }
+            if (maxCol > nC - 1) {
+              maxCol = nC - 1;
+            }
+            var best = prevCol;
+            var bestD = Infinity;
+            for (var ac = prevCol; ac <= maxCol; ac += 1) {
+              var ad = Math.abs(measureLyrics[aj].mid - cols[ac].mid);
+              if (ad < bestD) {
+                bestD = ad;
+                best = ac;
               }
             }
-            slot.mid += dx;
-            if (lyricUnion) {
-              lyricUnion.mid += dx;
+            lyricsForCols[best].push(measureLyrics[aj]);
+            prevCol = best;
+          }
+        })();
+
+        function shiftEl(el, amount, mark, force) {
+          if (!(Math.abs(amount) >= 0.5)) {
+            return;
+          }
+          // Eerste center-pass: één shift per noot (mark). Gap/S22 mag
+          // force=true om opnieuw te stapelen.
+          if (!force && mark && el.getAttribute(mark) === "1") {
+            return;
+          }
+          var prev = el.getAttribute("transform") || "";
+          el.setAttribute(
+            "transform",
+            (prev ? prev + " " : "") +
+              "translate(" +
+              amount.toFixed(2) +
+              ", 0)"
+          );
+          if (mark) {
+            el.setAttribute(mark, "1");
+          }
+        }
+
+        function shiftNoteAndLedgers(slot, dx, force) {
+          for (var ni = 0; ni < slot.notes.length; ni += 1) {
+            var noteEl = slot.notes[ni];
+            shiftEl(noteEl, dx, "data-osmd-slot", force);
+            var nid = noteEl.id || "";
+            if (nid) {
+              var doc = mount.ownerDocument || document;
+              var ledById = doc.getElementById(nid + "ledgers");
+              if (ledById) {
+                shiftEl(ledById, dx, "data-osmd-slot", force);
+              }
+            }
+            var prevLed = noteEl.previousElementSibling;
+            if (
+              prevLed &&
+              prevLed.classList &&
+              prevLed.classList.contains("vf-ledgers")
+            ) {
+              shiftEl(prevLed, dx, "data-osmd-slot", force);
             }
           }
-          // L2 / S22: lyric-midden op de nootkolom (alle stemmen delen
-          // slot.mid). Breve/melisma-eerste: zelfde anker.
-          if (lyricUnion && Math.abs(lyricUnion.mid - slot.mid) >= 3) {
-            var ldx = slot.mid - lyricUnion.mid;
-            for (var lj = 0; lj < lyricUnion.els.length; lj += 1) {
-              shiftEl(lyricUnion.els[lj], ldx, null);
+        }
+
+        // 1) Nootkolom centreren in het slot (alleen noot — niet de
+        //    lyric-bbox). OSMD zet lyrics vaak tientallen px rechts van
+        //    de kop; union-centreren liet dat offset intact → lyric onder
+        //    de volgende noot (P3e / S22).
+        // lyricsOnly: noten blijven; alleen opnieuw snappen na gap-enforce.
+        if (!lyricsOnly) {
+          for (var c = 0; c < cols.length; c += 1) {
+            var slot = cols[c];
+            var leftBound =
+              c === 0 ? musicStart : (cols[c - 1].mid + slot.mid) / 2;
+            var rightBound =
+              c === cols.length - 1
+                ? musicEnd
+                : (slot.mid + cols[c + 1].mid) / 2;
+            if (!(rightBound > leftBound + 10)) {
+              continue;
             }
+            var slotMid = (leftBound + rightBound) / 2;
+            var dx = slotMid - slot.mid;
+            var maxDx = Math.min(36, (rightBound - leftBound) * 0.35);
+            if (dx > maxDx) {
+              dx = maxDx;
+            }
+            if (dx < -maxDx) {
+              dx = -maxDx;
+            }
+            if (Math.abs(dx) >= 4) {
+              if (slot.x + dx < leftBound) {
+                dx = leftBound - slot.x;
+              }
+              if (slot.right + dx > rightBound) {
+                dx = rightBound - slot.right;
+              }
+            } else {
+              dx = 0;
+            }
+            if (Math.abs(dx) >= 4) {
+              // Noten + hulplijnen (M11). Melisma-slurs blijven op
+              // measure-dx (S2).
+              shiftNoteAndLedgers(slot, dx);
+              slot.mid += dx;
+              slot.x += dx;
+              slot.right += dx;
+            }
+          }
+        }
+
+        // 1b) S22+P3a: kolommen uit elkaar zodat lyrics op noteMid minGap
+        //     12 houden. Alleen bij weinig kolommen (recite); dichte
+        //     partituur (>16 cols) overslaan — daar breekt M11/S22.
+        if (!lyricsOnly && cols.length <= 16) {
+          var minGapCols = 12;
+          for (var passCol = 0; passCol < 6; passCol += 1) {
+            var movedCol = false;
+            for (var ci = 0; ci + 1 < cols.length; ci += 1) {
+              var lyA = lyricsForCols[ci];
+              var lyB = lyricsForCols[ci + 1];
+              if (!lyA.length || !lyB.length) {
+                continue;
+              }
+              var halfA = 0;
+              var halfB = 0;
+              for (var ha = 0; ha < lyA.length; ha += 1) {
+                halfA = Math.max(halfA, lyA[ha].half);
+              }
+              for (var hb = 0; hb < lyB.length; hb += 1) {
+                halfB = Math.max(halfB, lyB[hb].half);
+              }
+              var needDist = halfA + minGapCols + halfB;
+              var haveDist = cols[ci + 1].mid - cols[ci].mid;
+              if (!(haveDist < needDist - 0.5)) {
+                continue;
+              }
+              var pushN = needDist - haveDist;
+              for (var cj = ci + 1; cj < cols.length; cj += 1) {
+                shiftNoteAndLedgers(cols[cj], pushN, true);
+                cols[cj].mid += pushN;
+                cols[cj].x += pushN;
+                cols[cj].right += pushN;
+              }
+              movedCol = true;
+            }
+            if (!movedCol) {
+              break;
+            }
+          }
+        }
+
+        // 2) Lyric zo dicht mogelijk bij nootkolom (P3e), zonder P3a te
+        //    breken: eerst ideale mid=noteMid, daarna iteratief minGap 12
+        //    — bij push ook de nootkolom meeschuiven (S22 houdt Δ≈0).
+        var snapped = [];
+        for (var c2 = 0; c2 < cols.length; c2 += 1) {
+          var lyCol = lyricsForCols[c2];
+          var target = cols[c2].mid;
+          for (var lj = 0; lj < lyCol.length; lj += 1) {
+            var ly = lyCol[lj];
+            snapped.push({
+              el: ly.el,
+              mid: ly.mid,
+              x: ly.x,
+              right: ly.right,
+              half: ly.half,
+              w: ly.right - ly.x,
+              noteMid: target,
+              colIndex: c2,
+            });
+          }
+        }
+        snapped.sort(function (a, b) {
+          return a.mid - b.mid;
+        });
+        function appendTx(el, amount) {
+          if (!(Math.abs(amount) >= 0.5)) {
+            return false;
+          }
+          var prevT = el.getAttribute("transform") || "";
+          el.setAttribute(
+            "transform",
+            (prevT ? prevT + " " : "") +
+              "translate(" +
+              amount.toFixed(2) +
+              ", 0)"
+          );
+          return true;
+        }
+        function applySnapTo(item, newMid) {
+          var dx = newMid - item.mid;
+          if (!appendTx(item.el, dx)) {
+            return;
+          }
+          item.mid = newMid;
+          item.x += dx;
+          item.right += dx;
+          item.el.setAttribute("data-osmd-lyric-slot", "1");
+        }
+        function shiftColNotes(colIndex, amount) {
+          if (!(Math.abs(amount) >= 0.5)) {
+            return;
+          }
+          if (colIndex < 0 || colIndex >= cols.length) {
+            return;
+          }
+          shiftNoteAndLedgers(cols[colIndex], amount, true);
+          cols[colIndex].mid += amount;
+          cols[colIndex].x += amount;
+          cols[colIndex].right += amount;
+          for (var ui = 0; ui < snapped.length; ui += 1) {
+            if (snapped[ui].colIndex === colIndex) {
+              snapped[ui].noteMid += amount;
+            }
+          }
+        }
+        // Ideale snap (ook lyricsOnly na gap-enforce — S22 Δ≤2).
+        for (var s0 = 0; s0 < snapped.length; s0 += 1) {
+          applySnapTo(snapped[s0], snapped[s0].noteMid);
+        }
+        // P3a: minGap 12. Bij conflict: lyrics én nootkolom samen.
+        var minGap = 12;
+        for (var pass = 0; pass < 8; pass += 1) {
+          var moved = false;
+          for (var si = 0; si + 1 < snapped.length; si += 1) {
+            var a = snapped[si];
+            var b = snapped[si + 1];
+            var need = a.right + minGap - b.x;
+            if (!(need > 0)) {
+              continue;
+            }
+            var push = need / 2;
+            var dA = -push;
+            var dB = push;
+            if (b.mid >= b.noteMid - 1) {
+              dA = -need;
+              dB = 0;
+            }
+            if (appendTx(a.el, dA)) {
+              a.mid += dA;
+              a.x += dA;
+              a.right += dA;
+              shiftColNotes(a.colIndex, dA);
+              moved = true;
+            }
+            if (appendTx(b.el, dB)) {
+              b.mid += dB;
+              b.x += dB;
+              b.right += dB;
+              shiftColNotes(b.colIndex, dB);
+              moved = true;
+            }
+          }
+          if (!moved) {
+            break;
+          }
+        }
+        // Opnieuw dichter bij noot na gap-push (S22), zonder P3a te breken.
+        for (var s1 = 0; s1 < snapped.length; s1 += 1) {
+          var it2 = snapped[s1];
+          var ideal2 = it2.noteMid;
+          if (s1 > 0) {
+            var minMid =
+              snapped[s1 - 1].right + minGap + it2.half;
+            if (ideal2 < minMid) {
+              ideal2 = minMid;
+            }
+          }
+          if (s1 + 1 < snapped.length) {
+            var maxMid =
+              snapped[s1 + 1].x - minGap - it2.half;
+            if (ideal2 > maxMid) {
+              ideal2 = maxMid;
+            }
+          }
+          applySnapTo(it2, ideal2);
+          // Noot mee als lyric niet tot noteMid mocht.
+          var dNote = it2.mid - it2.noteMid;
+          if (Math.abs(dNote) > 2) {
+            shiftColNotes(it2.colIndex, dNote > 0 ? dNote - 2 : dNote + 2);
+          }
+        }
+        // Hard cap: S22 — lyric op noteMid (±2). Zo nodig noot meeschuiven
+        // i.p.v. P3a te breken.
+        var noteSlack = 2;
+        var minGapCap = 12;
+        for (var fi = 0; fi < snapped.length; fi += 1) {
+          var f = snapped[fi];
+          var away = f.mid - f.noteMid;
+          if (!(Math.abs(away) > noteSlack)) {
+            continue;
+          }
+          // Trek lyric naar noot; als P3a dat blokkeert, schuif de noot
+          // naar de lyric (binnen slack).
+          var pull = away > 0 ? away - noteSlack : away + noteSlack;
+          var newMid = f.mid - pull;
+          var blocked = false;
+          if (fi > 0) {
+            var prev = snapped[fi - 1];
+            if (newMid < prev.right + minGapCap + f.half) {
+              blocked = true;
+            }
+          }
+          if (fi + 1 < snapped.length) {
+            var next = snapped[fi + 1];
+            if (newMid > next.x - minGapCap - f.half) {
+              blocked = true;
+            }
+          }
+          if (!blocked && appendTx(f.el, -pull)) {
+            f.mid -= pull;
+            f.x -= pull;
+            f.right -= pull;
+            continue;
+          }
+          // Noot naar lyric toe.
+          var notePull = f.mid - f.noteMid;
+          if (Math.abs(notePull) > noteSlack) {
+            var nMove =
+              notePull > 0 ? notePull - noteSlack : notePull + noteSlack;
+            shiftColNotes(f.colIndex, nMove);
           }
         }
       });
   }
 
+  /**
+   * Alleen lyric→nootkolom snappen (P3e), zonder noten te verschuiven.
+   * Na gap-enforce opnieuw aanroepen: die pass mag lyrics tijdelijk van
+   * hun kolom trekken (woordgap «ren|Gods»).
+   */
+  function snapLyricsToNoteColumns(mount) {
+    centerSyllableSlots(mount, { lyricsOnly: true });
+  }
+
   global.__vsaOsmdCueLayout = runCueLayout;
+  // Na S8-spacer-hide opnieuw aanroepen: spacers hebben dan
+  // data-osmd-anchor-x (anders mist S22 spacer-kolommen).
+  global.__vsaOsmdCenterSyllableSlots = function (mount) {
+    centerSyllableSlots(mount, null);
+  };
+  global.__vsaOsmdSnapLyricsToNotes = snapLyricsToNoteColumns;
 })(typeof window !== "undefined" ? window : globalThis);

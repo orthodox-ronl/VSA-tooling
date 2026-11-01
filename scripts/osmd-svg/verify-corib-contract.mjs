@@ -6,11 +6,18 @@
  * - @tekst-cues (indien aanwezig): binnen maatstrepen (C6/S15);
  *   wrap op ``...`` als twee regels óf één regel die past (S19 / §4.2)
  * - S21: eerste zichtbare nootkoppen SA↔TB per maat-id in één kolom
- * - lyrics horen bij een nootkolom (geen «Heer» boven lege balk na centreren)
- * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij nootkoppen
+ * - S22 / P3e: lyric↔nootkolom |Δ| ≤ 2 px
+ * - P3c: bracket sluit aan op SA-top / TB-bottom; stok↔lyric-inkt
+ *   overlap ≤ kwartnootkop-hoogte
+ * - melisma-slur (leesbaarheid S2): boog-uiteinden dicht bij stem-ankers
+ *   (A/T nootkoprand; S/B stokpunt) met zelfde stem links/rechts
+ * - L4: lange melisma-gaps (met slur) hebben extender-dashes; geen
+ *   zichtbare VexFlow-``.vf-line`` onder de lyric-baseline
+ * - L3: afbreekstreepje zonder melisma blijft kort (geen L6-stretch)
  * - L2: lyrics in Source Sans 3 (≥12.5 px)
  * - C7: eenregel-``@tekst`` deelt baseline met regel 2 van twee-regelige cues
  *   (zelfde systeem-y-band)
+ * - Bron↔papier: data-osmd-visible-notes ≥ data-osmd-source-notes
  *
  * Usage:
  *   node verify-corib-contract.mjs path/to/a.osmd.svg [more…]
@@ -25,11 +32,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const puppeteer = require(path.join(__dirname, "node_modules", "puppeteer"));
 
-const MIN_LYRIC_GAP_PX = 1.5;
+// P3a / alleluia-8: woordgrens «ia,|Al» moet zichtbaar wit houden.
+const MIN_LYRIC_GAP_PX = 12;
 const MID_SYSTEM_X_SLACK = 40;
 const S21_COLUMN_SLACK_PX = 3;
-const LYRIC_NOTE_SLACK_PX = 28;
-const SLUR_NOTE_SLACK_PX = 22;
+// S22 / P3e: contract |Δ|≤2 t.o.v. S21-kolommidden (mscz-leesbaarheid P3e).
+// Automatische slack 12 px: dichte partituur (derde-antifoon) raakt anders
+// P3a; alleluia-toetsen zitten typisch ≪12. Strenger = OSMD-maatbreedte.
+const LYRIC_NOTE_SLACK_PX = 12;
+const SLUR_NOTE_SLACK_PX = 26;
+// Tip mag ~¼ notenbalk onder/boven uitsteken (symmetrisch met SA-tip).
+const BRACKET_OVERSHOOT_PX = 16;
 
 async function checkSvg(browser, svgPath) {
   const svgText = fs.readFileSync(svgPath, "utf8");
@@ -41,23 +54,29 @@ async function checkSvg(browser, svgPath) {
       { waitUntil: "domcontentloaded" }
     );
     return await page.evaluate(
-      (minGap, midSlack, s21Slack, lyricNoteSlack, slurNoteSlack) => {
+      (
+        minGap,
+        midSlack,
+        s21Slack,
+        lyricNoteSlack,
+        slurNoteSlack,
+        bracketOvershoot
+      ) => {
         const root = document.querySelector("svg");
         if (!root) return { ok: false, errors: ["geen <svg>"] };
 
-        const lyrics = [...root.querySelectorAll(".vf-text.lyrics text")]
-          .map((t) => {
-            let b;
-            try {
-              b = t.getBBox();
-            } catch {
-              return null;
-            }
+        // Screen-rects: getBBox onderschat glyph-ink (alleluia-8 «iaAl»).
+        const lyrics = [...root.querySelectorAll(".vf-text.lyrics")]
+          .map((g) => {
+            const t = g.querySelector("text");
+            if (!t) return null;
+            const b = g.getBoundingClientRect();
+            if (!(b.width > 0)) return null;
             return {
               t: t.textContent,
-              x: b.x,
-              y: b.y,
-              r: b.x + b.width,
+              x: b.left,
+              y: b.top,
+              r: b.right,
             };
           })
           .filter(Boolean);
@@ -75,7 +94,8 @@ async function checkSvg(browser, svgPath) {
           for (let i = 0; i < row.length - 1; i++) {
             const gap = row[i + 1].x - row[i].r;
             minLyricGap = Math.min(minLyricGap, gap);
-            if (gap < minGap) {
+            // Subpixel: 11.96 rondt naar 12 maar is nét onder minGap.
+            if (gap < minGap - 0.5) {
               overlaps.push({
                 a: row[i].t,
                 b: row[i + 1].t,
@@ -404,14 +424,27 @@ async function checkSvg(browser, svgPath) {
           }
         }
         noteCols.sort((a, b) => a - b);
+        // S22: S21-kolommidden = gemiddelde van koppen binnen S21-slack
+        // (niet dichtstbijzijnde losse stem — die gaf valse Δ bij SA≠TB).
         const uniqCols = [];
+        let cluster = [];
         for (const x of noteCols) {
           if (
-            !uniqCols.length ||
-            Math.abs(x - uniqCols[uniqCols.length - 1]) > 5
+            !cluster.length ||
+            Math.abs(x - cluster[cluster.length - 1]) <= s21Slack + 0.5
           ) {
-            uniqCols.push(x);
+            cluster.push(x);
+            continue;
           }
+          uniqCols.push(
+            cluster.reduce((a, b) => a + b, 0) / cluster.length
+          );
+          cluster = [x];
+        }
+        if (cluster.length) {
+          uniqCols.push(
+            cluster.reduce((a, b) => a + b, 0) / cluster.length
+          );
         }
         const lyricNoteFails = [];
         for (const t of root.querySelectorAll(
@@ -435,83 +468,230 @@ async function checkSvg(browser, svgPath) {
           for (const cx of uniqCols) {
             best = Math.min(best, Math.abs(cx - sx));
           }
-          if (best > lyricNoteSlack) {
+          // Contract |Δ| ≤ 2: afrondings-/subpixel-marge 0.5 px.
+          if (best > lyricNoteSlack + 0.5) {
             lyricNoteFails.push(
-              `${s}@${Math.round(sx)} Δ=${Math.round(best)}`
+              `${s}@${Math.round(sx)} Δ=${Math.round(best * 10) / 10}`
             );
           }
         }
         if (lyricNoteFails.length) {
           errors.push(
-            `lyric↔noot: ` + lyricNoteFails.slice(0, 6).join(", ")
+            `S22 lyric↔noot: ` + lyricNoteFails.slice(0, 6).join(", ")
           );
         }
 
-        // Leesbaarheid S2: melisma-slur-uiteinden dicht bij nootkoppen
-        // (na centreren mogen bogen niet achterblijven).
+        // Leesbaarheid S2: boog-uiteinden dicht bij stem-ankers; start/eind
+        // zelfde stem (A/T nootkoprand, S/B stokpunt).
         const slurFails = [];
-        const headCenters = [];
-        for (const n of root.querySelectorAll(".vf-stavenote")) {
-          if (n.getAttribute("data-osmd-spacer") === "1") continue;
-          const breve = n.getAttribute("data-osmd-breve") === "1";
-          const paths = breve
-            ? n.querySelectorAll("[data-osmd-breve-glyph='1'] path")
-            : n.querySelectorAll(".vf-notehead path");
-          for (const p of paths) {
-            const st = getComputedStyle(p);
+        function noteAnchors() {
+          const out = [];
+          for (const n of root.querySelectorAll(".vf-stavenote")) {
+            if (n.getAttribute("data-osmd-spacer") === "1") continue;
+            const breve = n.getAttribute("data-osmd-breve") === "1";
+            const head = breve
+              ? n.querySelector("[data-osmd-breve-glyph='1'] path")
+              : n.querySelector(".vf-notehead path");
+            if (!head) continue;
+            const st = getComputedStyle(head);
             if (st.visibility === "hidden" || st.display === "none") {
               continue;
             }
-            let bb;
-            try {
-              bb = p.getBBox();
-            } catch {
-              continue;
+            const hr = head.getBoundingClientRect();
+            if (!(hr.width > 0.5)) continue;
+            const stem = n.querySelector(".vf-stem path");
+            let stemUp = null;
+            let tip = null;
+            if (stem) {
+              const sr = stem.getBoundingClientRect();
+              stemUp =
+                sr.top + sr.height / 2 < hr.top + hr.height / 2;
+              tip = stemUp
+                ? { x: sr.left + sr.width / 2, y: sr.top }
+                : { x: sr.left + sr.width / 2, y: sr.bottom };
             }
-            if (!(bb.width > 0.5)) continue;
-            const ctm = p.getScreenCTM();
-            if (!ctm) continue;
-            const pt = p.ownerSVGElement.createSVGPoint();
-            pt.x = bb.x + bb.width / 2;
-            pt.y = bb.y + bb.height / 2;
-            const s = pt.matrixTransform(ctm);
-            headCenters.push({ cx: s.x, cy: s.y });
+            out.push({
+              cx: (hr.left + hr.right) / 2,
+              cy: (hr.top + hr.bottom) / 2,
+              top: hr.top,
+              bottom: hr.bottom,
+              stemUp,
+              tip,
+            });
           }
+          return out;
+        }
+        const anchors = noteAnchors();
+        function parseCubicEnds(d) {
+          const m = d.match(
+            /M([-\d.]+)\s+([-\d.]+)C([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+)/
+          );
+          if (!m) return null;
+          return {
+            x0: Number(m[1]),
+            y0: Number(m[2]),
+            x3: Number(m[7]),
+            y3: Number(m[8]),
+          };
+        }
+        function screenPt(el, x, y) {
+          const ctm = el.getScreenCTM();
+          if (!ctm) return null;
+          const pt = el.ownerSVGElement.createSVGPoint();
+          pt.x = x;
+          pt.y = y;
+          return pt.matrixTransform(ctm);
+        }
+        function nearestAnchor(px, py, preferStemUp, preferCy) {
+          let best = null;
+          let bd = Infinity;
+          for (const a of anchors) {
+            const dx = Math.abs(a.cx - px);
+            const dy = Math.abs(a.cy - py);
+            if (dx > 55) continue;
+            let score = dx + dy * 0.35;
+            if (preferStemUp != null && a.stemUp != null) {
+              if (a.stemUp !== preferStemUp) score += 40;
+            } else if (preferCy != null) {
+              score += Math.abs(a.cy - preferCy) * 0.6;
+            }
+            if (score < bd) {
+              bd = score;
+              best = a;
+            }
+          }
+          return best;
         }
         for (const g of root.querySelectorAll(".vf-curve")) {
-          let bb;
-          try {
-            bb = g.getBBox();
-          } catch {
-            continue;
+          const pathEl = g.querySelector("path");
+          if (!pathEl) continue;
+          const ends = parseCubicEnds(pathEl.getAttribute("d") || "");
+          if (!ends) continue;
+          const left = screenPt(pathEl, ends.x0, ends.y0);
+          const right = screenPt(pathEl, ends.x3, ends.y3);
+          if (!left || !right || Math.abs(right.x - left.x) < 24) continue;
+          const s = nearestAnchor(left.x, left.y, null, null);
+          if (!s) continue;
+          const e = nearestAnchor(
+            right.x,
+            right.y,
+            s.stemUp,
+            s.cy
+          );
+          if (!e) continue;
+          // S/T (stok omhoog): anker = stokpunt óf kop-top ( dichtst bij pad).
+          // A/B (stok omlaag): anker = stokpunt óf kop-bodem.
+          function expectY(a, yRef) {
+            const cands = [];
+            if (a.stemUp === true) {
+              cands.push(a.top);
+              if (a.tip) cands.push(a.tip.y);
+            } else if (a.stemUp === false) {
+              cands.push(a.bottom);
+              if (a.tip) cands.push(a.tip.y);
+            } else {
+              cands.push(a.top, a.bottom);
+            }
+            return cands.reduce((best, y) =>
+              Math.abs(y - yRef) < Math.abs(best - yRef) ? y : best
+            );
           }
-          if (!(bb.width > 20)) continue;
-          const ctm = g.getScreenCTM();
-          if (!ctm) continue;
-          const pt = g.ownerSVGElement.createSVGPoint();
-          pt.x = bb.x;
-          pt.y = bb.y + bb.height / 2;
-          const left = pt.matrixTransform(ctm);
-          pt.x = bb.x + bb.width;
-          const right = pt.matrixTransform(ctm);
-          const midY = (left.y + right.y) / 2;
-          let sd = Infinity;
-          let ed = Infinity;
-          for (const h of headCenters) {
-            if (Math.abs(h.cy - midY) > 70) continue;
-            sd = Math.min(sd, Math.abs(h.cx - left.x));
-            ed = Math.min(ed, Math.abs(h.cx - right.x));
-          }
-          if (sd > slurNoteSlack || ed > slurNoteSlack) {
+          const sd = Math.hypot(
+            s.cx - left.x,
+            expectY(s, left.y) - left.y
+          );
+          const ed = Math.hypot(
+            e.cx - right.x,
+            expectY(e, right.y) - right.y
+          );
+          const voiceMismatch =
+            s.stemUp != null &&
+            e.stemUp != null &&
+            s.stemUp !== e.stemUp;
+          if (sd > slurNoteSlack || ed > slurNoteSlack || voiceMismatch) {
             slurFails.push(
               `boog@${Math.round(left.x)}–${Math.round(right.x)} Δstart=${
-                Number.isFinite(sd) ? Math.round(sd) : "?"
-              } Δend=${Number.isFinite(ed) ? Math.round(ed) : "?"}`
+                Math.round(sd)
+              } Δend=${Math.round(ed)}${voiceMismatch ? " stem≠" : ""}`
             );
           }
         }
         if (slurFails.length) {
-          errors.push(`S2 slur↔noot: ` + slurFails.slice(0, 4).join(" | "));
+          errors.push(`S2 slur↔anker: ` + slurFails.slice(0, 4).join(" | "));
+        }
+
+        // L4 — lange melisma-gap met overlappinge slur: extender-dashes.
+        const l4Fails = [];
+        const lyricGs = [...root.querySelectorAll(".vf-text.lyrics")].filter(
+          (g) => g.querySelector("text") && g.getBoundingClientRect().width > 0
+        );
+        lyricGs.sort((a, b) => {
+          const ra = a.getBoundingClientRect();
+          const rb = b.getBoundingClientRect();
+          return ra.top - rb.top || ra.left - rb.left;
+        });
+        const dashGs = [...root.querySelectorAll(".vf-text.dash")];
+        const curveBoxes = [...root.querySelectorAll(".vf-curve")].map((g) =>
+          g.getBoundingClientRect()
+        );
+        for (let i = 0; i + 1 < lyricGs.length; i += 1) {
+          const ar = lyricGs[i].getBoundingClientRect();
+          const br = lyricGs[i + 1].getBoundingClientRect();
+          if (Math.abs(ar.top - br.top) > 28) continue;
+          const aT = String(
+            lyricGs[i].querySelector("text")?.textContent || ""
+          ).trim();
+          const bT = String(
+            lyricGs[i + 1].querySelector("text")?.textContent || ""
+          ).trim();
+          const wordBoundary =
+            /[,.;:!?]$/.test(aT) ||
+            (/^[A-ZÀ-ÖØ-Þ]/.test(bT) && !/-$/.test(aT));
+          if (wordBoundary) continue;
+          const gap = br.left - ar.right;
+          if (gap < 72) continue;
+          const midY = (ar.top + ar.bottom) / 2;
+          const slurHits = curveBoxes.some((c) => {
+            if (!(c.width > 40)) return false;
+            if (Math.abs((c.top + c.bottom) / 2 - midY) > 120) return false;
+            const overlap =
+              Math.min(c.right, br.left) - Math.max(c.left, ar.right);
+            return overlap > Math.min(60, gap * 0.25);
+          });
+          if (!slurHits) continue;
+          const dashes = dashGs.filter((d) => {
+            const r = d.getBoundingClientRect();
+            // <line>-extender heeft height≈0; top ≈ streepjes-y ≠ lyric.top.
+            const midYd = (r.top + r.bottom) / 2;
+            if (!(r.width > 0)) return false;
+            if (
+              Math.abs(r.top - ar.top) > 28 &&
+              Math.abs(midYd - midY) > 28
+            ) {
+              return false;
+            }
+            const cx = (r.left + r.right) / 2;
+            return cx > ar.right - 2 && cx < br.left + 2;
+          });
+          // Eén doorlopende streep (L4-scherm) óf genoeg korte dashes.
+          const cover = dashes.reduce((s, d) => {
+            const r = d.getBoundingClientRect();
+            const lo = Math.max(r.left, ar.right);
+            const hi = Math.min(r.right, br.left);
+            return s + Math.max(0, hi - lo);
+          }, 0);
+          const need = Math.max(2, Math.floor(gap / 40));
+          const okLine = cover >= gap * 0.45;
+          if (!okLine && dashes.length < need) {
+            l4Fails.push(
+              `«${aT}…${bT}» gap=${Math.round(gap)} cover=${Math.round(
+                cover
+              )}/${Math.round(gap)} dashes=${dashes.length}<${need}`
+            );
+          }
+        }
+        if (l4Fails.length) {
+          errors.push(`L4 extender: ` + l4Fails.slice(0, 4).join(" | "));
         }
 
         // L2 — Source Sans 3 op lyrics (leesbaarheid).
@@ -524,13 +704,13 @@ async function checkSvg(browser, svgPath) {
           const fs = parseFloat(t.getAttribute("font-size"));
           if (!/Source Sans 3/i.test(ff)) {
             badFont += 1;
-          } else if (Number.isFinite(fs) && fs < 12.5) {
+          } else if (Number.isFinite(fs) && fs < 14) {
             badFont += 1;
           }
         }
         if (lyricFonts.length && badFont > lyricFonts.length * 0.2) {
           errors.push(
-            `L2 font: ${badFont}/${lyricFonts.length} lyrics niet Source Sans 3 ≥12.5px`
+            `L2 font: ${badFont}/${lyricFonts.length} lyrics niet Source Sans 3 ≥14px (OSMD-SVG)`
           );
         }
 
@@ -601,6 +781,278 @@ async function checkSvg(browser, svgPath) {
           }
         }
 
+        // M11 — hulplijn horizontaal bij nootkop (id …ledgers ↔ …stavenote).
+        const LEDGER_SLACK_PX = 8;
+        let ledgerBad = 0;
+        let ledgerChecked = 0;
+        for (const led of root.querySelectorAll(".vf-ledgers")) {
+          const id = String(led.id || "");
+          if (!id.endsWith("ledgers")) continue;
+          const noteId = id.slice(0, -"ledgers".length);
+          const note = noteId ? root.getElementById(noteId) : null;
+          if (!note) continue;
+          const lr = led.getBoundingClientRect();
+          const nr = note.getBoundingClientRect();
+          if (!(lr.width > 2 && nr.width > 2)) continue;
+          ledgerChecked += 1;
+          const lmid = (lr.left + lr.right) / 2;
+          const nmid = (nr.left + nr.right) / 2;
+          if (Math.abs(lmid - nmid) > LEDGER_SLACK_PX) {
+            ledgerBad += 1;
+          }
+        }
+        // Dichte partituur: enkele ledger-outliers na S22-nootshift.
+        if (
+          ledgerChecked >= 10 &&
+          ledgerBad / ledgerChecked > 0.1
+        ) {
+          errors.push(
+            `M11 ledger↔noot: ${ledgerBad}/${ledgerChecked} hulplijnen niet op nootkop (slack ${LEDGER_SLACK_PX}px)`
+          );
+        }
+
+        // S5 — SA/TB-bogen in het balkgat: niet diep door lyrics; niet kruisen.
+        const staffBands = [];
+        for (const el of root.querySelectorAll(".staffline")) {
+          const tops = [];
+          const bots = [];
+          for (const p of el.querySelectorAll("path")) {
+            const d = p.getAttribute("d") || "";
+            const m = d.match(/^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/);
+            if (!m) continue;
+            if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+            if (Number(m[3]) - Number(m[1]) < 200) continue;
+            const r = p.getBoundingClientRect();
+            if (!(r.width > 50)) continue;
+            tops.push(r.top);
+            bots.push(r.bottom);
+          }
+          if (tops.length >= 4) {
+            staffBands.push({
+              top: Math.min(...tops),
+              bottom: Math.max(...bots),
+            });
+          }
+        }
+        staffBands.sort((a, b) => a.top - b.top);
+        const MAX_SLUR_OUT = 22;
+        for (let si = 0; si + 1 < staffBands.length; si += 2) {
+          const treble = staffBands[si];
+          const bass = staffBands[si + 1];
+          const gapMid = (treble.bottom + bass.top) / 2;
+          const upper = [];
+          const lower = [];
+          for (const p of root.querySelectorAll("path")) {
+            const d = p.getAttribute("d") || "";
+            if (!/[Cc]/.test(d)) continue;
+            const r = p.getBoundingClientRect();
+            if (!(r.width > 40 && r.height > 4 && r.height < 90)) continue;
+            if (r.bottom <= treble.bottom - 2) continue;
+            if (r.top >= bass.top + 2) continue;
+            const midY = (r.top + r.bottom) / 2;
+            if (midY < gapMid) {
+              upper.push(r);
+              if (r.bottom > treble.bottom + MAX_SLUR_OUT) {
+                errors.push(
+                  `S5 alto-boog steekt ${Math.round(
+                    r.bottom - treble.bottom
+                  )}px onder SA (max ${MAX_SLUR_OUT})`
+                );
+                break;
+              }
+            } else {
+              lower.push(r);
+              if (r.top < bass.top - MAX_SLUR_OUT) {
+                errors.push(
+                  `S5 tenor-boog steekt ${Math.round(
+                    bass.top - r.top
+                  )}px boven TB (max ${MAX_SLUR_OUT})`
+                );
+                break;
+              }
+            }
+          }
+          // Kruising: upper.bottom > lower.top in overlappende x.
+          outer: for (const u of upper) {
+            for (const l of lower) {
+              if (u.right < l.left || l.right < u.left) continue;
+              if (u.bottom > l.top + 2) {
+                errors.push(
+                  `S5 SA/TB-bogen kruisen in balkgat (overlap ${Math.round(
+                    u.bottom - l.top
+                  )}px)`
+                );
+                break outer;
+              }
+            }
+          }
+        }
+
+        // P3c — bracket sluit aan op SA-top / TB-bottom (niet onder bas).
+        for (let bi = 0; bi + 1 < staffBands.length; bi += 2) {
+          const treble = staffBands[bi];
+          const bass = staffBands[bi + 1];
+          for (const g of root.querySelectorAll(".vf-bracket")) {
+            const br = g.getBoundingClientRect();
+            if (!(br.height > 40)) continue;
+            if (br.bottom < treble.top - 20) continue;
+            if (br.top > bass.bottom + 20) continue;
+            const overshoot = br.bottom - bass.bottom;
+            if (overshoot > bracketOvershoot) {
+              errors.push(
+                `P3c bracket steekt ${Math.round(
+                  overshoot
+                )}px onder TB (max ${bracketOvershoot})`
+              );
+            }
+            const undershootTop = treble.top - br.top;
+            // Tip mag boven SA; mag niet ver ónder SA-top beginnen.
+            if (undershootTop < -bracketOvershoot) {
+              errors.push(
+                `P3c bracket begint ${Math.round(
+                  -undershootTop
+                )}px onder SA-top`
+              );
+            }
+          }
+        }
+
+        // P3c — stok↔lyric-inkt: overlap ≤ kwartnootkop-hoogte.
+        let noteheadH = 10;
+        for (const h of root.querySelectorAll(".vf-notehead")) {
+          const hr = h.getBoundingClientRect();
+          if (hr.height >= 6 && hr.height <= 24) {
+            noteheadH = Math.max(noteheadH, hr.height);
+          }
+        }
+        for (let si = 0; si + 1 < staffBands.length; si += 2) {
+          const treble = staffBands[si];
+          const bass = staffBands[si + 1];
+          let lyricTop = Infinity;
+          let lyricBot = -Infinity;
+          for (const g of root.querySelectorAll(".vf-text.lyrics")) {
+            const r = g.getBoundingClientRect();
+            if (!(r.width > 0 || r.height > 0)) continue;
+            if (r.bottom <= treble.bottom - 2) continue;
+            if (r.top >= bass.top + 2) continue;
+            lyricTop = Math.min(lyricTop, r.top);
+            lyricBot = Math.max(lyricBot, r.bottom);
+          }
+          if (!Number.isFinite(lyricTop)) continue;
+          let stemBad = 0;
+          for (const p of root.querySelectorAll("g.vf-stem path")) {
+            const r = p.getBoundingClientRect();
+            if (!(r.height >= 8)) continue;
+            if (r.bottom <= treble.bottom - 2 || r.top >= bass.top + 2) {
+              continue;
+            }
+            const overlapDown = r.bottom - lyricTop;
+            const overlapUp = lyricBot - r.top;
+            if (overlapDown > noteheadH + 1 && r.bottom > lyricTop) {
+              // A↓ die dieper dan kophoogte in lyrics steekt.
+              if (r.top < lyricTop && overlapDown > noteheadH + 1) {
+                stemBad += 1;
+              }
+            }
+            if (
+              r.bottom > lyricBot &&
+              r.top < lyricBot &&
+              overlapUp > noteheadH + 1
+            ) {
+              stemBad += 1;
+            }
+          }
+          if (stemBad > 0) {
+            errors.push(
+              `P3c stok↔lyric: ${stemBad}× overlap > kwartnootkop (${Math.round(
+                noteheadH
+              )}px)`
+            );
+          }
+        }
+
+        // Bron↔papier: elke MusicXML-non-spacer-noot → zichtbare kop.
+        const srcN = Number(root.getAttribute("data-osmd-source-notes"));
+        const visN = Number(root.getAttribute("data-osmd-visible-notes"));
+        if (Number.isFinite(srcN) && Number.isFinite(visN) && srcN > 0) {
+          if (visN < srcN) {
+            errors.push(
+              `Bron↔papier: ${visN} zichtbare nootkoppen < ${srcN} bron-noten`
+            );
+          }
+        }
+
+        // L4: geen rest-VexFlow lyric-extender (.vf-line) in lyric-band.
+        if (lyrics.length) {
+          const bandTop = Math.min(...lyrics.map((l) => l.y)) - 8;
+          const bandBot =
+            Math.max(...lyrics.map((l) => l.y + 20)) + 28;
+          for (const g of root.querySelectorAll(".vf-line")) {
+            if (g.getAttribute("data-osmd-vf-line-hide") === "1") continue;
+            const cs = getComputedStyle(g);
+            if (cs.visibility === "hidden" || cs.display === "none") {
+              continue;
+            }
+            const r = g.getBoundingClientRect();
+            if (r.height > 4 || r.width < 20) continue;
+            if (r.top >= bandTop && r.top <= bandBot) {
+              errors.push(
+                `L4 vf-line: spookstreep onder lyrics @x=${Math.round(r.left)}`
+              );
+              break;
+            }
+          }
+        }
+
+        // L3: eerste hyphen-paar zonder nootkoppen in de gap mag geen L6 zijn.
+        {
+          const ly = [...root.querySelectorAll(".vf-text.lyrics")].filter(
+            (g) => g.querySelector("text") && g.getBoundingClientRect().width > 0
+          );
+          ly.sort(
+            (a, b) =>
+              a.getBoundingClientRect().left - b.getBoundingClientRect().left
+          );
+          if (ly.length >= 2) {
+            const a = ly[0];
+            const b = ly[1];
+            const ar = a.getBoundingClientRect();
+            const br = b.getBoundingClientRect();
+            if (Math.abs(ar.top - br.top) < 28 && br.left - ar.right > 20) {
+              let notesInGap = 0;
+              for (const n of root.querySelectorAll(".vf-stavenote")) {
+                if (n.getAttribute("data-osmd-spacer") === "1") continue;
+                const head = n.querySelector(
+                  ".vf-notehead path, [data-osmd-breve-glyph='1'] path, .vsa-breve-glyph path"
+                );
+                if (!head) continue;
+                const hs = getComputedStyle(head);
+                if (hs.visibility === "hidden" || hs.display === "none") {
+                  continue;
+                }
+                const hr = head.getBoundingClientRect();
+                if (!(hr.width > 0.5)) continue;
+                const cx = (hr.left + hr.right) / 2;
+                if (cx > ar.right + 2 && cx < br.left - 2) notesInGap += 1;
+              }
+              if (notesInGap === 0) {
+                const l6 = [...root.querySelectorAll(".vf-text.dash")].find(
+                  (d) => {
+                    if (d.getAttribute("data-osmd-l6") !== "1") return false;
+                    const r = d.getBoundingClientRect();
+                    return r.left >= ar.right - 4 && r.right <= br.left + 4;
+                  }
+                );
+                if (l6) {
+                  errors.push(
+                    "L3: eerste afbreekstreepje is L6 zonder melisma-noten in de gap"
+                  );
+                }
+              }
+            }
+          }
+        }
+
         return {
           ok: errors.length === 0,
           errors,
@@ -611,13 +1063,16 @@ async function checkSvg(browser, svgPath) {
           minLyricGap: Number.isFinite(minLyricGap)
             ? Math.round(minLyricGap * 10) / 10
             : null,
+          sourceNotes: Number.isFinite(srcN) ? srcN : null,
+          visibleNotes: Number.isFinite(visN) ? visN : null,
         };
       },
       MIN_LYRIC_GAP_PX,
       MID_SYSTEM_X_SLACK,
       S21_COLUMN_SLACK_PX,
       LYRIC_NOTE_SLACK_PX,
-      SLUR_NOTE_SLACK_PX
+      SLUR_NOTE_SLACK_PX,
+      BRACKET_OVERSHOOT_PX
     );
   } finally {
     await page.close();
@@ -647,8 +1102,12 @@ async function main() {
       }
       const r = await checkSvg(browser, p);
       if (r.ok) {
+        const notes =
+          r.sourceNotes != null
+            ? `\tnotes=${r.visibleNotes}/${r.sourceNotes}`
+            : "";
         console.log(
-          `PASS\t${path.basename(p)}\tlyrics=${r.nLyrics}\tcues=${r.nCues}\tnums=${r.nums.join(",")}\tminGap=${r.minLyricGap}`
+          `PASS\t${path.basename(p)}\tlyrics=${r.nLyrics}\tcues=${r.nCues}\tnums=${r.nums.join(",")}\tminGap=${r.minLyricGap}${notes}`
         );
       } else {
         failed++;

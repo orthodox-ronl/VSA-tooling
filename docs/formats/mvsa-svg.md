@@ -54,9 +54,25 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --min-system-distance 9 --max-syste
 print-bouwsteen voor `index.md.pdf`). Optioneel `--engine osmd` schrijft een
 SVG via headless OSMD uit Score-IR (geen MuseScore; vereist Node +
 `scripts/osmd-svg`). Headless OSMD graveert met profiel `coribCompact`:
-dichtere balkafstand, lyrics tussen de balken, Source Sans 3, S10
-(maatnummers alleen aan systeembegin), zonder pixel-pariteit met
-MuseScore (S8/S13). Lettergrepen mogen niet overlappen
+dichtere balkafstand ([P3c](mscz-leesbaarheid.md#p--pagina--systeem-a4):
+stokken volledig zichtbaar; minimale lyric-overlap toegestaan), lyrics
+tussen de balken, Source Sans 3, S10, S22 (|Δ|≤2 px), L3/L6-streepjes,
+hulplijnen op de nootkop (M11), maatnummers alleen aan systeembegin,
+zonder pixel-pariteit met MuseScore (S8/S13). Post-layout zet melisma-bogen
+op stem-juiste ankers (leesbaarheid [S2](mscz-leesbaarheid.md#s--slurs) /
+[S5](mscz-leesbaarheid.md#s--slurs): A/T nootkoprand, S/B stokpunt), vult
+lyric-extenders tot de laatste melisma-noot ([L4](mscz-leesbaarheid.md#l--lyrics-algemeen)),
+zet ontbrekende lettergreepstreepjes ([L3](mscz-leesbaarheid.md#l--lyrics-algemeen))
+op basis van MusicXML-``syllabic`` (from-ir behoudt woordstreepje-``begin``/
+``end`` na same-pitch-collapse — K4), en centreert lettergreep-slots inclusief
+S8-spacers ([S22](mscz-leesbaarheid.md#p--pagina--systeem-a4) / P3e).
+S22 koppelt lyrics volgorde-behoudend aan nootkolommen (niet op mid-x-
+voronoi) en snapt elke lettergreep onder die kolom zolang de
+minimum-lettergreepafstand blijft; zo blijft o.a. derde-antifoon maat 16
+«Gods…ge-noemd» onder de juiste noten. Slot-centrering gebruikt
+visuele noot-x (SVG-CTM), niet kale ``getBBox`` — anders duwt de
+OSMD-``translate`` brede eerste lettergrepen zoals «want» uit het
+slotmidden. Lettergrepen mogen niet overlappen
 ([mscz-leesbaarheid](mscz-leesbaarheid.md) §2). S8-recite: na render past
 de A1-adapter spacer-hide toe (`notehead none`) en tekent ``||O||`` op
 breve-midden; zie [osmd-s8-recite](../plans/osmd-s8-recite.md) en

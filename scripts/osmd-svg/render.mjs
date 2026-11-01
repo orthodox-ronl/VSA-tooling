@@ -10,6 +10,7 @@
  * Cues (S15/S19/C6/C7 / schermpartituur §4.2): ``cue-layout.js`` zet
  * maat-WidthFactor, wrap/``...``, cue-X op eerste noot, centreren,
  * eenregel-cue-baseline (C7). Graveerprofiel: P3c/P3d/L2/S22.
+ * Post-layout: S2/S5 melisma-boogankers; L4 extender-dashes.
  *
  * Usage:
  *   npm install
@@ -53,37 +54,40 @@ const CORIB_COMPACT = {
   // bij S8-recite (mscz-leesbaarheid §2 / P3a; gemeten derde-antifoon).
   sheetWidthPx: 1000,
   contentPadPx: 10,
-  // (a) verticaal — P3c: dichtere balkafstand (lyrics blijven leesbaar);
-  //    P3d: ruimere systeemafstand (S10-nummers / @tekst raken vorig systeem niet).
-  StaffDistance: 3.6,
-  BetweenStaffDistance: 2.8,
+  // (a) verticaal — P3c: OSMD-default LyricsYOffset=0; eerdere 1.05/1.7
+  //    blies het SA↔TB-gat op (alleluia-8 ~148 px). LyricsHeight > 2
+  //    voor leesbaar font *vóór* layout (niet post-hoc font-size).
+  //    P3d: systeemlucht blijft ruimer.
+  StaffDistance: 2.6,
+  BetweenStaffDistance: 2.2,
   MinimumDistanceBetweenSystems: 5.0,
-  MinSkyBottomDistBetweenStaves: 0.5,
-  LyricsYOffsetToStaffHeight: 1.7,
-  LyricsYMarginToBottomLine: 0.3,
-  // (b) horizontaal — MeasureWidthFactor 1 (lager: S8-lettergrepen
-  //    overlappen). FixedMeasureWidth niet: die trekt élke maat tot de
-  //    breedste → blad veel te hoog voor CoriB-scherm.
-  //    compacttight zet VoiceSpacing op 0.65/2.0; dat knelt lettergrepen
-  //    (maat 2 «neer|gij»). Terug naar OSMD-default 0.85/3.0.
-  MeasureWidthFactor: 1.0,
-  VoiceSpacingMultiplierVexflow: 0.85,
-  VoiceSpacingAddendVexflow: 3.0,
-  // (c) lettergreep / streepje — OSMD-defaults (lager elongation/padding
-  //    gaf overlap in maat 2 van derde-antifoon).
-  BetweenSyllableMinimumDistance: 0.5,
-  BetweenSyllableMaximumDistance: 10,
-  HorizontalBetweenLyricsDistance: 0.2,
-  MinimumDistanceBetweenDashes: 10,
-  MaximumLyricsElongationFactor: 2.5,
+  MinSkyBottomDistBetweenStaves: 0.25,
+  MinimumStaffLineDistance: 2.8,
+  LyricsHeight: 3.4,
+  LyricsYOffsetToStaffHeight: 0,
+  LyricsYMarginToBottomLine: 0.15,
+  // (b) horizontaal — VoiceSpacing + syllable-min zodat S8-recite
+  //    niet tot «iaAl» plakt terwijl rechts wit blijft (alleluia-8).
+  MeasureWidthFactor: 1.05,
+  VoiceSpacingMultiplierVexflow: 1.0,
+  VoiceSpacingAddendVexflow: 6.0,
+  // (c) lettergreep — P3a; grotere LyricsHeight vraagt meer x-ruimte.
+  BetweenSyllableMinimumDistance: 2.0,
+  BetweenSyllableMaximumDistance: 12,
+  HorizontalBetweenLyricsDistance: 0.85,
+  MinimumDistanceBetweenDashes: 8,
+  MaximumLyricsElongationFactor: 3.0,
   LyricsUseXPaddingForLongLyrics: true,
-  LyricsXPaddingFactorForLongLyrics: 1.0,
+  LyricsXPaddingFactorForLongLyrics: 1.35,
+  LyricOverlapAllowedIntoNextMeasure: false,
   // (d) S10 — maatnummers alleen aan systeembegin (canonical-checklists).
   RenderMeasureNumbersOnlyAtSystemStart: true,
-  // (e) stokken iets korter dan OSMD-default (3.0 / 2.5–4.5)
-  IdealStemLength: 2.6,
-  StemMinLength: 2.2,
-  StemMaxLength: 3.6,
+  // (e) stoklengte — OSMD 1.9.3/VexFlow negeert IdealStemLength in de
+  // praktijk (altijd ~35 px). P3c-klaring A↓/T↑↔lyrics gebeurt post-layout
+  // (trimStemsClearOfLyricsScreen na balkgat-compressie).
+  IdealStemLength: 2.2,
+  StemMinLength: 1.8,
+  StemMaxLength: 2.8,
 };
 
 function coribCompactRuleEntries() {
@@ -325,120 +329,1191 @@ async function main() {
         if (typeof window.__vsaOsmdS8FinalizePrint === "function") {
           window.__vsaOsmdS8FinalizePrint(mount, xml);
         }
-        // L2 — Source Sans 3 op leesbare pt (MuseScore-ref: lyrics 13 / cues 12).
-        (function enforceLyricCueFontSizes() {
+        // S22 / P3e — ná S8 zodat spacer-kolommen data-osmd-anchor-x hebben.
+        if (typeof window.__vsaOsmdCenterSyllableSlots === "function") {
+          window.__vsaOsmdCenterSyllableSlots(mount);
+        }
+        // L2 — Source Sans 3; grootte volgt EngravingRules.LyricsHeight
+        // (niet post-hoc vergroten: dat veroorzaakte «iaAl»-overlap).
+        (function enforceLyricCueFontFamily() {
           for (const t of mount.querySelectorAll(
             ".vf-text.lyrics text, .vf-text.dash text"
           )) {
-            const fs = parseFloat(t.getAttribute("font-size"));
-            if (!Number.isFinite(fs) || fs < 12.5) {
-              t.setAttribute("font-size", "13");
-            }
             t.setAttribute("font-family", "'" + fontFamily + "'");
           }
           for (const t of mount.querySelectorAll("text")) {
             const s = String(t.textContent || "").trim();
             if (!(/^P:/.test(s) || s.startsWith("..."))) continue;
-            const fs = parseFloat(t.getAttribute("font-size"));
-            if (!Number.isFinite(fs) || fs < 11.5) {
-              t.setAttribute("font-size", "12");
-            }
             t.setAttribute("font-family", "'" + fontFamily + "'");
           }
         })();
-        // OSMD hangt lyrics aan de skyline van de bovenbalk; bij een
-        // groter balkgat blijven ze te hoog. Verschuif lyrics+streepjes
-        // per systeem naar het midden van treble-onder ↔ bas-boven.
-        (function centerLyricsBetweenStaves() {
-          const staffs = Array.from(mount.querySelectorAll(".staffline"));
-          if (staffs.length < 2) return;
-          // Alleen de vijf notenbalklijnen (niet de hele stave-bbox met
-          // stokken/lyrics) — anders valt het «gat» al over de lyrics heen.
-          const bands = staffs
-            .map((el) => {
-              const ys = [];
-              for (const p of el.querySelectorAll("path")) {
-                const d = p.getAttribute("d") || "";
-                const m = d.match(
-                  /^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/
-                );
-                if (!m) continue;
-                if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
-                if (Number(m[3]) - Number(m[1]) < 200) continue;
-                ys.push(Number(m[2]));
-              }
-              if (ys.length < 4) return null;
-              return { el, y: Math.min(...ys), bottom: Math.max(...ys) };
-            })
+        // Zelfde font op lyric-px laden vóór gap/compress-metingen
+        // (anders fallback-metrics → schijnbaar genoeg wit, later «iaAl»).
+        if (document.fonts && document.fonts.load) {
+          const sample = mount.querySelector(".vf-text.lyrics text");
+          const px = sample?.getAttribute("font-size") || "34px";
+          await document.fonts.load(px + ' "' + fontFamily + '"');
+          await document.fonts.ready;
+        }
+        // P3c — balkgat comprimeren. Meet op balk*lijnen* (niet `.staffline`-
+        // groep: die omvat stokken én lyrics). Ruimte houden voor S5-bogen
+        // + lyrics; alleen de bas-groep omhoog. S5-pull volgt ná compressie.
+        (function compressStaffGapScreen() {
+          const PAD = 14;
+          const svgEl = mount.querySelector("svg");
+          const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
+          const sy = ctm && ctm.d ? ctm.d : 1;
+          function staffLineBand(el) {
+            const tops = [];
+            const bots = [];
+            for (const p of el.querySelectorAll("path")) {
+              const d = p.getAttribute("d") || "";
+              const m = d.match(
+                /^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/
+              );
+              if (!m) continue;
+              if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+              if (Number(m[3]) - Number(m[1]) < 200) continue;
+              const r = p.getBoundingClientRect();
+              if (!(r.width > 50)) continue;
+              tops.push(r.top);
+              bots.push(r.bottom);
+            }
+            if (tops.length < 4) return null;
+            return {
+              el,
+              top: Math.min(...tops),
+              bottom: Math.max(...bots),
+            };
+          }
+          function appendTranslateY(el, dySvg) {
+            if (!(Math.abs(dySvg) >= 0.2)) return;
+            const prev = el.getAttribute("transform") || "";
+            el.setAttribute(
+              "transform",
+              `${prev} translate(0, ${dySvg.toFixed(2)})`.trim()
+            );
+          }
+          const bands = Array.from(mount.querySelectorAll(".staffline"))
+            .map(staffLineBand)
             .filter(Boolean)
-            .sort((a, b) => a.y - b.y);
+            .sort((a, b) => a.top - b.top);
+          if (bands.length < 2) return;
           for (let i = 0; i + 1 < bands.length; i += 2) {
             const treble = bands[i];
             const bass = bands[i + 1];
-            const gapTop = treble.bottom;
-            const gapBot = bass.y;
-            if (!(gapBot > gapTop + 20)) continue;
-            const nodes = [];
-            for (const sel of [
-              ".vf-text.lyrics text",
-              ".vf-text.dash text",
-              ".vf-text.lyrics",
-              ".vf-text.dash",
-            ]) {
-              for (const el of mount.querySelectorAll(sel)) {
-                let bb;
-                try {
-                  bb = el.getBBox();
-                } catch {
-                  continue;
+            const lyricGs = [];
+            for (const g of mount.querySelectorAll(
+              ".vf-text.lyrics, .vf-text.dash"
+            )) {
+              const r = g.getBoundingClientRect();
+              if (!(r.width > 0 || r.height > 0)) continue;
+              if (r.bottom <= treble.bottom - 2) continue;
+              if (r.top >= bass.top + 2) continue;
+              lyricGs.push(g);
+            }
+            if (!lyricGs.length) continue;
+            let lyricBot = -Infinity;
+            for (const g of lyricGs) {
+              lyricBot = Math.max(
+                lyricBot,
+                g.getBoundingClientRect().bottom
+              );
+            }
+            const band2 = staffLineBand(bass.el) || bass;
+            // Geen stok-overhang reserveren: MuseScore-ref deelt die band.
+            const bassDyPx = lyricBot + PAD - band2.top;
+            if (bassDyPx < -4) {
+              appendTranslateY(bass.el, bassDyPx / sy);
+            }
+            // Lyrics centreren in het (nieuwe) balkgat — niet tegen de bas.
+            const band2b = staffLineBand(bass.el) || band2;
+            let lyricTop = Infinity;
+            lyricBot = -Infinity;
+            for (const g of lyricGs) {
+              const r = g.getBoundingClientRect();
+              lyricTop = Math.min(lyricTop, r.top);
+              lyricBot = Math.max(lyricBot, r.bottom);
+            }
+            const gapMid = (treble.bottom + band2b.top) / 2;
+            const lyricMid = (lyricTop + lyricBot) / 2;
+            const centerDy = gapMid - lyricMid;
+            if (Math.abs(centerDy) >= 2) {
+              const dySvg = centerDy / sy;
+              for (const g of lyricGs) appendTranslateY(g, dySvg);
+            }
+            // P3c — accolade/bracket herschalen op SA-top ↔ TB-bottom.
+            // compress verplaatst alleen de bas; VexFlow-bracket blijft
+            // op de oude hoogte → steekt onder de bas uit (alleluia-8).
+            const band2c = staffLineBand(bass.el) || band2b;
+            for (const brG of mount.querySelectorAll(".vf-bracket")) {
+              if (brG.getAttribute("data-osmd-bracket-fit") === "1") {
+                continue;
+              }
+              const br = brG.getBoundingClientRect();
+              if (!(br.height > 40)) continue;
+              // Bracket hoort bij dit systeem als hij SA+TB overlapt.
+              if (br.bottom < treble.top - 20) continue;
+              if (br.top > band2c.bottom + 20) continue;
+              if (br.top > treble.bottom + 40) continue;
+              const tipAbove = Math.max(0, treble.top - br.top);
+              // Zelfde tip-lengte onder TB als boven SA (typisch ~12 px).
+              const tipBelow = Math.max(4, Math.min(14, tipAbove || 10));
+              const targetTop = treble.top - tipAbove;
+              const targetBottom = band2c.bottom + tipBelow;
+              if (!(targetBottom > targetTop + 40)) continue;
+              const scaleY = (targetBottom - targetTop) / br.height;
+              if (
+                Math.abs(scaleY - 1) < 0.015 &&
+                Math.abs(br.top - targetTop) < 1.5
+              ) {
+                brG.setAttribute("data-osmd-bracket-fit", "1");
+                continue;
+              }
+              const ctmB = brG.getScreenCTM();
+              if (!ctmB) continue;
+              const invB = ctmB.inverse();
+              const ptTop = svgEl.createSVGPoint();
+              ptTop.x = br.left + br.width / 2;
+              ptTop.y = br.top;
+              const locTop = ptTop.matrixTransform(invB);
+              const ptTgt = svgEl.createSVGPoint();
+              ptTgt.x = br.left + br.width / 2;
+              ptTgt.y = targetTop;
+              const locTgt = ptTgt.matrixTransform(invB);
+              const dyLoc = locTgt.y - locTop.y;
+              const prevT = brG.getAttribute("transform") || "";
+              brG.setAttribute(
+                "transform",
+                (
+                  `${prevT} translate(0, ${locTop.y.toFixed(3)}) ` +
+                  `scale(1, ${scaleY.toFixed(5)}) ` +
+                  `translate(0, ${(-locTop.y).toFixed(3)}) ` +
+                  `translate(0, ${dyLoc.toFixed(3)})`
+                ).trim()
+              );
+              brG.setAttribute("data-osmd-bracket-fit", "1");
+            }
+            // P3c — staff-connector naast accolade: verbergen. Bracket dekt
+            // SA↔TB al; de dunne connector oogt als spooklijn tussen
+            // accolade en maatnummer/sleutel (alleluia-toon-2).
+            for (const conn of mount.querySelectorAll(".vf-connector")) {
+              const cr = conn.getBoundingClientRect();
+              if (cr.bottom < treble.top - 40) continue;
+              if (cr.top > band2c.bottom + 40) continue;
+              conn.setAttribute("visibility", "hidden");
+              conn.setAttribute("data-osmd-connector-hide", "1");
+            }
+          }
+        })();
+        // P3c — A↓/T↑-stokken: overlap met lyric-inkt ≤ kwartnootkop-hoogte.
+        // OSMD/VexFlow IdealStemLength ~35 px; trim alleen excessieve snede.
+        (function trimStemsClearOfLyricsScreen() {
+          const MIN_STEM_PX = 10;
+          const svgEl = mount.querySelector("svg");
+          const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
+          const sy = ctm && ctm.d ? ctm.d : 1;
+          let noteheadH = 10;
+          for (const h of mount.querySelectorAll(".vf-notehead")) {
+            const hr = h.getBoundingClientRect();
+            if (hr.height >= 6 && hr.height <= 24) {
+              noteheadH = Math.max(noteheadH, hr.height);
+            }
+          }
+          const maxOverlap = noteheadH;
+          function staffLineBand(el) {
+            const tops = [];
+            const bots = [];
+            for (const p of el.querySelectorAll("path")) {
+              const d = p.getAttribute("d") || "";
+              const m = d.match(
+                /^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/
+              );
+              if (!m) continue;
+              if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+              if (Number(m[3]) - Number(m[1]) < 200) continue;
+              const r = p.getBoundingClientRect();
+              if (!(r.width > 50)) continue;
+              tops.push(r.top);
+              bots.push(r.bottom);
+            }
+            if (tops.length < 4) return null;
+            return {
+              top: Math.min(...tops),
+              bottom: Math.max(...bots),
+            };
+          }
+          const bands = Array.from(mount.querySelectorAll(".staffline"))
+            .map(staffLineBand)
+            .filter(Boolean)
+            .sort((a, b) => a.top - b.top);
+          if (bands.length < 2) return;
+          for (let i = 0; i + 1 < bands.length; i += 2) {
+            const treble = bands[i];
+            const bass = bands[i + 1];
+            const lyricGs = [];
+            for (const g of mount.querySelectorAll(".vf-text.lyrics")) {
+              const r = g.getBoundingClientRect();
+              if (!(r.width > 0 || r.height > 0)) continue;
+              if (r.bottom <= treble.bottom - 2) continue;
+              if (r.top >= bass.top + 2) continue;
+              lyricGs.push(r);
+            }
+            if (!lyricGs.length) continue;
+            let lyricTop = Infinity;
+            let lyricBot = -Infinity;
+            for (const r of lyricGs) {
+              lyricTop = Math.min(lyricTop, r.top);
+              lyricBot = Math.max(lyricBot, r.bottom);
+            }
+            // Tip mag maxOverlap in de lyric-inkt; daarboven inkorten.
+            const limitDown = lyricTop + maxOverlap;
+            const limitUp = lyricBot - maxOverlap;
+            for (const stemG of mount.querySelectorAll("g.vf-stem")) {
+              const p = stemG.querySelector("path");
+              if (!p) continue;
+              const d = p.getAttribute("d") || "";
+              const m = d.match(
+                /^M([-\d.]+)\s+([-\d.]+)L([-\d.]+)\s+([-\d.]+)$/
+              );
+              if (!m) continue;
+              const x1 = Number(m[1]);
+              const y1 = Number(m[2]);
+              const x2 = Number(m[3]);
+              const y2 = Number(m[4]);
+              if (Math.abs(x2 - x1) > 0.5) continue;
+              const r = p.getBoundingClientRect();
+              if (!(r.height >= 8)) continue;
+              // Alleen stokken die dit SA↔TB-balkgat raken.
+              if (r.bottom <= treble.bottom - 2 || r.top >= bass.top + 2) {
+                continue;
+              }
+              const stemDown = y2 > y1;
+              const stemUp = y2 < y1;
+              if (stemDown && r.bottom > limitDown) {
+                const tipScreen = Math.max(
+                  r.top + MIN_STEM_PX,
+                  Math.min(r.bottom, limitDown)
+                );
+                const dyScreen = tipScreen - r.bottom;
+                if (dyScreen < -0.5) {
+                  const tipLocal = y2 + dyScreen / sy;
+                  p.setAttribute(
+                    "d",
+                    `M${x1} ${y1}L${x2} ${tipLocal.toFixed(3)}`
+                  );
                 }
-                if (bb.y > gapTop - 2 && bb.y < gapBot + 2) {
-                  nodes.push(el);
+                continue;
+              }
+              if (stemUp && r.top < limitUp) {
+                const tipScreen = Math.min(
+                  r.bottom - MIN_STEM_PX,
+                  Math.max(r.top, limitUp)
+                );
+                const dyScreen = tipScreen - r.top;
+                if (dyScreen > 0.5) {
+                  const tipLocal = y2 + dyScreen / sy;
+                  p.setAttribute(
+                    "d",
+                    `M${x1} ${y1}L${x2} ${tipLocal.toFixed(3)}`
+                  );
                 }
               }
             }
-            // Uniek op element
-            const seen = new Set();
-            const uniq = [];
-            for (const el of nodes) {
-              if (seen.has(el)) continue;
-              seen.add(el);
-              uniq.push(el);
+          }
+        })();
+        // S2 (+ S5) — melisma-bogen herankeren op stem-juiste punten:
+        // A: onderkant nootkop→nootkop; T: bovenkant nootkop→nootkop;
+        // S: bovenkant stok→stok; B: onderkant stok→stok. Boog blijft
+        // dicht bij de balk (kleine bulge). Toets: alleluia-toon-2.
+        (function reanchorMelismaSlursS2() {
+          function staffLineBand(el) {
+            const tops = [];
+            const bots = [];
+            for (const p of el.querySelectorAll("path")) {
+              const d = p.getAttribute("d") || "";
+              const m = d.match(
+                /^M([-\d.]+) ([-\d.]+)L([-\d.]+) ([-\d.]+)$/
+              );
+              if (!m) continue;
+              if (Math.abs(Number(m[2]) - Number(m[4])) > 0.2) continue;
+              if (Number(m[3]) - Number(m[1]) < 200) continue;
+              const r = p.getBoundingClientRect();
+              if (!(r.width > 50)) continue;
+              tops.push(r.top);
+              bots.push(r.bottom);
             }
-            if (!uniq.length) continue;
-            let minY = Infinity;
-            let maxY = -Infinity;
-            for (const el of uniq) {
-              try {
-                const b = el.getBBox();
-                minY = Math.min(minY, b.y);
-                maxY = Math.max(maxY, b.y + b.height);
-              } catch {
-                /* skip */
+            if (tops.length < 4) return null;
+            return { top: Math.min(...tops), bottom: Math.max(...bots) };
+          }
+          function parseCubicStartEnd(d) {
+            const m = d.match(
+              /M([-\d.]+)\s+([-\d.]+)C([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+),([-\d.]+)\s+([-\d.]+)/
+            );
+            if (!m) return null;
+            return {
+              x0: Number(m[1]),
+              y0: Number(m[2]),
+              x3: Number(m[7]),
+              y3: Number(m[8]),
+            };
+          }
+          function toScreen(el, x, y) {
+            const ctm = el.getScreenCTM();
+            if (!ctm) return null;
+            const pt = el.ownerSVGElement.createSVGPoint();
+            pt.x = x;
+            pt.y = y;
+            const s = pt.matrixTransform(ctm);
+            return { x: s.x, y: s.y };
+          }
+          function toLocal(el, x, y) {
+            const ctm = el.getScreenCTM();
+            if (!ctm) return null;
+            const inv = ctm.inverse();
+            const pt = el.ownerSVGElement.createSVGPoint();
+            pt.x = x;
+            pt.y = y;
+            const s = pt.matrixTransform(inv);
+            return { x: s.x, y: s.y };
+          }
+          const bands = Array.from(mount.querySelectorAll(".staffline"))
+            .map(staffLineBand)
+            .filter(Boolean)
+            .sort((a, b) => a.top - b.top);
+          const notes = [];
+          for (const n of mount.querySelectorAll(".vf-stavenote")) {
+            if (n.getAttribute("data-osmd-spacer") === "1") continue;
+            const head = n.querySelector(
+              ".vf-notehead path, [data-osmd-breve-glyph='1'] path"
+            );
+            if (!head) continue;
+            const hb = head.getBoundingClientRect();
+            if (!(hb.width > 0.5)) continue;
+            const stem = n.querySelector(".vf-stem path");
+            let stemUp = null;
+            let tip = null;
+            if (stem) {
+              const sb = stem.getBoundingClientRect();
+              stemUp =
+                sb.top + sb.height / 2 < hb.top + hb.height / 2;
+              tip = stemUp
+                ? { x: sb.left + sb.width / 2, y: sb.top }
+                : { x: sb.left + sb.width / 2, y: sb.bottom };
+            }
+            notes.push({
+              id: n.id,
+              head: {
+                cx: (hb.left + hb.right) / 2,
+                cy: (hb.top + hb.bottom) / 2,
+                top: hb.top,
+                bottom: hb.bottom,
+              },
+              stemUp,
+              tip,
+            });
+          }
+          function bandIndex(y) {
+            let best = -1;
+            let bd = Infinity;
+            for (let i = 0; i < bands.length; i += 1) {
+              const mid = (bands[i].top + bands[i].bottom) / 2;
+              const d = Math.abs(mid - y);
+              if (d < bd) {
+                bd = d;
+                best = i;
               }
             }
-            if (!Number.isFinite(minY) || !Number.isFinite(maxY)) continue;
-            // Alleen omlaag schuiven als er onder meer lucht is dan boven
-            // (OSMD plakt lyrics aan de bovenbalk). Nooit omhoog.
-            const roomAbove = minY - gapTop;
-            const roomBelow = gapBot - maxY;
-            const dy = (roomBelow - roomAbove) / 2;
-            if (!(dy > 3)) continue;
-            // Alleen groepen verschuiven (tekst zit erin); voorkom dubbel.
-            const groups = new Set();
-            for (const el of uniq) {
-              const g =
-                el.classList && el.classList.contains("vf-text")
-                  ? el
-                  : el.closest(".vf-text");
-              if (g) groups.add(g);
+            return best;
+          }
+          function roleFor(note, bIdx, preferRole, preferCy) {
+            // Even index = SA (boven); oneven = TB.
+            const sa = bIdx % 2 === 0;
+            if (note.stemUp === true) return sa ? "S" : "T";
+            if (note.stemUp === false) return sa ? "A" : "B";
+            // Stokloos: niet via balkmidden (S én A zitten vaak beide
+            // onder de middellijn). Bij bekende startstem: zelfde stem als
+            // |cy−preferCy| klein is, anders de tegenstem.
+            if (preferRole && preferCy != null) {
+              if (Math.abs(note.head.cy - preferCy) <= 8) {
+                return preferRole;
+              }
+              if (sa) return preferRole === "S" ? "A" : "S";
+              return preferRole === "T" ? "B" : "T";
             }
-            for (const g of groups) {
+            return sa ? "S" : "T";
+          }
+          function anchorFor(note, role) {
+            if (role === "A") {
+              return { x: note.head.cx, y: note.head.bottom };
+            }
+            if (role === "T") {
+              return { x: note.head.cx, y: note.head.top };
+            }
+            if (role === "S") {
+              return note.tip
+                ? { x: note.tip.x, y: note.tip.y }
+                : { x: note.head.cx, y: note.head.top };
+            }
+            if (role === "B") {
+              return note.tip
+                ? { x: note.tip.x, y: note.tip.y }
+                : { x: note.head.cx, y: note.head.bottom };
+            }
+            return { x: note.head.cx, y: note.head.cy };
+          }
+          function pickNote(px, py, preferRole, preferCy) {
+            let best = null;
+            let bestScore = Infinity;
+            for (const n of notes) {
+              const bIdx = bandIndex(n.head.cy);
+              const role = roleFor(n, bIdx, preferRole, preferCy);
+              const useRole = preferRole || role;
+              const anc = anchorFor(n, useRole);
+              const dx = Math.abs(anc.x - px);
+              const dy = Math.abs(anc.y - py);
+              if (dx > 60) continue;
+              let score = dx + dy * 0.35;
+              if (preferRole && role !== preferRole) score += 45;
+              if (
+                preferCy != null &&
+                Math.abs(n.head.cy - preferCy) > 6
+              ) {
+                score += Math.abs(n.head.cy - preferCy) * 0.8;
+              }
+              if (score < bestScore) {
+                bestScore = score;
+                best = { note: n, role: useRole, bIdx, score };
+              }
+            }
+            return best;
+          }
+          for (const g of mount.querySelectorAll(".vf-curve")) {
+            const pathEl = g.querySelector("path");
+            if (!pathEl) continue;
+            const d0 = pathEl.getAttribute("d") || "";
+            const ends = parseCubicStartEnd(d0);
+            if (!ends) continue;
+            const p0 = toScreen(pathEl, ends.x0, ends.y0);
+            const p3 = toScreen(pathEl, ends.x3, ends.y3);
+            if (!p0 || !p3) continue;
+            if (Math.abs(p3.x - p0.x) < 24) continue;
+            const startHit = pickNote(p0.x, p0.y, null, null);
+            if (!startHit) continue;
+            const role = startHit.role;
+            const endHit = pickNote(
+              p3.x,
+              p3.y,
+              role,
+              startHit.note.head.cy
+            );
+            if (!endHit) continue;
+            const a0 = anchorFor(startHit.note, role);
+            const a3 = anchorFor(endHit.note, role);
+            const loc0 = toLocal(pathEl, a0.x, a0.y);
+            const loc3 = toLocal(pathEl, a3.x, a3.y);
+            if (!loc0 || !loc3) continue;
+            const span = Math.abs(loc3.x - loc0.x);
+            // S5: kleine bulge; A/T (richting balkgat) strakker dan S/B.
+            const above = role === "S" || role === "T";
+            const intoGap = role === "A" || role === "T";
+            const bulge = intoGap
+              ? Math.min(7, Math.max(3, span * 0.055))
+              : Math.min(12, Math.max(5, span * 0.09));
+            const by = above ? -bulge : bulge;
+            const thick = 0.55;
+            const ty = above ? -thick : thick;
+            const c1x = loc0.x + span * 0.28 * Math.sign(loc3.x - loc0.x || 1);
+            const c2x = loc3.x - span * 0.28 * Math.sign(loc3.x - loc0.x || 1);
+            const c1y = loc0.y + by;
+            const c2y = loc3.y + by;
+            const d =
+              `M${loc0.x} ${loc0.y}` +
+              `C${c1x} ${c1y},${c2x} ${c2y},${loc3.x} ${loc3.y}` +
+              `L${loc3.x} ${loc3.y + ty}` +
+              `C${c2x} ${c2y + ty},${c1x} ${c1y + ty},${loc0.x} ${loc0.y + ty}` +
+              `L${loc0.x} ${loc0.y}Z`;
+            pathEl.setAttribute("d", d);
+            g.setAttribute("data-osmd-s2", role);
+          }
+          // S5-clamp: restant-uitsteek in het balkgat terugduwen (na ankers).
+          const MAX_OUT_PX = 18;
+          const svgEl = mount.querySelector("svg");
+          const sy =
+            svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM()
+              ? svgEl.getScreenCTM().d || 1
+              : 1;
+          for (let i = 0; i + 1 < bands.length; i += 2) {
+            const treble = bands[i];
+            const bass = bands[i + 1];
+            const gapMid = (treble.bottom + bass.top) / 2;
+            for (const g of mount.querySelectorAll(".vf-curve")) {
+              const r = g.getBoundingClientRect();
+              if (!(r.width > 24)) continue;
+              if (r.bottom <= treble.bottom - 2) continue;
+              if (r.top >= bass.top + 2) continue;
+              const midY = (r.top + r.bottom) / 2;
+              let dyPx = 0;
+              if (midY < gapMid) {
+                const limit = treble.bottom + MAX_OUT_PX;
+                if (r.bottom > limit) dyPx = limit - r.bottom;
+              } else {
+                const limit = bass.top - MAX_OUT_PX;
+                if (r.top < limit) dyPx = limit - r.top;
+              }
+              if (!(Math.abs(dyPx) >= 1)) continue;
               const prev = g.getAttribute("transform") || "";
               g.setAttribute(
                 "transform",
-                `${prev} translate(0, ${dy.toFixed(2)})`.trim()
+                `${prev} translate(0, ${(dyPx / sy).toFixed(2)})`.trim()
               );
+            }
+          }
+        })();
+        // P3a — glyph-overlap herstellen. Screen-px → SVG-user units via CTM.
+        // Woordgrens (ia,|Al / ja,|Al) strenger. Dashes mee verschuiven —
+        // anders blijft «-» op oude x en snijdt door de volgende lettergreep
+        // (alleluia-2/3).
+        (function enforceScreenLyricGaps() {
+          const MIN_GAP_PX = 16;
+          const MIN_WORD_GAP_PX = 48;
+          // S22: gap-shift mag lyric niet >MAX_NOTE_DX_PX van nootkolom trekken.
+          // Contract |Δ|≤2; her-snap daarna herstelt — cap beperkt schade.
+          const MAX_NOTE_DX_PX = 8;
+          const svgEl = mount.querySelector("svg");
+          const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
+          const sx = ctm && ctm.a ? ctm.a : 1;
+          function appendTranslateX(el, dxSvg) {
+            if (!(dxSvg > 0.2)) return;
+            const prev = el.getAttribute("transform") || "";
+            el.setAttribute(
+              "transform",
+              `${prev} translate(${dxSvg.toFixed(2)}, 0)`.trim()
+            );
+          }
+          // Nootkolommen (screen): zichtbare koppen + breve-glyphs + spacer-
+          // ankers via tijdelijke probe-cirkel op data-osmd-anchor-x.
+          const noteCols = [];
+          for (const n of mount.querySelectorAll(".vf-stavenote")) {
+            const isSpacer = n.getAttribute("data-osmd-spacer") === "1";
+            const glyph = n.querySelector("[data-osmd-breve-glyph='1']");
+            const head = n.querySelector(".vf-notehead path");
+            const el = glyph || head;
+            if (el) {
+              const r = el.getBoundingClientRect();
+              if (r.width > 0.5) {
+                noteCols.push({
+                  cx: (r.left + r.right) / 2,
+                  cy: (r.top + r.bottom) / 2,
+                  spacer: isSpacer,
+                });
+                continue;
+              }
+            }
+            const anchor = n.getAttribute("data-osmd-anchor-x");
+            if (anchor == null || !Number.isFinite(Number(anchor))) continue;
+            const ns = "http://www.w3.org/2000/svg";
+            const probe = document.createElementNS(ns, "circle");
+            probe.setAttribute("cx", String(Number(anchor)));
+            probe.setAttribute("cy", "0");
+            probe.setAttribute("r", "0.01");
+            probe.setAttribute("fill", "none");
+            n.appendChild(probe);
+            // cy=0 is verkeerd; gebruik staf-y van een sibling-noot.
+            let staffY = null;
+            const sib = n.parentElement && n.parentElement.querySelector(
+              ".vf-stavenote .vf-notehead path, .vf-stavenote [data-osmd-breve-glyph='1']"
+            );
+            if (sib) {
+              staffY = sib.getBoundingClientRect().top;
+            }
+            const pr = probe.getBoundingClientRect();
+            n.removeChild(probe);
+            if (!(pr.width >= 0) && !(pr.left || pr.right)) continue;
+            noteCols.push({
+              cx: (pr.left + pr.right) / 2 || pr.x,
+              cy: staffY != null ? staffY + 5 : pr.top,
+              spacer: true,
+            });
+          }
+          function nearestNoteCol(lyricCx, lyricCy, extraDxPx) {
+            let best = null;
+            let bestD = Infinity;
+            for (const c of noteCols) {
+              if (Math.abs(c.cy - lyricCy) > 100) continue;
+              const d = Math.abs(c.cx - (lyricCx + (extraDxPx || 0)));
+              if (d < bestD) {
+                bestD = d;
+                best = c;
+              }
+            }
+            return best;
+          }
+          function nearestNoteDx(lyricCx, lyricCy, extraDxPx) {
+            const col = nearestNoteCol(lyricCx, lyricCy, extraDxPx);
+            return col ? Math.abs(col.cx - (lyricCx + (extraDxPx || 0))) : Infinity;
+          }
+          const groups = Array.from(
+            mount.querySelectorAll(".vf-text.lyrics")
+          ).filter((g) => {
+            const t = g.querySelector("text");
+            const r = g.getBoundingClientRect();
+            return t && r.width > 0;
+          });
+          groups.sort((a, b) => {
+            const ra = a.getBoundingClientRect();
+            const rb = b.getBoundingClientRect();
+            return ra.top - rb.top || ra.left - rb.left;
+          });
+          const dashes = Array.from(
+            mount.querySelectorAll(".vf-text.dash")
+          ).filter((g) => g.getBoundingClientRect().width > 0);
+          function shiftLyricWithDashes(i, needSvg, force) {
+            const curG = groups[i];
+            const curR = curG.getBoundingClientRect();
+            const nextR =
+              i + 1 < groups.length
+                ? groups[i + 1].getBoundingClientRect()
+                : null;
+            const prevR =
+              i > 0 ? groups[i - 1].getBoundingClientRect() : null;
+            if (
+              prevR &&
+              nextR &&
+              Math.abs(curR.top - prevR.top) > 28
+            ) {
+              /* other band */
+            }
+            // Beperk shift t.o.v. nootkolom (S22/P3e). Force (gap <12):
+            // nog steeds max ~28 px van de noot — anders faalt
+            // lyric↔noot op brede eindlettergrepen («heid,»).
+            // Nooit naar een ándere kolom lopen: 48px-woordgap na «ja,»
+            // trok anders de volgende lettergreep voorbij haar spacer-
+            // of melisma-slot (alleluia-toon-2).
+            const lyricCx = (curR.left + curR.right) / 2;
+            const lyricCy = (curR.top + curR.bottom) / 2;
+            let dx = needSvg;
+            const cap = force ? 28 : MAX_NOTE_DX_PX;
+            const home = nearestNoteCol(lyricCx, lyricCy, 0);
+            const before = nearestNoteDx(lyricCx, lyricCy, 0);
+            if (Number.isFinite(before) && before < 90) {
+              while (dx > 0.3) {
+                const afterHome = nearestNoteCol(
+                  lyricCx,
+                  lyricCy,
+                  dx * sx
+                );
+                if (
+                  home &&
+                  afterHome &&
+                  Math.abs(afterHome.cx - home.cx) > 8
+                ) {
+                  dx *= 0.7;
+                  continue;
+                }
+                const after = nearestNoteDx(lyricCx, lyricCy, dx * sx);
+                if (after <= cap) break;
+                dx *= 0.7;
+              }
+              if (
+                !force &&
+                nearestNoteDx(lyricCx, lyricCy, dx * sx) > cap + 8
+              ) {
+                return; // liever krappe gap dan losse lyric
+              }
+              const finalHome = nearestNoteCol(lyricCx, lyricCy, dx * sx);
+              if (
+                home &&
+                finalHome &&
+                Math.abs(finalHome.cx - home.cx) > 8
+              ) {
+                return;
+              }
+            }
+            if (!(dx > 0.2)) return;
+            appendTranslateX(curG, dx);
+            // Dashes die bij deze lettergreep horen: tussen prev en next,
+            // dichter bij cur dan bij de buur.
+            for (const d of dashes) {
+              const dr = d.getBoundingClientRect();
+              if (Math.abs(dr.top - curR.top) > 28) continue;
+              const mid = (dr.left + dr.right) / 2;
+              const leftBound = prevR ? prevR.right - 4 : -Infinity;
+              const rightBound = nextR ? nextR.left + 4 : Infinity;
+              if (mid < leftBound || mid > rightBound) continue;
+              const distCur = Math.abs(mid - (curR.left + curR.right) / 2);
+              const distPrev = prevR
+                ? Math.abs(mid - (prevR.left + prevR.right) / 2)
+                : Infinity;
+              const distNext = nextR
+                ? Math.abs(mid - (nextR.left + nextR.right) / 2)
+                : Infinity;
+              if (distCur <= distPrev && distCur <= distNext) {
+                appendTranslateX(d, dx);
+              }
+            }
+          }
+          for (let pass = 0; pass < 12; pass += 1) {
+            let moved = false;
+            for (let i = 1; i < groups.length; i += 1) {
+              const prevG = groups[i - 1];
+              const curG = groups[i];
+              const prevR = prevG.getBoundingClientRect();
+              const curR = curG.getBoundingClientRect();
+              if (Math.abs(curR.top - prevR.top) > 28) continue;
+              const prevT = String(
+                prevG.querySelector("text")?.textContent || ""
+              ).trim();
+              const curT = String(
+                curG.querySelector("text")?.textContent || ""
+              ).trim();
+              // Woordgap alleen na leesteken — niet bij mid-zin kapitaal
+              // («ren Gods»: heilige naam) want 48px trok lyrics van de
+              // nootkolom (P3e / maat 16).
+              // S8-recite: komma midden in spacer-run («ja,|Al» in
+              // alleluia-toon-2) mag géén 48px forceren — dat slaat de
+              // volgende spacer-kolom over en schuift cadens/melisma mis.
+              const wordBoundary = /[,.;:!?]$/.test(prevT);
+              let needMin = wordBoundary ? MIN_WORD_GAP_PX : MIN_GAP_PX;
+              if (wordBoundary) {
+                const prevCx = (prevR.left + prevR.right) / 2;
+                const curCx = (curR.left + curR.right) / 2;
+                const bandCy = (curR.top + curR.bottom) / 2;
+                const prevCol = nearestNoteCol(prevCx, bandCy, 0);
+                const curCol = nearestNoteCol(curCx, bandCy, 0);
+                if (
+                  (prevCol && prevCol.spacer) ||
+                  (curCol && curCol.spacer)
+                ) {
+                  needMin = MIN_GAP_PX;
+                }
+              }
+              const gapPx = curR.left - prevR.right;
+              if (gapPx >= needMin) continue;
+              const needSvg = (needMin - gapPx) / sx;
+              if (!(needSvg > 0.2)) continue;
+              // Onder verify-drempel (12px) of echte overlap: forceer shift
+              // (S22-cap mag dan wijken).
+              const force = gapPx < 12;
+              shiftLyricWithDashes(i, needSvg, force);
+              moved = true;
+            }
+            if (!moved) break;
+          }
+          // Woordgrens: streepjes in de gap tussen woorden weg (geen
+          // «ja, - Al»); hyphen hoort tussen lettergrepen van één woord.
+          for (let i = 1; i < groups.length; i += 1) {
+            const prevR = groups[i - 1].getBoundingClientRect();
+            const curR = groups[i].getBoundingClientRect();
+            if (Math.abs(curR.top - prevR.top) > 28) continue;
+            const prevT = String(
+              groups[i - 1].querySelector("text")?.textContent || ""
+            ).trim();
+            const curT = String(
+              groups[i].querySelector("text")?.textContent || ""
+            ).trim();
+            const wordBoundary =
+              /[,.;:!?]$/.test(prevT) ||
+              (/^[A-ZÀ-ÖØ-Þ]/.test(curT) && !/-$/.test(prevT));
+            if (!wordBoundary) continue;
+            for (const d of dashes) {
+              const dr = d.getBoundingClientRect();
+              if (Math.abs(dr.top - curR.top) > 28) continue;
+              const mid = (dr.left + dr.right) / 2;
+              if (mid > prevR.right - 2 && mid < curR.left + 2) {
+                d.remove();
+              }
+            }
+          }
+        })();
+        // P3e — her-snap na gap-enforce (S22).
+        if (typeof window.__vsaOsmdSnapLyricsToNotes === "function") {
+          window.__vsaOsmdSnapLyricsToNotes(mount);
+        }
+        // S22 — lyric naar dichtstbijzijnde kop; noot alleen mee bij Δ>5
+        // (dichte partituur / alleluia-3 «Al»).
+        (function finalSnapS22() {
+          const MAX_DX = 2;
+          const NOTE_MOVE_DX = 5;
+          const MIN_GAP = 12;
+          const svgEl = mount.querySelector("svg");
+          if (!svgEl) return;
+          const ctm = svgEl.getScreenCTM && svgEl.getScreenCTM();
+          const sx = ctm && ctm.a ? ctm.a : 1;
+          function appendTx(el, dxSvg) {
+            if (!(Math.abs(dxSvg) >= 0.25)) return;
+            const prev = el.getAttribute("transform") || "";
+            el.setAttribute(
+              "transform",
+              `${prev} translate(${dxSvg.toFixed(2)}, 0)`.trim()
+            );
+          }
+          function noteCx(n) {
+            const head =
+              n.querySelector("[data-osmd-breve-glyph='1'] path") ||
+              n.querySelector(".vf-notehead path");
+            if (head) {
+              const hr = head.getBoundingClientRect();
+              if (hr.width > 0.5) return (hr.left + hr.right) / 2;
+            }
+            const ax = n.getAttribute("data-osmd-anchor-x");
+            if (ax == null || !Number.isFinite(Number(ax))) return null;
+            const ns = "http://www.w3.org/2000/svg";
+            const probe = document.createElementNS(ns, "circle");
+            probe.setAttribute("cx", String(Number(ax)));
+            probe.setAttribute("cy", "0");
+            probe.setAttribute("r", "0.01");
+            n.appendChild(probe);
+            const pr = probe.getBoundingClientRect();
+            n.removeChild(probe);
+            return (pr.left + pr.right) / 2 || pr.x;
+          }
+          // Spacer-stavenotes hebben verborgen koppen → bbox vaak 0×0 op
+          // x≈0; cy-filter moet staf-y van een sibling gebruiken.
+          let staffCyFallback = null;
+          for (const n of mount.querySelectorAll(".vf-stavenote")) {
+            if (n.getAttribute("data-osmd-spacer") === "1") continue;
+            const head =
+              n.querySelector("[data-osmd-breve-glyph='1'] path") ||
+              n.querySelector(".vf-notehead path");
+            if (!head) continue;
+            const hr = head.getBoundingClientRect();
+            if (hr.width > 0.5) {
+              staffCyFallback = (hr.top + hr.bottom) / 2;
+              break;
+            }
+          }
+          function noteCy(n) {
+            const head =
+              n.querySelector("[data-osmd-breve-glyph='1'] path") ||
+              n.querySelector(".vf-notehead path");
+            if (head) {
+              const hr = head.getBoundingClientRect();
+              if (hr.width > 0.5) return (hr.top + hr.bottom) / 2;
+            }
+            if (n.getAttribute("data-osmd-spacer") === "1") {
+              return staffCyFallback;
+            }
+            const nr = n.getBoundingClientRect();
+            return (nr.top + nr.bottom) / 2;
+          }
+          const notes = Array.from(
+            mount.querySelectorAll(".vf-stavenote")
+          );
+          const lyrics = Array.from(
+            mount.querySelectorAll(".vf-text.lyrics")
+          ).filter((g) => {
+            const t = g.querySelector("text");
+            const r = g.getBoundingClientRect();
+            return t && r.width > 0;
+          });
+          lyrics.sort((a, b) => {
+            const ra = a.getBoundingClientRect();
+            const rb = b.getBoundingClientRect();
+            return ra.top - rb.top || ra.left - rb.left;
+          });
+          for (let i = 0; i < lyrics.length; i += 1) {
+            const g = lyrics[i];
+            const r = g.getBoundingClientRect();
+            const mid = (r.left + r.right) / 2;
+            const cy = (r.top + r.bottom) / 2;
+            let bestN = null;
+            let bestCx = null;
+            let bestD = Infinity;
+            for (const n of notes) {
+              const cx = noteCx(n);
+              if (cx == null) continue;
+              const ncy = noteCy(n);
+              if (ncy == null || Math.abs(ncy - cy) > 160) continue;
+              const d = Math.abs(cx - mid);
+              if (d < bestD) {
+                bestD = d;
+                bestCx = cx;
+                bestN = n;
+              }
+            }
+            if (!bestN || !(bestD > MAX_DX)) continue;
+            let target = bestCx;
+            const half = r.width / 2;
+            if (i > 0) {
+              const prev = lyrics[i - 1].getBoundingClientRect();
+              if (Math.abs(prev.top - r.top) <= 28) {
+                const minMid = prev.right + MIN_GAP + half;
+                if (target < minMid) target = minMid;
+              }
+            }
+            if (i + 1 < lyrics.length) {
+              const next = lyrics[i + 1].getBoundingClientRect();
+              if (Math.abs(next.top - r.top) <= 28) {
+                const maxMid = next.left - MIN_GAP - half;
+                if (target > maxMid) target = maxMid;
+              }
+            }
+            appendTx(g, (target - mid) / sx);
+            const newMid = target;
+            if (
+              Math.abs(newMid - bestCx) > NOTE_MOVE_DX &&
+              Math.abs(bestD) > NOTE_MOVE_DX
+            ) {
+              appendTx(bestN, (newMid - bestCx) / sx);
+              const nid = bestN.id || "";
+              if (nid) {
+                const led = document.getElementById(nid + "ledgers");
+                if (led) appendTx(led, (newMid - bestCx) / sx);
+              }
+            }
+          }
+        })();
+        // L3/L4/L6 — alle lyric-streepjes als één SVG-<line> op dezelfde
+        // x-hoogte (geen mix text «-» + lijn; geen reeks korte streepjes).
+        // L3/L6 = afbreekstreepje; L4 = extender in melisma-gap.
+        (function unifyLyricDashesL3L4L6() {
+          const svgEl = mount.querySelector("svg");
+          if (!svgEl) return;
+          const ns = "http://www.w3.org/2000/svg";
+          const HALF_DASH_PX = 4;
+          const MIN_GAP_L3 = 6;
+          const MIN_GAP_L4 = 48;
+          const syls = [];
+          const re =
+            /<lyric\b[^>]*>\s*<syllabic>([^<]*)<\/syllabic>\s*<text>([^<]*)<\/text>/g;
+          let m;
+          while ((m = re.exec(xml))) {
+            syls.push({
+              syl: String(m[1]).trim().toLowerCase(),
+              text: String(m[2])
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .replace(/&amp;/g, "&")
+                .replace(/&quot;/g, '"')
+                .trim(),
+            });
+          }
+          const needHyphen = new Set();
+          for (let i = 0; i + 1 < syls.length; i += 1) {
+            const a = syls[i].syl;
+            const b = syls[i + 1].syl;
+            const join =
+              (a === "begin" || a === "middle") &&
+              (b === "middle" || b === "end");
+            if (!join) continue;
+            needHyphen.add(syls[i].text + "\0" + syls[i + 1].text);
+          }
+          const lyrics = Array.from(
+            mount.querySelectorAll(".vf-text.lyrics")
+          ).filter((g) => {
+            const t = g.querySelector("text");
+            const r = g.getBoundingClientRect();
+            return t && r.width > 0;
+          });
+          lyrics.sort((a, b) => {
+            const ra = a.getBoundingClientRect();
+            const rb = b.getBoundingClientRect();
+            return ra.top - rb.top || ra.left - rb.left;
+          });
+          if (!lyrics.length) return;
+          // Gemeenschappelijke streepjes-y: x-hoogte van de lyric-inkt
+          // (≈ 55% vanaf top van de bbox) — één waarde per lyric-band.
+          const bandY = new Map();
+          function dashScreenY(ar) {
+            const key = Math.round(ar.top);
+            if (bandY.has(key)) return bandY.get(key);
+            const y = ar.top + ar.height * 0.55;
+            bandY.set(key, y);
+            return y;
+          }
+          function clearDashesInGap(ar, br, pad) {
+            const lo = ar.right - pad;
+            const hi = br.left + pad;
+            const midLyric = (ar.top + ar.bottom) / 2;
+            for (const d of Array.from(
+              mount.querySelectorAll(".vf-text.dash")
+            )) {
+              const r = d.getBoundingClientRect();
+              const line = d.querySelector("line");
+              const mid =
+                line != null
+                  ? (r.left + r.right) / 2
+                  : (r.left + r.right) / 2;
+              const y =
+                line != null
+                  ? Number(line.getAttribute("y1")) || r.top
+                  : (r.top + r.bottom) / 2;
+              // Line zit in lokale coords; screen-y via bbox.
+              const yScreen = line ? r.top : y;
+              if (Math.abs(yScreen - midLyric) > 40 && !line) {
+                if (Math.abs(r.top - ar.top) > 36) continue;
+              } else if (line && Math.abs(r.top - midLyric) > 40) {
+                continue;
+              }
+              if (mid > lo && mid < hi) d.remove();
+            }
+          }
+          function placeLine(a, ar, br, xLeft, xRight, kind) {
+            clearDashesInGap(ar, br, 4);
+            const left = Math.min(xLeft, xRight);
+            const right = Math.max(xLeft, xRight);
+            if (!(right - left >= 3)) return;
+            const aCtm = a.getScreenCTM();
+            if (!aCtm) return;
+            const inv = aCtm.inverse();
+            const yScreen = dashScreenY(ar);
+            const ptL = svgEl.createSVGPoint();
+            ptL.x = left;
+            ptL.y = yScreen;
+            const locL = ptL.matrixTransform(inv);
+            const ptR = svgEl.createSVGPoint();
+            ptR.x = right;
+            ptR.y = yScreen;
+            const locR = ptR.matrixTransform(inv);
+            const aText = a.querySelector("text");
+            const g = document.createElementNS(ns, "g");
+            g.setAttribute("class", "vf-text dash");
+            g.setAttribute("data-osmd-" + kind, "1");
+            g.setAttribute("transform", a.getAttribute("transform") || "");
+            const line = document.createElementNS(ns, "line");
+            line.setAttribute("x1", String(locL.x));
+            line.setAttribute("x2", String(locR.x));
+            line.setAttribute("y1", String(locL.y));
+            line.setAttribute("y2", String(locR.y));
+            line.setAttribute("stroke", aText?.getAttribute("fill") || "#000");
+            line.setAttribute("stroke-width", "1.8");
+            line.setAttribute("stroke-linecap", "butt");
+            g.appendChild(line);
+            (a.parentElement || mount).appendChild(g);
+          }
+          const curves = Array.from(
+            mount.querySelectorAll(".vf-curve")
+          ).map((g) => g.getBoundingClientRect());
+          for (let i = 0; i + 1 < lyrics.length; i += 1) {
+            const a = lyrics[i];
+            const b = lyrics[i + 1];
+            const ar = a.getBoundingClientRect();
+            const br = b.getBoundingClientRect();
+            if (Math.abs(ar.top - br.top) > 28) continue;
+            const aT = String(
+              a.querySelector("text")?.textContent || ""
+            ).trim();
+            const bT = String(
+              b.querySelector("text")?.textContent || ""
+            ).trim();
+            const wordBoundary =
+              /[,.;:!?]$/.test(aT) ||
+              (/^[A-ZÀ-ÖØ-Þ]/.test(bT) && !/-$/.test(aT));
+            const hyphen = needHyphen.has(aT + "\0" + bT);
+            const gap = br.left - ar.right;
+            if (gap < MIN_GAP_L3) continue;
+            const inkL = ar.right + HALF_DASH_PX;
+            const inkR = br.left - HALF_DASH_PX;
+            if (!(inkR > inkL)) continue;
+            const midY = (ar.top + ar.bottom) / 2;
+            const slurHits = curves.some((c) => {
+              if (!(c.width > 40)) return false;
+              if (Math.abs((c.top + c.bottom) / 2 - midY) > 120) {
+                return false;
+              }
+              const overlap =
+                Math.min(c.right, inkR) - Math.max(c.left, inkL);
+              return overlap > Math.min(60, gap * 0.25);
+            });
+            // Binnenwoord: L3 = vaste korte hyphen gecentreerd. L6 alleen
+            // als de *eerste* lettergreep een melisma heeft (= zichtbare
+            // nootkoppen in de gap). Grote witruimte zonder melisma → kort
+            // streepje laten, witruimte groeit (alleluia-8 eerste Al–le).
+            if (hyphen && !wordBoundary) {
+              let notesInGap = 0;
+              for (const n of mount.querySelectorAll(".vf-stavenote")) {
+                if (n.getAttribute("data-osmd-spacer") === "1") continue;
+                const head = n.querySelector(
+                  ".vf-notehead path, [data-osmd-breve-glyph=\"1\"] path, .vsa-breve-glyph path"
+                );
+                if (!head) continue;
+                const hs = getComputedStyle(head);
+                if (hs.visibility === "hidden" || hs.display === "none") {
+                  continue;
+                }
+                const hr = head.getBoundingClientRect();
+                if (!(hr.width > 0.5 && hr.height > 0.5)) continue;
+                const cx = (hr.left + hr.right) / 2;
+                if (cx > ar.right + 2 && cx < br.left - 2) notesInGap += 1;
+              }
+              if (notesInGap >= 1) {
+                placeLine(a, ar, br, inkL, inkR, "l6");
+              } else {
+                const mid = (ar.right + br.left) / 2;
+                const room = inkR - inkL;
+                if (room < 3) continue;
+                // Vaste hyphen ≈10 px, krimpt als de gap te krap is.
+                const half = Math.min(5, room / 2);
+                placeLine(a, ar, br, mid - half, mid + half, "l3");
+              }
+              continue;
+            }
+            // L4 melisma-extender: één lange lijn (geen reeks «-»).
+            if (wordBoundary) continue;
+            if (gap < MIN_GAP_L4) continue;
+            if (!slurHits) {
+              // Alleen als er al OSMD-dashes in de gap staan.
+              const hasDash = Array.from(
+                mount.querySelectorAll(".vf-text.dash")
+              ).some((d) => {
+                const r = d.getBoundingClientRect();
+                const cx = (r.left + r.right) / 2;
+                return (
+                  cx > ar.right - 2 &&
+                  cx < br.left + 2 &&
+                  Math.abs((r.top + r.bottom) / 2 - midY) < 40
+                );
+              });
+              if (!hasDash) continue;
+            }
+            placeLine(a, ar, br, inkL, inkR, "l4");
+          }
+          // Rest-OSMD-dashes in woordgrenzen weg (geen «ja, - Al»).
+          for (let i = 0; i + 1 < lyrics.length; i += 1) {
+            const a = lyrics[i];
+            const b = lyrics[i + 1];
+            const ar = a.getBoundingClientRect();
+            const br = b.getBoundingClientRect();
+            if (Math.abs(ar.top - br.top) > 28) continue;
+            const aT = String(
+              a.querySelector("text")?.textContent || ""
+            ).trim();
+            const bT = String(
+              b.querySelector("text")?.textContent || ""
+            ).trim();
+            const wordBoundary =
+              /[,.;:!?]$/.test(aT) ||
+              (/^[A-ZÀ-ÖØ-Þ]/.test(bT) && !/-$/.test(aT));
+            if (!wordBoundary) continue;
+            clearDashesInGap(ar, br, 2);
+          }
+          // Geen OSMD-text-«-» laten staan: die zitten op andere glyph-hoogte
+          // dan onze <line> (alleluia-2: mix korte/hoge vs lange/lage).
+          for (const d of Array.from(
+            mount.querySelectorAll(".vf-text.dash")
+          )) {
+            if (d.querySelector("line")) continue;
+            const t = d.querySelector("text");
+            if (t && /^[-–—]$/.test(String(t.textContent || "").trim())) {
+              d.remove();
+            }
+          }
+          // OSMD/VexFlow lyric-extender als .vf-line (losse path onder de
+          // lyric-baseline) — dubbel met onze L4; weg (alleluia-8 «lu»).
+          const lyricBand = lyrics.map((g) => g.getBoundingClientRect());
+          if (lyricBand.length) {
+            const bandTop = Math.min(...lyricBand.map((r) => r.top)) - 8;
+            const bandBot = Math.max(...lyricBand.map((r) => r.bottom)) + 24;
+            for (const g of Array.from(
+              mount.querySelectorAll(".vf-line")
+            )) {
+              const r = g.getBoundingClientRect();
+              if (r.height > 4) continue;
+              if (r.width < 20) continue;
+              if (r.top < bandTop || r.top > bandBot) continue;
+              g.setAttribute("visibility", "hidden");
+              g.setAttribute("data-osmd-vf-line-hide", "1");
             }
           }
         })();
@@ -555,7 +1630,63 @@ async function main() {
             svg.setAttribute("height", String(h));
           }
         }
-        return document.querySelectorAll("#osmd svg").length;
+        // Bron↔papier: elke klinkende non-spacer-noot uit de MusicXML moet
+        // als zichtbare nootkop (of S8-breve-glyph) op het scherm staan.
+        // Spacers (notehead none) tellen niet mee. Altijd controleren.
+        let sourceNotes = 0;
+        {
+          const re =
+            /<note\b[\s\S]*?<\/note>/g;
+          let nm;
+          while ((nm = re.exec(xml))) {
+            const block = nm[0];
+            if (/<rest[\s/>]/.test(block)) continue;
+            if (/<notehead>\s*none\s*<\/notehead>/.test(block)) continue;
+            sourceNotes += 1;
+          }
+        }
+        let visibleNotes = 0;
+        for (const n of mount.querySelectorAll(".vf-stavenote")) {
+          if (n.getAttribute("data-osmd-spacer") === "1") continue;
+          const heads = n.querySelectorAll(
+            ".vf-notehead path, .vsa-breve-glyph path, [data-osmd-breve-glyph='1'] path"
+          );
+          let ok = false;
+          for (const h of heads) {
+            const st = getComputedStyle(h);
+            if (st.visibility === "hidden" || st.display === "none") continue;
+            const hr = h.getBoundingClientRect();
+            if (hr.width > 0.5 && hr.height > 0.5) {
+              ok = true;
+              break;
+            }
+          }
+          // Breve-glyph kan sibling zijn van de stavenote.
+          if (!ok && n.getAttribute("data-osmd-breve") === "1") {
+            const sib = n.parentElement
+              ? n.parentElement.querySelector(
+                  `.vsa-breve-glyph[data-osmd-breve-glyph="1"]`
+                )
+              : null;
+            if (sib) {
+              const hp = sib.querySelector("path");
+              if (hp) {
+                const hr = hp.getBoundingClientRect();
+                if (hr.width > 0.5) ok = true;
+              }
+            }
+          }
+          if (ok) visibleNotes += 1;
+        }
+        if (svg) {
+          svg.setAttribute("data-osmd-source-notes", String(sourceNotes));
+          svg.setAttribute("data-osmd-visible-notes", String(visibleNotes));
+        }
+        return {
+          pageCount: document.querySelectorAll("#osmd svg").length,
+          sourceNotes,
+          visibleNotes,
+        };
       },
       musicxml,
       FONT_FAMILY,
@@ -564,8 +1695,18 @@ async function main() {
       CORIB_COMPACT.contentPadPx
     );
 
-    if (!pageCount) {
+    if (!pageCount || !pageCount.pageCount) {
       throw new Error("OSMD renderde geen SVG (0 elementen in #osmd)");
+    }
+    if (
+      Number(pageCount.sourceNotes) > 0 &&
+      Number(pageCount.visibleNotes) < Number(pageCount.sourceNotes)
+    ) {
+      throw new Error(
+        `Bron↔papier: ${pageCount.visibleNotes} zichtbare nootkoppen < ` +
+          `${pageCount.sourceNotes} klinkende non-spacer-noten in MusicXML ` +
+          `(elke bron-noot moet op papier komen)`
+      );
     }
 
     const markupParts = await page.evaluate(() => {

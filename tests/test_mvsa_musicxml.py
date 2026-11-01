@@ -111,6 +111,67 @@ B: -             f3  -   |
         assert ("single", "ge") not in lyrics, layout
 
 
+def test_export_hyphen_survives_same_pitch_measure_collapse():
+    """L3/K4: ``ar_-men`` houdt ``begin``/``end`` na maat-niveau same-pitch-collapse.
+
+    Regressie: score-IR riep ``_collapse_same_pitch_melisma`` opnieuw aan op de
+    hele maat; finalize demoteerde woordstreepje-``begin`` → ``single`` (OSMD
+    toonde geen hyphen tussen ar en men op derde-antifoon).
+    """
+    from vsa.mvsa_musicxml import (
+        _collapse_same_pitch_melisma,
+        _system_to_events,
+    )
+    from vsa.mvsa_parse import parse_mvsa
+    from vsa.mvsa_speelplan import sections_for_layout
+
+    text = """\
+@do F4
+@mode major
+L: (Za-lig de) ar_-men |
+S: -           c5  a4  |
+A: -           a4  f4  |
+T: -           -   -   |
+B: -           -   -   |
+"""
+    for layout in ("playback", "partituur"):
+        xml = export_mvsa_to_musicxml(text, layout=layout)
+        lyrics = _part_lyrics(xml, "P1")
+        assert ("begin", "ar") in lyrics, layout
+        assert ("end", "men") in lyrics, layout
+        assert ("single", "ar") not in lyrics, layout
+
+    # Zelfde pad als score-IR / from-ir (allow_dotted maat-collapse).
+    doc = parse_mvsa(text)
+    sections = sections_for_layout(doc, layout="partituur")
+    pitch_carry: dict = {}
+    found = False
+    for section in sections:
+        for system in section.systems:
+            events_by_voice, pitch_carry = _system_to_events(
+                system,
+                layout="partituur",
+                hulptekst=False,
+                pitch_carry=pitch_carry,
+            )
+            for measure in events_by_voice.get("S", []):
+                texts = [ly.text for n in measure for ly in n.lyrics]
+                if "ar" not in texts:
+                    continue
+                after = _collapse_same_pitch_melisma(measure, allow_dotted=True)
+                syls = [
+                    (ly.syllabic, ly.text)
+                    for n in after
+                    for ly in n.lyrics
+                    if (ly.text or "").strip()
+                ]
+                assert ("begin", "ar") in syls
+                assert ("end", "men") in syls
+                assert ("single", "ar") not in syls
+                found = True
+    assert found, "ar-maat niet gevonden"
+
+
 def test_parse_l_recite_optional_elm():
     pos = parse_l_positions("(Zoon van God)_")
     assert pos[0].recite is True
