@@ -465,6 +465,9 @@ Projectdefaults vastleggen.
 [rendering]
 max-line-width = 800
 
+[rendering.svg]
+relative-size = 1.25
+
 [hugo]
 assets-url-prefix = "/vsa"
 output-mode = "img"
@@ -475,11 +478,12 @@ output-mode = "img"
 
 ### Defaults
 
-| Instelling          | Default |
-| ------------------- | ------- |
-| `max-line-width`    | `800`   |
-| `assets-url-prefix` | `/vsa`  |
-| `output-mode`       | `img`   |
+| Instelling                       | Default |
+| -------------------------------- | ------- |
+| `max-line-width`                 | `800`   |
+| `rendering.svg.relative-size`    | `1.25`  |
+| `assets-url-prefix`              | `/vsa`  |
+| `output-mode`                    | `img`   |
 
 ### Voorrang
 

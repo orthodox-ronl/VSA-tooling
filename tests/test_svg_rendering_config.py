@@ -13,6 +13,7 @@ def test_svg_config_loads_nested_values(tmp_path: Path):
 [rendering.svg]
 font-family = "Noto Serif"
 font-size = 24
+relative-size = 1.1
 line-height = 96
 text-gap = 7
 scope-gap = 8
@@ -37,6 +38,7 @@ dash-width-factor = 0.4
 
     assert config.rendering.svg.font_family == "Noto Serif"
     assert config.rendering.svg.font_size == 24
+    assert config.rendering.svg.relative_size == 1.1
     assert config.rendering.svg.upper.color == "blue"
     assert config.rendering.svg.lower.color == "green"
     assert config.rendering.svg.pitch_marker.width == 30

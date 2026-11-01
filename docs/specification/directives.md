@@ -326,26 +326,35 @@ Wordt bij `build-markdown` omgezet naar Hugo-shortcode `coria-html` of `coria`.
     [inhoud die bij afdrukken bij elkaar gehouden wordt]
     :::end-keep-together:::
 
-    :::keep-together scale="70%":::
-    [inhoud met verkleinde SVGs]
+    :::keep-together size="1.1":::
+    [inhoud; VSA-letters 1,1× de omliggende tekstgrootte]
     :::end-keep-together:::
 
-- In browser: geen zichtbaar effect
+    :::keep-together scale="70%":::
+    [legacy: kolom/wrapper op 70% van de paginabreedte]
+    :::end-keep-together:::
+
+- In browser: geen zichtbaar effect op paginering; `size` beïnvloedt wel de
+  weergavegrootte van [VSA-notaties](@bron) via CSS `--vsa-size`
 - Bij afdrukken: CSS voorkomt een paginabreuk binnen het blok
   (`break-inside: avoid`)
 - Als de inhoud groter is dan één pagina, verplaatst de browser het hele blok
   naar de volgende pagina; past het dan nog steeds niet, dan wordt de
   `avoid`-instructie genegeerd
-- De optionele parameter `scale="<waarde>"` schaalt alle [VSA-notaties](@bron) binnen
-  het blok naar de opgegeven breedte (bijv. `"70%"`); de hoogte schaalt
-  proportioneel mee omdat de SVGs een `viewBox` hebben. Gebruik dit wanneer
-  twee of meer SVGs samen op één pagina moeten passen.
+- **`size="<factor>"`** (aanbevolen) — unitless factor t.o.v. `1em` van de
+  omliggende markdown (site-default `1.25` via `rendering.svg.relative-size`).
+  Alle VSA-blokken in de wrapper houden dezelfde lettergrootte.
+- **`scale="<waarde>"`** (legacy) — zet de **wrapperbreedte** (bijv. `"70%"`
+  van de kolom). Geschikt om een hele sectie smaller te maken voor print;
+  niet bedoeld om korte Amen-blokken te “verkleinen” (die worden dan juist
+  opgerekt als ze smaller zijn dan de kolom).
 
 Blok-directives worden Hugo-shortcodes (`{{< web-only >}}`, enz.). De
 shortcode-templates renderen de innerlijke markdown via `Page.RenderString`
 (zonder extra lege regels in de bron). Witruimte in content-source is daarmee
-**niet** van invloed op de afdruk-layout; alleen expliciete HTML/CSS (zoals
-`scale` op `keep-together`) beïnvloedt paginering.
+**niet** van invloed op de afdruk-layout; expliciete HTML/CSS (`size` /
+legacy `scale` op `keep-together`) beïnvloedt weergave en paginering.
+Zie ook [SVG exporteren](../guides/svg-export.md) (sectie weergavegrootte).
 
 ---
 
@@ -443,9 +452,9 @@ Hugo verwerkt daarna het gegenereerde Markdown-bestand tot HTML.
         page-break-inside: avoid;
     }
 
-    /* Schaling van SVGs binnen keep-together (via scale-parameter) */
-    .keep-together .vsa-notation {
-        width: var(--vsa-scale, auto);
+    /* Optioneel: site-default voor em-relatieve VSA-grootte */
+    :root {
+        --vsa-size: 1.25;
     }
 }
 

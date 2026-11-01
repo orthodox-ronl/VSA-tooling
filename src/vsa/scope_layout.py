@@ -25,6 +25,7 @@ class ScopeLayout:
     text_width: float = 0.0
     filler_width: float = 0.0
     prefix_extra: float = 0.0
+    leading_pad: float = 0.0
 
 
 def build_scope_layout(
@@ -32,7 +33,12 @@ def build_scope_layout(
     minimum_column_width: float = MIN_GLYPH_CELL_WIDTH,
     text_font_size: float = 20.0,
     font_family: str = "Segoe UI",
+    *,
+    leading_safety: bool = True,
+    trailing_safety: bool = True,
 ):
+    from .spacing_policy import scope_safety_margin
+
     hm = node.height_modifier or []
     lm = node.length_modifier or []
 
@@ -53,7 +59,21 @@ def build_scope_layout(
         lm = lm * count
 
     text = node.text
-    text_width = estimate_scope_text_width(text, text_font_size, font_family=font_family)
+    margin = scope_safety_margin(text_font_size)
+    # Left pad only when the word starts here (not mid-word). Isolated scopes
+    # keep legacy “one trailing margin” via estimate_scope_text_width.
+    if leading_safety and not trailing_safety:
+        leading_pad = margin
+    else:
+        leading_pad = 0.0
+
+    text_width = estimate_scope_text_width(
+        text,
+        text_font_size,
+        font_family=font_family,
+        leading_safety=leading_safety,
+        trailing_safety=trailing_safety,
+    )
 
     if count <= 1:
         base_grid_width = text_width
@@ -73,7 +93,7 @@ def build_scope_layout(
         1 for ehm in hm
         if len(ehm) >= 2 and ehm[0] in HALFTOON_CANONICAL
     )
-    prefix_extra = round(prefix_count * text_font_size * 0.8, 2)
+    prefix_extra = round(prefix_count * text_font_size * 0.8, 2) + leading_pad
 
     grid_width = base_grid_width + prefix_extra
     column_width = grid_width / count
@@ -94,11 +114,25 @@ def build_scope_layout(
         text_width=round(text_width, 2),
         filler_width=round(filler_width, 2),
         prefix_extra=prefix_extra,
+        leading_pad=leading_pad,
     )
 
 
-def estimate_scope_text_width(text: str, font_size: float, font_family: str = "Segoe UI"):
-    return _estimate_scope_text_width(text, font_size, font_family=font_family)
+def estimate_scope_text_width(
+    text: str,
+    font_size: float,
+    font_family: str = "Segoe UI",
+    *,
+    leading_safety: bool = True,
+    trailing_safety: bool = True,
+):
+    return _estimate_scope_text_width(
+        text,
+        font_size,
+        font_family=font_family,
+        leading_safety=leading_safety,
+        trailing_safety=trailing_safety,
+    )
 
 
 def estimate_text_width(

@@ -34,8 +34,11 @@ Implementatie playback/partituur-MusicXML: `mvsa_musicxml._collapse_same_pitch_m
 
 ## Checklist bij elke export-PR
 
-1. Welke M-/S-/R-regel raakt dit?
-2. Staat die regel al in `canonical-checklists.md`? Zo nee: toevoegen.
+1. Welke M-/S-/R-/K-/L-regel raakt dit? (melisma: K2/K3, M5a, S13, L3/L4, S2/S4)
+2. Staat die regel al in `canonical-checklists.md` / `mscz-leesbaarheid.md`?
+   Zo nee: toevoegen in dezelfde PR.
 3. Test die het contract vastzet (playback én/of partituur naar gelang de regel).
 4. Geen stille divergentie: “werkt op MSCZ, MXL later” alleen als de checklist
    dat **expliciet** als verschil noemt (zoals recite M10 vs print).
+5. Melisma-slur/`<extend/>` altijd **dicht** binnen één lettergreep — geen open
+   slur die over hyphen-lettergrepen of volgende maten doorloopt.

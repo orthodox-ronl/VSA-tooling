@@ -105,9 +105,13 @@ IMPORT_SKETCH_WARNING_BANNER = """\
 _DURATION_TO_ELM: dict[tuple[str, int], str] = {
     ("quarter", 0): "~",
     ("quarter", 1): "-.",
+    ("quarter", 2): "~..",
     ("half", 0): "_",
     ("half", 1): "_.",
+    ("half", 2): "_..",
     ("whole", 0): "__",
+    ("whole", 1): "__.",
+    ("whole", 2): "__..",
     ("eighth", 0): ".",
     ("16th", 0): "..",
 }

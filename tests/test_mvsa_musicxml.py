@@ -441,6 +441,25 @@ def test_export_playback_no_recite_collapse():
     assert "<extend" in body
 
 
+def test_export_partituur_s8_stemmen_sync_no_solo_breve():
+    """S8 stemmen-sync: gemengde recite (S/T wisselen, A/B houden) → geen breve."""
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: Die he_-mel,_ (aar-de en zee) heeft ge-maakt,_ ||
+S: -   g4  a4     f4             g4    a4 Bb4     ||
+A: -   e4  f4     -              -     -  -       ||
+T: -   c4  -      a3             Bb3   c4 d4      ||
+B: -   c3  f3     -              -     -  Bb2     ||
+"""
+    xml = export_mvsa_to_musicxml(text, layout="partituur")
+    # ||O|| in partituur-MusicXML = notehead breve; spacers = notehead none.
+    assert "<notehead>breve</notehead>" not in xml
+    assert "<notehead>none</notehead>" not in xml
+
+
 def test_export_empty_recite_melisma_keeps_all_slots_and_full_measure():
     """``()~&~&.&.&~`` + multi-slot stem: all pitches, full 4/4 — not one quarter.
 
@@ -1390,6 +1409,37 @@ B: re ||
 
 
 
+def test_tekst_spaces_emitted_as_nbsp():
+    """S19: leidende/meervoudige spaties in ``@tekst`` → NBSP in ``<words>``."""
+    from vsa.mvsa_musicxml import (
+        _CUE_SPACE,
+        _emit_staff_text_directions,
+        cue_text_for_score,
+    )
+
+    assert cue_text_for_score("P: cue") == "P: cue"
+    assert cue_text_for_score("  a  b") == f"{_CUE_SPACE * 2}a{_CUE_SPACE * 2}b"
+    out: list[str] = []
+    _emit_staff_text_directions(out, ["  hello"])
+    blob = "".join(out)
+    assert f">{_CUE_SPACE * 2}hello</words>" in blob
+    assert ">  hello<" not in blob
+
+
+def test_estimate_cue_width_milder_cap():
+    """C6: lange cues → capped width (niet max_len×14 zonder plafond)."""
+    from vsa.mvsa_musicxml import estimate_cue_width_tenths
+
+    assert estimate_cue_width_tenths(["x"]) == 80
+    short = estimate_cue_width_tenths(["P: kort"])
+    assert 80 <= short <= 240
+    long = "P: " + ("woord " * 20)
+    wide = estimate_cue_width_tenths([long])
+    assert wide == 240
+    # Oude formule (len×14) zou ver boven de cap liggen.
+    assert len(long) * 14 > 240
+
+
 def test_tekst_wraps_at_ellipsis_and_sets_width():
     from vsa.mvsa_musicxml import wrap_tekst_at_ellipsis, estimate_cue_width_tenths
 
@@ -1418,7 +1468,14 @@ B: re ||
     assert "P: Onze Alheilige" in xml
     assert "... ons leven aan" in xml
     assert "width=" in xml
-    assert estimate_cue_width_tenths([wrapped]) >= 80
+    w = estimate_cue_width_tenths([wrapped])
+    assert 80 <= w <= 240
+    # Geëxporteerde width volgt de milde schatting (langste regel).
+    import re
+
+    widths = [int(x) for x in re.findall(r'width="(\d+)"', xml)]
+    assert widths
+    assert max(widths) <= 240
 
 
 _SPEELPLAN_DEMO = """\

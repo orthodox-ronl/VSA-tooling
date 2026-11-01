@@ -134,6 +134,8 @@ def _resolve_musescore_svg_pages(dest: Path) -> list[Path]:
     if not pages:
         return []
     if len(pages) == 1:
-        pages[0].replace(dest)
+        from .atomic_io import replace_into
+
+        replace_into(dest, pages[0])
         return [dest]
     return pages

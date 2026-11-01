@@ -1,10 +1,10 @@
 # Score-IR / partituur-IR — contract (stap 1)
 
-| Veld            | Waarde                                                                                                                                                           |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**      | werkplan; **niet normatief**; stap 1–5 + schermbrug-contract (§7) gedaan; CoriB-MVP en site-embed nog open                                                       |
-| **Doel**        | Vastleggen wat het JSON-achtige tussenmodel bevat dat schermrenderer (koormap-SVG) én CoriB voedt — zonder MuseScore als schermmotor                             |
-| **Eigenaar**    | Export uit `.mvsa` → IR: [VSA-tooling](@bron); consumptie: bibliotheek (shortcode `muziek`) + CoriB                                                              |
+| Veld            | Waarde                                                                                                                                                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**      | werkplan; **niet normatief**; stap 1–5 + schermbrug-contract (§7) gedaan; CoriB-MVP en site-embed nog open                                                                                                       |
+| **Doel**        | Vastleggen wat het JSON-achtige tussenmodel bevat dat schermrenderer (koormap-SVG) én CoriB voedt — zonder MuseScore als schermmotor                                                                             |
+| **Eigenaar**    | Export uit `.mvsa` → IR: [VSA-tooling](@bron); consumptie: bibliotheek (shortcode `muziek`) + CoriB                                                                                                              |
 | **Gerelateerd** | [contract-index](../formats/contract-index.md), [canonical-checklists](../formats/canonical-checklists.md) (S-reeks = layoutdoel), [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md), `@tekst` |
 
 Contract + [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir). Schema-validator en schermrenderer: later.
@@ -142,7 +142,7 @@ LyricPos
 ```text
 VoiceEvent
   pitch: { step, alter?, octave } | "rest" | "hold"
-  duration: { elm }                       # canonieke ELM-token
+  duration: { elm }                       # canonieke ELM-token (incl. ``__.`` / ``__..`` voor S13 gestipte whole)
   lyricIndex?: number                     # index in measure.lyrics (eerste noot van melisma)
   melisma?: {
     extend?: bool
@@ -165,6 +165,15 @@ weg — zie [osmd-s8-recite](osmd-s8-recite.md).
 
 **S13 in IR:** same-pitch melisma al als compacte (gestipte) noot waar
 representeerbaar — OSMD-eindvorm, niet de MuseScore-import I1-tie-keten.
+Gestipte whole = ELM ``__.`` (dubbelgepunt ``__..``); die tokens zijn
+Score-IR/from-ir-only (niet als gewone ``.mvsa``-invoer). Zonder die
+mapping viel de serializer terug op ``~`` (gevulde kwart) — regressie
+op o.a. T «lu» in alleluia-toon-2.
+
+**lyricIndex:** per stem het *n*-de lyric-dragende event ↔
+`measure.lyrics[n]` (zelfde L-regel). Niet de event-index van S
+hergebruiken: na S13-collapse zijn stemmen korter en zouden «lu»/«ja»
+anders kwijt raken of op de verkeerde noot landen.
 
 ### 4.5 meta (mag wel / mag niet)
 
@@ -237,9 +246,10 @@ mvsa score-ir lied.mvsa --musicxml
 mvsa score-ir map-met-mvsa --musicxml
 ```
 
-**Bewijs (spike, geen product-UI):** `examples/spikes/partituur-browser/`
-(OSMD in de browser); optioneel headless SVG:
-`examples/spikes/partituur-osmd-svg/`.
+**Bewijs (spike + optionele CLI):** `examples/spikes/partituur-browser/`
+(OSMD in de browser); headless SVG:
+`examples/spikes/partituur-osmd-svg/` / `scripts/osmd-svg/`;
+`mvsa svg --engine osmd` (Score-IR → from-ir MusicXML → OSMD-bestand).
 
 **Non-goals van deze brug:**
 
@@ -266,7 +276,9 @@ catalogus-MXL of MuseScore-SVG.
    [kale-muziek §4](kale-muziek-svg-en-uitgaven.md))
 7. ~~**Productiescherm** (mvsa / S8)~~ — bibliotheek from-ir → OSMD; S8 A1
    ([osmd-s8-recite](osmd-s8-recite.md)); rest kale-muziek §4 (`.vsa`, CoriB, …)
-8. CoriB-MVP (speler op §7-brug) — later
+8. ~~Optionele OSMD-SVG CLI~~ (`mvsa svg --engine osmd`; D2-vergelijking in
+   `examples/spikes/partituur-osmd-svg/README.md`)
+9. CoriB-MVP (speler op §7-brug) — plan: [corib-mvp.md](corib-mvp.md) (M1–M4; branch `corib`)
 
 ---
 

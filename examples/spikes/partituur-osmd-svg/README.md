@@ -1,75 +1,72 @@
 # Spike: MusicXML → SVG via OSMD (headless)
 
-Proef: kan **OpenSheetMusicDisplay** in headless Chromium een
-**partituur-SVG** schrijven uit dezelfde MusicXML als de browser-spike —
-**zonder MuseScore** en **zonder** `vsa`-CLI?
+Proef + productbrug: **OpenSheetMusicDisplay** schrijft een partituur-SVG
+uit Score-IR-MusicXML — **zonder MuseScore**.
 
-Geen product-commando. Bewijs voor een latere optie
-`mvsa svg --engine osmd` (handover D, stap 2–3).
+Product-CLI (D3): `mvsa svg --engine osmd` (renderer:
+[`scripts/osmd-svg/`](../../../scripts/osmd-svg/)).
 
 ## Vereisten
 
-- Node.js 18+ (met `npm`)
-- Netwerk bij eerste run (Puppeteer downloadt Chromium; OSMD via CDN)
+- Node.js 18+ (`npm`)
+- Eenmalig: `cd scripts\osmd-svg && npm install && npx puppeteer browsers install chrome`
 
-## Eenmalig
-
-```cmd
-cd /d C:\Git\orthodox-ronl\VSA-tooling\examples\spikes\partituur-osmd-svg
-npm install
-npx puppeteer browsers install chrome
-```
-
-(Als `npm install` de Chromium-download blokkeert: het tweede commando
-is verplicht vóór `npm run render`.)
-
-## MusicXML (zelfde als browser-spike)
-
-Als `..\partituur-browser\score.musicxml` ontbreekt:
+## MusicXML
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o examples\spikes\partituur-browser\score.score-ir.json --musicxml examples\spikes\partituur-browser\score.musicxml
 ```
 
-## Renderen
+## Renderen (spike)
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling\examples\spikes\partituur-osmd-svg
 npm run render
 ```
 
-Uitvoer: `out\score.svg`. Optioneel eigen paden:
+(Delegeert naar `scripts\osmd-svg\render.mjs`.) Uitvoer: `out\score.svg`.
+
+Of via product-CLI:
 
 ```cmd
-cd /d C:\Git\orthodox-ronl\VSA-tooling\examples\spikes\partituur-osmd-svg
-node render.mjs ..\partituur-browser\score.musicxml out\score.svg
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
 ```
 
-Open `out\score.svg` in een browser of viewer. Vergelijk met MuseScore-SVG:
+## D2 — vergelijking OSMD vs MuseScore (1a-vredeslitanie)
+
+Cloud-run (2026-10-31): MuseScore niet in de VM; OSMD-SVG wél gerenderd
+(`out\score.svg`, ~238 KB, viewBox `0 0 900 585.5`, 1 Endless-pagina).
+
+| Check                          | OSMD (headless)                          | MuseScore (`mvsa svg`, default)        |
+| ------------------------------ | ---------------------------------------- | -------------------------------------- |
+| Twee balken SA/TB              | Ja (Score-IR MusicXML)                   | Ja (partituur-MXL → MSCZ)              |
+| Lyrics                         | Ja (o.a. Amen, Heer ontferm U)           | Ja                                     |
+| `@tekst`-cues                  | Ja (o.a. «P: Gezegend…», «P: Laat ons…») | Ja (SystemText)                        |
+| Titel/colofon                  | Uit (`drawTitle` false)                  | Uit (layout ``muziek``)                |
+| Bronketen                      | Score-IR → from-ir MusicXML              | partituur-MXL → MSCZ                   |
+| Style-CLI (afstand/fonts/…)    | Nee (OSMD/Score-IR)                      | Ja (MuseScore Style)                   |
+| Print/`index.md.pdf`-bouwsteen | Nee — scherm/optioneel bestand           | Ja (tall compact sibling)              |
+
+**Conclusie:** OSMD-SVG dekt lyrics + cues voor dit voorbeeld; geschikt als
+optionele scherm-/inspectie-export. Print-fallback en pagina-PDF blijven
+MuseScore ([kale-muziek §4](../../../docs/plans/kale-muziek-svg-en-uitgaven.md)).
+
+Lokaal MuseScore-SVG naast leggen:
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-musescore.svg
 ```
 
-## Wat we willen zien
+## Relatie
 
-1. Twee balken (SA / TB).
-2. Lyrics zichtbaar.
-3. `@tekst`-cues (o.a. “P: Gezegend…”).
-4. Eén SVG-bestand (Endless-page; geen A4-stapel tenzij OSMD splitst).
+| Pad                                                               | Rol                                      |
+| ----------------------------------------------------------------- | ---------------------------------------- |
+| [`partituur-browser`](../partituur-browser/)                      | OSMD in de browser                       |
+| **deze spike** / [`scripts/osmd-svg`](../../../scripts/osmd-svg/) | Headless SVG-bestand                     |
+| `mvsa svg --engine osmd`                                          | Product-CLI (D3)                         |
+| `mvsa svg` (default musescore)                                    | Print/fallback tall-SVG                  |
 
-## Relatie tot andere spikes / product
-
-Productieschermrichting: Score-IR → MusicXML → OSMD. Deze spike bewijst
-headless SVG uit dezelfde MusicXML; MuseScore blijft print/blad.
-
-| Pad                                                                | Rol                                      |
-| ------------------------------------------------------------------ | ---------------------------------------- |
-| [`partituur-browser`](../partituur-browser/)                       | OSMD in de browser (zelfde MusicXML)     |
-| **deze spike**                                                     | Zelfde keten → **bestand** `.svg`        |
-| [`mvsa svg`](../../../docs/reference/cli/mvsa.md#mvsa-svg) | Blad-/print-SVG via MuseScore            |
-| Later: CLI `--engine osmd`                                         | Optioneel; ná site-embed                 |
-
-Contract Score-IR / CoriB-brug: [partituur-ir.md](../../../docs/plans/partituur-ir.md) §7.
+Contract: [partituur-ir §7](../../../docs/plans/partituur-ir.md).

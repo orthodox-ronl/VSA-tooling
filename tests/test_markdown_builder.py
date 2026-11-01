@@ -34,10 +34,58 @@ Na de notatie.
     assert "::: vsa-notatie" not in rewritten
     assert '<img class="vsa-notation"' in rewritten
     assert 'src="/vsa/demo-block-1.svg"' in rewritten
+    assert "var(--vsa-size, 1.25)" in rewritten
+    assert "height: auto" in rewritten
 
     svg = (assets_dir / "demo-block-1.svg").read_text(encoding="utf-8")
 
     assert "Hei" in svg
+
+
+def test_build_markdown_block_size_overrides_em_factor(tmp_path: Path):
+    input_dir = tmp_path / "content-source"
+    output_dir = tmp_path / "content-generated"
+    assets_dir = tmp_path / "static" / "vsa"
+    input_dir.mkdir()
+
+    (input_dir / "amen.md").write_text(
+        """::: vsa-notatie
+size="1.0"
+
+K: [//:] A-men [//:]
+:::
+""",
+        encoding="utf-8",
+    )
+
+    build_markdown_site(input_dir, output_dir, assets_dir)
+    rewritten = (output_dir / "amen.md").read_text(encoding="utf-8")
+
+    assert "var(--vsa-size" not in rewritten
+    assert "* 1 * 1em)" in rewritten or "* 1.0 * 1em)" in rewritten
+
+
+def test_build_markdown_block_scale_wins_over_em(tmp_path: Path):
+    input_dir = tmp_path / "content-source"
+    output_dir = tmp_path / "content-generated"
+    assets_dir = tmp_path / "static" / "vsa"
+    input_dir.mkdir()
+
+    (input_dir / "amen.md").write_text(
+        """::: vsa-notatie
+scale="50%"
+
+K: [//:] A-men [//:]
+:::
+""",
+        encoding="utf-8",
+    )
+
+    build_markdown_site(input_dir, output_dir, assets_dir)
+    rewritten = (output_dir / "amen.md").read_text(encoding="utf-8")
+
+    assert "var(--vsa-size" not in rewritten
+    assert "px; height: auto" in rewritten
 
 
 def test_build_markdown_site_copies_content_assets(tmp_path: Path):

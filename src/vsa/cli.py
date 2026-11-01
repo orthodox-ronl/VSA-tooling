@@ -379,9 +379,10 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "svg",
         help="Exporteer .mvsa naar partituur-SVG (koormap).",
         description=(
-            "Bron .mvsa: kale muziek-SVG via MuseScore "
-            "(geen titel/colofon/footer; layout muziek-chrome), "
-            "daarna viewBox-trim. Vereist MuseScore 4. "
+            "Bron .mvsa: kale muziek-SVG. Default --engine musescore "
+            "(geen titel/colofon; layout muziek; viewBox-trim; MuseScore 4). "
+            "--engine osmd: Score-IR → from-ir MusicXML → headless OSMD "
+            "(Node + scripts/osmd-svg; geen MuseScore). "
             "Bron .mscz: gebruik mscz svg."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -390,6 +391,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "  mvsa svg examples\\mvsa\\1a-vredeslitanie.mvsa\n"
             "  mvsa svg lied.mvsa -o generated\\lied.mvsa.svg\n"
             "  mvsa svg lied.mvsa --lyrics-font-size 14 --cue-font-size 11\n"
+            "  mvsa svg lied.mvsa -o generated\\lied-osmd.svg --engine osmd\n"
             "  mscz svg generated\\lied.mscz -o generated\\lied.svg\n"
             "  mvsa svg lied.mvsa --section schets1 --keep-mscz generated\\lied.mscz"
         ),
@@ -457,7 +459,18 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "Geen witte achtergrond na trim (transparant). "
-            "Default: witte rechthoek achter de notatie."
+            "Default: witte rechthoek achter de notatie. "
+            "Alleen bij --engine musescore."
+        ),
+    )
+    m_svg.add_argument(
+        "--engine",
+        metavar="NAME",
+        choices=["musescore", "osmd"],
+        default="musescore",
+        help=(
+            "SVG-engine: musescore (default; print/fallback) of osmd "
+            "(Score-IR → headless OSMD; vereist Node + scripts/osmd-svg)."
         ),
     )
     _add_partituur_style_args(m_svg)
@@ -1174,6 +1187,7 @@ def _run(args):
             force=bool(args.force),
             dry_run=bool(args.dry_run),
             skip_svg=bool(getattr(args, "skip_svg", False)),
+            quiet=bool(getattr(args, "quiet", False)),
             musescore=musescore,
         )
 
@@ -1328,9 +1342,11 @@ def _cmd_svg(args, config):
             text = input_path.read_text(encoding="utf-8")
             body, _ = prepare_vsa_body(text, input_path)
             document = Parser(preserve_vsa_source_newlines(body)).parse()
+            from .atomic_io import write_text
+
             svg = renderer.render_document(document)
             out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(svg, encoding="utf-8")
+            write_text(out, svg, encoding="utf-8")
         except IncludeVsaError as exc:
             print(f"{input_path}: {exc.message_nl}", file=sys.stderr)
             exit_code = 1
@@ -2245,6 +2261,7 @@ def _cmd_mvsa(args) -> int:
             force=bool(args.force),
             dry_run=bool(args.dry_run),
             skip_svg=bool(getattr(args, "skip_svg", False)),
+            quiet=bool(getattr(args, "quiet", False)),
             musescore=musescore,
         )
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
@@ -2792,6 +2809,23 @@ def _cmd_mvsa_svg(args) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mscz", "keep_mxl"):
         return 1
+    engine = getattr(args, "engine", "musescore") or "musescore"
+    if engine == "osmd":
+        if args.keep_mscz or args.musescore or args.no_trim or args.transparent:
+            print(
+                "mvsa svg --engine osmd: --keep-mscz/--musescore/--no-trim/"
+                "--transparent gelden niet (alleen MuseScore-keten)",
+                file=sys.stderr,
+            )
+            return 1
+        if _has_partituur_style_cli(args):
+            print(
+                "mvsa svg --engine osmd: Style-opties (afstand/fonts/spacing) "
+                "gelden niet; die zijn MuseScore-Style. "
+                "OSMD gebruikt Score-IR/from-ir MusicXML.",
+                file=sys.stderr,
+            )
+            return 1
     musescore = Path(args.musescore) if args.musescore else None
     trim = not bool(getattr(args, "no_trim", False))
     white_background = not bool(getattr(args, "transparent", False))
@@ -2816,6 +2850,7 @@ def _cmd_mvsa_svg(args) -> int:
                 translit=bool(getattr(args, "translit", False)),
                 trim=trim,
                 white_background=white_background,
+                engine=engine,
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:

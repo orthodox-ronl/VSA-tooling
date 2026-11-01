@@ -11,6 +11,7 @@ from .svg_line_layout import (
     build_lines,
 )
 from .syllabify import display_lyric_text
+# Optical gap is decided in line layout (collision-based); renderer applies item.pre_gap.
 
 
 class SVGRenderer:
@@ -48,6 +49,8 @@ class SVGRenderer:
             pitch_marker_width=self.svg_config.pitch_marker.width,
             pitch_marker_gap=self.pitch_marker_gap,
             font_family=self.font_family,
+            optical_scope_gap=self.optical_scope_gap,
+            glyphs=self.glyphs,
         )
         lines = build_lines(document, self.max_line_width, settings=line_settings)
 
@@ -70,31 +73,32 @@ class SVGRenderer:
         for line_index, line in enumerate(lines):
             x = self.left_margin
             baseline_y = self.top_margin + extra_top + 28 + (line_index * self.line_height)
-            previous_rendered_node = None
 
             parts.append(f'<g class="vsa-line" data-vsa-line="{line_index + 1}">')
 
             for item_index, item in enumerate(line.items, start=1):
                 node = item.node
+                x += item.pre_gap
 
                 if isinstance(node, WhitespaceNode):
                     x = self._render_whitespace(node, x)
-                    previous_rendered_node = node
 
                 elif isinstance(node, TextNode):
                     x = self._render_text(parts, node.text, x, baseline_y, item_index)
-                    previous_rendered_node = node
 
                 elif isinstance(node, ScopeNode):
-                    if _needs_optical_scope_gap(previous_rendered_node, node):
-                        x += self.optical_scope_gap
-
-                    x = self._render_scope(parts, node, x, baseline_y, item_index)
-                    previous_rendered_node = node
+                    x = self._render_scope(
+                        parts,
+                        node,
+                        x,
+                        baseline_y,
+                        item_index,
+                        leading_safety=item.leading_safety,
+                        trailing_safety=item.trailing_safety,
+                    )
 
                 elif isinstance(node, PitchMarkerNode):
                     x = self._render_pitch_marker(parts, node, x, baseline_y, item_index)
-                    previous_rendered_node = node
 
             parts.append("</g>")
 
@@ -173,11 +177,23 @@ class SVGRenderer:
             font_family=self.font_family,
         ) + self.text_gap
 
-    def _render_scope(self, parts, node, x, baseline_y, item_index):
+    def _render_scope(
+        self,
+        parts,
+        node,
+        x,
+        baseline_y,
+        item_index,
+        *,
+        leading_safety: bool = True,
+        trailing_safety: bool = True,
+    ):
         layout = build_scope_layout(
             node,
             text_font_size=self.font_size,
             font_family=self.font_family,
+            leading_safety=leading_safety,
+            trailing_safety=trailing_safety,
         )
         upper_y = baseline_y + self.svg_config.upper.offset_y
         lower_y = baseline_y + self.svg_config.lower.offset_y
@@ -268,14 +284,3 @@ class SVGRenderer:
 
         return x + width + self.pitch_marker_gap
 
-
-def _needs_optical_scope_gap(previous_node, current_node):
-    if not isinstance(previous_node, ScopeNode):
-        return False
-    if not isinstance(current_node, ScopeNode):
-        return False
-    return _scope_has_visible_modifiers(previous_node) or _scope_has_visible_modifiers(current_node)
-
-
-def _scope_has_visible_modifiers(node):
-    return bool(node.height_modifier or node.length_modifier)

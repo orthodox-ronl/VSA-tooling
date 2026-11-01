@@ -10,7 +10,7 @@ Contract-matrix: [contract-index](../../formats/contract-index.md). Straatplan:
 ## Synopsis
 
 ```text
-vsa products [-h] [--force] [--dry-run] path
+vsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] path
 ```
 
 ## Beschrijving
@@ -47,12 +47,15 @@ er zijn. `--force` regenereert altijd.
 | `path`         | Ja        | `.vsa`-bestand of map (recursief).              | —       | Moet bestaan.      |
 | `--force`      | Nee       | Regenereer ook als meta zegt dat alles vers is. | Uit     | —                  |
 | `--dry-run`    | Nee       | Alleen tonen wat er zou gebeuren.               | Uit     | Geen bestanden.    |
+| `--quiet`      | Nee       | Geen voortgangsregels op stdout (`mxl`/`Meta`). | Uit     | Fouten op stderr.  |
+| `--skip-svg`   | Nee       | Sla native SVG over.                            | Uit     | —                  |
 | `-h`, `--help` | Nee       | Toon hulp.                                      | —       | —                  |
 
 ## Output
 
 - **stdout**: regels per product (`mxl` / `svg`) en `Meta: …` bij schrijven;
   of `ok (meta): …` / `dry-run: …` wanneer er niets verandert.
+  Met `--quiet` blijft stdout leeg (fouten blijven op stderr).
 - **Bestanden**: siblings naast de bron (zie tabel).
 - **stderr**: include-/exportfouten.
 

@@ -164,7 +164,10 @@ def write_meta(
     if not payload["products"]:
         raise ValueError("products-meta: geen product-keys over na schrijven")
 
-    dest.write_text(
+    from .atomic_io import write_text
+
+    write_text(
+        dest,
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
         newline="\n",

@@ -40,4 +40,7 @@ output-mode = "shortcode"
 
     content = (output_dir / "demo.md").read_text(encoding="utf-8")
 
-    assert '{{< vsa src="/vsa/demo-block-1.svg" alt="VSA notatie" >}}' in content
+    assert (
+        '{{< vsa src="/vsa/demo-block-1.svg" alt="VSA notatie" '
+        'scale="calc(3.4 * var(--vsa-size, 1.25) * 1em)" >}}'
+    ) in content

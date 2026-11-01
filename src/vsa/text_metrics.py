@@ -52,21 +52,37 @@ def estimate_scope_text_width(
     text: str,
     font_size: float,
     font_family: str = DEFAULT_FONT_FAMILY,
+    *,
+    leading_safety: bool = True,
+    trailing_safety: bool = True,
 ) -> float:
+    """Bare syllable width plus optional edge safety pads (C).
+
+    Text is left-aligned in the syllable zone; only ``trailing_safety`` widens
+    that zone to the right. ``leading_safety`` is applied in
+    :func:`vsa.scope_layout.build_scope_layout` as a left pad (not here), so
+    callers that only need the historical “text + margin” width for an
+    isolated scope should pass both flags True — this function then adds the
+    full margin on the trailing side (same total as before).
+    """
     if text == "":
         return round(max(4.0, font_size * 0.25), 2)
 
     # Import here to avoid circular import at module load time.
     from .spacing_policy import scope_safety_margin
 
-    return round(
-        max(
-            4.0,
-            estimate_text_width(text, font_size, font_family=font_family)
-            + scope_safety_margin(font_size),
-        ),
-        2,
-    )
+    margin = scope_safety_margin(font_size)
+    bare = estimate_text_width(text, font_size, font_family=font_family)
+    # Isolated scope: one full margin (legacy). Mid-word: none. Word-end only:
+    # trailing margin. Word-start only: bare here; left pad added in layout.
+    if leading_safety and trailing_safety:
+        extra = margin
+    elif trailing_safety:
+        extra = margin
+    else:
+        extra = 0.0
+
+    return round(max(4.0, bare + extra), 2)
 
 
 def get_font_metrics(

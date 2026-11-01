@@ -20,6 +20,7 @@ from .resolve_catalogus import (
     resolve_catalogus_markdown,
 )
 from .include_vsa import prepare_markdown_block_body
+from .svg_display import notation_style_attr, svg_natural_width, vsa_shortcode
 from .svg_renderer import SVGRenderer
 from .validation_runner import validate_file
 from .markdown_processor import ProcessValidationError
@@ -128,6 +129,7 @@ def build_markdown_site(
             max_line_width=max_line_width,
             output_mode=output_mode,
             bron_root=_discover_bron_root(input_dir),
+            config=config,
         )
 
         target_markdown.write_text(rewritten, encoding="utf-8")
@@ -164,6 +166,7 @@ def prepare_markdown_document(
     max_line_width: float = 800.0,
     output_mode: str = "img",
     bron_root: Path | None = None,
+    config: VSAConfig | None = None,
 ) -> tuple[str, list[Path]]:
     """Resolve includes/directives and replace VSA-blokken with SVG references.
 
@@ -174,6 +177,10 @@ def prepare_markdown_document(
     content_root = Path(content_root)
     assets_dir = Path(assets_dir)
     assets_dir.mkdir(parents=True, exist_ok=True)
+
+    svg_cfg = (config or VSAConfig()).rendering.svg
+    design_font_size = svg_cfg.font_size
+    relative_size = svg_cfg.relative_size
 
     source = markdown_file.read_text(encoding="utf-8")
     if bron_root is None:
@@ -195,6 +202,8 @@ def prepare_markdown_document(
         svg_assets_url_prefix=assets_url_prefix,
         content_root=content_root,
         bron_root=bron_root,
+        design_font_size=design_font_size,
+        relative_size=relative_size,
     )
     source = resolve_coria_directives(
         source,
@@ -211,6 +220,7 @@ def prepare_markdown_document(
         assets_url_prefix=assets_url_prefix,
         max_line_width=max_line_width,
         output_mode=output_mode,
+        svg_config=svg_cfg,
     )
     return rewritten, svg_paths
 
@@ -284,7 +294,13 @@ def _rewrite_markdown_file(
     assets_url_prefix,
     max_line_width,
     output_mode,
+    svg_config=None,
 ):
+    from .config import SVGRenderingConfig
+
+    if svg_config is None:
+        svg_config = SVGRenderingConfig()
+
     blocks = parse_markdown_blocks(source)
     lines = source.splitlines()
 
@@ -351,6 +367,7 @@ def _rewrite_markdown_file(
                 assets_url_prefix=assets_url_prefix,
                 max_line_width=max_line_width,
                 output_mode=output_mode,
+                svg_config=svg_config,
             )
             result_lines.append(replacement)
             svg_paths.append(svg_path)
@@ -371,7 +388,13 @@ def _rewrite_vsa_block(
     assets_url_prefix,
     max_line_width,
     output_mode,
+    svg_config=None,
 ) -> tuple[str, Path]:
+    from .config import SVGRenderingConfig
+
+    if svg_config is None:
+        svg_config = SVGRenderingConfig()
+
     expanded_body, _ = prepare_markdown_block_body(
         block.body,
         markdown_path=source_path,
@@ -382,7 +405,7 @@ def _rewrite_vsa_block(
     svg_path = assets_dir / svg_name
     svg_path.parent.mkdir(parents=True, exist_ok=True)
 
-    renderer = SVGRenderer()
+    renderer = SVGRenderer(svg_config=svg_config)
     renderer.max_line_width = max_line_width
     svg = renderer.render_document(block.parse_body(expanded_body))
     svg_path.write_text(svg, encoding="utf-8")
@@ -390,14 +413,29 @@ def _rewrite_vsa_block(
     img_src = f"{assets_url_prefix.rstrip('/')}/{svg_name.replace(chr(92), '/')}"
     alt = block.metadata.get("alt", "VSA notatie")
     scale = block.metadata.get("scale")
-    natural_width = _svg_natural_width(svg)
-    style_attr = _scale_style(scale, natural_width)
+    size = block.metadata.get("size")
+    natural_width = svg_natural_width(svg)
+    design_font_size = svg_config.font_size
+    relative_size = svg_config.relative_size
 
     if output_mode == "shortcode":
-        px = _scale_px(scale, natural_width)
-        scale_param = f' scale="{px}"' if px else ""
-        replacement = f'{{{{< vsa src="{img_src}" alt="{alt}"{scale_param} >}}}}'
+        replacement = vsa_shortcode(
+            img_src,
+            alt,
+            natural_width=natural_width,
+            design_font_size=design_font_size,
+            relative_size=relative_size,
+            scale=scale,
+            size=size,
+        )
     else:
+        style_attr = notation_style_attr(
+            natural_width=natural_width,
+            design_font_size=design_font_size,
+            relative_size=relative_size,
+            scale=scale,
+            size=size,
+        )
         replacement = (
             f'<img class="vsa-notation" '
             f'src="{img_src}" alt="{alt}"{style_attr}>'
@@ -474,34 +512,3 @@ def _opening_or_closing_fence(stripped: str):
 def _closes_fence(stripped: str, fence_marker: str):
     return stripped.startswith(fence_marker)
 
-
-_SVG_WIDTH_RE = re.compile(r"<svg\b[^>]*\bwidth=\"(\d+(?:\.\d+)?)\"")
-
-
-def _svg_natural_width(svg_text: str) -> float | None:
-    """Extract the natural pixel width from a rendered SVG string."""
-    m = _SVG_WIDTH_RE.search(svg_text)
-    return float(m.group(1)) if m else None
-
-
-def _scale_px(scale: str | None, natural_width: float | None) -> str | None:
-    """Convert a percentage scale to an absolute pixel width string (e.g. '680px').
-
-    Returns None when scale is absent, and falls back to the original value
-    (e.g. '85%') when natural_width is unavailable.
-    """
-    if not scale:
-        return None
-    if natural_width is not None:
-        try:
-            pct = float(scale.rstrip("%"))
-            return f"{round(natural_width * pct / 100)}px"
-        except ValueError:
-            pass
-    return scale
-
-
-def _scale_style(scale: str | None, natural_width: float | None) -> str:
-    """Return an inline style attribute string, or empty string when no scale."""
-    value = _scale_px(scale, natural_width)
-    return f' style="width: {value}"' if value else ""

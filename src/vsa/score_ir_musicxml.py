@@ -292,6 +292,8 @@ def score_ir_json_to_musicxml(text: str) -> str:
 def export_score_ir_path_to_musicxml(path: Path, out: Path) -> None:
     path = Path(path)
     out = Path(out)
+    from .atomic_io import write_text
+
     xml = score_ir_json_to_musicxml(path.read_text(encoding="utf-8"))
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(xml, encoding="utf-8", newline="\n")
+    write_text(out, xml, encoding="utf-8", newline="\n")

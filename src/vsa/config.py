@@ -38,6 +38,8 @@ class SVGRenderingConfig:
     margin_x: float = 8.0
     margin_y: float = 8.0
     filler_offset_y: float = -6.0
+    # Display size vs surrounding markdown ``1em`` (CSS ``--vsa-size`` default).
+    relative_size: float = 1.25
     upper: UpperGlyphConfig = field(default_factory=UpperGlyphConfig)
     lower: LowerGlyphConfig = field(default_factory=LowerGlyphConfig)
     pitch_marker: PitchMarkerConfig = field(default_factory=PitchMarkerConfig)
@@ -141,6 +143,11 @@ def _load_svg_rendering_config(config: SVGRenderingConfig, data: dict):
         config.font_family = _non_empty_string(data["font-family"], "rendering.svg.font-family")
     if "font-size" in data:
         config.font_size = _positive_float(data["font-size"], "rendering.svg.font-size")
+    if "relative-size" in data:
+        config.relative_size = _positive_float(
+            data["relative-size"],
+            "rendering.svg.relative-size",
+        )
     if "line-height" in data:
         config.line_height = _positive_float(data["line-height"], "rendering.svg.line-height")
     if "text-gap" in data:

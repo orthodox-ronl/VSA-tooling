@@ -36,7 +36,7 @@ def test_expand_pagebreak_and_vsa_shortcode():
     result = expand_print_shortcodes(text)
     assert 'class="pagebreak"' in result
     assert 'src="assets/demo.svg"' in result
-    assert 'style="width: 200px"' in result
+    assert 'style="width: 200px; height: auto"' in result
     assert "{{<" not in result
 
 
@@ -64,6 +64,13 @@ def test_expand_keep_together_scale():
     assert 'style="width: 70%"' in result
 
 
+def test_expand_keep_together_size():
+    text = '{{< keep-together size="1.1" >}}\ntekst\n{{< /keep-together >}}\n'
+    result = expand_print_shortcodes(text)
+    assert 'class="keep-together"' in result
+    assert 'style="--vsa-size: 1.1"' in result
+
+
 def test_markdown_to_print_html_has_print_css_and_headings():
     html = markdown_to_print_html("# Titel\n\n{{< pagebreak >}}\n", title="Demo")
     assert "<title>Demo</title>" in html
@@ -73,6 +80,7 @@ def test_markdown_to_print_html_has_print_css_and_headings():
     assert "page-break-before: always" in html
     assert 'class="pagebreak"' in html
     assert "<h1>Titel</h1>" in html
+    assert "--vsa-size: 1.25" in html
 
 
 def test_write_markdown_pdf_renders_vsa_and_pagebreak(tmp_path: Path, monkeypatch):

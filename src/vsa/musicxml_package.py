@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import os
+import tempfile
 import zipfile
 from pathlib import Path
+
+from .atomic_io import replace_into, write_bytes
 
 _MXL_CONTAINER = """\
 <?xml version="1.0" encoding="UTF-8"?>
@@ -34,15 +38,32 @@ def musicxml_output_suffix(*, format_name: str | None = None, path: Path | None 
 
 
 def write_musicxml_output(path: Path, xml: str) -> None:
-    """Write *xml* to *path* as ``.musicxml`` or ``.mxl`` (ZIP with ``score.xml``)."""
+    """Write *xml* to *path* as ``.musicxml`` or ``.mxl`` (ZIP with ``score.xml``).
+
+    Uses sibling temp + replace (see ``atomic_io``) against Windows EINVAL.
+    """
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.suffix.lower() == _MXL_SUFFIX:
         _write_mxl(path, xml)
     else:
-        path.write_text(xml, encoding="utf-8")
+        write_bytes(path, xml.encode("utf-8"))
 
 
 def _write_mxl(path: Path, xml: str) -> None:
-    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("META-INF/container.xml", _MXL_CONTAINER)
-        archive.writestr("score.xml", xml)
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=str(path.parent),
+    )
+    os.close(fd)
+    tmp_path = Path(tmp_name)
+    try:
+        with zipfile.ZipFile(tmp_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("META-INF/container.xml", _MXL_CONTAINER)
+            archive.writestr("score.xml", xml)
+        replace_into(path, tmp_path)
+        tmp_path = Path()
+    finally:
+        if tmp_path.is_file():
+            tmp_path.unlink(missing_ok=True)

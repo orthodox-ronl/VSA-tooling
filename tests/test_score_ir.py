@@ -138,6 +138,37 @@ B:  g          \\2 ||
     assert not any((ev.get("print") or {}).get("breveHead") for ev in sop)
 
 
+_S8_STEMMEN_SYNC = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: Die he_-mel,_ (aar-de en zee) heeft ge-maakt,_ ||
+S: -   g4  a4     f4             g4    a4 Bb4     ||
+A: -   e4  f4     -              -     -  -       ||
+T: -   c4  -      a3             Bb3   c4 d4      ||
+B: -   c3  f3     -              -     -  Bb2     ||
+"""
+
+
+def test_score_ir_s8_stemmen_sync_no_solo_breve() -> None:
+    """S8 stemmen-sync: A/B houden door, S/T wisselen → geen solo-breve (maat 13-patroon)."""
+    doc = export_mvsa_to_score_ir(_S8_STEMMEN_SYNC)
+    m1 = doc["measures"][0]
+    for letter in ("S", "A", "T", "B"):
+        evs = m1["voices"][letter]
+        prints = [ev.get("print") or {} for ev in evs]
+        assert not any(p.get("breveHead") for p in prints), (
+            f"stem {letter}: onverwachte ||O||-breve bij gemengde recite"
+        )
+        assert not any(p.get("spacer") for p in prints), (
+            f"stem {letter}: onverwachte recite-spacers bij gemengde recite"
+        )
+        assert len(evs) == len(m1["voices"]["S"]), (
+            f"stem {letter}: noot-aantal moet gelijk zijn aan S (geen collapse)"
+        )
+
+
 _S13_MELISMA = """\
 @do F4
 @mode major
@@ -159,6 +190,125 @@ def test_score_ir_s13_same_pitch_compact() -> None:
     assert len(sounding) == 1, f"verwacht 1 noot, kreeg {len(sounding)}"
     # half + half = whole, of gestipte vorm via elm
     assert sounding[0]["duration"]["elm"] in {"__", "_.", "_"}
+
+
+def test_score_ir_s13_dotted_whole_elm() -> None:
+    """S13: whole+half same-pitch → ELM ``__.`` (niet stil ``~`` / gevulde kwart)."""
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=-1 T=-1 B=-1
+
+L: a__&_ ||
+S: g&-   ||
+A: d&-   ||
+T: -&-   ||
+B: g&-   ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    for voice in ("S", "A", "T", "B"):
+        sounding = [
+            ev for ev in doc["measures"][0]["voices"][voice] if ev.get("pitch")
+        ]
+        assert len(sounding) == 1, f"{voice}: {sounding}"
+        assert sounding[0]["duration"]["elm"] == "__.", (
+            f"{voice}: verwacht ``__.``, kreeg {sounding[0]['duration']}"
+        )
+
+
+def test_score_ir_lyric_index_follows_voice_not_s_event_index() -> None:
+    """lyricIndex = n-de lyric-noot per stem; S-event-index faalt na S13-collapse.
+
+    Regressie alleluia-toon-2: T korter dan S → «lu»/«ja» kregen verkeerde index.
+    """
+    path = ROOT / "examples" / "bug-cases" / "corib" / "alleluia-toon-2.mvsa"
+    doc = export_mvsa_to_score_ir(path.read_text(encoding="utf-8"))
+    m0 = doc["measures"][0]
+    texts = [
+        "".join(s["text"] for s in ly.get("syllables", []))
+        for ly in m0["lyrics"]
+    ]
+    assert "lu" in texts and texts.count("lu") >= 2
+
+    ten = m0["voices"]["T"]
+    assert len(ten) < len(m0["voices"]["S"]), "preconditie: T korter na S13"
+
+    for voice in ("S", "A", "T", "B"):
+        idxs = [
+            ev["lyricIndex"]
+            for ev in m0["voices"][voice]
+            if ev.get("lyricIndex") is not None
+        ]
+        assert idxs == list(range(len(texts))), f"{voice}: lyricIndex {idxs}"
+
+    last_lu = max(i for i, t in enumerate(texts) if t == "lu")
+    t_lu = next(ev for ev in ten if ev.get("lyricIndex") == last_lu)
+    assert t_lu["duration"]["elm"] == "__.", (
+        f"T laatste «lu» moet ``__.`` zijn, kreeg {t_lu['duration']}"
+    )
+
+
+def test_score_ir_s13_pitch_change_melisma_closes_slur() -> None:
+    """S13/S2: melisma met toonwissel + trailing hold → slurStart én slurStop (K3).
+
+    Regressie cherubijnenhymne (alt/bas ``d4&c4&-``): open slur liep door
+    over volgende lettergrepen/maten.
+    """
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=-1 T=-1 B=-2
+
+L: uit~&~&~ ||
+S: g4&f4&e4 ||
+A: d4&c4&-  ||
+B: Bb2&c3&- ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    for voice in ("S", "A", "B"):
+        evs = doc["measures"][0]["voices"][voice]
+        starts = [
+            i
+            for i, ev in enumerate(evs)
+            if (ev.get("melisma") or {}).get("slurStart")
+        ]
+        stops = [
+            i
+            for i, ev in enumerate(evs)
+            if (ev.get("melisma") or {}).get("slurStop")
+        ]
+        assert starts and stops, f"{voice}: melisma-slur ontbreekt ({starts=}, {stops=})"
+        assert len(starts) == len(stops) == 1, f"{voice}: {starts=} {stops=}"
+        assert starts[0] < stops[0], f"{voice}: slur volgorde {starts[0]}≥{stops[0]}"
+
+
+def test_score_ir_k2_hyphen_syllables_not_merged_as_melisma() -> None:
+    """K2/L3/M5a: twee lettergrepen same-pitch in één maat blijven twee noten.
+
+    ``-beel_-den~`` met ``f4 -`` mag niet tot één noot + weggegooid «den».
+    """
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=-1 T=-1 B=-2
+
+L: -beel_-den~ ||
+S: f4     -    ||
+A: -      -    ||
+B: f2     -    ||
+"""
+    doc = export_mvsa_to_score_ir(text)
+    m0 = doc["measures"][0]
+    texts = [
+        "".join(s["text"] for s in ly.get("syllables", []))
+        for ly in m0["lyrics"]
+    ]
+    assert "beel" in texts and "den" in texts, f"lettergrepen kwijt: {texts}"
+    sop = [ev for ev in m0["voices"]["S"] if ev.get("pitch")]
+    assert len(sop) == 2, f"S: verwacht 2 noten, kreeg {len(sop)}"
+    assert not any(
+        (ev.get("melisma") or {}).get("slurStart") for ev in m0["voices"]["S"]
+    ), "hyphen-lettergrepen mogen geen melisma-slur krijgen (L3/S2)"
 
 
 def test_score_ir_s8_keeps_all_lyrics_no_phrase_slur() -> None:

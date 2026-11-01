@@ -1,0 +1,25 @@
+---
+do: F4
+mode: major
+tempo: 180
+soort: kondak
+bron:
+  uitgangspunt: Liturgikon, p 279
+toon: 3
+taal: nl
+gelegenheid:
+- naam: Maria, Hulp der Christenen (Pokrof)
+  datum: 1 okt
+zoektekst: >-
+  Heden staat de Maagd voor het altaar, om onzichtbaar met alle Heiligen voor ons te bidden
+  tot God. De Engelen buigen tezamen met de Hogepriesters en de Apostelen luisteren met de
+  Profeten. Want zij, uit wie God geboren is, smeekt tot God Die is voor alle eeuwen.
+---
+
+<!-- Kondak Maria, Hulp der Christenen (Pokrof), Toon 3, Liturgikon p.279 -->
+[\\:] He{/den} {/staat} de Maagd {\voor} {/het} {/&/al}{taar_}, *
+om onzichtbaar met alle Heiligen voor ons te {\bid_}{\den} {\tot} {\God_}. *
+{/De} {/En}gelen buigen tezamen met de {\Ho}{/ge}{/&/pries}{ters_} *
+en de Apostelen luisteren met de Pro{/fe__}{\ten_}. *
+Want zij, uit {\wie} {/God} {/ge}{/bo_.}{\ren_} {\is_}, **
+smeekt tot God Die is voor {\al}{\le} {/&/&/&\&\&\&/eeuw-&-&-&-&-&-&_}{\en_}. [:]

@@ -13,6 +13,8 @@ from collections.abc import Mapping
 from fractions import Fraction
 from pathlib import Path
 
+from .atomic_io import replace_into
+
 # A4 in inches (MuseScore). 15 mm = 0.590551 in.
 _A4_W = "8.26772"
 _A4_H = "11.6929"
@@ -433,7 +435,7 @@ def apply_partituur_mscz_conventions(
         for n, data in other.items():
             zout.writestr(n, data)
         zout.writestr(mscx_name, mscx.encode("utf-8"))
-    tmp.replace(path)
+    replace_into(path, tmp)
 
 
 # MuseScore 4 zet vaak ``<eid>`` vóór ``<style>`` — niet alleen ``Text>style``.
@@ -586,7 +588,7 @@ def pad_mscz_lyric_word_gaps(path: Path) -> None:
     with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zout:
         for name, data in files.items():
             zout.writestr(name, data)
-    tmp.replace(path)
+    replace_into(path, tmp)
 
 
 def patch_mscz_style(path: Path, overrides: Mapping[str, str]) -> None:
@@ -628,7 +630,7 @@ def patch_mscz_style(path: Path, overrides: Mapping[str, str]) -> None:
     with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zout:
         for name, data in files.items():
             zout.writestr(name, data)
-    tmp.replace(path)
+    replace_into(path, tmp)
 
 
 def strip_mscz_sheet_chrome(path: Path) -> None:
@@ -663,7 +665,7 @@ def strip_mscz_sheet_chrome(path: Path) -> None:
         for n, data in other.items():
             zout.writestr(n, data)
         zout.writestr(mscx_name, mscx.encode("utf-8"))
-    tmp.replace(path)
+    replace_into(path, tmp)
 
 
 def _fix_ds_al_fine_play_until(mscx: str) -> str:
@@ -717,8 +719,10 @@ def _clear_instrument_names(mscx: str) -> str:
     return mscx
 
 
-def _plain_cue_text(s: str) -> str:
-    """Normalize MuseScore/MusicXML cue text for matching (br/newlines/entities)."""
+def _cue_logical_text(s: str) -> str:
+    """Decode MuseScore/MusicXML cue markup → platte tekst (spaties behouden)."""
+    from vsa.mvsa_musicxml import _CUE_SPACE
+
     t = (
         s.replace("&lt;", "<")
         .replace("&gt;", ">")
@@ -728,6 +732,13 @@ def _plain_cue_text(s: str) -> str:
     t = re.sub(r"<br\s*/?>", "\n", t, flags=re.I)
     t = re.sub(r"<[^>]+>", "", t)
     t = t.replace("\r\n", "\n").replace("\r", "\n")
+    t = t.replace(_CUE_SPACE, " ")
+    return t
+
+
+def _plain_cue_text(s: str) -> str:
+    """Normalize MuseScore/MusicXML cue text for matching (br/newlines/entities)."""
+    t = _cue_logical_text(s)
     # ``Gezegend\n...`` en ``Gezegend ...`` als dezelfde cue.
     t = re.sub(r"[ \t]*\n[ \t]*", " ", t)
     t = re.sub(r"[ \t]+", " ", t)
@@ -1014,8 +1025,8 @@ def _insert_colophon_after_staff1(mscx: str, full_text: str) -> str:
 
 
 def _wrap_system_text_ellipsis(mscx: str, texts: list[str]) -> str:
-    """Zet newline vóór ``...`` in SystemText (twee regels op het blad)."""
-    from vsa.mvsa_musicxml import wrap_tekst_at_ellipsis
+    """Zet newline vóór ``...`` in SystemText; behoud spaties (S19)."""
+    from vsa.mvsa_musicxml import cue_text_for_score, wrap_tekst_at_ellipsis
 
     wanted_plain = [_plain_cue_text(t) for t in texts if t]
 
@@ -1025,14 +1036,15 @@ def _wrap_system_text_ellipsis(mscx: str, texts: list[str]) -> str:
         if tm is None:
             return block
         raw = tm.group(1)
+        logical = _cue_logical_text(raw)
         plain = _plain_cue_text(raw)
         if wanted_plain and not any(w and w in plain for w in wanted_plain):
             return block
-        wrapped = wrap_tekst_at_ellipsis(plain)
-        if wrapped == plain and "<br" in raw.lower():
+        wrapped = wrap_tekst_at_ellipsis(logical)
+        if wrapped == logical and "<br" in raw.lower() and " " not in logical:
             return block
-        # MuseScore: harde regelbreuk als ``<br/>``, niet als letterlijke newline.
-        out = wrapped.replace("\n", "<br/>")
+        # MuseScore: harde regelbreuk als ``<br/>``; spaties als NBSP.
+        out = cue_text_for_score(wrapped.replace("\n", "<br/>"))
         return block[: tm.start(1)] + out + block[tm.end(1) :]
 
     return re.sub(r"<SystemText>.*?</SystemText>", fix_system, mscx, flags=re.S)

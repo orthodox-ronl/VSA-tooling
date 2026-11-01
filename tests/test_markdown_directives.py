@@ -60,10 +60,29 @@ def test_keep_together_with_scale():
     assert "scale" not in result.split("{{< /keep-together >}}")[1]
 
 
+def test_keep_together_with_size():
+    text = ':::keep-together size="1.1":::\nInhoud.\n:::end-keep-together:::\n'
+    result = process_directives(text)
+    assert '{{< keep-together size="1.1" >}}' in result
+    assert "{{< /keep-together >}}" in result
+
+
+def test_keep_together_with_size_and_scale():
+    text = (
+        ':::keep-together size="1.1" scale="70%":::\n'
+        "Inhoud.\n"
+        ":::end-keep-together:::\n"
+    )
+    result = process_directives(text)
+    assert 'size="1.1"' in result
+    assert 'scale="70%"' in result
+
+
 def test_keep_together_without_scale_has_no_scale_attr():
     text = ":::keep-together:::\nInhoud.\n:::end-keep-together:::\n"
     result = process_directives(text)
     assert 'scale=' not in result
+    assert 'size=' not in result
 
 
 def test_multiple_directives_in_sequence():

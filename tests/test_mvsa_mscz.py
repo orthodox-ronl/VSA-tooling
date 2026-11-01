@@ -540,6 +540,30 @@ def test_promote_tekst_matches_br_ellipsis(tmp_path: Path):
     assert "Gezegend" in out
 
 
+def test_tekst_leading_spaces_preserved_in_system_text(tmp_path: Path):
+    """S19: spaties in ``@tekst \"…\"`` blijven (NBSP) in SystemText."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+    from vsa.mvsa_musicxml import _CUE_SPACE
+
+    cue = "   hello  world"
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        f"<StaffText><text>{cue}</text></StaffText>"
+        "</Score></museScore>"
+    )
+    path = tmp_path / "t.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("t.mscx", mscx)
+    apply_partituur_mscz_conventions(path, system_texts=[cue])
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    assert "<SystemText>" in out
+    expected = cue.replace(" ", _CUE_SPACE)
+    assert f"<text>{expected}</text>" in out
+    assert "hello" in out
+
+
 def test_gap_cue_spacer_rests_marks_short_rest_only_measure(tmp_path: Path):
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 

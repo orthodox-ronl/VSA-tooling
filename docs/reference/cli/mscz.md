@@ -32,7 +32,7 @@ mscz normalize [-h] [-o OUTPUT] [--layout PROFILE] [--bibliotheek-id ID]
                [--compact] [Style-opties…] path
 mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
              score mvsa
-mscz products [-h] [--force] [--dry-run] [--skip-svg] [--musescore PATH] path
+mscz products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
 ```
 
 ## Subcommando's

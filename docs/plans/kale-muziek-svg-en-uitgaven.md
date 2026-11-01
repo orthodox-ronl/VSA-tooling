@@ -57,12 +57,12 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).
 
 ## 2. Huidige toestand (kort)
 
-| Onderdeel                                    | Nu                                                                                          |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `mvsa`/`mscz` `svg` + `products`             | Eén tall compacte kale SVG (geen bladreeks)                                                 |
-| Catalogus-sibling PDF                        | MuseScore layout ``partituur`` (titel/colofon in het scorebestand)                          |
+| Onderdeel                                    | Nu                                                                                                 |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `mvsa`/`mscz` `svg` + `products`             | Eén tall compacte kale SVG (geen bladreeks)                                                        |
+| Catalogus-sibling PDF                        | MuseScore layout ``partituur`` (titel/colofon in het scorebestand)                                 |
 | bibliotheek `pdf.cmd` / `index.md.pdf`       | Bestaande tall-SVG + Markdown; systeemsnee naar A4 (lokaal exporteren alleen indien SVG ontbreekt) |
-| Lange stukken                                | Tall-SVG + snede; scherm: Score-IR/OSMD (fase 3)                                            |
+| Lange stukken                                | Tall-SVG + snede; scherm: Score-IR/OSMD (fase 3)                                                   |
 
 ---
 
@@ -71,7 +71,7 @@ koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).
 | Fase | Wat                                                                                          | Repo’s                              | Status            |
 | ---- | -------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------- |
 | 0    | Deze afspraak vastleggen + herinnering schermpad / Score-IR                                  | VSA-tooling (+ pointer bibliotheek) | **gedaan**        |
-| 1    | ~~Bladreeks~~ → **één tall compacte SVG** als product (scherm-fallback + print-bouwsteen)   | VSA-tooling                         | **gedaan** (tall) |
+| 1    | ~~Bladreeks~~ → **één tall compacte SVG** als product (scherm-fallback + print-bouwsteen)    | VSA-tooling                         | **gedaan** (tall) |
 | 2    | `pagina-pdf`: samenstellen uit blad-SVG’s + Markdown; catalogus-PDF-plakpad uitfaseren       | bibliotheek                         | **gedaan**        |
 | 3    | **Score-IR/OSMD** als productieschermpad (geen MuseScore-paginamodel op de site)             | VSA-tooling + bibliotheek           | **deels** — §4    |
 
@@ -94,9 +94,11 @@ Contract voor koormap (shortcode `muziek`) en latere CoriB-consumptie:
 
 **Stand:** bibliotheek-shortcode `muziek` / catalogus gebruikt from-ir → OSMD
 voor canonieke `.mvsa` (S8: A1-adapter, geen SVG-bypass —
-[osmd-s8-recite](osmd-s8-recite.md)). **Nog open t.o.v. eindbeeld §4:** o.a.
-`.vsa` zonder Score-IR, cue-/SVG-pariteit, CoriB. MuseScore-SVG blijft
-fallback, niet het S8-schermpad.
+[osmd-s8-recite](osmd-s8-recite.md)). Optioneel bestand:
+`mvsa svg --engine osmd` (headless OSMD uit Score-IR;
+[`scripts/osmd-svg`](../../scripts/osmd-svg/)). **Nog open t.o.v. eindbeeld
+§4:** o.a. `.vsa` zonder Score-IR, cue-/SVG-pariteit, CoriB. MuseScore-SVG
+blijft fallback/print, niet het S8-schermpad.
 
 **Herinneringsborging (naast dit plan):**
 

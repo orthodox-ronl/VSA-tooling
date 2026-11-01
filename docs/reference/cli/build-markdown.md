@@ -82,7 +82,8 @@ Bron-Markdown:
 Gegenereerde Markdown met `--output-mode img` (default):
 
 ```html
-<img class="vsa-notation" src="/vsa/smoke-block-1.svg" alt="VSA notatie">
+<img class="vsa-notation" src="/vsa/smoke-block-1.svg" alt="VSA notatie"
+  style="width: calc(… * var(--vsa-size, 1.25) * 1em); height: auto">
 ```
 
 Gegenereerde Markdown met `--output-mode shortcode`:

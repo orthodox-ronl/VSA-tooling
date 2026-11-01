@@ -1,0 +1,18 @@
+{
+  "schema": 2,
+  "bron": "alleluia-toon-2.mvsa",
+  "bron_sha256": "56f1544ff3678ab60df4ba94874c6c3de9a05179f7250cb376b10a3aa8894f2c",
+  "generated_at": "2026-10-31T10:57:18+00:00",
+  "products": {
+    "pdf": {
+      "file": "alleluia-toon-2.mvsa.pdf",
+      "sha256": "5d246e7b1fc8991df556a76a86c0ece6d1b8b42085c6520169720316ca43cf68",
+      "generated_at": "2026-10-31T10:57:18+00:00"
+    },
+    "svg": {
+      "file": "alleluia-toon-2.mvsa.svg",
+      "sha256": "a2131b659bd9581a7f1aa2d997fdcb855c84fa1bc4941773a67fcdcdcd7fa4bb",
+      "generated_at": "2026-10-31T10:57:02+00:00"
+    }
+  }
+}
