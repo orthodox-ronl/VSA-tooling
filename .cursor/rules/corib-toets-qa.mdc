@@ -1,0 +1,56 @@
+---
+description: CoriB/OSMD producttoets — regen, contract-check, visuele QA, ref-diff vóór melden
+alwaysApply: true
+---
+
+# CoriB / OSMD producttoets-QA (hard)
+
+Geldt wanneer je **OSMD-schermlayout**, from-ir, cue-layout, of CoriB-toetsen
+raakt (`examples/bug-cases/corib/`, `scripts/osmd-svg/`, gerelateerde
+leesbaarheid/contracten). Aanvulling op `contracten-eerst.mdc` en
+`klikbare-bewijslinks.mdc`.
+
+## Klaar = alles hieronder gedaan
+
+Werk is **niet** klaar (en je mag de gebruiker **niet** lastigvallen met
+«kijk even» / «lijkt OK») totdat je **zelf** dit hebt afgerond en er **voor
+instaat**:
+
+1. **Regen** — alle relevante toets-artifacts opnieuw met de **laatste** code
+   van deze run (`toets/*.osmd.svg` + `*.osmd.png` voor elk stuk in het
+   corpus; geen verouderde beelden van een eerdere commit laten liggen).
+2. **Contracten** — elk gegenereerd bestand toetsen tegen **alle** relevante
+   contract-ids (hub via [contract-index](docs/formats/contract-index.md):
+   o.a. S2/S5/S8/S10/S21/S22, L2/L4, P3a–P3e, M11, C7, …). Automatische
+   verify (`verify-corib-contract.mjs` e.d.) **én** handmatige checks waar
+   de verifier geen regel dekt.
+3. **Visueel** — **zelf** elk gegenereerd PNG/SVG openen (Read/screenshot)
+   en beoordelen: lyrics, hyphens, extenders, bogen, hulplijnen, kolommen.
+   «Verify PASS» alleen is **onvoldoende**. Gevonden fouten **corrigeren**
+   (of expliciet als bekende contractgap registreren) vóór je meldt.
+4. **Ref-diff** — zodra de corpus aan de contracten voldoet: elk
+   `{stuk}.osmd.*` vergelijken met `{stuk}.ref.*` waar die bestaat;
+   **verschillen inventariseren** (kort, per stuk/maat/symptoom) en die
+   lijst in het eindbericht zetten zodat contracten aangescherpt kunnen
+   worden. Geen stille «lijkt op de ref».
+
+## Verboden
+
+- Melden «klaar» / «PASS» terwijl nog niet alle toetsen met *deze* code
+  zijn gegenereerd.
+- Alleen één steekproef-PNG bekijken terwijl andere toetsen ook geraakt
+  zijn.
+- De gebruiker vragen om jouw visuele QA of ref-vergelijking te doen.
+- Contractregels (S22/P3e centreren, S2 bogen, L4 extender, …) als
+  «gedaan» claimen zonder dat de gegenereerde beelden dat tonen.
+
+## Eindbericht (minimaal)
+
+1. Welke toetsen geregenereerd (lijst).
+2. Welke verify/contract-checks groen zijn (ids noemen).
+3. Dat je **alle** PNG’s zelf hebt bekeken (kort: geen open restfout, of
+   gefixte restfout).
+4. Ref-diff-inventaris (of «geen ref aanwezig voor …»).
+5. Klikbare links / open-commando’s (`klikbare-bewijslinks.mdc`).
+
+Corpus en regeneratie: `examples/bug-cases/corib/README.md`.
