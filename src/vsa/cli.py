@@ -1118,37 +1118,39 @@ def _build_parser():
 
     pdf = subparsers.add_parser(
         "pdf",
-        help=(
-            "Verouderd: Markdown → A4-PDF. Gebruik ``markdown pdf`` "
-            "(zelfde keten; default sibling *.md.pdf)."
+        help="Print-PDF uit .vsa (partituur via MuseScore).",
+        description=(
+            "Partituur-PDF via MuseScore. Alleen .vsa. "
+            "Pagina-Markdown (index.md.pdf): markdown pdf. "
+            "Bron .mvsa: mvsa pdf; bron .mscz: mscz pdf."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa pdf examples\\minimal\\valid-demo.vsa\n"
+            "  vsa pdf lied.vsa -o generated\\lied.pdf\n"
+            "  markdown pdf index.md\n"
+            "  mvsa pdf lied.mvsa\n"
+            "  mscz pdf lied.mscz"
         ),
     )
-    pdf.add_argument("input", help="Markdownbestand (.md) met VSA-blokken en/of includes.")
+    pdf.add_argument(
+        "path",
+        help=".vsa-bestand of map met .vsa-bestanden (recursief).",
+    )
     pdf.add_argument(
         "-o",
         "--output",
         default=None,
         help=(
-            "Uitvoer-PDF (default: sibling <bronnaam>.pdf, bv. index.md.pdf). "
-            "Zie markdown pdf."
+            "Uitvoer-.pdf (default: sibling <bronnaam>.pdf). "
+            "Alleen bij precies één bronbestand."
         ),
     )
-    pdf.add_argument("--config", default=None)
     pdf.add_argument(
-        "--content-root",
+        "--musescore",
         default=None,
-        help="Content-root voor includes (default: map met lokaal/, anders de map van het bestand).",
-    )
-    pdf.add_argument(
-        "--bron-root",
-        default=None,
-        help="Bron-repo root (default: auto via vendor/bron of ../bron).",
-    )
-    pdf.add_argument("--max-line-width", type=float, default=None)
-    pdf.add_argument(
-        "--chrome",
-        default=None,
-        help="Pad naar Edge/Chrome/Chromium (anders CHROME_PATH of auto-detectie).",
+        help="Pad naar MuseScore-executable (default: auto).",
     )
 
     return parser
@@ -1420,23 +1422,63 @@ def _cmd_build_markdown(args, config):
 
 
 def _cmd_pdf(args, config):
-    """Verouderd alias voor ``markdown pdf`` (site-Markdown → A4-PDF)."""
-    from .cli_md import run_markdown_pdf_cli
+    """``vsa pdf``: alleen ``.vsa`` → partituur-PDF (los gereedschap, niet products)."""
+    from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
+    from .street_product_export import (
+        StreetProductExportError,
+        export_bron_to_partituur_pdf,
+    )
+    from .street_products import MSCZ_PDF_KEY, merge_street_product_meta
 
-    print(
-        "Let op: `vsa pdf` is verouderd; gebruik `markdown pdf` "
-        "(zelfde opties; default sibling *.md.pdf).",
-        file=sys.stderr,
-    )
-    return run_markdown_pdf_cli(
-        input_path=Path(args.input),
-        output=Path(args.output) if args.output else None,
-        config_path=getattr(args, "config", None),
-        content_root=args.content_root,
-        bron_root=args.bron_root,
-        max_line_width=args.max_line_width,
-        chrome=args.chrome,
-    )
+    del config  # partituur-PDF gebruikt geen vsa.toml-renderconfig
+    if _reject_wrong_street_source(
+        "vsa", "pdf", args.path, wrong_suffix=".md", hint_street="markdown"
+    ):
+        return 1
+    if _reject_wrong_street_source(
+        "vsa", "pdf", args.path, wrong_suffix=".markdown", hint_street="markdown"
+    ):
+        return 1
+    if _reject_wrong_street_source("vsa", "pdf", args.path, wrong_suffix=".mvsa"):
+        return 1
+    if _reject_wrong_street_source("vsa", "pdf", args.path, wrong_suffix=".mscz"):
+        return 1
+    if _reject_non_street_file("vsa", "pdf", args.path, allowed=(".vsa",)):
+        return 1
+    files = _cli_collect_sources(args.path, (".vsa",))
+    if files is None:
+        return 1
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
+    musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
+    exit_code = 0
+    for path in files:
+        out = (
+            Path(args.output)
+            if getattr(args, "output", None)
+            else derived_output_path(path, ".pdf")
+        )
+        try:
+            written = export_bron_to_partituur_pdf(
+                path, out, musescore=musescore
+            )
+        except (
+            StreetProductExportError,
+            MuseScoreNotFoundError,
+            MuseScoreConvertError,
+        ) as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+        meta = merge_street_product_meta(path, {MSCZ_PDF_KEY: written})
+        if meta is not None:
+            print(f"Meta: {meta.name}", flush=True)
+    return exit_code
 
 
 def _cmd_text(args) -> int:

@@ -10,7 +10,8 @@ Tekstbron voor **eenstemmige** [VSA](@)-notatie. Normatieve taal: de
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Syntax, semantiek, validatie            | [Specificaties](../specification/README.md)                                                          |
 | Valideren / MusicXML                    | [`vsa`](../reference/cli/index.md), [`vsa musicxml`](../reference/cli/musicxml.md)                   |
-| Standaardproducten + meta               | [`vsa products`](../reference/cli/products.md) (Coria-`.mxl` met syllabify+finalize + `.svg` + meta) |
+| Standaardproducten + meta               | [`vsa products`](../reference/cli/products.md) (geen `.vsa.pdf`)                                     |
+| Losse partituur-PDF                     | [`vsa pdf`](../reference/cli/pdf.md)                                                                 |
 | Muziek-only SVG (scherm / koormap)      | [`vsa-svg`](vsa-svg.md) · [`vsa svg`](../reference/cli/svg.md)                                       |
 | Zoektekst in canonieke bron             | [`zoektekst`](zoektekst.md) · CLI [`vsa zoektekst`](../reference/cli/zoektekst.md)                   |
 | Platte gezongen tekst (extractie)       | [`vsa text`](../reference/cli/text.md)                                                               |
@@ -23,6 +24,7 @@ Tekstbron voor **eenstemmige** [VSA](@)-notatie. Normatieve taal: de
 vsa validate examples\minimal\050_svg_demo.vsa
 vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa
 vsa products examples\minimal\valid-demo.vsa
+vsa pdf examples\minimal\valid-demo.vsa -o generated\demo.pdf
 vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie.mxl --syllabify
 vsa text examples\minimal\001_plain_text.vsa
 ```

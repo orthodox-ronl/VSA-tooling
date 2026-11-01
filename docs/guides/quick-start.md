@@ -7,5 +7,5 @@ Voor fouten: [Validatie — Diagnose](validation.md#diagnose-bij-problemen).
 Volledige lokale CI-smoke:
 
 ```cmd
-scripts\ci.cmd
+check
 ```

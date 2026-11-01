@@ -43,8 +43,8 @@ mscz products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PAT
 | `import`          | **Naar `.mscz`** uit `.mvsa`/MusicXML (= `mvsa mscz` / `mxl mscz`).                                                                                           |
 | `products`        | **Universele** standaardset + `{stam}.mscz.products-meta.json`. Zie [products-meta](../../formats/products-meta.md).                                          |
 | `mxl`             | Coria-`.mxl`; merget key `mxl`.                                                                                                                               |
-| `svg`             | Kale tall compacte SVG (key `svg`). Niet via `mvsa svg`.                                                                                                     |
-| `pdf`             | Print-PDF; merget `pdf`. Niet via `mvsa pdf`.                                                                                                                 |
+| `svg`             | Kale tall compacte SVG (key `svg`). Niet via `mvsa svg`.                                                                                                      |
+| `pdf`             | Losse print-PDF (P*); merget key `pdf`. Geen onderdeel van `products`. Niet via `mvsa pdf`.                                                                   |
 | `mp3`/`ogg`/`wav` | Preview-audio; `mp3` merget key `mp3`.                                                                                                                        |
 | `score-ir`        | Score-IR (+ `--musicxml` → from-ir); merget `score-ir` / `from-ir`.                                                                                           |
 | `mscz`            | Partituur-sibling `*.mscz.mscz` (layout `partituur`); merget key `mscz`.                                                                                      |

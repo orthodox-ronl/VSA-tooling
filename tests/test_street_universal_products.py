@@ -39,10 +39,6 @@ def _fake_mscz(_bron: Path, out: Path, **_kw: object) -> Path:
     return _touch(out, b"PK\x03\x04")
 
 
-def _fake_pdf(_bron: Path, out: Path, **_kw: object) -> Path:
-    return _touch(out, b"%PDF-1.4")
-
-
 def _fake_mp3(_bron: Path, out: Path, **_kw: object) -> Path:
     return _touch(out, b"ID3")
 
@@ -75,10 +71,6 @@ def _universal_patches(*, with_svg: bool = True):
         patch(
             "vsa.street_product_export.export_bron_to_mscz_product",
             side_effect=_fake_mscz,
-        ),
-        patch(
-            "vsa.street_product_export.export_bron_to_partituur_pdf",
-            side_effect=_fake_pdf,
         ),
         patch("vsa.audio_export.export_to_audio", side_effect=_fake_mp3),
         patch(
@@ -113,10 +105,6 @@ def test_mscz_products_writes_universal_keys(tmp_path: Path) -> None:
             "vsa.street_product_export.export_bron_to_mscz_product",
             side_effect=_fake_mscz,
         ),
-        patch(
-            "vsa.street_product_export.export_bron_to_partituur_pdf",
-            side_effect=_fake_pdf,
-        ),
         patch("vsa.audio_export.export_to_audio", side_effect=_fake_mp3),
         patch(
             "vsa.street_product_export.write_lyrics_product",
@@ -129,6 +117,8 @@ def test_mscz_products_writes_universal_keys(tmp_path: Path) -> None:
     keys = set(data["products"])
     assert set(UNIVERSAL_PRODUCT_KEYS).issubset(keys)
     assert "svg" in keys
+    assert "pdf" not in keys
+    assert not (tmp_path / "lied.mscz.pdf").is_file()
 
 
 def test_mscz_mp3_writes_sibling(tmp_path: Path, capsys) -> None:

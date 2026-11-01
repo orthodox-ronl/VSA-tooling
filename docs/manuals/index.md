@@ -25,6 +25,7 @@ Taakgerichte documentatie voor werken met de [VSA-tooling](@bron). Dit is het
 
 | Pagina                                                              | Wat je er vindt                                      |
 | ------------------------------------------------------------------- | ---------------------------------------------------- |
+| [Scripts (cmd)](../formats/scripts.md)                              | Welk `.cmd`-script, met plakbare voorbeelden.        |
 | [mvsa schrijven 101](../guides/mvsa-schrijven-101.md)               | Tutorial: L/stemmen, notatie, octaven, taken.        |
 | [MusicXML-export](../guides/musicxml-export.md)                     | Export naar MusicXML / Coria.                        |
 | [Rendering en fonts](../guides/rendering-fonts.md)                  | Fonts en SVG-metrics.                                |

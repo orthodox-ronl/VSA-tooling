@@ -17,13 +17,14 @@ OSMD/S8/S13-wijziging die het schermbeeld raakt.
 
 | Bron (`.mvsa`)                       | MuseScore-ref (sibling)   | Waarom                                  |
 | ------------------------------------ | ------------------------- | --------------------------------------- |
-| `alleluia-toon-8.mvsa`               | `.mvsa.svg` + `.mvsa.pdf` | Canonieke lange `()`-recite             |
+| `alleluia-toon-8.mvsa`               | `.mvsa.svg`               | Canonieke lange `()`-recite             |
 | `alleluia-toon-3.mvsa`               | idem                      | Korte recite + zelfde-toon-vervolg → S8 |
 | `alleluia-toon-2.mvsa`               | idem                      | Extra lange `()`-recite                 |
 | `derde-antifoon-zondag-hemelum.mvsa` | idem                      | Langere praktijkcasus (veel recite)     |
 
-Referentie-SVG/PDF: door de beheerder gegenereerd met `mvsa svg` / `mvsa pdf`
-(MuseScore). OSMD-product: `mvsa svg --engine osmd`.
+Referentie-SVG: door de beheerder gegenereerd met `mvsa svg` (MuseScore).
+OSMD-product: `mvsa svg --engine osmd`. Een `.mvsa.pdf` hoort niet in
+deze map.
 
 ## Vastgelegde toetsbestanden
 

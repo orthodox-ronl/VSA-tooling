@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 
-from vsa.cli import main
 from vsa.cli_md import main as md_main
 from vsa.markdown_pdf import (
     PdfError,
@@ -165,13 +164,12 @@ def test_cli_pdf_writes_output(tmp_path: Path, monkeypatch, capsys):
 
     monkeypatch.setattr("vsa.markdown_pdf.html_file_to_pdf", fake_html_to_pdf)
 
-    exit_code = main(["pdf", str(source), "-o", str(pdf_path)])
+    exit_code = md_main(["pdf", str(source), "-o", str(pdf_path)])
     captured = capsys.readouterr()
     assert exit_code == 0
     assert pdf_path.is_file()
     assert "PDF geschreven naar:" in captured.out
-    assert "verouderd" in captured.err
-    assert "markdown pdf" in captured.err
+    assert "verouderd" not in captured.err
 
 
 def test_md_pdf_default_sibling_name(tmp_path: Path, monkeypatch, capsys):
@@ -250,7 +248,7 @@ def test_cli_pdf_validation_error_shows_file_line(tmp_path: Path, capsys):
         ":::\n",
         encoding="utf-8",
     )
-    exit_code = main(["pdf", str(source), "-o", str(tmp_path / "x.pdf")])
+    exit_code = md_main(["pdf", str(source), "-o", str(tmp_path / "x.pdf")])
     captured = capsys.readouterr()
     assert exit_code == 1
     assert "fout.md:" in captured.out or "fout.md:" in captured.err

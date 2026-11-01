@@ -200,7 +200,7 @@ Lokaal controleren (tooling):
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa validate examples\consumer-minimal\content-source
-scripts\docs-serve.cmd
+serve
 ```
 
 Hugo-voorbeeldconsumer: [VSA-demo](https://github.com/orthodox-ronl/VSA-demo).

@@ -111,7 +111,7 @@ Transforms: Oefenhoek `mscz-product-transforms.md` (PDF-kolom).
 
 **Canonieke pagina:** elke door ons geproduceerde PDF is **A4 staand**
 (210×297 mm). US Letter is **niet** canoniek — noch voor partituur-PDF
-(`mvsa pdf` / MuseScore), noch voor Markdown-PDF ([`markdown pdf`](../reference/cli/markdown.md#markdown-pdf); verouderd: [`vsa pdf`](../reference/cli/pdf.md)).
+(`vsa pdf` / `mvsa pdf` / MuseScore), noch voor Markdown-PDF ([`markdown pdf`](../reference/cli/markdown.md#markdown-pdf)).
 
 | #   | Eis                                  | Toelichting                                                                                                                                                                                      |
 | --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

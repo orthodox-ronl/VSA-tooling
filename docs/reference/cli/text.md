@@ -1,35 +1,46 @@
 # `vsa text` — platte gezongen tekst
 
-Haal de **woorden** uit een bronbestand, zonder notatie (geen EHM/ELM,
-geen stempartijen). Bedoeld voor zoekindex, lyrics-producten en als
-**referentie** voor het veld [`zoektekst`](../../formats/zoektekst.md) in
-canonieke `.vsa` / `.mvsa` — niet voor bewerken van de notatie.
+Haal de **woorden** uit een `.vsa`, zonder notatie (geen EHM/ELM).
+Bedoeld als lyrics-product en als **referentie** voor het veld
+[`zoektekst`](../../formats/zoektekst.md) — niet voor bewerken van de
+notatie.
 
-Op `.vsa` / `.mvsa` is de referentie de **body** (VSA-tekst of L-regels), niet
-het veld `zoektekst` (YAML-frontmatter wordt in beide formaten gestript). Zie
+De woorden komen uit de VSA-body, niet uit het veld `zoektekst`
+(YAML-frontmatter wordt gestript). Zie
 [zoektekst — tooling](../../formats/zoektekst.md#tooling).
+Voor een `.mvsa`: [`mvsa text`](mvsa.md#mvsa-text). Voor een `.mscz`:
+[`mscz text`](mscz.md).
 
 ## Synopsis
 
 ```text
-vsa text [-h] [-o OUTPUT] [--musescore PATH] path
+vsa text [-h] [-o OUTPUT] path
 ```
 
-**Invoer:** `path` mag één bronbestand **of** een map zijn (recursief alle
-passende extensies). Bij meerdere bronnen: tekst naar stdout met
-`=== <pad> ===`-koppen; `-o` alleen bij precies één bron. Zie
+**Invoer:** één `.vsa` of een map (recursief alle `.vsa`). Standaard
+schrijft het commando `{stam}.vsa.lyrics.txt` naast de bron en meldt
+`Geschreven:` plus `Meta:`. `-o` alleen bij precies één bestand. Zie
 [Invoer bestand of map](input-pad.md).
 
 ## Bronnen
 
-| Extensie                         | Gedrag                                                                                                                                           |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `.vsa`                           | Directe extractie uit VSA-body.                                                                                                                  |
-| `.mvsa`                          | Directe extractie uit L-regel(s). Systeembreuk (`@mscz-newline`) is geen woordbreuk: leidend `-`/`=` plakt door (ook over sectiegrenzen).        |
-| `.mxl` / `.musicxml` / `.xml`    | Lyrics uit MusicXML (geen MuseScore nodig).                                                                                                      |
-| `.mscz`                          | Via tijdelijke MuseScore-`.mxl`; schrijft **geen** `.mvsa`-sibling.                                                                              |
+`vsa text` leest alleen een `.vsa`. Andere bronnen hebben een eigen
+commando. Een verkeerde extensie stopt met een fout en noemt het
+commando dat wel past.
 
-Bestandsnamen zoals `{stam}.mscz.mxl` horen bij `.mxl` (laatste suffix).
+| Bron                         | Commando        | Sibling                          |
+| ---------------------------- | --------------- | -------------------------------- |
+| `.vsa`                       | `vsa text`      | `{stam}.vsa.lyrics.txt`          |
+| `.mvsa`                      | `mvsa text`     | `{stam}.mvsa.lyrics.txt`         |
+| `.mscz`                      | `mscz text`     | `{stam}.mscz.lyrics.txt`         |
+| `.md`                        | `markdown text` | zie [`markdown`](markdown.md)    |
+
+`.mvsa`: de woorden komen uit de L-regels. Een systeembreuk
+(`@mscz-newline`) is geen woordbreuk.
+
+`.mscz`: `mscz text` gaat via een tijdelijke MuseScore-MusicXML en
+schrijft geen `.mvsa` ernaast. De MusicXML-regels hieronder beschrijven
+die keuze. `vsa text lied.mscz` weigert het bestand.
 
 ### MusicXML-regel (SATB / partituur)
 
@@ -48,36 +59,31 @@ Lege of lyric-loze scores geven een **lege string** (exitcode 0), net als
 
 ### `.mscz` zonder import-keten
 
-`vsa text lied.mscz` (of `mscz text lied.mscz`) exporteert alleen via
-MuseScore naar een temp-`.mxl` en leest daaruit. Er ontstaat geen
-`{stam}.mscz.mvsa`. Voor catalogus-zoeken is een bestaande
-`{stam}.mscz.mxl` vaak voldoende: `vsa text lied.mscz.mxl`.
+`mscz text lied.mscz` exporteert alleen via MuseScore naar een
+tijdelijke MusicXML en leest daaruit. Er ontstaat geen
+`{stam}.mscz.mvsa`.
 
 ## Opties
 
 | Optie               | Betekenis                                                                      |
 | ------------------- | ------------------------------------------------------------------------------ |
-| `-o`, `--output`    | Schrijf naar bestand i.p.v. stdout (`Geschreven: …`). Alleen bij één bron.     |
-| `--musescore PATH`  | MuseScore-executable (alleen bij `.mscz`; default auto).                       |
+| `-o`, `--output`    | Ander pad dan de sibling `{stam}.vsa.lyrics.txt`. Alleen bij één bron.         |
 
-Geen stamp-header (`# vsa-source-sha256:`) in deze tooling — dat hoort bij
-consumer lyrics-products. Een sibling `*.lyrics.txt` is **niet** verplicht
-naast canonieke `.vsa` / `.mvsa` (daar: [`zoektekst`](../../formats/zoektekst.md)).
-Optioneel lyrics-product (o.a. uit `.mscz` / `.mxl`):
-`{stam}.mscz.lyrics.txt` — zie
-[canonieke checklists — naamgeving](../../formats/canonical-checklists.md#bestandsnaamgeving-conventie).
+Geen stamp-header (`# vsa-source-sha256:`) in deze tooling.
+Editorzoeken in een canonieke `.vsa` of `.mvsa` gebruikt het veld
+`zoektekst` in de bron — zie
+[`zoektekst`](../../formats/zoektekst.md). Het sibling-bestand
+`*.lyrics.txt` schrijft `{straat} text` of `{straat} products`
+(standaardproduct, meta-key `lyrics`).
 
 ## Voorbeelden
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa text examples\minimal\001_plain_text.vsa
-vsa text docs\specification-vsa-templates\library\tropaar-toon-4\examples\corpus\T4-01-johannes-voorloper.mxl
-vsa text lied.mscz.mxl -o generated\lied.lyrics.txt
-vsa text lied.mscz -o generated\lied.lyrics.txt
+mvsa text examples\mvsa\alleluia-toon-1.mvsa
+mscz text lied.mscz -o generated\lied.mscz.lyrics.txt
 ```
-
-Alias voor alleen `.mscz`: [`mscz text`](mscz.md).
 
 ## Zie ook
 

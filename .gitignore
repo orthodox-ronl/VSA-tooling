@@ -8,11 +8,9 @@ public/
 resources/
 node_modules/
 
-# MuseScore/lokale PDF-export — niet committen (scans horen in bron)
+# MuseScore-export en straat-product-PDF (.vsa.pdf / .mvsa.pdf / .mscz.pdf).
+# Niet committen. Pagina-afdruk is index.md.pdf (bibliotheek), niet deze bestanden.
 *.pdf
-# Uitzondering: spike-proef-PDF’s in bug-cases wél zichtbaar/commitbaar
-!examples/bug-cases/*.pdf
-!examples/bug-cases/**/*.pdf
 
 # MuseScore autosave — nergens committen
 *.autosave
