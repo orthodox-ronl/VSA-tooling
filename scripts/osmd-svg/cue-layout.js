@@ -890,42 +890,85 @@
       .forEach(function (id) {
         var info = byId[id];
         // Nootkolommen: cluster mid-x over alle balken van dit maat-id.
-        // Spacers meenemen via data-osmd-anchor-x (S8-hide maakt bbox 0).
+        // Visuele SVG-x (screen→svg) — getBBox negeert translate() op de
+        // stavenote (OSMD ~56px + S21), waardoor S22 «want» de verkeerde
+        // kant op duwde (maat 16: Δ≈26 px rechts van slotmidden).
+        var svgRoot =
+          (info.el && info.el.ownerSVGElement) ||
+          mount.querySelector("svg");
+        var invScreen = null;
+        try {
+          if (svgRoot && svgRoot.getScreenCTM) {
+            invScreen = svgRoot.getScreenCTM().inverse();
+          }
+        } catch (eInv) {
+          invScreen = null;
+        }
+        function screenToSvgX(clientX) {
+          if (!invScreen) {
+            return clientX;
+          }
+          return clientX * invScreen.a + invScreen.e;
+        }
+        function visualNoteBox(noteEl, isSpacer) {
+          var anchor = noteEl.getAttribute("data-osmd-anchor-x");
+          if (
+            isSpacer &&
+            anchor != null &&
+            anchor !== "" &&
+            Number.isFinite(Number(anchor))
+          ) {
+            // anchor = getBBox-mid vóór hide (lokaal); × note CTM → svg.
+            var am = Number(anchor);
+            var actm = null;
+            try {
+              actm = noteEl.getCTM();
+            } catch (eA) {
+              actm = null;
+            }
+            var vx = actm ? am * actm.a + actm.e : am;
+            return { mid: vx, x: vx - 6, right: vx + 6 };
+          }
+          if (isSpacer) {
+            return null;
+          }
+          var head =
+            noteEl.querySelector("[data-osmd-breve-glyph='1']") ||
+            noteEl.querySelector(".vf-notehead") ||
+            noteEl;
+          var hr;
+          try {
+            hr = head.getBoundingClientRect();
+          } catch (e2) {
+            return null;
+          }
+          if (!(hr.width > 0.5)) {
+            return null;
+          }
+          var xL = screenToSvgX(hr.left);
+          var xR = screenToSvgX(hr.right);
+          if (xR < xL) {
+            var tmp = xL;
+            xL = xR;
+            xR = tmp;
+          }
+          return { mid: (xL + xR) / 2, x: xL, right: xR };
+        }
         var heads = [];
         for (var s = 0; s < info.staffs.length; s += 1) {
           var notes = info.staffs[s].querySelectorAll(".vf-stavenote");
           for (var n = 0; n < notes.length; n += 1) {
             var noteEl = notes[n];
             var isSpacer = noteEl.getAttribute("data-osmd-spacer") === "1";
-            var mid = null;
-            var x0 = null;
-            var x1 = null;
-            var anchor = noteEl.getAttribute("data-osmd-anchor-x");
-            if (anchor != null && anchor !== "" && Number.isFinite(Number(anchor))) {
-              mid = Number(anchor);
-              x0 = mid - 6;
-              x1 = mid + 6;
-            } else if (!isSpacer) {
-              var nb;
-              try {
-                nb = noteEl.getBBox();
-              } catch (e2) {
-                continue;
-              }
-              if (!(nb.width > 0)) {
-                continue;
-              }
-              mid = nb.x + nb.width / 2;
-              x0 = nb.x;
-              x1 = nb.x + nb.width;
-            } else {
+            var box = visualNoteBox(noteEl, isSpacer);
+            if (!box) {
               continue;
             }
             heads.push({
               el: noteEl,
-              mid: mid,
-              x: x0,
-              right: x1,
+              mid: box.mid,
+              x: box.x,
+              right: box.right,
               spacer: isSpacer,
             });
           }
@@ -998,14 +1041,27 @@
           if (g.classList && g.classList.contains("dash")) {
             continue;
           }
-          var gb;
+          var gr;
           try {
-            gb = g.getBBox();
+            gr = g.getBoundingClientRect();
           } catch (e4) {
             continue;
           }
-          var gmid = gb.x + gb.width / 2;
-          var gy = gb.y + gb.height / 2;
+          if (!(gr.width > 0.5)) {
+            continue;
+          }
+          var gx0 = screenToSvgX(gr.left);
+          var gx1 = screenToSvgX(gr.right);
+          if (gx1 < gx0) {
+            var gswap = gx0;
+            gx0 = gx1;
+            gx1 = gswap;
+          }
+          var gmid = (gx0 + gx1) / 2;
+          // y-band in svg-ruimte (zelfde als info.y uit measure getBBox).
+          var gy = invScreen
+            ? gr.top * invScreen.d + invScreen.f
+            : gr.top;
           if (gy < colY0 || gy > colY1) {
             continue;
           }
@@ -1014,10 +1070,10 @@
           }
           measureLyrics.push({
             el: g,
-            x: gb.x,
-            right: gb.x + gb.width,
+            x: gx0,
+            right: gx1,
             mid: gmid,
-            half: gb.width / 2,
+            half: (gx1 - gx0) / 2,
           });
         }
         measureLyrics.sort(function (a, b) {
@@ -1204,49 +1260,72 @@
           item.right += dx;
           item.el.setAttribute("data-osmd-lyric-slot", "1");
         }
-        // Ideale snap (cap 72).
-        for (var s0 = 0; s0 < snapped.length; s0 += 1) {
-          var it = snapped[s0];
-          var ideal = it.noteMid;
-          var dx0 = ideal - it.mid;
-          if (dx0 > 72) {
-            ideal = it.mid + 72;
+        // Ideale snap. lyricsOnly (na gap-enforce): sla over — alleen
+        // hard-cap hieronder trekt Δ>28 bij.
+        if (!lyricsOnly) {
+          for (var s0 = 0; s0 < snapped.length; s0 += 1) {
+            var it = snapped[s0];
+            var ideal = it.noteMid;
+            var dx0 = ideal - it.mid;
+            if (dx0 > 72) {
+              ideal = it.mid + 72;
+            }
+            if (dx0 < -72) {
+              ideal = it.mid - 72;
+            }
+            applySnapTo(it, ideal);
           }
-          if (dx0 < -72) {
-            ideal = it.mid - 72;
+          // P3a: minGap 12 (verify-corib-contract). P3e wijkt bij conflict.
+          var minGap = 12;
+          for (var pass = 0; pass < 8; pass += 1) {
+            var moved = false;
+            for (var si = 0; si + 1 < snapped.length; si += 1) {
+              var a = snapped[si];
+              var b = snapped[si + 1];
+              var need = a.right + minGap - b.x;
+              if (!(need > 0)) {
+                continue;
+              }
+              var push = need / 2;
+              var dA = -push;
+              var dB = push;
+              // Brede eindlettergreep al rechts van noot: duw vooral de
+              // vorige naar links (anders «heid,» Δ>28 na gap-enforce).
+              if (b.mid >= b.noteMid - 1) {
+                dA = -need;
+                dB = 0;
+              }
+              if (appendTx(a.el, dA)) {
+                a.mid += dA;
+                a.x += dA;
+                a.right += dA;
+                moved = true;
+              }
+              if (appendTx(b.el, dB)) {
+                b.mid += dB;
+                b.x += dB;
+                b.right += dB;
+                moved = true;
+              }
+            }
+            if (!moved) {
+              break;
+            }
           }
-          applySnapTo(it, ideal);
         }
-        // P3a: minGap 12 (verify-corib-contract). P3e wijkt bij conflict.
-        var minGap = 12;
-        for (var pass = 0; pass < 8; pass += 1) {
-          var moved = false;
-          for (var si = 0; si + 1 < snapped.length; si += 1) {
-            var a = snapped[si];
-            var b = snapped[si + 1];
-            var need = a.right + minGap - b.x;
-            if (!(need > 0)) {
-              continue;
-            }
-            // Duw uit elkaar; wie verder van z'n noot mag meer wijken.
-            var push = need / 2;
-            var dA = -push;
-            var dB = push;
-            if (appendTx(a.el, dA)) {
-              a.mid += dA;
-              a.x += dA;
-              a.right += dA;
-              moved = true;
-            }
-            if (appendTx(b.el, dB)) {
-              b.mid += dB;
-              b.x += dB;
-              b.right += dB;
-              moved = true;
-            }
+        // Hard cap: binnen verify lyric↔noot slack (28 px); 27 voor afronding.
+        var noteSlack = 27;
+        for (var fi = 0; fi < snapped.length; fi += 1) {
+          var f = snapped[fi];
+          var away = f.mid - f.noteMid;
+          if (!(Math.abs(away) > noteSlack)) {
+            continue;
           }
-          if (!moved) {
-            break;
+          var pull = away > 0 ? away - noteSlack : away + noteSlack;
+          if (appendTx(f.el, -pull)) {
+            f.mid -= pull;
+            f.x -= pull;
+            f.right -= pull;
           }
         }
       });

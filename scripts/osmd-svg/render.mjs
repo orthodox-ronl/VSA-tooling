@@ -791,23 +791,25 @@ async function main() {
             ) {
               /* other band */
             }
-            // Beperk shift t.o.v. nootkolom (S22/P3e). Onder verify-
-            // drempel (force): P3a wint — volledige gap-shift.
+            // Beperk shift t.o.v. nootkolom (S22/P3e). Force (gap <12):
+            // nog steeds max ~28 px van de noot — anders faalt
+            // lyric↔noot op brede eindlettergrepen («heid,»).
             const lyricCx = (curR.left + curR.right) / 2;
             const lyricCy = (curR.top + curR.bottom) / 2;
             let dx = needSvg;
-            if (!force) {
-              const cap = MAX_NOTE_DX_PX;
-              const before = nearestNoteDx(lyricCx, lyricCy, 0);
-              if (Number.isFinite(before) && before < 90) {
-                while (dx > 0.3) {
-                  const after = nearestNoteDx(lyricCx, lyricCy, dx * sx);
-                  if (after <= cap) break;
-                  dx *= 0.7;
-                }
-                if (nearestNoteDx(lyricCx, lyricCy, dx * sx) > cap + 8) {
-                  return; // liever krappe gap dan losse lyric
-                }
+            const cap = force ? 28 : MAX_NOTE_DX_PX;
+            const before = nearestNoteDx(lyricCx, lyricCy, 0);
+            if (Number.isFinite(before) && before < 90) {
+              while (dx > 0.3) {
+                const after = nearestNoteDx(lyricCx, lyricCy, dx * sx);
+                if (after <= cap) break;
+                dx *= 0.7;
+              }
+              if (
+                !force &&
+                nearestNoteDx(lyricCx, lyricCy, dx * sx) > cap + 8
+              ) {
+                return; // liever krappe gap dan losse lyric
               }
             }
             if (!(dx > 0.2)) return;
@@ -890,9 +892,12 @@ async function main() {
             }
           }
         })();
-        // Geen tweede lyric-snap hier: die ondermijnde P3a-gaps (derde
-        // verify ×20). S22+eerste snap vóór gap-enforce + zachtere
-        // woordgap (alleen leesteken) houdt P3e op maat 16.
+        // P3e — zachte her-snap na gap-enforce: alleen lyrics die >28 px
+        // van hun nootkolom staan (verify lyric↔noot), zonder volle
+        // her-centrering die P3a opnieuw breekt.
+        if (typeof window.__vsaOsmdSnapLyricsToNotes === "function") {
+          window.__vsaOsmdSnapLyricsToNotes(mount);
+        }
         // L3 — lettergreepstreepjes tussen syllabic begin/middle/end.
         // OSMD laat ze soms weg in krappe gaps (alleluia-8, derde-antifoon).
         // Alleen waar MusicXML een binnenwoord-overgang markeert — geen

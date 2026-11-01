@@ -66,7 +66,10 @@ S8-spacers ([S22](mscz-leesbaarheid.md#p--pagina--systeem-a4) / P3e).
 S22 koppelt lyrics volgorde-behoudend aan nootkolommen (niet op mid-x-
 voronoi) en snapt elke lettergreep onder die kolom zolang de
 minimum-lettergreepafstand blijft; zo blijft o.a. derde-antifoon maat 16
-«Gods…ge-noemd» onder de juiste noten. Lettergrepen mogen niet overlappen
+«Gods…ge-noemd» onder de juiste noten. Slot-centrering gebruikt
+visuele noot-x (SVG-CTM), niet kale ``getBBox`` — anders duwt de
+OSMD-``translate`` brede eerste lettergrepen zoals «want» uit het
+slotmidden. Lettergrepen mogen niet overlappen
 ([mscz-leesbaarheid](mscz-leesbaarheid.md) §2). S8-recite: na render past
 de A1-adapter spacer-hide toe (`notehead none`) en tekent ``||O||`` op
 breve-midden; zie [osmd-s8-recite](../plans/osmd-s8-recite.md) en
