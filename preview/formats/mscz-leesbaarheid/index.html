@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/osmd-alleluia8-layout-91fb</code>
-  , gebouwd 2026-11-01 14:53 CET.
+  , gebouwd 2026-11-01 15:35 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5255,6 +5255,13 @@ Ownership (wie kiest, wie handhaaft):
 <li>Eenregelige <code>@tekst</code> deelt de baseline van regel 2 van een twee-regelige
     cue (C7).</li>
 <li>Hulplijnen blijven op de nootkop na post-layout (M11; T-stem C/D).</li>
+<li><strong>Bron↔papier (altijd):</strong> elke klinkende non-spacer-noot uit de bron
+    (Score-IR / from-ir MusicXML) staat als zichtbare nootkop op het blad
+    of OSMD-scherm. S8-spacers (<code>notehead none</code>) horen juist <strong>niet</strong>
+    zichtbaar; same-pitch-collapse (S13/M5a) telt als één langere noot.
+    Geen “pixel-slack”-excuus — tel bronnoten tegen zichtbare koppen
+    (OSMD: <code>data-osmd-source-notes</code> / <code>data-osmd-visible-notes</code>;
+    <code>verify-corib-contract.mjs</code>). Toets: alleluia-toon-8.</li>
 </ol>
 <hr />
 <h2 id="r-recite-tekst-model-a-spacers">R — Recite-tekst (model A: spacers)<a class="headerlink" href="#r-recite-tekst-model-a-spacers" title="Permanent link">&para;</a></h2>
@@ -5355,11 +5362,11 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>L3</td>
-<td>Hyphen (<code>Va-der</code>) ≠ melisma. Lettergreepstreepjes horen <strong>tussen</strong> opeenvolgende lettergrepen van <strong>hetzelfde</strong> woord (begin/middle syllabic) — zichtbaar; <strong>niet</strong> ontbrekend; <strong>niet</strong> in een woordgrens-gap (<code>ia, | Al</code>); <strong>niet</strong> vóór de eerste lettergreep of achter de volgende; <strong>niet</strong> door (een deel van) de <strong>zichtbare inkt</strong> van die lettergrepen. <strong>Inktrand</strong> = wat je echt ziet (glyph-inkt op scherm/papier), geen lege layout-marge. <strong>Plaatsing:</strong> <strong>één</strong> streepje (geen reeks losse <code>-</code>); het midden ervan staat <strong>horizontaal in het midden</strong> tussen de rechter inktrand van de eerste lettergreep en de linker inktrand van de volgende. <strong>Witruimte:</strong> tussen streepje-uiteinde en die letterranden ≥ <strong>½ × breedte</strong> van één standaard-afbreekstreepje. Bron/export: MusicXML <code>syllabic</code> blijft <code>begin</code>/<code>end</code> na same-pitch-/score-IR-collapse (K4). Toets: alleluia-toon-8, derde-antifoon.</td>
+<td>Hyphen (<code>Va-der</code>) ≠ melisma. Lettergreepstreepjes horen <strong>tussen</strong> opeenvolgende lettergrepen van <strong>hetzelfde</strong> woord (begin/middle syllabic) — zichtbaar; <strong>niet</strong> ontbrekend; <strong>niet</strong> in een woordgrens-gap (<code>ia, | Al</code>); <strong>niet</strong> vóór de eerste lettergreep of achter de volgende; <strong>niet</strong> door (een deel van) de <strong>zichtbare inkt</strong> van die lettergrepen. <strong>Inktrand</strong> = wat je echt ziet (glyph-inkt op scherm/papier), geen lege layout-marge. <strong>Plaatsing:</strong> <strong>één</strong> streepje (geen reeks losse <code>-</code>); het midden ervan staat <strong>horizontaal in het midden</strong> tussen de rechter inktrand van de eerste lettergreep en de linker inktrand van de volgende. <strong>Witruimte:</strong> tussen streepje-uiteinde en die letterranden ≥ <strong>½ × breedte</strong> van één standaard-afbreekstreepje. Het streepje zelf wordt <strong>niet</strong> uitgerekt om een grote gap te vullen — bij geen melisma op de eerste lettergreep blijft het korte streepje; de witruimte wordt dan gewoon groter (toets: alleluia-toon-8 eerste <code>Al</code>–<code>le</code>). Uitrekken alleen bij L6. Bron/export: MusicXML <code>syllabic</code> blijft <code>begin</code>/<code>end</code> na same-pitch-/score-IR-collapse (K4). Toets: alleluia-toon-8, derde-antifoon.</td>
 </tr>
 <tr>
 <td>L4</td>
-<td>Melisma: tekst op de <strong>eerste</strong> noot van de lettergreep; <strong>lyric-extender</strong> loopt van die lettergreep <strong>door tot onder de laatste</strong> noot van het melisma — op het <strong>OSMD-scherm</strong> als <strong>één</strong> doorlopende streep op dezelfde hoogte als L3/L6 (geen mix van korte <code>text</code>-dashes en lijnen). Plus <strong>melisma-slur</strong> (S2/S4). Geen extender onder recite (R4). Toets: alleluia-toon-3 (laatste «lu…ja»), alleluia-toon-2. <strong>L4 = extender onder het melisma; L3/L6 = afbreekstreepje naar de volgende lettergreep</strong> — niet verwarren.</td>
+<td>Melisma: tekst op de <strong>eerste</strong> noot van de lettergreep; <strong>lyric-extender</strong> loopt van die lettergreep <strong>door tot onder de laatste</strong> noot van het melisma — op het <strong>OSMD-scherm</strong> als <strong>één</strong> doorlopende streep op dezelfde hoogte als L3/L6 (geen mix van korte <code>text</code>-dashes en lijnen; geen extra VexFlow-<code>.vf-line</code> onder de lyric-baseline). Plus <strong>melisma-slur</strong> (S2/S4). Geen extender onder recite (R4). Toets: alleluia-toon-3 (laatste «lu…ja»), alleluia-toon-2, alleluia-toon-8 («lu»). <strong>L4 = extender onder het melisma; L3/L6 = afbreekstreepje naar de volgende lettergreep</strong> — niet verwarren.</td>
 </tr>
 <tr>
 <td>L5</td>
@@ -5367,7 +5374,7 @@ lettergreep een klinkende noot. Same-pitch <strong>melisma</strong> wél samentr
 </tr>
 <tr>
 <td>L6</td>
-<td><strong>Afbreekstreepje na melisma:</strong> als de eerste van twee opeenvolgende lettergrepen van hetzelfde woord een melisma heeft, wordt het L3-streepje <strong>één</strong> horizontaal <strong>uitgerekt</strong> streepje (vervangt eventuele reeks korte <code>-</code>). Horizontale span: van nabij de eerste lettergreep tot het <strong>gemiddelde</strong> van (a) nootkop-midden van de <strong>laatste</strong> melisma-noot en (b) nootkop-midden van de <strong>eerste</strong> noot van de volgende lettergreep. Bij verschillende melismalengtes per stem telt het <strong>langste</strong> melisma over S/A/T/B (alleluia-toon-8: T korter → gebruik langere keten). L3-witruimte (≥½ streepje) blijft aan de uiteinden t.o.v. de <strong>inktrand</strong> van de letters.</td>
+<td><strong>Afbreekstreepje na melisma:</strong> alleen als de eerste van twee opeenvolgende lettergrepen van hetzelfde woord <strong>echt een melisma</strong> heeft (zichtbare nootkoppen tussen die lettergrepen) — <strong>niet</strong> enkel omdat de gap breed is. Dan wordt het L3-streepje <strong>één</strong> horizontaal <strong>uitgerekt</strong> streepje (vervangt eventuele reeks korte <code>-</code>). Horizontale span: van nabij de eerste lettergreep tot het <strong>gemiddelde</strong> van (a) nootkop-midden van de <strong>laatste</strong> melisma-noot en (b) nootkop-midden van de <strong>eerste</strong> noot van de volgende lettergreep. Bij verschillende melismalengtes per stem telt het <strong>langste</strong> melisma over S/A/T/B (alleluia-toon-8: T korter → gebruik langere keten). L3-witruimte (≥½ streepje) blijft aan de uiteinden t.o.v. de <strong>inktrand</strong> van de letters.</td>
 </tr>
 </tbody>
 </table>
