@@ -33,9 +33,9 @@ const puppeteer = require(path.join(__dirname, "node_modules", "puppeteer"));
 const MIN_LYRIC_GAP_PX = 12;
 const MID_SYSTEM_X_SLACK = 40;
 const S21_COLUMN_SLACK_PX = 3;
-// S22 / P3e: contract |Δ|≤2 t.o.v. S21-kolommidden. Verify-slack 6 px:
-// dichte partituur (derde-antifoon) houdt soms Δ≈5–6 na P3a-gap; strengere
-// handhaving vereist maatbreedte-expansie in OSMD (niet alleen lyric-shift).
+// S22 / P3e: contract |Δ|≤2 t.o.v. S21-kolommidden (mscz-leesbaarheid P3e).
+// Automatische slack 12 px: dichte partituur (derde-antifoon) raakt anders
+// P3a; alleluia-toetsen zitten typisch ≪12. Strenger = OSMD-maatbreedte.
 const LYRIC_NOTE_SLACK_PX = 12;
 const SLUR_NOTE_SLACK_PX = 26;
 // Tip mag ~¼ notenbalk onder/boven uitsteken (symmetrisch met SA-tip).
@@ -658,15 +658,32 @@ async function checkSvg(browser, svgPath) {
           if (!slurHits) continue;
           const dashes = dashGs.filter((d) => {
             const r = d.getBoundingClientRect();
+            // <line>-extender heeft height≈0; top ≈ streepjes-y ≠ lyric.top.
+            const midYd = (r.top + r.bottom) / 2;
             if (!(r.width > 0)) return false;
-            if (Math.abs(r.top - ar.top) > 28) return false;
+            if (
+              Math.abs(r.top - ar.top) > 28 &&
+              Math.abs(midYd - midY) > 28
+            ) {
+              return false;
+            }
             const cx = (r.left + r.right) / 2;
-            return cx > ar.right && cx < br.left;
+            return cx > ar.right - 2 && cx < br.left + 2;
           });
+          // Eén doorlopende streep (L4-scherm) óf genoeg korte dashes.
+          const cover = dashes.reduce((s, d) => {
+            const r = d.getBoundingClientRect();
+            const lo = Math.max(r.left, ar.right);
+            const hi = Math.min(r.right, br.left);
+            return s + Math.max(0, hi - lo);
+          }, 0);
           const need = Math.max(2, Math.floor(gap / 40));
-          if (dashes.length < need) {
+          const okLine = cover >= gap * 0.45;
+          if (!okLine && dashes.length < need) {
             l4Fails.push(
-              `«${aT}…${bT}» gap=${Math.round(gap)} dashes=${dashes.length}<${need}`
+              `«${aT}…${bT}» gap=${Math.round(gap)} cover=${Math.round(
+                cover
+              )}/${Math.round(gap)} dashes=${dashes.length}<${need}`
             );
           }
         }
