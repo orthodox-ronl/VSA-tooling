@@ -895,6 +895,7 @@ async function main() {
           // ankers via tijdelijke probe-cirkel op data-osmd-anchor-x.
           const noteCols = [];
           for (const n of mount.querySelectorAll(".vf-stavenote")) {
+            const isSpacer = n.getAttribute("data-osmd-spacer") === "1";
             const glyph = n.querySelector("[data-osmd-breve-glyph='1']");
             const head = n.querySelector(".vf-notehead path");
             const el = glyph || head;
@@ -904,6 +905,7 @@ async function main() {
                 noteCols.push({
                   cx: (r.left + r.right) / 2,
                   cy: (r.top + r.bottom) / 2,
+                  spacer: isSpacer,
                 });
                 continue;
               }
@@ -931,15 +933,25 @@ async function main() {
             noteCols.push({
               cx: (pr.left + pr.right) / 2 || pr.x,
               cy: staffY != null ? staffY + 5 : pr.top,
+              spacer: true,
             });
           }
-          function nearestNoteDx(lyricCx, lyricCy, extraDxPx) {
-            let best = Infinity;
+          function nearestNoteCol(lyricCx, lyricCy, extraDxPx) {
+            let best = null;
+            let bestD = Infinity;
             for (const c of noteCols) {
               if (Math.abs(c.cy - lyricCy) > 100) continue;
-              best = Math.min(best, Math.abs(c.cx - (lyricCx + extraDxPx)));
+              const d = Math.abs(c.cx - (lyricCx + (extraDxPx || 0)));
+              if (d < bestD) {
+                bestD = d;
+                best = c;
+              }
             }
             return best;
+          }
+          function nearestNoteDx(lyricCx, lyricCy, extraDxPx) {
+            const col = nearestNoteCol(lyricCx, lyricCy, extraDxPx);
+            return col ? Math.abs(col.cx - (lyricCx + (extraDxPx || 0))) : Infinity;
           }
           const groups = Array.from(
             mount.querySelectorAll(".vf-text.lyrics")
@@ -975,13 +987,30 @@ async function main() {
             // Beperk shift t.o.v. nootkolom (S22/P3e). Force (gap <12):
             // nog steeds max ~28 px van de noot — anders faalt
             // lyric↔noot op brede eindlettergrepen («heid,»).
+            // Nooit naar een ándere kolom lopen: 48px-woordgap na «ja,»
+            // trok anders de volgende lettergreep voorbij haar spacer-
+            // of melisma-slot (alleluia-toon-2).
             const lyricCx = (curR.left + curR.right) / 2;
             const lyricCy = (curR.top + curR.bottom) / 2;
             let dx = needSvg;
             const cap = force ? 28 : MAX_NOTE_DX_PX;
+            const home = nearestNoteCol(lyricCx, lyricCy, 0);
             const before = nearestNoteDx(lyricCx, lyricCy, 0);
             if (Number.isFinite(before) && before < 90) {
               while (dx > 0.3) {
+                const afterHome = nearestNoteCol(
+                  lyricCx,
+                  lyricCy,
+                  dx * sx
+                );
+                if (
+                  home &&
+                  afterHome &&
+                  Math.abs(afterHome.cx - home.cx) > 8
+                ) {
+                  dx *= 0.7;
+                  continue;
+                }
                 const after = nearestNoteDx(lyricCx, lyricCy, dx * sx);
                 if (after <= cap) break;
                 dx *= 0.7;
@@ -991,6 +1020,14 @@ async function main() {
                 nearestNoteDx(lyricCx, lyricCy, dx * sx) > cap + 8
               ) {
                 return; // liever krappe gap dan losse lyric
+              }
+              const finalHome = nearestNoteCol(lyricCx, lyricCy, dx * sx);
+              if (
+                home &&
+                finalHome &&
+                Math.abs(finalHome.cx - home.cx) > 8
+              ) {
+                return;
               }
             }
             if (!(dx > 0.2)) return;
@@ -1033,8 +1070,24 @@ async function main() {
               // Woordgap alleen na leesteken — niet bij mid-zin kapitaal
               // («ren Gods»: heilige naam) want 48px trok lyrics van de
               // nootkolom (P3e / maat 16).
+              // S8-recite: komma midden in spacer-run («ja,|Al» in
+              // alleluia-toon-2) mag géén 48px forceren — dat slaat de
+              // volgende spacer-kolom over en schuift cadens/melisma mis.
               const wordBoundary = /[,.;:!?]$/.test(prevT);
-              const needMin = wordBoundary ? MIN_WORD_GAP_PX : MIN_GAP_PX;
+              let needMin = wordBoundary ? MIN_WORD_GAP_PX : MIN_GAP_PX;
+              if (wordBoundary) {
+                const prevCx = (prevR.left + prevR.right) / 2;
+                const curCx = (curR.left + curR.right) / 2;
+                const bandCy = (curR.top + curR.bottom) / 2;
+                const prevCol = nearestNoteCol(prevCx, bandCy, 0);
+                const curCol = nearestNoteCol(curCx, bandCy, 0);
+                if (
+                  (prevCol && prevCol.spacer) ||
+                  (curCol && curCol.spacer)
+                ) {
+                  needMin = MIN_GAP_PX;
+                }
+              }
               const gapPx = curR.left - prevR.right;
               if (gapPx >= needMin) continue;
               const needSvg = (needMin - gapPx) / sx;
@@ -1115,6 +1168,35 @@ async function main() {
             n.removeChild(probe);
             return (pr.left + pr.right) / 2 || pr.x;
           }
+          // Spacer-stavenotes hebben verborgen koppen → bbox vaak 0×0 op
+          // x≈0; cy-filter moet staf-y van een sibling gebruiken.
+          let staffCyFallback = null;
+          for (const n of mount.querySelectorAll(".vf-stavenote")) {
+            if (n.getAttribute("data-osmd-spacer") === "1") continue;
+            const head =
+              n.querySelector("[data-osmd-breve-glyph='1'] path") ||
+              n.querySelector(".vf-notehead path");
+            if (!head) continue;
+            const hr = head.getBoundingClientRect();
+            if (hr.width > 0.5) {
+              staffCyFallback = (hr.top + hr.bottom) / 2;
+              break;
+            }
+          }
+          function noteCy(n) {
+            const head =
+              n.querySelector("[data-osmd-breve-glyph='1'] path") ||
+              n.querySelector(".vf-notehead path");
+            if (head) {
+              const hr = head.getBoundingClientRect();
+              if (hr.width > 0.5) return (hr.top + hr.bottom) / 2;
+            }
+            if (n.getAttribute("data-osmd-spacer") === "1") {
+              return staffCyFallback;
+            }
+            const nr = n.getBoundingClientRect();
+            return (nr.top + nr.bottom) / 2;
+          }
           const notes = Array.from(
             mount.querySelectorAll(".vf-stavenote")
           );
@@ -1141,8 +1223,8 @@ async function main() {
             for (const n of notes) {
               const cx = noteCx(n);
               if (cx == null) continue;
-              const nr = n.getBoundingClientRect();
-              if (Math.abs((nr.top + nr.bottom) / 2 - cy) > 160) continue;
+              const ncy = noteCy(n);
+              if (ncy == null || Math.abs(ncy - cy) > 160) continue;
               const d = Math.abs(cx - mid);
               if (d < bestD) {
                 bestD = d;

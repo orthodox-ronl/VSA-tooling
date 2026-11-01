@@ -18,7 +18,11 @@ van het balkgat (na-render verschuiving). **P3c:** na balkgat-compressie
 wordt de accolade/bracket herschaald op SA-bovenkant ↔ TB-onderkant;
 A↓/T↑-stokken mogen lyric-**inkt** tot max. één **kwartnootkop-hoogte**
 overlappen (daarboven inkorten; OSMD negeert `IdealStemLength`).
-**S22:** lyric↔nootkolom \|Δ\| ≤ 2 px. **L3/L6:** één afbreekstreepje tussen lettergrepen — kort (L3) tenzij
+**S22:** lyric↔nootkolom \|Δ\| ≤ 2 px. Gap-enforce (woordgap na `,`) mag
+een lettergreep **niet** naar een andere noot-/spacer-kolom trekken —
+anders slaat S8-recite slots over (`ja,|Al` in alleluia-toon-2). Komma
+tussen spacer-lyrics gebruikt de gewone lettergreep-gap, geen 48 px.
+**L3/L6:** één afbreekstreepje tussen lettergrepen — kort (L3) tenzij
 de eerste lettergreep een melisma heeft (L6 uitgerekt); grote witruimte
 zonder melisma laat het streepje kort. Geen reeks losse `-`.
 **L4:** eigen SVG-lijn; VexFlow-`.vf-line`-extender onder lyrics wordt
