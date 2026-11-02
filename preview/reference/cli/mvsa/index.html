@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>corib</code>
-  , gebouwd 2026-11-01 20:03 CET.
+   — branch <code>translit</code>
+  , gebouwd 2026-11-02 11:47 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -7729,7 +7729,7 @@ mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--lyrics-font FACE] [--lyrics-font-size PT]
          [--cue-font FACE] [--cue-font-size PT] path
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-[--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
+         [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
          [--transparent] [--engine {musescore,osmd}] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
@@ -8097,7 +8097,7 @@ VSA).</p>
 <div class="highlight"><pre><span></span><code>mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o generated\bug-cases\cherubijnen.mxl
 </code></pre></div>
 <p>Blad/MSCZ: lyric 2 op partituur-MXL (keten via <code>mscz --translit</code>):</p>
-<div class="highlight"><pre><span></span><code>mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --translit -o generated\hulptekst-ksl.mscz
+<div class="highlight"><pre><span></span><code>mvsa mscz examples\mvsa\translit-ksl-mini.mvsa --translit -o generated\translit-ksl.mscz
 </code></pre></div>
 <h3 id="voorbeelden-falen">Voorbeelden — falen<a class="headerlink" href="#voorbeelden-falen" title="Permanent link">&para;</a></h3>
 <p>Onbekende sectie-id of sync-fout in het <code>.mvsa</code>-bestand levert exitcode <code>1</code>
@@ -8582,7 +8582,7 @@ mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
 mvsa pdf lied.mvsa --compact
 mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
-mvsa pdf examples\mvsa\hulptekst-nl-mini.mvsa --translit -o generated\nl-translit.pdf
+mvsa pdf examples\mvsa\translit-nl-mini.mvsa --translit -o generated\nl-translit.pdf
 mscz pdf lied.mscz -o lied.pdf
 </code></pre></div>
 <hr />
@@ -8594,7 +8594,7 @@ S8 A1-adapter (<a href="https://github.com/orthodox-ronl/VSA-tooling/tree/main/s
 <a href="../../../formats/mvsa-svg/">mvsa-svg</a>.</p>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-[--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
+             [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
              [--transparent] [--engine {musescore,osmd}]
              [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
@@ -9306,7 +9306,7 @@ mvsa products examples\mvsa --dry-run --skip-svg
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-01
+        Bijgewerkt: 2026-11-02
         
       </p>
       
