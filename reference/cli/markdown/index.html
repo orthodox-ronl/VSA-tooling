@@ -3969,7 +3969,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -4937,6 +4937,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../plans/corib-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoriB MVP (plan)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5088,10 +5116,11 @@ pagina-producten: A4-PDF, SVG’s uit <a class="og-termref" href="/VSA-tooling/t
 CLI en repo-wrapper: <code>markdown</code> / <code>scripts\markdown.cmd</code>.</p>
 <p>Er is <strong>geen</strong> <code>md</code>-commando of <code>md.cmd</code>: op Windows is <code>md</code> het
 ingebouwde <em>makedir</em>.</p>
-<p>Dit is <strong>niet</strong> de notatie-PDF uit <code>.mvsa</code> / <code>.mscz</code>
-(<a href="../mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> / <a href="../mscz/"><code>mscz pdf</code></a>). Die volgt
-checklist P* via MuseScore. <code>markdown pdf</code> is de <strong>site-Markdown-PDF</strong>
-(browser/Chrome; print-CSS A4). Contract:
+<p>Dit is <strong>niet</strong> de partituur-PDF uit <code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>
+(<a href="../pdf/"><code>vsa pdf</code></a> / <a href="../mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> /
+<a href="../mscz/"><code>mscz pdf</code></a>). Die volgt checklist P* via MuseScore.
+<code>markdown pdf</code> is de <strong>site-Markdown-PDF</strong> (browser/Chrome; print-CSS A4),
+typisch <code>index.md.pdf</code>. Contract:
 <a href="../../../formats/contract-index/">contract-index — site-Markdown-PDF</a>.</p>
 <p>Er is geen <code>markdown validate</code>, <code>markdown kuiser</code> of <code>markdown normalize</code>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
@@ -5170,8 +5199,6 @@ scripts\markdown.cmd pdf examples\consumer-minimal\content-source\index.md
 scripts\markdown.cmd pdf index.md -o index.md.pdf
 </code></pre></div>
 <p>Stdout bij succes: <code>PDF geschreven naar: &lt;pad&gt;</code>.</p>
-<p><strong>Verouderd alias:</strong> <a href="../pdf/"><code>vsa pdf</code></a> roept dezelfde keten aan en schrijft
-een waarschuwing naar stderr. Gebruik voortaan <code>markdown pdf</code>.</p>
 <h2 id="markdown-svg"><code>markdown svg</code><a class="headerlink" href="#markdown-svg" title="Permanent link">&para;</a></h2>
 <p>Schrijf SVG’s voor alle <code>:::vsa-notatie</code>-blokken in het Markdownbestand
 (zelfde voorbereiding als <a href="../build-markdown/"><code>vsa build-markdown</code></a> /
@@ -5261,9 +5288,8 @@ Markdown-opmaak (koppen, links, nadruk) weggehaald.</p>
 </table>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../pdf/"><code>vsa pdf</code></a> — verouderd alias naar <code>markdown pdf</code></li>
+<li><a href="../pdf/"><code>vsa pdf</code></a> / <a href="../mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> / <a href="../mscz/"><code>mscz pdf</code></a> — partituur-PDF (P*)</li>
 <li><a href="../build-markdown/"><code>vsa build-markdown</code></a> — hele site-Markdown + SVG-assets</li>
-<li><a href="../mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> / <a href="../mscz/"><code>mscz pdf</code></a> — partituur-PDF (P*)</li>
 <li><a href="../">CLI-overzicht</a> · <a href="../../../plans/straat-clis/">Straat-CLIs</a></li>
 </ul>
 
@@ -5302,7 +5328,7 @@ Markdown-opmaak (koppen, links, nadruk) weggehaald.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-28
+        Bijgewerkt: 2026-11-01
         
       </p>
       

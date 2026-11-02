@@ -3980,7 +3980,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -5072,6 +5072,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../plans/corib-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoriB MVP (plan)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5229,13 +5257,17 @@
 
 
 <h1 id="vsa-products-standaardproducten-meta"><code>vsa products</code> — standaardproducten + meta<a class="headerlink" href="#vsa-products-standaardproducten-meta" title="Permanent link">&para;</a></h1>
-<p>Genereer de standaard siblings bij een <code>.vsa</code>-bron: Coria-playback-<code>.mxl</code>,
-muziek-<code>.svg</code>, en <code>{stam}.vsa.products-meta.json</code> voor herkomst/versheid.</p>
+<p>Genereer de standaard siblings bij een <code>.vsa</code>-bron, plus
+<code>{stam}.vsa.products-meta.json</code> voor herkomst en versheid.</p>
+<p>Geen partituur-PDF. Download en print van een pagina gaan via
+<a href="../markdown/"><code>markdown pdf</code></a> (<code>index.md.pdf</code>). Een losse partituur-PDF
+maak je met <a href="../pdf/"><code>vsa pdf</code></a>, <a href="../mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> of
+<a href="../mscz/"><code>mscz pdf</code></a>, niet met <code>products</code>.</p>
 <p>Herkomst-sidecar (schema, invariante): <a href="../../../formats/products-meta/">products-meta</a>.
 Contract-matrix: <a href="../../../formats/contract-index/">contract-index</a>. Straatplan:
 <a href="../../../plans/straat-clis/">straat-CLIs</a>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>vsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] path
+<div class="highlight"><pre><span></span><code>vsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
 </code></pre></div>
 <h2 id="beschrijving">Beschrijving<a class="headerlink" href="#beschrijving" title="Permanent link">&para;</a></h2>
 <p>Voor elke <code>.vsa</code> onder <code>path</code> (bestand of map, recursief):</p>
@@ -5252,6 +5284,26 @@ Contract-matrix: <a href="../../../formats/contract-index/">contract-index</a>. 
 <td><code>{stam}.vsa.mxl</code></td>
 </tr>
 <tr>
+<td>Score-IR</td>
+<td><code>{stam}.vsa.score-ir.json</code></td>
+</tr>
+<tr>
+<td>MusicXML uit Score-IR</td>
+<td><code>{stam}.vsa.from-ir.musicxml</code></td>
+</tr>
+<tr>
+<td>Partituur-<code>.mscz</code></td>
+<td><code>{stam}.vsa.mscz</code></td>
+</tr>
+<tr>
+<td>Preview-mp3</td>
+<td><code>{stam}.vsa.mp3</code></td>
+</tr>
+<tr>
+<td>Gezongen tekst</td>
+<td><code>{stam}.vsa.lyrics.txt</code></td>
+</tr>
+<tr>
 <td>Muziek-SVG (native renderer)</td>
 <td><code>{stam}.vsa.svg</code></td>
 </tr>
@@ -5261,6 +5313,8 @@ Contract-matrix: <a href="../../../formats/contract-index/">contract-index</a>. 
 </tr>
 </tbody>
 </table>
+<p>Geen <code>{stam}.vsa.pdf</code>. MuseScore is nodig voor <code>.mscz</code>, <code>.mp3</code> en de
+Score-IR-keten. De SVG komt uit de VSA-renderer zelf.</p>
 <p><strong>MXL-keten</strong> (gelijk aan wat bibliotheek-sync eerder zelf deed):</p>
 <ol>
 <li>Tijdelijke <a href="../syllabify/">syllabify</a> (canonieke <code>.vsa</code> blijft ongewijzigd).</li>
@@ -5311,7 +5365,7 @@ er zijn. <code>--force</code> regenereert altijd.</p>
 <tr>
 <td><code>--quiet</code></td>
 <td>Nee</td>
-<td>Geen voortgangsregels op stdout (<code>mxl</code>/<code>Meta</code>).</td>
+<td>Geen voortgangsregels op stdout.</td>
 <td>Uit</td>
 <td>Fouten op stderr.</td>
 </tr>
@@ -5320,6 +5374,13 @@ er zijn. <code>--force</code> regenereert altijd.</p>
 <td>Nee</td>
 <td>Sla native SVG over.</td>
 <td>Uit</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>--musescore</code></td>
+<td>Nee</td>
+<td>Pad naar MuseScore (mscz, mp3, Score-IR).</td>
+<td>auto</td>
 <td>—</td>
 </tr>
 <tr>
@@ -5333,7 +5394,7 @@ er zijn. <code>--force</code> regenereert altijd.</p>
 </table>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>stdout</strong>: regels per product (<code>mxl</code> / <code>svg</code>) en <code>Meta: …</code> bij schrijven;
+<li><strong>stdout</strong>: een regel per product en <code>Meta: …</code> bij schrijven;
   of <code>ok (meta): …</code> / <code>dry-run: …</code> wanneer er niets verandert.
   Met <code>--quiet</code> blijft stdout leeg (fouten blijven op stderr).</li>
 <li><strong>Bestanden</strong>: siblings naast de bron (zie tabel).</li>
@@ -5408,7 +5469,7 @@ vsa products examples\minimal\valid-demo.vsa --force
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-30
+        Bijgewerkt: 2026-11-01
         
       </p>
       

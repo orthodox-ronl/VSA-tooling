@@ -3991,7 +3991,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -4959,6 +4959,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../plans/corib-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoriB MVP (plan)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5137,7 +5165,7 @@
 </div>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>vsa svg [-h] [--config CONFIG] [--max-line-width MAX_LINE_WIDTH]
-        [-o OUTPUT] input
+        [--translit] [--translit-modus {nls,ksl}] [-o OUTPUT] input
 </code></pre></div>
 <p><strong>Invoer:</strong> <code>input</code> mag één <code>.vsa</code> <strong>of</strong> een map zijn (recursief). Default
 per bron: sibling <code>&lt;bronnaam&gt;.vsa.svg</code> (zie <a href="../../../formats/vsa-svg/">derived pad</a>).
@@ -5150,6 +5178,11 @@ per bron: sibling <code>&lt;bronnaam&gt;.vsa.svg</code> (zie <a href="../../../f
 scherm). Dit commando verwerkt <strong>geen</strong> Markdownblokken — voor Markdown
 met <a class="og-termref" href="/VSA-tooling/terminologie/vsa-blokken" title="VSA-blok: een tekstfragment in een Markdownbestand dat begint met <code>::: vsa-notatie</code> en eindigt met <code>:::</code>, beide aan het begin van een regel, met daartussen VSA-notatie; typisch ontdekt en verwerkt door de Vsa-toolset (o.a. <code>vsa blocks</code>, <code>vsa validate</code>, <code>vsa process</code>).">VSA-blokken</a> gebruik je <a href="../process/"><code>vsa process</code></a> of
 <a href="../build-markdown/"><code>vsa build-markdown</code></a>.</p>
+<p>Met <code>--translit</code> / <code>--translit-modus</code> (vorm A): onder elke gezongen tekst
+een tweede regel met transliteratie; in scopes de volgorde EHM → bron →
+translit → ELM. Regelbreedte en <code>viewBox</code> meten <code>max(bron, translit)</code> per
+lettergreep, zodat bredere Cyrillische regels niet rechts afkappen. Zie
+<a href="../../../plans/kerkslavisch-transliteratie/#5a-besluiten-productmodel-nu">productmodel §5a</a>.</p>
 <p><code>vsa svg</code> valideert de invoer niet expliciet vooraf; een parsefout leidt tot
 een foutmelding en exitcode <code>1</code>. Draai bij twijfel eerst
 <a href="../validate/"><code>vsa validate</code></a>.</p>
@@ -5178,7 +5211,7 @@ een foutmelding en exitcode <code>1</code>. Draai bij twijfel eerst
 <td><code>-o</code> / <code>--output</code> OUTPUT</td>
 <td>Nee</td>
 <td>Uitvoer-<code>.svg</code>.</td>
-<td>Sibling <code>&lt;naam&gt;.vsa.svg</code> naast elke bron</td>
+<td>Sibling <code>.vsa.svg</code>; met translit: <code>.translit-nls.svg</code> / <code>.translit-ksl.svg</code> / <code>.translit.svg</code></td>
 <td>Alleen bij precies één bronbestand.</td>
 </tr>
 <tr>
@@ -5194,6 +5227,20 @@ een foutmelding en exitcode <code>1</code>. Draai bij twijfel eerst
 <td>Maximale SVG-regelbreedte voordat wordt afgebroken.</td>
 <td><code>max-line-width</code> uit <code>vsa.toml</code>, anders <code>800</code></td>
 <td>Getal (float)</td>
+</tr>
+<tr>
+<td><code>--translit</code></td>
+<td>Nee</td>
+<td>Tweede tekstregel (vorm A): transliteratie onder de bron.</td>
+<td>uit</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>--translit-modus {nls,ksl}</code></td>
+<td>Nee</td>
+<td>Filter + default sibling-naam (<code>nls</code>/<code>ksl</code>).</td>
+<td>beide (als alleen <code>--translit</code>)</td>
+<td>Impliceert <code>--translit</code>.</td>
 </tr>
 <tr>
 <td><code>-h</code>, <code>--help</code></td>
@@ -5310,7 +5357,7 @@ regel/kolom; herstel de <a class="og-termref" href="/bron/terms/vsa-notatie" tit
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-11-02
         
       </p>
       

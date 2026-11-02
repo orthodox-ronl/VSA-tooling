@@ -4079,7 +4079,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -5047,6 +5047,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../plans/corib-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoriB MVP (plan)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5534,7 +5562,7 @@ Staat er al een sectie-eindestreep (<code>||</code> / <code>:||</code>) vóór d
 tweede pauze. Herhaalstrepen (<code>:|</code>) blijven intact. Stemrust <code>r</code>/<code>R</code> binnen
 een frase (lege recite + rusten) is iets anders; zie
 <a href="../semantics/#rusten-op-de-stemregel">Rusten op de stemregel</a>.</p>
-<p>Lange cues met <code>...</code> worden op <strong>twee regels</strong> gezet: de tweede regel begint bij <code>...</code>. Is de cue breder dan de maat, dan krijgt die maat minstens die breedte (MusicXML <code>width</code> / MuseScore-maat).</p>
+<p>Lange cues met <code>...</code> worden op <strong>twee regels</strong> gezet: de tweede regel begint bij <code>...</code>. Is de cue breder dan de maat, dan krijgt die maat een <strong>milde</strong> MusicXML-<code>width</code> (floor/cap; zie <a href="../../formats/mscz-leesbaarheid/#c--cues-gaps-hbox-accolade">leesbaarheid C6</a>) — genoeg hint voor MuseScore, zonder een holle maat waar noten links blijven hangen.</p>
 <div class="highlight"><pre><span></span><code>@mscz-newline
 @tekst "P: Laat ons de Heer in vrede bidden"
 L:  Heer ont-ferm_ U__  ||
@@ -5780,7 +5808,7 @@ zet. De keys zijn dezelfde <strong>lyrics-identifiers</strong> als op de lyrics-
 <thead>
 <tr>
 <th>Waarde (richting)</th>
-<th>Effect bij <code>--hulptekst</code></th>
+<th>Effect bij <code>--translit</code></th>
 </tr>
 </thead>
 <tbody>
@@ -5802,7 +5830,7 @@ zet. De keys zijn dezelfde <strong>lyrics-identifiers</strong> als op de lyrics-
 </tr>
 </tbody>
 </table>
-<p><strong>Coria-partnamen</strong> (<code>--hulptekst-as-parts</code>): één MusicXML-part per
+<p><strong>Coria-partnamen</strong> (<code>--translit-as-parts</code>): één MusicXML-part per
 <strong>stem × lyrics-laag</strong>, genaamd <code>{stemidentifier} ({label})</code> — bijvoorbeeld
 <code>Sop (aap)</code>, <code>Zeep (noot)</code>. Stemidentifiers die precies <code>S</code>/<code>A</code>/<code>T</code>/<code>B</code> zijn
 (eventueel met cijfer) krijgen de bekende namen Soprano/Alto/Tenor/Bass. Ontbreekt
@@ -5822,7 +5850,7 @@ Sop: a4    |
 Zeep: f3   |
 </code></pre></div>
 <p>Zie <a href="../../plans/kerkslavisch-transliteratie/">kerkslavisch-transliteratie</a> en
-het <a href="../../plans/hulptekst-reviewcorpus/">reviewcorpus</a>.</p>
+het <a href="../../plans/translit-reviewcorpus/">reviewcorpus</a>.</p>
 <hr />
 <h2 id="-"><code>@---</code><a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
 <p><strong>Wat het is.</strong> Optionele <strong>no-op</strong> die een LSATB-systeem afbreekt — hetzelfde
@@ -5899,7 +5927,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-30
+        Bijgewerkt: 2026-11-02
         
       </p>
       

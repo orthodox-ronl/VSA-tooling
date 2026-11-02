@@ -27,7 +27,7 @@
     
     
       
-        <title>vsa pdf — verouderd (gebruik markdown pdf) - VSA-tooling — documentatie</title>
+        <title>vsa pdf — partituur-PDF uit .vsa - VSA-tooling — documentatie</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#vsa-pdf-verouderd-gebruik-markdown-pdf" class="md-skip">
+        <a href="#vsa-pdf-partituur-pdf-uit-vsa" class="md-skip">
           Ga naar inhoud
         </a>
       
@@ -129,7 +129,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              vsa pdf — verouderd (gebruik markdown pdf)
+              vsa pdf — partituur-PDF uit .vsa
             
           </span>
         </div>
@@ -3865,7 +3865,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -3883,7 +3883,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -3909,10 +3909,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#synopsis-alias" class="md-nav__link">
+  <a href="#synopsis" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Synopsis (alias)
+        Synopsis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#voorbeelden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voorbeelden
       
     </span>
   </a>
@@ -4904,6 +4915,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../plans/corib-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoriB MVP (plan)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -4959,10 +4998,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#synopsis-alias" class="md-nav__link">
+  <a href="#synopsis" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Synopsis (alias)
+        Synopsis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#voorbeelden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voorbeelden
       
     </span>
   </a>
@@ -5016,34 +5066,56 @@
   
 
 
-<h1 id="vsa-pdf-verouderd-gebruik-markdown-pdf"><code>vsa pdf</code> — verouderd (gebruik <code>markdown pdf</code>)<a class="headerlink" href="#vsa-pdf-verouderd-gebruik-markdown-pdf" title="Permanent link">&para;</a></h1>
-<p><code>vsa pdf</code> blijft werken als <strong>alias</strong> voor
-<a href="../markdown/#markdown-pdf"><code>markdown pdf</code></a>: Markdown met VSA → A4-PDF via Edge/Chrome.</p>
-<p>Bij elke aanroep schrijft de CLI een waarschuwing naar stderr:</p>
-<div class="highlight"><pre><span></span><code>Let op: `vsa pdf` is verouderd; gebruik `markdown pdf` (zelfde opties; default sibling *.md.pdf).
+<h1 id="vsa-pdf-partituur-pdf-uit-vsa"><code>vsa pdf</code> — partituur-PDF uit <code>.vsa</code><a class="headerlink" href="#vsa-pdf-partituur-pdf-uit-vsa" title="Permanent link">&para;</a></h1>
+<p>Maak een print-PDF van een eenstemmige <code>.vsa</code>-bron via MuseScore
+(checklist P*). Dit is <strong>los gereedschap</strong>: geen standaardproduct.
+<code>vsa products</code> schrijft geen <code>.vsa.pdf</code>.</p>
+<p>Pagina-afdruk van site-Markdown (<code>index.md.pdf</code>) gaat via
+<a href="../markdown/#markdown-pdf"><code>markdown pdf</code></a>, niet via dit commando.</p>
+<h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>vsa pdf [-h] [-o OUTPUT] [--musescore PATH] path
 </code></pre></div>
-<h2 id="synopsis-alias">Synopsis (alias)<a class="headerlink" href="#synopsis-alias" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>vsa pdf [-h] [--config CONFIG] [--content-root CONTENT_ROOT]
-         [--bron-root BRON_ROOT] [--max-line-width MAX_LINE_WIDTH]
-         [--chrome CHROME] [-o OUTPUT]
-         input
-</code></pre></div>
-<p>Argumenten en gedrag zijn gelijk aan <a href="../markdown/#markdown-pdf"><code>markdown pdf</code></a>, inclusief
-default sibling-naam (<code>index.md</code> → <code>index.md.pdf</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Argument / optie</th>
+<th>Betekenis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Eén <code>.vsa</code> of een map (recursief alle <code>.vsa</code>).</td>
+</tr>
+<tr>
+<td><code>-o</code>, <code>--output</code></td>
+<td>Uitvoer-PDF. Alleen bij precies één bron. Default: sibling <code>.vsa.pdf</code>.</td>
+</tr>
+<tr>
+<td><code>--musescore PATH</code></td>
+<td>Pad naar MuseScore (default: auto).</td>
+</tr>
+</tbody>
+</table>
+<p>Andere extensies worden geweigerd met een tip naar de juiste straat:
+<code>.md</code> → <code>markdown pdf</code>, <code>.mvsa</code> → <code>mvsa pdf</code>, <code>.mscz</code> → <code>mscz pdf</code>.</p>
+<h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-markdown pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
+vsa pdf examples\minimal\valid-demo.vsa
+vsa pdf examples\minimal\valid-demo.vsa -o generated\demo.pdf
 </code></pre></div>
 <h2 id="wat-is-dit-niet">Wat is dit niet?<a class="headerlink" href="#wat-is-dit-niet" title="Permanent link">&para;</a></h2>
 <ul>
+<li><strong>Pagina-PDF</strong> uit Markdown: <a href="../markdown/#markdown-pdf"><code>markdown pdf</code></a>
+  (<code>index.md.pdf</code>).</li>
 <li><strong>Partituur-PDF</strong> uit <code>.mvsa</code> / <code>.mscz</code>: <a href="../mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> /
-  <a href="../mscz/"><code>mscz pdf</code></a> (MuseScore; checklist P*).</li>
-<li><strong>Notatie-SVG</strong> uit <code>.vsa</code>: <a href="../svg/"><code>vsa svg</code></a>.</li>
+  <a href="../mscz/"><code>mscz pdf</code></a>.</li>
+<li><strong>Standaardproducten</strong>: <a href="../products/"><code>vsa products</code></a> (geen pdf).</li>
 </ul>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../markdown/"><code>markdown</code></a> — canonieke Markdown-straat (<code>pdf</code> / <code>svg</code> / <code>text</code>)</li>
-<li><a href="../build-markdown/"><code>vsa build-markdown</code></a></li>
-<li><a href="../../../formats/contract-index/">contract-index — site-Markdown-PDF</a></li>
+<li><a href="../../../formats/contract-index/">contract-index — PDF</a></li>
+<li><a href="../"><code>vsa mscz</code></a> — tussenstap partituur-<code>.mscz</code></li>
 </ul>
 
 
@@ -5081,7 +5153,7 @@ markdown pdf content-source\praktijk\samenstellingen\20260811-di-liturgie.md
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-28
+        Bijgewerkt: 2026-11-01
         
       </p>
       
