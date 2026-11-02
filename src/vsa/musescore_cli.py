@@ -92,7 +92,31 @@ def _release_lockfile(fd: int) -> None:
             pass
 
 
+def _lock_holder_alive() -> bool:
+    """True als de pid in het lockbestand nog bestaat."""
+    try:
+        text = _LOCK_PATH.read_text(encoding="ascii", errors="replace").strip()
+    except OSError:
+        return False
+    first = (text.splitlines() or [""])[0].strip()
+    if not first.isdigit():
+        return False
+    pid = int(first)
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    return True
+
+
 def _lock_is_stale() -> bool:
+    """Wees-lock: houder-pid dood, of ouder dan ``_LOCK_STALE_S``."""
+    if not _LOCK_PATH.is_file():
+        return False
+    if not _lock_holder_alive():
+        return True
     try:
         age = time.time() - _LOCK_PATH.stat().st_mtime
     except OSError:
