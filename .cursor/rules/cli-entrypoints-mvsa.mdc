@@ -1,0 +1,22 @@
+# CLI-entrypoints: geen `vsa mvsa`
+
+**Nooit** `vsa mvsa …` — dat bestaat niet.
+
+| Bron    | Commando (console-script)                                   |
+| ------- | ----------------------------------------------------------- |
+| `.mvsa` | `mvsa validate` / `mvsa mxl` / `mvsa mscz` / `mvsa pdf` / … |
+| `.mscz` | `mscz …`                                                    |
+| `.mxl`  | `mxl …`                                                     |
+| `.vsa`  | `vsa validate` / `vsa svg` / `vsa musicxml` / …             |
+
+Translit (productbesluiten: `docs/plans/kerkslavisch-transliteratie.md` §5a):
+
+```cmd
+mvsa mxl pad\lied.mvsa --translit
+mvsa mxl pad\lied.mvsa --translit-as-parts
+mvsa mscz pad\lied.mvsa --translit
+mvsa pdf pad\lied.mvsa --translit
+mvsa svg pad\lied.mvsa --translit
+```
+
+`--translit-as-parts` alleen op `mvsa mxl` (Coria). Sibling-uitvoer: `lied.mvsa.mxl`, enz.

@@ -47,7 +47,7 @@ mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--lyrics-font FACE] [--lyrics-font-size PT]
          [--cue-font FACE] [--cue-font-size PT] path
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-[--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
+         [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
          [--transparent] [--engine {musescore,osmd}] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
@@ -532,7 +532,7 @@ S8 A1-adapter ([`scripts/osmd-svg`](../../../scripts/osmd-svg/)). Formaatpagina:
 
 ```text
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
-[--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
+             [--keep-mscz PATH] [--keep-mxl PATH] [--translit] [--no-trim]
              [--transparent] [--engine {musescore,osmd}]
              [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]

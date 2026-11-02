@@ -420,7 +420,7 @@ def export_mvsa_to_svg(
 ) -> list[Path]:
     """Export ``.mvsa`` to één kale tall-SVG.
 
-Default ``engine=musescore``: partituur-MXL → MSCZ → MuseScore → trim.
+    Default ``engine=musescore``: partituur-MXL → MSCZ → MuseScore → trim.
     ``engine=osmd``: Score-IR → from-ir MusicXML → headless OSMD (geen MuseScore).
     Style-kwargs gelden alleen voor MuseScore.
     *translit*: tweede lyric-laag in de tussen-MXL/MSCZ (koormap «met translit»).
