@@ -13,9 +13,9 @@ from vsa.mvsa_validate import validate_mvsa_text
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples" / "mvsa"
 
-KSL_MINI = (EXAMPLES / "hulptekst-ksl-mini.mvsa").read_text(encoding="utf-8")
-NL_MINI = (EXAMPLES / "hulptekst-nl-mini.mvsa").read_text(encoding="utf-8")
-PARALLEL = (EXAMPLES / "hulptekst-parallel-l1-mini.mvsa").read_text(
+KSL_MINI = (EXAMPLES / "translit-ksl-mini.mvsa").read_text(encoding="utf-8")
+NL_MINI = (EXAMPLES / "translit-nl-mini.mvsa").read_text(encoding="utf-8")
+PARALLEL = (EXAMPLES / "translit-parallel-l1-mini.mvsa").read_text(
     encoding="utf-8"
 )
 
@@ -65,7 +65,7 @@ def test_translit_as_parts_nl_labels() -> None:
 
 def test_translit_as_parts_custom_ids() -> None:
     text = (
-        ROOT / "examples" / "mvsa" / "hulptekst-coria-custom-ids-mini.mvsa"
+        ROOT / "examples" / "mvsa" / "translit-coria-custom-ids-mini.mvsa"
     ).read_text(encoding="utf-8")
     doc = parse_mvsa(text)
     systems = [sys for sec in doc.sections for sys in sec.systems]

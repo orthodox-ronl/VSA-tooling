@@ -10,7 +10,7 @@ from vsa.mvsa_validate import validate_mvsa_text
 
 ROOT = Path(__file__).resolve().parents[1]
 GEMENGD = (
-    ROOT / "examples" / "mvsa" / "hulptekst-gemengd-taal-mini.mvsa"
+    ROOT / "examples" / "mvsa" / "translit-gemengd-taal-mini.mvsa"
 ).read_text(encoding="utf-8")
 
 

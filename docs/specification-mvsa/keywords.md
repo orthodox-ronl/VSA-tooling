@@ -520,7 +520,7 @@ Zeep: f3   |
 ```
 
 Zie [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md) en
-het [reviewcorpus](../plans/hulptekst-reviewcorpus.md).
+het [reviewcorpus](../plans/translit-reviewcorpus.md).
 
 ---
 

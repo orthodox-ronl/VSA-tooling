@@ -265,7 +265,7 @@ mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o gener
 Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mscz --translit`):
 
 ```cmd
-mvsa mscz examples\mvsa\hulptekst-ksl-mini.mvsa --translit -o generated\hulptekst-ksl.mscz
+mvsa mscz examples\mvsa\translit-ksl-mini.mvsa --translit -o generated\translit-ksl.mscz
 ```
 
 ### Voorbeelden — falen
@@ -514,7 +514,7 @@ mvsa pdf lied.mvsa --layout partituur --bibliotheek-id zangstuk/var/uv
 mvsa pdf lied.mvsa -o generated\lied.pdf --page-margin-top 5 --page-margin-bottom 5
 mvsa pdf lied.mvsa --compact
 mvsa pdf lied.mvsa --compact --min-system-distance 9 --max-system-distance 9
-mvsa pdf examples\mvsa\hulptekst-nl-mini.mvsa --translit -o generated\nl-translit.pdf
+mvsa pdf examples\mvsa\translit-nl-mini.mvsa --translit -o generated\nl-translit.pdf
 mscz pdf lied.mscz -o lied.pdf
 ```
 

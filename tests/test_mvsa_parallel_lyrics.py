@@ -8,10 +8,10 @@ from vsa.mvsa_musicxml import export_mvsa_to_musicxml
 from vsa.mvsa_musicxml import _lyric_number_for_marker
 
 ROOT = Path(__file__).resolve().parents[1]
-PARALLEL = (ROOT / "examples" / "mvsa" / "hulptekst-parallel-l1-mini.mvsa").read_text(
+PARALLEL = (ROOT / "examples" / "mvsa" / "translit-parallel-l1-mini.mvsa").read_text(
     encoding="utf-8"
 )
-KSL_MINI = (ROOT / "examples" / "mvsa" / "hulptekst-ksl-mini.mvsa").read_text(
+KSL_MINI = (ROOT / "examples" / "mvsa" / "translit-ksl-mini.mvsa").read_text(
     encoding="utf-8"
 )
 
