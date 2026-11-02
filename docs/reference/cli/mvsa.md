@@ -523,7 +523,7 @@ mscz pdf lied.mscz -o lied.pdf
 Exporteer **`.mvsa`** naar partituur-SVG voor koormap-pagina’s. Voor bron
 `.mscz`: [`mscz svg`](mscz.md). Default: MuseScore tall-SVG (print/fallback).
 Optioneel `--engine osmd`: Score-IR → from-ir MusicXML → headless OSMD +
-S8 A1-adapter ([`scripts/osmd-svg`](../../../scripts/osmd-svg/)). Formaatpagina:
+S8 A1-adapter ([`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg)). Formaatpagina:
 [mvsa-svg](../../formats/mvsa-svg.md).
 
 ### Synopsis

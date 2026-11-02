@@ -96,7 +96,7 @@ Contract voor koormap (shortcode `muziek`) en latere CoriB-consumptie:
 voor canonieke `.mvsa` (S8: A1-adapter, geen SVG-bypass —
 [osmd-s8-recite](osmd-s8-recite.md)). Optioneel bestand:
 `mvsa svg --engine osmd` (headless OSMD uit Score-IR;
-[`scripts/osmd-svg`](../../scripts/osmd-svg/)). **Nog open t.o.v. eindbeeld
+[`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg)). **Nog open t.o.v. eindbeeld
 §4:** o.a. `.vsa` zonder Score-IR, cue-/SVG-pariteit, CoriB. MuseScore-SVG
 blijft fallback/print, niet het S8-schermpad.
 
