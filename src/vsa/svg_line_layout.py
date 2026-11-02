@@ -47,6 +47,9 @@ class LineLayoutSettings:
     font_family: str = "DejaVu Sans"
     optical_scope_gap: float = 4.0
     glyphs: SVGGlyphRenderer | None = None
+    # Vorm A: meet max(bron, translit) voor wrap + viewBox (§5a / afkap-fix).
+    translit: bool = False
+    translit_modus: str = "both"
 
 
 def split_text_node(node: TextNode):
@@ -89,6 +92,30 @@ def _default_glyphs(settings: LineLayoutSettings) -> SVGGlyphRenderer:
     return SVGGlyphRenderer(unit=max(6.0, settings.font_size * 0.40))
 
 
+def _translit_second_width(shown: str, settings: LineLayoutSettings) -> float | None:
+    """Breedte van de vorm-A-tweede regel, of ``None`` als die niet getoond wordt."""
+    if not settings.translit or not shown:
+        return None
+    from .transliterate import (
+        detect_direction,
+        modus_allows_direction,
+        render_syllable,
+    )
+
+    det = detect_direction(shown)
+    if not modus_allows_direction(settings.translit_modus, det):
+        return None
+    out = render_syllable(shown, direction=det)
+    if not out or out == shown:
+        return None
+    return estimate_text_width(
+        out,
+        settings.font_size,
+        preserve_whitespace=True,
+        font_family=settings.font_family,
+    )
+
+
 def measure_node(
     node,
     settings: LineLayoutSettings | None = None,
@@ -111,30 +138,38 @@ def measure_node(
         )
 
     if isinstance(node, TextNode):
-        w = (
-            estimate_text_width(
-                node.text,
-                settings.font_size,
-                preserve_whitespace=True,
-                font_family=settings.font_family,
-            )
-            + settings.text_gap
+        from .syllabify import display_lyric_text
+
+        shown = display_lyric_text(node.text)
+        base = estimate_text_width(
+            shown,
+            settings.font_size,
+            preserve_whitespace=True,
+            font_family=settings.font_family,
         )
-        return w, 0.0, True, True
+        second_w = _translit_second_width(shown, settings)
+        if second_w is not None:
+            base = max(base, second_w)
+        return base + settings.text_gap, 0.0, True, True
 
     if isinstance(node, ScopeNode):
+        from .syllabify import display_lyric_text
+
         lead = leading_safety_for(previous)
         trail = trailing_safety_for(nxt)
-        body = (
-            build_scope_layout(
-                node,
-                text_font_size=settings.font_size,
-                font_family=settings.font_family,
-                leading_safety=lead,
-                trailing_safety=trail,
-            ).width
-            + settings.scope_gap
+        layout = build_scope_layout(
+            node,
+            text_font_size=settings.font_size,
+            font_family=settings.font_family,
+            leading_safety=lead,
+            trailing_safety=trail,
         )
+        body = layout.width + settings.scope_gap
+        shown = display_lyric_text(layout.text)
+        second_w = _translit_second_width(shown, settings)
+        if second_w is not None:
+            # Zelfde width_extra als svg_renderer._render_scope (vorm A-kolom).
+            body += max(0.0, second_w - layout.text_width)
         pre_gap = 0.0
         if isinstance(previous, ScopeNode):
             # Pair layouts must match how each scope was (or will be) measured:
