@@ -1,4 +1,4 @@
-"""Tests voor atomic_io (Windows EINVAL-hardening)."""
+"""Tests voor atomic_io (Windows lock/EINVAL-hardening)."""
 
 from __future__ import annotations
 
@@ -31,8 +31,36 @@ def test_replace_into_retries_einval(tmp_path: Path) -> None:
             raise OSError(errno.EINVAL, "Invalid argument", str(b))
         real_replace(a, b)
 
-    with patch("vsa.atomic_io.os.replace", side_effect=flaky):
+    with (
+        patch("vsa.atomic_io.os.replace", side_effect=flaky),
+        patch("vsa.atomic_io.time.sleep", lambda _s: None),
+    ):
         replace_into(dest, src)
     assert calls["n"] == 2
     assert dest.read_bytes() == b"new"
     assert not src.exists()
+
+
+def test_replace_into_retries_access_denied(tmp_path: Path) -> None:
+    dest = tmp_path / "dest.bin"
+    src = tmp_path / "src.bin"
+    dest.write_bytes(b"old")
+    src.write_bytes(b"new")
+    calls = {"n": 0}
+    real_replace = __import__("os").replace
+
+    def flaky(a: str | Path, b: str | Path) -> None:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            exc = OSError(errno.EACCES, "Access denied", str(b))
+            exc.winerror = 5  # type: ignore[attr-defined]
+            raise exc
+        real_replace(a, b)
+
+    with (
+        patch("vsa.atomic_io.os.replace", side_effect=flaky),
+        patch("vsa.atomic_io.time.sleep", lambda _s: None),
+    ):
+        replace_into(dest, src)
+    assert calls["n"] == 2
+    assert dest.read_bytes() == b"new"

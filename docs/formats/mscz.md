@@ -24,6 +24,10 @@ layoutprofielen).
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
 verwachten voor bruikbare SATB + lyrics.
 
+**CLI-lock:** elke MuseScore-aanroep via `vsa.musescore_cli` wacht tot een
+eventuele vorige conversie (ook in een ander proces) klaar is. Zo botsen
+batch-exports minder op Windows-vergrendelingen.
+
 **Normaalvorm (checklist):**
 [canonieke checklists — MSCZ](canonical-checklists.md#checklist-mscz-partituur-musescore)
 — **twee balken SA + TB**, **geen** stem-indicaties op de balken,
