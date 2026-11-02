@@ -399,6 +399,27 @@ def test_svg_meta_products_drops_legacy_bladreeks_keys(tmp_path: Path) -> None:
     assert drop == {"svg-1", "svg-2"}
 
 
+def test_svg_meta_products_keeps_translit_keys(tmp_path: Path) -> None:
+    bron = tmp_path / "lied.mvsa"
+    bron.write_text("x", encoding="utf-8")
+    main = tmp_path / "lied.mvsa.svg"
+    translit = tmp_path / "lied.mvsa.translit-ksl.svg"
+    main.write_text("<svg/>", encoding="utf-8")
+    translit.write_text("<svg>t</svg>", encoding="utf-8")
+    write_meta(
+        bron,
+        {"svg": main, "svg-translit-ksl": translit, "svg-1": main},
+    )
+    products, drop = svg_meta_products(bron, [main])
+    assert products == {"svg": main}
+    assert drop == {"svg-1"}
+    assert "svg-translit-ksl" not in drop
+
+    products_t, drop_t = svg_meta_products(bron, [translit])
+    assert products_t == {"svg-translit-ksl": translit}
+    assert drop_t == {"svg-1"}
+
+
 def _fake_write_mxl(_src: Path, dest: Path, **_kwargs: object) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text("<score/>", encoding="utf-8")

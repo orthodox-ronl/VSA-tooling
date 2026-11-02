@@ -55,11 +55,24 @@ def _log_meta(meta_name: str, *, quiet: bool = False) -> None:
 
 
 def _assign_svg_products(products: dict[str, Path], written: list[Path]) -> None:
-    """Tall product-SVG: altijd één key ``svg`` (geen bladreeks ``svg-N``)."""
+    """Tall product-SVG: key ``svg``, of translit-siblings ``svg-translit-*``.
+
+    Geen bladreeks ``svg-N`` hier — dat is print-SVG. Translit-bestanden
+    (``*.translit-ksl.svg`` / ``*.translit-nls.svg``) krijgen eigen keys
+    zodat ze de canonieke scherm-``svg`` niet overschrijven.
+    """
     if not written:
         products.pop("svg", None)
         return
-    products["svg"] = written[0]
+    path = written[0]
+    name = path.name.lower()
+    if name.endswith(".translit-ksl.svg") or ".translit-ksl.svg" in name:
+        products["svg-translit-ksl"] = path
+        return
+    if name.endswith(".translit-nls.svg") or ".translit-nls.svg" in name:
+        products["svg-translit-nls"] = path
+        return
+    products["svg"] = path
 
 
 def _paths_are_siblings(bron: Path, paths: list[Path]) -> bool:
@@ -103,8 +116,11 @@ def svg_meta_products(
     prev = existing.get("products") if existing else None
     if isinstance(prev, dict):
         for key in prev:
-            if key.startswith("svg-"):
-                drop.add(key)
+            # Alleen bladreeks svg-1…svg-N; behoud svg-translit-*.
+            if isinstance(key, str) and key.startswith("svg-"):
+                rest = key[4:]
+                if rest.isdigit():
+                    drop.add(key)
     return products, drop
 
 
