@@ -93,7 +93,7 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
+   — branch <code>translit</code>
   , gebouwd 2026-11-02 11:47 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
@@ -3846,7 +3846,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — partituur-PDF uit .vsa
+    vsa pdf — verouderd (gebruik markdown pdf)
   
 
     
@@ -4931,10 +4931,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#13-pdf-voor-de-pagina" class="md-nav__link">
+  <a href="#13-twee-pdf-soorten-niet-door-elkaar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1.3 PDF voor de pagina
+        1.3 Twee PDF-soorten — niet door elkaar
       
     </span>
   </a>
@@ -5109,12 +5109,31 @@ niet opnieuw uit het MuseScore-titelblok wanneer je een pagina-PDF bouwt.</p>
 </table>
 <p>Zelfde sibling-SVG voor scherm-fallback én print-compose. Scherm-hoofdpad
 blijft Score-IR/OSMD (§4). A4-bladreeks (<code>stem-N.svg</code>) is verlaten.</p>
-<h3 id="13-pdf-voor-de-pagina">1.3 PDF voor de pagina<a class="headerlink" href="#13-pdf-voor-de-pagina" title="Permanent link">&para;</a></h3>
-<p>Print en download gebruiken <code>index.md.pdf</code> (site-Markdown plus kale SVG,
-commando <code>markdown pdf</code>). <code>.vsa.pdf</code>, <code>.mvsa.pdf</code> en <code>.mscz.pdf</code> zijn
-geen standaardproduct en geen download, print of navigatie. <code>products</code>
-maakt ze niet. Een losse partituur-PDF kan nog met <code>mvsa pdf</code> of
-<code>mscz pdf</code> (checklist P*). Die PDF is geen bouwsteen voor <code>index.md.pdf</code>.</p>
+<h3 id="13-twee-pdf-soorten-niet-door-elkaar">1.3 Twee PDF-soorten — niet door elkaar<a class="headerlink" href="#13-twee-pdf-soorten-niet-door-elkaar" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>PDF</th>
+<th>Metadata uit</th>
+<th>Mag catalogus-sibling-PDF als bouwsteen?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Catalogus-blad (sibling)</td>
+<td>Catalogus-samenstelling / oefenblad</td>
+<td>— (dit <em>is</em> de catalogus-PDF)</td>
+</tr>
+<tr>
+<td>Koormap-pagina (<code>index.pagina.pdf</code>)</td>
+<td>Koormap-<code>index.md</code> (<code>kop</code>, …)</td>
+<td><strong>Nee</strong> — alleen kale blad-SVG’s + Markdown-layout</td>
+</tr>
+</tbody>
+</table>
+<p>Catalogus-<code>.mvsa.pdf</code> / <code>.vsa.pdf</code> mag blijven als download van <strong>dat
+catalogusstuk</strong>. Die PDF mag <strong>niet</strong> de input zijn waarmee <code>pagina-pdf</code> een
+koormapblad samenstelt (anders krijg je catalogus- én koormap-metadata).</p>
 <h3 id="14-wat-web-en-print-welniet-delen">1.4 Wat web en print wel/niet delen<a class="headerlink" href="#14-wat-web-en-print-welniet-delen" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Delen:</strong> kale muziekbeelden (SVG).</li>
@@ -5139,8 +5158,8 @@ maakt ze niet. Een losse partituur-PDF kan nog met <code>mvsa pdf</code> of
 <td>Eén tall compacte kale SVG (geen bladreeks)</td>
 </tr>
 <tr>
-<td>Partituur-PDF</td>
-<td>Geen standaardproduct. Los: <code>mvsa pdf</code> / <code>mscz pdf</code> (P*)</td>
+<td>Catalogus-sibling PDF</td>
+<td>MuseScore layout <code>partituur</code> (titel/colofon in het scorebestand)</td>
 </tr>
 <tr>
 <td>bibliotheek <code>pdf.cmd</code> / <code>index.md.pdf</code></td>
@@ -5219,8 +5238,9 @@ blijft fallback/print, niet het S8-schermpad.</p>
 <hr />
 <h2 id="5-wat-dit-geen-is">5. Wat dit géén is<a class="headerlink" href="#5-wat-dit-geen-is" title="Permanent link">&para;</a></h2>
 <ul>
-<li>De norm voor wel of geen product-PDF staat in de
-  <a href="../../formats/contract-index/#universele-productcatalogus">contract-index</a>.</li>
+<li>Geen normatieve wijziging van CLI-gedrag in deze documentronde.</li>
+<li>Geen verplichting om catalogus-sibling-PDF af te schaffen — alleen om die
+  niet meer als koormap-bouwsteen te gebruiken.</li>
 <li>Geen vervanging van OSMD door tall-SVG op het scherm (§4); tall-SVG = fallback + print.</li>
 </ul>
 

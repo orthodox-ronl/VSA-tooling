@@ -97,7 +97,7 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
+   — branch <code>translit</code>
   , gebouwd 2026-11-02 11:47 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
@@ -3974,7 +3974,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — partituur-PDF uit .vsa
+    vsa pdf — verouderd (gebruik markdown pdf)
   
 
     
@@ -5129,11 +5129,10 @@ aanraakt. Normatieve regels staan <strong>alleen</strong> in de hubs hieronder. 
    per kanaal verschillen als de hub dat zo scheidt (bijv. M10 vs R5).</li>
 <li><code>normalize</code> / <code>products</code> / <code>import</code> <strong>implementeren</strong> deze hubs; ze
    definiëren geen parallelle norm.</li>
-<li>Een <strong>standaardproduct</strong> heeft één contract. De <strong>bronstraat</strong> (<code>vsa</code> /
-   <code>mvsa</code> / <code>mscz</code>) bepaalt alleen de CLI-prefix en toegestane
-   invoerextensie. Elk standaardproduct moet uit elke notatiebron
-   (<code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>) genereerbaar zijn volgens dat productcontract.
-   Partituur-PDF (P*) is <strong>geen</strong> standaardproduct: alleen los gereedschap.</li>
+<li>Een <strong>product</strong> heeft één contract. De <strong>bronstraat</strong> (<code>vsa</code> / <code>mvsa</code> /
+   <code>mscz</code>) bepaalt alleen de CLI-prefix en toegestane invoerextensie — niet
+   of het product bestaat. Elk standaardproduct moet uit elke notatiebron
+   (<code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>) genereerbaar zijn volgens dat productcontract.</li>
 </ol>
 <p>Agent-regel in de repo: <code>.cursor/rules/contracten-eerst.mdc</code> (en voor
 mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
@@ -5160,7 +5159,7 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 <tr>
 <td>P-reeks (PDF A4 e.d.)</td>
 <td><a href="../canonical-checklists/">canonical-checklists.md</a> §PDF</td>
-<td>los: <code>vsa</code>/<code>mvsa</code>/<code>mscz pdf</code>; site: <code>markdown pdf</code> → <code>index.md.pdf</code></td>
+<td><code>mvsa pdf</code> / <code>mscz pdf</code> (partituur); <code>markdown pdf</code> (site-Markdown)</td>
 </tr>
 <tr>
 <td>Bestandsnaamgeving <code>{stam}.{bron}.{doel}</code></td>
@@ -5175,7 +5174,7 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 <tr>
 <td>Layoutprofielen <code>partituur</code> / <code>muziek</code> / <code>plain</code></td>
 <td><a href="../mscz/">mscz.md</a>#layoutprofielen---layout</td>
-<td><code>mvsa mscz</code> / <code>{straat} svg</code> / <code>{straat} pdf</code></td>
+<td><code>mvsa mscz</code> / <code>mvsa svg</code> / <code>mvsa pdf</code></td>
 </tr>
 <tr>
 <td><code>.mvsa</code>-syntax</td>
@@ -5240,9 +5239,9 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 </tbody>
 </table>
 <h2 id="universele-productcatalogus">Universele productcatalogus<a class="headerlink" href="#universele-productcatalogus" title="Permanent link">&para;</a></h2>
-<p>Een standaardproduct is een afgeleid bestand met <strong>één</strong> contract.
-<code>{straat} products</code> schrijft de <strong>volledige</strong> standaardset uit elke
-notatiebron. De bibliotheek mag per bron kiezen wat zij publiceert.
+<p>Product = afgeleid bestand met <strong>één</strong> contract. De consumer (o.a.
+bibliotheek) mag per bron selecteren wat zij nodig heeft; tooling
+genereert de <strong>volledige</strong> standaardset uit elke notatiebron.
 Straat-CLI’s: <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
 <table>
 <thead>
@@ -5262,6 +5261,11 @@ Straat-CLI’s: <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
 <td><code>svg</code></td>
 <td><code>lied.mscz.svg</code></td>
 <td>kale tall compacte SVG — <a href="../mvsa-svg/">mvsa-svg</a></td>
+</tr>
+<tr>
+<td><code>pdf</code></td>
+<td><code>lied.vsa.pdf</code></td>
+<td>checklists P* / partituur-print</td>
 </tr>
 <tr>
 <td><code>mp3</code></td>
@@ -5290,13 +5294,6 @@ Straat-CLI’s: <a href="../../plans/straat-clis/">straat-CLIs (plan)</a>.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Geen standaardproduct:</strong> partituur-PDF (P<em>, sibling <code>{stam}.{bron}.pdf</code>).
-Scherm, download, print en navigatie gebruiken die PDF niet.
-Publicatiecontrole eist <code>.vsa.pdf</code>, <code>.mvsa.pdf</code> en <code>.mscz.pdf</code> niet.
-Los maken kan nog wel: <code>vsa pdf</code>, <code>mvsa pdf</code> of <code>mscz pdf</code> (checklist P</em>).
-<code>products</code> schrijft die bestanden niet en haalt een oude meta-key <code>pdf</code>
-uit de sidecar. Het pdf-bestand op schijf blijft staan tot je het zelf
-wist.</p>
 <p>CLI: <code>{straat} {product}</code> met alleen de eigen bronextensie
 (<code>.vsa</code> / <code>.mvsa</code> / <code>.mscz</code>). Voorbeeld: <code>mscz score-ir</code>, <code>vsa mp3</code>,
 <code>mvsa lyrics</code> via <code>mvsa text</code>. Batch op een map pikt geen geneste
@@ -5311,11 +5308,10 @@ met hint naar de juiste straat. Uitzonderingen: <code>mvsa import</code> /
 format-CLI <code>mxl …</code>.</p>
 <p><strong>Geen product (wel straat-actie):</strong> <code>normalize</code>, <code>import</code>, <code>validate</code>,
 <code>transpose</code>, <code>kuiser</code>, <code>compare</code> — geen meta-keys in <code>products</code>.</p>
-<p><strong>Pagina-PDF (wel voor download en print):</strong> <code>markdown pdf</code> schrijft
-<code>index.md.pdf</code> naast de site-Markdown. Dat is geen notatie-product en
-geen checklist P*. In de bibliotheek doet <code>scripts\pdf.cmd</code> hetzelfde.
-Man-pagina: <a href="../../reference/cli/markdown/"><code>markdown</code></a>. Partituur-PDF
-uit <code>.vsa</code>: <a href="../../reference/cli/pdf/"><code>vsa pdf</code></a>.</p>
+<p><strong>Site-Markdown-PDF:</strong> <code>markdown pdf</code> (verouderd: <code>vsa pdf</code>) en
+bibliotheek-<code>scripts\pdf.cmd</code> → <code>index.md.pdf</code> zijn <strong>geen</strong>
+notatie-product <code>pdf</code> (P<em>). Partituur-PDF volgt P</em> via <code>mvsa pdf</code> /
+<code>mscz pdf</code>. Man-pagina: <a href="../../reference/cli/markdown/"><code>markdown</code></a>.</p>
 <table>
 <thead>
 <tr>
@@ -5356,7 +5352,7 @@ street-<code>products</code> of individuele product-subs (merge).</p>
 <tbody>
 <tr>
 <td><code>vsa</code>/<code>mvsa</code>/<code>mscz products</code></td>
-<td><code>mxl</code>, <code>score-ir</code>, <code>from-ir</code>, <code>mscz</code>, <code>mp3</code>, <code>lyrics</code> + <code>svg</code> (tenzij <code>--skip-svg</code>). Geen <code>pdf</code>.</td>
+<td><code>mxl</code>, <code>score-ir</code>, <code>from-ir</code>, <code>mscz</code>, <code>pdf</code>, <code>mp3</code>, <code>lyrics</code> + <code>svg</code> (tenzij <code>--skip-svg</code>)</td>
 </tr>
 <tr>
 <td>Individuele <code>{straat} {product}</code></td>
@@ -5379,13 +5375,13 @@ SVG uit de ongewijzigde bron. Man-pagina:
 </thead>
 <tbody>
 <tr>
-<td>Losse partituur-PDF (niet in <code>products</code>)</td>
-<td><code>vsa</code> / <code>mvsa</code> / <code>mscz pdf</code></td>
-<td><code>{stam}.{bron}.pdf</code> (niet verplicht)</td>
+<td>Uit notatiebron (product <code>pdf</code>)</td>
+<td><code>{straat} pdf</code></td>
+<td><code>{stam}.{bron}.pdf</code> (naamgevingsconventie)</td>
 </tr>
 <tr>
 <td>Uit site-<code>index.md</code> (bibliotheek)</td>
-<td><code>markdown pdf</code> of <code>scripts\pdf.cmd</code></td>
+<td><code>scripts\pdf.cmd</code></td>
 <td><strong><code>index.md.pdf</code></strong></td>
 </tr>
 </tbody>
@@ -5431,7 +5427,7 @@ punt, geen excuus voor een parallelle checklist in de site-repo.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-01
+        Bijgewerkt: 2026-10-28
         
       </p>
       
