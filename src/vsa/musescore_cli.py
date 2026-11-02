@@ -1,11 +1,23 @@
-"""Locate MuseScore and convert scores via its CLI."""
+"""Locate MuseScore and convert scores via its CLI.
+
+MuseScore-conversies lopen **één tegelijk** (thread- én procesbreed lock):
+twee CLI-runs tegelijk vergrendelen elkaars ``.mscz``/SVG’s op Windows
+(Access Denied). Andere processen die deze module gebruiken, wachten
+tot de vorige conversie klaar is.
+"""
 
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
+import tempfile
+import threading
+import time
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 _SVG_PAGE_INDEX_RE = re.compile(r"-(\d+)\.svg$", re.IGNORECASE)
 
@@ -13,6 +25,12 @@ MUSESCORE_CANDIDATES = (
     Path(r"C:\Program Files\MuseScore 4\bin\MuseScore4.exe"),
     Path(r"C:\Program Files\MuseScore 3\bin\MuseScore3.exe"),
 )
+
+# Eén MuseScore-CLI tegelijk (ook over processen heen).
+_THREAD_LOCK = threading.Lock()
+_LOCK_PATH = Path(tempfile.gettempdir()) / "vsa-musescore-cli.lock"
+_LOCK_WAIT_S = 0.25
+_LOCK_STALE_S = 2 * 60 * 60  # 2 uur: wees-lock na crash
 
 
 class MuseScoreNotFoundError(RuntimeError):
@@ -53,6 +71,77 @@ def require_musescore(*, override: Path | None = None) -> Path:
     return found
 
 
+def _try_acquire_lockfile() -> int | None:
+    """Open lockfile exclusief; return fd of ``None`` als bezet."""
+    flags = os.O_CREAT | os.O_EXCL | os.O_RDWR
+    try:
+        return os.open(str(_LOCK_PATH), flags)
+    except FileExistsError:
+        return None
+    except OSError:
+        return None
+
+
+def _release_lockfile(fd: int) -> None:
+    try:
+        os.close(fd)
+    finally:
+        try:
+            _LOCK_PATH.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def _lock_is_stale() -> bool:
+    try:
+        age = time.time() - _LOCK_PATH.stat().st_mtime
+    except OSError:
+        return False
+    return age >= _LOCK_STALE_S
+
+
+def _unlink_with_retry(path: Path, *, attempts: int = 8) -> None:
+    """``unlink`` met korte retries bij Windows Access Denied."""
+    path = Path(path)
+    last: OSError | None = None
+    for attempt in range(max(1, attempts)):
+        try:
+            path.unlink(missing_ok=True)
+            return
+        except OSError as exc:
+            last = exc
+            time.sleep(0.05 * (attempt + 1))
+    assert last is not None
+    raise last
+
+
+@contextmanager
+def musescore_exclusive() -> Iterator[None]:
+    """Wacht tot deze thread/proces exclusief MuseScore mag starten."""
+    with _THREAD_LOCK:
+        fd: int | None = None
+        while True:
+            fd = _try_acquire_lockfile()
+            if fd is not None:
+                break
+            if _lock_is_stale():
+                try:
+                    _LOCK_PATH.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                continue
+            time.sleep(_LOCK_WAIT_S)
+        try:
+            # Pid in lockfile helpt bij diagnose; geen harde eis.
+            try:
+                os.write(fd, f"{os.getpid()}\n".encode("ascii", errors="replace"))
+            except OSError:
+                pass
+            yield
+        finally:
+            _release_lockfile(fd)
+
+
 def convert_with_musescore(
     source: Path,
     dest: Path,
@@ -67,46 +156,49 @@ def convert_with_musescore(
     *musicxml_infer_text_type*: zet MuseScore ``--musicxml-infer-text-type`` aan
     (alleen zinvol bij MusicXML→MSCZ). Dan worden Fine / D.S. / Segno echte
     Marker/Jump met rechtsuitlijning i.p.v. losse StaffText.
+
+    Start nooit een tweede MuseScore-CLI zolang een andere conversie via
+    deze module nog loopt (zie :func:`musescore_exclusive`).
     """
     exe = require_musescore(override=musescore)
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if dest.exists():
-        dest.unlink()
-    # MuseScore SVG: wis eventuele oude pagina-bestanden (stem-1.svg, …).
-    if dest.suffix.lower() == ".svg":
-        for stale in dest.parent.glob(f"{dest.stem}-*.svg"):
-            stale.unlink(missing_ok=True)
-    cmd = [str(exe), "-f"]
-    if musicxml_infer_text_type:
-        cmd.append("--musicxml-infer-text-type")
-    cmd.extend(["-o", str(dest), str(source)])
-    try:
-        proc = subprocess.run(
-            cmd,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-    except OSError as exc:
-        raise MuseScoreConvertError(f"MuseScore starten mislukt: {exc}") from exc
-    if proc.returncode != 0:
-        detail = (proc.stderr or proc.stdout or "").strip()
-        msg = f"MuseScore schreef geen {dest} (exit {proc.returncode})"
-        if detail:
-            msg = f"{msg}: {detail[:500]}"
-        raise MuseScoreConvertError(msg)
-    if dest.suffix.lower() == ".svg" and not dest.is_file():
-        pages = _resolve_musescore_svg_pages(dest)
-        if pages:
-            return pages[0]
-    if not dest.is_file():
-        detail = (proc.stderr or proc.stdout or "").strip()
-        msg = f"MuseScore schreef geen {dest} (exit {proc.returncode})"
-        if detail:
-            msg = f"{msg}: {detail[:500]}"
-        raise MuseScoreConvertError(msg)
-    return dest
+    with musescore_exclusive():
+        _unlink_with_retry(dest)
+        # MuseScore SVG: wis eventuele oude pagina-bestanden (stem-1.svg, …).
+        if dest.suffix.lower() == ".svg":
+            for stale in dest.parent.glob(f"{dest.stem}-*.svg"):
+                _unlink_with_retry(stale)
+        cmd = [str(exe), "-f"]
+        if musicxml_infer_text_type:
+            cmd.append("--musicxml-infer-text-type")
+        cmd.extend(["-o", str(dest), str(source)])
+        try:
+            proc = subprocess.run(
+                cmd,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except OSError as exc:
+            raise MuseScoreConvertError(f"MuseScore starten mislukt: {exc}") from exc
+        if proc.returncode != 0:
+            detail = (proc.stderr or proc.stdout or "").strip()
+            msg = f"MuseScore schreef geen {dest} (exit {proc.returncode})"
+            if detail:
+                msg = f"{msg}: {detail[:500]}"
+            raise MuseScoreConvertError(msg)
+        if dest.suffix.lower() == ".svg" and not dest.is_file():
+            pages = _resolve_musescore_svg_pages(dest)
+            if pages:
+                return pages[0]
+        if not dest.is_file():
+            detail = (proc.stderr or proc.stdout or "").strip()
+            msg = f"MuseScore schreef geen {dest} (exit {proc.returncode})"
+            if detail:
+                msg = f"{msg}: {detail[:500]}"
+            raise MuseScoreConvertError(msg)
+        return dest
 
 
 def _svg_page_index(path: Path) -> int:

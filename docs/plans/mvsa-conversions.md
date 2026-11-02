@@ -190,6 +190,9 @@ mvsa mscz PATH [-o OUT] [--section ID] [--musescore PATH] [--keep-mxl PATH]
 ```
 
 - Module: `vsa.mvsa_mscz` + `vsa.mscz_partituur` + `vsa.musescore_cli`.
+- MuseScore-CLI via `musescore_cli`: **één conversie tegelijk** (lockbestand
+  in de temp-map), zodat Windows geen Access Denied geeft wanneer twee
+  exports elkaars `.mscz`/SVG’s vasthouden.
 - Playback/Coria blijft `mvsa mxl` (vier parts).
 
 **Criterium (gehaald):** met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
