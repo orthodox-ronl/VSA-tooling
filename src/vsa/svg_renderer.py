@@ -15,8 +15,18 @@ from .syllabify import display_lyric_text
 
 
 class SVGRenderer:
-    def __init__(self, svg_config: SVGRenderingConfig | None = None):
+    def __init__(
+        self,
+        svg_config: SVGRenderingConfig | None = None,
+        *,
+        translit: bool = False,
+        translit_modus: str = "both",
+    ):
         self.svg_config = svg_config or SVGRenderingConfig()
+        self.translit = bool(translit)
+        from .transliterate import normalize_translit_modus
+
+        self.translit_modus = normalize_translit_modus(translit_modus)
 
         self.font_family = self.svg_config.font_family
         self.font_size = self.svg_config.font_size
@@ -40,6 +50,26 @@ class SVGRenderer:
         self.scope_gap = self.svg_config.scope_gap
         self.optical_scope_gap = self.svg_config.optical_scope_gap
         self.pitch_marker_gap = self.svg_config.pitch_marker_gap
+        # Vorm A: tweede tekstregel onder de bron (§5a).
+        self._translit_row_dy = self.font_size * 1.05 if self.translit else 0.0
+
+    def _translit_line(self, shown: str) -> str | None:
+        """Tweede regel of ``None`` als modus/schrift geen omzetting geeft."""
+        if not self.translit or not shown:
+            return None
+        from .transliterate import (
+            detect_direction,
+            modus_allows_direction,
+            render_syllable,
+        )
+
+        det = detect_direction(shown)
+        if not modus_allows_direction(self.translit_modus, det):
+            return None
+        out = render_syllable(shown, direction=det)
+        if not out or out == shown:
+            return None
+        return out
 
     def render_document(self, document):
         line_settings = LineLayoutSettings(
@@ -51,6 +81,8 @@ class SVGRenderer:
             font_family=self.font_family,
             optical_scope_gap=self.optical_scope_gap,
             glyphs=self.glyphs,
+            translit=self.translit,
+            translit_modus=self.translit_modus,
         )
         lines = build_lines(document, self.max_line_width, settings=line_settings)
 
@@ -58,7 +90,8 @@ class SVGRenderer:
         width = max(width, 60.0)
 
         extra_top = self._compute_extra_top(lines)
-        height = self.top_margin * 2 + len(lines) * self.line_height + extra_top
+        row_h = self.line_height + self._translit_row_dy
+        height = self.top_margin * 2 + len(lines) * row_h + extra_top
         height = max(height, 55.0)
 
         parts = [
@@ -69,10 +102,9 @@ class SVGRenderer:
             '<g class="vsa-score">',
         ]
 
-
         for line_index, line in enumerate(lines):
             x = self.left_margin
-            baseline_y = self.top_margin + extra_top + 28 + (line_index * self.line_height)
+            baseline_y = self.top_margin + extra_top + 28 + (line_index * row_h)
 
             parts.append(f'<g class="vsa-line" data-vsa-line="{line_index + 1}">')
 
@@ -161,6 +193,7 @@ class SVGRenderer:
             return x
 
         shown = display_lyric_text(text)
+        second = self._translit_line(shown)
         parts.append(f'<g class="vsa-unit vsa-unit-text" data-vsa-unit="{item_index}">')
         parts.append(
             f'<text class="vsa-text vsa-free-text" x="{x:.2f}" y="{baseline_y:.2f}" '
@@ -168,14 +201,33 @@ class SVGRenderer:
             f'font-family="{escape(self.font_family)}" font-size="{self.font_size:.2f}">'
             f'{escape(shown)}</text>'
         )
-        parts.append("</g>")
-
-        return x + estimate_text_width(
+        w = estimate_text_width(
             shown,
             self.font_size,
             preserve_whitespace=True,
             font_family=self.font_family,
-        ) + self.text_gap
+        )
+        if second is not None:
+            parts.append(
+                f'<text class="vsa-text vsa-free-text vsa-translit-text" '
+                f'x="{x:.2f}" y="{baseline_y + self._translit_row_dy:.2f}" '
+                f'xml:space="preserve" '
+                f'font-family="{escape(self.font_family)}" '
+                f'font-size="{self.font_size:.2f}">'
+                f'{escape(second)}</text>'
+            )
+            w = max(
+                w,
+                estimate_text_width(
+                    second,
+                    self.font_size,
+                    preserve_whitespace=True,
+                    font_family=self.font_family,
+                ),
+            )
+        parts.append("</g>")
+
+        return x + w + self.text_gap
 
     def _render_scope(
         self,
@@ -195,8 +247,11 @@ class SVGRenderer:
             leading_safety=leading_safety,
             trailing_safety=trailing_safety,
         )
+        shown = display_lyric_text(layout.text)
+        second = self._translit_line(shown)
+        translit_dy = self._translit_row_dy if second is not None else 0.0
         upper_y = baseline_y + self.svg_config.upper.offset_y
-        lower_y = baseline_y + self.svg_config.lower.offset_y
+        lower_y = baseline_y + self.svg_config.lower.offset_y + translit_dy
         filler_y = baseline_y + self.svg_config.filler_offset_y
 
         # x_syllable is where the syllable text (and ELM) begins.
@@ -205,15 +260,35 @@ class SVGRenderer:
         # prefix symbol occupies the reserved space to the left.
         x_syllable = x + layout.prefix_extra
 
+        second_w = 0.0
+        if second is not None:
+            second_w = estimate_text_width(
+                second,
+                self.font_size,
+                preserve_whitespace=True,
+                font_family=self.font_family,
+            )
+        width_extra = max(0.0, second_w - layout.text_width)
+        total_width = layout.width + width_extra
+
         parts.append(f'<g class="vsa-unit vsa-unit-scope" data-vsa-unit="{item_index}">')
 
-        shown = display_lyric_text(layout.text)
+        # Vorm A-kolom: EHM → bron → translit → ELM.
         parts.append(
             f'<text class="vsa-text vsa-sung-text" x="{x_syllable:.2f}" y="{baseline_y:.2f}" '
             f'xml:space="preserve" '
             f'font-family="{escape(self.font_family)}" font-size="{self.font_size:.2f}">'
             f'{escape(shown)}</text>'
         )
+        if second is not None:
+            parts.append(
+                f'<text class="vsa-text vsa-sung-text vsa-translit-text" '
+                f'x="{x_syllable:.2f}" y="{baseline_y + translit_dy:.2f}" '
+                f'xml:space="preserve" '
+                f'font-family="{escape(self.font_family)}" '
+                f'font-size="{self.font_size:.2f}">'
+                f'{escape(second)}</text>'
+            )
 
         if layout.filler_width > 2.0:
             start = x_syllable + layout.text_width + 1.0
@@ -230,22 +305,33 @@ class SVGRenderer:
         # EHM: runs from x (full column width includes the prefix zone).
         parts.append('<g class="vsa-glyph-group vsa-upper-glyphs">')
         running_x = x
+        col_scale = total_width / layout.width if layout.width else 1.0
         for column in layout.columns:
-            parts.extend(self.glyphs.render_height_modifier([column.ehm], running_x, upper_y, column.width))
-            running_x += column.width
+            col_w = column.width * col_scale
+            parts.extend(
+                self.glyphs.render_height_modifier(
+                    [column.ehm], running_x, upper_y, col_w
+                )
+            )
+            running_x += col_w
         parts.append("</g>")
 
-        # ELM: runs from x_syllable with the syllable-zone column width.
+        # ELM: under translit-regel (of bron als geen tweede regel).
         parts.append('<g class="vsa-glyph-group vsa-lower-glyphs">')
-        elm_col_width = (layout.width - layout.prefix_extra) / len(layout.columns)
+        elm_zone = total_width - layout.prefix_extra
+        elm_col_width = elm_zone / len(layout.columns)
         running_x = x_syllable
         for column in layout.columns:
-            parts.extend(self.glyphs.render_length_modifier([column.elm], running_x, lower_y, elm_col_width))
+            parts.extend(
+                self.glyphs.render_length_modifier(
+                    [column.elm], running_x, lower_y, elm_col_width
+                )
+            )
             running_x += elm_col_width
         parts.append("</g>")
 
         parts.append("</g>")
-        return x + layout.width + self.scope_gap
+        return x + total_width + self.scope_gap
 
     def _render_pitch_marker(self, parts, node, x, baseline_y, item_index):
         width = max(

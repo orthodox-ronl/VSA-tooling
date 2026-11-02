@@ -25,7 +25,7 @@ from .parser import Parser
 from .svg_renderer import SVGRenderer
 from .validation_display import format_validation_message
 from .validation_runner import validate_path
-from .derived_path import derived_output_path
+from .derived_path import derived_output_path, derived_svg_output_path
 from .input_paths import InputPathError, collect_cli_sources
 from .resolve_catalogus import ResolveCatalogusError, write_resolved_markdown
 from .syllabify import (
@@ -54,6 +54,55 @@ def main(argv=None):
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         return 1
+
+
+def _add_translit_args(
+    parser: argparse.ArgumentParser, *, with_as_parts: bool = False
+) -> None:
+    """``--translit`` + ``--translit-modus``; optioneel ``--translit-as-parts``."""
+    parser.add_argument(
+        "--translit",
+        action="store_true",
+        help=(
+            "Tweede lyric-laag (number=2): ksl→Latijn / nl→Cyrillisch "
+            "(filter met --translit-modus)."
+        ),
+    )
+    parser.add_argument(
+        "--translit-modus",
+        choices=("nls", "ksl"),
+        default=None,
+        dest="translit_modus",
+        help=(
+            "Filter hulpregel: nls = alleen ksl→Latijn; ksl = alleen "
+            "nl→Cyrillisch. Zonder deze vlag (met --translit): beide. "
+            "Alleen --translit-modus impliceert --translit."
+        ),
+    )
+    if with_as_parts:
+        parser.add_argument(
+            "--translit-as-parts",
+            action="store_true",
+            dest="translit_as_parts",
+            help=(
+                "Alleen bij .mvsa: Coria-extra parts (volume 0). "
+                "Auto-translit: Soprano (nls)/(ksl); parallelle L/L1: "
+                "labels via @taal. Impliceert --translit. Alleen playback."
+            ),
+        )
+
+
+def _cli_translit_kwargs(args) -> dict:
+    """Gemeenschappelijke kwargs voor mvsa-export met translit."""
+    modus = getattr(args, "translit_modus", None)
+    translit = bool(getattr(args, "translit", False)) or modus is not None
+    kwargs: dict = {
+        "translit": translit,
+        "translit_modus": modus if modus is not None else "both",
+    }
+    if hasattr(args, "translit_as_parts"):
+        kwargs["translit_as_parts"] = bool(args.translit_as_parts)
+    return kwargs
 
 
 def _build_mvsa_parser() -> argparse.ArgumentParser:
@@ -192,24 +241,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "(default: pad-sniff onder content-source/bibliotheek)."
         ),
     )
-    m_musicxml.add_argument(
-        "--translit",
-        action="store_true",
-        help=(
-            "Alleen bij .mvsa: tweede lyric-laag (number=2): ksl→Latijn / "
-            "nl→Cyrillisch per lettergreep."
-        ),
-    )
-    m_musicxml.add_argument(
-        "--translit-as-parts",
-        action="store_true",
-        dest="translit_as_parts",
-        help=(
-            "Alleen bij .mvsa: Coria-extra SATB-parts met translit (volume 0). "
-            "Part-namen: Soprano (ksl)/(nl) via @taal. "
-            "Impliceert --translit. Alleen playback-layout."
-        ),
-    )
+    _add_translit_args(m_musicxml, with_as_parts=True)
     m_musicxml.add_argument(
         "--musescore",
         metavar="PATH",
@@ -287,14 +319,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "Zonder deze optie: optionele pad-afleiding. Consumer bepaalt de id."
         ),
     )
-    m_mscz.add_argument(
-        "--translit",
-        action="store_true",
-        help=(
-            "Tweede lyric-laag (number=2) in partituur-MXL: ksl→Latijn / "
-            "nl→Cyrillisch."
-        ),
-    )
+    _add_translit_args(m_mscz)
     _add_partituur_style_args(m_mscz)
     m_pdf = mvsa_sub.add_parser(
         "pdf",
@@ -366,14 +391,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         dest="bibliotheek_id",
         help="Bij .mvsa + layout partituur: expliciete bibliotheek-id voor colofon.",
     )
-    m_pdf.add_argument(
-        "--translit",
-        action="store_true",
-        help=(
-            "Tweede lyric-laag (number=2) in de tussen-MXL/MSCZ: "
-            "ksl→Latijn / nl→Cyrillisch."
-        ),
-    )
+    _add_translit_args(m_pdf)
     _add_partituur_style_args(m_pdf)
     m_svg = mvsa_sub.add_parser(
         "svg",
@@ -441,14 +459,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         dest="bibliotheek_id",
         help="Alleen bij .mvsa; genegeerd voor layout muziek (geen colofon).",
     )
-    m_svg.add_argument(
-        "--translit",
-        action="store_true",
-        help=(
-            "Tweede lyric-laag (number=2) in de tussen-MXL/MSCZ: "
-            "ksl→Latijn / nl→Cyrillisch."
-        ),
-    )
+    _add_translit_args(m_svg)
     m_svg.add_argument(
         "--no-trim",
         action="store_true",
@@ -796,6 +807,7 @@ def _build_parser():
     )
     svg.add_argument("--config", default=None)
     svg.add_argument("--max-line-width", type=float, default=None)
+    _add_translit_args(svg)
 
     from .street_products import add_products_parser as _add_vsa_products_parser
 
@@ -1326,7 +1338,12 @@ def _cmd_svg(args, config):
     if _cli_reject_multi_single_opts(files, args):
         return 1
 
-    renderer = SVGRenderer(svg_config=config.rendering.svg)
+    tkw = _cli_translit_kwargs(args)
+    renderer = SVGRenderer(
+        svg_config=config.rendering.svg,
+        translit=bool(tkw.get("translit")),
+        translit_modus=str(tkw.get("translit_modus") or "both"),
+    )
     renderer.max_line_width = (
         args.max_line_width
         if args.max_line_width is not None
@@ -1338,7 +1355,11 @@ def _cmd_svg(args, config):
         out = (
             Path(args.output)
             if args.output
-            else derived_output_path(input_path, ".svg")
+            else derived_svg_output_path(
+                input_path,
+                translit=bool(tkw.get("translit")),
+                translit_modus=str(tkw.get("translit_modus") or "both"),
+            )
         )
         try:
             text = input_path.read_text(encoding="utf-8")
@@ -2563,10 +2584,7 @@ def _cmd_mvsa_musicxml(args) -> int:
                 out,
                 section_id=args.section,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                translit=bool(getattr(args, "translit", False)),
-                translit_as_parts=bool(
-                    getattr(args, "translit_as_parts", False)
-                ),
+                **_cli_translit_kwargs(args),
             )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
@@ -2613,7 +2631,11 @@ def _cmd_mvsa_mscz(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=getattr(args, "layout", None),
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                translit=bool(getattr(args, "translit", False)),
+                **{
+                    k: v
+                    for k, v in _cli_translit_kwargs(args).items()
+                    if k != "translit_as_parts"
+                },
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:
@@ -2809,7 +2831,11 @@ def _cmd_mvsa_pdf(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=args.layout,
                 bibliotheek_id=args.bibliotheek_id,
-                translit=bool(getattr(args, "translit", False)),
+                **{
+                    k: v
+                    for k, v in _cli_translit_kwargs(args).items()
+                    if k != "translit_as_parts"
+                },
                 **_partituur_style_kwargs(args),
             )
         except MvsaValidationError as exc:
@@ -2852,7 +2878,19 @@ def _cmd_mvsa_svg(args) -> int:
     if _cli_reject_multi_single_opts(files, args, "keep_mscz", "keep_mxl"):
         return 1
     engine = getattr(args, "engine", "musescore") or "musescore"
+    tkw = {
+        k: v
+        for k, v in _cli_translit_kwargs(args).items()
+        if k != "translit_as_parts"
+    }
     if engine == "osmd":
+        if tkw.get("translit"):
+            print(
+                "mvsa svg: --translit werkt niet met --engine osmd "
+                "(translit-SVG alleen via MuseScore-keten; zie §5a).",
+                file=sys.stderr,
+            )
+            return 1
         if args.keep_mscz or args.musescore or args.no_trim or args.transparent:
             print(
                 "mvsa svg --engine osmd: --keep-mscz/--musescore/--no-trim/"
@@ -2876,7 +2914,11 @@ def _cmd_mvsa_svg(args) -> int:
         out = (
             Path(args.output)
             if args.output
-            else derived_output_path(path, ".svg")
+            else derived_svg_output_path(
+                path,
+                translit=bool(tkw.get("translit")),
+                translit_modus=str(tkw.get("translit_modus") or "both"),
+            )
         )
         keep_mscz = Path(args.keep_mscz) if args.keep_mscz else None
         keep_mxl = Path(args.keep_mxl) if args.keep_mxl else None
@@ -2889,7 +2931,7 @@ def _cmd_mvsa_svg(args) -> int:
                 keep_mscz=keep_mscz,
                 keep_mxl=keep_mxl,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                translit=bool(getattr(args, "translit", False)),
+                **tkw,
                 trim=trim,
                 white_background=white_background,
                 engine=engine,
