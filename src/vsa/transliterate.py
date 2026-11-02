@@ -14,6 +14,36 @@ from typing import Literal
 
 Direction = Literal["ksl_to_latin", "nl_to_cyrillic"]
 Scheme = Literal["parochie"]
+# SVG/CLI-filter: nls = alleen ksl→Latijn; ksl = alleen nl→Cyrillisch; both = beide.
+TranslitModus = Literal["nls", "ksl", "both"]
+
+
+def normalize_translit_modus(modus: str | None) -> TranslitModus:
+    """Normaliseer CLI/SVG-modus; ``None``/leeg → ``both``."""
+    if modus is None:
+        return "both"
+    low = str(modus).strip().lower()
+    if not low or low == "both":
+        return "both"
+    if low in ("nls", "ksl"):
+        return low  # type: ignore[return-value]
+    raise ValueError(
+        f"onbekende translit-modus {modus!r}; verwacht nls, ksl of both"
+    )
+
+
+def modus_allows_direction(
+    modus: str | None, direction: Direction | None
+) -> bool:
+    """Of deze modus de omzettingsrichting mag tonen (vorm A / lyric 2)."""
+    if direction is None:
+        return False
+    m = normalize_translit_modus(modus)
+    if m == "both":
+        return True
+    if m == "nls":
+        return direction == "ksl_to_latin"
+    return direction == "nl_to_cyrillic"
 
 # Cyrillisch → Latijn: basisletters (``е``/``ь``/``ий`` via context in renderer).
 _KSL_TO_LATIN: dict[str, str] = {
@@ -414,9 +444,12 @@ __all__ = [
     "BOGORODITSE_LATIN_LINES",
     "Direction",
     "Scheme",
+    "TranslitModus",
     "detect_direction",
     "has_cyrillic",
     "has_latin_letter",
+    "modus_allows_direction",
+    "normalize_translit_modus",
     "render_ksl_to_latin",
     "render_nl_to_cyrillic",
     "render_syllable",
