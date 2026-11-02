@@ -55,6 +55,7 @@ def export_mvsa_to_mscz(
     layout: str | None = None,
     bibliotheek_id: str | None = None,
     translit: bool = False,
+    translit_modus: str | None = None,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
     staff_distance: float | None = None,
@@ -81,6 +82,9 @@ def export_mvsa_to_mscz(
     Returns ``out``.
     """
     from .mscz_partituur import build_partituur_style_overrides
+
+    # Zelfde CLI-kwarg als MXL/SVG; lyric-filter nls/ksl volgt later.
+    _ = translit_modus
 
     path = Path(path)
     out = Path(out)
@@ -401,6 +405,7 @@ def export_mvsa_to_svg(
     keep_mxl: Path | None = None,
     bibliotheek_id: str | None = None,
     translit: bool = False,
+    translit_modus: str | None = None,
     trim: bool = True,
     white_background: bool = True,
     engine: str | None = None,
@@ -499,6 +504,7 @@ def export_mvsa_to_svg(
             layout="muziek",
             bibliotheek_id=bibliotheek_id,
             translit=translit,
+            translit_modus=translit_modus,
             min_system_distance=style.get("min_system_distance"),
             max_system_distance=style.get("max_system_distance"),
             staff_distance=style.get("staff_distance"),

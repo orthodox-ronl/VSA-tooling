@@ -698,6 +698,7 @@ def export_mvsa_path(
     bibliotheek_id: str | None = None,
     translit: bool = False,
     translit_as_parts: bool = False,
+    translit_modus: str | None = None,
 ) -> None:
     path = Path(path)
     if path.suffix.lower() != ".mvsa":
@@ -712,6 +713,9 @@ def export_mvsa_path(
             f"kan {path.name} niet als tekst lezen ({exc}). "
             "Controleer of dit een .mvsa-bestand is."
         ) from exc
+    # translit_modus (nls/ksl/both) filtert nu vooral SVG; MXL exporteert
+    # bij translit=True beide richtingen totdat lyric-filter bestaat.
+    del translit_modus
     xml = export_mvsa_to_musicxml(
         text,
         title=path.stem,
