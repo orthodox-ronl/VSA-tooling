@@ -8,7 +8,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from vsa.cli_mvsa import main as mvsa_main
-from vsa.derived_path import derived_output_path
+from vsa.derived_path import (
+    derived_output_path,
+    derived_svg_output_path,
+    translit_svg_doel_suffix,
+)
 
 
 @pytest.mark.parametrize(
@@ -26,6 +30,33 @@ from vsa.derived_path import derived_output_path
 )
 def test_derived_output_path(source: str, doel: str, expected: str) -> None:
     assert derived_output_path(Path(source), doel) == Path(expected)
+
+
+@pytest.mark.parametrize(
+    ("modus", "suffix"),
+    [
+        ("nls", ".translit-nls.svg"),
+        ("ksl", ".translit-ksl.svg"),
+        ("both", ".translit.svg"),
+        (None, ".translit.svg"),
+    ],
+)
+def test_translit_svg_doel_suffix(modus: str | None, suffix: str) -> None:
+    assert translit_svg_doel_suffix(modus) == suffix
+
+
+def test_derived_svg_output_path_translit_siblings() -> None:
+    src = Path("lied.mvsa")
+    assert derived_svg_output_path(src) == Path("lied.mvsa.svg")
+    assert derived_svg_output_path(
+        src, translit=True, translit_modus="nls"
+    ) == Path("lied.mvsa.translit-nls.svg")
+    assert derived_svg_output_path(
+        src, translit=True, translit_modus="ksl"
+    ) == Path("lied.mvsa.translit-ksl.svg")
+    assert derived_svg_output_path(
+        Path("x.vsa"), translit=True, translit_modus="both"
+    ) == Path("x.vsa.translit.svg")
 
 
 def test_mvsa_mscz_default_out_appends_brontype(

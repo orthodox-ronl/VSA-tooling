@@ -11,7 +11,7 @@
 
 ```text
 vsa svg [-h] [--config CONFIG] [--max-line-width MAX_LINE_WIDTH]
-        [-o OUTPUT] input
+        [--translit] [--translit-modus {nls,ksl}] [-o OUTPUT] input
 ```
 
 **Invoer:** `input` mag één `.vsa` **of** een map zijn (recursief). Default
@@ -28,6 +28,12 @@ scherm). Dit commando verwerkt **geen** Markdownblokken — voor Markdown
 met [VSA-blokken](@) gebruik je [`vsa process`](process.md) of
 [`vsa build-markdown`](build-markdown.md).
 
+Met `--translit` / `--translit-modus` (vorm A): onder elke gezongen tekst
+een tweede regel met transliteratie; in scopes de volgorde EHM → bron →
+translit → ELM. Regelbreedte en `viewBox` meten `max(bron, translit)` per
+lettergreep, zodat bredere Cyrillische regels niet rechts afkappen. Zie
+[productmodel §5a](../../plans/kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu).
+
 `vsa svg` valideert de invoer niet expliciet vooraf; een parsefout leidt tot
 een foutmelding en exitcode `1`. Draai bij twijfel eerst
 [`vsa validate`](validate.md).
@@ -37,13 +43,15 @@ Bij sibling-output (default) merget `vsa svg` product-key `svg` in
 
 ## Argumenten en opties
 
-| Naam                              | Verplicht | Betekenis                                                             | Default                                       | Beperkingen                          |
-| --------------------------------- | --------- | --------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------ |
-| `input`                           | Ja        | `.vsa`-bestand of map met `.vsa`-bestanden.                           | —                                             | Moet bestaan.                        |
-| `-o` / `--output` OUTPUT          | Nee       | Uitvoer-``.svg``.                                                     | Sibling ``<naam>.vsa.svg`` naast elke bron    | Alleen bij precies één bronbestand.  |
-| `--config CONFIG`                 | Nee       | Pad naar een alternatief `vsa.toml`.                                  | Auto-detectie van `vsa.toml`                  | —                                    |
-| `--max-line-width MAX_LINE_WIDTH` | Nee       | Maximale SVG-regelbreedte voordat wordt afgebroken.                   | `max-line-width` uit `vsa.toml`, anders `800` | Getal (float)                        |
-| `-h`, `--help`                    | Nee       | Toon hulp voor dit subcommando.                                       | —                                             | —                                    |
+| Naam                              | Verplicht | Betekenis                                                             | Default                                                                                               | Beperkingen                          |
+| --------------------------------- | --------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `input`                           | Ja        | `.vsa`-bestand of map met `.vsa`-bestanden.                           | —                                                                                                     | Moet bestaan.                        |
+| `-o` / `--output` OUTPUT          | Nee       | Uitvoer-``.svg``.                                                     | Sibling ``.vsa.svg``; met translit: ``.translit-nls.svg`` / ``.translit-ksl.svg`` / ``.translit.svg`` | Alleen bij precies één bronbestand.  |
+| `--config CONFIG`                 | Nee       | Pad naar een alternatief `vsa.toml`.                                  | Auto-detectie van `vsa.toml`                                                                          | —                                    |
+| `--max-line-width MAX_LINE_WIDTH` | Nee       | Maximale SVG-regelbreedte voordat wordt afgebroken.                   | `max-line-width` uit `vsa.toml`, anders `800`                                                         | Getal (float)                        |
+| `--translit`                      | Nee       | Tweede tekstregel (vorm A): transliteratie onder de bron.             | uit                                                                                                   | —                                    |
+| `--translit-modus {nls,ksl}`      | Nee       | Filter + default sibling-naam (`nls`/`ksl`).                          | beide (als alleen `--translit`)                                                                       | Impliceert `--translit`.             |
+| `-h`, `--help`                    | Nee       | Toon hulp voor dit subcommando.                                       | —                                                                                                     | —                                    |
 
 ## Output
 
