@@ -97,7 +97,7 @@
             
   
   <strong>Preview</strong>
-   — branch <code>translit</code>
+   — branch <code>development</code>
   , gebouwd 2026-11-02 11:47 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
@@ -3946,7 +3946,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -5107,8 +5107,12 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/build-markdown/"><code>vsa build-markdown …</code></a></td>
 </tr>
 <tr>
-<td>Markdown + VSA naar A4-PDF</td>
-<td><a href="../../reference/cli/markdown/#markdown-pdf"><code>markdown pdf &lt;bestand.md&gt;</code></a> (verouderd: <a href="../../reference/cli/pdf/"><code>vsa pdf</code></a>)</td>
+<td>Pagina-Markdown naar A4-PDF (<code>index.md.pdf</code>)</td>
+<td><a href="../../reference/cli/markdown/#markdown-pdf"><code>markdown pdf &lt;bestand.md&gt;</code></a></td>
+</tr>
+<tr>
+<td>Partituur-PDF uit <code>.vsa</code></td>
+<td><a href="../../reference/cli/pdf/"><code>vsa pdf &lt;pad.vsa&gt;</code></a></td>
 </tr>
 <tr>
 <td><code>zoek=</code>-includes oplossen naar catalogus</td>
@@ -5119,16 +5123,20 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/syllabify/"><code>vsa syllabify &lt;pad&gt;</code></a></td>
 </tr>
 <tr>
-<td>Platte gezongen tekst (zoekindex)</td>
-<td><a href="../../reference/cli/text/"><code>vsa text &lt;pad&gt;</code></a> (<code>.vsa</code> / <code>.mvsa</code> / MusicXML / <code>.mscz</code>)</td>
+<td>Platte gezongen tekst uit <code>.vsa</code></td>
+<td><a href="../../reference/cli/text/"><code>vsa text &lt;pad.vsa&gt;</code></a></td>
+</tr>
+<tr>
+<td>Platte gezongen tekst uit <code>.mvsa</code> of <code>.mscz</code></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-text"><code>mvsa text</code></a> / <a href="../../reference/cli/mscz/"><code>mscz text</code></a></td>
 </tr>
 <tr>
 <td>MusicXML exporteren</td>
 <td><a href="../../reference/cli/musicxml/"><code>vsa musicxml &lt;input.vsa&gt; &lt;output.mxl&gt;</code></a> (Coria: <code>--syllabify</code>)</td>
 </tr>
 <tr>
-<td>Standaardproducten <code>.vsa</code> (MXL+SVG+meta)</td>
-<td><a href="../../reference/cli/products/"><code>vsa products &lt;pad&gt;</code></a></td>
+<td>Standaardproducten (geen partituur-PDF)</td>
+<td><a href="../../reference/cli/products/"><code>vsa products</code></a> / <a href="../../reference/cli/mvsa/#mvsa-products"><code>mvsa products</code></a> / <a href="../../reference/cli/mscz/"><code>mscz products</code></a></td>
 </tr>
 <tr>
 <td><code>.vsa</code> canonieke notatie controleren</td>
@@ -5163,8 +5171,8 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg &lt;pad.mvsa&gt; [-o …]</code></a> (<code>--engine osmd</code> optioneel)</td>
 </tr>
 <tr>
-<td>mscz → kale muziek-SVG / print-PDF</td>
-<td><a href="../../reference/cli/mscz/"><code>mscz svg</code></a> / <a href="../../reference/cli/mscz/"><code>mscz pdf</code></a></td>
+<td>mscz → kale muziek-SVG</td>
+<td><a href="../../reference/cli/mscz/"><code>mscz svg</code></a></td>
 </tr>
 <tr>
 <td>mscz → layout/leesbaarheid opnieuw</td>
@@ -5175,12 +5183,16 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 <td><a href="../../reference/cli/mvsa/#mvsa-mxl"><code>mvsa mxl … --translit-as-parts</code></a> + <a href="../../specification-mvsa/keywords/#taal"><code>@taal</code></a></td>
 </tr>
 <tr>
-<td>mvsa → blad/PDF/SVG met tweede tekstregel</td>
-<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code>/<code>pdf</code>/<code>svg … --translit</code></a> (<a href="../../plans/kerkslavisch-transliteratie/#5a-besluiten-productmodel-nu">productbesluiten</a>)</td>
+<td>mvsa → blad/SVG met tweede tekstregel</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code> / <code>svg … --translit</code></a> (<a href="../../plans/kerkslavisch-transliteratie/#5a-besluiten-productmodel-nu">productbesluiten</a>)</td>
 </tr>
 <tr>
-<td>mvsa → MuseScore / print-PDF (draft)</td>
-<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a> / <a href="../../reference/cli/mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> (dicht: <code>--compact</code>; PDF uit <code>.mscz</code>: <code>mscz pdf</code>)</td>
+<td>mvsa → MuseScore-partituur</td>
+<td><a href="../../reference/cli/mvsa/#mvsa-mscz"><code>mvsa mscz</code></a></td>
+</tr>
+<tr>
+<td>Losse partituur-PDF uit <code>.mvsa</code> / <code>.mscz</code></td>
+<td><a href="../../reference/cli/mvsa/#mvsa-pdf"><code>mvsa pdf</code></a> / <a href="../../reference/cli/mscz/"><code>mscz pdf</code></a>. Niet via <code>products</code>.</td>
 </tr>
 <tr>
 <td>mvsa → preview-audio (draft)</td>
@@ -5237,17 +5249,20 @@ man-pagina's onder <a href="../../reference/cli/">CLI-referentie</a>.</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>vsa musicxml mijn-lied.vsa mijn-lied.mxl
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>vsa text mijn-lied.mscz.mxl -o generated\mijn-lied.mscz.lyrics.txt
+<div class="highlight"><pre><span></span><code>vsa text mijn-lied.vsa
+mvsa text mijn-lied.mvsa
+mscz text mijn-lied.mscz
 </code></pre></div>
-<p>Platte tekst uit een canonieke <code>.vsa</code> / <code>.mvsa</code> hoort als veld <code>zoektekst</code> in
-de YAML-frontmatter van dat bestand (editorzoeken) — zie
-<a href="../../formats/zoektekst/">zoektekst</a>.</p>
+<p>Elk van die commando’s leest alleen de eigen extensie. Platte tekst voor
+editorzoeken hoort als veld <code>zoektekst</code> in de YAML-frontmatter van een
+canonieke <code>.vsa</code> of <code>.mvsa</code> — zie <a href="../../formats/zoektekst/">zoektekst</a>.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa zoektekst examples\mvsa\alleluia-toon-1.mvsa
 vsa zoektekst examples\mvsa --check
 </code></pre></div>
-<p><code>vsa text -o …lyrics.txt</code> blijft nuttig voor export uit <code>.mscz</code> / <code>.mxl</code> of
-site-build; een sibling <code>.lyrics.txt</code> is niet verplicht naast de canonieke bron.</p>
+<p><code>products</code> schrijft het lyrics-bestand mee. Je hoeft het niet met de hand
+naast de bron te zetten voor editorzoeken. Welk script bij welke taak
+hoort: <a href="../../formats/scripts/">Scripts (cmd)</a>.</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 mxl mvsa generated\alleluia.mxl -o generated\alleluia.mxl.mvsa
 mvsa validate generated\alleluia.mxl.mvsa
@@ -5301,7 +5316,7 @@ mvsa validate examples\bug-cases\alleluia-9b-toon-3-vokn.transposed.mvsa
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-29
+        Bijgewerkt: 2026-11-01
         
       </p>
       

@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#windows-cmd-scripts-formaten" class="md-skip">
+        <a href="#windows-scripts-de-gereedschappen" class="md-skip">
           Ga naar inhoud
         </a>
       
@@ -97,7 +97,7 @@
             
   
   <strong>Preview</strong>
-   — branch <code>translit</code>
+   — branch <code>development</code>
   , gebouwd 2026-11-02 11:47 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
@@ -1449,10 +1449,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#formaat-scripts" class="md-nav__link">
+  <a href="#welk-script-bij-welke-bron" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Formaat-scripts
+        Welk script bij welke bron
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Welk script bij welke bron">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#voorbeeld-een-mvsa-controleren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voorbeeld: een .mvsa controleren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standaardproducten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standaardproducten
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pdf-twee-verschillende-bestanden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDF: twee verschillende bestanden
       
     </span>
   </a>
@@ -1460,10 +1499,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#voorbeelden" class="md-nav__link">
+  <a href="#de-repository-bijhouden" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Voorbeelden
+        De repository bijhouden
       
     </span>
   </a>
@@ -1471,21 +1510,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#overige-repo-scripts" class="md-nav__link">
+  <a href="#oude-namen" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overige repo-scripts
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#man-paginas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Man-pagina’s
+        Oude namen
       
     </span>
   </a>
@@ -3963,7 +3991,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -5014,10 +5042,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#formaat-scripts" class="md-nav__link">
+  <a href="#welk-script-bij-welke-bron" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Formaat-scripts
+        Welk script bij welke bron
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Welk script bij welke bron">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#voorbeeld-een-mvsa-controleren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voorbeeld: een .mvsa controleren
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standaardproducten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standaardproducten
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pdf-twee-verschillende-bestanden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDF: twee verschillende bestanden
       
     </span>
   </a>
@@ -5025,10 +5092,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#voorbeelden" class="md-nav__link">
+  <a href="#de-repository-bijhouden" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Voorbeelden
+        De repository bijhouden
       
     </span>
   </a>
@@ -5036,21 +5103,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#overige-repo-scripts" class="md-nav__link">
+  <a href="#oude-namen" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overige repo-scripts
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#man-paginas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Man-pagina’s
+        Oude namen
       
     </span>
   </a>
@@ -5093,74 +5149,212 @@
   
 
 
-<h1 id="windows-cmd-scripts-formaten">Windows <code>.cmd</code>-scripts (formaten)<a class="headerlink" href="#windows-cmd-scripts-formaten" title="Permanent link">&para;</a></h1>
-<p>Dunne wrappers rond de Python-entrypoints. Ze doen <code>_ensure</code> (venv / <code>vsa</code>
-importeerbaar) en roepen daarna de top-level CLI aan.</p>
-<h2 id="formaat-scripts">Formaat-scripts<a class="headerlink" href="#formaat-scripts" title="Permanent link">&para;</a></h2>
+<h1 id="windows-scripts-de-gereedschappen">Windows-scripts (de gereedschappen)<a class="headerlink" href="#windows-scripts-de-gereedschappen" title="Permanent link">&para;</a></h1>
+<p>De gereedschappen van VSA-tooling zijn de <code>.cmd</code>-bestanden in de map
+<code>scripts</code>. Je gebruikt ze in het Windows-opdrachtvenster (<code>cmd</code>).</p>
+<p>Je hebt twee dingen nodig: de repository-map <code>VSA-tooling</code> op je pc, en
+dat opdrachtvenster. Plak daarna één blok tegelijk.</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+</code></pre></div>
+<p>De map <code>scripts</code> staat op het zoekpad van deze repo. Daarom mag je
+<code>mvsa validate examples\mvsa</code> schrijven. Hetzelfde commando met het
+volledige script is <code>scripts\mvsa.cmd validate examples\mvsa</code>.</p>
+<p>Elk script zet de Python-omgeving zelf klaar. Een aparte
+installatiestap is niet nodig.</p>
+<h2 id="welk-script-bij-welke-bron">Welk script bij welke bron<a class="headerlink" href="#welk-script-bij-welke-bron" title="Permanent link">&para;</a></h2>
+<p>Kies het script bij het bestand dat je open hebt. Een <code>.mvsa</code> gaat niet
+door <code>mscz</code>, en een <code>.mscz</code> niet door <code>mvsa</code>.</p>
 <table>
 <thead>
 <tr>
 <th>Script</th>
-<th>Equivalent</th>
-<th>Bron</th>
+<th>Bronbestand</th>
+<th>Waarvoor</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>scripts\mvsa.cmd</code></td>
-<td><code>mvsa …</code> / <code>python -m vsa.cli_mvsa</code></td>
+<td><code>mvsa</code></td>
 <td><code>.mvsa</code></td>
+<td>Controleren, standaardproducten, losse export</td>
 </tr>
 <tr>
-<td><code>scripts\mxl.cmd</code></td>
-<td><code>mxl …</code> / <code>python -m vsa.cli_mxl</code></td>
+<td><code>mxl</code></td>
 <td><code>.mxl</code> / <code>.musicxml</code></td>
+<td>Controleren, normaliseren, omzetten naar <code>.mvsa</code> of <code>.mscz</code></td>
 </tr>
 <tr>
-<td><code>scripts\mscz.cmd</code></td>
-<td><code>mscz …</code> / <code>python -m vsa.cli_mscz</code></td>
+<td><code>mscz</code></td>
 <td><code>.mscz</code></td>
+<td>Controleren via import, standaardproducten, losse export</td>
 </tr>
 <tr>
-<td><code>scripts\markdown.cmd</code></td>
-<td><code>markdown …</code> / <code>python -m vsa.cli_md</code></td>
-<td><code>.md</code> / <code>.markdown</code></td>
+<td><code>markdown</code></td>
+<td><code>.md</code></td>
+<td>Pagina-PDF, SVG’s uit de pagina, platte tekst</td>
+</tr>
+<tr>
+<td><code>vsa</code></td>
+<td><code>.vsa</code></td>
+<td>Controleren, SVG, standaardproducten, losse <code>pdf</code> (geen <code>scripts\vsa.cmd</code>)</td>
 </tr>
 </tbody>
 </table>
-<p>Na <code>pip install -e .</code> kun je ook zonder script <code>mvsa</code>, <code>mxl</code>, <code>mscz</code>,
-<code>markdown</code> op PATH aanroepen. Geen <code>md</code>-entrypoint: op Windows is <code>md</code>
-makedir. De <code>.cmd</code>-bestanden werken altijd vanuit de repo-root.</p>
-<h2 id="voorbeelden">Voorbeelden<a class="headerlink" href="#voorbeelden" title="Permanent link">&para;</a></h2>
+<p><code>vsa</code> is het commando na installatie. Er is geen <code>scripts\vsa.cmd</code>.</p>
+<p>Man-pagina’s: <a href="../../reference/cli/mvsa/"><code>mvsa</code></a>,
+<a href="../../reference/cli/mxl/"><code>mxl</code></a>, <a href="../../reference/cli/mscz/"><code>mscz</code></a>,
+<a href="../../reference/cli/markdown/"><code>markdown</code></a>,
+<a href="../../reference/cli/">CLI-overzicht</a>.</p>
+<h3 id="voorbeeld-een-mvsa-controleren">Voorbeeld: een <code>.mvsa</code> controleren<a class="headerlink" href="#voorbeeld-een-mvsa-controleren" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-
-scripts\mvsa.cmd -h
-scripts\mvsa.cmd validate examples\mvsa
-scripts\mvsa.cmd normalize examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.normalized.mvsa
-scripts\mxl.cmd normalize generated\alleluia.mxl -o generated\alleluia.norm.mxl
-scripts\mscz.cmd mxl generated\alleluia.mscz -o generated\y.mxl
-scripts\mscz.cmd svg generated\alleluia.mscz -o generated\alleluia.svg
-scripts\mscz.cmd pdf generated\alleluia.mscz -o generated\alleluia.pdf
-scripts\mscz.cmd normalize generated\alleluia.mscz --layout partituur
-scripts\markdown.cmd pdf examples\consumer-minimal\content-source\index.md
+mvsa validate examples\mvsa
 </code></pre></div>
-<p>In handleidingen en voorbeelden: altijd <code>scripts\*.cmd</code> (of <code>vsa</code>/<code>mvsa</code>/<code>mxl</code>/<code>mscz</code>/<code>markdown</code>
-op PATH na install). Geen <code>python -m vsa.cli…</code> als gebruikerscommando.</p>
-<h2 id="overige-repo-scripts">Overige repo-scripts<a class="headerlink" href="#overige-repo-scripts" title="Permanent link">&para;</a></h2>
-<p>Installatie, testen, docs-build: zie
-<a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/scripts/README.md">scripts/README.md</a>
-(<code>test</code>, <code>serve</code>, <code>build</code>, <code>run-example</code>, …).</p>
-<h2 id="man-paginas">Man-pagina’s<a class="headerlink" href="#man-paginas" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="../../reference/cli/mvsa/"><code>mvsa</code></a></li>
-<li><a href="../../reference/cli/mxl/"><code>mxl</code></a></li>
-<li><a href="../../reference/cli/mscz/"><code>mscz</code></a></li>
-<li><a href="../../reference/cli/markdown/"><code>markdown</code></a></li>
-<li><a href="../../reference/cli/">CLI-overzicht</a></li>
-</ul>
+<p>Bij succes eindigt het commando zonder fouttekst (exitcode 0). In <code>cmd</code>
+controleer je dat met <code>echo %ERRORLEVEL%</code>.</p>
+<h3 id="standaardproducten">Standaardproducten<a class="headerlink" href="#standaardproducten" title="Permanent link">&para;</a></h3>
+<p><code>mvsa products</code>, <code>mscz products</code> en <code>vsa products</code> maken de vaste set
+naast de bron: MusicXML, Score-IR, partituur-<code>.mscz</code>, een mp3, de
+gezongen tekst, een SVG, en een meta-bestand. Vlag <code>--skip-svg</code> slaat
+de SVG over.</p>
+<p>Die commando’s maken <strong>geen</strong> <code>.mvsa.pdf</code>, <code>.mscz.pdf</code> of <code>.vsa.pdf</code>.</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa products examples\mvsa\1a-vredeslitanie.mvsa --skip-svg
+</code></pre></div>
+<h2 id="pdf-twee-verschillende-bestanden">PDF: twee verschillende bestanden<a class="headerlink" href="#pdf-twee-verschillende-bestanden" title="Permanent link">&para;</a></h2>
+<p><strong>Pagina afdrukken of downloaden.</strong> Het bestand heet <code>index.md.pdf</code> en
+staat naast de Markdown van die pagina. Scherm en navigatie gebruiken
+alleen dat bestand. Commando:</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+markdown pdf examples\consumer-minimal\content-source\index.md
+</code></pre></div>
+<p>Zonder <code>-o</code> wordt de PDF <code>index.md.pdf</code> naast <code>index.md</code>.
+In de bibliotheek heet het script <code>scripts\pdf.cmd</code>.</p>
+<p><strong>Losse partituur-PDF van één lied.</strong> Die heb je niet nodig voor de
+site, voor download of voor de publicatiecontrole. De controle eist
+<code>.vsa.pdf</code>, <code>.mvsa.pdf</code> en <code>.mscz.pdf</code> niet. Wil je zo’n PDF toch:</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa pdf examples\minimal\valid-demo.vsa -o generated\demo.pdf
+mvsa pdf examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.pdf
+mscz pdf generated\alleluia.mscz -o generated\alleluia-uit-mscz.pdf
+</code></pre></div>
+<p>Elk commando leest alleen de eigen bronextensie. MuseScore 4 moet
+geïnstalleerd zijn voor <code>vsa</code> / <code>mvsa</code> / <code>mscz pdf</code>.</p>
+<h2 id="de-repository-bijhouden">De repository bijhouden<a class="headerlink" href="#de-repository-bijhouden" title="Permanent link">&para;</a></h2>
+<p>Deze scripts zijn voor wie de tool of de documentatie nakijkt, niet voor
+het bewerken van een lied.</p>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Wanneer je het gebruikt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test</code></td>
+<td>De automatische tests draaien. Extra detail: <code>test -v</code>.</td>
+</tr>
+<tr>
+<td><code>check</code></td>
+<td>Tests plus het kleine voorbeeld <code>consumer-minimal</code> (zelfde controle als de bouw op GitHub).</td>
+</tr>
+<tr>
+<td><code>serve</code></td>
+<td>De documentatie in de browser, zonder term-uitleg bij hover. Adres: <code>http://127.0.0.1:8000/</code>. Stoppen met Ctrl+C.</td>
+</tr>
+<tr>
+<td><code>serve-tev2</code></td>
+<td>Dezelfde documentatie mét term-uitleg (hover). Eerst een keer <code>npm install</code> in deze map.</td>
+</tr>
+<tr>
+<td><code>build</code></td>
+<td>De documentatiesite bouwen zoals de publicatie dat doet.</td>
+</tr>
+<tr>
+<td><code>build --no-tev2</code></td>
+<td>De documentatie bouwen zonder de term-pipeline.</td>
+</tr>
+<tr>
+<td><code>check-docs</code></td>
+<td>Controle of documentatie en vaste voorbeeld-SVG’s nog kloppen.</td>
+</tr>
+<tr>
+<td><code>clean</code></td>
+<td>Tijdelijke Python-mappen weg (cache, <code>build</code>, <code>dist</code>). Bronbestanden blijven staan.</td>
+</tr>
+<tr>
+<td><code>import</code></td>
+<td>Een zip uit je map Downloads uitpakken in de repo. Gebruik: <code>import bestandsnaam.zip</code>.</td>
+</tr>
+<tr>
+<td><code>run-example</code></td>
+<td>Eén voorbeeld-<code>.vsa</code> door <code>vsa</code> halen. Gebruik: <code>run-example examples\minimal\001_plain_text.vsa</code>.</td>
+</tr>
+<tr>
+<td><code>migrate-metadata</code></td>
+<td>Op <code>.mvsa</code>-bestanden <code>@toon</code> zetten (en met <code>--tempo</code> ook <code>@tempo 130</code>). Eerst zonder <code>--apply</code>: dan zie je alleen wat er zou veranderen.</td>
+</tr>
+<tr>
+<td><code>install-rendering-deps</code></td>
+<td>Controleren of het lettertype voor SVG-tekenen aanwezig is.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+check
+</code></pre></div>
+<h2 id="oude-namen">Oude namen<a class="headerlink" href="#oude-namen" title="Permanent link">&para;</a></h2>
+<p>Deze scripts bestaan nog. Ze schrijven één regel welke naam je nu
+gebruikt, en starten daarna het nieuwe script.</p>
+<table>
+<thead>
+<tr>
+<th>Oude naam</th>
+<th>Gebruik nu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ci</code></td>
+<td><code>check</code></td>
+</tr>
+<tr>
+<td><code>docs-serve</code></td>
+<td><code>serve</code></td>
+</tr>
+<tr>
+<td><code>docs-serve-tev2</code></td>
+<td><code>serve-tev2</code></td>
+</tr>
+<tr>
+<td><code>docs-build</code></td>
+<td><code>build --no-tev2</code></td>
+</tr>
+<tr>
+<td><code>docs-build-tev2</code></td>
+<td><code>build</code></td>
+</tr>
+<tr>
+<td><code>test-verbose</code></td>
+<td><code>test -v</code></td>
+</tr>
+<tr>
+<td><code>bootstrap</code></td>
+<td>niets apart; de scripts hierboven zetten de omgeving zelf klaar</td>
+</tr>
+</tbody>
+</table>
+<p>Er is geen <code>vsa-products.cmd</code>, <code>serve-hugo.cmd</code> of <code>retry.cmd</code> in deze
+repo. Standaardproducten: <code>vsa products</code> (of <code>mvsa products</code> /
+<code>mscz products</code>).</p>
+<p>Python-bestanden in <code>scripts\</code> (bijvoorbeeld
+<code>align_markdown_tables.py</code>) zijn hulpen voor onderhoud, geen
+commando’s die je als beheerder nodig hebt.</p>
 <h2 id="zie-ook">Zie ook<a class="headerlink" href="#zie-ook" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../">Formaten &amp; CLI — overzicht</a></li>
+<li><a href="../../guides/cli-taken/">CLI-taken</a> — welk commando bij welke taak</li>
+<li><a href="../../getting-started/">Starten</a> — eerste <code>vsa validate</code></li>
+<li>Zelfde lijst naast de scripts: <code>scripts/README.md</code> in de repo</li>
 </ul>
 
 
@@ -5198,7 +5392,7 @@ op PATH na install). Geen <code>python -m vsa.cli…</code> als gebruikerscomman
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-28
+        Bijgewerkt: 2026-11-01
         
       </p>
       

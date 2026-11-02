@@ -97,7 +97,7 @@
             
   
   <strong>Preview</strong>
-   — branch <code>translit</code>
+   — branch <code>development</code>
   , gebouwd 2026-11-02 11:47 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
@@ -4153,7 +4153,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -5441,7 +5441,7 @@ globale <code>--config</code>.</p>
 </tr>
 <tr>
 <td><a href="pdf/"><code>pdf</code></a></td>
-<td>Verouderd alias voor <a href="markdown/#markdown-pdf"><code>markdown pdf</code></a> (Markdown → A4-PDF).</td>
+<td>Partituur-PDF uit <code>.vsa</code> (MuseScore). Pagina-PDF: <a href="markdown/#markdown-pdf"><code>markdown pdf</code></a>.</td>
 </tr>
 <tr>
 <td><a href="resolve-catalogus/"><code>resolve-catalogus</code></a></td>
@@ -5465,7 +5465,7 @@ globale <code>--config</code>.</p>
 </tr>
 <tr>
 <td><a href="products/"><code>products</code></a></td>
-<td>Standaardproducten + <code>*.products-meta.json</code> (MXL met syllabify+finalize + SVG); ook <code>mvsa</code>/<code>mscz products</code>.</td>
+<td>Standaardproducten + <code>*.products-meta.json</code> (geen partituur-PDF); ook <code>mvsa</code>/<code>mscz products</code>.</td>
 </tr>
 <tr>
 <td><a href="audio/"><code>audio</code></a></td>
@@ -5491,9 +5491,10 @@ globale <code>--config</code>.</p>
 opties (inclusief defaults), voorbeeldoutput, en typische foutgevallen. Deze
 overzichtspagina herhaalt die details niet.</p>
 <h2 id="scripts">Scripts<a class="headerlink" href="#scripts" title="Permanent link">&para;</a></h2>
-<p>De onderstaande scripts gebruik je rond <code>vsa</code> zelf (installatie, testen,
-docs). Zie <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/scripts/README.md"><code>scripts/README.md</code></a>
-voor het volledige overzicht.</p>
+<p>De gereedschappen zijn de <code>.cmd</code>-bestanden in <code>scripts\</code>. Volledige lijst,
+in gewone taal, voor wie af en toe een commando plakt:
+<a href="../../formats/scripts/">Scripts (cmd)</a>.</p>
+<p>Kort:</p>
 <table>
 <thead>
 <tr>
@@ -5503,23 +5504,29 @@ voor het volledige overzicht.</p>
 </thead>
 <tbody>
 <tr>
+<td><code>mvsa</code> / <code>mxl</code> / <code>mscz</code></td>
+<td>Werken met een <code>.mvsa</code> / <code>.mxl</code> / <code>.mscz</code></td>
+</tr>
+<tr>
+<td><code>markdown</code></td>
+<td>Pagina-Markdown: pdf (<code>index.md.pdf</code>), svg, tekst</td>
+</tr>
+<tr>
 <td><code>test</code></td>
-<td>Installeert de lokale omgeving (<code>.venv</code>, <code>vsa</code>, pytest).</td>
+<td>Tests draaien</td>
 </tr>
 <tr>
-<td><code>scripts\test.cmd</code></td>
-<td>Draait de pytest-suite.</td>
-</tr>
-<tr>
-<td><code>scripts\ci.cmd</code></td>
-<td>Draait de volledige lokale CI (pytest + consumer-minimal).</td>
+<td><code>check</code></td>
+<td>Zelfde controle als de automatische bouw</td>
 </tr>
 <tr>
 <td><code>serve</code></td>
-<td>Serveert deze MkDocs-documentatie lokaal.</td>
+<td>Deze documentatie in de browser</td>
 </tr>
 </tbody>
 </table>
+<p><code>test</code> installeert de omgeving niet als aparte stap: elk script zet die
+zelf klaar. <code>ci</code> is een oude naam voor <code>check</code>.</p>
 <h2 id="diagnosevolgorde">Diagnosevolgorde<a class="headerlink" href="#diagnosevolgorde" title="Permanent link">&para;</a></h2>
 <p>Bij problemen: eerst <a href="validate/"><code>vsa validate</code></a>, daarna <code>scripts\test.cmd</code>, eventueel
 <a href="blocks/"><code>vsa blocks</code></a> <code>… --json</code>. Volledige uitleg:
@@ -5574,7 +5581,7 @@ voor het volledige overzicht.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-28
+        Bijgewerkt: 2026-11-01
         
       </p>
       
