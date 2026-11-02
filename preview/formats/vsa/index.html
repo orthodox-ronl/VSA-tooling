@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>translit</code>
-  , gebouwd 2026-11-02 11:47 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-11-02 12:56 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -3941,7 +3941,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -5072,7 +5072,11 @@
 </tr>
 <tr>
 <td>Standaardproducten + meta</td>
-<td><a href="../../reference/cli/products/"><code>vsa products</code></a> (Coria-<code>.mxl</code> met syllabify+finalize + <code>.svg</code> + meta)</td>
+<td><a href="../../reference/cli/products/"><code>vsa products</code></a> (geen <code>.vsa.pdf</code>)</td>
+</tr>
+<tr>
+<td>Losse partituur-PDF</td>
+<td><a href="../../reference/cli/pdf/"><code>vsa pdf</code></a></td>
 </tr>
 <tr>
 <td>Muziek-only SVG (scherm / koormap)</td>
@@ -5100,6 +5104,7 @@
 <div class="highlight"><pre><span></span><code>vsa validate examples\minimal\050_svg_demo.vsa
 vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa
 vsa products examples\minimal\valid-demo.vsa
+vsa pdf examples\minimal\valid-demo.vsa -o generated\demo.pdf
 vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie.mxl --syllabify
 vsa text examples\minimal\001_plain_text.vsa
 </code></pre></div>
@@ -5144,7 +5149,7 @@ vsa text examples\minimal\001_plain_text.vsa
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-11-01
         
       </p>
       

@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>translit</code>
-  , gebouwd 2026-11-02 11:47 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-11-02 12:56 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2085,6 +2085,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mvsa-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mvsa text
+      
+    </span>
+  </a>
   
 </li>
       
@@ -4794,7 +4805,7 @@
   <span class="md-ellipsis">
     
   
-    vsa pdf — verouderd (gebruik markdown pdf)
+    vsa pdf — partituur-PDF uit .vsa
   
 
     
@@ -5836,6 +5847,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mvsa-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mvsa text
+      
+    </span>
+  </a>
   
 </li>
       
@@ -7603,6 +7625,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mvsa-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mvsa text
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#mvsa-products" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7705,7 +7738,7 @@ komt de uitvoer als sibling naast elk bronbestand; <code>-o</code> en vergelijkb
 enkelvoudige paden (<code>--keep-mxl</code>, …) zijn alleen toegestaan bij precies
 één bronbestand. Overzicht: <a href="../input-pad/">Invoer bestand of map</a>.</p>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,import,products} …
+<div class="highlight"><pre><span></span><code>mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,text,normalize,transpose,kuiser,import,products} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
               [--translit-as-parts] [--bibliotheek-id ID]
@@ -7773,7 +7806,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 </tr>
 <tr>
 <td><a href="#mvsa-pdf"><code>pdf</code></a></td>
-<td>Exporteer <code>.mvsa</code> naar print-PDF (zangers). Merget key <code>pdf</code>. Bron <code>.mscz</code>: <a href="../mscz/"><code>mscz pdf</code></a>.</td>
+<td>Losse print-PDF (P*). Niet via <code>products</code>. Bron <code>.mscz</code>: <a href="../mscz/"><code>mscz pdf</code></a>.</td>
 </tr>
 <tr>
 <td><a href="#mvsa-svg"><code>svg</code></a></td>
@@ -7800,8 +7833,12 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 <td>Score/MusicXML → werkbank-<code>.mvsa</code> (catalogus-vrij; = <code>mscz</code>/<code>mxl mvsa</code>).</td>
 </tr>
 <tr>
+<td><a href="#mvsa-text"><code>text</code></a></td>
+<td>Gezongen tekst → <code>{stam}.mvsa.lyrics.txt</code> (key <code>lyrics</code>). Alleen <code>.mvsa</code>.</td>
+</tr>
+<tr>
 <td><a href="#mvsa-products"><code>products</code></a></td>
-<td>Standaardproducten + <code>*.products-meta.json</code> (versheid).</td>
+<td>Standaardproducten + meta (geen pdf).</td>
 </tr>
 </tbody>
 </table>
@@ -7816,6 +7853,7 @@ mvsa svg -h
 mvsa mp3 -h
 mvsa ogg -h
 mvsa wav -h
+mvsa text -h
 mvsa normalize -h
 mvsa transpose -h
 mvsa kuiser -h
@@ -9214,6 +9252,16 @@ mvsa import examples\importer\tweede-antifoon-zondag-hemelum.mxl -o generated\fr
 mscz mvsa lied.mscz
 </code></pre></div>
 <hr />
+<h2 id="mvsa-text"><code>mvsa text</code><a class="headerlink" href="#mvsa-text" title="Permanent link">&para;</a></h2>
+<p>Platte gezongen tekst uit één <code>.mvsa</code> of een map met <code>.mvsa</code>-bestanden.
+Standaard komt het bestand naast de bron: <code>lied.mvsa</code> wordt
+<code>lied.mvsa.lyrics.txt</code>. De meta-key is <code>lyrics</code>.</p>
+<p><code>.vsa</code> gaat via <a href="../text/"><code>vsa text</code></a>. <code>.mscz</code> via <a href="../mscz/"><code>mscz text</code></a>.
+<code>mvsa text</code> weigert die andere extensies.</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa text examples\mvsa\alleluia-toon-1.mvsa
+</code></pre></div>
+<hr />
 <h2 id="mvsa-products"><code>mvsa products</code><a class="headerlink" href="#mvsa-products" title="Permanent link">&para;</a></h2>
 <h3 id="synopsis_12">Synopsis<a class="headerlink" href="#synopsis_12" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mvsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
@@ -9241,15 +9289,31 @@ mscz mvsa lied.mscz
 <td><code>{stam}.mvsa.from-ir.musicxml</code></td>
 </tr>
 <tr>
+<td>Partituur-<code>.mscz</code></td>
+<td><code>{stam}.mvsa.mscz</code></td>
+</tr>
+<tr>
+<td>Preview-mp3</td>
+<td><code>{stam}.mvsa.mp3</code></td>
+</tr>
+<tr>
+<td>Gezongen tekst</td>
+<td><code>{stam}.mvsa.lyrics.txt</code></td>
+</tr>
+<tr>
 <td>SVG (tenzij <code>--skip-svg</code>)</td>
 <td><code>{stam}.mvsa.svg</code> (tall, compact)</td>
 </tr>
 <tr>
 <td>Meta</td>
-<td><code>{stam}.mvsa.products-meta.json</code> (key <code>svg</code>; zie products-meta)</td>
+<td><code>{stam}.mvsa.products-meta.json</code></td>
 </tr>
 </tbody>
 </table>
+<p>Geen <code>{stam}.mvsa.pdf</code>. Die maak je alleen met <a href="#mvsa-pdf"><code>mvsa pdf</code></a>
+als je zelf een partituur-PDF wilt. <code>products</code> haalt een oude key <code>pdf</code>
+uit de meta. De site-pagina gebruikt <code>index.md.pdf</code>
+(<a href="../markdown/"><code>markdown pdf</code></a>).</p>
 <p>Slaat over als meta zegt dat de bron-hash nog klopt en de bestanden er zijn
 (<code>--force</code> regenereert). <code>--quiet</code> onderdrukt voortgangsregels op stdout
 (fouten blijven op stderr). Kaal: geen bibliotheek-stamps.
@@ -9268,7 +9332,7 @@ mvsa products examples\mvsa --dry-run --skip-svg
 <li>Invoer bestand of map: <a href="../input-pad/">input-pad.md</a></li>
 <li>Voorbeelden: <a href="https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa">examples/mvsa</a></li>
 <li>Eenstemmig: <a href="../validate/"><code>vsa validate</code></a>, <a href="../musicxml/"><code>vsa musicxml</code></a></li>
-<li>Platte gezongen tekst: <a href="../text/"><code>vsa text</code></a> (ook op <code>.mvsa</code> / MusicXML / <code>.mscz</code>)</li>
+<li>Platte gezongen tekst: <a href="#mvsa-text"><code>mvsa text</code></a> (<code>.vsa</code>: <a href="../text/"><code>vsa text</code></a>; <code>.mscz</code>: <a href="../mscz/"><code>mscz text</code></a>)</li>
 </ul>
 
 
