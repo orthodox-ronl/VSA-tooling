@@ -5955,6 +5955,9 @@ MusicXML-MIDI overal +2 (<code>tests/test_mvsa_transpose.py</code>).</p>
 </code></pre></div>
 <ul>
 <li>Module: <code>vsa.mvsa_mscz</code> + <code>vsa.mscz_partituur</code> + <code>vsa.musescore_cli</code>.</li>
+<li>MuseScore-CLI via <code>musescore_cli</code>: <strong>één conversie tegelijk</strong> (lockbestand
+  in de temp-map), zodat Windows geen Access Denied geeft wanneer twee
+  exports elkaars <code>.mscz</code>/SVG’s vasthouden.</li>
 <li>Playback/Coria blijft <code>mvsa mxl</code> (vier parts).</li>
 </ul>
 <p><strong>Criterium (gehaald):</strong> met MuseScore 4 lokaal: twee Parts, geen Soprano-labels
@@ -6078,7 +6081,7 @@ man-pagina’s <code>docs/reference/cli/{mvsa,mxl,mscz}.md</code>.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-11-02
         
       </p>
       

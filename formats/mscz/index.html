@@ -5124,6 +5124,9 @@ layoutprofielen).</p>
 </table>
 <p>Geen volledige MuseScore-formaat-spec — wel: wat <strong>wij</strong> genereren en
 verwachten voor bruikbare SATB + lyrics.</p>
+<p><strong>CLI-lock:</strong> elke MuseScore-aanroep via <code>vsa.musescore_cli</code> wacht tot een
+eventuele vorige conversie (ook in een ander proces) klaar is. Zo botsen
+batch-exports minder op Windows-vergrendelingen.</p>
 <p><strong>Normaalvorm (checklist):</strong>
 <a href="../canonical-checklists/#checklist-mscz-partituur-musescore">canonieke checklists — MSCZ</a>
 — <strong>twee balken SA + TB</strong>, <strong>geen</strong> stem-indicaties op de balken,
@@ -5273,7 +5276,7 @@ scripts\mvsa.cmd mscz examples\mvsa\alleluia-toon-8.mvsa -o generated\alleluia.m
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-31
+        Bijgewerkt: 2026-11-02
         
       </p>
       
