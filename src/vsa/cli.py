@@ -2597,7 +2597,15 @@ def _cmd_mvsa_musicxml(args) -> int:
             exit_code = 1
             continue
         print(f"Geschreven: {out}")
-        meta = merge_street_product_meta(path, {"mxl": out})
+        # Translit-Coria (``--translit-as-parts`` / ``*.translit.mxl``) is een
+        # apart product; niet de canonieke key ``mxl`` overschrijven.
+        tkw = _cli_translit_kwargs(args)
+        out_name = out.name.lower()
+        if tkw.get("translit_as_parts") or out_name.endswith(".translit.mxl"):
+            meta_key = "mxl-translit"
+        else:
+            meta_key = "mxl"
+        meta = merge_street_product_meta(path, {meta_key: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
     return exit_code

@@ -52,6 +52,22 @@ def test_musescore_exclusive_clears_stale_lock(
     assert not lock.exists()
 
 
+def test_musescore_exclusive_clears_dead_pid_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Wees-lock met dode pid wordt meteen opgeruimd (niet pas na 2 uur)."""
+    lock = tmp_path / "vsa-musescore-cli.lock"
+    lock.write_text("99999\n", encoding="utf-8")
+    monkeypatch.setattr(ms, "_LOCK_PATH", lock)
+    monkeypatch.setattr(ms, "_LOCK_STALE_S", 10_000)
+    monkeypatch.setattr(ms, "_LOCK_WAIT_S", 0.01)
+    assert ms._lock_is_stale()
+
+    with ms.musescore_exclusive():
+        assert lock.read_text(encoding="utf-8").strip() == str(os.getpid())
+    assert not lock.exists()
+
+
 def test_convert_uses_exclusive_and_subprocess(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
