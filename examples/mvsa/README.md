@@ -31,11 +31,11 @@ Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 | `3-eerste-kleine-litanie.mvsa`         | Korte litanie, antwoorden één keer uitgeschreven                                       |
 | `kleine-intocht-zondag-hemelum.mvsa`   | Omzetting VSA-demo MusicXML; absolute `bb4`/`g3`                                       |
 | `trisagion-8a-slav-hemelum.mvsa`       | `@speelplan` → Segno / Fine / D.S. al Fine                                             |
-| `hulptekst-ksl-mini.mvsa`              | Kerkslavisch; export met `--translit` → Latijn als lyric number 2                     |
-| `hulptekst-nl-mini.mvsa`               | Nederlands; export met `--translit` → Cyrillisch als lyric number 2                   |
-| `hulptekst-parallel-l1-mini.mvsa`      | `L` + `L1` → lyric number 1 + 2 (handmatige parallelle laag)                           |
-| `hulptekst-gemengd-taal-mini.mvsa`     | `@taal nl` / `@taal ksl` + `--translit` (gemengde passages)                           |
-| `hulptekst-coria-custom-ids-mini.mvsa` | Vrije ids (`Lap`/`Sop`/`Zeep`) + `@taal`/`@oct`; Coria `--translit-as-parts`          |
+| `translit-ksl-mini.mvsa`              | Kerkslavisch; export met `--translit` → Latijn als lyric number 2                     |
+| `translit-nl-mini.mvsa`               | Nederlands; export met `--translit` → Cyrillisch als lyric number 2                   |
+| `translit-parallel-l1-mini.mvsa`      | `L` + `L1` → lyric number 1 + 2 (handmatige parallelle laag)                           |
+| `translit-gemengd-taal-mini.mvsa`     | `@taal nl` / `@taal ksl` + `--translit` (gemengde passages)                           |
+| `translit-coria-custom-ids-mini.mvsa` | Vrije ids (`Lap`/`Sop`/`Zeep`) + `@taal`/`@oct`; Coria `--translit-as-parts`          |
 | `uitvoeraanwijzingen-demo.mvsa`        | Kort oefenstuk: `[p]`/`[f]`, cresc/dim, `@tempo`, `[rit]`/`[atempo]`, cesuur/adem/ferm |
 
 **Translit exporteren:** `--translit` = lyric 2 op dezelfde noten

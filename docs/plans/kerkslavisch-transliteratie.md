@@ -2,7 +2,7 @@
 
 | Veld            | Waarde                                                                                                                                                                                                                                       |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**      | werkplan; **fase 1–3 gedaan**; schema **v1 bevroren**; **productbesluiten vast** (§5a); keuzes: [transliteraties-keuzes](transliteraties-keuzes.md); review: [hulptekst-reviewcorpus](hulptekst-reviewcorpus.md)                             |
+| **Status**      | werkplan; **fase 1–3 gedaan**; schema **v1 bevroren**; **productbesluiten vast** (§5a); keuzes: [transliteraties-keuzes](transliteraties-keuzes.md); review: [translit-reviewcorpus](translit-reviewcorpus.md)                             |
 | **CLI-vlaggen** | `--translit` / `--translit-as-parts` (niet `--hulptekst`)                                                                                                                                                                                    |
 | **Doel**        | Bidirectionele hulptekst (ksl → Latijn én nl → Cyrillisch) in blad- en Coria-export, zonder echte tweede melodiestem                                                                                                                         |
 | **Eigenaar**    | Transliterator + export: [VSA-tooling](@bron); catalogus-id/map: bibliotheek (handover 1); org-termen: [bron glossary](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)                                           |
@@ -343,7 +343,7 @@ mvsa svg …\bron.mvsa --translit -o generated\koormap\….svg
    productmodel §5a).
 
 Transliterator-kwaliteit (parochieschema) is een **apart** traject via
-[hulptekst-reviewcorpus](hulptekst-reviewcorpus.md); export werkt al met het
+[translit-reviewcorpus](translit-reviewcorpus.md); export werkt al met het
 huidige schema.
 
 ---
