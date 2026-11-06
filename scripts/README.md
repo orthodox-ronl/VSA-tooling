@@ -5,6 +5,10 @@ De leesbare handleiding voor beheerders staat op de documentatiesite:
 [Scripts (cmd)](../docs/formats/scripts.md). Org-conventie:
 https://github.com/orthodox-ronl/bron/blob/main/docs/specs/repo-scripts.md
 
+Intern voor console-rollen/kleur: `_msg.cmd` (vanuit andere `.cmd`-bestanden)
+en `cli_style.py` (Python onder `scripts/`). Zelfde rollen als in die
+org-spec (`ok` / `work` / `hard` / `refuse` / …).
+
 Scripts mogen redactionele `content-source` niet herschrijven.
 CI gebruikt `examples\consumer-minimal\content-source`.
 
