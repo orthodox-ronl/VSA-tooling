@@ -60,7 +60,7 @@ Niet forceren naar het andere formaat:
 | Alleen `.mvsa`                                      | Alleen `.vsa`                                      |
 | --------------------------------------------------- | -------------------------------------------------- |
 | `@oct`, `@start`, `@sectie`, `@blok`, `@speelplan`  | `validate-ending`, `duration-model`, `meter`       |
-| `@tekst`, `@mscz-newline`, `@---`                   | `reciting-mode`, `musicxml-profile`                |
+| `@tekst`, `@nieuw-systeem`, `@---`                  | `reciting-mode`, `musicxml-profile`                |
 | `@taal` (hulptekst / Coria-labels)                  | `part-name`, `midi-*`, `typografie.*`              |
 | `@genre`, `@opmerkingen` (gereserveerd)             | `@include-vsa`                                     |
 

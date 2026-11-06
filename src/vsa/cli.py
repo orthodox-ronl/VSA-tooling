@@ -229,7 +229,10 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+        help=(
+            "Alleen bij .mvsa: deze @sectie-id (niet @blok; "
+            "default: hele bestand)."
+        ),
     )
     m_musicxml.add_argument(
         "--bibliotheek-id",
@@ -285,7 +288,10 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen deze @sectie-id exporteren (default: alle secties).",
+        help=(
+            "Alleen deze @sectie-id exporteren (niet @blok; "
+            "default: hele bestand)."
+        ),
     )
     m_mscz.add_argument(
         "--musescore",
@@ -355,7 +361,10 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+        help=(
+            "Alleen bij .mvsa: deze @sectie-id (niet @blok; "
+            "default: hele bestand)."
+        ),
     )
     m_pdf.add_argument(
         "--musescore",
@@ -432,7 +441,10 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+        help=(
+            "Alleen bij .mvsa: deze @sectie-id (niet @blok; "
+            "default: hele bestand)."
+        ),
     )
     m_svg.add_argument(
         "--musescore",
@@ -636,7 +648,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen deze @sectie-id exporteren.",
+        help="Alleen deze @sectie-id exporteren (niet @blok).",
     )
     m_score_ir.add_argument(
         "--bibliotheek-id",
@@ -1102,7 +1114,10 @@ def _build_parser():
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+        help=(
+            "Alleen bij .mvsa: deze @sectie-id (niet @blok; "
+            "default: hele bestand)."
+        ),
     )
     audio.add_argument(
         "--keep-mxl",
@@ -2262,7 +2277,10 @@ def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
             "--section",
             metavar="SECTION",
             default=None,
-            help="Alleen bij .mvsa: deze @sectie-id (default: alle secties).",
+            help=(
+            "Alleen bij .mvsa: deze @sectie-id (niet @blok; "
+            "default: hele bestand)."
+        ),
         )
         parser.add_argument(
             "--musescore",

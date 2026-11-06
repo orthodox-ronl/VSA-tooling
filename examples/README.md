@@ -14,5 +14,6 @@ Fixtures voor tests, regressie en CI-smoke. Geen volledige Hugo-site — die sta
 | `site-demo/`          | Kleine Markdown-fixtures (geen Hugo-build)                        |
 | `site-demo-invalid/`  | Ongeldige site-fixtures voor tests                                |
 | `mvsa/`               | Experimentele meerstemmige invoer (niet door `vsa` geparsed)      |
+| `formule-tekst/`      | Herstart: formule=muziek + tekst=klemtoon (tropaar toon 4)        |
 
 Volledige presentatiesite: [VSA-demo](https://github.com/orthodox-ronl/VSA-demo).

@@ -40,18 +40,17 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
     hetzelfde systeem; wél tussen twee systemen (primaire scheiding). Optioneel
     mag `@---` (met commentaar) of een andere directive hetzelfde doen.
     `#`-commentaar mag wél tussen markers van hetzelfde systeem.
-4. Een **sectie** (`@sectie` of anoniem) eindigt door: (a) `||` of `:||` op alle
-   LSATB-regels van een systeem (expliciet midden in het bestand); of (b) een
-   nieuwe `@sectie` — de **laatste maatstreep** van het vorige laatste systeem
-   (`|` of `||`, …) is dan het sectie-einde; of (c) einde van het bestand (EOF);
-   of (d) sluiten van een `::: mvsa-notatie` / `::: mvsa`-fence (zelfde als EOF).
-   Geen warning `MVSA-SECTIE-IMPLICIT` meer voor (b)/(c)/(d).
-   **Uitzondering:** speelblokken (`@blok`) — geen `||`-eis tussen blokken
-   (zie [Speelplan](speelplan.md)).
+4. Een **adresseerbare sectie** (`@sectie` of de impliciete sectie) eindigt
+   door: (a) een nieuwe `@sectie`; of (b) EOF; of (c) sluiten van een
+   `::: mvsa-notatie` / `::: mvsa`-fence. **`||` / `:||` sluit geen sectie**
+   (wel dubbele maatstreep / Coria-pauze). Geen warning
+   `MVSA-SECTIE-IMPLICIT`. Speelblokken (`@blok`): idem tot volgend `@blok`
+   of EOF (zie [Speelplan](speelplan.md)).
 5. `@sectie` *id* voldoet aan `[a-z][a-z0-9_-]*`.
 5a. `@blok` / `@speelplan`: zie [Speelplan](speelplan.md). Eén `@speelplan` per
-    bestand; geen `@sectie`/anonieme muziek naast een speelplan; geen
-    herhaalstrepen in speelplan-blokken.
+    bestand; **nu** geen `@sectie`/anonieme muziek naast een speelplan
+    (later: plan binnen één sectie); geen herhaalstrepen in speelplan-blokken.
+    `--section` selecteert alleen `@sectie`-ids, nooit `@blok`.
 
 ## Sync
 
@@ -79,14 +78,15 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
 9. Onbekende `@`-keywords (geldige vorm, niet in
    [Keywords](keywords.md)): **warning**. Ongeldige keyword-vorm (bijv. `@1foo`):
    ook **warning**. Gedefinieerd in v0: sticky (`@do`, `@mode`, `@oct`,
-   `@start`), layout (`@tekst`, `@mscz-newline`, `@sectie`, `@blok`,
+   `@start`), layout (`@tekst`, `@nieuw-systeem`, `@sectie`, `@blok`,
    `@speelplan`, `@---`), actieve metadata (`@title`, `@ondertitel`,
    `@composer`, `@tekstdichter`, `@arrangeur`, `@vertaler`, `@bron`,
    `@copyright`), en gereserveerde metadata (`@toon`, `@taal`, `@genre`,
    `@opmerkingen`).
 10. Sticky / `@tekst` / metadata met ongeldige waarde: **error**
-    (`MVSA-META` voor string-metadata). `@mscz-newline` met argumenten:
-    **error**. `@tekst` of `@mscz-newline` zonder volgend LSATB-systeem:
+    (`MVSA-META` voor string-metadata). `@nieuw-systeem` / `@systeembreuk`
+    (of verouderd `@mscz-newline`) met argumenten: **error**. `@tekst` of
+    `@nieuw-systeem` zonder volgend LSATB-systeem:
     **warning**.
 
 ## Canonieke vorm (warning)

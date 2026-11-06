@@ -13,7 +13,7 @@ zonder de L↔SATB-sync te breken.
 Gerelateerd:
 
 - Lyrics-regels: [syntax.md § Lyrics](syntax.md#6-lyrics-regel-l)
-- Dubbele maatstreep / sectie-einde: [syntax.md § Einde](syntax.md#einde)
+- Dubbele maatstreep (`||`): [syntax.md § Maatstrepen](syntax.md#4-maatstrepen-en-dubbele-streep); sectiegrenzen: [syntax.md § Einde](syntax.md#einde)
 - Speelplan-navigatie (andere laag): [speelplan.md](speelplan.md)
 - Cues: [`@tekst` in keywords.md](keywords.md#tekst)
 - Open backlog: [open-points.md](open-points.md)
@@ -118,12 +118,12 @@ plus die strepen) blijft de structurele **beurtgrens**: einde van een serie
 koormaten, waarna priester of diaken weer het woord krijgt. Dat is **geen**
 L-`[…]`-token en wordt **niet** vervangen door `[//]`.
 
-| Laag             | Wat de dubbele maatstreep is                                                                                                      | Wat het níet is                               |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Bron-syntax      | Maatstreep op alle LSATB-regels; expliciet sectie-einde ([syntax § Einde](syntax.md#einde))                                       | Geen lettergreep-markering; geen `[//]`       |
-| Semantiek        | Beurtgrens: koor (tijdelijk) klaar; ruimte voor cue / andere stem in de liturgie                                                  | Geen “adem even midden in één zin”            |
-| Partituur (MSCZ) | Dubbele maatstreep (MusicXML `light-light`); herhalingsvorm → repeat-end waar van toepassing                                      | Geen cesuur-glyph op de laatste noot          |
-| Coria / oefenen  | Bestaande **pauzemaat** (hele-nootrust, lyric `[PAUZE]`) ná die grens — oefenhulp (checklist M12/M15)                             | Geen cesuur-kwart-rust; geen L-aanwijzing     |
+| Laag             | Wat de dubbele maatstreep is                                                                                                                       | Wat het níet is                               |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Bron-syntax      | Dubbele maatstreep `\|\|` / `:\|\|` op alle LSATB-regels ([syntax § Maatstrepen](syntax.md#4-maatstrepen-en-dubbele-streep)); geen `@sectie`-grens | Geen lettergreep-markering; geen `[//]`       |
+| Semantiek        | Beurtgrens: koor (tijdelijk) klaar; ruimte voor cue / andere stem in de liturgie                                                                   | Geen “adem even midden in één zin”            |
+| Partituur (MSCZ) | Dubbele maatstreep (MusicXML `light-light`); herhalingsvorm → repeat-end waar van toepassing                                                       | Geen cesuur-glyph op de laatste noot          |
+| Coria / oefenen  | Bestaande **pauzemaat** (hele-nootrust, lyric `[PAUZE]`) ná die grens — oefenhulp (checklist M12/M15)                                              | Geen cesuur-kwart-rust; geen L-aanwijzing     |
 
 Typische combinatie (blijft geldig):
 

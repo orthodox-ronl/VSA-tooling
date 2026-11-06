@@ -1,0 +1,22 @@
+# Sjabloon: waarschuwingsbanner voor `vsa mvsa` (werkbank-schets).
+# Zelfde vorm als IMPORT_SKETCH_WARNING_BANNER (mscz/mxl → mvsa).
+# Bij CLI-implementatie: na herkomstregels in de .mvsa plakken, bv.:
+#   # From-vsa: <pad>
+#   # Template: <template-id>
+#   # Generated: vsa mvsa …
+
+#  ##########################################################################  #
+#  #                                                                        #  #
+#  #   WAARSCHUWING:                                                        #  #
+#  #                                                                        #  #
+#  #   DIT BESTAND IS GEGENEREERD UIT .VSA + TEMPLATE EN IS EEN SCHETS.     #  #
+#  #   CONTROLEER VÓÓR OPNAME IN DE CATALOGUS TEN MINSTE:                   #  #
+#  #   - frasegrenzen en speelplan (f1/f2/…/laatste t.o.v. de formule)      #  #
+#  #   - S-hoogten t.o.v. de gekozen template (mismatch = geen stille fix)  #  #
+#  #   - A/T/B uit de template (provisional; klank + uitlijning t.o.v. S)   #  #
+#  #   - ankers e.st./l.st. en optionals (a?): wel/niet gevuurd             #  #
+#  #   - cadenspad (bijv. re vs fa) als de formule meerdere paden toelaat   #  #
+#  #   - ritme/ELM/maatstrepen en recite-print na export naar mscz/mxl      #  #
+#  #   - metadata (@do, @tempo, titel) die de mapper niet invulde           #  #
+#  #                                                                        #  #
+#  ##########################################################################  #

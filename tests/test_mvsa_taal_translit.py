@@ -40,3 +40,65 @@ def test_gemengd_hulptekst_respects_taal() -> None:
     assert "<text>Гос</text>" in xml
     assert "<text>Gos</text>" in xml
     assert "<text>loej</text>" in xml
+
+
+def test_gemengd_translit_modus_nls_only_ksl_to_latin() -> None:
+    """Ксл→Nls: Latijn onder Ksl; Nederlandse passage zonder hulpregel."""
+    xml = export_mvsa_to_musicxml(
+        GEMENGD, layout="playback", translit=True, translit_modus="nls"
+    )
+    assert "<text>Heer</text>" in xml
+    assert "<text>Хиир</text>" not in xml
+    assert "<text>онт</text>" not in xml
+    assert "<text>Гос</text>" in xml
+    assert "<text>Gos</text>" in xml
+    assert "<text>loej</text>" in xml
+
+
+def test_gemengd_translit_modus_ksl_only_nl_to_cyrillic() -> None:
+    """Nls→Ксл: Cyrillisch onder NL; kerkslavische passage zonder hulpregel."""
+    xml = export_mvsa_to_musicxml(
+        GEMENGD, layout="playback", translit=True, translit_modus="ksl"
+    )
+    assert "<text>Heer</text>" in xml
+    assert "<text>Хиир</text>" in xml
+    assert "<text>онт</text>" in xml
+    assert "<text>Гос</text>" in xml
+    assert "<text>Gos</text>" not in xml
+    assert "<text>loej</text>" not in xml
+
+
+def test_hybrid_auto_script_respects_translit_modus() -> None:
+    """Zonder @taal: auto per schrift + modusfilter (hybride bron)."""
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+L: Heer_ |
+S: a4    |
+A: f4    |
+T: c4    |
+B: f3    |
+
+L: Гос_ |
+S: a4   |
+A: f4   |
+T: c4   |
+B: f3   |
+"""
+    nls = export_mvsa_to_musicxml(
+        text, layout="playback", translit=True, translit_modus="nls"
+    )
+    assert "<text>Heer</text>" in nls
+    assert "<text>Хиир</text>" not in nls
+    assert "<text>Гос</text>" in nls
+    assert "<text>Gos</text>" in nls
+
+    ksl = export_mvsa_to_musicxml(
+        text, layout="playback", translit=True, translit_modus="ksl"
+    )
+    assert "<text>Heer</text>" in ksl
+    assert "<text>Хиир</text>" in ksl
+    assert "<text>Гос</text>" in ksl
+    assert "<text>Gos</text>" not in ksl

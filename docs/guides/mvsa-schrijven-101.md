@@ -71,8 +71,8 @@ horen **vóór** of **tussen** LSATB-systemen — niet tussen `L:` en `S:`.
 | `@do`            | Grondtoon van de do-context (`F4`, `G4`, …)                              | `F4`                 |
 | `@mode`          | `major` of `minor`                                                       | `major`              |
 | `@oct`           | Schrijfoctaaf per stem (`S=0 A=0 T=-1 B=-1`)                             | overal `0`           |
-| `@sectie`        | Label voor een stuk (export `--section`); **niet** bij `@speelplan`      | —                    |
-| `@blok`          | Speelblok-id voor `@speelplan` (één plan per bestand)                    | zie speelplan-spec   |
+| `@sectie`        | Adresseerbaar deel (`--section` / later bieb-`…@id`); nu niet bij plan   | impliciet: heel file |
+| `@blok`          | Alleen speelplan-bouwsteen (geen `--section`)                            | zie speelplan-spec   |
 | `@speelplan`     | Klinkende volgorde van blokken (Coria uitgeschreven; blad compact)       | hoogstens één/file   |
 | `@start`         | Beginanker (EHM) per stem; liever vaak `S-:` / `T\6:` op de stemregel    | —                    |
 | `@tekst`         | Cue / systeembrontekst (priesterregel, …) boven het volgende systeem     | —                    |
@@ -101,7 +101,8 @@ is alleen nodig als je commentaar op die scheidingsregel wilt.
 Complete lijst (wel/niet gebruiken, vorm, onbekende keywords):
 [Keywords (`@…`)](../specification-mvsa/keywords.md). Speelplan en bladvorm:
 [Speelplan](../specification-mvsa/speelplan.md) — één `@speelplan` per
-`.mvsa`; `@sectie` alleen in bestanden zonder speelplan.
+bestand; `@blok` alleen voor dat plan; `@sectie` voor named export (nu niet
+in hetzelfde bestand als een speelplan; later mag een plan binnen één sectie).
 
 ---
 
@@ -408,12 +409,12 @@ Voorbeeld met meerdere equivalente schetsen:
 
 | Stap                 | Commando (voorbeeld)                                      |
 | -------------------- | --------------------------------------------------------- |
-| Valideren            | `mvsa validate lied.mvsa`                             |
-| MusicXML             | `mvsa musicxml lied.mvsa -o generated\lied.mxl`       |
-| MuseScore            | `mvsa mscz lied.mvsa -o generated\lied.mscz`          |
+| Valideren            | `mvsa validate lied.mvsa`                                 |
+| MusicXML             | `mvsa musicxml lied.mvsa -o generated\lied.mxl`           |
+| MuseScore            | `mvsa mscz lied.mvsa -o generated\lied.mscz`              |
 | Eén sectie           | voeg `--section sectie-id` toe                            |
-| Uitlijnen / kuisen   | `mvsa kuiser lied.mvsa`                               |
-| Andere tonica        | `mvsa transpose lied.mvsa --to F4`                    |
+| Uitlijnen / kuisen   | `mvsa kuiser lied.mvsa`                                   |
+| Andere tonica        | `mvsa transpose lied.mvsa --to F4`                        |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -448,6 +449,6 @@ CLI-detail: [mvsa-referentie](../reference/cli/mvsa.md). Formaten-hub:
 | [Keywords](../specification-mvsa/keywords.md)                                               | Alle `@`-regels                           |
 | [Syntax](../specification-mvsa/syntax.md) · [Semantiek](../specification-mvsa/semantics.md) | L, stemmen, octaven                       |
 | [mvsa-conversies](../plans/mvsa-conversions.md)                                             | `mxl`/`mscz mvsa` · normalize · transpose |
-| [`mvsa transpose`](../reference/cli/mvsa.md#mvsa-transpose)                             | andere tonica                             |
+| [`mvsa transpose`](../reference/cli/mvsa.md#mvsa-transpose)                                 | andere tonica                             |
 | [`.mvsa` formaat](../formats/mvsa.md)                                                       | Korte formaatpagina                       |
 | [CLI-taken](cli-taken.md)                                                                   | Welk `vsa`-commando                       |

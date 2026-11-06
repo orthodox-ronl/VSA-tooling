@@ -36,7 +36,7 @@ commando dat wel past.
 | `.md`                        | `markdown text` | zie [`markdown`](markdown.md)    |
 
 `.mvsa`: de woorden komen uit de L-regels. Een systeembreuk
-(`@mscz-newline`) is geen woordbreuk.
+(`@nieuw-systeem`) is geen woordbreuk.
 
 `.mscz`: `mscz text` gaat via een tijdelijke MuseScore-MusicXML en
 schrijft geen `.mvsa` ernaast. De MusicXML-regels hieronder beschrijven

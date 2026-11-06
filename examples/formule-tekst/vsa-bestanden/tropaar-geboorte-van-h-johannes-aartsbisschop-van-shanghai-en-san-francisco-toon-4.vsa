@@ -1,0 +1,132 @@
+---
+title: Tropaar Geboorte van H. Johannes, Aartsbisschop van Shanghai en San Francisco, Toon 4
+do: F4
+mode: major
+tempo: 120
+genre: tropaar
+tone: 4
+template: tropaar-toon-4
+bron: Hemelum
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens, nog niet geparsed): tropaar-toon-4.formule.mvsa
+
+# === afgeleide mvsa ===
+@title "Tropaar Geboorte van H. Johannes, Aartsbisschop van Shanghai en San Francisco, Toon 4"
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+@speelplan |: f1, f2 :| laatste
+# Afgeleid: VSA (S) + tropaar-toon-4 template.yaml (A/T/B, slots)
+# Mapper: vsa.template_instance.map_vsa_to_template
+
+@blok f1  # template-frase '1' (1/7)
+L: Als een Re_ gel van ge loof |
+S: a - - - bb - a |
+A: f - - - g - f# |
+T: c - - - d - - |
+B: f - - - g - d |
+@blok f2  # template-frase '2' (2/7)
+L: en een voor beeld van zacht moe__ dig heid_ |
+S: bb - - - - - - - a |
+A: g - - - - - - - f |
+T: d - - - - - - c - |
+B: g - - - - - - c f |
+@blok f1  # template-frase '1' (3/7)
+L: heeft de waar heid u wer da den aan uw kud_ de ge toond._ |
+S: a - - - - - - - - - - bb - a |
+A: f - - - - - - - - - - g - f# |
+T: c - - - - - - - - - - d - - |
+B: f - - - - - - - - - - g - d |
+@blok f2  # template-frase '2' (4/7)
+L: Daar om zijt gij door ne_ de rig heid groot,_ |
+S: bb - - - - - - - - a |
+A: g - - - - - - - - f |
+T: d - - - - - c - - - |
+B: g - - - - - c - - f |
+@blok f1  # template-frase '1' (5/7)
+L: en door ar moe de rijk ge wor_ __ den,_ |
+S: a - - - - - - - bb a |
+A: f - - - - - - - g f# |
+T: c - - - - - - - d - |
+B: f - - - - - - - g d |
+@blok f2  # template-frase '2' (6/7)
+L: Va der en Ho ge pries ter Jo han_. nes,_ |
+S: bb - - - - - - - - a |
+A: g - - - - - - - - f |
+T: d - - - - - - - - c |
+B: g - - - - - - - - f |
+@blok laatste  # template-frase 'laatste' (7/7)
+L: bid Chris tus God on ze zie len te red_ __ den._ |
+S: a - - - - - - - - - g a |
+A: f - - - - - - - - - e f |
+T: c - - - - - - - - - - - |
+B: f - - - - - - - - - c f |
+
+# === analyse S / mapping ===
+# NORMALISATIE: geen `*` in bron → 7 regels genormaliseerd tot frasen met `*`
+# ### Frase → template `1` (7 noten)
+# - VSA S (7): A4 A4 A4 A4 Bb4 Bb4 A4
+# - MVSA S (7): A4 A4 A4 A4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'cadence', 'cadence', 'cadence', 'cadence', 'cadence']
+# - anker l.st. op 'gel' (S=A4)
+#
+# ### Frase → template `2` (9 noten)
+# - VSA S (9): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - MVSA S (9): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['cadence', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence']
+# - optional link: overgeslagen (geen optional in instance)
+# - anker e.st. op 'en' (S=Bb4)
+# - anker l.st. op 'dig' (S=Bb4)
+#
+# ### Frase → template `1` (14 noten)
+# - VSA S (14): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 Bb4 A4
+# - MVSA S (14): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence', 'cadence']
+#
+# ### Frase → template `2` (10 noten)
+# - VSA S (10): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - MVSA S (10): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['cadence', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence', 'cadence', 'cadence']
+# - optional link: overgeslagen (geen optional in instance)
+# - anker e.st. op 'Daar' (S=Bb4)
+# - anker l.st. op 'de' (S=Bb4)
+#
+# ### Frase → template `1` (10 noten)
+# - VSA S (10): A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - MVSA S (10): A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence']
+#
+# ### Frase → template `2` (10 noten)
+# - VSA S (10): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - MVSA S (10): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['cadence', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence']
+# - optional link: overgeslagen (geen optional in instance)
+# - anker e.st. op 'Va' (S=Bb4)
+#
+# ### Frase → template `laatste` (12 noten)
+# - VSA S (12): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 G4 A4
+# - MVSA S (12): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 G4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence']
+#
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Tropaar Geboorte van H. Johannes, Aartsbisschop van Shanghai en San Francisco, Toon 4 (Hemelum) -->
+# <!-- Bronbestand: content-source/praktijk/feesteigen/07-jul/07-02-johannes-aartsbisschop-van-shanghai-en-san-francisco.md -->
+#
+# [//:] Als een {Re_}gel {/van} ge{\loof}
+# {/en} een voor-beeld van zacht{moe__}dig{\heid_}
+# heeft de waar-heid u-wer da-den aan uw {kud_}{/de} ge{\toond_}.
+# {/Daar}om zijt gij door {ne_}derigheid {\groot_},
+# en door ar-moe-de rijk ge{-&/wor_&_}{\den_},
+# {/Va}der en Ho-ge-pries-ter Jo{han_.}{\nes_},
+# // bid Chris-tus God on-ze zie-len te {-&\red_&_}{/den_}. [//:]

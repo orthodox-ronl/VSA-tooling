@@ -1,0 +1,211 @@
+---
+title: Tropaar Geboorte van Johannes de Voorloper, Toon 4
+do: F4
+mode: major
+tempo: 120
+genre: tropaar
+tone: 4
+template: tropaar-toon-4
+bron: Hemelum
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
+#
+# === afgeleide mvsa ===
+# MAPPING MISLUKT: VSA-TEMPLATE-REQUIRED-SLOT-UNUSED
+# verplicht(e) template-slot(s) niet aangedaan in frase '2': fa, fa/l.st., mi
+#
+ 
+H
+i
+n
+t
+:
+ 
+B
+r
+e
+i
+d
+ 
+d
+e
+ 
+V
+S
+A
+-
+c
+a
+d
+e
+n
+s
+ 
+u
+i
+t
+ 
+z
+o
+d
+a
+t
+ 
+e
+l
+k
+e
+ 
+v
+e
+r
+p
+l
+i
+c
+h
+t
+e
+ 
+l
+a
+d
+d
+e
+r
+g
+r
+a
+a
+d
+ 
+v
+o
+o
+r
+k
+o
+m
+t
+ 
+(
+s
+y
+l
+l
+a
+b
+e
+,
+ 
+h
+o
+l
+d
+ 
+H
+6
+,
+ 
+o
+f
+ 
+l
+.
+l
+g
+r
+.
+-
+m
+e
+l
+i
+s
+m
+a
+ 
+H
+8
+)
+,
+ 
+o
+f
+ 
+z
+e
+t
+ 
+o
+p
+t
+i
+o
+n
+e
+l
+e
+ 
+s
+l
+o
+t
+s
+ 
+o
+p
+ 
+o
+p
+t
+i
+o
+n
+a
+l
+:
+ 
+t
+r
+u
+e
+ 
+i
+n
+ 
+d
+e
+ 
+t
+e
+m
+p
+l
+a
+t
+e
+.
+
+# === analyse ===
+# NORMALISATIE: geen `*` in bron → 8 regels genormaliseerd tot frasen met `*`
+# MAPPING: MISLUKT
+# tropaar-geboorte-van-johannes-de-voorloper-toon-4.vsa:17:49
+# ERROR: VSA-TEMPLATE-REQUIRED-SLOT-UNUSED: verplicht(e) template-slot(s) niet aangedaan in frase '2': fa, fa/l.st., mi
+# Hint: Breid de VSA-cadens uit zodat elke verplichte laddergraad voorkomt (syllabe, hold H6, of l.lgr.-melisma H8), of zet optionele slots op optional: true in de template.
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Tropaar Geboorte van Johannes de Voorloper, Toon 4 -->
+# <!-- Bronbestand: content-source/praktijk/feesteigen/06-jun/06-24-geboorte-johannes-de-voorloper.md -->
+#
+# [//:] Profeet en Voorloper van {Chris_}{/tus_} {\komst_},
+# {/wij} zijn niet in staat u naar waarde te {lo_.}{\ven_}
+# die wij met liefde ver{-&/e_&_}{\ren_}.
+# {/Want} de onvruchtbaarheid van uw moeder en de stomheid
+#     van uw vader werd opge{he_.}{\ven_}
+# door uw roemrijke en eerbiedwaardige Ge{-&/boor_&_}{\te_}.
+# // Toen werd de Vleeswording van Gods Zoon aan de wereld
+#     ver{-&\kon_&_}{/digd_}. [//:]

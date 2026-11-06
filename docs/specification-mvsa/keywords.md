@@ -143,25 +143,35 @@ beide voorkomen.
 
 ## `@sectie`
 
-**Wat het is.** Opent een nieuwe **sectie** met een id. Een sectie is een
-muzikale eenheid van een of meer LSATB-systemen — in bestanden **zonder**
-`@speelplan`.
+**Wat het is.** Opent een **adresseerbare sectie**: een muzikale eenheid van
+een of meer LSATB-systemen die je los kunt exporteren of (in de bibliotheek)
+los kunt insluiten. Een sectie is **geen** speelblok.
 
 **Vorm.** `@sectie` + spatie + id: `[a-z][a-z0-9_-]*` (kleine letters).
 
-**Sectie-einde.** Bij een nieuwe `@sectie`, bij **EOF**, of (later) bij
-fence-`:::` is de **laatste maatstreep** van het vorige laatste systeem
-(`|`, `||`, …) het sectie-einde. Expliciet midden in een bestand (zonder
-nieuwe `@sectie`) gebruik je `||` of `:||`. Tooling schrijft bij genereren
-bij voorkeur `||`. Zie [Syntax — sectie-einde](syntax.md#einde).
+**Impliciete sectie.** Staat er **geen** `@sectie` in het bestand, dan is het
+hele muzikale deel **één** sectie (anoniem). Die ene sectie exporteer je door
+het bestand zelf; er is geen `--section`-id. Met één of meer `@sectie`-koppen
+zijn alleen die ids adresseerbaar.
+
+**Sectie-einde (adresseerbaar).** Een named `@sectie` loopt tot de **volgende
+`@sectie`**, tot **EOF**, of (later) tot fence-`:::`. Een dubbele maatstreep
+`||` / `:||` **sluit de named sectie niet** — die blijft een blad-/Coria-
+markering binnen de sectie (meerdere antwoorden in één litanie-sectie).
+Zie [Syntax — sectiegrenzen](syntax.md#einde).
 
 **Wel gebruiken** om delen te benoemen die je apart wilt exporteren
-(`mvsa mxl … --section id`) of om schetsen in één experiment-bestand
-uit elkaar te houden (couplet / refrein / pitch-variant).
+(`mvsa mxl … --section id`), om schetsen in één experiment-bestand uit elkaar
+te houden, of (in de bibliotheek) als fragment achter `…@sectie-id` in een
+`bieb`-verwijzing. Alleen `@sectie`-ids horen daar; **niet** `@blok`-ids.
 
-**Niet gebruiken** samen met `@speelplan` (dan: `@blok`). Niet als litanie-cue
-(dat is `@tekst`). Niet om meerdere speelplannen in één file te nesten — één
-plan = één `.mvsa`.
+**Niet gebruiken** i.p.v. `@blok` (dat is alleen voor `@speelplan`). Niet als
+litanie-cue (dat is `@tekst`).
+
+**Nu vs. later.** Nu mogen `@sectie` en `@speelplan` **niet** in hetzelfde
+bestand. Richting: later **één** `@speelplan` met bijbehorende `@blok`’s
+**binnen** één sectie (bestand zonder `@sectie` = die ene impliciete sectie).
+Zie [Speelplan](speelplan.md) en [Open punten](open-points.md).
 
 ```text
 @sectie openingsfrase
@@ -171,17 +181,18 @@ plan = één `.mvsa`.
 
 ## `@blok`
 
-**Wat het is.** Opent een **speelblok**: genoemd LSATB-segment voor een
-`@speelplan`. Geen “sectie” in de zin van `||`-afsluiting; tussen blokken is
-`||` niet verplicht.
+**Wat het is.** Opent een **speelblok**: genoemd LSATB-segment **alleen** voor
+een `@speelplan`. Geen adresseerbare sectie: geen `--section`, geen
+`bieb …@blok-id`. Tussen blokken is `||` niet verplicht (wel toegestaan als
+dubbele maatstreep).
 
 **Vorm.** `@blok` + spatie + id: `[1-9][0-9]*` **of** `[a-z][a-z0-9_-]*`.
 
 **Wel gebruiken** wanneer je een speelplan hebt: elk blok één keer, volgorde in
-`@speelplan`. Eén speelplan per bestand.
+`@speelplan`.
 
-**Niet gebruiken** i.p.v. `@tekst` of `@mscz-newline`; niet i.p.v. `@sectie`
-buiten een speelplan-bestand (tenzij je redactioneel een id wilt zonder plan).
+**Niet gebruiken** i.p.v. `@sectie` (export-/fragment-id); niet i.p.v. `@tekst`
+of `@nieuw-systeem`.
 
 Zie [Speelplan](speelplan.md).
 
@@ -195,15 +206,16 @@ Zie [Speelplan](speelplan.md).
 
 **Wat het is.** Zet de **canonieke klinkende volgorde** van speelblokken.
 Bladmuziek (MSCZ) blijft compact (volta / herhaling / D.S. of expand);
-MXL-playback schrijft het plan uit.
+MXL-playback schrijft het plan uit. Speelplan en blokken horen bij **één**
+sectie (nu: het hele bestand; later: binnen één `@sectie`).
 
 **Vorm.** `@speelplan` + komma-gescheiden ids (zelfde id-vorm als `@blok`).
-Hoogstens **één** per bestand — nest geen plan in `@sectie`.
+Hoogstens **één** per sectie (nu: per bestand).
 
 **Wel gebruiken** bij vaste herhaalpatronen (bijv. alleluia 1-2-1-2-1-3).
 
-**Niet gebruiken** samen met `|:` / `:|` in die speelblokken; niet naast
-`@sectie` in hetzelfde bestand.
+**Niet gebruiken** samen met `|:` / `:|` in die speelblokken. **Nu** ook niet
+naast `@sectie` in hetzelfde bestand (tijdelijke limiet tot nesten).
 
 Zie [Speelplan](speelplan.md).
 
@@ -277,20 +289,20 @@ systeem worden onder elkaar gezet (zelfde volgorde als in het bestand). Staat
 `@tekst` aan het eind zonder volgend systeem → **warning**.
 
 `@tekst` forceert **geen** nieuw MuseScore-systeem. Wil je wél een nieuwe
-regel in de partituur, zet dan `@mscz-newline` (eventueel samen met `@tekst`).
+regel in de partituur, zet dan `@nieuw-systeem` (eventueel samen met `@tekst`).
 De cue staat boven de ge-cue-de maat. Op het **partituur/MSCZ**-pad: als die
 maat **niet** het begin van een MuseScore-systeem is, sluit export de vorige
 maat af met een **dubbele maatstreep** (behalve als daar al een herhaalstreep
 `:|` / `:||` staat — die blijft zichtbaar) en zet de cue als SystemText.
 Geen mid-systeem-HBox en geen spacermaat: MuseScore tekent daar een accolade
 middenin het systeem of een leeg stuk notenbalk. Wil je wél een duidelijke
-regelsprong, gebruik `@mscz-newline`. Canonieke MSCZ-eisen:
+regelsprong, gebruik `@nieuw-systeem`. Canonieke MSCZ-eisen:
 [checklist S14–S20](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
 en [leesbaarheid — cues](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade).
 Op het **playback/MXL**-pad (Coria): vóór
 elke mid-flow `@tekst` (niet de eerste maat van het stuk) komt dezelfde
 `[PAUZE]`-maat als na `||` — whole-rest met lyric `[PAUZE]`, cue erboven.
-Staat er al een sectie-eindestreep (`||` / `:||`) vóór die cue, dan geen
+Staat er al een dubbele maatstreep (`||` / `:||`) vóór die cue, dan geen
 tweede pauze. Herhaalstrepen (`:|`) blijven intact. Stemrust `r`/`R` binnen
 een frase (lege recite + rusten) is iets anders; zie
 [Rusten op de stemregel](semantics.md#rusten-op-de-stemregel).
@@ -298,7 +310,7 @@ een frase (lege recite + rusten) is iets anders; zie
 Lange cues met `...` worden op **twee regels** gezet: de tweede regel begint bij `...`. Is de cue breder dan de maat, dan krijgt die maat een **milde** MusicXML-`width` (floor/cap; zie [leesbaarheid C6](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade)) — genoeg hint voor MuseScore, zonder een holle maat waar noten links blijven hangen.
 
 ```text
-@mscz-newline
+@nieuw-systeem
 @tekst "P: Laat ons de Heer in vrede bidden"
 L:  Heer ont-ferm_ U__  ||
 S:  a    -   -     -    ||
@@ -309,25 +321,31 @@ B:  f    -   c     f    ||
 
 ---
 
-## `@mscz-newline`
+## `@nieuw-systeem` / `@systeembreuk`
 
 **Wat het is.** Geeft aan dat bij **mvsa → `.mscz`**-conversie het
 **eerstvolgende** LSATB-systeem als **nieuw MuseScore-systeem** moet beginnen
 (nieuwe regelsprong op het blad). Heeft geen effect op de gezongen inhoud;
 alleen layout.
 
-**Vorm.** Alleen het keyword, zonder argumenten:
+**Vorm.** Alleen het keyword, zonder argumenten. Twee gelijkwaardige namen:
 
 ```text
-@mscz-newline
+@nieuw-systeem
 ```
+
+```text
+@systeembreuk
+```
+
+Verouderd synoniem (blijft geldig tot bronnen om zijn): `@mscz-newline`.
 
 **Wel gebruiken** als een antwoord, couplet of cue op een **nieuwe regel** van
 de partituur moet staan (bijv. litanie-antwoorden onder elkaar, of een
 duidelijke visuele breuk vóór een nieuw blok). Vaak samen met `@tekst`:
 
 ```text
-@mscz-newline
+@nieuw-systeem
 @tekst "P: Gezegend … der eeuwen"
 L: A_-men_ |
 …
@@ -337,14 +355,14 @@ L: A_-men_ |
 
 - cues zonder regelsprong — alleen `@tekst` volstaat (export zet desnoods een
   dubbele maatstreep vóór de cue);
-- sectiegrenzen in de bron — dat is `||` / `@sectie`;
+- sectiegrenzen in de bron — dat is `@sectie` (niet `||`);
 - scheiding van vscode-blokken zonder MSCZ-layout — dan volstaat een **lege
   regel** (optioneel `@---` met commentaar).
 
 **Gedrag.** Geldt alleen voor het eerstvolgende LSATB-systeem (niet sticky).
 Op het eerste systeem van de partituur is een explicit new-system overbodig
-(dat systeem begint al). Staat `@mscz-newline` zonder volgend systeem →
-**warning**. Ongeldig met argumenten → **error**.
+(dat systeem begint al). Staat `@nieuw-systeem` (of synoniem) zonder volgend
+systeem → **warning**. Ongeldig met argumenten → **error**.
 
 Op het partituur/MSCZ-pad: export zet `<print new-system="yes"/>` op de eerste
 maat van dat systeem. Op playback/MXL is de markering aanwezig maar voor Coria
@@ -530,7 +548,7 @@ het [reviewcorpus](../plans/translit-reviewcorpus.md).
 effect als een **lege regel**. Voor een gewone scheiding tussen vscode-systemen
 volstaat die lege regel; `@---` is vooral handig als je bij de scheiding
 **commentaar op dezelfde regel** wilt (`@--- tweede couplet`). Voor een
-**nieuwe MuseScore-regel** op het blad: gebruik `@mscz-newline`, niet alleen
+**nieuwe MuseScore-regel** op het blad: gebruik `@nieuw-systeem`, niet alleen
 `@---` of een lege regel.
 
 **Vorm.** `@---` of `@ ---`. Optioneel **commentaar** erna op dezelfde regel
@@ -562,7 +580,7 @@ S: a     … ||
 ```
 
 **Niet gebruiken** als zichtbare inhoud op het blad — daarvoor is `@tekst`.
-Ook niet als vervanging van `@mscz-newline` (dat forceert de MSCZ-regelsprong).
+Ook niet als vervanging van `@nieuw-systeem` (dat forceert de MSCZ-regelsprong).
 Zonder commentaar is `@---` overbodig naast een lege regel.
 
 ---

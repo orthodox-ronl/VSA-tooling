@@ -23,7 +23,7 @@
     },
     "genre": {
       "type": "string",
-      "enum": ["tropaar", "stichier", "vers", "other"]
+      "enum": ["tropaar", "kondak", "stichier", "vers", "other"]
     },
     "tone": {
       "type": "integer",
@@ -68,7 +68,7 @@
       "minItems": 1,
       "items": {
         "type": "string",
-        "enum": ["tropaar", "stichier", "vers", "other"]
+        "enum": ["tropaar", "kondak", "stichier", "vers", "other"]
       }
     },
     "cycle": {

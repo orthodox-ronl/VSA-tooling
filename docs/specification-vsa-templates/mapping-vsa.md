@@ -245,8 +245,8 @@ waarvan de hoogten (EHM) kloppen. Geen pad → `TemplateInstanceError`
 
 Dit zijn **formule-alternatieven in één template**, geen aparte
 [uitvoeringsvorm](@bron)-en (die horen bij zangstuk → variant →
-uitvoeringsvorm). Tropaar-toon-4 `laatste` is nu alleen mi–re–mi; een fa-pad
-kan later als tweede `of`-tak zonder extra YAML-bestand.
+uitvoeringsvorm). Tropaar-toon-4 `laatste` (Hemelum) heeft twee takken:
+`re-close` (mi–re–mi, formuleblad pad 0) en `fa-close` (mi–fa–mi).
 
 Formuleblad (`template.mscz`): toont **pad 0** (eerste tak).
 

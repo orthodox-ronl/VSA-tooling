@@ -295,7 +295,10 @@ def add_mscz_import_parser(
         "--section",
         metavar="SECTION",
         default=None,
-        help="Alleen bij .mvsa: deze @sectie-id (default: alle).",
+        help=(
+            "Alleen bij .mvsa: deze @sectie-id (niet @blok; "
+            "default: hele bestand)."
+        ),
     )
     p.add_argument(
         "--musescore",

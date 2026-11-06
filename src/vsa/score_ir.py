@@ -269,11 +269,13 @@ def export_mvsa_to_score_ir(
     if errors:
         raise MvsaValidationError(errors)
 
-    sections = doc.sections
     if section_id is not None:
-        sections = [s for s in sections if s.id == section_id]
-        if not sections:
-            raise MvsaExportError(f"sectie {section_id!r} niet gevonden")
+        from .mvsa_speelplan import select_named_sectie
+
+        sections, err = select_named_sectie(doc, section_id)
+        if err is not None:
+            raise MvsaExportError(err)
+        assert sections is not None
     else:
         from .mvsa_speelplan import sections_for_layout
 

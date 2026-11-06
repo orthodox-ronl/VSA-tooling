@@ -363,6 +363,14 @@ def test_assign_svg_products_single_keeps_svg(tmp_path: Path) -> None:
     assert products == {"svg": written}
 
 
+def test_assign_svg_products_translit_beide(tmp_path: Path) -> None:
+    beide = tmp_path / "lied.mvsa.translit.svg"
+    products: dict[str, Path] = {}
+    _assign_svg_products(products, [beide])
+    assert products == {"svg-translit-beide": beide}
+    assert "svg" not in products
+
+
 def test_freshness_required_svg_still_accepts_legacy_bladreeks(
     tmp_path: Path,
 ) -> None:

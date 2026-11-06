@@ -1,13 +1,24 @@
-# Tropaar toon 4
+# Tropaar toon 4 (Hemelum)
 
-| Veld           | Waarde                                                         |
-| -------------- | -------------------------------------------------------------- |
-| Formule-bron   | [`template.yaml`](template.yaml)                               |
-| Formule-MSCZ   | [`template.mscz`](template.mscz) (MuseScore-controle)          |
-| Formule-MXL    | [`template.mxl`](template.mxl) (delen / Coria-achtig)          |
-| Formule-PDF    | `template.pdf` (lokaal; niet in git)                           |
-| Status pitches | `provisional`                                                  |
-| Mapping        | S=VSA, A/T/B=template ([mapping-vsa.md](../../mapping-vsa.md)) |
+**Traditie:** Hemelum (niet Groningen). **Ook voor kondak** toon 4
+(`also_used_as: [kondak]`). Canonieke id: `tropaar-toon-4`. Playbook-alias
+voor CLI: `hemelum-tropaar-toon-4` → dit id (default bij `vsa mvsa`).
+
+> **Herstart 2026-11:** formule+tekst-verkenning in de repo-map
+> `examples/formule-tekst/tropaar-toon-4/` (niet op de documentatiesite).
+> Playbook: `examples/formule-tekst/PLAYBOOK.md`.
+> Snapshot oude aanpak: `examples/formule-tekst/.archief/tropaar-toon-4-oud/`.
+
+| Veld              | Waarde                                                              |
+| ----------------- | ------------------------------------------------------------------- |
+| Formule-bron      | [`template.yaml`](template.yaml)                                    |
+| Traditie / genres | Hemelum; tropaar + kondak                                           |
+| `laatste` cadens  | `of:` `re-close` (pad 0, formuleblad) · `fa-close` (mi–fa–mi)       |
+| Formule-MSCZ      | [`template.mscz`](template.mscz) (MuseScore; toont pad 0)           |
+| Formule-MXL       | [`template.mxl`](template.mxl) (delen / Coria-achtig)               |
+| Formule-PDF       | `template.pdf` (lokaal; niet in git)                                |
+| Status pitches    | `provisional`                                                       |
+| Mapping           | S=VSA, A/T/B=template ([mapping-vsa.md](../../mapping-vsa.md))      |
 
 ## Wat hoort in deze map
 

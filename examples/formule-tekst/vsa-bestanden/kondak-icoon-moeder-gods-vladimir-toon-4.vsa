@@ -1,0 +1,170 @@
+---
+title: Kondak icoon MGs, Toon 4
+do: F4
+mode: major
+tempo: 120
+genre: kondak
+tone: 4
+bron: Koorinstructie di 8 september 2026 (Hemelum)
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
+#
+# === afgeleide mvsa ===
+# MAPPING MISLUKT: VSA-TEMPLATE-PITCH-MISMATCH
+# hoogte-mismatch: VSA 'zijt' = G4, geen passend template-S-slot meer (verwacht o.a. mi, mi, fa, mi)
+#
+ 
+H
+i
+n
+t
+:
+ 
+P
+a
+s
+ 
+d
+e
+ 
+V
+S
+A
+-
+h
+o
+o
+g
+t
+e
+m
+a
+r
+k
+e
+r
+i
+n
+g
+e
+n
+ 
+a
+a
+n
+ 
+z
+o
+d
+a
+t
+ 
+z
+e
+ 
+d
+e
+ 
+v
+e
+r
+p
+l
+i
+c
+h
+t
+e
+ 
+c
+a
+d
+e
+n
+s
+g
+r
+a
+d
+e
+n
+ 
+v
+a
+n
+ 
+d
+e
+ 
+t
+e
+m
+p
+l
+a
+t
+e
+ 
+v
+o
+l
+g
+e
+n
+,
+ 
+o
+f
+ 
+k
+i
+e
+s
+ 
+e
+e
+n
+ 
+a
+n
+d
+e
+r
+e
+ 
+f
+r
+a
+s
+e
+/
+c
+a
+d
+e
+n
+s
+p
+a
+d
+.
+
+# === analyse ===
+# MAPPING: MISLUKT
+# kondak-icoon-moeder-gods-vladimir-toon-4.vsa:13:9
+# ERROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA 'zijt' = G4, geen passend template-S-slot meer (verwacht o.a. mi, mi, fa, mi)
+# Hint: Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden van de template volgen, of kies een andere frase/cadenspad.
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Kondak icoon MGs, Toon 4 (Koorinstructie Hemelum, 20260908) -->
+# <!-- Bronbestand: content-source/praktijk/samenstellingen/20260908-di-liturgie-icoon-mgods-vladimir.md -->
+#
+# [:] Gij {/zijt} {/de} {/Aan}voerd{\ster} die {\voor} ons {\strijdt_}, *
+# en {/die} {/ons} van de {/bo}{\ze} {\hebt} be{\vrijd_}. *
+# Daar{/om} {/zin}gen wij u vol {/dank}baar{\heid} het {\ze}ge{\lied_}. *
+# Maar {/door} {/uw} onoverwinnelijke {/macht}, {\o} {\Moe}der {\Gods_}, *
+# red {/nu} {/ook} uit alle ge{/va}{\ren} het bevrijde volk dat {\tot} u {\zingt_}: *
+# {-&/ver}{/heug} {/u}, {\on}ge{/huw_}{de_} {\Bruid_}. [//:]
