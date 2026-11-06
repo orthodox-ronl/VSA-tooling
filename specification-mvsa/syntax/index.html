@@ -3048,15 +3048,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-maatstrepen-en-sectie-einde" class="md-nav__link">
+  <a href="#4-maatstrepen-en-dubbele-streep" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Maatstrepen en sectie-einde
+        4. Maatstrepen (en dubbele streep)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="4. Maatstrepen en sectie-einde">
+    <nav class="md-nav" aria-label="4. Maatstrepen (en dubbele streep)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5337,15 +5337,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-maatstrepen-en-sectie-einde" class="md-nav__link">
+  <a href="#4-maatstrepen-en-dubbele-streep" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Maatstrepen en sectie-einde
+        4. Maatstrepen (en dubbele streep)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="4. Maatstrepen en sectie-einde">
+    <nav class="md-nav" aria-label="4. Maatstrepen (en dubbele streep)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5822,10 +5822,9 @@ editor onder elkaar. Per <strong>maat</strong>, binnen één LSATB-systeem:</p>
 </li>
 <li>
 <p>Maatstrepen (<code>|</code>, <code>||</code>, <code>|:</code>, <code>:|</code>, <code>:||</code>) staan op <strong>dezelfde
-   kolomposities</strong> op alle LSATB-regels van het systeem: na elke maat (en aan
-   het sectie-einde) begint de streep in VSCode in dezelfde kolom. De
-   standaardlayout vult spaties aan het eind van een maat zo nodig aan tot die
-   strepen onder elkaar vallen.</p>
+   kolomposities</strong> op alle LSATB-regels van het systeem: na elke maat begint
+   de streep in VSCode in dezelfde kolom. De standaardlayout vult spaties aan
+   het eind van een maat zo nodig aan tot die strepen onder elkaar vallen.</p>
 </li>
 </ol>
 <p>In VSCode (vaste-breedteletter) staan die ankers én de maatstrepen dus <strong>in
@@ -5856,7 +5855,7 @@ rompiger zijn; de kuiser mag normaliseren (<code>mvsa kuiser</code>). Gegenereer
 output en de voorbeelden in <code>examples/mvsa</code> volgen wél deze layout. Hulpje:
 <code>python scripts/align_mvsa_columns.py examples/mvsa</code> (alleen kolommen; de
 volledige kuiser-pipeline is <code>mvsa kuiser</code>).</p>
-<h2 id="4-maatstrepen-en-sectie-einde">4. Maatstrepen en sectie-einde<a class="headerlink" href="#4-maatstrepen-en-sectie-einde" title="Permanent link">&para;</a></h2>
+<h2 id="4-maatstrepen-en-dubbele-streep">4. Maatstrepen (en dubbele streep)<a class="headerlink" href="#4-maatstrepen-en-dubbele-streep" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -5867,7 +5866,7 @@ volledige kuiser-pipeline is <code>mvsa kuiser</code>).</p>
 <tbody>
 <tr>
 <td><code>\|</code></td>
-<td>Einde van een maat (frase) binnen de sectie</td>
+<td>Einde van een maat (frase)</td>
 </tr>
 <tr>
 <td><code>\|:</code></td>
@@ -5879,11 +5878,11 @@ volledige kuiser-pipeline is <code>mvsa kuiser</code>).</p>
 </tr>
 <tr>
 <td><code>\|\|</code></td>
-<td>Einde van de <strong>sectie</strong></td>
+<td>Dubbele maatstreep (blad / Coria-pauze); <strong>geen</strong> einde van <code>@sectie</code></td>
 </tr>
 <tr>
 <td><code>:\|\|</code></td>
-<td>Einde van de sectie mét herhalingsteken</td>
+<td>Dubbele maatstreep mét herhalingsteken; evenmin einde van named <code>@sectie</code></td>
 </tr>
 </tbody>
 </table>
@@ -5942,48 +5941,47 @@ opnieuw (dat doet wel een EHM in de
 sync van maatstrepen telt alleen het <strong>bar-token</strong> (zonder anker): <code>L</code> met <code>|</code>
 en <code>S</code> met <code>|mi</code> zijn synchroon.</p>
 <h2 id="5-sectie">5. Sectie<a class="headerlink" href="#5-sectie" title="Permanent link">&para;</a></h2>
+<p>Een <strong>sectie</strong> is de adresseerbare eenheid in een <code>.mvsa</code> (export
+<code>--section</code>, bibliotheek-fragment <code>…@sectie-id</code>). Een bestand <strong>zonder</strong>
+<code>@sectie</code> is <strong>één</strong> impliciete (anonieme) sectie. Speelblokken (<code>@blok</code>) zijn
+<strong>geen</strong> secties — zie <a href="../speelplan/">Speelplan</a>.</p>
 <h3 id="begin">Begin<a class="headerlink" href="#begin" title="Permanent link">&para;</a></h3>
 <p>Een sectie begint aan het begin van een tekstregel die niet tot een reeds
 begonnen sectie behoort, en wel met:</p>
 <ul>
 <li>een sectiekop <code>@sectie</code> <em>id</em>, of</li>
-<li>een regelidentifier (anonieme sectie).</li>
+<li>een regelidentifier (anonieme / impliciete sectie — geen named id).</li>
 </ul>
 <div class="highlight"><pre><span></span><code>@sectie nl1
 L: …
 S: …
 </code></pre></div>
-<p><strong>Sectie-id:</strong> <code>[a-z][a-z0-9_-]*</code> (bijvoorbeeld <code>nl1</code>, <code>slav1</code>, <code>doxologie</code>).</p>
+<p><strong>Sectie-id:</strong> <code>[a-z][a-z0-9_-]*</code> (bijvoorbeeld <code>nl1</code>, <code>slav1</code>, <code>doxologie</code>).
+Alleen deze ids zijn geldig voor <code>--section</code> en voor een fragment achter <code>@</code>
+in een catalogus-verwijzing. Een <code>@blok</code>-id (ook cijfer-ids zoals <code>1</code>) hoort
+daar <strong>niet</strong>.</p>
 <h3 id="einde">Einde<a class="headerlink" href="#einde" title="Permanent link">&para;</a></h3>
-<p>Een sectie eindigt op een van deze manieren:</p>
+<p>Een <strong>adresseerbare</strong> sectie (<code>@sectie</code> <em>id</em>, of de ene impliciete sectie
+zonder <code>@sectie</code>) eindigt alleen zo:</p>
 <ol>
-<li><strong>Sectie-eindestreep <code>||</code> / <code>:||</code>:</strong> op <strong>alle</strong> LSATB-regels van een
-   systeem. Regels daarna horen niet meer bij die sectie. Dit is de vorm die
-   tooling bij <strong>genereren</strong> schrijft, en die je nodig hebt om midden in een
-   bestand een sectie te beëindigen <strong>zonder</strong> meteen een nieuwe <code>@sectie</code> te
-   openen.</li>
-<li><strong>Nieuwe <code>@sectie</code>:</strong> een volgende <code>@sectie</code> <em>id</em> opent een nieuwe sectie.
-   De <strong>laatste maatstreep</strong> van het vorige laatste systeem (<code>|</code>, <code>||</code>, of
-   herhalingsvorm) is tegelijk het sectie-einde — ook als dat geen <code>||</code> was.</li>
-<li><strong>Einde van het bestand (EOF):</strong> idem: de laatste maatstreep van het
-   laatste systeem beëindigt de open sectie.</li>
-<li><strong>Fenced markdown:</strong> het sluiten van <code>::: mvsa-notatie</code> / <code>::: mvsa</code> …
+<li><strong>Nieuwe <code>@sectie</code>:</strong> de volgende <code>@sectie</code> <em>id</em> opent een nieuwe sectie.
+   Alles sindsdien (ook systemen die op <code>||</code> eindigen) hoorde bij de vorige.</li>
+<li><strong>Einde van het bestand (EOF):</strong> de open sectie stopt.</li>
+<li><strong>Fenced markdown:</strong> sluiten van <code>::: mvsa-notatie</code> / <code>::: mvsa</code> …
    <code>:::</code> werkt hetzelfde als EOF voor de open sectie in dat blok.</li>
 </ol>
-<p>Kort: bij <strong>EOF</strong>, <strong>nieuwe <code>@sectie</code></strong>, of <strong>fence-<code>:::</code></strong> is elke geldige
-eindmaatstreep op het laatste systeem genoeg. <code>||</code> blijft nuttig als
-<strong>expliciete</strong> sectie-eindestreep midden in de bron en als canonieke
-exportvorm.</p>
-<p><strong>Speelblokken (<code>@blok</code>):</strong> horen niet onder een <code>||</code>-eis tussen blokken. Een
-nieuw <code>@blok</code> of EOF na een speelblok is gewoon toegestaan. Zie
-<a href="../speelplan/">Speelplan</a>.</p>
+<p><strong><code>||</code> / <code>:||</code> is geen sectiegrens.</strong> Die dubbele streep blijft een
+muzikale markering (dubbele maatstreep, Coria-pauze tussen antwoorden).
+Tooling mag bij genereren nog steeds <code>||</code> aan het eind van een systeem
+schrijven; dat splitst <strong>geen</strong> named <code>@sectie</code>.</p>
+<p><strong>Speelblokken (<code>@blok</code>):</strong> idem — <code>||</code> tussen systemen van één blok sluit
+het blok niet; een nieuw <code>@blok</code> of EOF wel. Zie <a href="../speelplan/">Speelplan</a>.</p>
 <h3 id="meerdere-systemen-per-sectie">Meerdere systemen per sectie<a class="headerlink" href="#meerdere-systemen-per-sectie" title="Permanent link">&para;</a></h3>
-<p>Een lange sectie mag over meerdere LSATB-systemen worden gesplitst (leesbaarheid
-in de editor). Elk tussensysteem eindigt op <code>|</code> (of herhalingsspecialisatie die
-geen sectie-einde is). Het <strong>laatste</strong> systeem van de sectie eindigt op een
-geldige maatstreep; bij doorlopende tekst zonder nieuwe <code>@sectie</code> gebruik je
-<code>||</code> of <code>:||</code> om de sectie te beëindigen. Bij een volgende <code>@sectie</code>, bij EOF,
-of bij fence-<code>:::</code> volstaat ook <code>|</code>.</p>
+<p>Een lange sectie mag over meerdere LSATB-systemen worden gesplitst
+(leesbaarheid in de editor). Elk systeem eindigt op een geldige maatstreep
+(<code>|</code>, <code>||</code>, herhaling, …). Tussensystemen mogen op <code>||</code> eindigen zonder de
+sectie te sluiten — handig bij litanie-antwoorden. Een volgende <code>@sectie</code>,
+EOF of fence-<code>:::</code> beëindigt de open sectie.</p>
 <p>Alle systemen in één sectie hebben hetzelfde aantal LSATB-regels en dezelfde
 regelidentifiers in dezelfde volgorde (zelfde stemidentifier én dezelfde
 optionele EHM per regel).</p>
@@ -6421,7 +6419,7 @@ dezelfde kolom; zie
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-11-06
         
       </p>
       

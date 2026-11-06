@@ -3153,10 +3153,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mscz-newline" class="md-nav__link">
+  <a href="#nieuw-systeem-systeembreuk" class="md-nav__link">
     <span class="md-ellipsis">
       
-        @mscz-newline
+        @nieuw-systeem / @systeembreuk
       
     </span>
   </a>
@@ -5229,10 +5229,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mscz-newline" class="md-nav__link">
+  <a href="#nieuw-systeem-systeembreuk" class="md-nav__link">
     <span class="md-ellipsis">
       
-        @mscz-newline
+        @nieuw-systeem / @systeembreuk
       
     </span>
   </a>
@@ -5453,33 +5453,42 @@ stemregel zelf is meestal duidelijker (anker zit bij de stem). <code>@start</cod
 beide voorkomen.</p>
 <hr />
 <h2 id="sectie"><code>@sectie</code><a class="headerlink" href="#sectie" title="Permanent link">&para;</a></h2>
-<p><strong>Wat het is.</strong> Opent een nieuwe <strong>sectie</strong> met een id. Een sectie is een
-muzikale eenheid van een of meer LSATB-systemen — in bestanden <strong>zonder</strong>
-<code>@speelplan</code>.</p>
+<p><strong>Wat het is.</strong> Opent een <strong>adresseerbare sectie</strong>: een muzikale eenheid van
+een of meer LSATB-systemen die je los kunt exporteren of (in de bibliotheek)
+los kunt insluiten. Een sectie is <strong>geen</strong> speelblok.</p>
 <p><strong>Vorm.</strong> <code>@sectie</code> + spatie + id: <code>[a-z][a-z0-9_-]*</code> (kleine letters).</p>
-<p><strong>Sectie-einde.</strong> Bij een nieuwe <code>@sectie</code>, bij <strong>EOF</strong>, of (later) bij
-fence-<code>:::</code> is de <strong>laatste maatstreep</strong> van het vorige laatste systeem
-(<code>|</code>, <code>||</code>, …) het sectie-einde. Expliciet midden in een bestand (zonder
-nieuwe <code>@sectie</code>) gebruik je <code>||</code> of <code>:||</code>. Tooling schrijft bij genereren
-bij voorkeur <code>||</code>. Zie <a href="../syntax/#einde">Syntax — sectie-einde</a>.</p>
+<p><strong>Impliciete sectie.</strong> Staat er <strong>geen</strong> <code>@sectie</code> in het bestand, dan is het
+hele muzikale deel <strong>één</strong> sectie (anoniem). Die ene sectie exporteer je door
+het bestand zelf; er is geen <code>--section</code>-id. Met één of meer <code>@sectie</code>-koppen
+zijn alleen die ids adresseerbaar.</p>
+<p><strong>Sectie-einde (adresseerbaar).</strong> Een named <code>@sectie</code> loopt tot de <strong>volgende
+<code>@sectie</code></strong>, tot <strong>EOF</strong>, of (later) tot fence-<code>:::</code>. Een dubbele maatstreep
+<code>||</code> / <code>:||</code> <strong>sluit de named sectie niet</strong> — die blijft een blad-/Coria-
+markering binnen de sectie (meerdere antwoorden in één litanie-sectie).
+Zie <a href="../syntax/#einde">Syntax — sectiegrenzen</a>.</p>
 <p><strong>Wel gebruiken</strong> om delen te benoemen die je apart wilt exporteren
-(<code>mvsa mxl … --section id</code>) of om schetsen in één experiment-bestand
-uit elkaar te houden (couplet / refrein / pitch-variant).</p>
-<p><strong>Niet gebruiken</strong> samen met <code>@speelplan</code> (dan: <code>@blok</code>). Niet als litanie-cue
-(dat is <code>@tekst</code>). Niet om meerdere speelplannen in één file te nesten — één
-plan = één <code>.mvsa</code>.</p>
+(<code>mvsa mxl … --section id</code>), om schetsen in één experiment-bestand uit elkaar
+te houden, of (in de bibliotheek) als fragment achter <code>…@sectie-id</code> in een
+<code>bieb</code>-verwijzing. Alleen <code>@sectie</code>-ids horen daar; <strong>niet</strong> <code>@blok</code>-ids.</p>
+<p><strong>Niet gebruiken</strong> i.p.v. <code>@blok</code> (dat is alleen voor <code>@speelplan</code>). Niet als
+litanie-cue (dat is <code>@tekst</code>).</p>
+<p><strong>Nu vs. later.</strong> Nu mogen <code>@sectie</code> en <code>@speelplan</code> <strong>niet</strong> in hetzelfde
+bestand. Richting: later <strong>één</strong> <code>@speelplan</code> met bijbehorende <code>@blok</code>’s
+<strong>binnen</strong> één sectie (bestand zonder <code>@sectie</code> = die ene impliciete sectie).
+Zie <a href="../speelplan/">Speelplan</a> en <a href="../open-points/">Open punten</a>.</p>
 <div class="highlight"><pre><span></span><code>@sectie openingsfrase
 </code></pre></div>
 <hr />
 <h2 id="blok"><code>@blok</code><a class="headerlink" href="#blok" title="Permanent link">&para;</a></h2>
-<p><strong>Wat het is.</strong> Opent een <strong>speelblok</strong>: genoemd LSATB-segment voor een
-<code>@speelplan</code>. Geen “sectie” in de zin van <code>||</code>-afsluiting; tussen blokken is
-<code>||</code> niet verplicht.</p>
+<p><strong>Wat het is.</strong> Opent een <strong>speelblok</strong>: genoemd LSATB-segment <strong>alleen</strong> voor
+een <code>@speelplan</code>. Geen adresseerbare sectie: geen <code>--section</code>, geen
+<code>bieb …@blok-id</code>. Tussen blokken is <code>||</code> niet verplicht (wel toegestaan als
+dubbele maatstreep).</p>
 <p><strong>Vorm.</strong> <code>@blok</code> + spatie + id: <code>[1-9][0-9]*</code> <strong>of</strong> <code>[a-z][a-z0-9_-]*</code>.</p>
 <p><strong>Wel gebruiken</strong> wanneer je een speelplan hebt: elk blok één keer, volgorde in
-<code>@speelplan</code>. Eén speelplan per bestand.</p>
-<p><strong>Niet gebruiken</strong> i.p.v. <code>@tekst</code> of <code>@mscz-newline</code>; niet i.p.v. <code>@sectie</code>
-buiten een speelplan-bestand (tenzij je redactioneel een id wilt zonder plan).</p>
+<code>@speelplan</code>.</p>
+<p><strong>Niet gebruiken</strong> i.p.v. <code>@sectie</code> (export-/fragment-id); niet i.p.v. <code>@tekst</code>
+of <code>@nieuw-systeem</code>.</p>
 <p>Zie <a href="../speelplan/">Speelplan</a>.</p>
 <div class="highlight"><pre><span></span><code>@blok 1
 </code></pre></div>
@@ -5487,12 +5496,13 @@ buiten een speelplan-bestand (tenzij je redactioneel een id wilt zonder plan).</
 <h2 id="speelplan"><code>@speelplan</code><a class="headerlink" href="#speelplan" title="Permanent link">&para;</a></h2>
 <p><strong>Wat het is.</strong> Zet de <strong>canonieke klinkende volgorde</strong> van speelblokken.
 Bladmuziek (MSCZ) blijft compact (volta / herhaling / D.S. of expand);
-MXL-playback schrijft het plan uit.</p>
+MXL-playback schrijft het plan uit. Speelplan en blokken horen bij <strong>één</strong>
+sectie (nu: het hele bestand; later: binnen één <code>@sectie</code>).</p>
 <p><strong>Vorm.</strong> <code>@speelplan</code> + komma-gescheiden ids (zelfde id-vorm als <code>@blok</code>).
-Hoogstens <strong>één</strong> per bestand — nest geen plan in <code>@sectie</code>.</p>
+Hoogstens <strong>één</strong> per sectie (nu: per bestand).</p>
 <p><strong>Wel gebruiken</strong> bij vaste herhaalpatronen (bijv. alleluia 1-2-1-2-1-3).</p>
-<p><strong>Niet gebruiken</strong> samen met <code>|:</code> / <code>:|</code> in die speelblokken; niet naast
-<code>@sectie</code> in hetzelfde bestand.</p>
+<p><strong>Niet gebruiken</strong> samen met <code>|:</code> / <code>:|</code> in die speelblokken. <strong>Nu</strong> ook niet
+naast <code>@sectie</code> in hetzelfde bestand (tijdelijke limiet tot nesten).</p>
 <p>Zie <a href="../speelplan/">Speelplan</a>.</p>
 <div class="highlight"><pre><span></span><code>@speelplan 1, 2, 1, 2, 1, 3
 </code></pre></div>
@@ -5545,25 +5555,25 @@ voor het eerstvolgende LSATB-systeem. Meerdere <code>@tekst</code>-regels vóór
 systeem worden onder elkaar gezet (zelfde volgorde als in het bestand). Staat
 <code>@tekst</code> aan het eind zonder volgend systeem → <strong>warning</strong>.</p>
 <p><code>@tekst</code> forceert <strong>geen</strong> nieuw MuseScore-systeem. Wil je wél een nieuwe
-regel in de partituur, zet dan <code>@mscz-newline</code> (eventueel samen met <code>@tekst</code>).
+regel in de partituur, zet dan <code>@nieuw-systeem</code> (eventueel samen met <code>@tekst</code>).
 De cue staat boven de ge-cue-de maat. Op het <strong>partituur/MSCZ</strong>-pad: als die
 maat <strong>niet</strong> het begin van een MuseScore-systeem is, sluit export de vorige
 maat af met een <strong>dubbele maatstreep</strong> (behalve als daar al een herhaalstreep
 <code>:|</code> / <code>:||</code> staat — die blijft zichtbaar) en zet de cue als SystemText.
 Geen mid-systeem-HBox en geen spacermaat: MuseScore tekent daar een accolade
 middenin het systeem of een leeg stuk notenbalk. Wil je wél een duidelijke
-regelsprong, gebruik <code>@mscz-newline</code>. Canonieke MSCZ-eisen:
+regelsprong, gebruik <code>@nieuw-systeem</code>. Canonieke MSCZ-eisen:
 <a href="../../formats/canonical-checklists/#checklist-mscz-partituur-musescore">checklist S14–S20</a>
 en <a href="../../formats/mscz-leesbaarheid/#c--cues-gaps-hbox-accolade">leesbaarheid — cues</a>.
 Op het <strong>playback/MXL</strong>-pad (Coria): vóór
 elke mid-flow <code>@tekst</code> (niet de eerste maat van het stuk) komt dezelfde
 <code>[PAUZE]</code>-maat als na <code>||</code> — whole-rest met lyric <code>[PAUZE]</code>, cue erboven.
-Staat er al een sectie-eindestreep (<code>||</code> / <code>:||</code>) vóór die cue, dan geen
+Staat er al een dubbele maatstreep (<code>||</code> / <code>:||</code>) vóór die cue, dan geen
 tweede pauze. Herhaalstrepen (<code>:|</code>) blijven intact. Stemrust <code>r</code>/<code>R</code> binnen
 een frase (lege recite + rusten) is iets anders; zie
 <a href="../semantics/#rusten-op-de-stemregel">Rusten op de stemregel</a>.</p>
 <p>Lange cues met <code>...</code> worden op <strong>twee regels</strong> gezet: de tweede regel begint bij <code>...</code>. Is de cue breder dan de maat, dan krijgt die maat een <strong>milde</strong> MusicXML-<code>width</code> (floor/cap; zie <a href="../../formats/mscz-leesbaarheid/#c--cues-gaps-hbox-accolade">leesbaarheid C6</a>) — genoeg hint voor MuseScore, zonder een holle maat waar noten links blijven hangen.</p>
-<div class="highlight"><pre><span></span><code>@mscz-newline
+<div class="highlight"><pre><span></span><code>@nieuw-systeem
 @tekst "P: Laat ons de Heer in vrede bidden"
 L:  Heer ont-ferm_ U__  ||
 S:  a    -   -     -    ||
@@ -5572,18 +5582,21 @@ T:  c    -   -     -    ||
 B:  f    -   c     f    ||
 </code></pre></div>
 <hr />
-<h2 id="mscz-newline"><code>@mscz-newline</code><a class="headerlink" href="#mscz-newline" title="Permanent link">&para;</a></h2>
+<h2 id="nieuw-systeem-systeembreuk"><code>@nieuw-systeem</code> / <code>@systeembreuk</code><a class="headerlink" href="#nieuw-systeem-systeembreuk" title="Permanent link">&para;</a></h2>
 <p><strong>Wat het is.</strong> Geeft aan dat bij <strong>mvsa → <code>.mscz</code></strong>-conversie het
 <strong>eerstvolgende</strong> LSATB-systeem als <strong>nieuw MuseScore-systeem</strong> moet beginnen
 (nieuwe regelsprong op het blad). Heeft geen effect op de gezongen inhoud;
 alleen layout.</p>
-<p><strong>Vorm.</strong> Alleen het keyword, zonder argumenten:</p>
-<div class="highlight"><pre><span></span><code>@mscz-newline
+<p><strong>Vorm.</strong> Alleen het keyword, zonder argumenten. Twee gelijkwaardige namen:</p>
+<div class="highlight"><pre><span></span><code>@nieuw-systeem
 </code></pre></div>
+<div class="highlight"><pre><span></span><code>@systeembreuk
+</code></pre></div>
+<p>Verouderd synoniem (blijft geldig tot bronnen om zijn): <code>@mscz-newline</code>.</p>
 <p><strong>Wel gebruiken</strong> als een antwoord, couplet of cue op een <strong>nieuwe regel</strong> van
 de partituur moet staan (bijv. litanie-antwoorden onder elkaar, of een
 duidelijke visuele breuk vóór een nieuw blok). Vaak samen met <code>@tekst</code>:</p>
-<div class="highlight"><pre><span></span><code>@mscz-newline
+<div class="highlight"><pre><span></span><code>@nieuw-systeem
 @tekst "P: Gezegend … der eeuwen"
 L: A_-men_ |
 …
@@ -5592,14 +5605,14 @@ L: A_-men_ |
 <ul>
 <li>cues zonder regelsprong — alleen <code>@tekst</code> volstaat (export zet desnoods een
   dubbele maatstreep vóór de cue);</li>
-<li>sectiegrenzen in de bron — dat is <code>||</code> / <code>@sectie</code>;</li>
+<li>sectiegrenzen in de bron — dat is <code>@sectie</code> (niet <code>||</code>);</li>
 <li>scheiding van vscode-blokken zonder MSCZ-layout — dan volstaat een <strong>lege
   regel</strong> (optioneel <code>@---</code> met commentaar).</li>
 </ul>
 <p><strong>Gedrag.</strong> Geldt alleen voor het eerstvolgende LSATB-systeem (niet sticky).
 Op het eerste systeem van de partituur is een explicit new-system overbodig
-(dat systeem begint al). Staat <code>@mscz-newline</code> zonder volgend systeem →
-<strong>warning</strong>. Ongeldig met argumenten → <strong>error</strong>.</p>
+(dat systeem begint al). Staat <code>@nieuw-systeem</code> (of synoniem) zonder volgend
+systeem → <strong>warning</strong>. Ongeldig met argumenten → <strong>error</strong>.</p>
 <p>Op het partituur/MSCZ-pad: export zet <code>&lt;print new-system="yes"/&gt;</code> op de eerste
 maat van dat systeem. Op playback/MXL is de markering aanwezig maar voor Coria
 niet bedoeld als layout-sturing.</p>
@@ -5857,7 +5870,7 @@ het <a href="../../plans/translit-reviewcorpus/">reviewcorpus</a>.</p>
 effect als een <strong>lege regel</strong>. Voor een gewone scheiding tussen vscode-systemen
 volstaat die lege regel; <code>@---</code> is vooral handig als je bij de scheiding
 <strong>commentaar op dezelfde regel</strong> wilt (<code>@--- tweede couplet</code>). Voor een
-<strong>nieuwe MuseScore-regel</strong> op het blad: gebruik <code>@mscz-newline</code>, niet alleen
+<strong>nieuwe MuseScore-regel</strong> op het blad: gebruik <code>@nieuw-systeem</code>, niet alleen
 <code>@---</code> of een lege regel.</p>
 <p><strong>Vorm.</strong> <code>@---</code> of <code>@ ---</code>. Optioneel <strong>commentaar</strong> erna op dezelfde regel
 (wordt genegeerd, geen error/warning), bv. <code>@--- tweede systeem</code> of
@@ -5881,7 +5894,7 @@ S: a     … ||
 …
 </code></pre></div>
 <p><strong>Niet gebruiken</strong> als zichtbare inhoud op het blad — daarvoor is <code>@tekst</code>.
-Ook niet als vervanging van <code>@mscz-newline</code> (dat forceert de MSCZ-regelsprong).
+Ook niet als vervanging van <code>@nieuw-systeem</code> (dat forceert de MSCZ-regelsprong).
 Zonder commentaar is <code>@---</code> overbodig naast een lege regel.</p>
 <hr />
 <h2 id="onbekende-keywords">Onbekende keywords<a class="headerlink" href="#onbekende-keywords" title="Permanent link">&para;</a></h2>
@@ -5927,7 +5940,7 @@ komt het op deze pagina met vaste argumenten en gedrag.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-02
+        Bijgewerkt: 2026-11-06
         
       </p>
       

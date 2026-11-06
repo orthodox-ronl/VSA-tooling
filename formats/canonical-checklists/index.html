@@ -5251,7 +5251,7 @@ en Oefenhoek <code>VSA-demo/scripts/mscz-product-transforms.md</code> (Coria-kol
 <tr>
 <td>M12</td>
 <td><strong>Dubbele maatstreep</strong></td>
-<td>Sectie-einde (<code>\|\|</code>) → <code>light-light</code>; Coria mag daar een pauzemaat van maken (Oefenhoek-transform). Pauzemaat: <code>@number</code> = <code>Np</code> (bijv. <code>6p</code>); <strong>geen</strong> hernummering van volgende koormaten — <a href="../mvsa/#canonieke-maatnummers">canonieke maatnummers</a>.</td>
+<td><code>\|\|</code> / <code>:\|\|</code> → <code>light-light</code> (blad/Coria; <strong>geen</strong> <code>@sectie</code>-grens). Coria mag daar een pauzemaat van maken (Oefenhoek-transform). Pauzemaat: <code>@number</code> = <code>Np</code> (bijv. <code>6p</code>); <strong>geen</strong> hernummering van volgende koormaten — <a href="../mvsa/#canonieke-maatnummers">canonieke maatnummers</a>.</td>
 </tr>
 <tr>
 <td>M13</td>
@@ -5266,7 +5266,7 @@ en Oefenhoek <code>VSA-demo/scripts/mscz-product-transforms.md</code> (Coria-kol
 <tr>
 <td>M15</td>
 <td><strong><code>@tekst</code>-pauze</strong></td>
-<td>Mid-flow <code>@tekst</code> (niet maat 1): zelfde <code>[PAUZE]</code>-maat als na <code>\|\|</code> (cue op de pauzemaat). Geen dubbele pauze als de vorige maat al sectie-einde is.</td>
+<td>Mid-flow <code>@tekst</code> (niet maat 1): zelfde <code>[PAUZE]</code>-maat als na <code>\|\|</code> (cue op de pauzemaat). Geen dubbele pauze als de vorige maat al <code>\|\|</code> / dubbele streep heeft.</td>
 </tr>
 <tr>
 <td>M16</td>
@@ -5358,7 +5358,7 @@ Leesregels in deze repo: <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a>.<
 <tr>
 <td>S9</td>
 <td><strong>Maatstrepen</strong></td>
-<td>Enkele streep = frase/adem; <strong>dubbele</strong> (<code>light-light</code>) = sectie-einde (<code>\|\|</code> in <code>.mvsa</code>) of scheiding vóór mid-flow <code>@tekst</code> (S15); slot = <code>light-heavy</code>. Eindstreep per systeem zichtbaar. Herhaalstrepen (<code>\|:</code> / <code>:\|</code> / <code>:\|\|</code>) blijven herhaalpunten tonen (S16).</td>
+<td>Enkele streep = frase/adem; <strong>dubbele</strong> (<code>light-light</code>) = <code>\|\|</code> / <code>:\|\|</code> in <code>.mvsa</code> (dubbele maatstreep / Coria-pauze; <strong>geen</strong> <code>@sectie</code>-grens) of scheiding vóór mid-flow <code>@tekst</code> (S15); slot = <code>light-heavy</code>. Eindstreep per systeem zichtbaar. Herhaalstrepen (<code>\|:</code> / <code>:\|</code> / <code>:\|\|</code>) blijven herhaalpunten tonen (S16).</td>
 </tr>
 <tr>
 <td>S10</td>
@@ -5388,7 +5388,7 @@ Leesregels in deze repo: <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a>.<
 <tr>
 <td>S15</td>
 <td><strong>Mid-flow <code>@tekst</code></strong></td>
-<td>Cue als <strong>SystemText</strong> boven de ge-cue-de maat. Vorige maat: <strong>dubbele streep</strong> (<code>light-light</code>), tenzij daar al <code>:\|</code> / <code>:\|\|</code> / <code>\|\|</code> staat (die blijft). <strong>Geen</strong> spacermaat met notenbalklijnen en <strong>geen</strong> mid-systeem-HBox (S14). Wil je een regelsprong: <code>@mscz-newline</code>. MusicXML-<code>width</code> voor de cue-maat: <strong>mild</strong> (floor/cap; <a href="../mscz-leesbaarheid/#c--cues-gaps-hbox-accolade">leesbaarheid C6</a>).</td>
+<td>Cue als <strong>SystemText</strong> boven de ge-cue-de maat. Vorige maat: <strong>dubbele streep</strong> (<code>light-light</code>), tenzij daar al <code>:\|</code> / <code>:\|\|</code> / <code>\|\|</code> staat (die blijft). <strong>Geen</strong> spacermaat met notenbalklijnen en <strong>geen</strong> mid-systeem-HBox (S14). Wil je een regelsprong: <code>@nieuw-systeem</code>. MusicXML-<code>width</code> voor de cue-maat: <strong>mild</strong> (floor/cap; <a href="../mscz-leesbaarheid/#c--cues-gaps-hbox-accolade">leesbaarheid C6</a>).</td>
 </tr>
 <tr>
 <td>S16</td>
@@ -5413,7 +5413,7 @@ Leesregels in deze repo: <a href="../mscz-leesbaarheid/">MSCZ-leesbaarheid</a>.<
 <tr>
 <td>S20</td>
 <td><strong>Volta alleen boven SA</strong></td>
-<td>MusicXML-<code>&lt;ending&gt;</code> (herhaal-haken 1./2./…) alleen op de <strong>bovenste balk</strong> (SA / P1), niet op TB. Anders tekent MuseScore een tweede set haken boven de basbalk — zichtbaar onder de lyrics tussen de balken. Herhaalstrepen (<code>\|:</code> / <code>:\|</code>) blijven op beide balken. Zelfde plaatsingsregel als Segno/Fine/D.S.-nav-marks.</td>
+<td>MusicXML-<code>&lt;ending&gt;</code> (herhaal-haken 1./2./…) alleen op de <strong>bovenste balk</strong> (SA / P1), niet op TB. Anders tekent MuseScore een tweede set haken boven de basbalk — zichtbaar onder de lyrics tussen de balken. Herhaalstrepen (<code>\|:</code> / <code>:\|</code>) blijven op beide balken. Zelfde plaatsingsregel als Segno/Fine/D.S.-nav-marks. <strong>Segno/Coda</strong> (links): MSCZ-postprocess zet spatium-offset zodat het teken rechts van de sleutel en dichter bij de SA-balk staat — niet klem in de accolade of in de spleet tussen systemen. Fine / To Coda / D.S.|D.C. (rechts) ongemoeid.</td>
 </tr>
 </tbody>
 </table>
@@ -5630,7 +5630,7 @@ Editorzoeken in canonieke <code>.vsa</code>/<code>.mvsa</code> loopt daarnaast v
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-01
+        Bijgewerkt: 2026-11-06
         
       </p>
       

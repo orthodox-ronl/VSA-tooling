@@ -5176,18 +5176,17 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
     hetzelfde systeem; wél tussen twee systemen (primaire scheiding). Optioneel
     mag <code>@---</code> (met commentaar) of een andere directive hetzelfde doen.
     <code>#</code>-commentaar mag wél tussen markers van hetzelfde systeem.</li>
-<li>Een <strong>sectie</strong> (<code>@sectie</code> of anoniem) eindigt door: (a) <code>||</code> of <code>:||</code> op alle
-   LSATB-regels van een systeem (expliciet midden in het bestand); of (b) een
-   nieuwe <code>@sectie</code> — de <strong>laatste maatstreep</strong> van het vorige laatste systeem
-   (<code>|</code> of <code>||</code>, …) is dan het sectie-einde; of (c) einde van het bestand (EOF);
-   of (d) sluiten van een <code>::: mvsa-notatie</code> / <code>::: mvsa</code>-fence (zelfde als EOF).
-   Geen warning <code>MVSA-SECTIE-IMPLICIT</code> meer voor (b)/(c)/(d).
-   <strong>Uitzondering:</strong> speelblokken (<code>@blok</code>) — geen <code>||</code>-eis tussen blokken
-   (zie <a href="../speelplan/">Speelplan</a>).</li>
+<li>Een <strong>adresseerbare sectie</strong> (<code>@sectie</code> of de impliciete sectie) eindigt
+   door: (a) een nieuwe <code>@sectie</code>; of (b) EOF; of (c) sluiten van een
+   <code>::: mvsa-notatie</code> / <code>::: mvsa</code>-fence. <strong><code>||</code> / <code>:||</code> sluit geen sectie</strong>
+   (wel dubbele maatstreep / Coria-pauze). Geen warning
+   <code>MVSA-SECTIE-IMPLICIT</code>. Speelblokken (<code>@blok</code>): idem tot volgend <code>@blok</code>
+   of EOF (zie <a href="../speelplan/">Speelplan</a>).</li>
 <li><code>@sectie</code> <em>id</em> voldoet aan <code>[a-z][a-z0-9_-]*</code>.
 5a. <code>@blok</code> / <code>@speelplan</code>: zie <a href="../speelplan/">Speelplan</a>. Eén <code>@speelplan</code> per
-    bestand; geen <code>@sectie</code>/anonieme muziek naast een speelplan; geen
-    herhaalstrepen in speelplan-blokken.</li>
+    bestand; <strong>nu</strong> geen <code>@sectie</code>/anonieme muziek naast een speelplan
+    (later: plan binnen één sectie); geen herhaalstrepen in speelplan-blokken.
+    <code>--section</code> selecteert alleen <code>@sectie</code>-ids, nooit <code>@blok</code>.</li>
 </ol>
 <h2 id="sync">Sync<a class="headerlink" href="#sync" title="Permanent link">&para;</a></h2>
 <ol>
@@ -5215,14 +5214,15 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
 <li>Onbekende <code>@</code>-keywords (geldige vorm, niet in
    <a href="../keywords/">Keywords</a>): <strong>warning</strong>. Ongeldige keyword-vorm (bijv. <code>@1foo</code>):
    ook <strong>warning</strong>. Gedefinieerd in v0: sticky (<code>@do</code>, <code>@mode</code>, <code>@oct</code>,
-   <code>@start</code>), layout (<code>@tekst</code>, <code>@mscz-newline</code>, <code>@sectie</code>, <code>@blok</code>,
+   <code>@start</code>), layout (<code>@tekst</code>, <code>@nieuw-systeem</code>, <code>@sectie</code>, <code>@blok</code>,
    <code>@speelplan</code>, <code>@---</code>), actieve metadata (<code>@title</code>, <code>@ondertitel</code>,
    <code>@composer</code>, <code>@tekstdichter</code>, <code>@arrangeur</code>, <code>@vertaler</code>, <code>@bron</code>,
    <code>@copyright</code>), en gereserveerde metadata (<code>@toon</code>, <code>@taal</code>, <code>@genre</code>,
    <code>@opmerkingen</code>).</li>
 <li>Sticky / <code>@tekst</code> / metadata met ongeldige waarde: <strong>error</strong>
-    (<code>MVSA-META</code> voor string-metadata). <code>@mscz-newline</code> met argumenten:
-    <strong>error</strong>. <code>@tekst</code> of <code>@mscz-newline</code> zonder volgend LSATB-systeem:
+    (<code>MVSA-META</code> voor string-metadata). <code>@nieuw-systeem</code> / <code>@systeembreuk</code>
+    (of verouderd <code>@mscz-newline</code>) met argumenten: <strong>error</strong>. <code>@tekst</code> of
+    <code>@nieuw-systeem</code> zonder volgend LSATB-systeem:
     <strong>warning</strong>.</li>
 </ol>
 <h2 id="canonieke-vorm-warning">Canonieke vorm (warning)<a class="headerlink" href="#canonieke-vorm-warning" title="Permanent link">&para;</a></h2>
@@ -5282,7 +5282,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-11-06
         
       </p>
       

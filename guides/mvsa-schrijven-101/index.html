@@ -5544,12 +5544,12 @@ horen <strong>vóór</strong> of <strong>tussen</strong> LSATB-systemen — niet
 </tr>
 <tr>
 <td><code>@sectie</code></td>
-<td>Label voor een stuk (export <code>--section</code>); <strong>niet</strong> bij <code>@speelplan</code></td>
-<td>—</td>
+<td>Adresseerbaar deel (<code>--section</code> / later bieb-<code>…@id</code>); nu niet bij plan</td>
+<td>impliciet: heel file</td>
 </tr>
 <tr>
 <td><code>@blok</code></td>
-<td>Speelblok-id voor <code>@speelplan</code> (één plan per bestand)</td>
+<td>Alleen speelplan-bouwsteen (geen <code>--section</code>)</td>
 <td>zie speelplan-spec</td>
 </tr>
 <tr>
@@ -5602,7 +5602,8 @@ S: fa            so- ||
 <p>Complete lijst (wel/niet gebruiken, vorm, onbekende keywords):
 <a href="../../specification-mvsa/keywords/">Keywords (<code>@…</code>)</a>. Speelplan en bladvorm:
 <a href="../../specification-mvsa/speelplan/">Speelplan</a> — één <code>@speelplan</code> per
-<code>.mvsa</code>; <code>@sectie</code> alleen in bestanden zonder speelplan.</p>
+bestand; <code>@blok</code> alleen voor dat plan; <code>@sectie</code> voor named export (nu niet
+in hetzelfde bestand als een speelplan; later mag een plan binnen één sectie).</p>
 <hr />
 <h2 id="3-l-regels-schrijven">3. L-regels schrijven<a class="headerlink" href="#3-l-regels-schrijven" title="Permanent link">&para;</a></h2>
 <p>De <code>L:</code>-regel is de <strong>telling</strong>: lettergrepen, ELM-duur, recite en melisma.
@@ -6155,7 +6156,7 @@ mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o gen
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-11-06
         
       </p>
       

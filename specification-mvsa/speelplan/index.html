@@ -5314,9 +5314,28 @@ wil opschrijven en de uitvoeringsvolgorde apart wil vastleggen.</p>
 <p><strong>Besluit bladvorm (“als vanzelf”):</strong> optie <strong>A</strong> — compact blad met
 conventionele herhaal-/volta-/D.S.-notatie. Niet standaard: speelplan ook op
 papier uitschrijven (dat is alleen het vangnet als geen navigatiepatroon past).</p>
-<p><strong>Bestandsgrens:</strong> één <code>.mvsa</code> ↔ hoogstens <strong>één</strong> <code>@speelplan</code>. Geen nesten
-van speelplan in <code>@sectie</code>. Meerdere stukken met eigen plan → aparte bestanden.
-<code>@sectie</code> blijft voor bestanden <strong>zonder</strong> speelplan (schetsen, <code>--section</code>).</p>
+<p><strong>Grenzen (model):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nu (afgedwongen)</th>
+<th>Richting (later)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hoogstens <strong>één</strong> <code>@speelplan</code> per bestand; <strong>geen</strong> <code>@sectie</code> in hetzelfde bestand</td>
+<td>Speelplan + <code>@blok</code>’s <strong>binnen</strong> één sectie; bestand zonder <code>@sectie</code> = die ene impliciete sectie</td>
+</tr>
+<tr>
+<td>Meerdere stukken met eigen plan → aparte bestanden</td>
+<td>Meerdere secties per bestand, elk met hoogstens één plan (als nodig)</td>
+</tr>
+</tbody>
+</table>
+<p><code>@sectie</code> is de <strong>adresseerbare</strong> eenheid (<code>--section</code>, bibliotheek-fragment).
+<code>@blok</code> is <strong>alleen</strong> speelplan-materiaal — geen export-id, geen <code>…@blok</code> in
+een <code>bieb</code>-verwijzing.</p>
 <p>Zonder <code>@speelplan</code> blijft het huidige gedrag: documentvolgorde = klinkende
 volgorde. Open herhalingen (litanie: <code>|:</code> … <code>:|</code> zonder vaste N) horen
 <strong>buiten</strong> een speelplan; MusicXML-<code>&lt;repeat&gt;</code> blijft daar geldig voor blad én
@@ -5333,8 +5352,12 @@ formule-frasen). Speelplan is voor vaste SATB-blokken in één <code>.mvsa</code
 </thead>
 <tbody>
 <tr>
+<td><strong>Sectie</strong></td>
+<td>Adresseerbare eenheid (<code>@sectie</code> <em>id</em>, of één impliciete sectie zonder <code>@sectie</code>)</td>
+</tr>
+<tr>
 <td><strong>Speelblok</strong></td>
-<td>Genoemd LSATB-segment (<code>@blok</code> <em>id</em>); staat één keer in de bron</td>
+<td>Genoemd LSATB-segment (<code>@blok</code> <em>id</em>) <strong>alleen</strong> voor <code>@speelplan</code>; staat één keer in de bron</td>
 </tr>
 <tr>
 <td><strong>Speelplan</strong></td>
@@ -5359,11 +5382,12 @@ formule-frasen). Speelplan is voor vaste SATB-blokken in één <code>.mvsa</code
 <div class="highlight"><pre><span></span><code>@speelplan 1, 2, 1, 2, 1, 3
 </code></pre></div>
 <ul>
-<li>Hoogstens <strong>één</strong> <code>@speelplan</code> per bestand.</li>
+<li>Hoogstens <strong>één</strong> <code>@speelplan</code> per sectie (nu: per bestand).</li>
 <li>Argument: komma-gescheiden speelblok-ids (spaties mogen rond komma’s).</li>
 <li>Staat bij de document-metadata (bij <code>@do</code> / <code>@title</code>), vóór het eerste
   speelblok.</li>
-<li>Elk id moet voorkomen als <code>@blok</code> <em>id</em> in hetzelfde bestand.</li>
+<li>Elk id moet voorkomen als <code>@blok</code> <em>id</em> in hetzelfde bestand (later: in
+  dezelfde sectie).</li>
 </ul>
 <h3 id="blok"><code>@blok</code><a class="headerlink" href="#blok" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>@blok 1
@@ -5384,13 +5408,49 @@ L: … ||
 <li>Elk speelblok-id komt hoogstens één keer voor.</li>
 <li>Tussen blokken is <strong><code>||</code> niet verplicht</strong> (en vaak ongewenst: <code>||</code> triggert
   in Coria een pauze). Geen <code>||</code>-eis tussen blokken (in tegenstelling tot
-  expliciete sectie-eindestreep midden in een <code>@sectie</code>-bestand).
+  dubbele maatstreep midden in een <code>@sectie</code>-bestand).
   Optioneel <code>||</code> alleen op het <strong>laatste</strong> blok van het bestand.</li>
 </ul>
-<p><strong><code>@sectie</code> vs <code>@blok</code>:</strong> gebruik <code>@sectie</code> in bestanden <strong>zonder</strong> <code>@speelplan</code>
-(export-id, schetsen). In een bestand <strong>met</strong> <code>@speelplan</code> moeten alle
-muzikale segmenten via <code>@blok</code> (geen anonieme sectie, geen <code>@sectie</code>).
-Nest geen speelplan in een sectie — één plan per bestand.</p>
+<p><strong><code>@sectie</code> vs <code>@blok</code> (scherp):</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>@sectie</code></th>
+<th><code>@blok</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rol</td>
+<td>Adresseerbaar deel van de bron</td>
+<td>Bouwsteen voor <code>@speelplan</code></td>
+</tr>
+<tr>
+<td>Export</td>
+<td><code>mvsa … --section *id*</code></td>
+<td>Niet via <code>--section</code></td>
+</tr>
+<tr>
+<td>Bibliotheek-fragment</td>
+<td><code>…@sectie-id</code></td>
+<td>Niet</td>
+</tr>
+<tr>
+<td>Nu met speelplan</td>
+<td>Verboden in hetzelfde bestand</td>
+<td>Verplicht voor elk muzikaal segment</td>
+</tr>
+<tr>
+<td>Later</td>
+<td>Mag speelplan + blokken <strong>bevatten</strong></td>
+<td>Blijft binnen die ene sectie</td>
+</tr>
+</tbody>
+</table>
+<p>Nu: bestand <strong>met</strong> <code>@speelplan</code> → alle muzikale segmenten via <code>@blok</code> (geen
+anonieme sectie, geen <code>@sectie</code>). Bestand <strong>zonder</strong> <code>@speelplan</code> → <code>@sectie</code>
+voor named delen, of één impliciete sectie.</p>
 <h2 id="herhaalstrepen-en-speelplan">Herhaalstrepen en speelplan<a class="headerlink" href="#herhaalstrepen-en-speelplan" title="Permanent link">&para;</a></h2>
 <p>In een speelblok dat in <code>@speelplan</code> voorkomt zijn <strong><code>|:</code></strong> en <strong><code>:|</code></strong>
 (en <strong><code>:||</code></strong>) <strong>verboden</strong>. Canonieke volgorde komt uit het speelplan, niet uit
@@ -5453,7 +5513,7 @@ blokken (zie hierboven).</p>
 <tr>
 <td><code>MVSA-SPEELPLAN-ANON</code></td>
 <td>error</td>
-<td>Anonieme sectie of <code>@sectie</code> terwijl speelplan bestaat</td>
+<td>Anonieme sectie of <code>@sectie</code> terwijl speelplan bestaat (tijdelijk tot nesten)</td>
 </tr>
 <tr>
 <td><code>MVSA-SPEELPLAN-REPEAT-BAR</code></td>
@@ -5558,7 +5618,7 @@ L:   Al le.&amp;. lu_ i_  a_   … |
 S-:  -    -&amp;/  /   \   … |
 …
 
-@mscz-newline
+@nieuw-systeem
 
 @blok 2
 L:  Al-&amp;-&amp;-&amp;.&amp;.&amp;-  … |
@@ -5621,7 +5681,7 @@ na <code>3</code>, Coda-teken bij <code>4</code>.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-11-06
         
       </p>
       

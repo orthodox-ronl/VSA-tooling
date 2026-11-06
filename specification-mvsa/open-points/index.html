@@ -5187,6 +5187,11 @@ audio via <code>mvsa audio</code>).</p>
 <td><a href="../speelplan/">speelplan.md</a> «Bewust later»</td>
 </tr>
 <tr>
+<td>Speelplan binnen <code>@sectie</code></td>
+<td>Nu: <code>@sectie</code> en <code>@speelplan</code> mutex. Later: plan+<code>@blok</code> binnen één sectie; bestand zonder <code>@sectie</code> = één impliciete sectie. Fragment-ids blijven alleen <code>@sectie</code></td>
+<td><a href="../keywords/#sectie">keywords <code>@sectie</code></a>; <a href="../speelplan/">speelplan.md</a></td>
+</tr>
+<tr>
 <td>Blokhergebruik</td>
 <td>Secties of stemmen hergebruiken (<code>@voices</code>, deelbereiken)</td>
 <td>Experiment: <code>examples/mvsa/trisagion-8a-slav-hemelum.mvsa</code></td>
@@ -5317,7 +5322,7 @@ audio via <code>mvsa audio</code>).</p>
 </tr>
 <tr>
 <td>Sectie-einde</td>
-<td>Bij EOF / nieuwe <code>@sectie</code> / (later) fence: laatste maatstreep = einde; geen <code>MVSA-SECTIE-IMPLICIT</code></td>
+<td>Bij EOF / nieuwe <code>@sectie</code> / (later) fence; <code>\|\|</code> sluit geen adresseerbare sectie; geen <code>MVSA-SECTIE-IMPLICIT</code></td>
 </tr>
 <tr>
 <td>MSCZ-layout + id</td>
@@ -5376,7 +5381,7 @@ audio via <code>mvsa audio</code>).</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-25
+        Bijgewerkt: 2026-11-06
         
       </p>
       
