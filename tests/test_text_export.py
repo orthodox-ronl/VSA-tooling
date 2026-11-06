@@ -94,8 +94,8 @@ B: b2           d3&-&-    g3   ||
     assert "heiligeSterke" not in text
 
 
-def test_mvsa_word_continues_across_mscz_newline() -> None:
-    """``@mscz-newline`` + leidend ``-``: één woord, geen spatie/newline ertussen."""
+def test_mvsa_word_continues_across_nieuw_systeem() -> None:
+    """``@nieuw-systeem`` + leidend ``-``: één woord, geen spatie/newline ertussen."""
     src = """\
 @do F4
 @mode major
@@ -106,7 +106,7 @@ A: do re ||
 T: do re ||
 B: do re ||
 
-@mscz-newline
+@nieuw-systeem
 L: -bij-nen ||
 S: mi fa ||
 A: mi fa ||

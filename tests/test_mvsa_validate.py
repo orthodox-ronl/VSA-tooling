@@ -315,7 +315,7 @@ S: do ||
     assert "zonder volgend" in orphans[0].message
 
 
-def test_validate_mscz_newline_ok_and_bad():
+def test_validate_nieuw_systeem_ok_and_bad():
     ok = """\
 @do F4
 @mode major
@@ -325,7 +325,7 @@ S: do |
 A: do |
 T: do |
 B: do |
-@mscz-newline
+@nieuw-systeem
 L: b_ ||
 S: re ||
 A: re ||
@@ -334,22 +334,27 @@ B: re ||
 """
     assert validate_mvsa_text(ok) == []
 
+    for synonym in ("nieuw-systeem", "systeembreuk", "mscz-newline"):
+        ok_syn = ok.replace("@nieuw-systeem", f"@{synonym}", 1)
+        assert validate_mvsa_text(ok_syn) == [], synonym
+
     bad = """\
-@mscz-newline extra
+@nieuw-systeem extra
 @sectie demo
 L: a_ ||
 S: do ||
 """
     diags = validate_mvsa_text(bad)
     assert any(d.code == "MVSA-MSCZ-NEWLINE" and d.severity == "error" for d in diags)
+    assert any("@nieuw-systeem" in d.message for d in diags)
 
 
-def test_validate_mscz_newline_orphan_warning():
+def test_validate_nieuw_systeem_orphan_warning():
     text = """\
 @sectie demo
 L: a_ ||
 S: do ||
-@mscz-newline
+@systeembreuk
 """
     diags = validate_mvsa_text(text)
     orphans = [
@@ -357,6 +362,7 @@ S: do ||
     ]
     assert orphans, diags
     assert "zonder volgend" in orphans[0].message
+    assert "@systeembreuk" in orphans[0].message
 
 
 def test_validate_height_token_elm_on_stem():

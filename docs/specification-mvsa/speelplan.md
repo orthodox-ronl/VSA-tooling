@@ -184,7 +184,7 @@ L:   Al le.&. lu_ i_  a_   … |
 S-:  -    -&/  /   \   … |
 …
 
-@mscz-newline
+@nieuw-systeem
 
 @blok 2
 L:  Al-&-&-&.&.&-  … |

@@ -79,14 +79,15 @@ errors heeft. Alleen primaire `L` als lyric-laag; geen blokhergebruik.
 9. Onbekende `@`-keywords (geldige vorm, niet in
    [Keywords](keywords.md)): **warning**. Ongeldige keyword-vorm (bijv. `@1foo`):
    ook **warning**. Gedefinieerd in v0: sticky (`@do`, `@mode`, `@oct`,
-   `@start`), layout (`@tekst`, `@mscz-newline`, `@sectie`, `@blok`,
+   `@start`), layout (`@tekst`, `@nieuw-systeem`, `@sectie`, `@blok`,
    `@speelplan`, `@---`), actieve metadata (`@title`, `@ondertitel`,
    `@composer`, `@tekstdichter`, `@arrangeur`, `@vertaler`, `@bron`,
    `@copyright`), en gereserveerde metadata (`@toon`, `@taal`, `@genre`,
    `@opmerkingen`).
 10. Sticky / `@tekst` / metadata met ongeldige waarde: **error**
-    (`MVSA-META` voor string-metadata). `@mscz-newline` met argumenten:
-    **error**. `@tekst` of `@mscz-newline` zonder volgend LSATB-systeem:
+    (`MVSA-META` voor string-metadata). `@nieuw-systeem` / `@systeembreuk`
+    (of verouderd `@mscz-newline`) met argumenten: **error**. `@tekst` of
+    `@nieuw-systeem` zonder volgend LSATB-systeem:
     **warning**.
 
 ## Canonieke vorm (warning)

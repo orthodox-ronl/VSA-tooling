@@ -39,7 +39,7 @@ Bij review van `.mscz` / MuseScore-PDF:
 8. **Geen** accolade/bracket middenin een systeem (alleen bij systeembegin).
 9. **Geen** leeg stuk notenbalk (spacermaat) of mid-systeem-HBox vóór een
    `@tekst`-cue; scheiding = dubbele streep + SystemText (of
-   `@mscz-newline`).
+   `@nieuw-systeem`).
 10. Leidende `|:` maakt **geen** lege rustmaat; herhaalpunten (`:|`) blijven
     zichtbaar.
 11. Alle `@tekst`-cues staan als SystemText (ook meerregelig met `...`).
@@ -139,7 +139,7 @@ Contract: checklist MSCZ **S14–S20**. MuseScore-gedrag dat we vermijden:
 | #   | Regel                                                                                                                                                                       |
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | C1  | Mid-flow `@tekst` (niet begin van MuseScore-systeem): vorige maat **dubbele streep**, cue = **SystemText**. Geen HBox, geen spacermaat.                                     |
-| C2  | `@tekst` forceert **geen** systeembreuk; gebruik `@mscz-newline` voor een nieuwe regel op het blad.                                                                         |
+| C2  | `@tekst` forceert **geen** systeembreuk; gebruik `@nieuw-systeem` (of `@systeembreuk`) voor een nieuwe regel op het blad.                                                   |
 | C3  | Korte rust-only / `print-object=no`-maten: **strippen** in MSCZ-postprocess; niet vervangen door mid-systeem-HBox.                                                          |
 | C4  | Trailing HBox aan staff-eind (vóór `</Staff>` / colofon-VBox): weg.                                                                                                         |
 | C5  | Accolade/bracket alleen bij systeembegin.                                                                                                                                   |

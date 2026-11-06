@@ -1374,8 +1374,8 @@ B: do ||
     assert 'miscellaneous-field name="bron">koormap Hemelum</miscellaneous-field>' in playback
 
 
-def test_mscz_newline_emits_new_system():
-    text = """\
+def test_nieuw_systeem_emits_new_system():
+    template = """\
 @do F4
 @mode major
 @sectie demo
@@ -1384,7 +1384,7 @@ S: do |
 A: do |
 T: do |
 B: do |
-@mscz-newline
+@{keyword}
 @tekst "P: cue op nieuw systeem"
 L: b_ ||
 S: re ||
@@ -1392,20 +1392,24 @@ A: re ||
 T: re ||
 B: re ||
 """
-    doc = parse_mvsa(text)
-    assert doc.sections[0].systems[0].mscz_newline is False
-    assert doc.sections[0].systems[1].mscz_newline is True
-    assert doc.sections[0].systems[1].staff_texts == ["P: cue op nieuw systeem"]
+    for keyword in ("nieuw-systeem", "systeembreuk", "mscz-newline"):
+        text = template.format(keyword=keyword)
+        doc = parse_mvsa(text)
+        assert doc.sections[0].systems[0].mscz_newline is False, keyword
+        assert doc.sections[0].systems[1].mscz_newline is True, keyword
+        assert doc.sections[0].systems[1].staff_texts == [
+            "P: cue op nieuw systeem"
+        ], keyword
 
-    xml = export_mvsa_to_musicxml(text, layout="partituur")
-    assert xml.count('<print new-system="yes"/>') == 1
-    # Met new-system geen cue-spacer nodig vóór de tweede maat.
-    assert '<note print-object="no"' not in xml
-    p1 = xml.split('<part id="P1">')[1].split("</part>")[0]
-    measures = p1.split("<measure ")
-    # [1]=eerste maat, [2]=tweede maat met new-system + cue
-    assert "new-system" in measures[2]
-    assert "P: cue op nieuw systeem" in measures[2]
+        xml = export_mvsa_to_musicxml(text, layout="partituur")
+        assert xml.count('<print new-system="yes"/>') == 1, keyword
+        # Met new-system geen cue-spacer nodig vóór de tweede maat.
+        assert '<note print-object="no"' not in xml, keyword
+        p1 = xml.split('<part id="P1">')[1].split("</part>")[0]
+        measures = p1.split("<measure ")
+        # [1]=eerste maat, [2]=tweede maat met new-system + cue
+        assert "new-system" in measures[2], keyword
+        assert "P: cue op nieuw systeem" in measures[2], keyword
 
 
 

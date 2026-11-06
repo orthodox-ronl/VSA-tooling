@@ -67,8 +67,21 @@ ALLOWED_DIRECTIVES = frozenset(
         "toon",
         "genre",
         "opmerkingen",
-        "mscz-newline",
+        # Systeembreuk op het blad (MSCZ new-system); zie SYSTEM_BREAK_DIRECTIVES.
+        "nieuw-systeem",
+        "systeembreuk",
+        "mscz-newline",  # verouderd synoniem; blijft tot bronnen om zijn
         "taal",  # sticky: nl|ksl|auto óf L=/L1=-toekenningen
+    }
+)
+# Forceert MuseScore-systeembreuk vóór het volgende LSATB-systeem.
+# Canonieke namen: ``nieuw-systeem`` / ``systeembreuk``.
+# ``mscz-newline`` blijft als verouderd synoniem tot er geen bronnen meer zijn.
+SYSTEM_BREAK_DIRECTIVES = frozenset(
+    {
+        "nieuw-systeem",
+        "systeembreuk",
+        "mscz-newline",
     }
 )
 # Document-metadata met quoted string (laatste waarde wint).
@@ -355,7 +368,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
     current: _Section | None = None
     pending_sectie: tuple[str, int, str] | None = None  # id, line, origin
     pending_tekst_lines: list[int] = []
-    pending_mscz_newline_lines: list[int] = []
+    pending_mscz_newline_lines: list[tuple[int, str]] = []  # line, keyword
     i = 0
     n = len(lines)
 
@@ -417,8 +430,8 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                 _validate_directive_value(name, rest, line_no, diagnostics)
                 if name == "tekst" and parse_tekst_argument(rest) is not None:
                     pending_tekst_lines.append(line_no)
-                elif name == "mscz-newline" and not rest:
-                    pending_mscz_newline_lines.append(line_no)
+                elif name in SYSTEM_BREAK_DIRECTIVES and not rest:
+                    pending_mscz_newline_lines.append((line_no, name))
             else:
                 diagnostics.append(
                     MvsaDiagnostic(
@@ -531,11 +544,11 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                 severity="warning",
             )
         )
-    for nl_line in pending_mscz_newline_lines:
+    for nl_line, nl_name in pending_mscz_newline_lines:
         diagnostics.append(
             MvsaDiagnostic(
                 "MVSA-MSCZ-NEWLINE",
-                "@mscz-newline zonder volgend LSATB-systeem",
+                f"@{nl_name} zonder volgend LSATB-systeem",
                 nl_line,
                 severity="warning",
             )
@@ -734,12 +747,12 @@ def _validate_directive_value(
                     line_no,
                 )
             )
-    elif name == "mscz-newline":
+    elif name in SYSTEM_BREAK_DIRECTIVES:
         if rest:
             diagnostics.append(
                 MvsaDiagnostic(
                     "MVSA-MSCZ-NEWLINE",
-                    f"@mscz-newline neemt geen argumenten (kreeg {rest!r})",
+                    f"@{name} neemt geen argumenten (kreeg {rest!r})",
                     line_no,
                 )
             )

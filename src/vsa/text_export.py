@@ -148,7 +148,7 @@ def plain_text_from_mvsa(source: str) -> str:
     """Gezongen tekst uit een .mvsa-bron (alle L-stems, documentvolgorde).
 
     Woordvoortzetting (leidend ``-``/``=`` / ``continues_word``) plakt over
-    systemen én sectiegrenzen heen: ``@mscz-newline`` is geen woordbreuk.
+    systemen én sectiegrenzen heen: ``@nieuw-systeem`` is geen woordbreuk.
     Geen newline midden in een voortgezet woord. Secties zonder voortzetting
     worden met newline gescheiden.
     """

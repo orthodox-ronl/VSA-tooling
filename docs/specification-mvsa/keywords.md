@@ -180,7 +180,7 @@ plan = één `.mvsa`.
 **Wel gebruiken** wanneer je een speelplan hebt: elk blok één keer, volgorde in
 `@speelplan`. Eén speelplan per bestand.
 
-**Niet gebruiken** i.p.v. `@tekst` of `@mscz-newline`; niet i.p.v. `@sectie`
+**Niet gebruiken** i.p.v. `@tekst` of `@nieuw-systeem`; niet i.p.v. `@sectie`
 buiten een speelplan-bestand (tenzij je redactioneel een id wilt zonder plan).
 
 Zie [Speelplan](speelplan.md).
@@ -277,14 +277,14 @@ systeem worden onder elkaar gezet (zelfde volgorde als in het bestand). Staat
 `@tekst` aan het eind zonder volgend systeem → **warning**.
 
 `@tekst` forceert **geen** nieuw MuseScore-systeem. Wil je wél een nieuwe
-regel in de partituur, zet dan `@mscz-newline` (eventueel samen met `@tekst`).
+regel in de partituur, zet dan `@nieuw-systeem` (eventueel samen met `@tekst`).
 De cue staat boven de ge-cue-de maat. Op het **partituur/MSCZ**-pad: als die
 maat **niet** het begin van een MuseScore-systeem is, sluit export de vorige
 maat af met een **dubbele maatstreep** (behalve als daar al een herhaalstreep
 `:|` / `:||` staat — die blijft zichtbaar) en zet de cue als SystemText.
 Geen mid-systeem-HBox en geen spacermaat: MuseScore tekent daar een accolade
 middenin het systeem of een leeg stuk notenbalk. Wil je wél een duidelijke
-regelsprong, gebruik `@mscz-newline`. Canonieke MSCZ-eisen:
+regelsprong, gebruik `@nieuw-systeem`. Canonieke MSCZ-eisen:
 [checklist S14–S20](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore)
 en [leesbaarheid — cues](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade).
 Op het **playback/MXL**-pad (Coria): vóór
@@ -298,7 +298,7 @@ een frase (lege recite + rusten) is iets anders; zie
 Lange cues met `...` worden op **twee regels** gezet: de tweede regel begint bij `...`. Is de cue breder dan de maat, dan krijgt die maat een **milde** MusicXML-`width` (floor/cap; zie [leesbaarheid C6](../formats/mscz-leesbaarheid.md#c--cues-gaps-hbox-accolade)) — genoeg hint voor MuseScore, zonder een holle maat waar noten links blijven hangen.
 
 ```text
-@mscz-newline
+@nieuw-systeem
 @tekst "P: Laat ons de Heer in vrede bidden"
 L:  Heer ont-ferm_ U__  ||
 S:  a    -   -     -    ||
@@ -309,25 +309,31 @@ B:  f    -   c     f    ||
 
 ---
 
-## `@mscz-newline`
+## `@nieuw-systeem` / `@systeembreuk`
 
 **Wat het is.** Geeft aan dat bij **mvsa → `.mscz`**-conversie het
 **eerstvolgende** LSATB-systeem als **nieuw MuseScore-systeem** moet beginnen
 (nieuwe regelsprong op het blad). Heeft geen effect op de gezongen inhoud;
 alleen layout.
 
-**Vorm.** Alleen het keyword, zonder argumenten:
+**Vorm.** Alleen het keyword, zonder argumenten. Twee gelijkwaardige namen:
 
 ```text
-@mscz-newline
+@nieuw-systeem
 ```
+
+```text
+@systeembreuk
+```
+
+Verouderd synoniem (blijft geldig tot bronnen om zijn): `@mscz-newline`.
 
 **Wel gebruiken** als een antwoord, couplet of cue op een **nieuwe regel** van
 de partituur moet staan (bijv. litanie-antwoorden onder elkaar, of een
 duidelijke visuele breuk vóór een nieuw blok). Vaak samen met `@tekst`:
 
 ```text
-@mscz-newline
+@nieuw-systeem
 @tekst "P: Gezegend … der eeuwen"
 L: A_-men_ |
 …
@@ -343,8 +349,8 @@ L: A_-men_ |
 
 **Gedrag.** Geldt alleen voor het eerstvolgende LSATB-systeem (niet sticky).
 Op het eerste systeem van de partituur is een explicit new-system overbodig
-(dat systeem begint al). Staat `@mscz-newline` zonder volgend systeem →
-**warning**. Ongeldig met argumenten → **error**.
+(dat systeem begint al). Staat `@nieuw-systeem` (of synoniem) zonder volgend
+systeem → **warning**. Ongeldig met argumenten → **error**.
 
 Op het partituur/MSCZ-pad: export zet `<print new-system="yes"/>` op de eerste
 maat van dat systeem. Op playback/MXL is de markering aanwezig maar voor Coria
@@ -530,7 +536,7 @@ het [reviewcorpus](../plans/translit-reviewcorpus.md).
 effect als een **lege regel**. Voor een gewone scheiding tussen vscode-systemen
 volstaat die lege regel; `@---` is vooral handig als je bij de scheiding
 **commentaar op dezelfde regel** wilt (`@--- tweede couplet`). Voor een
-**nieuwe MuseScore-regel** op het blad: gebruik `@mscz-newline`, niet alleen
+**nieuwe MuseScore-regel** op het blad: gebruik `@nieuw-systeem`, niet alleen
 `@---` of een lege regel.
 
 **Vorm.** `@---` of `@ ---`. Optioneel **commentaar** erna op dezelfde regel
@@ -562,7 +568,7 @@ S: a     … ||
 ```
 
 **Niet gebruiken** als zichtbare inhoud op het blad — daarvoor is `@tekst`.
-Ook niet als vervanging van `@mscz-newline` (dat forceert de MSCZ-regelsprong).
+Ook niet als vervanging van `@nieuw-systeem` (dat forceert de MSCZ-regelsprong).
 Zonder commentaar is `@---` overbodig naast een lege regel.
 
 ---
