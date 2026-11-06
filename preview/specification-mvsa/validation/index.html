@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-06 12:02 CET.
+  , gebouwd 2026-11-06 12:07 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5220,14 +5220,15 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
 <li>Onbekende <code>@</code>-keywords (geldige vorm, niet in
    <a href="../keywords/">Keywords</a>): <strong>warning</strong>. Ongeldige keyword-vorm (bijv. <code>@1foo</code>):
    ook <strong>warning</strong>. Gedefinieerd in v0: sticky (<code>@do</code>, <code>@mode</code>, <code>@oct</code>,
-   <code>@start</code>), layout (<code>@tekst</code>, <code>@mscz-newline</code>, <code>@sectie</code>, <code>@blok</code>,
+   <code>@start</code>), layout (<code>@tekst</code>, <code>@nieuw-systeem</code>, <code>@sectie</code>, <code>@blok</code>,
    <code>@speelplan</code>, <code>@---</code>), actieve metadata (<code>@title</code>, <code>@ondertitel</code>,
    <code>@composer</code>, <code>@tekstdichter</code>, <code>@arrangeur</code>, <code>@vertaler</code>, <code>@bron</code>,
    <code>@copyright</code>), en gereserveerde metadata (<code>@toon</code>, <code>@taal</code>, <code>@genre</code>,
    <code>@opmerkingen</code>).</li>
 <li>Sticky / <code>@tekst</code> / metadata met ongeldige waarde: <strong>error</strong>
-    (<code>MVSA-META</code> voor string-metadata). <code>@mscz-newline</code> met argumenten:
-    <strong>error</strong>. <code>@tekst</code> of <code>@mscz-newline</code> zonder volgend LSATB-systeem:
+    (<code>MVSA-META</code> voor string-metadata). <code>@nieuw-systeem</code> / <code>@systeembreuk</code>
+    (of verouderd <code>@mscz-newline</code>) met argumenten: <strong>error</strong>. <code>@tekst</code> of
+    <code>@nieuw-systeem</code> zonder volgend LSATB-systeem:
     <strong>warning</strong>.</li>
 </ol>
 <h2 id="canonieke-vorm-warning">Canonieke vorm (warning)<a class="headerlink" href="#canonieke-vorm-warning" title="Permanent link">&para;</a></h2>
@@ -5287,7 +5288,7 @@ errors heeft. Alleen primaire <code>L</code> als lyric-laag; geen blokhergebruik
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-23
+        Bijgewerkt: 2026-11-06
         
       </p>
       
