@@ -76,15 +76,14 @@ def export_mvsa_to_mscz(
     Post-process follows *layout* (default ``partituur``). *bibliotheek_id*
     is preferred over path sniffing for the colofon (``partituur`` only).
     *translit*: tweede lyric-laag in het tussen-MXL (blad «tweede couplet»).
+    *translit_modus*: ``nls`` / ``ksl`` / ``both`` — filter welke
+    omzettingsrichting in lyric 2 komt (door naar MusicXML-tussenbestand).
     Style-overrides (systeem-/stafafstand, pagina-marges, lyric-clearance,
     fonts, measureSpacing): not valid with layout ``plain``.
 
     Returns ``out``.
     """
     from .mscz_partituur import build_partituur_style_overrides
-
-    # Zelfde CLI-kwarg als MXL/SVG; lyric-filter nls/ksl volgt later.
-    _ = translit_modus
 
     path = Path(path)
     out = Path(out)
@@ -151,6 +150,7 @@ def export_mvsa_to_mscz(
                 section_id=section_id,
                 layout="partituur",
                 translit=translit,
+                translit_modus=translit_modus,
             )
         except (MvsaValidationError, MvsaExportError):
             raise
@@ -226,6 +226,7 @@ def export_mvsa_to_pdf(
     layout: str | None = None,
     bibliotheek_id: str | None = None,
     translit: bool = False,
+    translit_modus: str | None = None,
     min_system_distance: float | None = None,
     max_system_distance: float | None = None,
     staff_distance: float | None = None,
@@ -245,6 +246,7 @@ def export_mvsa_to_pdf(
     Returns ``out`` (``.pdf``). Intermediate ``.mscz`` is kept when
     ``keep_mscz`` is set; otherwise a temp file is used.
     *translit*: tweede lyric-laag in de tussen-MXL/MSCZ (blad «tweede regel»).
+    *translit_modus*: filter ``nls`` / ``ksl`` / ``both`` (door naar MSCZ).
     """
     path = Path(path)
     out = Path(out)
@@ -273,6 +275,7 @@ def export_mvsa_to_pdf(
             layout=layout,
             bibliotheek_id=bibliotheek_id,
             translit=translit,
+            translit_modus=translit_modus,
             min_system_distance=min_system_distance,
             max_system_distance=max_system_distance,
             staff_distance=staff_distance,

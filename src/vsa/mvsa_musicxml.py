@@ -384,9 +384,19 @@ def _apply_translit_to_notes(
     notes: list[NoteEvent],
     *,
     direction: str | None,
+    translit_modus: str | None = None,
 ) -> None:
-    """Voeg lyric number 2 toe; skip als number 2 al bestaat (handmatige L1)."""
-    from .transliterate import render_syllable
+    """Voeg lyric number 2 toe; skip als number 2 al bestaat (handmatige L1).
+
+    *direction*: sticky ``@taal``-richting, of ``None`` = auto per lettergreep.
+    *translit_modus*: ``nls`` / ``ksl`` / ``both`` (default) — filtert welke
+    omzettingsrichting lyric 2 mag worden (vorm A / ``--translit-modus``).
+    """
+    from .transliterate import (
+        detect_direction,
+        modus_allows_direction,
+        render_syllable,
+    )
 
     for ev in notes:
         if any(ly.number == 2 for ly in ev.lyrics):
@@ -397,7 +407,10 @@ def _apply_translit_to_notes(
                 continue
             if not ly.text or ly.text == PAUSE_LYRIC:
                 continue
-            rendered = render_syllable(ly.text, direction=direction)
+            dir_ = direction if direction is not None else detect_direction(ly.text)
+            if not modus_allows_direction(translit_modus, dir_):
+                continue
+            rendered = render_syllable(ly.text, direction=dir_)
             if rendered == ly.text:
                 continue
             extras.append(
@@ -413,11 +426,15 @@ def _apply_translit_to_notes(
 
 def _apply_translit_lyric_layer(
     voice_measures: dict[str, list[list[NoteEvent]]],
+    *,
+    translit_modus: str | None = None,
 ) -> None:
     """Fallback zonder sticky ``@taal`` (auto per lettergreep)."""
     for measures in voice_measures.values():
         for measure in measures:
-            _apply_translit_to_notes(measure, direction=None)
+            _apply_translit_to_notes(
+                measure, direction=None, translit_modus=translit_modus
+            )
 
 
 
@@ -431,11 +448,15 @@ def export_mvsa_to_musicxml(
     bibliotheek_id: str | None = None,
     translit: bool = False,
     translit_as_parts: bool = False,
+    translit_modus: str | None = None,
 ) -> str:
     """Validate + export. Raises MvsaValidationError or MvsaExportError.
 
     *translit*: tweede lyric-laag (``number=\"2\"``) via
     :mod:`vsa.transliterate` (ksl→Latijn / nl→Cyrillisch per lettergreep).
+    *translit_modus*: ``nls`` = alleen ksl→Latijn; ``ksl`` = alleen
+    nl→Cyrillisch; ``None``/``both`` = beide richtingen (sticky ``@taal``
+    of auto per lettergreep).
     *translit_as_parts*: alleen zinvol bij ``layout=\"playback\"`` — extra
     SATB-parts met alleen translit (volume 0; speler kan solo zetten).
     """
@@ -452,11 +473,13 @@ def export_mvsa_to_musicxml(
     if errors:
         raise MvsaValidationError(errors)
 
-    sections = doc.sections
     if section_id is not None:
-        sections = [s for s in sections if s.id == section_id]
-        if not sections:
-            raise MvsaExportError(f"sectie {section_id!r} niet gevonden")
+        from .mvsa_speelplan import select_named_sectie
+
+        sections, err = select_named_sectie(doc, section_id)
+        if err is not None:
+            raise MvsaExportError(err)
+        assert sections is not None
     else:
         from .mvsa_speelplan import sections_for_layout
 
@@ -488,6 +511,7 @@ def export_mvsa_to_musicxml(
                 system,
                 layout=layout,
                 translit=translit,
+                translit_modus=translit_modus,
                 pitch_carry=pitch_carry,
             )
             for voice, measures in events_by_voice.items():
@@ -502,7 +526,8 @@ def export_mvsa_to_musicxml(
                 if mi == 0:
                     texts = list(getattr(system, "staff_texts", None) or [])
                     measure_staff_texts.append(texts)
-                    # Alleen ``@mscz-newline`` forceert een MuseScore-systeembreuk.
+                    # Alleen ``@nieuw-systeem``/``@systeembreuk``/``@mscz-newline``
+                    # forceert een MuseScore-systeembreuk.
                     wants_break = bool(getattr(system, "mscz_newline", False))
                     measure_new_system.append(wants_break and score_started)
                     sys_tempo = getattr(system, "tempo", None)
@@ -713,9 +738,6 @@ def export_mvsa_path(
             f"kan {path.name} niet als tekst lezen ({exc}). "
             "Controleer of dit een .mvsa-bestand is."
         ) from exc
-    # translit_modus (nls/ksl/both) filtert nu vooral SVG; MXL exporteert
-    # bij translit=True beide richtingen totdat lyric-filter bestaat.
-    del translit_modus
     xml = export_mvsa_to_musicxml(
         text,
         title=path.stem,
@@ -725,6 +747,7 @@ def export_mvsa_path(
         bibliotheek_id=bibliotheek_id,
         translit=translit,
         translit_as_parts=translit_as_parts,
+        translit_modus=translit_modus,
     )
     write_musicxml_output(out, xml)
 
@@ -838,6 +861,7 @@ def _system_to_events(
     *,
     layout: MvsaLayout = "playback",
     translit: bool = False,
+    translit_modus: str | None = None,
     pitch_carry: dict[str, Pitch] | None = None,
 ) -> tuple[dict[str, list[list[NoteEvent]]], dict[str, Pitch]]:
     ctx: StickyContext = system.context
@@ -935,7 +959,11 @@ def _system_to_events(
                     include_jump_nav=(layout == "partituur" and key == "S"),
                 )
                 if translit:
-                    _apply_translit_to_notes(notes, direction=hulp_direction)
+                    _apply_translit_to_notes(
+                        notes,
+                        direction=hulp_direction,
+                        translit_modus=translit_modus,
+                    )
                 measure_events[key].extend(notes)
 
         if layout == "partituur":
@@ -2006,7 +2034,7 @@ def _mvsa_bar_to_style(token: str) -> str:
     - ``regular`` / ``light-light`` / ``none`` — alleen streepstijl
     - ``repeat-start`` — ``|:`` (forward-repeat als *linker* streep van de volgende maat)
     - ``repeat-end`` — ``:|`` (backward-repeat rechts)
-    - ``repeat-end-section`` — ``:||`` (sectie-einde + backward-repeat)
+    - ``repeat-end-section`` — ``:||`` (dubbele streep + backward-repeat)
     """
     t = (token or "|").strip()
     if t == "|:":
@@ -2026,7 +2054,7 @@ def _is_section_end_bar(style: str) -> bool:
 
 
 def _right_bar_style(mi: int, n_measures: int, bar_styles: list[str]) -> str:
-    """Sectie-``||`` → ``light-light``; cue-spacer → ``none``; slot = ``light-heavy``."""
+    """``||`` → ``light-light``; cue-spacer → ``none``; slot = ``light-heavy``."""
     raw = bar_styles[mi] if 0 <= mi < len(bar_styles) else "regular"
     if raw == "repeat-start":
         # Start-herhaling hoort links op de *volgende* maat; rechts hier gewoon.
@@ -2258,7 +2286,7 @@ def _prepare_partituur_tekst_frames(
 
     Herhalingen (``:|``) blijven ``repeat-end`` (light-heavy + backward).
     Geen HBox/spacermaat: MuseScore tekent daar mid-systeem-accolades of
-    lege balklijnen. Scheiding = ``‖`` + SystemText (+ optioneel ``@mscz-newline``).
+    lege balklijnen. Scheiding = ``‖`` + SystemText (+ optioneel ``@nieuw-systeem``).
     """
     n = len(measure_staff_texts)
     while len(bar_styles) < n:
@@ -2410,11 +2438,11 @@ def _insert_playback_pauze_measures(
     measure_tempos: list[int | None] | None = None,
     measure_tempo_labels: list[str | None] | None = None,
 ) -> list[bool]:
-    """``[PAUZE]``-maten voor Coria: na sectie-einde én vóór mid-flow ``@tekst``.
+    """``[PAUZE]``-maten voor Coria: na dubbele maatstreep én vóór mid-flow ``@tekst``.
 
     - Na ``||`` / ``:||`` (``light-light`` / ``repeat-end-section``).
     - Vóór een koormaat met ``@tekst`` als die niet de eerste maat is en de
-      vorige maat nog geen sectie-eindestreep had (geen dubbele pauze).
+      vorige maat nog geen ``||`` had (geen dubbele pauze).
     Cue-teksten van de volgende koormaat verhuizen naar de pauzemaat.
     Tempo-wissels blijven op de koormaat (pauzemaat krijgt ``None``).
     """
@@ -2444,7 +2472,7 @@ def _insert_playback_pauze_measures(
         i for i in range(n - 1) if _is_section_end_bar(bar_styles[i])
     }
     # Mid-flow @tekst: pauze vóór die koormaat (= insert na i-1), tenzij
-    # sectie-einde die pauze al triggert.
+    # dubbele maatstreep die pauze al triggert.
     for i in range(1, n):
         if not measure_staff_texts[i]:
             continue
