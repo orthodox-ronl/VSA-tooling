@@ -58,8 +58,8 @@ def _assign_svg_products(products: dict[str, Path], written: list[Path]) -> None
     """Tall product-SVG: key ``svg``, of translit-siblings ``svg-translit-*``.
 
     Geen bladreeks ``svg-N`` hier — dat is print-SVG. Translit-bestanden
-    (``*.translit-ksl.svg`` / ``*.translit-nls.svg``) krijgen eigen keys
-    zodat ze de canonieke scherm-``svg`` niet overschrijven.
+    (``*.translit-ksl.svg`` / ``*.translit-nls.svg`` / ``*.translit.svg``)
+    krijgen eigen keys zodat ze de canonieke scherm-``svg`` niet overschrijven.
     """
     if not written:
         products.pop("svg", None)
@@ -71,6 +71,10 @@ def _assign_svg_products(products: dict[str, Path], written: list[Path]) -> None
         return
     if name.endswith(".translit-nls.svg") or ".translit-nls.svg" in name:
         products["svg-translit-nls"] = path
+        return
+    # Hybride both: ``lied.mvsa.translit.svg`` (niet ``.translit-nls.svg``).
+    if name.endswith(".translit.svg") or ".translit.svg" in name:
+        products["svg-translit-beide"] = path
         return
     products["svg"] = path
 
