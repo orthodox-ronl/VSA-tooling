@@ -1,0 +1,173 @@
+---
+title: Tropaar Tempelgang van de Moeder Gods, Toon 4
+do: F4
+mode: major
+tempo: 120
+genre: tropaar
+tone: 4
+template: tropaar-toon-4
+bron: Liturgikon, p282
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
+#
+# === afgeleide mvsa ===
+# MAPPING MISLUKT: VSA-TEMPLATE-PITCH-MISMATCH
+# hoogte-mismatch: VSA '(melisma)' = Bb4, geen passend template-S-slot meer (verwacht o.a. mi, re, mi)
+#
+ 
+H
+i
+n
+t
+:
+ 
+P
+a
+s
+ 
+d
+e
+ 
+V
+S
+A
+-
+h
+o
+o
+g
+t
+e
+m
+a
+r
+k
+e
+r
+i
+n
+g
+e
+n
+ 
+a
+a
+n
+ 
+z
+o
+d
+a
+t
+ 
+z
+e
+ 
+d
+e
+ 
+v
+e
+r
+p
+l
+i
+c
+h
+t
+e
+ 
+c
+a
+d
+e
+n
+s
+g
+r
+a
+d
+e
+n
+ 
+v
+a
+n
+ 
+d
+e
+ 
+t
+e
+m
+p
+l
+a
+t
+e
+ 
+v
+o
+l
+g
+e
+n
+,
+ 
+o
+f
+ 
+k
+i
+e
+s
+ 
+e
+e
+n
+ 
+a
+n
+d
+e
+r
+e
+ 
+f
+r
+a
+s
+e
+/
+c
+a
+d
+e
+n
+s
+p
+a
+d
+.
+
+# === analyse ===
+# NORMALISATIE: geen `*` in bron → 7 regels genormaliseerd tot frasen met `*`
+# MAPPING: MISLUKT
+# tropaar-tempelgang-van-de-moeder-gods-toon-4.vsa:20:43
+# ERROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA '(melisma)' = Bb4, geen passend template-S-slot meer (verwacht o.a. mi, re, mi)
+# Hint: Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden van de template volgen, of kies een andere frase/cadenspad.
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Tropaar Tempelgang van de Moeder Gods, Toon 4 (Liturgikon) -->
+# <!-- Bronbestand: content-source/praktijk/feesteigen/11-nov/11-21-tempelgang-moeder-gods.md -->
+#
+# [//:] He-den is het be-gin van Gods we-lbe{-&/ha_&_}{\gen_}:
+# {/de} voor-be-rei-den-de Ver-kon-di-ging van de Ver-los-sing der {men__}{\sen_}.
+# De Maagd komt in de {Tem_}{/pel_} {\Gods_}
+# {/en} ver-kon-digt reeds aan al-len de {Chris__}{\tus_}.
+# Tot haar wil-len ook wij met de En-gel {-&/roe_&_}{\pen_}:
+# {/Ver}{heug__} {\U_},
+# // Ver-vul-ling van het Heils-plan van de {-&/Schep_&_}{\per_}. [//:]

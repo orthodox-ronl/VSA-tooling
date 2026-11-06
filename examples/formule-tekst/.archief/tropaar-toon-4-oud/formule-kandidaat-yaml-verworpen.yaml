@@ -1,0 +1,99 @@
+# Kandidaat A — YAML eventlijst (afstammeling van de eerdere vsa-template).
+# Verschil met het archief: dit bestand hoort bij formule=muziek;
+# tekst komt uit .ftxt, niet uit .vsa-melodie.
+#
+# Legenda per event:
+#   role: open | recite | cadence | link
+#   optional: true  → haakjesnoot op het blad (mag weg als de tekst hem niet nodig heeft)
+#   anchor: e.st. | l.st. | …
+#   duration: ELM-indicatie op het formuleblad (instance mag later anders kiezen)
+
+spec_version: explore-v0
+id: tropaar-toon-4
+genre: tropaar
+tone: 4
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: "Archief template.yaml + MuseScore tropaar toon 4 (provisional)"
+
+# Tekstfrasen (*-regels) → formulefrasen
+text_mapping:
+  - repeat: ["1", "2"]
+    until: final
+  - phrase: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - role: open
+        duration: "~"
+        note: "Zelfde graad als recite; vaak overgeslagen als de tekst meteen reciteert"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: mi, A: "#do", T: la-1, B: la-2 }
+
+  - id: "2"
+    events:
+      - role: link
+        duration: "~"
+        optional: true
+        note: "Haakjesnoot vóór e.st.; alleen meeklinken als de tekst die lettergreep heeft"
+        pitches: { S: mi, A: "#do", T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: e.st.
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: fa, A: re, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+
+  - id: laatste
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }

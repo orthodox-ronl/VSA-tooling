@@ -1,0 +1,171 @@
+---
+title: Tropaar Apostel Andreas, de Eerstgeroepene, Toon 4
+do: F4
+mode: major
+tempo: 120
+genre: tropaar
+tone: 4
+template: tropaar-toon-4
+bron: Liturgikon
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
+#
+# === afgeleide mvsa ===
+# MAPPING MISLUKT: VSA-TEMPLATE-PITCH-MISMATCH
+# hoogte-mismatch: VSA '(melisma)' = Bb4, geen passend template-S-slot meer (verwacht o.a. mi, re, mi)
+#
+ 
+H
+i
+n
+t
+:
+ 
+P
+a
+s
+ 
+d
+e
+ 
+V
+S
+A
+-
+h
+o
+o
+g
+t
+e
+m
+a
+r
+k
+e
+r
+i
+n
+g
+e
+n
+ 
+a
+a
+n
+ 
+z
+o
+d
+a
+t
+ 
+z
+e
+ 
+d
+e
+ 
+v
+e
+r
+p
+l
+i
+c
+h
+t
+e
+ 
+c
+a
+d
+e
+n
+s
+g
+r
+a
+d
+e
+n
+ 
+v
+a
+n
+ 
+d
+e
+ 
+t
+e
+m
+p
+l
+a
+t
+e
+ 
+v
+o
+l
+g
+e
+n
+,
+ 
+o
+f
+ 
+k
+i
+e
+s
+ 
+e
+e
+n
+ 
+a
+n
+d
+e
+r
+e
+ 
+f
+r
+a
+s
+e
+/
+c
+a
+d
+e
+n
+s
+p
+a
+d
+.
+
+# === analyse ===
+# NORMALISATIE: geen `*` in bron → 5 regels genormaliseerd tot frasen met `*`
+# MAPPING: MISLUKT
+# tropaar-apostel-andreas-de-eerstgeroepene-toon-4.vsa:18:36
+# ERROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA '(melisma)' = Bb4, geen passend template-S-slot meer (verwacht o.a. mi, re, mi)
+# Hint: Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden van de template volgen, of kies een andere frase/cadenspad.
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Tropaar Apostel Andreas, de Eerstgeroepene, Toon 4 (Liturgikon) -->
+# <!-- Bronbestand: content-source/praktijk/feesteigen/11-nov/11-30-apostel-andreas.md -->
+#
+# [//:] Gij zijt de Eerst-ge-roe-pe-ne der A{pos_}{/te_}{\len_},
+# {/en} de broe-der van {Pe_}{\tros_}.
+# Bid daar-om, hei-li-ge An-dre-as, tot de {Mees_}ter {/van} het heel{\al_},
+# {/om} aan de we-reld vre-de te {schen__}{\ken_},
+# // en aan onze zie-len de gro-te ge{-&/na_&_}{\de_}. [//:]

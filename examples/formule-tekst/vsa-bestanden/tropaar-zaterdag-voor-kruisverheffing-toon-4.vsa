@@ -1,0 +1,170 @@
+---
+title: Tropaar zaterdag voor kruisverheffing, toon 4
+do: F4
+mode: major
+tempo: 120
+genre: tropaar
+tone: 4
+template: tropaar-toon-4
+bron: Liturgikon (p.275-278)
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
+#
+# === afgeleide mvsa ===
+# MAPPING MISLUKT: VSA-TEMPLATE-PITCH-MISMATCH
+# hoogte-mismatch: VSA 'ken,' = C5, geen passend template-S-slot meer (verwacht o.a. fa, mi)
+#
+ 
+H
+i
+n
+t
+:
+ 
+P
+a
+s
+ 
+d
+e
+ 
+V
+S
+A
+-
+h
+o
+o
+g
+t
+e
+m
+a
+r
+k
+e
+r
+i
+n
+g
+e
+n
+ 
+a
+a
+n
+ 
+z
+o
+d
+a
+t
+ 
+z
+e
+ 
+d
+e
+ 
+v
+e
+r
+p
+l
+i
+c
+h
+t
+e
+ 
+c
+a
+d
+e
+n
+s
+g
+r
+a
+d
+e
+n
+ 
+v
+a
+n
+ 
+d
+e
+ 
+t
+e
+m
+p
+l
+a
+t
+e
+ 
+v
+o
+l
+g
+e
+n
+,
+ 
+o
+f
+ 
+k
+i
+e
+s
+ 
+e
+e
+n
+ 
+a
+n
+d
+e
+r
+e
+ 
+f
+r
+a
+s
+e
+/
+c
+a
+d
+e
+n
+s
+p
+a
+d
+.
+
+# === analyse ===
+# MAPPING: MISLUKT
+# tropaar-zaterdag-voor-kruisverheffing-toon-4.vsa:15:45
+# ERROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA 'ken,' = C5, geen passend template-S-slot meer (verwacht o.a. fa, mi)
+# Hint: Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden van de template volgen, of kies een andere frase/cadenspad.
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Tropaar zaterdag voor kruisverheffing, toon 4 - Liturgikon, p.278 -->
+# <!-- Bronbestand: content-source/praktijk/feesteigen/09-sep/09-14-kruisverheffing.md -->
+#
+# [//:] Het levenschenkend Kruis Uwer {-&/goed_&_}{\heid_}, *
+# {/dat} Gij ons, onwaardigen, hebt ge{schon_}{/ken}, {\o} {\Heer_}, *
+# brengen wij tot U met de {-&/be_&_}{\de_}: *
+# {/Red_} {uw_} {\volk_}, *
+# o enig Mens{lie_}{/ven_}{\de}. [//:]

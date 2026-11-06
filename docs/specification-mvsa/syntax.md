@@ -120,10 +120,9 @@ editor onder elkaar. Per **maat**, binnen één LSATB-systeem:
      (`fa`, `mi&do&re&mi`, `f#4`, `/`, …).
 
 4. Maatstrepen (`|`, `||`, `|:`, `:|`, `:||`) staan op **dezelfde
-   kolomposities** op alle LSATB-regels van het systeem: na elke maat (en aan
-   het sectie-einde) begint de streep in VSCode in dezelfde kolom. De
-   standaardlayout vult spaties aan het eind van een maat zo nodig aan tot die
-   strepen onder elkaar vallen.
+   kolomposities** op alle LSATB-regels van het systeem: na elke maat begint
+   de streep in VSCode in dezelfde kolom. De standaardlayout vult spaties aan
+   het eind van een maat zo nodig aan tot die strepen onder elkaar vallen.
 
 In VSCode (vaste-breedteletter) staan die ankers én de maatstrepen dus **in
 dezelfde kolom** op L, S, A, T en B. Spaties tussen posities (en vóór een
@@ -158,15 +157,15 @@ output en de voorbeelden in `examples/mvsa` volgen wél deze layout. Hulpje:
 `python scripts/align_mvsa_columns.py examples/mvsa` (alleen kolommen; de
 volledige kuiser-pipeline is `mvsa kuiser`).
 
-## 4. Maatstrepen en sectie-einde
+## 4. Maatstrepen (en dubbele streep)
 
-| Teken   | Betekenis                                        |
-| ------- | ------------------------------------------------ |
-| `\|`    | Einde van een maat (frase) binnen de sectie      |
-| `\|:`   | Begin herhaling (zoals in VSA/partituurpraktijk) |
-| `:\|`   | Einde herhaling                                  |
-| `\|\|`  | Einde van de **sectie**                          |
-| `:\|\|` | Einde van de sectie mét herhalingsteken          |
+| Teken   | Betekenis                                                                 |
+| ------- | ------------------------------------------------------------------------- |
+| `\|`    | Einde van een maat (frase)                                                |
+| `\|:`   | Begin herhaling (zoals in VSA/partituurpraktijk)                          |
+| `:\|`   | Einde herhaling                                                           |
+| `\|\|`  | Dubbele maatstreep (blad / Coria-pauze); **geen** einde van `@sectie`     |
+| `:\|\|` | Dubbele maatstreep mét herhalingsteken; evenmin einde van named `@sectie` |
 
 v0 vereist **geen** `\|\|:` of `:\|\|:` als overgang naar een volgende sectie.
 Een nieuwe sectie begint altijd in een **nieuw** LSATB-systeem (nieuwe set
@@ -207,13 +206,18 @@ en `S` met `|mi` zijn synchroon.
 
 ## 5. Sectie
 
+Een **sectie** is de adresseerbare eenheid in een `.mvsa` (export
+`--section`, bibliotheek-fragment `…@sectie-id`). Een bestand **zonder**
+`@sectie` is **één** impliciete (anonieme) sectie. Speelblokken (`@blok`) zijn
+**geen** secties — zie [Speelplan](speelplan.md).
+
 ### Begin
 
 Een sectie begint aan het begin van een tekstregel die niet tot een reeds
 begonnen sectie behoort, en wel met:
 
 - een sectiekop `@sectie` *id*, of
-- een regelidentifier (anonieme sectie).
+- een regelidentifier (anonieme / impliciete sectie — geen named id).
 
 ```text
 @sectie nl1
@@ -222,41 +226,36 @@ S: …
 ```
 
 **Sectie-id:** `[a-z][a-z0-9_-]*` (bijvoorbeeld `nl1`, `slav1`, `doxologie`).
+Alleen deze ids zijn geldig voor `--section` en voor een fragment achter `@`
+in een catalogus-verwijzing. Een `@blok`-id (ook cijfer-ids zoals `1`) hoort
+daar **niet**.
 
 ### Einde
 
-Een sectie eindigt op een van deze manieren:
+Een **adresseerbare** sectie (`@sectie` *id*, of de ene impliciete sectie
+zonder `@sectie`) eindigt alleen zo:
 
-1. **Sectie-eindestreep `||` / `:||`:** op **alle** LSATB-regels van een
-   systeem. Regels daarna horen niet meer bij die sectie. Dit is de vorm die
-   tooling bij **genereren** schrijft, en die je nodig hebt om midden in een
-   bestand een sectie te beëindigen **zonder** meteen een nieuwe `@sectie` te
-   openen.
-2. **Nieuwe `@sectie`:** een volgende `@sectie` *id* opent een nieuwe sectie.
-   De **laatste maatstreep** van het vorige laatste systeem (`|`, `||`, of
-   herhalingsvorm) is tegelijk het sectie-einde — ook als dat geen `||` was.
-3. **Einde van het bestand (EOF):** idem: de laatste maatstreep van het
-   laatste systeem beëindigt de open sectie.
-4. **Fenced markdown:** het sluiten van `::: mvsa-notatie` / `::: mvsa` …
+1. **Nieuwe `@sectie`:** de volgende `@sectie` *id* opent een nieuwe sectie.
+   Alles sindsdien (ook systemen die op `||` eindigen) hoorde bij de vorige.
+2. **Einde van het bestand (EOF):** de open sectie stopt.
+3. **Fenced markdown:** sluiten van `::: mvsa-notatie` / `::: mvsa` …
    `:::` werkt hetzelfde als EOF voor de open sectie in dat blok.
 
-Kort: bij **EOF**, **nieuwe `@sectie`**, of **fence-`:::`** is elke geldige
-eindmaatstreep op het laatste systeem genoeg. `||` blijft nuttig als
-**expliciete** sectie-eindestreep midden in de bron en als canonieke
-exportvorm.
+**`||` / `:||` is geen sectiegrens.** Die dubbele streep blijft een
+muzikale markering (dubbele maatstreep, Coria-pauze tussen antwoorden).
+Tooling mag bij genereren nog steeds `||` aan het eind van een systeem
+schrijven; dat splitst **geen** named `@sectie`.
 
-**Speelblokken (`@blok`):** horen niet onder een `||`-eis tussen blokken. Een
-nieuw `@blok` of EOF na een speelblok is gewoon toegestaan. Zie
-[Speelplan](speelplan.md).
+**Speelblokken (`@blok`):** idem — `||` tussen systemen van één blok sluit
+het blok niet; een nieuw `@blok` of EOF wel. Zie [Speelplan](speelplan.md).
 
 ### Meerdere systemen per sectie
 
-Een lange sectie mag over meerdere LSATB-systemen worden gesplitst (leesbaarheid
-in de editor). Elk tussensysteem eindigt op `|` (of herhalingsspecialisatie die
-geen sectie-einde is). Het **laatste** systeem van de sectie eindigt op een
-geldige maatstreep; bij doorlopende tekst zonder nieuwe `@sectie` gebruik je
-`||` of `:||` om de sectie te beëindigen. Bij een volgende `@sectie`, bij EOF,
-of bij fence-`:::` volstaat ook `|`.
+Een lange sectie mag over meerdere LSATB-systemen worden gesplitst
+(leesbaarheid in de editor). Elk systeem eindigt op een geldige maatstreep
+(`|`, `||`, herhaling, …). Tussensystemen mogen op `||` eindigen zonder de
+sectie te sluiten — handig bij litanie-antwoorden. Een volgende `@sectie`,
+EOF of fence-`:::` beëindigt de open sectie.
 
 Alle systemen in één sectie hebben hetzelfde aantal LSATB-regels en dezelfde
 regelidentifiers in dezelfde volgorde (zelfde stemidentifier én dezelfde

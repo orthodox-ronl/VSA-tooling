@@ -48,7 +48,7 @@ Vereist **MuseScore 4** (of 3), zoals `mvsa pdf` / `mvsa mscz`, én
 | `output`                   | Ja        | Doelbestand (``.mp3`` / ``.ogg`` / ``.wav``), of uitvoermap bij meerdere bronnen | —                                |
 | `--format {mp3,ogg,wav}`   | Nee       | Formaat als `output` geen audio-extensie heeft                                   | ``mp3`` of ``[audio].format``    |
 | `--musescore PATH`         | Nee       | Pad naar MuseScore-executable                                                    | Auto-detectie                    |
-| `--section SECTION`        | Nee       | Alleen bij ``.mvsa``: deze ``@sectie``-id                                        | Alle secties                     |
+| `--section SECTION`        | Nee       | Alleen bij ``.mvsa``: deze ``@sectie``-id (niet ``@blok``)                       | Hele bestand                     |
 | `--keep-mxl PATH`          | Nee       | Bewaar tussenliggende playback-``.mxl`` (alleen bij één bron)                    | — (tijdelijk bestand)            |
 | `--config CONFIG`          | Nee       | Pad naar ``vsa.toml``                                                            | Auto-detectie                    |
 | `-h`, `--help`             | Nee       | Toon hulp                                                                        | —                                |

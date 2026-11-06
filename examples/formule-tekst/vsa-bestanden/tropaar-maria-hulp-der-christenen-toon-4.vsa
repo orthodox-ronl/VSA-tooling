@@ -1,0 +1,172 @@
+---
+title: Tropaar Maria, Hulp der Christenen (Pokrof), Toon 4, Liturgikon p.279
+do: F4
+mode: major
+tempo: 120
+genre: tropaar
+tone: 4
+template: tropaar-toon-4
+bron: Koorinstructie wo 14 okt sept 2026 (Hemelum)
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
+#
+# === afgeleide mvsa ===
+# MAPPING MISLUKT: VSA-TEMPLATE-PITCH-MISMATCH
+# hoogte-mismatch: VSA '(melisma)' = Bb4, geen passend template-S-slot meer (verwacht o.a. mi, re, mi)
+#
+ 
+H
+i
+n
+t
+:
+ 
+P
+a
+s
+ 
+d
+e
+ 
+V
+S
+A
+-
+h
+o
+o
+g
+t
+e
+m
+a
+r
+k
+e
+r
+i
+n
+g
+e
+n
+ 
+a
+a
+n
+ 
+z
+o
+d
+a
+t
+ 
+z
+e
+ 
+d
+e
+ 
+v
+e
+r
+p
+l
+i
+c
+h
+t
+e
+ 
+c
+a
+d
+e
+n
+s
+g
+r
+a
+d
+e
+n
+ 
+v
+a
+n
+ 
+d
+e
+ 
+t
+e
+m
+p
+l
+a
+t
+e
+ 
+v
+o
+l
+g
+e
+n
+,
+ 
+o
+f
+ 
+k
+i
+e
+s
+ 
+e
+e
+n
+ 
+a
+n
+d
+e
+r
+e
+ 
+f
+r
+a
+s
+e
+/
+c
+a
+d
+e
+n
+s
+p
+a
+d
+.
+
+# === analyse ===
+# MAPPING: MISLUKT
+# tropaar-maria-hulp-der-christenen-toon-4.vsa:20:19
+# ERROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA '(melisma)' = Bb4, geen passend template-S-slot meer (verwacht o.a. mi, re, mi)
+# Hint: Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden van de template volgen, of kies een andere frase/cadenspad.
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Tropaar Maria, Hulp der Christenen (Pokrof), Toon 4, Liturgikon p.279 -->
+# <!-- Bronbestand: content-source/praktijk/samenstellingen/20261014-wo-liturgie-pokrov.md -->
+#
+# [//:] Heden viert het Ortho{do_}{/xe_} {\volk_} *
+# {/het} stralende {feest_} van uw {\komst_}. *
+# En staande voor uw reine Ikoon roepen wij {sme_}{/kend} tot {\u_}: *
+# {/be}scherm ons door uw kostbare be{schut__}{\ting_}. *
+# Verlos ons uit {al_}{/le_} {\nood_}, *
+# {/en} bid tot uw Zoon, {Chris_}{tus_} {\God}, **
+# om onze zielen te {-&/red_&_}{\den_}. [//:]

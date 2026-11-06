@@ -90,6 +90,50 @@ def test_fix_ds_al_fine_play_until(tmp_path: Path):
     assert "<playUntil>end</playUntil>" not in out
 
 
+def test_reposition_left_nav_markers_segno_not_fine(tmp_path: Path):
+    """S20: Segno/Coda krijgen offset; Fine blijft onaangeraakt."""
+    from vsa.mscz_partituur import apply_partituur_mscz_conventions
+
+    mscx = (
+        '<?xml version="1.0"?>'
+        "<museScore><Score><Style></Style>"
+        "<Marker>"
+        "<style>repeat_left</style>"
+        "<text><sym>segno</sym></text>"
+        "<label>segno</label>"
+        "<markerType>segno</markerType>"
+        "</Marker>"
+        "<Marker>"
+        "<style>repeat_right</style>"
+        "<text><b>Fine</b></text>"
+        "<label>fine</label>"
+        "</Marker>"
+        "<Marker>"
+        "<style>repeat_left</style>"
+        "<text><sym>coda</sym></text>"
+        "<label>coda</label>"
+        "<markerType>coda</markerType>"
+        "</Marker>"
+        "</Score></museScore>"
+    )
+    path = tmp_path / "nav-offset.mscz"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("t.mscx", mscx)
+    apply_partituur_mscz_conventions(path)
+    with zipfile.ZipFile(path) as zf:
+        out = zf.read("t.mscx").decode("utf-8")
+    markers = re.findall(r"<Marker>.*?</Marker>", out, flags=re.DOTALL)
+    assert len(markers) == 3
+    segno, fine, coda = markers
+    assert "<label>segno</label>" in segno
+    assert "<autoplace>0</autoplace>" in segno
+    assert '<offset x="3.5" y="-2.5"/>' in segno
+    assert "<label>fine</label>" in fine
+    assert "<offset" not in fine
+    assert "<label>coda</label>" in coda
+    assert '<offset x="3.5" y="-2.5"/>' in coda
+
+
 def test_apply_partituur_style_on_minimal_mscz(tmp_path: Path):
     from vsa.mscz_partituur import apply_partituur_mscz_conventions
 

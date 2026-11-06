@@ -309,6 +309,32 @@ def sections_for_layout(
     return list(doc.sections)
 
 
+def select_named_sectie(
+    doc: ParsedDocument, section_id: str
+) -> tuple[list[ParsedSection] | None, str | None]:
+    """Selecteer alleen een ``@sectie``-id voor ``--section``.
+
+    ``@blok`` is geen adresseerbare sectie (alleen speelplan). Bestand zonder
+    ``@sectie`` is één impliciete sectie — dan is er geen named id om te
+    selecteren. Returns ``(sections, None)`` of ``(None, fouttekst)``.
+    """
+    matches = [
+        s
+        for s in doc.sections
+        if s.origin == "sectie" and s.id == section_id
+    ]
+    if matches:
+        return matches, None
+    if any(s.origin == "blok" and s.id == section_id for s in doc.sections):
+        return (
+            None,
+            f"{section_id!r} is een @blok-id, geen @sectie "
+            "(--section selecteert alleen @sectie; blokken horen bij "
+            "@speelplan)",
+        )
+    return None, f"sectie {section_id!r} niet gevonden"
+
+
 def expand_speelplan(doc: ParsedDocument) -> list[ParsedSection]:
     """Ordered sections for klinkende vorm (may repeat the same section)."""
     if not doc.speelplan:
@@ -355,10 +381,12 @@ def collect_speelplan_diagnostics(doc: ParsedDocument) -> list[MvsaDiagnostic]:
         diags.append(
             MvsaDiagnostic(
                 "MVSA-SPEELPLAN-ANON",
-                "bestand met @speelplan: elk muzikaal segment moet via @blok "
-                f"(gevonden: {s.origin or 'anonieme sectie'}"
+                "bestand met @speelplan: elk muzikaal segment moet nu via "
+                "@blok (gevonden: "
+                f"{s.origin or 'anonieme sectie'}"
                 + (f" {s.id!r}" if s.id else "")
-                + ")",
+                + "); @sectie + speelplan in één bestand volgt later "
+                "(speelplan binnen één sectie)",
                 s.start_line,
             )
         )

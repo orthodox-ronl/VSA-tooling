@@ -18,7 +18,7 @@ VOICES = ("S", "A", "T", "B")
 ROLES = frozenset({"open", "recite", "cadence", "link"})
 DURATIONS = frozenset({"~", "-", "-.", "~.", "_", "_.", "__", ".", ".."})
 ANCHORS = frozenset(CANON_ANCHORS)
-GENRES = frozenset({"tropaar", "stichier", "vers", "other"})
+GENRES = frozenset({"tropaar", "kondak", "stichier", "vers", "other"})
 
 
 class TemplateValidationError(Exception):

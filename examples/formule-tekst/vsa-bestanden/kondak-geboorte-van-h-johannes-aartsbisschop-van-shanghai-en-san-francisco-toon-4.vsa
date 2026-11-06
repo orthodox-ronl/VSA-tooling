@@ -1,0 +1,172 @@
+---
+title: Kondak Geboorte van H. Johannes, Aartsbisschop van Shanghai en San Francisco, Toon 4,
+do: F4
+mode: major
+tempo: 120
+genre: kondak
+tone: 4
+bron: Hemelum
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
+#
+# === afgeleide mvsa ===
+# MAPPING MISLUKT: VSA-TEMPLATE-PITCH-MISMATCH
+# hoogte-mismatch: VSA 'zuin' = C5, geen passend template-S-slot meer (verwacht o.a. mi)
+#
+ 
+H
+i
+n
+t
+:
+ 
+P
+a
+s
+ 
+d
+e
+ 
+V
+S
+A
+-
+h
+o
+o
+g
+t
+e
+m
+a
+r
+k
+e
+r
+i
+n
+g
+e
+n
+ 
+a
+a
+n
+ 
+z
+o
+d
+a
+t
+ 
+z
+e
+ 
+d
+e
+ 
+v
+e
+r
+p
+l
+i
+c
+h
+t
+e
+ 
+c
+a
+d
+e
+n
+s
+g
+r
+a
+d
+e
+n
+ 
+v
+a
+n
+ 
+d
+e
+ 
+t
+e
+m
+p
+l
+a
+t
+e
+ 
+v
+o
+l
+g
+e
+n
+,
+ 
+o
+f
+ 
+k
+i
+e
+s
+ 
+e
+e
+n
+ 
+a
+n
+d
+e
+r
+e
+ 
+f
+r
+a
+s
+e
+/
+c
+a
+d
+e
+n
+s
+p
+a
+d
+.
+
+# === analyse ===
+# NORMALISATIE: geen `*` in bron → 7 regels genormaliseerd tot frasen met `*`
+# MAPPING: MISLUKT
+# kondak-geboorte-van-h-johannes-aartsbisschop-van-shanghai-en-san-francisco-toon-4.vsa:13:37
+# ERROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA 'zuin' = C5, geen passend template-S-slot meer (verwacht o.a. mi)
+# Hint: Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden van de template volgen, of kies een andere frase/cadenspad.
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Kondak Geboorte van H. Johannes, Aartsbisschop van Shanghai en San Francisco, Toon 4,  (Hemelum) -->
+# <!-- Bronbestand: content-source/praktijk/feesteigen/07-jul/07-02-johannes-aartsbisschop-van-shanghai-en-san-francisco.md -->
+#
+# [/:] God-de-lij-ke {/Roe_}per, {/Ba}{/zuin_} {\van} de {\Geest_}
+# en plan-ter {\van_} het ge{\loof_},
+# {//Uit_}roei-er van {/het} {/bij_}{\ge_}{\loof_},
+# Be-min-de der Hei-li-ge Drie-{\een_}{\heid_}
+# {/Gro}te {/Va_}der, Hiër-arch {/Jo}{/&\han_&_}{\nes_},
+# gij die voor God staat met de {\En_}ge{\len_}
+# // {//bid} {\zon}{/der} {/op}hou-den {\voor} {/ons} {\&\al_&_}{\len_}. [:]

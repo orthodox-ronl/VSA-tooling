@@ -46,13 +46,15 @@ Leesbaarheid: [MSCZ-leesbaarheid](../../docs/formats/mscz-leesbaarheid.md).
 [productbesluiten](../../docs/plans/kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu)
 en [`@taal`](../../docs/specification-mvsa/keywords.md#taal).
 
-**Speelplan vs `|:…:|`:** vaste klinkende volgorde → één `@speelplan` per
-`.mvsa` met `@blok` (Coria schrijft uit; blad: volta / herhaling / D.S. of
-expand). Open litanie-herhaling (N onbekend) → `|:…:|` zonder speelplan.
-`@sectie` alleen in bestanden zonder speelplan (schetsen / `--section`).
+**Speelplan vs `|:…:|`:** vaste klinkende volgorde → één `@speelplan` met
+`@blok` (Coria schrijft uit; blad: volta / herhaling / D.S. of expand). Open
+litanie-herhaling (N onbekend) → `|:…:|` zonder speelplan. **Sectie** =
+adresseerbaar deel (`--section` / bibliotheek-fragment); **blok** = alleen
+speelplan. Nu: `@sectie` en speelplan niet in hetzelfde bestand; later mag
+een plan binnen één sectie. Bestand zonder `@sectie` = één impliciete sectie.
 
 Canonieke vorm (draft): woordstreepjes tussen lettergrepen van hetzelfde woord;
-maatstrepen op alle LSATB-regels; bij **secties** eindigt het laatste systeem
-op een maatstreep (`||` bij voorkeur in gegenereerde output; bij EOF / nieuwe
-`@sectie` volstaat ook `|`); tussen **speelblokken** is `||` geen eis.
-**Lege regel** tussen vscode-systemen (geen `@---` nodig).
+maatstrepen op alle LSATB-regels; systemen eindigen op `|` of `||` (gegenereerde
+output heeft vaak `||` als dubbele streep — dat is **geen** `@sectie`-grens);
+tussen **speelblokken** is `||` geen eis. **Lege regel** tussen vscode-systemen
+(geen `@---` nodig).

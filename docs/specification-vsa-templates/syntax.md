@@ -27,7 +27,7 @@ mode: major
 duration-model: default
 pitches_status: provisional
 source: "…"
-also_used_as: [stichier]
+also_used_as: [kondak]
 cycle: ["1", "2"]
 final: laatste
 phrases:
@@ -36,6 +36,9 @@ phrases:
   - id: "1a"
     events: [ ... ]
 ```
+
+Toegestane `genre` / `also_used_as`: `tropaar`, `kondak`, `stichier`,
+`vers`, `other`.
 
 [Template-frasen](template-frase@) in `phrases` die **niet** in `cycle`/`final`
 staan (zoals `"1a"`) horen bij de bibliotheek.

@@ -285,7 +285,7 @@ B: |: do re :|
 
 
 def test_export_section_end_with_repeat():
-    """``:||`` = sectie-einde (light-light) én backward-repeat."""
+    """``:||`` = dubbele maatstreep (light-light) én backward-repeat."""
     text = """\
 @do F4
 @mode major
@@ -673,7 +673,8 @@ def test_playback_ksl_svyaty_melisma_not_fake_quarter():
 def test_alleluia_toon1_playback_lu_bb_is_half():
     """Alleluia toon 1 maat 1: melisma ``lu`` op Bb&Bb → één Bb-halve."""
     text = (EXAMPLES / "alleluia-toon-1.mvsa").read_text(encoding="utf-8")
-    xml = export_mvsa_to_musicxml(text, layout="playback", section_id="1")
+    # Speelblok-ids zijn geen --section; hele klinkende vorm (speelplan).
+    xml = export_mvsa_to_musicxml(text, layout="playback")
     p1 = xml.split('<part id="P1">')[1].split("</part>")[0]
     # Geen twee opeenvolgende Bb-kwarten meer voor lu
     assert "<text>lu</text>" in p1
@@ -698,8 +699,9 @@ def test_alleluia_toon1_playback_lu_bb_is_half():
     bb_lu = [
         n for n in notes if n[0] == "B" and n[1] == "-1" and n[3] == "lu"
     ]
-    assert len(bb_lu) == 1
-    assert bb_lu[0][2] == "half"
+    # Speelplan herhaalt blok 1; elke keer moet Bb+lu één half zijn (M5a).
+    assert bb_lu
+    assert all(n[2] == "half" for n in bb_lu)
 
 
 def test_partituur_long_same_pitch_melisma_never_emits_breve():
@@ -949,11 +951,18 @@ def test_vsa_mode_beginanker_uses_schrijf_do():
 def test_alleluia_toon_1_tenor_not_c5():
     """Regression: eindblokken must respect @oct (tenor around C4, not C5)."""
     text = (EXAMPLES / "alleluia-toon-1.mvsa").read_text(encoding="utf-8")
-    xml = export_mvsa_to_musicxml(text, section_id="2")
+    xml = export_mvsa_to_musicxml(text, layout="playback")
     t = _part_pitches(xml, "P3")
     assert t
     assert all(int(oct_) <= 4 for _s, _a, oct_ in t)
-    assert t[0] == ("C", "", "4")
+    assert ("C", "", "4") in t
+
+
+def test_export_section_rejects_blok_id():
+    """``--section`` is alleen ``@sectie``, niet ``@blok``."""
+    text = (EXAMPLES / "alleluia-toon-1.mvsa").read_text(encoding="utf-8")
+    with pytest.raises(MvsaExportError, match="@blok-id"):
+        export_mvsa_to_musicxml(text, section_id="1")
 
 
 def test_ag_without_digit_uses_do_octave():
@@ -1094,7 +1103,7 @@ B: re ||
 
 
 def test_playback_inserts_pauze_before_midflow_tekst():
-    """Mid-flow ``@tekst`` zonder ``||`` → zelfde ``[PAUZE]`` als sectie-einde."""
+    """Mid-flow ``@tekst`` zonder ``||`` → zelfde ``[PAUZE]`` als na dubbele streep."""
     text = """\
 @do F4
 @mode major

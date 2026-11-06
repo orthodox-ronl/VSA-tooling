@@ -1,0 +1,90 @@
+# Tropaar toon 4 — gesynchroniseerd met MuseScore-export
+# "Template - Tropaar (Toon 4).musicxml" (menselijke edit t.o.v. PDF).
+# do=F4 major. role: recite → breve (||O||) in MSCX, 2 tellen afspelen;
+# haakjes = optional; staff text = ankers.
+
+spec_version: draft-v0
+id: tropaar-toon-4
+genre: tropaar
+tone: 4
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: "Template - Tropaar (Toon 4).musicxml (MuseScore; PDF tonen tropaar toon 4)"
+cycle:
+  - "1"
+  - "2"
+final: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: mi, A: "#do", T: la-1, B: la-2 }
+
+  - id: "2"
+    events:
+      - role: link
+        duration: "~"
+        optional: true
+        pitches: { S: mi, A: "#do", T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: e.st.
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: fa, A: re, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+
+  - id: laatste
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }

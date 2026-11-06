@@ -1,0 +1,129 @@
+---
+title: Tropaar H. Marina, Toon 4
+do: F4
+mode: major
+tempo: 120
+genre: tropaar
+tone: 4
+template: tropaar-toon-4
+bron: Groningen
+---
+
+# === pad: VSA + template → MVSA (Fase A herstart) ===
+# template: docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# formule-notatie (mens, nog niet geparsed): tropaar-toon-4.formule.mvsa
+
+# === afgeleide mvsa ===
+@title "Tropaar H. Marina, Toon 4"
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+@speelplan |: f1, f2 :| laatste
+# Afgeleid: VSA (S) + tropaar-toon-4 template.yaml (A/T/B, slots)
+# Mapper: vsa.template_instance.map_vsa_to_template
+
+@blok f1  # template-frase '1' (1/7)
+L: Uw hei li ge Ma ri na, o Je sus, roept als een lam_ tot_ U:_ |
+S: a - - - - - - - - - - - - - bb a |
+A: f - - - - - - - - - - - - - g f# |
+T: c - - - - - - - - - - - - - d - |
+B: f - - - - - - - - - - - - - g d |
+@blok f2  # template-frase '2' (2/7)
+L: Mijn Brui de gom, U be min_ ik,_ |
+S: bb - - - - - - a |
+A: g - - - - - - f |
+T: d - - - - - - c |
+B: g - - - - - - f |
+@blok f1  # template-frase '1' (3/7)
+L: en om U te zoe ken laat ik mij me dek rui si gen en me de beg ra ven in_ uw_ Doop._ |
+S: a - - - - - - - - - - - - - - - - - - - - bb a |
+A: f - - - - - - - - - - - - - - - - - - - - g f# |
+T: c - - - - - - - - - - - - - - - - - - - - d - |
+B: f - - - - - - - - - - - - - - - - - - - - g d |
+@blok f2  # template-frase '2' (4/7)
+L: Ik lijd om wil le van U op dat ik heer_ sen mag met U,_ |
+S: bb - - - - - - - - - - - - - a |
+A: g - - - - - - - - - - - - - f |
+T: d - - - - - - - - - - c - - - |
+B: g - - - - - - - - - - c - - f |
+@blok f1  # template-frase '1' (5/7)
+L: ik sterf voor U om met U te le_ __ ven;_ |
+S: a - - - - - - - - bb a |
+A: f - - - - - - - - g f# |
+T: c - - - - - - - - d - |
+B: f - - - - - - - - g d |
+@blok f2  # template-frase '2' (6/7)
+L: aan vaard mij als gift, want ik heb mij zelf uit lief de aan U ge of_ ferd._ |
+S: bb - - - - - - - - - - - - - - - - a |
+A: g - - - - - - - - - - - - - - - - f |
+T: d - - - - - - - - - - - - - - - - c |
+B: g - - - - - - - - - - - - - - - - f |
+@blok laatste  # template-frase 'laatste' (7/7)
+L: Door haar ge be den, Barm har ti ge, ver los on ze zie_ __ len. |
+S: a - - - - - - - - - - - - - g a |
+A: f - - - - - - - - - - - - - e f |
+T: c - - - - - - - - - - - - - - - |
+B: f - - - - - - - - - - - - - c f |
+
+# === analyse S / mapping ===
+# ### Frase → template `1` (16 noten)
+# - VSA S (16): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - MVSA S (16): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence']
+#
+# ### Frase → template `2` (8 noten)
+# - VSA S (8): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - MVSA S (8): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['cadence', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence']
+# - optional link: overgeslagen (geen optional in instance)
+# - anker e.st. op 'Mijn' (S=Bb4)
+#
+# ### Frase → template `1` (23 noten)
+# - VSA S (23): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - MVSA S (23): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence']
+#
+# ### Frase → template `2` (15 noten)
+# - VSA S (15): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - MVSA S (15): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['cadence', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence', 'cadence', 'cadence']
+# - optional link: overgeslagen (geen optional in instance)
+# - anker e.st. op 'Ik' (S=Bb4)
+# - anker l.st. op 'sen' (S=Bb4)
+#
+# ### Frase → template `1` (11 noten)
+# - VSA S (11): A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - MVSA S (11): A4 A4 A4 A4 A4 A4 A4 A4 A4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence']
+#
+# ### Frase → template `2` (18 noten)
+# - VSA S (18): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - MVSA S (18): Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 Bb4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['cadence', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence']
+# - optional link: overgeslagen (geen optional in instance)
+# - anker e.st. op 'aan' (S=Bb4)
+#
+# ### Frase → template `laatste` (16 noten)
+# - VSA S (16): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 G4 A4
+# - MVSA S (16): A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 G4 A4
+# - S-hoogtes: IDENTIEK (verwacht: S komt uit VSA na slot-match)
+# - roles: ['recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'recite', 'cadence', 'cadence', 'cadence']
+#
+
+# === oorspronkelijke VSA (commentaar) ===
+# <!-- Tropaar H. Marina, Toon 4 -->
+# <!-- Bronbestand: content-source/praktijk/feesteigen/07-jul/07-17-grootmartelares-marina.md -->
+#
+# [//:] Uw heilige Marina, o Jesus, roept als een {lam_} {/tot_} {\U_}: *
+# {/Mijn} Bruidegom, U be{min_} {\ik_}, *
+# en om U te zoeken laat ik mij medekruisigen en medebegraven {in_} {/uw_} {\Doop_}. *
+# {/Ik} lijd omwille van U opdat ik {heer_}sen mag met {\U_}, *
+# ik sterf voor U om met U te {-&/le_&_}{\ven_}; *
+# {/aan}vaard mij als gift, want ik heb mijzelf uit liefde aan U ge{of_}{\ferd_}. **
+# Door haar gebeden, Barmhartige, verlos onze {-&\zie_&_}{/len}. [//:]

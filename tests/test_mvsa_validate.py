@@ -464,7 +464,7 @@ B: g&-&- ||
 
 
 def test_validate_eof_closes_section_on_final_bar():
-    """EOF: laatste maatstreep (| of ||) beëindigt de sectie; geen warning."""
+    """EOF sluit de open sectie; ``|`` volstaat (geen IMPLICIT-warning)."""
     text = """\
 @sectie demo
 L: a_ |
@@ -476,7 +476,7 @@ S: do |
 
 
 def test_validate_new_sectie_closes_previous_on_final_bar():
-    """Nieuwe @sectie: vorige sectie eindigt op haar laatste maatstreep."""
+    """Nieuwe ``@sectie`` opent een nieuwe adresseerbare sectie."""
     text = """\
 @sectie a
 L: a_ |
@@ -489,6 +489,44 @@ S: re ||
     diags = validate_mvsa_text(text)
     assert not any(d.severity == "error" for d in diags), diags
     assert not any(d.code == "MVSA-SECTIE-IMPLICIT" for d in diags)
+
+
+def test_named_sectie_keeps_systems_after_double_bar():
+    """``||`` midden in een ``@sectie`` sluit die sectie niet (litanie-antwoord)."""
+    from vsa.mvsa_parse import parse_mvsa
+
+    text = """\
+@do F4
+@mode major
+@sectie eerste
+L: a_ ||
+S: do ||
+A: do ||
+T: do ||
+B: do ||
+
+L: b_ ||
+S: re ||
+A: re ||
+T: re ||
+B: re ||
+
+@sectie tweede
+L: c_ ||
+S: mi ||
+A: mi ||
+T: mi ||
+B: mi ||
+"""
+    doc = parse_mvsa(text)
+    by_id = {s.id: s for s in doc.sections if s.id}
+    assert set(by_id) == {"eerste", "tweede"}
+    assert len(by_id["eerste"].systems) == 2
+    assert len(by_id["tweede"].systems) == 1
+    assert by_id["eerste"].systems[0].ends_with_double_bar is True
+    assert by_id["eerste"].systems[1].ends_with_double_bar is True
+    diags = validate_mvsa_text(text)
+    assert not any(d.code == "MVSA-SECTIE-EARLY" for d in diags)
 
 
 def test_validate_blok_no_implicit_sectie_warning():

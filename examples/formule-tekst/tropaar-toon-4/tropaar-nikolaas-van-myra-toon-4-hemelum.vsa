@@ -1,0 +1,33 @@
+---
+do: F4
+mode: major
+tempo: 180
+corpus_id: T4-11
+soort: tropaar
+toon: 4
+titel: Nicolaas van Myra
+partituur:
+  title: Nicolaas van Myra
+  arranger: Hemelum
+bron:
+  uitgangspunt: Liturgikon
+  bewerking: zetting/praktijk Hemelum
+taal: nl
+gelegenheid:
+- naam: Nikolaas van Myra
+  datum: 6 dec
+zoektekst: >-
+  Als een Regel van geloof en een voorbeeld van zachtmoedigheid heeft de waarheid van uw daden
+  u aan uw kudde getoond. Daarom zijt gij door nederigheid groot, en door armoede rijk geworden,
+  Vader en Hogepriester Nicolaas, bid Christus God, onze zielen te redden.
+---
+
+<!-- Bron: feesteigen\12-dec\12-06-nicolaas-van-myra.md | type: chapter -->
+[//:] Als een {Re_}gel {/van} ge{\loof_} 
+{/en} een voorbeeld van zacht{moe__}dig{\heid_} 
+heeft de waarheid van uw daden u aan uw {kud_}{/de} ge{\toond_}. 
+{/Daar}om zijt gij door {ne_}derigheid {\groot_}, 
+en door armoede rijk ge{-&/wor_&_}{\den_}, 
+{/Va}der en Hogepriester {Ni__}co{\laas_}, 
+// bid Christus {God_}, onze zielen te {-&/red_&_}{\den_}. [//:]
+<!-- Bron: Liturgikon / feesteigen Nicolaas; uitvoeringsvorm hemelum -->

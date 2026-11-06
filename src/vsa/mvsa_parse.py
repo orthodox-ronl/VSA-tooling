@@ -159,7 +159,9 @@ class ParsedSystem:
     markers: list[str]
     lines: dict[str, str]  # marker -> raw content
     line_nos: dict[str, int]
-    ends_section: bool
+    # True als het systeem op ``||`` / ``:||`` eindigt (dubbele maatstreep).
+    # Geen einde van adresseerbare ``@sectie``.
+    ends_with_double_bar: bool
     context: StickyContext
     measures: list[MeasureBundle] = field(default_factory=list)
     line_ehms: dict[str, str | None] = field(default_factory=dict)
@@ -267,8 +269,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
                         )
                     )
                 else:
-                    # Nieuwe @sectie: laatste maatstreep van vorige sectie
-                    # (ook |) is sectie-einde; geen MVSA-SECTIE-IMPLICIT.
+                    # Nieuwe @sectie: vorige adresseerbare sectie stopt hier.
                     pending_sectie = (rest, line_no, "sectie")
                     current = None
             elif name == "blok":
@@ -282,7 +283,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
                         )
                     )
                 else:
-                    # Speelblok ≠ sectie: geen ||-eis tussen @blok's (Coria-pauze).
+                    # Speelblok ≠ @sectie; || tussen blokken niet verplicht.
                     pending_sectie = (rest, line_no, "blok")
                     current = None
             elif name == "speelplan":
@@ -423,14 +424,16 @@ def parse_mvsa(text: str) -> ParsedDocument:
         line_map = {m: c for _, m, c, _, _, _ in system_lines}
         line_nos = {m: ln for ln, m, _, _, _, _ in system_lines}
         line_ehms = {m: ehm for _, m, _, ehm, _, _ in system_lines}
-        ends, final_bars = _ends_section(system_lines, diagnostics)
+        double_bar, _final_bars = _system_ends_with_double_bar(
+            system_lines, diagnostics
+        )
 
         system = ParsedSystem(
             start_line=system_lines[0][0],
             markers=markers,
             lines=line_map,
             line_nos=line_nos,
-            ends_section=ends,
+            ends_with_double_bar=double_bar,
             context=deepcopy(ctx),
             line_ehms=line_ehms,
             identities=identities,
@@ -459,8 +462,10 @@ def parse_mvsa(text: str) -> ParsedDocument:
             pending_sectie = None
 
         current.systems.append(system)
-        if ends:
-            current = None
+        # ``||`` / ``:||`` is dubbele maatstreep (Coria-pauze / blad), geen
+        # einde van een adresseerbare sectie. Named ``@sectie`` / ``@blok``
+        # en de impliciete sectie lopen tot de volgende ``@sectie``/``@blok``
+        # of EOF.
 
     if pending_sectie is not None:
         sid, start, origin = pending_sectie
@@ -499,8 +504,7 @@ def parse_mvsa(text: str) -> ParsedDocument:
                 severity="warning",
             )
         )
-    # EOF (en later fence-:::): open sectie eindigt op de laatste maatstreep
-    # van het laatste systeem (| of ||); geen MVSA-SECTIE-IMPLICIT.
+    # EOF / fence-::: : open adresseerbare sectie stopt; geen IMPLICIT-warning.
 
     _validate_sync(sections, diagnostics)
     doc = ParsedDocument(
@@ -573,9 +577,10 @@ def _apply_directive(ctx: StickyContext, name: str, rest: str) -> None:
 
 
 
-def _ends_section(
+def _system_ends_with_double_bar(
     system_lines: list[tuple], diagnostics: list[MvsaDiagnostic]
 ) -> tuple[bool, list[str | None]]:
+    """True als alle LSATB-regels op ``||`` / ``:||`` eindigen (blad/Coria)."""
     endings: list[str | None] = []
     for item in system_lines:
         line_no, marker, content = item[0], item[1], item[2]
@@ -584,7 +589,7 @@ def _ends_section(
             diagnostics.append(
                 MvsaDiagnostic(
                     "MVSA-BAR",
-                    f"{marker}: regel eindigt niet op een maat-/sectiestreep",
+                    f"{marker}: regel eindigt niet op een maatstreep",
                     line_no,
                 )
             )

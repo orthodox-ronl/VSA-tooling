@@ -1,0 +1,41 @@
+# Formule tropaar toon 4 — zoveel mogelijk bestaande MVSA/VSA-syntax.
+# Nog niet door `mvsa` geparsed. Geen L: tekst komt uit .ftxt / vsa-bestanden.
+#
+# Hoogte: eerste stuk a-g (of a-g met #/b); daarna EHM (- / \ #\ …).
+#   Let op: `a-` plakt = toonnaam+octaaf. Zelfde toon = `a -` (spaties).
+# Duur: op de stem (geen L) — formule-uitbreiding: ELM ná het hoogte-stuk.
+# Optioneel: `a?`. Recite: één toonhoogte-slot; print 1-n-1 = export.
+# Ankers: @e.st. / @l.st. plakken aan het hoogte-stuk ervoor.
+
+# Hemelum tropaar/kondak toon 4. Canonieke mapper-bron: library template.yaml.
+# Dit bestand = mensformule pad 0 (laatste = mi–re–mi). Alternatief mi–fa–mi
+# staat als of:/fa-close in template.yaml — hier nog niet uitdrukbaar.
+
+@formule tropaar-toon-4
+@title "Tropaar — Toon 4 (Hemelum, formule)"
+@genre tropaar
+@tone 4
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+@pitches_status provisional
+
+@speelplan |: f1, f2 :| laatste
+
+@blok f1
+S: a - @l.st._ /_ \_ |
+A: f - @l.st._ /_ #\ |
+T: c - @l.st._ /_ - |
+B: f - @l.st._ /_ \\\ |
+
+@blok f2
+S: a? /@e.st._ - @l.st._ \_ |
+A: f#? /@e.st._ - @l.st._ \ |
+T: a? -@e.st._ - @l.st._ \ |
+B: g? -@e.st._ - \\\@l.st._ /_ |
+
+@blok laatste
+S: a - @l.st._ \_ /__ |
+A: f - @l.st._ \_ /__ |
+T: c - @l.st._ -__ |
+B: f - @l.st._ \\\_ /__ |

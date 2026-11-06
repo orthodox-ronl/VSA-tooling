@@ -273,7 +273,8 @@ class _System:
     start_line: int
     markers: list[str]  # stem_ids in order
     lines: dict[str, _RawLine]  # stem_id -> line
-    ends_section: bool
+    # True als het systeem op ``||`` / ``:||`` eindigt (geen @sectie-grens).
+    ends_with_double_bar: bool
     identities: list[str] = field(default_factory=list)  # stem+ehm order keys
 
 
@@ -409,7 +410,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                     )
                 else:
                     # Nieuwe @sectie: laatste maatstreep van vorige sectie
-                    # (ook |) is sectie-einde; geen MVSA-SECTIE-IMPLICIT.
+                    # Vorige sectie sluit bij nieuwe @sectie; geen IMPLICIT.
                     pending_sectie = (rest, line_no, "sectie")
                     current = None
             elif name == "blok":
@@ -506,12 +507,12 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                 )
             )
 
-        ends = _system_ends_section(system_lines, diagnostics)
+        double_bar = _system_ends_with_double_bar(system_lines, diagnostics)
         system = _System(
             start_line=system_lines[0].line_no,
             markers=markers,
             lines={rl.marker: rl for rl in system_lines},
-            ends_section=ends,
+            ends_with_double_bar=double_bar,
             identities=identities,
         )
         pending_tekst_lines.clear()
@@ -532,8 +533,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
             pending_sectie = None
 
         current.systems.append(system)
-        if ends:
-            current = None
+        # ``||`` sluit geen adresseerbare sectie; zie mvsa_parse.py.
 
     for tekst_line in pending_tekst_lines:
         diagnostics.append(
@@ -563,8 +563,7 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                 start,
             )
         )
-    # EOF / fence-::: : open sectie eindigt op de laatste maatstreep
-    # van het laatste systeem (| of ||); geen warning. Speelblokken: idem.
+    # EOF / fence-::: : open adresseerbare sectie stopt; geen IMPLICIT.
     return sections
 
 
@@ -760,10 +759,10 @@ def _validate_directive_value(
     # (via merge in validate_mvsa_text).
     # sectie handled elsewhere
 
-def _system_ends_section(
+def _system_ends_with_double_bar(
     system_lines: list[_RawLine], diagnostics: list[MvsaDiagnostic]
 ) -> bool:
-    """True if every line ends with || or :||."""
+    """True als alle LSATB-regels op ``||`` / ``:||`` eindigen (blad/Coria)."""
     endings: list[str | None] = []
     for rl in system_lines:
         bars = _split_bars(rl.content)
@@ -771,7 +770,7 @@ def _system_ends_section(
             diagnostics.append(
                 MvsaDiagnostic(
                     "MVSA-BAR",
-                    f"{rl.marker}: regel eindigt niet op een maat-/sectiestreep",
+                    f"{rl.marker}: regel eindigt niet op een maatstreep",
                     rl.line_no,
                 )
             )
@@ -901,16 +900,8 @@ def _validate_section(section: _Section, diagnostics: list[MvsaDiagnostic]) -> N
         _validate_system_sync(system, diagnostics)
         _validate_system_height_tokens(system, diagnostics)
         _validate_system_l_marks(system, diagnostics)
-        # Intermediate systems must not end section; last must — checked at parse
-        if system is not section.systems[-1] and system.ends_section:
-            diagnostics.append(
-                MvsaDiagnostic(
-                    "MVSA-SECTIE-EARLY",
-                    "|| beëindigt de sectie; verdere systemen horen bij een nieuwe sectie",
-                    system.start_line,
-                    severity="warning",
-                )
-            )
+        # ``||`` midden in een sectie is normaal (dubbele maatstreep / Coria);
+        # geen MVSA-SECTIE-EARLY meer — sectie eindigt alleen bij @sectie/EOF.
 
 
 def _validate_system_sync(system: _System, diagnostics: list[MvsaDiagnostic]) -> None:

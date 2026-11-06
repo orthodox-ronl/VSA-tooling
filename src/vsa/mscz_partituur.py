@@ -380,6 +380,7 @@ def apply_partituur_mscz_conventions(
     mscx = _clear_instrument_names(mscx)
     mscx = _hide_tempo_marks(mscx)
     mscx = _fix_ds_al_fine_play_until(mscx)
+    mscx = _reposition_left_nav_markers(mscx)
     merged_style = dict(_STYLE_OVERRIDES)
     if style_overrides:
         merged_style.update({str(k): str(v) for k, v in style_overrides.items()})
@@ -689,6 +690,49 @@ def _fix_ds_al_fine_play_until(mscx: str) -> str:
         return f"<Jump>{body2}</Jump>"
 
     return re.sub(r"<Jump>(.*?)</Jump>", _fix_jump, mscx, flags=re.DOTALL)
+
+
+# Segno/Coda (style repeat_left): MuseScore plaatst ze standaard klem tegen de
+# accolade / in de spleet tussen systemen — bijna onzichtbaar. Na ``autoplace=0``
+# is de ankerpositie bij de balk; spatium-offset (zelfde as StaffText):
+# +x = rechts van de sleutel; −y = omhoog boven de SA-balk.
+_LEFT_NAV_MARKER_OFFSET_X = "3.5"
+_LEFT_NAV_MARKER_OFFSET_Y = "-2.5"
+_LEFT_NAV_MARKER_RE = re.compile(r"<Marker>(.*?)</Marker>", re.DOTALL)
+_LEFT_NAV_LABELS = frozenset({"segno", "coda", "varsegno", "varcoda"})
+
+
+def _reposition_left_nav_markers(mscx: str) -> str:
+    """Duwt Segno/Coda rechts van de sleutel en dichter bij de SA-balk (S20).
+
+    Fine / To Coda / D.S.|D.C. (``repeat_right``) blijven onaangeraakt.
+    """
+
+    def _fix(m: re.Match[str]) -> str:
+        body = m.group(1)
+        lab = re.search(r"<label>\s*([^<]+?)\s*</label>", body)
+        mtype = re.search(r"<markerType>\s*([^<]+?)\s*</markerType>", body)
+        kind = (
+            (lab.group(1) if lab else "")
+            or (mtype.group(1) if mtype else "")
+        ).strip().lower()
+        is_left = (
+            kind in _LEFT_NAV_LABELS
+            or "<sym>segno</sym>" in body
+            or "<sym>coda</sym>" in body
+        )
+        if not is_left or "<offset" in body:
+            return m.group(0)
+        insert = (
+            f'<offset x="{_LEFT_NAV_MARKER_OFFSET_X}" '
+            f'y="{_LEFT_NAV_MARKER_OFFSET_Y}"/>'
+        )
+        # autoplace uit zodat MuseScore de offset niet wegcorrigeert
+        if "<autoplace>" not in body:
+            insert = f"<autoplace>0</autoplace>{insert}"
+        return f"<Marker>{body}{insert}</Marker>"
+
+    return _LEFT_NAV_MARKER_RE.sub(_fix, mscx)
 
 
 def _hide_tempo_marks(mscx: str) -> str:

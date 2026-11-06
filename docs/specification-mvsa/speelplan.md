@@ -23,9 +23,16 @@ In de `.mvsa` schrijf je elk **speelblok** één keer (`@blok`).
 conventionele herhaal-/volta-/D.S.-notatie. Niet standaard: speelplan ook op
 papier uitschrijven (dat is alleen het vangnet als geen navigatiepatroon past).
 
-**Bestandsgrens:** één `.mvsa` ↔ hoogstens **één** `@speelplan`. Geen nesten
-van speelplan in `@sectie`. Meerdere stukken met eigen plan → aparte bestanden.
-`@sectie` blijft voor bestanden **zonder** speelplan (schetsen, `--section`).
+**Grenzen (model):**
+
+| Nu (afgedwongen)                                                                    | Richting (later)                                                                                  |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Hoogstens **één** `@speelplan` per bestand; **geen** `@sectie` in hetzelfde bestand | Speelplan + `@blok`’s **binnen** één sectie; bestand zonder `@sectie` = die ene impliciete sectie |
+| Meerdere stukken met eigen plan → aparte bestanden                                  | Meerdere secties per bestand, elk met hoogstens één plan (als nodig)                              |
+
+`@sectie` is de **adresseerbare** eenheid (`--section`, bibliotheek-fragment).
+`@blok` is **alleen** speelplan-materiaal — geen export-id, geen `…@blok` in
+een `bieb`-verwijzing.
 
 Zonder `@speelplan` blijft het huidige gedrag: documentvolgorde = klinkende
 volgorde. Open herhalingen (litanie: `|:` … `:|` zonder vaste N) horen
@@ -37,13 +44,14 @@ formule-frasen). Speelplan is voor vaste SATB-blokken in één `.mvsa`.
 
 ## Termen
 
-| Term               | Betekenis                                                                 |
-| ------------------ | ------------------------------------------------------------------------- |
-| **Speelblok**      | Genoemd LSATB-segment (`@blok` *id*); staat één keer in de bron           |
-| **Speelplan**      | Niet-lege lijst speelblok-ids = canonieke klinkende volgorde              |
-| **Bladvorm**       | Wat op papier staat: elk speelblok één keer, bronvolgorde                 |
-| **Klinkende vorm** | Tijdlijn na expansie van het speelplan                                    |
-| **Speeltekst**     | Alleen vangnet als geen navigatiepatroon past (zelden)                    |
+| Term               | Betekenis                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| **Sectie**         | Adresseerbare eenheid (`@sectie` *id*, of één impliciete sectie zonder `@sectie`)              |
+| **Speelblok**      | Genoemd LSATB-segment (`@blok` *id*) **alleen** voor `@speelplan`; staat één keer in de bron   |
+| **Speelplan**      | Niet-lege lijst speelblok-ids = canonieke klinkende volgorde                                   |
+| **Bladvorm**       | Wat op papier staat: elk speelblok één keer, bronvolgorde                                      |
+| **Klinkende vorm** | Tijdlijn na expansie van het speelplan                                                         |
+| **Speeltekst**     | Alleen vangnet als geen navigatiepatroon past (zelden)                                         |
 
 ## Syntax
 
@@ -53,11 +61,12 @@ formule-frasen). Speelplan is voor vaste SATB-blokken in één `.mvsa`.
 @speelplan 1, 2, 1, 2, 1, 3
 ```
 
-- Hoogstens **één** `@speelplan` per bestand.
+- Hoogstens **één** `@speelplan` per sectie (nu: per bestand).
 - Argument: komma-gescheiden speelblok-ids (spaties mogen rond komma’s).
 - Staat bij de document-metadata (bij `@do` / `@title`), vóór het eerste
   speelblok.
-- Elk id moet voorkomen als `@blok` *id* in hetzelfde bestand.
+- Elk id moet voorkomen als `@blok` *id* in hetzelfde bestand (later: in
+  dezelfde sectie).
 
 ### `@blok`
 
@@ -80,13 +89,22 @@ L: … ||
 - Elk speelblok-id komt hoogstens één keer voor.
 - Tussen blokken is **`||` niet verplicht** (en vaak ongewenst: `||` triggert
   in Coria een pauze). Geen `||`-eis tussen blokken (in tegenstelling tot
-  expliciete sectie-eindestreep midden in een `@sectie`-bestand).
+  dubbele maatstreep midden in een `@sectie`-bestand).
   Optioneel `||` alleen op het **laatste** blok van het bestand.
 
-**`@sectie` vs `@blok`:** gebruik `@sectie` in bestanden **zonder** `@speelplan`
-(export-id, schetsen). In een bestand **met** `@speelplan` moeten alle
-muzikale segmenten via `@blok` (geen anonieme sectie, geen `@sectie`).
-Nest geen speelplan in een sectie — één plan per bestand.
+**`@sectie` vs `@blok` (scherp):**
+
+|                      | `@sectie`                            | `@blok`                             |
+| -------------------- | ------------------------------------ | ----------------------------------- |
+| Rol                  | Adresseerbaar deel van de bron       | Bouwsteen voor `@speelplan`         |
+| Export               | `mvsa … --section *id*`              | Niet via `--section`                |
+| Bibliotheek-fragment | `…@sectie-id`                        | Niet                                |
+| Nu met speelplan     | Verboden in hetzelfde bestand        | Verplicht voor elk muzikaal segment |
+| Later                | Mag speelplan + blokken **bevatten** | Blijft binnen die ene sectie        |
+
+Nu: bestand **met** `@speelplan` → alle muzikale segmenten via `@blok` (geen
+anonieme sectie, geen `@sectie`). Bestand **zonder** `@speelplan` → `@sectie`
+voor named delen, of één impliciete sectie.
 
 ## Herhaalstrepen en speelplan
 
@@ -118,16 +136,16 @@ blokken (zie hierboven).
 
 ## Validatie (fase 1)
 
-| Code                         | Ernst   | Wanneer                                                |
-| ---------------------------- | ------- | ------------------------------------------------------ |
-| `MVSA-SPEELPLAN-SYNTAX`      | error   | Lege lijst, leeg id, ongeldig id-teken                 |
-| `MVSA-SPEELPLAN-MULTI`       | error   | Meer dan één `@speelplan`                              |
-| `MVSA-SPEELPLAN-UNKNOWN-ID`  | error   | Id in plan zonder `@blok`                              |
-| `MVSA-BLOK-ID`               | error   | Ongeldige `@blok`-id                                   |
-| `MVSA-BLOK-DUP`              | error   | Twee `@blok` met hetzelfde id                          |
-| `MVSA-SPEELPLAN-ANON`        | error   | Anonieme sectie of `@sectie` terwijl speelplan bestaat |
-| `MVSA-SPEELPLAN-REPEAT-BAR`  | error   | `\|:` / `:\|` / `:\|\|` in een speelplan-blok          |
-| `MVSA-SPEELPLAN-UNUSED`      | warning | `@blok` niet genoemd in het speelplan                  |
+| Code                         | Ernst   | Wanneer                                                                       |
+| ---------------------------- | ------- | ----------------------------------------------------------------------------- |
+| `MVSA-SPEELPLAN-SYNTAX`      | error   | Lege lijst, leeg id, ongeldig id-teken                                        |
+| `MVSA-SPEELPLAN-MULTI`       | error   | Meer dan één `@speelplan`                                                     |
+| `MVSA-SPEELPLAN-UNKNOWN-ID`  | error   | Id in plan zonder `@blok`                                                     |
+| `MVSA-BLOK-ID`               | error   | Ongeldige `@blok`-id                                                          |
+| `MVSA-BLOK-DUP`              | error   | Twee `@blok` met hetzelfde id                                                 |
+| `MVSA-SPEELPLAN-ANON`        | error   | Anonieme sectie of `@sectie` terwijl speelplan bestaat (tijdelijk tot nesten) |
+| `MVSA-SPEELPLAN-REPEAT-BAR`  | error   | `\|:` / `:\|` / `:\|\|` in een speelplan-blok                                 |
+| `MVSA-SPEELPLAN-UNUSED`      | warning | `@blok` niet genoemd in het speelplan                                         |
 
 ## Export
 
