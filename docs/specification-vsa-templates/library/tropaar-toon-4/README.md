@@ -4,11 +4,10 @@
 (`also_used_as: [kondak]`). Canonieke id: `tropaar-toon-4`. Playbook-alias
 voor CLI: `hemelum-tropaar-toon-4` → dit id (default bij `vsa mvsa`).
 
-> **Herstart 2026-11:** formule+tekst-verkenning in
-> [`examples/formule-tekst/tropaar-toon-4/`](../../../../examples/formule-tekst/tropaar-toon-4/).
-> Playbook: [`examples/formule-tekst/PLAYBOOK.md`](../../../../examples/formule-tekst/PLAYBOOK.md).
-> Snapshot oude aanpak:
-> [`examples/formule-tekst/.archief/tropaar-toon-4-oud/`](../../../../examples/formule-tekst/.archief/tropaar-toon-4-oud/).
+> **Herstart 2026-11:** formule+tekst-verkenning in de repo-map
+> `examples/formule-tekst/tropaar-toon-4/` (niet op de documentatiesite).
+> Playbook: `examples/formule-tekst/PLAYBOOK.md`.
+> Snapshot oude aanpak: `examples/formule-tekst/.archief/tropaar-toon-4-oud/`.
 
 | Veld              | Waarde                                                              |
 | ----------------- | ------------------------------------------------------------------- |

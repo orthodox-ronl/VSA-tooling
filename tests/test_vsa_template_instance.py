@@ -450,16 +450,18 @@ def test_elia_instance_visible_barline_per_stanza() -> None:
 
 
 def test_pitch_mismatch_in_laatste_raises() -> None:
-    """mi–fa–mi op template mi–re–mi (oude T4-08) → hoogte-mismatch, geen stil hold."""
+    """mi–fa–sol past op geen ``of:``-cadens → cadenspad-fout met bronlocatie."""
+    from vsa.template_instance import CODE_CADENCE_PATH
+
     doc = _template()
     phrase = next(p for p in doc["phrases"] if p["id"] == "laatste")
-    # Schep-melisma als vroeger fout: /-&_ → mi–fa–mi i.p.v. mi–re–mi.
+    # Schep = fa, daarna nog een stijging (sol): geen pad is mi–fa–sol.
     text = (
         "---\ndo: F4\nmode: major\n---\n\n"
-        "// Ver-vul-ling van het Heils-plan van de {-&/Schep_&_}{\\per_}. [//:]\n"
+        "// Ver-vul-ling van het Heils-plan van de {-&/Schep_}{/per_}. [//:]\n"
     )
     stanzas = extract_stanza_notes(text)
-    with pytest.raises(TemplateInstanceError, match="hoogte-mismatch") as caught:
+    with pytest.raises(TemplateInstanceError) as caught:
         map_stanza(
             stanzas[0],
             phrase,
@@ -468,15 +470,16 @@ def test_pitch_mismatch_in_laatste_raises() -> None:
             source="demo.vsa",
         )
     err = caught.value
-    assert err.code == "VSA-TEMPLATE-PITCH-MISMATCH"
+    assert err.code == CODE_CADENCE_PATH
     assert err.hint_nl
+    assert "cadenspad" in err.hint_nl
     assert err.line >= 6  # na frontmatter
     assert err.column >= 1
     assert "demo.vsa" in err.format_compact()
     assert f"demo.vsa:{err.line}:{err.column}" == err.location_label()
     lines = err.format_lines()
     assert lines[0] == err.location_label()
-    assert lines[1].startswith("ERROR: VSA-TEMPLATE-PITCH-MISMATCH:")
+    assert lines[1].startswith(f"ERROR: {CODE_CADENCE_PATH}:")
     assert any(line.startswith("Hint:") for line in lines)
 
 
