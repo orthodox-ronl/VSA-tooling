@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-06 12:07 CET.
+  , gebouwd 2026-11-06 13:10 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5177,11 +5177,11 @@ bij rendering/export, niet bij mvsa-brontekst.</p>
 </tr>
 <tr>
 <td><strong>Sectie</strong></td>
-<td>Muzikale eenheid (<code>@sectie</code> of anoniem): een of meer LSATB-systemen. Eindigt met <code>\|\|</code> / <code>:\|\|</code> (expliciet), of met de laatste maatstreep bij een nieuwe <code>@sectie</code>, bij EOF, of bij <code>::: mvsa-notatie</code> / <code>::: mvsa</code>. <strong>Niet</strong> van toepassing op speelblokken (<code>@blok</code>) — zie <a href="../speelplan/">Speelplan</a>.</td>
+<td>Adresseerbare eenheid (<code>@sectie</code> <em>id</em>, of één impliciete/anonieme sectie zonder <code>@sectie</code>): een of meer LSATB-systemen. Eindigt bij een nieuwe <code>@sectie</code>, bij EOF, of bij <code>::: mvsa-notatie</code> / <code>::: mvsa</code> — <strong>niet</strong> bij <code>\|\|</code> (dat is dubbele maatstreep / Coria-pauze). <strong>Niet</strong> van toepassing op speelblokken (<code>@blok</code>) — zie <a href="../speelplan/">Speelplan</a>.</td>
 </tr>
 <tr>
 <td><strong>Speelblok</strong></td>
-<td>Genoemd segment (<code>@blok</code> <em>id</em>) voor een speelplan. Geen <code>\|\|</code>-eis tussen blokken. Eén <code>@speelplan</code> per bestand.</td>
+<td>Genoemd segment (<code>@blok</code> <em>id</em>) <strong>alleen</strong> voor <code>@speelplan</code> (geen <code>--section</code>). Geen <code>\|\|</code>-eis tussen blokken. Eén <code>@speelplan</code> per bestand (later: per sectie).</td>
 </tr>
 <tr>
 <td><strong>LSATB-systeem</strong></td>
@@ -5267,7 +5267,7 @@ bij rendering/export, niet bij mvsa-brontekst.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-14
+        Bijgewerkt: 2026-11-06
         
       </p>
       
