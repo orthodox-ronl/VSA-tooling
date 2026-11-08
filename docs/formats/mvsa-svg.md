@@ -13,13 +13,14 @@ Style — geen A4-bladreeks (`stem-N.svg`). Die sibling voedt scherm-fallback
 én `index.md.pdf` (systeemsnee naar A4). A4-paginering zit in de PDF, niet
 in het SVG-product.
 
-| Onderwerp                    | Waar                                                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| CLI (``.mvsa``)              | [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                                                             |
-| CLI (``.mscz``)              | [`mscz svg`](../reference/cli/mscz.md)                                                                      |
-| MSCZ-layout ``muziek``       | [`.mscz` layoutprofielen](mscz.md#layoutprofielen---layout)                                                 |
+| Onderwerp                    | Waar                                                                                                                                                                             |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CLI (``.mvsa``)              | [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                                                                                                                                  |
+| CLI (``.mscz``)              | [`mscz svg`](../reference/cli/mscz.md)                                                                                                                                           |
+| MSCZ-layout ``muziek``       | [`.mscz` layoutprofielen](mscz.md#layoutprofielen---layout)                                                                                                                      |
 | `--engine osmd`              | Score-IR → from-ir MusicXML → headless OSMD + S8 A1-adapter ([`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg)); witte `vsa-page-bg` |
-| Score-IR / schermpad         | [score-ir](score-ir.md) · [partituur-ir](../plans/partituur-ir.md) §7                                       |
+| `--engine eigen`             | Score-IR → eigen schilder. `--view notes` (default), `vsa-notes` of `vsa`. Geen standaardproduct; zie [het werkplan](../plans/eigen-partituur-svg.md)                            |
+| Score-IR / schermpad         | [score-ir](score-ir.md) · [partituur-ir](../plans/partituur-ir.md) §7                                                                                                            |
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -64,4 +65,11 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 cd scripts\osmd-svg && npm install && npx puppeteer browsers install chrome
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --engine eigen --view notes
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa-notes
 ```
+
+`--engine eigen` schrijft een sibling `lied.mvsa.eigen-notes.svg`
+(of `eigen-vsa-notes` / `eigen-vsa`) en laat `lied.mvsa.svg` en
+products-meta met rust. Het bestand bevat Source Sans 3 en schaalt mee
+met de vensterbreedte. Het productiescherm blijft OSMD.

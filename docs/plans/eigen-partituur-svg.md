@@ -2,7 +2,7 @@
 
 | Veld            | Waarde                                                                                                                                                          |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**      | werkplan; **niet normatief**; geen productcode in deze stap                                                                                                     |
+| **Status**      | werkplan; **niet normatief**. Schilder en `mvsa svg --engine eigen` bestaan. Nog geen standaardproduct en geen wijziging van het productiescherm.               |
 | **Doel**        | Vastleggen hoe een eigen tekening uit Score-IR de keuzes van MuseScore en OSMD kan overnemen, en wanneer die tekening het schermpad mag worden                  |
 | **Bewijs**      | Spike op [pull request 75](https://github.com/orthodox-ronl/VSA-tooling/pull/75): Alleluia toon 8, Alleluia toon 2, vredeslitanie (1a)                          |
 | **Eigenaar**    | Tekening en contracten: [VSA-tooling](@bron). Inbedden op de site: bibliotheek. Samenstelling en colofon: bibliotheek, niet deze tekening                       |
@@ -62,9 +62,13 @@ Wat op die platen al op een partituur lijkt: notenkoppen, sleutels,
 voortekens, stokrichting, de stokloze `||O||`, de accolade, de
 maatstrepen en de herhaalpuntjes.
 
-Wat nog een schets is: de bogen zijn eenvoudige krommen, de afstand
-tussen noten is grof, er is één systeem per stuk (ook waar de bron
-`@nieuw-systeem` zet), en de zangtekst is nog niet Source Sans 3.
+Wat op de spike nog een schets was: de bogen zijn eenvoudige krommen,
+de afstand tussen noten is grof, er was één systeem per stuk (ook waar
+de bron `@nieuw-systeem` zet), en de zangtekst was nog niet Source Sans 3.
+De schilder in `src/vsa/eigen_svg.py` heeft die drie punten inmiddels:
+Source Sans 3 (gewicht 400, ingebed vanuit `scripts/osmd-svg/fonts/`),
+een nieuw systeem waar Score-IR `newSystem` zet, en de S13-extender
+op de notenbeelden. De bogen en de nootafstand blijven grof.
 Een koppelteken in «ont-ferm» ontbreekt omdat Score-IR «ont» als losse
 lettergreep noteert (`syllabic: single`), niet als begin van een woord.
 
@@ -104,8 +108,13 @@ Dit werkplan herhaalt de regels niet. Een testrun noemt het contract-id
 ## 3. Keuzes die mee moeten
 
 Elke rij is een keuze die voor MuseScore of voor OSMD al gemaakt is.
-De kolom «Spike» zegt of pull request 75 die keuze al tekent.
-«Fase» wijst naar §7.
+De kolom «Spike» zegt of pull request 75 die keuze al tekende.
+«Fase» wijst naar §7. De schilder in `src/vsa/eigen_svg.py` dekt de
+fase-2-rijen die `tests/test_eigen_svg.py` vastzet: drie beelden,
+Source Sans 3, stokrichting, recite, extender, herhaling, cues,
+maatnummer, `@nieuw-systeem`, en de woorden Segno / Fine / D.S.
+Een volledige volta-haak is dat nog niet: de schilder zet het
+voltanummer en een kort streepje. Checklist S20 blijft daarmee open.
 
 ### 3.1 Bladbeeld
 
@@ -322,13 +331,13 @@ De schilder weigert een onbekende `format` of een onbekende major van
 
 ### Uitvoer per fase
 
-| Fase          | Bestand                                                                | Wie het gebruikt                |
-| ------------- | ---------------------------------------------------------------------- | ------------------------------- |
-| 0–2           | SVG in de spike-map, niet een standaardproduct                         | Review van de platen            |
-| 3             | Optioneel naast OSMD, nog geen vervanging van `lied.mvsa.svg`          | Vergelijken op dezelfde stukken |
-| 4, na besluit | Dan pas een naam in de productcatalogus, en een zin in kale muziek §4  | Site                            |
-| 5             | Hetzelfde SVG, met systeemafbreuk voor een smal venster                | Tablet en telefoon              |
-| 6             | Alleen na een apart besluit: hoge SVG die de paginasnijder kan snijden | `index.md.pdf`                  |
+| Fase          | Bestand                                                                                              | Wie het gebruikt                |
+| ------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------- |
+| 0–2           | SVG in de spike-map, niet een standaardproduct                                                       | Review van de platen            |
+| 3             | `lied.mvsa.eigen-notes.svg` (en `eigen-vsa-notes`, `eigen-vsa`); geen vervanging van `lied.mvsa.svg` | Vergelijken op dezelfde stukken |
+| 4, na besluit | Dan pas een naam in de productcatalogus, en een zin in kale muziek §4                                | Site                            |
+| 5             | Hetzelfde SVG, met systeemafbreuk voor een smal venster                                              | Tablet en telefoon              |
+| 6             | Alleen na een apart besluit: hoge SVG die de paginasnijder kan snijden                               | `index.md.pdf`                  |
 
 Fase 2 levert per stuk de drie beelden uit §4.2, als aparte SVG's.
 Elk bestand heeft een viewBox en `width="100%"`, zodat een venster het
@@ -383,17 +392,29 @@ beelden uit §4.2 kan leveren vanuit dezelfde Score-IR. Kale VSA voor
 een eenstemmige `.vsa` blijft de bestaande `vsa svg`; de nieuwe eis is
 dat een `.mvsa`-tropaar hetzelfde soort beeld krijgt, zonder notenbalk.
 
+Die zin is waar voor de proefset in `tests/test_eigen_svg.py`.
+Open binnen deze fase: een volta-haak over de hele maat (nu een kort
+streepje met het nummer), bundels, en bogen die de melodie volgen.
+
 Buiten fase 2: site, `products`, OSMD uitschakelen, A4, cursor.
 
 ### Fase 3 — naast OSMD kunnen draaien
 
-Een aanroep, nog geen standaardproduct. Voorstel voor de vlag, pas
-invullen als de man-pagina meegaat: `mvsa svg --engine eigen`, naast
-het bestaande `--engine osmd`. De default blijft de huidige engine.
+De aanroep is `mvsa svg --engine eigen`, naast `--engine osmd`.
+De default blijft MuseScore. `--view` is `notes` (default),
+`vsa-notes` of `vsa`. Zonder `-o` heet het bestand
+`lied.mvsa.eigen-notes.svg` (of `eigen-vsa-notes` / `eigen-vsa`).
+Met `--translit` komt daar het bestaande translit-stuk bij, bijvoorbeeld
+`lied.mvsa.eigen-notes.translit-nls.svg`.
+`--lyrics-font-size` en `--cue-font-size` gelden.
+Een ander `--lyrics-font` of `--cue-font` dan Source Sans 3 weigert
+de aanroep. MuseScore-Style (afstand, marges, compact) weigert ook.
+De aanroep schrijft geen products-meta en overschrijft `lied.mvsa.svg` niet.
 
 Klaar wanneer dezelfde drie spike-stukken én de trisagion via die
 aanroep een SVG geven, de test in CI draait, en de bibliotheek nog
-steeds OSMD toont.
+steeds OSMD toont. Die aanroep en die test zijn er. Het productiescherm
+is OSMD gebleven.
 
 ### Fase 4 — besluit
 
@@ -431,24 +452,27 @@ checklist S7 horen bij die fase, niet bij het scherm.
 
 ## 8. Gebruik
 
-### Zolang de schilder een spike is
+### De platen bekijken
 
-De platen opnieuw maken, op een Windows-pc met deze repo:
+Voorbeelden staan in `examples/spikes/eigen-svg/` (`index.html`).
+Opnieuw maken, op een Windows-pc met deze repo:
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-set PYTHONPATH=src
-python examples\spikes\score-ir-svg\render_score_ir_svg.py examples\bug-cases\corib\alleluia-toon-8.mvsa -o examples\spikes\score-ir-svg\alleluia-toon-8.svg --from-mvsa
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa-notes -o examples\spikes\eigen-svg\alleluia-toon-8.vsa-notes.svg
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view notes -o examples\spikes\eigen-svg\alleluia-toon-8.notes.svg
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa -o examples\spikes\eigen-svg\alleluia-toon-8.vsa.svg
 ```
 
-Die aanroep bestaat alleen op de branch van pull request 75.
-`index.html` naast die SVG laat het beeld meeschalen. Versmal het
-venster: de tekening wordt kleiner, de regelindeling blijft één systeem.
+De default-sibling zonder `-o` is `alleluia-toon-8.mvsa.eigen-vsa-notes.svg`
+naast de bron, niet het product `alleluia-toon-8.mvsa.svg`.
+Versmal het venster: de tekening wordt kleiner. De regelindeling volgt
+`@nieuw-systeem` en breekt niet opnieuw af als het venster smal wordt.
 
-### Als fase 3 er is
+### Naast OSMD
 
-De beheerder draait de gewone straat, met de nieuwe engine-vlag, en
-legt het bestand naast de OSMD-SVG en de MuseScore-SVG.
+De beheerder draait de gewone straat, met `--engine eigen`, en legt
+het bestand naast de OSMD-SVG en de MuseScore-SVG.
 De site verandert niet vanzelf.
 
 ### Voor een koorlid
@@ -471,13 +495,13 @@ noten, geen tweede partituur.
 
 ### Code
 
-| Onderdeel         | Nu                                                                       | Later                                                                 |
-| ---------         | --                                                                       | -----                                                                 |
-| Schilder          | `examples/spikes/score-ir-svg/render_score_ir_svg.py` op de spike-branch | Module onder `src/vsa/` pas in fase 2, als de spike de proefset haalt |
-| Bravura-contouren | `bravura_glyphs.py` in de spike (paden, niet het fontbestand)            | Zelfde: paden in de repo, het OTF niet als productafhankelijkheid     |
-| Source Sans 3     | `scripts/osmd-svg/fonts/*.woff2`                                         | Hergebruiken. Geen tweede kopie van het lettertype                    |
-| OSMD-adapter S8   | `scripts/osmd-svg/`                                                      | Blijft zolang OSMD het scherm is                                      |
-| MuseScore Style   | `vsa.mscz_partituur`                                                     | Blijft het afdruk- en bewerkpad                                       |
+| Onderdeel         | Nu                                                                        | Later                                              |
+| ---------         | --                                                                        | -----                                              |
+| Schilder          | `src/vsa/eigen_svg.py` (`render_score_ir_svg`, `mvsa svg --engine eigen`) | Blijft één codepad voor de drie beelden            |
+| Bravura-contouren | `src/vsa/bravura_glyphs.py` (paden, niet het fontbestand)                 | Het OTF blijft buiten de repo                      |
+| Source Sans 3     | `scripts/osmd-svg/fonts/*.woff2`                                          | Hergebruiken. Geen tweede kopie van het lettertype |
+| OSMD-adapter S8   | `scripts/osmd-svg/`                                                       | Blijft zolang OSMD het scherm is                   |
+| MuseScore Style   | `vsa.mscz_partituur`                                                      | Blijft het afdruk- en bewerkpad                    |
 
 De schilder houdt één codepad. Scherm, latere afdruk en CoriB delen
 die schilder. Een aparte «mooie» en «snelle» variant is precies de
@@ -492,8 +516,8 @@ Naam van het id in de test (`S8`, `S13`, `L2`), niet alleen een vrije zin.
 Geen pixelvergelijking met MuseScore. De acceptatie is de tabel in §3
 plus het oog van een beheerder op de platen in fase 4.
 
-CI draait die test in de bestaande Python-run (`vsa-ci`). Geen extra
-workflow tot fase 3 een CLI heeft die op Linux én Windows moet.
+CI draait `tests/test_eigen_svg.py` in de bestaande Python-run (`vsa-ci`).
+Geen extra workflow: de aanroep is Python, zonder Node en zonder MuseScore.
 
 ### Wat een beheerder bijhoudt
 
@@ -524,9 +548,9 @@ beschrijft.
 
 | Moment      | Bijwerken                                                                                                                                                                                         |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nu (fase 0) | Dit bestand, [Plannen](README.md), de navigatie, een verwijzing vanuit [kale muziek §4](kale-muziek-svg-en-uitgaven.md) en [partituur-ir §8](partituur-ir.md). Geen man-pagina, geen contract-hub |
-| Fase 2      | De spike-README op die branch. Nog steeds geen product-CLI-pagina                                                                                                                                 |
-| Fase 3      | Man-pagina van `mvsa svg`, [mvsa-svg](../formats/mvsa-svg.md), één rij in de contract-index («eigen SVG», link naar de bestaande id's)                                                            |
+| Nu (fase 0) | Dit bestand, [Plannen](README.md), de navigatie, een verwijzing vanuit [kale muziek §4](kale-muziek-svg-en-uitgaven.md) en [partituur-ir §8](partituur-ir.md)                                     |
+| Fase 2      | De schilder en `tests/test_eigen_svg.py`. Voorbeelden in `examples/spikes/eigen-svg/`                                                                                                             |
+| Fase 3      | Man-pagina van `mvsa svg`, [mvsa-svg](../formats/mvsa-svg.md), één rij in de contract-index («eigen SVG», link naar de bestaande id's). Die drie zijn bijgewerkt                                  |
 | Fase 4      | Kale muziek §4, alleen als het besluit «doorgaan» is. Anders een zin «bekeken en niet overgenomen» in dit plan                                                                                    |
 | Fase 5      | Bibliotheek `schermpartituur.md` (link, geen tweede checklist) en [CoriB](corib-mvp.md) als de speler het SVG gaat lezen                                                                          |
 

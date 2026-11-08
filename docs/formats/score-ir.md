@@ -11,6 +11,8 @@ bronstraat bepaalt alleen de CLI (`vsa score-ir` / `mvsa score-ir` /
 
 **Productieschermpad:** Score-IR → MusicXML (uit IR) → OSMD. Print/blad blijft
 MuseScore. Brugcontract: [partituur-ir §7](../plans/partituur-ir.md).
+Optioneel, geen standaardproduct: `mvsa svg --engine eigen` tekent dezelfde
+Score-IR zelf ([eigen partituur-SVG](../plans/eigen-partituur-svg.md)).
 Bedoelde printvorm = checklists; OSMD-emit: [osmd-s8-recite](../plans/osmd-s8-recite.md).
 
 **Sibling-artifacts** (naamgeving `{bron}.score-ir.json` /
@@ -49,6 +51,7 @@ from-ir: `notehead breve` + `stem none` (geen `type=breve`).
 | Scherm- / CoriB-brug              | [partituur-ir §7](../plans/partituur-ir.md)                                          |
 | CLI                               | `{straat} score-ir` — o.a. [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir) |
 | Score-IR → MusicXML (OSMD)        | `vsa.score_ir_musicxml` · CLI ``--musicxml``                                         |
+| Score-IR → eigen SVG (optioneel)  | `vsa.eigen_svg` · [`mvsa svg --engine eigen`](../reference/cli/mvsa.md#mvsa-svg)     |
 | Browser-spike                     | `examples/spikes/partituur-browser/`                                                 |
 
 ```cmd
