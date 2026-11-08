@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/eigen-partituur-svg-plan-cabd</code>
-  , gebouwd 2026-11-08 23:43 CET.
+  , gebouwd 2026-11-09 00:00 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5038,13 +5038,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-voorgestelde-productkeuzes" class="md-nav__link">
+  <a href="#4-keuzes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Voorgestelde productkeuzes
+        4. Keuzes
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="4. Keuzes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-lettertype-en-muziektekens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Lettertype en muziektekens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-drie-beelden-plus-schrift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Drie beelden, plus schrift
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5122,10 +5150,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fase-1-de-vier-voorstellen-in-4-bevestigen" class="md-nav__link">
+  <a href="#fase-1-lettertype-en-beelden" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fase 1 — de vier voorstellen in §4 bevestigen
+        Fase 1 — lettertype en beelden
       
     </span>
   </a>
@@ -5545,13 +5573,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-voorgestelde-productkeuzes" class="md-nav__link">
+  <a href="#4-keuzes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Voorgestelde productkeuzes
+        4. Keuzes
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="4. Keuzes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-lettertype-en-muziektekens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Lettertype en muziektekens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-drie-beelden-plus-schrift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Drie beelden, plus schrift
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5629,10 +5685,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fase-1-de-vier-voorstellen-in-4-bevestigen" class="md-nav__link">
+  <a href="#fase-1-lettertype-en-beelden" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fase 1 — de vier voorstellen in §4 bevestigen
+        Fase 1 — lettertype en beelden
       
     </span>
   </a>
@@ -5930,11 +5986,16 @@ nu indirect leest. Alle keuzes die voor MuseScore en voor OSMD al
 vastliggen, moeten in die tekening terecht kunnen. Nieuwe smaak
 (pixelgelijk aan MuseScore, een tweede notenbalkmodel, OSMD nu
 uitschakelen) hoort er niet bij.</p>
-<p>Het lettertype voor zangtekst, cues en woorden is al gekozen:
-<strong>Source Sans 3</strong>. Dat is de Style van de MuseScore-partituur
-(checklist S7, leesbaarheid L2) en het lettertype in de OSMD-SVG
-(<code>scripts/osmd-svg/fonts/</code>, gewichten 400, 600 en cursief).
-De spike zette DejaVu Sans. DejaVu wordt niet het productlettertype.</p>
+<p>Het lettertype voor zangtekst, cues en woorden is <strong>Source Sans 3</strong>,
+gewicht 400, in de maten van MuseScore (checklist S7, leesbaarheid L2:
+zangtekst 13 pt, cues 12 pt). De bestanden liggen in
+<code>scripts/osmd-svg/fonts/</code>. De spike zette DejaVu Sans. DejaVu wordt
+niet het productlettertype. Of een zwaarder gewicht later prettiger
+leest, blijft open; de tekening volgt MuseScore tot dat opnieuw
+bekeken wordt.</p>
+<p>Een tropaar (en elk ander stuk) moet in meer dan één beeld op het
+scherm kunnen. De pagina-Markdown zet het startbeeld. De lezer wisselt
+in de UI. De tekening kiest dat beeld niet zelf. Zie §4.</p>
 <hr />
 <h2 id="1-wat-de-spike-al-liet-zien">1. Wat de spike al liet zien<a class="headerlink" href="#1-wat-de-spike-al-liet-zien" title="Permanent link">&para;</a></h2>
 <p>De spike staat in <code>examples/spikes/score-ir-svg/</code> op de branch van
@@ -6169,10 +6230,11 @@ lijnen. Daar is geen glyph voor nodig; MuseScore doet dat ook zo.</p>
 </tr>
 </tbody>
 </table>
-<p>De VSA-strepen uit de spike zijn een extra laag, geen vervanging van
-checklist S13. De muzieklaag tekent de extender en de slur.
-De VSA-laag tekent de hoogte van de sopraan en de lengte-onderstreping.
-Zie §4 voor wanneer die laag aan staat.</p>
+<p>De VSA-strepen uit de spike zijn een beeld, geen vervanging van
+checklist S13. In het beeld «noten met VSA» tekent de muzieklaag de
+extender en de slur, en de VSA-laag de hoogte van de sopraan plus de
+lengte-onderstreping. In het beeld «noten zonder strepen» ontbreekt
+die VSA-laag. In het beeld «kale VSA» ontbreken de balken. Zie §4.2.</p>
 <h3 id="34-cues-systeem-accolade">3.4 Cues, systeem, accolade<a class="headerlink" href="#34-cues-systeem-accolade" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -6326,7 +6388,7 @@ colofon komen uit de samenstelling van de pagina
 <tr>
 <td>Telefoon en tablet zonder handmatig zoomen</td>
 <td><a href="../gebruikseisen-dragers/">gebruikseisen §2</a></td>
-<td>Meeschalen is fase 1-bewijs. Opnieuw afbreken bij een smal venster is fase 5</td>
+<td>Meeschalen is het spike-bewijs. Opnieuw afbreken bij een smal venster is fase 5</td>
 </tr>
 <tr>
 <td>Vier losse partijen voor Coria</td>
@@ -6336,57 +6398,114 @@ colofon komen uit de samenstelling van de pagina
 </tbody>
 </table>
 <hr />
-<h2 id="4-voorgestelde-productkeuzes">4. Voorgestelde productkeuzes<a class="headerlink" href="#4-voorgestelde-productkeuzes" title="Permanent link">&para;</a></h2>
-<p>Vier punten zijn nog een bevestiging waard. De rest van §3 is overnemen,
-niet opnieuw kiezen.</p>
+<h2 id="4-keuzes">4. Keuzes<a class="headerlink" href="#4-keuzes" title="Permanent link">&para;</a></h2>
+<h3 id="41-lettertype-en-muziektekens">4.1 Lettertype en muziektekens<a class="headerlink" href="#41-lettertype-en-muziektekens" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>#</th>
-<th>Voorstel</th>
-<th>Waarom</th>
-<th>Alternatief</th>
+<th>Stand</th>
+<th>Keuze</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>K1</td>
-<td>Zangtekst en cues in Source Sans 3, gewicht 400, maten uit L2 (13 pt en 12 pt)</td>
-<td>Gelijk aan MuseScore en aan de OSMD-SVG</td>
-<td>Gewicht 600 (het bestand ligt al in de repo) als de vette spike-tekst de voorkeur houdt</td>
+<td>gekozen</td>
+<td>Zangtekst en cues in Source Sans 3, gewicht 400, maten uit leesbaarheid L2 (13 pt en 12 pt). Gelijk aan MuseScore. Een zwaarder gewicht kan later, als de platen dat vragen.</td>
 </tr>
 <tr>
 <td>K2</td>
-<td>Muziektekens als Bravura-contouren</td>
-<td>Geen ontbrekend lettertype; spike doet dit al</td>
-<td>Leland, dichter bij MuseScore 4, tweede licentie en tweede contourset</td>
-</tr>
-<tr>
-<td>K3</td>
-<td>VSA-laag uit, tenzij de aanroep die laag vraagt</td>
-<td>De koormap toont vandaag geen schuine strepen boven de lettergrepen. Kale muziek blijft daardoor vergelijkbaar met OSMD</td>
-<td>Altijd aan, omdat de spike juist dáár meer kan dan OSMD</td>
+<td>aanbeveling</td>
+<td>Notenkoppen, sleutels, voortekens, accolade en herhaalpuntjes als Bravura-contouren. Leland (MuseScore 4) blijft mogelijk, maar vraagt een tweede contourset.</td>
 </tr>
 <tr>
 <td>K4</td>
-<td>OSMD en MuseScore blijven staan tot fase 4</td>
-<td>De site en de afdruk hebben een werkend pad. De eigen tekening moet de tabel in §3 eerst halen</td>
-<td>OSMD nu al uit het scherm halen</td>
+<td>uitgangspunt</td>
+<td>OSMD en MuseScore blijven staan tot fase 4. De site en de afdruk hebben een werkend pad.</td>
 </tr>
 </tbody>
 </table>
-<p>VSA-laag, wanneer K3 aan staat (zoals de spike, als voorstel voor die laag):</p>
+<h3 id="42-drie-beelden-plus-schrift">4.2 Drie beelden, plus schrift<a class="headerlink" href="#42-drie-beelden-plus-schrift" title="Permanent link">&para;</a></h3>
+<p>K3 als «VSA aan of uit» is de verkeerde vraag. Een stuk, bijvoorbeeld
+een tropaar, moet in drie beelden kunnen. De pagina die op het scherm
+staat (de Markdown van die pagina) noemt het startbeeld. De UI laat de
+lezer wisselen. De schilder levert de beelden; de schilder kiest niet
+welk beeld de pagina opent.</p>
+<table>
+<thead>
+<tr>
+<th>Beeld</th>
+<th>Wat de lezer ziet</th>
+<th>Waar dat vandaag al bestaat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kale VSA</td>
+<td>Lettergrepen met hoogte- en lengtestrepen. Geen notenbalk.</td>
+<td><a href="../../formats/vsa-svg/"><code>vsa svg</code></a> voor eenstemmige <code>.vsa</code></td>
+</tr>
+<tr>
+<td>VSA met noten</td>
+<td>Dezelfde strepen, plus de partituur (twee balken, recite, melisma).</td>
+<td>De spike</td>
+</tr>
+<tr>
+<td>Noten zonder strepen</td>
+<td>De partituur zonder die VSA-strepen.</td>
+<td>OSMD en de MuseScore-SVG</td>
+</tr>
+</tbody>
+</table>
+<p>Regels voor de strepen, in de twee beelden die ze tonen:</p>
 <ul>
 <li>Hoogte van de sopraan, niet vier rijen.</li>
 <li>Een kale <code>-</code> blijft weg. Die streep komt alleen in een melisma dat ook
   stijgt of daalt (<code>-&amp;/</code> of <code>-&amp;\</code>).</li>
 <li>Een onderstreping staat op de nootpositie waar de bron een lengteteken
   heeft (<code>_</code>, <code>__</code>). Bij «lu_&amp;~&amp;~&amp;_» zijn dat de eerste en de laatste noot.</li>
-<li>De laag vervangt de extender van checklist S13 niet.</li>
+<li>De strepen vervangen de extender van checklist S13 niet. Die extender
+  hoort bij «noten zonder strepen» en bij «VSA met noten».</li>
 </ul>
-<p>Gewicht van de zangtekst (K1) en de VSA-standaard (K3) zijn de twee
-punten waarop een beheerder dit werkplan kan bijsturen zonder de
-architectuur te wijzigen.</p>
+<p>Transliteratie is een tweede as, geen vierde beeld. Dezelfde drie
+beelden moeten kunnen met de brontekst en met de getranslitereerde
+tekst. Het schrift volgt het besluit in
+<a href="../kerkslavisch-transliteratie/#5a-besluiten-productmodel-nu">kerkslavisch-transliteratie §5a</a>:
+zelfde lettergrepen, ander schrift, geen nieuwe melodie, en vandaag een
+bestand mét en een bestand zonder de tweede tekstregel. «Alleen de
+transliteratie, zonder de bronregel» staat daar als later. De drie
+beelden gelden voor elk van die schriftvormen. Nederlands en
+kerkslavisch met een andere lettergreepdeling blijven aparte
+uitvoeringsvormen, geen weergave van elkaar.</p>
+<p>De pagina en de UI horen bij de bibliotheek, niet bij een nieuwe
+checklist hier.</p>
+<table>
+<thead>
+<tr>
+<th>Wie</th>
+<th>Wat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tooling</td>
+<td>Maakt de afgeleiden: drie beelden, en per beeld de schriftvariant die §5a al kent.</td>
+</tr>
+<tr>
+<td>Markdown van de pagina</td>
+<td>Noemt het startbeeld (een tropaar opent bijvoorbeeld als kale VSA, een litanie als noten zonder strepen).</td>
+</tr>
+<tr>
+<td>UI</td>
+<td>Wisselt beeld en schrift. Download en print volgen het gekozen bestand.</td>
+</tr>
+</tbody>
+</table>
+<p>Aanbeveling voor de bestanden: aparte SVG’s, dezelfde werkwijze als de
+bestaande schakelaar met/zonder transliteratie. Eén SVG met verborgen
+lagen kan later, als de wissel zonder nieuw bestand moet. De pagina
+ziet hoe dan ook drie beelden van dezelfde bron, niet drie zangstukken.</p>
 <hr />
 <h2 id="5-contracten">5. Contracten<a class="headerlink" href="#5-contracten" title="Permanent link">&para;</a></h2>
 <p>Geen tweede checklist. De hubs blijven de norm.</p>
@@ -6410,7 +6529,7 @@ eerder:</p>
 </tr>
 <tr>
 <td>Extender en VSA</td>
-<td>Twee lagen. De extender hoort bij checklist S13. De VSA-strepen horen bij een vlag, beschreven in dit werkplan tot de vlag een product is</td>
+<td>Twee lagen in het beeld «VSA met noten». De extender hoort bij checklist S13. De strepen horen bij het beeld uit §4.2, niet bij een aparte checklist.</td>
 </tr>
 <tr>
 <td>Maatstreep</td>
@@ -6500,8 +6619,9 @@ regel als bij elke export-wijziging
 </tr>
 </tbody>
 </table>
-<p>Het SVG van fase 2 en 3 heeft een viewBox en <code>width="100%"</code>, zodat een
-venster het beeld kleiner maakt zonder de noten te herrekenen.
+<p>Fase 2 levert per stuk de drie beelden uit §4.2, als aparte SVG's.
+Elk bestand heeft een viewBox en <code>width="100%"</code>, zodat een venster het
+beeld kleiner maakt zonder de noten te herrekenen.
 Achtergrond wit, met een latere vlag voor transparant, gelijk aan
 <a href="../../formats/mvsa-svg/"><code>mvsa svg</code></a>.</p>
 <p>Geen titelblok in het bestand. De pagina-Markdown zet de titel.</p>
@@ -6516,13 +6636,12 @@ Een volgende fase begint niet omdat de vorige «bijna» is.</p>
 <p>Klaar wanneer het plan in <a href="../">Plannen</a> staat en de
 productiezin in kale muziek §4 ongewijzigd is.
 Geen renderer, geen CLI, geen contract-hub.</p>
-<h3 id="fase-1-de-vier-voorstellen-in-4-bevestigen">Fase 1 — de vier voorstellen in §4 bevestigen<a class="headerlink" href="#fase-1-de-vier-voorstellen-in-4-bevestigen" title="Permanent link">&para;</a></h3>
-<p>K1 tot en met K4 staan als voorstel. Een beheerder zet in dit bestand
-de gekozen kolom op «gekozen» of wijzigt K1 of K3.
-Klaar wanneer die vier rijen geen «voorstel» meer zijn.
-Tot die tijd mag fase 2 de spike wel laten staan, maar geen Source Sans 3
-inbouwen op een gok over het gewicht, en de VSA-laag niet tot standaard
-maken.</p>
+<h3 id="fase-1-lettertype-en-beelden">Fase 1 — lettertype en beelden<a class="headerlink" href="#fase-1-lettertype-en-beelden" title="Permanent link">&para;</a></h3>
+<p>K1 is gekozen: Source Sans 3 zoals MuseScore (gewicht 400, L2).
+Het weergavemodel is gekozen: drie beelden, schrift als aparte as,
+startbeeld in de pagina-Markdown, wissel in de UI (§4.2).
+K2 (Bravura) blijft de aanbeveling. K4 blijft het uitgangspunt.
+Deze fase is daarmee klaar. Fase 2 hoeft niet op een extra ja te wachten.</p>
 <h3 id="fase-2-de-schilder-dekt-de-tabel">Fase 2 — de schilder dekt de tabel<a class="headerlink" href="#fase-2-de-schilder-dekt-de-tabel" title="Permanent link">&para;</a></h3>
 <p>De spike-schilder groeit tot de rijen in §3 met fase 2 een test hebben.
 De test controleert het contract (stokrichting, géén nootkop op een
@@ -6531,13 +6650,15 @@ herhaalpuntjes, cue boven de maat, geen titel).
 De test controleert geen pixels.</p>
 <p>Proefset, in deze volgorde:</p>
 <ol>
-<li>Alleluia toon 8 en toon 2 (recite, melisma, VSA-vlag).</li>
-<li>Vredeslitanie (1a) (strepen, herhaling, cues).</li>
-<li><code>examples/bug-cases/trisagion-8a-hemelum.mvsa</code> (<code>@nieuw-systeem</code> en herhaling).</li>
+<li>Alleluia toon 8 en toon 2 (recite, melisma, de twee notenbeelden).</li>
+<li>Vredeslitanie (1a) (maatstrepen, herhaling, cues), als noten zonder strepen.</li>
+<li><code>examples/bug-cases/trisagion-8a-hemelum.mvsa</code> (<code>@nieuw-systeem</code> en herhaling), ook als kale VSA.</li>
 <li>Eén speelplan-stuk met Segno of volta, vóór checklist S20.</li>
 </ol>
-<p>Klaar wanneer die vier bronnen de fase-2-rijen halen en de VSA-laag
-uit dezelfde Score-IR aan en uit kan.</p>
+<p>Klaar wanneer die bronnen de fase-2-rijen halen en elk stuk de drie
+beelden uit §4.2 kan leveren vanuit dezelfde Score-IR. Kale VSA voor
+een eenstemmige <code>.vsa</code> blijft de bestaande <code>vsa svg</code>; de nieuwe eis is
+dat een <code>.mvsa</code>-tropaar hetzelfde soort beeld krijgt, zonder notenbalk.</p>
 <p>Buiten fase 2: site, <code>products</code>, OSMD uitschakelen, A4, cursor.</p>
 <h3 id="fase-3-naast-osmd-kunnen-draaien">Fase 3 — naast OSMD kunnen draaien<a class="headerlink" href="#fase-3-naast-osmd-kunnen-draaien" title="Permanent link">&para;</a></h3>
 <p>Een aanroep, nog geen standaardproduct. Voorstel voor de vlag, pas
@@ -6753,12 +6874,16 @@ dan een ander programma bijsturen.</p>
 </thead>
 <tbody>
 <tr>
-<td>K1 gewicht 400 of 600</td>
-<td>Bevestigen in fase 1</td>
+<td>K1 zwaarder dan MuseScore (gewicht 600)</td>
+<td>Later, als de platen in Source Sans 3 400 dat vragen. Niet in fase 2</td>
 </tr>
 <tr>
-<td>K3 VSA standaard uit of aan</td>
-<td>Bevestigen in fase 1</td>
+<td>Alleen transliteratie, zonder de bronregel</td>
+<td>Al «bewust later» in <a href="../kerkslavisch-transliteratie/#5a-besluiten-productmodel-nu">kerkslavisch-transliteratie §5a</a>. De drie beelden wachten daar niet op</td>
+</tr>
+<tr>
+<td>Welk startbeeld een pagina krijgt</td>
+<td>De Markdown van die pagina (bibliotheek), niet de schilder</td>
 </tr>
 <tr>
 <td>«ont» als <code>syllabic: single</code> terwijl de bron <code>ont-ferm</code> schrijft</td>
