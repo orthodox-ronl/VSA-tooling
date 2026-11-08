@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <title>Eigen partituur-SVG — voorbeelden</title>
+  <style>
+    body { font-family: "Source Sans 3", sans-serif; margin: 24px; max-width: 1100px; }
+    figure { margin: 0 0 32px; }
+    img { width: 100%; height: auto; border: 1px solid #ccc; background: white; }
+    figcaption { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Eigen partituur-SVG</h1>
+  <p>
+    Dezelfde Score-IR, drie beelden. Dit is geen standaardproduct.
+    Het scherm op de site blijft OSMD. Opnieuw maken:
+    <code>mvsa svg … --engine eigen --view notes|vsa-notes|vsa</code>.
+  </p>
+
+  <h2>Alleluia, toon 8</h2>
+  <figure>
+    <img src="alleluia-toon-8.notes.svg" alt="Alleluia toon 8, noten zonder VSA-strepen">
+    <figcaption>Noten zonder strepen. De melisma-streep onder «lu» hoort bij de muziek.</figcaption>
+  </figure>
+  <figure>
+    <img src="alleluia-toon-8.vsa-notes.svg" alt="Alleluia toon 8, noten met VSA">
+    <figcaption>Noten met VSA. Strepen alleen waar de toon beweegt, onderstreping op de lengtetekens.</figcaption>
+  </figure>
+  <figure>
+    <img src="alleluia-toon-8.vsa.svg" alt="Alleluia toon 8, kale VSA">
+    <figcaption>Kale VSA. Geen notenbalk.</figcaption>
+  </figure>
+
+  <h2>Alleluia, toon 2</h2>
+  <figure>
+    <img src="alleluia-toon-2.vsa-notes.svg" alt="Alleluia toon 2, noten met VSA">
+    <figcaption>De liggende streep staat alleen in het melisma, niet boven elke gelijke toon.</figcaption>
+  </figure>
+
+  <h2>Vredeslitanie</h2>
+  <figure>
+    <img src="1a-vredeslitanie.notes.svg" alt="Vredeslitanie, noten zonder VSA-strepen">
+    <figcaption>Drie systemen op <code>@nieuw-systeem</code>, met herhaling en priesterregels.</figcaption>
+  </figure>
+
+  <h2>Trisagion, toon 8a, als kale VSA</h2>
+  <figure>
+    <img src="trisagion-8a-hemelum.vsa.svg" alt="Trisagion als kale VSA">
+    <figcaption>Een tropaar zonder notenbalk, in vier systemen.</figcaption>
+  </figure>
+
+  <h2>Trisagion, Slavisch, met transliteratie</h2>
+  <figure>
+    <img src="trisagion-slav.notes.translit-nls.svg" alt="Slavisch trisagion met Latijnse hulptekst">
+    <figcaption>Noten zonder strepen. Het stuk begint in het Nederlands. Bij de Slavische verzen staat dezelfde lettergreep in Latijns schrift op de tweede regel.</figcaption>
+  </figure>
+</body>
+</html>

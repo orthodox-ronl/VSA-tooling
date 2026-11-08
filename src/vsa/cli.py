@@ -410,7 +410,9 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "(geen titel/colofon; layout muziek; viewBox-trim; MuseScore 4). "
             "--engine osmd: Score-IR → from-ir MusicXML → headless OSMD "
             "(Node + scripts/osmd-svg; geen MuseScore). "
-            "Bron .mscz: gebruik mscz svg."
+            "--engine eigen: Score-IR → eigen schilder (drie beelden: "
+            "notes, vsa-notes, vsa). Geen standaardproduct; schrijft geen "
+            "products-meta. Bron .mscz: gebruik mscz svg."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
@@ -419,6 +421,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "  mvsa svg lied.mvsa -o generated\\lied.mvsa.svg\n"
             "  mvsa svg lied.mvsa --lyrics-font-size 14 --cue-font-size 11\n"
             "  mvsa svg lied.mvsa -o generated\\lied-osmd.svg --engine osmd\n"
+            "  mvsa svg lied.mvsa --engine eigen --view vsa-notes\n"
             "  mscz svg generated\\lied.mscz -o generated\\lied.svg\n"
             "  mvsa svg lied.mvsa --section schets1 --keep-mscz generated\\lied.mscz"
         ),
@@ -489,11 +492,23 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     m_svg.add_argument(
         "--engine",
         metavar="NAME",
-        choices=["musescore", "osmd"],
+        choices=["musescore", "osmd", "eigen"],
         default="musescore",
         help=(
-            "SVG-engine: musescore (default; print/fallback) of osmd "
-            "(Score-IR → headless OSMD; vereist Node + scripts/osmd-svg)."
+            "SVG-engine: musescore (default; print/fallback), osmd "
+            "(Score-IR → headless OSMD; vereist Node + scripts/osmd-svg) "
+            "of eigen (Score-IR → eigen schilder; optioneel, geen standaardproduct)."
+        ),
+    )
+    m_svg.add_argument(
+        "--view",
+        metavar="NAME",
+        choices=["notes", "vsa-notes", "vsa"],
+        default=None,
+        help=(
+            "Alleen bij --engine eigen. notes (default): partituur zonder "
+            "VSA-strepen. vsa-notes: dezelfde partituur mét sopraan-VSA. "
+            "vsa: kale VSA, zonder notenbalk."
         ),
     )
     _add_partituur_style_args(m_svg)
@@ -2891,6 +2906,82 @@ def _cmd_mvsa_pdf(args) -> int:
     return exit_code
 
 
+def _cmd_mvsa_svg_eigen(args, files: list[Path], tkw: dict) -> int:
+    """Score-IR → eigen schilder. Geen products-meta, geen MuseScore-Style."""
+    from .eigen_svg import EigenSvgError, eigen_svg_suffix, export_mvsa_to_eigen_svg
+    from .mvsa_musicxml import MvsaExportError
+    from .mvsa_validate import MvsaValidationError, format_diagnostic
+
+    if args.keep_mscz or args.musescore or args.no_trim or args.transparent:
+        print(
+            "mvsa svg --engine eigen: --keep-mscz/--musescore/--no-trim/"
+            "--transparent gelden niet (alleen MuseScore-keten)",
+            file=sys.stderr,
+        )
+        return 1
+    style_blocked = (
+        getattr(args, "compact", False)
+        or getattr(args, "min_system_distance", None) is not None
+        or getattr(args, "max_system_distance", None) is not None
+        or getattr(args, "staff_distance", None) is not None
+        or getattr(args, "page_margin_top", None) is not None
+        or getattr(args, "page_margin_bottom", None) is not None
+        or getattr(args, "measure_spacing", None) is not None
+    )
+    if style_blocked:
+        print(
+            "mvsa svg --engine eigen: systeemafstand, marges en maat-spreiding "
+            "zijn MuseScore-Style en gelden hier niet. "
+            "Lettergrootte wel: --lyrics-font-size en --cue-font-size.",
+            file=sys.stderr,
+        )
+        return 1
+    for label, face in (
+        ("--lyrics-font", getattr(args, "lyrics_font", None)),
+        ("--cue-font", getattr(args, "cue_font", None)),
+    ):
+        if face and str(face).strip().casefold() != "source sans 3":
+            print(
+                f"mvsa svg --engine eigen: {label} is {face!r}; "
+                "de eigen schilder zet alleen Source Sans 3 in.",
+                file=sys.stderr,
+            )
+            return 1
+    view = getattr(args, "view", None) or "notes"
+    exit_code = 0
+    for path in files:
+        suffix = eigen_svg_suffix(
+            view,
+            translit=bool(tkw.get("translit")),
+            translit_modus=str(tkw.get("translit_modus") or "both"),
+        )
+        out = Path(args.output) if args.output else path.with_name(f"{path.name}{suffix}")
+        try:
+            written = export_mvsa_to_eigen_svg(
+                path,
+                out,
+                view=view,
+                section_id=args.section,
+                bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                translit=bool(tkw.get("translit")),
+                translit_modus=tkw.get("translit_modus"),
+                lyric_pt=getattr(args, "lyrics_font_size", None),
+                cue_pt=getattr(args, "cue_font_size", None),
+            )
+        except MvsaValidationError as exc:
+            for d in exc.diagnostics:
+                print(format_diagnostic(d, path), file=sys.stderr)
+            exit_code = 1
+            continue
+        except (MvsaExportError, EigenSvgError) as exc:
+            loc = f"{path}:{exc.line}: " if getattr(exc, "line", None) else f"{path}: "
+            print(f"{loc}ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
+        print(f"Geschreven: {written}")
+    return exit_code
+
+
 def _cmd_mvsa_svg(args) -> int:
     from .mvsa_mscz import MvsaMsczError, export_mvsa_to_svg
     from .mvsa_musicxml import MvsaExportError
@@ -2909,6 +3000,15 @@ def _cmd_mvsa_svg(args) -> int:
         for k, v in _cli_translit_kwargs(args).items()
         if k != "translit_as_parts"
     }
+    if engine == "eigen":
+        return _cmd_mvsa_svg_eigen(args, files, tkw)
+    if getattr(args, "view", None):
+        print(
+            "mvsa svg: --view hoort bij --engine eigen "
+            "(notes, vsa-notes of vsa).",
+            file=sys.stderr,
+        )
+        return 1
     if engine == "osmd":
         if tkw.get("translit"):
             print(
