@@ -5,8 +5,9 @@ product-CLI. Contracten die deze tekening laat zien:
 
 - S4  stok S/T omhoog, A/B omlaag
 - S8  recite 1–(n−2)–1: randnoten, stokloze ||O||, spacers alleen als tekst
-- S13 melisma: lyric + extender; bij toonwissel een slur alleen over die noten
-- VSA-hoogtestrepen van de sopraanlijn (echte beweging, geen losse overlay)
+- S13 melisma: lyric op de eerste noot; slur alleen over de toonwissel
+- VSA-hoogtestrepen van de sopraan, alleen waar de toon beweegt of in zo'n melisma
+- VSA-onderstreping op de nootpositie waar de bron een lengteteken heeft (`_`, `__`)
 
 Het SVG heeft een viewBox en width="100%" zodat het in een venster meeschaalt.
 """
@@ -40,7 +41,8 @@ STAFF_UNITS = _bravura.STAFF_UNITS
 
 SP = 12.0
 PX_QUARTER = 36.0
-LYRIC_FONT = 18.0
+LYRIC_FONT = 22.0
+LYRIC_WEIGHT = "700"
 # Bravura: één staff space = 250 font-eenheden.
 GLYPH_SCALE = SP / STAFF_UNITS
 
@@ -102,19 +104,37 @@ def _ehm_glyph(token: str) -> str:
     return prefix + base
 
 
-def soprano_vsa_tokens(doc: dict[str, Any]) -> list[tuple[int, str, str]]:
-    """Echte VSA-beweging van de sopraan: (event-index, mvsa-token, glyph).
+def _token_moves(token: str) -> bool:
+    """Een kale ``-`` of ``~`` is geen zichtbare VSA-streep."""
+    body = token[1:] if token[:1] in {"#", "b"} else token
+    return body not in {"-", "~", ""}
 
-    Eerste noot en elke gelijkblijvende toon krijgen een liggende streep (``-``).
+
+def _shows_length(elm: str) -> bool:
+    """``~`` en ``-`` zijn een gewone tel. ``_``, ``__`` en ``.`` zijn een teken."""
+    return elm not in {"", "~", "-"}
+
+
+def soprano_vsa_plan(
+    doc: dict[str, Any],
+) -> tuple[list[tuple[int, int, str, str]], list[tuple[int, int, str]]]:
+    """Zichtbare sopraan-VSA en onderstrepingen.
+
+    Een liggende ``-`` komt alleen in beeld binnen een melisma dat ook een
+    stijgende of dalende streep heeft (``-&/`` of ``-&\\``). Een
+    onderstreping staat op de nootpositie waar de bron een lengteteken heeft.
+    Bij «lu_&~&~&_» zijn dat dus de eerste en de laatste noot.
     """
     ctx = doc.get("pitchContext") or {}
     do = _parse_do(str(ctx.get("do") or "F4"))
     mode = str(ctx.get("mode") or "major")
     intervals = _SCALE_INTERVALS.get(mode, _SCALE_INTERVALS["major"])
     prev: int | None = None
-    out: list[tuple[int, str, str]] = []
-    for measure in doc.get("measures") or []:
+    marks: list[tuple[int, int, str, str]] = []
+    underlines: list[tuple[int, int, str]] = []
+    for measure_i, measure in enumerate(doc.get("measures") or []):
         events = _events_for_voice(list((measure.get("voices") or {}).get("S") or []), "S")
+        pitched: list[tuple[Ev, str, str]] = []
         for ev in events:
             if ev.step is None or ev.octave is None:
                 continue
@@ -122,8 +142,29 @@ def soprano_vsa_tokens(doc: dict[str, Any]) -> list[tuple[int, str, str]]:
             degree, _chrom = pitch_to_degree_and_chrom(do, pitch, intervals)
             token = "-" if prev is None else format_ehm(prev, pitch, do, intervals)
             prev = degree
-            out.append((ev.index, token, _ehm_glyph(token)))
-    return out
+            pitched.append((ev, token, _ehm_glyph(token)))
+            if not ev.spacer and not ev.rest and _shows_length(ev.elm):
+                underlines.append((measure_i, ev.index, ev.elm))
+        group: list[tuple[Ev, str, str]] = []
+        groups: list[list[tuple[Ev, str, str]]] = []
+        for item in pitched:
+            if item[0].lyric_index is not None and group:
+                groups.append(group)
+                group = []
+            group.append(item)
+        if group:
+            groups.append(group)
+        for grouped in groups:
+            if any(_token_moves(token) for _ev, token, _glyph in grouped):
+                for ev, token, glyph in grouped:
+                    marks.append((measure_i, ev.index, token, glyph))
+    return marks, underlines
+
+
+def soprano_vsa_tokens(doc: dict[str, Any]) -> list[tuple[int, str, str]]:
+    """Zichtbare VSA-strepen van de sopraan, in leesvolgorde."""
+    marks, _underlines = soprano_vsa_plan(doc)
+    return [(index, token, glyph) for _measure_i, index, token, glyph in marks]
 
 
 def _parse_do(raw: str) -> Pitch:
@@ -201,7 +242,8 @@ def _lyric_text(lyric: dict[str, Any]) -> str:
 
 
 def _text_width(text: str) -> float:
-    return max(12.0, len(text) * LYRIC_FONT * 0.52)
+    # Vet lettertype is iets breder dan de gewone schatting.
+    return max(14.0, len(text) * LYRIC_FONT * 0.56)
 
 
 def _f_major(doc: dict[str, Any]) -> bool:
@@ -360,31 +402,35 @@ def render_score_ir_svg(doc: dict[str, Any]) -> str:
     x = left + 54.0
     if f_major:
         x += 22.0
-    note_centers: dict[tuple[str, int], tuple[float, float]] = {}
-    lyric_centers: dict[int, float] = {}
     end_x = x
+    vsa_marks, vsa_underlines = soprano_vsa_plan(doc)
 
-    prepared: list[tuple[dict[str, Any], dict[str, list[Ev]], dict[float, float]]] = []
+    prepared: list[tuple[dict[str, Any], dict[str, list[Ev]], dict[float, float], float]] = []
     for measure in measures:
         lyrics = list(measure.get("lyrics") or [])
         voices = {
             letter: _events_for_voice(list((measure.get("voices") or {}).get(letter) or []), letter)
             for letter in ("S", "A", "T", "B")
         }
+        left_style = str((measure.get("bar") or {}).get("left") or "")
+        if left_style in {"repeat-start", "heavy-light", "heavy-heavy"}:
+            x += 36.0
         x_at = _layout_times(voices, lyrics, x)
-        prepared.append((measure, voices, x_at))
-        end_x = max(x_at.values(), default=x) + 28.0
-        x = end_x + 8.0
+        prepared.append((measure, voices, x_at, x))
+        right_style = str((measure.get("bar") or {}).get("right") or "single")
+        tail = 18.0 if right_style in {"repeat-end", "repeat-end-section", "light-heavy", "light-light", "heavy-heavy"} else 0.0
+        end_x = max(x_at.values(), default=x) + 22.0 + tail
+        # De priesterregel boven de balk mag niet in de volgende maat doorlopen.
+        cue_w = max((len(line) * 7.4 for line in _cue_lines(measure)), default=0.0)
+        if cue_w:
+            end_x = max(end_x, x + cue_w + 14.0)
+        x = end_x + 10.0
 
     width = max(end_x + 24.0, 240.0)
     svg.add(
         f'<rect class="page" x="0" y="0" width="{width:.1f}" height="{height:.1f}" fill="white"/>'
     )
-    svg.add(
-        f'<path class="brace" d="M {left - 10:.1f} {treble_bottom - 4 * SP:.1f} '
-        f'Q {left - 22:.1f} {(treble_bottom + bass_bottom - 4 * SP) / 2:.1f} '
-        f'{left - 10:.1f} {bass_bottom:.1f}" fill="none" stroke="black" stroke-width="1.6"/>'
-    )
+    _draw_brace(svg, left - 4.0, treble_bottom - 4 * SP, bass_bottom)
 
     for staff, bottom in staff_bottom.items():
         for line in range(5):
@@ -396,22 +442,45 @@ def render_score_ir_svg(doc: dict[str, Any]) -> str:
 
     _draw_clefs_and_signature(svg, left, treble_bottom, bass_bottom, f_major)
 
-    for measure, voices, x_at in prepared:
+    for measure_i, (measure, voices, x_at, measure_x) in enumerate(prepared):
         lyrics = list(measure.get("lyrics") or [])
+        note_centers: dict[tuple[str, int], tuple[float, float]] = {}
+        lyric_centers: dict[int, float] = {}
+        left_style = str((measure.get("bar") or {}).get("left") or "")
+        if left_style:
+            _draw_barline(svg, left_style, measure_x - 34.0, treble_bottom, bass_bottom, staff_bottom)
         for letter, evs in voices.items():
             for ev in evs:
                 cx = _cx(x_at, ev, lyrics)
-                cy = 0.0
                 if not ev.rest and ev.step is not None and ev.octave is not None:
                     cy, pos = _pitch_y(staff_bottom[_STAFF_OF[letter]], bottom_dia[_STAFF_OF[letter]], ev.step, ev.octave)
                     note_centers[(letter, ev.index)] = (cx, cy)
                     _draw_note(svg, ev, cx, cy, pos, f_major, lyric_y)
                 if letter == "S" and ev.lyric_index is not None:
-                    lyric_centers[ev.lyric_index] = cx
+                    lyric_centers[ev.lyric_index] = _cx(x_at, ev, lyrics)
         _draw_slurs(svg, voices, note_centers, lyric_y)
         bar_x = max(x_at.values(), default=end_x)
-        _draw_barline(svg, measure, bar_x, treble_bottom, bass_bottom)
-        _draw_lyrics(svg, lyrics, lyric_centers, voices, note_centers, lyric_y, glyphs, doc)
+        _draw_barline(
+            svg,
+            str((measure.get("bar") or {}).get("right") or "single"),
+            bar_x,
+            treble_bottom,
+            bass_bottom,
+            staff_bottom,
+        )
+        _draw_cues(svg, measure, measure_x, treble_bottom)
+        _draw_lyrics(
+            svg,
+            lyrics,
+            lyric_centers,
+            voices,
+            note_centers,
+            lyric_y,
+            glyphs,
+            vsa_marks,
+            vsa_underlines,
+            measure_i,
+        )
 
     title = html.escape(str((doc.get("meta") or {}).get("title") or "partituur"))
     body = "\n".join(svg.parts)
@@ -574,19 +643,85 @@ def _draw_slurs(
             )
 
 
-def _draw_barline(svg: _Svg, measure: dict[str, Any], x: float, treble_bottom: float, bass_bottom: float) -> None:
-    right = str((measure.get("bar") or {}).get("right") or "single")
+def _draw_brace(svg: _Svg, x_right: float, y_top: float, y_bottom: float) -> None:
+    """Bravura-accolade, opgerekt over de twee balken.
+
+    Het teken is één balk hoog. De breedte blijft ongeveer 16 px, anders
+    wordt de streep een haarlijn als je hem over de tekst heen trekt.
+    """
+    d, x0, y0, x1, y1 = GLYPHS["brace"]
+    target_h = max(1.0, y_bottom - y_top)
+    sy = target_h / (y1 - y0)
+    sx = 16.0 / max(1.0, x1 - x0)
+    ox = x_right - x1 * sx
+    oy = y_top + y1 * sy
+    svg.add(
+        f'<path class="brace" d="{d}" fill="black" fill-rule="nonzero" '
+        f'transform="translate({ox:.2f},{oy:.2f}) scale({sx:.5f},{-sy:.5f})"/>'
+    )
+
+
+def _bar_strokes(style: str) -> list[tuple[float, float]]:
+    """Afstand vanaf het anker, en lijndikte. Enkele streep is één dunne lijn."""
+    thin, thick, gap = 1.35, 3.8, 5.2
+    if style in {"repeat-end", "repeat-end-section", "light-heavy"}:
+        return [(0.0, thin), (gap, thick)]
+    if style in {"repeat-start", "heavy-light"}:
+        return [(0.0, thick), (gap, thin)]
+    if style == "light-light":
+        return [(0.0, thin), (gap, thin)]
+    if style == "heavy-heavy":
+        return [(0.0, thick), (gap, thick)]
+    return [(0.0, thin)]
+
+
+def _draw_barline(
+    svg: _Svg,
+    style: str,
+    x: float,
+    treble_bottom: float,
+    bass_bottom: float,
+    staff_bottom: dict[str, float],
+) -> None:
     y1 = treble_bottom - 4 * SP
     y2 = bass_bottom
-    svg.add(
-        f'<line class="barline" data-style="{html.escape(right)}" x1="{x:.1f}" y1="{y1:.1f}" '
-        f'x2="{x:.1f}" y2="{y2:.1f}" stroke="black" stroke-width="1.2"/>'
-    )
-    if right in {"light-light", "light-heavy", "heavy-light", "heavy-heavy", "repeat-end", "repeat-end-section"}:
+    for offset, stroke in _bar_strokes(style):
+        bx = x + offset
         svg.add(
-            f'<line class="barline barline-double" x1="{x + 5:.1f}" y1="{y1:.1f}" x2="{x + 5:.1f}" y2="{y2:.1f}" '
-            f'stroke="black" stroke-width="1.2"/>'
+            f'<line class="barline" data-style="{html.escape(style)}" x1="{bx:.1f}" y1="{y1:.1f}" '
+            f'x2="{bx:.1f}" y2="{y2:.1f}" stroke="black" stroke-width="{stroke:.2f}"/>'
         )
+    if style in {"repeat-start", "heavy-light"}:
+        dot_x = x + 5.2 + 12.0
+    elif style in {"repeat-end", "repeat-end-section"}:
+        dot_x = x - 12.0
+    else:
+        return
+    for bottom in staff_bottom.values():
+        mid = bottom - 2 * SP
+        svg.add(_paint_glyph("repeatDots", dot_x, mid, "repeat-dots", center=True))
+
+
+def _cue_lines(measure: dict[str, Any]) -> list[str]:
+    lines: list[str] = []
+    for cue in measure.get("cues") or []:
+        for line in str(cue.get("text") or "").splitlines():
+            text = line.strip()
+            if text:
+                lines.append(text)
+    return lines
+
+
+def _draw_cues(svg: _Svg, measure: dict[str, Any], x: float, treble_bottom: float) -> None:
+    lines = _cue_lines(measure)
+    y = treble_bottom - 4 * SP - 8.0 - 16.0 * (len(lines) - 1)
+    for text in lines:
+        svg.add(
+            f'<text class="cue" x="{x:.1f}" y="{y:.1f}" '
+            f'font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">'
+            f'{html.escape(text)}</text>'
+        )
+        y += 16.0
 
 
 def _draw_lyrics(
@@ -597,57 +732,49 @@ def _draw_lyrics(
     note_centers: dict[tuple[str, int], tuple[float, float]],
     lyric_y: float,
     glyphs: SVGGlyphRenderer,
-    doc: dict[str, Any],
+    vsa_marks: list[tuple[int, int, str, str]],
+    vsa_underlines: list[tuple[int, int, str]],
+    measure_i: int,
 ) -> None:
+    face = f'font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="{LYRIC_FONT:.0f}" font-weight="{LYRIC_WEIGHT}"'
     sop = voices.get("S") or []
     for index, lyric in enumerate(lyrics):
         if index not in centers:
             continue
         text = _lyric_text(lyric)
         cx = centers[index]
-        kind = "lyric"
         ev = next((e for e in sop if e.lyric_index == index), None)
-        if ev is not None and ev.spacer:
-            kind = "lyric spacer-lyric"
+        kind = "lyric spacer-lyric" if ev is not None and ev.spacer else "lyric"
         svg.add(
             f'<text class="{kind}" data-lyric-index="{index}" x="{cx:.1f}" y="{lyric_y:.1f}" '
-            f'text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" '
-            f'font-size="{LYRIC_FONT:.0f}">{html.escape(text)}</text>'
+            f'text-anchor="middle" {face}>{html.escape(text)}</text>'
         )
-        if ev is not None and ev.extend:
-            stop = next((e for e in sop if e.slur_stop and e.index > ev.index), None)
-            end_x = cx + _text_width(text)
-            if stop is not None and ("S", stop.index) in note_centers:
-                end_x = note_centers[("S", stop.index)][0] + _half_width("noteheadHalf")
-            y = lyric_y - 6.0
-            svg.add(
-                f'<line class="melisma-extend" data-lyric-index="{index}" '
-                f'x1="{cx + _text_width(text) / 2 + 4:.1f}" y1="{y:.1f}" x2="{end_x:.1f}" y2="{y:.1f}" '
-                f'stroke="black" stroke-width="1.1"/>'
-            )
     for index, lyric in enumerate(lyrics[:-1]):
         syll = str((lyric.get("syllables") or [{}])[0].get("syllabic") or "")
         nxt = str((lyrics[index + 1].get("syllables") or [{}])[0].get("syllabic") or "")
         if syll in {"begin", "middle"} and nxt in {"middle", "end"} and index in centers and index + 1 in centers:
             hx = (centers[index] + centers[index + 1]) / 2.0
             svg.add(
-                f'<text class="hyphen" x="{hx:.1f}" y="{lyric_y:.1f}" text-anchor="middle" '
-                f'font-family="DejaVu Sans, sans-serif" font-size="{LYRIC_FONT:.0f}">-</text>'
+                f'<text class="hyphen" x="{hx:.1f}" y="{lyric_y:.1f}" text-anchor="middle" {face}>-</text>'
             )
-    _draw_soprano_vsa(svg, glyphs, doc, note_centers, lyric_y)
+    _draw_soprano_vsa(svg, glyphs, note_centers, lyric_y, vsa_marks, vsa_underlines, measure_i)
 
 
 def _draw_soprano_vsa(
     svg: _Svg,
     glyphs: SVGGlyphRenderer,
-    doc: dict[str, Any],
     note_centers: dict[tuple[str, int], tuple[float, float]],
     lyric_y: float,
+    vsa_marks: list[tuple[int, int, str, str]],
+    vsa_underlines: list[tuple[int, int, str]],
+    measure_i: int,
 ) -> None:
-    """Hoogtestrepen van de sopraan, boven de lettergrepen. Dat is de VSA van dit stuk."""
+    """Hoogtestrepen boven de noot, onderstreping eronder. Alleen de sopraan."""
     width = 36.0
-    y = lyric_y - 30.0
-    for index, token, glyph in soprano_vsa_tokens(doc):
+    y = lyric_y - 36.0
+    for mark_measure, index, token, glyph in vsa_marks:
+        if mark_measure != measure_i:
+            continue
         center = note_centers.get(("S", index))
         if center is None:
             continue
@@ -657,6 +784,20 @@ def _draw_soprano_vsa(
             f'data-ehm="{html.escape(token, quote=True)}">'
         )
         for fragment in glyphs.render_height_modifier([glyph], x, y, width):
+            svg.add(fragment)
+        svg.add("</g>")
+    for mark_measure, index, elm in vsa_underlines:
+        if mark_measure != measure_i:
+            continue
+        center = note_centers.get(("S", index))
+        if center is None:
+            continue
+        x = center[0] - width / 2.0
+        svg.add(
+            f'<g class="vsa-underline" data-voice="S" data-index="{index}" '
+            f'data-elm="{html.escape(elm, quote=True)}">'
+        )
+        for fragment in glyphs.render_length_modifier([elm], x, lyric_y + 8.0, width):
             svg.add(fragment)
         svg.add("</g>")
 

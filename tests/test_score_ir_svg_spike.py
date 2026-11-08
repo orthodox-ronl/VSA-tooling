@@ -1,4 +1,4 @@
-"""Spike Score-IR → eigen SVG: Alleluia toon 8, S4 / S8 / S13 + één VSA-accent."""
+"""Spike Score-IR → eigen SVG: drie stukken, S4 / S8 / S13 en echte VSA."""
 
 from __future__ import annotations
 
@@ -90,7 +90,7 @@ def test_alleluia_toon_8_svg_shows_s4_s8_s13_and_one_accent() -> None:
     for el in slurs:
         assert int(el.attrib["data-from"]) > 0
         assert int(el.attrib["data-from"]) < int(el.attrib["data-to"])
-    assert any("melisma-extend" in _classes(el) for el in root.iter())
+    assert not any("melisma-extend" in _classes(el) for el in root.iter())
 
     texts = [
         el.text or ""
@@ -119,4 +119,64 @@ def test_alleluia_toon_8_svg_shows_s4_s8_s13_and_one_accent() -> None:
     marks = [el for el in root.iter() if "vsa-mark" in _classes(el)]
     tokens = [el.attrib["data-ehm"] for el in marks]
     assert tokens == [token for _i, token, _glyph in module.soprano_vsa_tokens(doc)]
-    assert "/" in tokens and "\\2" in tokens and tokens.count("-") >= 6
+    # Recite blijft gelijk: geen kale «-». Alleen de laatste le, de vier noten
+    # van lu, en daarna i en a.
+    assert tokens == ["/", "\\2", "\\2", "/", "/", "/", "\\"]
+    assert 'font-weight="700"' in svg
+    underlines = [el for el in root.iter() if "vsa-underline" in _classes(el)]
+    # lu_ … _  op de eerste en laatste noot, plus i_ en a__.
+    assert [el.attrib["data-index"] for el in underlines] == ["10", "13", "14", "15"]
+    assert [el.attrib["data-elm"] for el in underlines] == ["_", "_", "_", "__"]
+    assert any("brace" in _classes(el) for el in root.iter())
+    doubles = [el for el in root.iter() if "barline" in _classes(el)]
+    assert len(doubles) == 2 and {el.attrib["data-style"] for el in doubles} == {"light-light"}
+
+
+def test_alleluia_toon_2_keeps_dash_inside_melisma() -> None:
+    module = _render()
+    src = ROOT / "examples" / "bug-cases" / "corib" / "alleluia-toon-2.mvsa"
+    doc = export_mvsa_to_score_ir(src.read_text(encoding="utf-8"), title="Alleluia - Toon 2")
+    svg = module.render_score_ir_svg(doc)
+    root = ET.fromstring(svg)
+    tokens = [
+        el.attrib["data-ehm"]
+        for el in root.iter()
+        if "vsa-mark" in _classes(el)
+    ]
+    # «Al~&/&/&\&\»: de liggende streep hoort bij het melisma, de recite niet.
+    assert tokens[0] == "-"
+    assert tokens.count("-") == 1
+    assert "/" in tokens and "\\" in tokens
+
+
+def test_vredeslitanie_repeat_and_double_bar() -> None:
+    module = _render()
+    src = ROOT / "examples" / "mvsa" / "1a-vredeslitanie.mvsa"
+    doc = export_mvsa_to_score_ir(src.read_text(encoding="utf-8"), title="(1a) Vredeslitanie")
+    svg = module.render_score_ir_svg(doc)
+    root = ET.fromstring(svg)
+    styles = [
+        el.attrib["data-style"]
+        for el in root.iter()
+        if "barline" in _classes(el)
+    ]
+    assert "repeat-start" in styles
+    assert "repeat-end" in styles
+    assert "light-light" in styles
+    assert "single" in styles
+    assert any("repeat-dots" in _classes(el) for el in root.iter())
+    tokens = [
+        el.attrib["data-ehm"]
+        for el in root.iter()
+        if "vsa-mark" in _classes(el)
+    ]
+    assert "-" not in tokens
+    assert tokens == ["\\", "/", "/", "\\", "/", "\\"]
+    cues = [
+        (float(el.attrib["x"]), el.text or "")
+        for el in root.iter()
+        if "cue" in _classes(el)
+    ]
+    gezegend = next(x for x, text in cues if text.startswith("P: Gezegend"))
+    laat = next(x for x, text in cues if text.startswith("P: Laat ons"))
+    assert laat > gezegend + 120

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 967.0 400.0" width="100%" preserveAspectRatio="xMinYMin meet" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1039.0 400.0" width="100%" preserveAspectRatio="xMinYMin meet" role="img">
 <title>Alleluia - Toon 8</title>
-<rect class="page" x="0" y="0" width="967.0" height="400.0" fill="white"/>
-<path class="brace" d="M 26.0 52.0 Q 14.0 190.0 26.0 328.0" fill="none" stroke="black" stroke-width="1.6"/>
-<line class="staff" data-staff="treble" x1="36.0" y1="100.0" x2="943.0" y2="100.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="treble" x1="36.0" y1="88.0" x2="943.0" y2="88.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="treble" x1="36.0" y1="76.0" x2="943.0" y2="76.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="treble" x1="36.0" y1="64.0" x2="943.0" y2="64.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="treble" x1="36.0" y1="52.0" x2="943.0" y2="52.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="bass" x1="36.0" y1="328.0" x2="943.0" y2="328.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="bass" x1="36.0" y1="316.0" x2="943.0" y2="316.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="bass" x1="36.0" y1="304.0" x2="943.0" y2="304.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="bass" x1="36.0" y1="292.0" x2="943.0" y2="292.0" stroke="black" stroke-width="1"/>
-<line class="staff" data-staff="bass" x1="36.0" y1="280.0" x2="943.0" y2="280.0" stroke="black" stroke-width="1"/>
+<rect class="page" x="0" y="0" width="1039.0" height="400.0" fill="white"/>
+<path class="brace" d="M0 500C24 463 37 435 37 397C37 330 2 251 2 175C2 121 20 48 61 1C64 -3 71 1 69 6C45 45 37 91 37 131C37 212 69 285 69 354C69 404 56 452 16 500C55 547 69 595 69 645C69 714 37 788 37 868C37 909 44 954 68 993C71 999 63 1003 60 999C19 951 2 879 2 824C2 748 37 669 37 602C37 564 24 537 0 500Z" fill="black" fill-rule="nonzero" transform="translate(16.00,327.83) scale(0.23070,-0.27566)"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="100.0" x2="1015.0" y2="100.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="88.0" x2="1015.0" y2="88.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="76.0" x2="1015.0" y2="76.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="64.0" x2="1015.0" y2="64.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="52.0" x2="1015.0" y2="52.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="328.0" x2="1015.0" y2="328.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="316.0" x2="1015.0" y2="316.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="304.0" x2="1015.0" y2="304.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="292.0" x2="1015.0" y2="292.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="280.0" x2="1015.0" y2="280.0" stroke="black" stroke-width="1"/>
 <path class="clef" data-staff="treble" d="M376 415C374 427 376 428 382 434C398 449 419 470 438 491C522 583 572 702 572 815C572 902 548 988 507 1048C492 1070 466 1098 455 1098C441 1098 410 1072 390 1050C316 968 292 843 292 739C292 681 299 616 306 575C308 563 309 561 297 551C233 498 164 437 112 373C43 287 0 194 0 87C0 -87 119 -252 364 -252C387 -252 413 -250 433 -246C444 -244 446 -243 448 -255C460 -322 475 -409 475 -456C475 -604 375 -622 316 -622C262 -622 236 -606 236 -593C236 -586 245 -583 268 -576C299 -567 335 -540 335 -482C335 -427 300 -380 239 -380C172 -380 132 -433 132 -495C132 -560 171 -658 322 -658C389 -658 519 -628 519 -458C519 -401 501 -306 490 -244C488 -232 489 -233 503 -227C604 -187 671 -102 671 11C671 139 577 252 430 252C404 252 404 252 401 270ZM470 943C503 943 530 916 530 861C530 792 497 728 419 650C403 634 379 611 356 591C349 585 345 586 343 599C339 625 337 659 337 691C337 847 409 943 470 943ZM361 262C364 243 364 244 346 238C258 208 201 129 201 44C201 -46 248 -110 316 -133C324 -136 336 -139 343 -139C351 -139 355 -134 355 -128C355 -121 347 -118 340 -115C298 -97 268 -54 268 -8C268 49 307 92 368 109C384 113 386 112 388 101L438 -197C440 -208 439 -208 424 -211C408 -214 388 -216 368 -216C193 -216 80 -119 80 20C80 79 90 158 173 252C233 319 279 356 326 394C336 402 338 401 340 390ZM430 103C428 115 429 118 441 117C522 110 589 42 589 -46C589 -109 551 -160 495 -188C483 -194 481 -194 479 -182Z" fill="black" fill-rule="nonzero" transform="translate(38.00,88.00) scale(0.04800,-0.04800)"/>
 <path class="clef" data-staff="bass" d="M252 262C78 262 0 135 0 39C0 -41 42 -110 123 -110C186 -110 229 -66 229 -4C229 60 182 100 133 100C106 100 96 93 83 93C70 93 67 101 67 111C67 151 127 224 229 224C335 224 381 120 381 -37C381 -140 359 -260 297 -356C237 -449 134 -534 10 -605C1 -610 -5 -615 -5 -623C-5 -629 -1 -635 8 -635C13 -635 19 -633 25 -630C158 -565 286 -489 392 -375C479 -281 531 -159 531 -28C531 146 425 262 252 262ZM629 180C598 180 574 156 574 125C574 94 598 70 629 70C660 70 684 94 684 125C684 156 660 180 629 180ZM630 -71C599 -71 576 -94 576 -125C576 -156 599 -179 630 -179C661 -179 684 -156 684 -125C684 -94 661 -71 630 -71Z" fill="black" fill-rule="nonzero" transform="translate(38.00,292.00) scale(0.04800,-0.04800)"/>
 <path class="key-signature" data-staff="treble" d="M12 -170C15 -174 18 -175 21 -175C24 -175 27 -173 27 -173C57 -156 81 -129 106 -112C195 -50 226 11 226 57C226 114 182 150 136 153C129 153 122 152 115 150C104 147 92 143 81 136C75 131 64 122 59 122C57 122 56 122 54 123C47 126 43 133 43 140C44 162 50 402 50 422C50 433 41 439 31 439C17 439 1 429 0 411C0 411 4 -160 12 -170ZM47 -81C47 -81 44 -21 44 19C44 35 45 47 46 51C50 63 76 85 90 93C99 98 108 100 116 100C126 100 135 96 141 89C151 78 157 61 157 42C157 24 152 3 140 -18C127 -42 98 -74 68 -93C64 -95 61 -96 58 -96C49 -96 47 -86 47 -81Z" fill="black" fill-rule="nonzero" transform="translate(71.15,76.00) scale(0.04800,-0.04800)"/>
@@ -22,7 +22,7 @@
 <line class="stem stem-up voice-S" data-voice="S" x1="132.3" y1="76.0" x2="132.3" y2="40.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S breve" data-voice="S" data-kind="breve" data-index="1" data-step="B" data-octave="4" data-cy="76.0" data-lyric-index="1" >
-<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(147.62,76.00) scale(0.04800,-0.04800)"/>
+<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(152.26,76.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="2" data-step="B" data-octave="4" data-cy="76.0" data-lyric-index="2" >
 </g>
@@ -37,42 +37,42 @@
 <g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="7" data-step="B" data-octave="4" data-cy="76.0" data-lyric-index="7" >
 </g>
 <g class="note voice-S note" data-voice="S" data-kind="note" data-index="8" data-step="B" data-octave="4" data-cy="76.0" data-lyric-index="8" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(417.96,76.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-S" data-voice="S" x1="431.3" y1="76.0" x2="431.3" y2="40.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(468.68,76.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="482.0" y1="76.0" x2="482.0" y2="40.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S note" data-voice="S" data-kind="note" data-index="9" data-step="C" data-octave="5" data-cy="70.0" data-lyric-index="9" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(453.96,70.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-S" data-voice="S" x1="467.3" y1="70.0" x2="467.3" y2="34.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(509.32,70.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="522.7" y1="70.0" x2="522.7" y2="34.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S note" data-voice="S" data-kind="note" data-index="10" data-step="A" data-octave="4" data-cy="82.0" data-lyric-index="10" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(489.96,82.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-S" data-voice="S" x1="503.3" y1="82.0" x2="503.3" y2="46.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(549.96,82.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="563.3" y1="82.0" x2="563.3" y2="46.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S note" data-voice="S" data-kind="note" data-index="11" data-step="F" data-octave="4" data-cy="94.0" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(561.96,94.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-S" data-voice="S" x1="575.3" y1="94.0" x2="575.3" y2="58.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(621.96,94.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="635.3" y1="94.0" x2="635.3" y2="58.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S note" data-voice="S" data-kind="note" data-index="12" data-step="G" data-octave="4" data-cy="88.0" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(597.96,88.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-S" data-voice="S" x1="611.3" y1="88.0" x2="611.3" y2="52.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(657.96,88.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="671.3" y1="88.0" x2="671.3" y2="52.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S note" data-voice="S" data-kind="note" data-index="13" data-step="A" data-octave="4" data-cy="82.0" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(633.96,82.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-S" data-voice="S" x1="647.3" y1="82.0" x2="647.3" y2="46.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(693.96,82.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="707.3" y1="82.0" x2="707.3" y2="46.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S note" data-voice="S" data-kind="note" data-index="14" data-step="B" data-octave="4" data-cy="76.0" data-lyric-index="11" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(705.96,76.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-S" data-voice="S" x1="719.3" y1="76.0" x2="719.3" y2="40.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(765.96,76.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="779.3" y1="76.0" x2="779.3" y2="40.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-S whole" data-voice="S" data-kind="whole" data-index="15" data-step="A" data-octave="4" data-cy="82.0" data-lyric-index="12" >
-<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(774.91,82.00) scale(0.04800,-0.04800)"/>
+<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(834.91,82.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="0" data-step="G" data-octave="4" data-cy="88.0" data-lyric-index="0" >
 <path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(118.92,88.00) scale(0.04800,-0.04800)"/>
 <line class="stem stem-down voice-A" data-voice="A" x1="119.7" y1="88.0" x2="119.7" y2="124.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A breve" data-voice="A" data-kind="breve" data-index="1" data-step="G" data-octave="4" data-cy="88.0" data-lyric-index="1" >
-<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(147.62,88.00) scale(0.04800,-0.04800)"/>
+<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(152.26,88.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="2" data-step="G" data-octave="4" data-cy="88.0" data-lyric-index="2" >
 </g>
@@ -87,35 +87,35 @@
 <g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="7" data-step="G" data-octave="4" data-cy="88.0" data-lyric-index="7" >
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="8" data-step="G" data-octave="4" data-cy="88.0" data-lyric-index="8" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(417.96,88.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-A" data-voice="A" x1="418.8" y1="88.0" x2="418.8" y2="124.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(468.68,88.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="469.5" y1="88.0" x2="469.5" y2="124.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="9" data-step="G" data-octave="4" data-cy="88.0" data-lyric-index="9" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(453.96,88.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-A" data-voice="A" x1="454.8" y1="88.0" x2="454.8" y2="124.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(509.32,88.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="510.1" y1="88.0" x2="510.1" y2="124.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="10" data-step="F" data-octave="4" data-cy="94.0" data-lyric-index="10" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(489.96,94.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-A" data-voice="A" x1="490.8" y1="94.0" x2="490.8" y2="130.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(549.96,94.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="550.8" y1="94.0" x2="550.8" y2="130.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="11" data-step="D" data-octave="4" data-cy="106.0" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(561.96,106.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-A" data-voice="A" x1="562.8" y1="106.0" x2="562.8" y2="142.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(621.96,106.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="622.8" y1="106.0" x2="622.8" y2="142.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="12" data-step="E" data-octave="4" data-cy="100.0" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(597.96,100.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-A" data-voice="A" x1="598.8" y1="100.0" x2="598.8" y2="136.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(657.96,100.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="658.8" y1="100.0" x2="658.8" y2="136.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="13" data-step="F" data-octave="4" data-cy="94.0" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(633.96,94.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-A" data-voice="A" x1="634.8" y1="94.0" x2="634.8" y2="130.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(693.96,94.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="694.8" y1="94.0" x2="694.8" y2="130.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A note" data-voice="A" data-kind="note" data-index="14" data-step="G" data-octave="4" data-cy="88.0" data-lyric-index="11" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(705.96,88.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-A" data-voice="A" x1="706.8" y1="88.0" x2="706.8" y2="124.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(765.96,88.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="766.8" y1="88.0" x2="766.8" y2="124.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-A whole" data-voice="A" data-kind="whole" data-index="15" data-step="E" data-octave="4" data-cy="100.0" data-lyric-index="12" >
-<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(774.91,100.00) scale(0.04800,-0.04800)"/>
+<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(834.91,100.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-T note" data-voice="T" data-kind="note" data-index="0" data-step="D" data-octave="4" data-cy="262.0" data-lyric-index="0" >
 <line class="ledger" x1="115.0" y1="268.0" x2="137.0" y2="268.0" stroke="black" stroke-width="1"/>
@@ -123,8 +123,8 @@
 <line class="stem stem-up voice-T" data-voice="T" x1="132.3" y1="262.0" x2="132.3" y2="226.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-T breve" data-voice="T" data-kind="breve" data-index="1" data-step="D" data-octave="4" data-cy="262.0" data-lyric-index="1" >
-<line class="ledger" x1="151.0" y1="268.0" x2="173.0" y2="268.0" stroke="black" stroke-width="1"/>
-<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(147.62,262.00) scale(0.04800,-0.04800)"/>
+<line class="ledger" x1="155.6" y1="268.0" x2="177.6" y2="268.0" stroke="black" stroke-width="1"/>
+<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(152.26,262.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="2" data-step="D" data-octave="4" data-cy="262.0" data-lyric-index="2" >
 </g>
@@ -139,46 +139,46 @@
 <g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="7" data-step="D" data-octave="4" data-cy="262.0" data-lyric-index="7" >
 </g>
 <g class="note voice-T note" data-voice="T" data-kind="note" data-index="8" data-step="D" data-octave="4" data-cy="262.0" data-lyric-index="8" >
-<line class="ledger" x1="414.0" y1="268.0" x2="436.0" y2="268.0" stroke="black" stroke-width="1"/>
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(417.96,262.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-T" data-voice="T" x1="431.3" y1="262.0" x2="431.3" y2="226.0" stroke="black" stroke-width="1.35"/>
+<line class="ledger" x1="464.8" y1="268.0" x2="486.8" y2="268.0" stroke="black" stroke-width="1"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(468.68,262.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="482.0" y1="262.0" x2="482.0" y2="226.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-T note" data-voice="T" data-kind="note" data-index="9" data-step="C" data-octave="4" data-cy="268.0" data-lyric-index="9" >
-<line class="ledger" x1="450.0" y1="268.0" x2="472.0" y2="268.0" stroke="black" stroke-width="1"/>
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(453.96,268.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-T" data-voice="T" x1="467.3" y1="268.0" x2="467.3" y2="232.0" stroke="black" stroke-width="1.35"/>
+<line class="ledger" x1="505.4" y1="268.0" x2="527.4" y2="268.0" stroke="black" stroke-width="1"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(509.32,268.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="522.7" y1="268.0" x2="522.7" y2="232.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-T note" data-voice="T" data-kind="note" data-index="10" data-step="C" data-octave="4" data-cy="268.0" data-lyric-index="10" >
-<line class="ledger" x1="486.0" y1="268.0" x2="508.0" y2="268.0" stroke="black" stroke-width="1"/>
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(489.96,268.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-T" data-voice="T" x1="503.3" y1="268.0" x2="503.3" y2="232.0" stroke="black" stroke-width="1.35"/>
+<line class="ledger" x1="546.0" y1="268.0" x2="568.0" y2="268.0" stroke="black" stroke-width="1"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(549.96,268.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="563.3" y1="268.0" x2="563.3" y2="232.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-T note" data-voice="T" data-kind="note" data-index="11" data-step="A" data-octave="3" data-cy="280.0" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(561.96,280.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-T" data-voice="T" x1="575.3" y1="280.0" x2="575.3" y2="244.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(621.96,280.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="635.3" y1="280.0" x2="635.3" y2="244.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-T note" data-voice="T" data-kind="note" data-index="12" data-step="C" data-octave="4" data-cy="268.0" >
-<line class="ledger" x1="594.0" y1="268.0" x2="616.0" y2="268.0" stroke="black" stroke-width="1"/>
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(597.96,268.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-T" data-voice="T" x1="611.3" y1="268.0" x2="611.3" y2="232.0" stroke="black" stroke-width="1.35"/>
-<path class="dot" d="M100 0C100 28 78 50 50 50C22 50 0 28 0 0C0 -28 22 -50 50 -50C78 -50 100 -28 100 0Z" fill="black" fill-rule="nonzero" transform="translate(616.72,265.00) scale(0.04800,-0.04800)"/>
+<line class="ledger" x1="654.0" y1="268.0" x2="676.0" y2="268.0" stroke="black" stroke-width="1"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(657.96,268.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="671.3" y1="268.0" x2="671.3" y2="232.0" stroke="black" stroke-width="1.35"/>
+<path class="dot" d="M100 0C100 28 78 50 50 50C22 50 0 28 0 0C0 -28 22 -50 50 -50C78 -50 100 -28 100 0Z" fill="black" fill-rule="nonzero" transform="translate(676.72,265.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-T note" data-voice="T" data-kind="note" data-index="13" data-step="D" data-octave="4" data-cy="262.0" data-lyric-index="11" >
-<line class="ledger" x1="702.0" y1="268.0" x2="724.0" y2="268.0" stroke="black" stroke-width="1"/>
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(705.96,262.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-up voice-T" data-voice="T" x1="719.3" y1="262.0" x2="719.3" y2="226.0" stroke="black" stroke-width="1.35"/>
+<line class="ledger" x1="762.0" y1="268.0" x2="784.0" y2="268.0" stroke="black" stroke-width="1"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(765.96,262.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="779.3" y1="262.0" x2="779.3" y2="226.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-T whole" data-voice="T" data-kind="whole" data-index="14" data-step="C" data-octave="4" data-cy="268.0" data-lyric-index="12" >
-<line class="ledger" x1="774.0" y1="268.0" x2="796.0" y2="268.0" stroke="black" stroke-width="1"/>
-<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(774.91,268.00) scale(0.04800,-0.04800)"/>
-<path class="accidental" d="M237 118C244 121 249 129 249 135V206C249 211 246 214 242 214C240 214 239 214 237 213C237 213 217 205 212 204C205 204 198 209 198 217V339C198 345 192 350 184 350C174 350 168 345 168 339V209C167 199 164 186 155 180C143 173 109 159 92 155C83 155 80 167 80 175V295C80 301 73 306 66 306C56 306 50 301 50 295V160C50 146 44 136 38 133C32 130 12 122 12 122C5 120 0 112 0 106V35C0 29 3 26 8 26C9 26 11 27 12 27C12 27 27 33 34 37C35 37 36 38 37 38C44 38 50 28 50 20V-79C50 -90 45 -99 39 -102C33 -104 12 -113 12 -113C5 -115 0 -123 0 -129V-200C0 -206 3 -209 8 -209C9 -209 11 -208 12 -208C12 -208 26 -202 35 -199C36 -198 37 -198 38 -198C45 -198 50 -209 50 -214V-337C50 -343 56 -348 63 -348C73 -348 80 -343 80 -337V-198C80 -185 85 -178 90 -176L151 -151C152 -151 154 -150 155 -150C163 -150 168 -162 168 -168V-293C168 -299 174 -304 181 -304C192 -304 198 -299 198 -293V-151C198 -143 202 -131 209 -128C216 -125 237 -117 237 -117C244 -114 249 -106 249 -100V-29C249 -24 246 -21 242 -21C240 -21 239 -21 237 -22L211 -32C205 -32 198 -26 198 -14V79C198 86 203 105 211 108ZM168 -45C162 -65 115 -85 92 -85C86 -85 81 -83 80 -80C78 -76 77 -54 77 -30C77 1 78 36 80 44C82 61 128 82 153 82C160 82 166 80 168 76C170 71 172 46 172 19C172 -8 170 -36 168 -45Z" fill="black" fill-rule="nonzero" transform="translate(759.96,268.00) scale(0.04800,-0.04800)"/>
+<line class="ledger" x1="834.0" y1="268.0" x2="856.0" y2="268.0" stroke="black" stroke-width="1"/>
+<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(834.91,268.00) scale(0.04800,-0.04800)"/>
+<path class="accidental" d="M237 118C244 121 249 129 249 135V206C249 211 246 214 242 214C240 214 239 214 237 213C237 213 217 205 212 204C205 204 198 209 198 217V339C198 345 192 350 184 350C174 350 168 345 168 339V209C167 199 164 186 155 180C143 173 109 159 92 155C83 155 80 167 80 175V295C80 301 73 306 66 306C56 306 50 301 50 295V160C50 146 44 136 38 133C32 130 12 122 12 122C5 120 0 112 0 106V35C0 29 3 26 8 26C9 26 11 27 12 27C12 27 27 33 34 37C35 37 36 38 37 38C44 38 50 28 50 20V-79C50 -90 45 -99 39 -102C33 -104 12 -113 12 -113C5 -115 0 -123 0 -129V-200C0 -206 3 -209 8 -209C9 -209 11 -208 12 -208C12 -208 26 -202 35 -199C36 -198 37 -198 38 -198C45 -198 50 -209 50 -214V-337C50 -343 56 -348 63 -348C73 -348 80 -343 80 -337V-198C80 -185 85 -178 90 -176L151 -151C152 -151 154 -150 155 -150C163 -150 168 -162 168 -168V-293C168 -299 174 -304 181 -304C192 -304 198 -299 198 -293V-151C198 -143 202 -131 209 -128C216 -125 237 -117 237 -117C244 -114 249 -106 249 -100V-29C249 -24 246 -21 242 -21C240 -21 239 -21 237 -22L211 -32C205 -32 198 -26 198 -14V79C198 86 203 105 211 108ZM168 -45C162 -65 115 -85 92 -85C86 -85 81 -83 80 -80C78 -76 77 -54 77 -30C77 1 78 36 80 44C82 61 128 82 153 82C160 82 166 80 168 76C170 71 172 46 172 19C172 -8 170 -36 168 -45Z" fill="black" fill-rule="nonzero" transform="translate(819.96,268.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="0" data-step="G" data-octave="3" data-cy="286.0" data-lyric-index="0" >
 <path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(118.92,286.00) scale(0.04800,-0.04800)"/>
 <line class="stem stem-down voice-B" data-voice="B" x1="119.7" y1="286.0" x2="119.7" y2="322.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B breve" data-voice="B" data-kind="breve" data-index="1" data-step="G" data-octave="3" data-cy="286.0" data-lyric-index="1" >
-<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(147.62,286.00) scale(0.04800,-0.04800)"/>
+<path class="notehead breve-head" d="M9 155C3 155 0 151 0 147V-148C0 -152 3 -155 9 -155H22C27 -155 31 -152 31 -148V147C31 151 27 155 22 155ZM67 155C61 155 57 151 57 147V-148C57 -152 61 -155 67 -155H79C84 -155 89 -152 89 -148V147C89 151 84 155 79 155ZM519 155C514 155 509 151 509 147V-148C509 -152 514 -155 519 -155H532C537 -155 542 -152 542 -148V147C542 151 537 155 532 155ZM576 155C572 155 566 151 566 147V-148C566 -152 572 -155 576 -155H589C595 -155 599 -152 599 -148V147C599 151 595 155 589 155ZM304 125C172 125 90 70 90 1C90 -64 146 -125 294 -125C456 -125 509 -68 509 1C509 72 397 125 304 125ZM399 -49C394 -74 380 -91 355 -98C346 -101 336 -101 326 -101C316 -101 308 -101 299 -98C282 -92 265 -83 251 -71C244 -65 237 -57 230 -49C212 -26 197 8 197 40C197 49 197 56 199 63C210 97 247 102 278 102C346 102 401 29 401 -31C401 -37 400 -44 399 -49Z" fill="black" fill-rule="nonzero" transform="translate(152.26,286.00) scale(0.04800,-0.04800)"/>
 </g>
 <g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="2" data-step="G" data-octave="3" data-cy="286.0" data-lyric-index="2" >
 </g>
@@ -193,112 +193,97 @@
 <g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="7" data-step="G" data-octave="3" data-cy="286.0" data-lyric-index="7" >
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="8" data-step="G" data-octave="3" data-cy="286.0" data-lyric-index="8" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(417.96,286.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-B" data-voice="B" x1="418.8" y1="286.0" x2="418.8" y2="322.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(468.68,286.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="469.5" y1="286.0" x2="469.5" y2="322.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="9" data-step="E" data-octave="3" data-cy="298.0" data-lyric-index="9" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(453.96,298.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-B" data-voice="B" x1="454.8" y1="298.0" x2="454.8" y2="334.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(509.32,298.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="510.1" y1="298.0" x2="510.1" y2="334.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="10" data-step="F" data-octave="3" data-cy="292.0" data-lyric-index="10" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(489.96,292.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-B" data-voice="B" x1="490.8" y1="292.0" x2="490.8" y2="328.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(549.96,292.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="550.8" y1="292.0" x2="550.8" y2="328.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="11" data-step="D" data-octave="3" data-cy="304.0" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(561.96,304.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-B" data-voice="B" x1="562.8" y1="304.0" x2="562.8" y2="340.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(621.96,304.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="622.8" y1="304.0" x2="622.8" y2="340.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="12" data-step="C" data-octave="3" data-cy="310.0" >
-<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(597.96,310.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-B" data-voice="B" x1="598.8" y1="310.0" x2="598.8" y2="346.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C186 -125 295 -43 295 42C295 93 255 125 198 125C88 125 0 44 0 -42C0 -94 43 -125 97 -125Z" fill="black" fill-rule="nonzero" transform="translate(657.96,310.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="658.8" y1="310.0" x2="658.8" y2="346.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="13" data-step="F" data-octave="3" data-cy="292.0" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(633.96,292.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-B" data-voice="B" x1="634.8" y1="292.0" x2="634.8" y2="328.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(693.96,292.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="694.8" y1="292.0" x2="694.8" y2="328.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B note" data-voice="B" data-kind="note" data-index="14" data-step="G" data-octave="3" data-cy="286.0" data-lyric-index="11" >
-<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(705.96,286.00) scale(0.04800,-0.04800)"/>
-<line class="stem stem-down voice-B" data-voice="B" x1="706.8" y1="286.0" x2="706.8" y2="322.0" stroke="black" stroke-width="1.35"/>
+<path class="notehead" d="M97 -125C262 -125 295 9 295 42C295 93 254 125 196 125C47 125 0 10 0 -42C0 -95 42 -125 97 -125ZM173 -46C128 -76 97 -87 75 -87C54 -87 42 -76 35 -64C32 -58 29 -51 29 -44C29 -22 51 5 120 45C170 74 201 84 221 84C240 84 251 75 258 63C261 57 264 51 264 44C264 24 243 0 173 -46Z" fill="black" fill-rule="nonzero" transform="translate(765.96,286.00) scale(0.04800,-0.04800)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="766.8" y1="286.0" x2="766.8" y2="322.0" stroke="black" stroke-width="1.35"/>
 </g>
 <g class="note voice-B whole" data-voice="B" data-kind="whole" data-index="15" data-step="A" data-octave="3" data-cy="280.0" data-lyric-index="12" >
-<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(774.91,280.00) scale(0.04800,-0.04800)"/>
+<path class="notehead" d="M216 125C83 125 0 70 0 2C0 -65 57 -125 206 -125C370 -125 422 -68 422 2C422 73 309 125 216 125ZM111 63C122 98 159 103 190 103C259 103 314 29 314 -31C314 -38 313 -44 312 -50C307 -75 293 -92 268 -98C258 -101 247 -102 237 -102C228 -102 220 -101 211 -98C194 -93 178 -84 164 -72C156 -65 149 -58 143 -50C123 -27 108 7 108 39C108 47 109 55 111 63Z" fill="black" fill-rule="nonzero" transform="translate(834.91,280.00) scale(0.04800,-0.04800)"/>
 </g>
-<path class="melisma-slur" data-voice="S" data-from="10" data-to="13" d="M 497.0 38.0 Q 569.0 24.0 641.0 38.0" fill="none" stroke="black" stroke-width="1.3"/>
-<path class="melisma-slur" data-voice="A" data-from="10" data-to="13" d="M 497.0 150.0 Q 569.0 158.0 641.0 150.0" fill="none" stroke="black" stroke-width="1.3"/>
-<path class="melisma-slur" data-voice="T" data-from="10" data-to="12" d="M 497.0 224.0 Q 551.0 216.0 605.0 224.0" fill="none" stroke="black" stroke-width="1.3"/>
-<path class="melisma-slur" data-voice="B" data-from="10" data-to="13" d="M 497.0 354.0 Q 569.0 364.0 641.0 354.0" fill="none" stroke="black" stroke-width="1.3"/>
-<line class="barline" data-style="light-light" x1="915.0" y1="52.0" x2="915.0" y2="328.0" stroke="black" stroke-width="1.2"/>
-<line class="barline barline-double" x1="920.0" y1="52.0" x2="920.0" y2="328.0" stroke="black" stroke-width="1.2"/>
-<text class="lyric" data-lyric-index="0" x="126.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Al</text>
-<text class="lyric" data-lyric-index="1" x="162.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">le</text>
-<text class="lyric spacer-lyric" data-lyric-index="2" x="198.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">lu</text>
-<text class="lyric spacer-lyric" data-lyric-index="3" x="232.8" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">ia,</text>
-<text class="lyric spacer-lyric" data-lyric-index="4" x="276.8" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Al</text>
-<text class="lyric spacer-lyric" data-lyric-index="5" x="311.5" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">le</text>
-<text class="lyric spacer-lyric" data-lyric-index="6" x="346.2" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">lu</text>
-<text class="lyric spacer-lyric" data-lyric-index="7" x="381.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">ia,</text>
-<text class="lyric" data-lyric-index="8" x="425.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Al</text>
-<text class="lyric" data-lyric-index="9" x="461.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">le</text>
-<text class="lyric" data-lyric-index="10" x="497.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">lu</text>
-<line class="melisma-extend" data-lyric-index="10" x1="510.4" y1="202.0" x2="648.1" y2="202.0" stroke="black" stroke-width="1.1"/>
-<text class="lyric" data-lyric-index="11" x="713.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">i</text>
-<text class="lyric" data-lyric-index="12" x="785.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">a</text>
-<text class="hyphen" x="144.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<text class="hyphen" x="180.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<text class="hyphen" x="215.4" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<text class="hyphen" x="294.2" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<text class="hyphen" x="328.9" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<text class="hyphen" x="363.6" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<text class="hyphen" x="443.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<text class="hyphen" x="479.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
-<g class="vsa-mark" data-voice="S" data-index="0" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="117.36" y1="178.00" x2="134.64" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="1" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="153.36" y1="178.00" x2="170.64" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="2" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="189.36" y1="178.00" x2="206.64" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="3" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="224.12" y1="178.00" x2="241.40" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="4" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="268.16" y1="178.00" x2="285.44" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="5" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="302.88" y1="178.00" x2="320.16" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="6" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="337.60" y1="178.00" x2="354.88" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="7" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="372.36" y1="178.00" x2="389.64" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
-<g class="vsa-mark" data-voice="S" data-index="8" data-ehm="-">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-flat" x1="416.40" y1="178.00" x2="433.68" y2="178.00" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-</g>
+<path class="melisma-slur" data-voice="S" data-from="10" data-to="13" d="M 557.0 38.0 Q 629.0 24.0 701.0 38.0" fill="none" stroke="black" stroke-width="1.3"/>
+<path class="melisma-slur" data-voice="A" data-from="10" data-to="13" d="M 557.0 150.0 Q 629.0 158.0 701.0 150.0" fill="none" stroke="black" stroke-width="1.3"/>
+<path class="melisma-slur" data-voice="T" data-from="10" data-to="12" d="M 557.0 224.0 Q 611.0 216.0 665.0 224.0" fill="none" stroke="black" stroke-width="1.3"/>
+<path class="melisma-slur" data-voice="B" data-from="10" data-to="13" d="M 557.0 354.0 Q 629.0 364.0 701.0 354.0" fill="none" stroke="black" stroke-width="1.3"/>
+<line class="barline" data-style="light-light" x1="975.0" y1="52.0" x2="975.0" y2="328.0" stroke="black" stroke-width="1.35"/>
+<line class="barline" data-style="light-light" x1="980.2" y1="52.0" x2="980.2" y2="328.0" stroke="black" stroke-width="1.35"/>
+<text class="lyric" data-lyric-index="0" x="126.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">Al</text>
+<text class="lyric" data-lyric-index="1" x="166.6" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">le</text>
+<text class="lyric spacer-lyric" data-lyric-index="2" x="207.3" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">lu</text>
+<text class="lyric spacer-lyric" data-lyric-index="3" x="252.4" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">ia,</text>
+<text class="lyric spacer-lyric" data-lyric-index="4" x="300.9" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">Al</text>
+<text class="lyric spacer-lyric" data-lyric-index="5" x="341.5" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">le</text>
+<text class="lyric spacer-lyric" data-lyric-index="6" x="382.2" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">lu</text>
+<text class="lyric spacer-lyric" data-lyric-index="7" x="427.3" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">ia,</text>
+<text class="lyric" data-lyric-index="8" x="475.8" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">Al</text>
+<text class="lyric" data-lyric-index="9" x="516.4" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">le</text>
+<text class="lyric" data-lyric-index="10" x="557.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">lu</text>
+<text class="lyric" data-lyric-index="11" x="773.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">i</text>
+<text class="lyric" data-lyric-index="12" x="845.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">a</text>
+<text class="hyphen" x="146.3" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
+<text class="hyphen" x="187.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
+<text class="hyphen" x="229.8" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
+<text class="hyphen" x="321.2" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
+<text class="hyphen" x="361.8" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
+<text class="hyphen" x="404.7" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
+<text class="hyphen" x="496.1" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
+<text class="hyphen" x="536.7" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="700">-</text>
 <g class="vsa-mark" data-voice="S" data-index="9" data-ehm="/">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="452.40" y1="181.89" x2="469.68" y2="174.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="507.76" y1="175.89" x2="525.04" y2="168.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
 </g>
 <g class="vsa-mark" data-voice="S" data-index="10" data-ehm="\2">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="488.40" y1="174.11" x2="505.68" y2="181.89" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="488.40" y1="167.67" x2="505.68" y2="175.45" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="548.40" y1="168.11" x2="565.68" y2="175.89" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="548.40" y1="161.67" x2="565.68" y2="169.45" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
 </g>
 <g class="vsa-mark" data-voice="S" data-index="11" data-ehm="\2">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="560.40" y1="174.11" x2="577.68" y2="181.89" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="560.40" y1="167.67" x2="577.68" y2="175.45" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="620.40" y1="168.11" x2="637.68" y2="175.89" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="620.40" y1="161.67" x2="637.68" y2="169.45" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
 </g>
 <g class="vsa-mark" data-voice="S" data-index="12" data-ehm="/">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="596.40" y1="181.89" x2="613.68" y2="174.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="656.40" y1="175.89" x2="673.68" y2="168.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
 </g>
 <g class="vsa-mark" data-voice="S" data-index="13" data-ehm="/">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="632.40" y1="181.89" x2="649.68" y2="174.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="692.40" y1="175.89" x2="709.68" y2="168.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
 </g>
 <g class="vsa-mark" data-voice="S" data-index="14" data-ehm="/">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="704.40" y1="181.89" x2="721.68" y2="174.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="764.40" y1="175.89" x2="781.68" y2="168.11" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
 </g>
 <g class="vsa-mark" data-voice="S" data-index="15" data-ehm="\">
-<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="776.40" y1="174.11" x2="793.68" y2="181.89" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-upper-glyph vsa-glyph-fall" x1="836.40" y1="168.11" x2="853.68" y2="175.89" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+</g>
+<g class="vsa-underline" data-voice="S" data-index="10" data-elm="_">
+<line class="vsa-glyph vsa-lower-glyph vsa-glyph-length" x1="547.14" y1="216.00" x2="566.94" y2="216.00" stroke="red" stroke-width="2.66" stroke-linecap="round"/>
+</g>
+<g class="vsa-underline" data-voice="S" data-index="13" data-elm="_">
+<line class="vsa-glyph vsa-lower-glyph vsa-glyph-length" x1="691.14" y1="216.00" x2="710.94" y2="216.00" stroke="red" stroke-width="2.66" stroke-linecap="round"/>
+</g>
+<g class="vsa-underline" data-voice="S" data-index="14" data-elm="_">
+<line class="vsa-glyph vsa-lower-glyph vsa-glyph-length" x1="763.14" y1="216.00" x2="782.94" y2="216.00" stroke="red" stroke-width="2.66" stroke-linecap="round"/>
+</g>
+<g class="vsa-underline" data-voice="S" data-index="15" data-elm="__">
+<line class="vsa-glyph vsa-lower-glyph vsa-glyph-length" x1="835.14" y1="216.00" x2="854.94" y2="216.00" stroke="red" stroke-width="2.66" stroke-linecap="round"/>
+<line class="vsa-glyph vsa-lower-glyph vsa-glyph-length" x1="835.14" y1="221.60" x2="854.94" y2="221.60" stroke="red" stroke-width="2.66" stroke-linecap="round"/>
 </g>
 </svg>
