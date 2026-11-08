@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 967.0 400.0" width="100%" preserveAspectRatio="xMinYMin meet" role="img">
+<title>Alleluia - Toon 8</title>
+<rect class="page" x="0" y="0" width="967.0" height="400.0" fill="white"/>
+<path class="brace" d="M 26.0 52.0 Q 14.0 190.0 26.0 328.0" fill="none" stroke="black" stroke-width="1.6"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="100.0" x2="943.0" y2="100.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="88.0" x2="943.0" y2="88.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="76.0" x2="943.0" y2="76.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="64.0" x2="943.0" y2="64.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="treble" x1="36.0" y1="52.0" x2="943.0" y2="52.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="328.0" x2="943.0" y2="328.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="316.0" x2="943.0" y2="316.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="304.0" x2="943.0" y2="304.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="292.0" x2="943.0" y2="292.0" stroke="black" stroke-width="1"/>
+<line class="staff" data-staff="bass" x1="36.0" y1="280.0" x2="943.0" y2="280.0" stroke="black" stroke-width="1"/>
+<text class="clef" data-staff="treble" x="44.0" y="86.2" font-family="Noto Music, serif" font-size="38">&#119070;</text>
+<text class="clef" data-staff="bass" x="44.0" y="297.4" font-family="Noto Music, serif" font-size="34">&#119074;</text>
+<text class="key-signature" data-staff="treble" x="76.0" y="81.0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="20">&#9837;</text>
+<text class="key-signature" data-staff="bass" x="76.0" y="321.0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="20">&#9837;</text>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="0" data-lyric-index="0" >
+<ellipse class="notehead" cx="126.0" cy="76.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 126.0 76.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="131.6" y1="76.0" x2="131.6" y2="40.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S breve" data-voice="S" data-kind="breve" data-index="1" data-lyric-index="1" >
+<line class="breve-bar" x1="151.8" y1="57.4" x2="151.8" y2="94.6" stroke="black" stroke-width="1.6"/>
+<line class="breve-bar" x1="172.2" y1="57.4" x2="172.2" y2="94.6" stroke="black" stroke-width="1.6"/>
+<ellipse class="breve-head" cx="162.0" cy="76.0" rx="5.4" ry="4.2" fill="none" stroke="black" stroke-width="1.4"/>
+</g>
+<g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="2" data-lyric-index="2" >
+</g>
+<g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="3" data-lyric-index="3" >
+</g>
+<g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="4" data-lyric-index="4" >
+</g>
+<g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="5" data-lyric-index="5" >
+</g>
+<g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="6" data-lyric-index="6" >
+</g>
+<g class="note voice-S spacer" data-voice="S" data-kind="spacer" data-index="7" data-lyric-index="7" >
+</g>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="8" data-lyric-index="8" >
+<ellipse class="notehead" cx="425.0" cy="76.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 425.0 76.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="430.6" y1="76.0" x2="430.6" y2="40.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="9" data-lyric-index="9" >
+<line class="ledger" x1="450.0" y1="112.0" x2="472.0" y2="112.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="461.0" cy="112.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 461.0 112.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="466.6" y1="112.0" x2="466.6" y2="76.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="10" data-lyric-index="10" >
+<ellipse class="notehead" cx="497.0" cy="82.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 497.0 82.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="502.6" y1="82.0" x2="502.6" y2="46.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="11" >
+<ellipse class="notehead" cx="569.0" cy="94.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 569.0 94.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="574.6" y1="94.0" x2="574.6" y2="58.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="12" >
+<ellipse class="notehead" cx="605.0" cy="88.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 605.0 88.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="610.6" y1="88.0" x2="610.6" y2="52.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="13" >
+<ellipse class="notehead" cx="641.0" cy="82.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 641.0 82.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="646.6" y1="82.0" x2="646.6" y2="46.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S note" data-voice="S" data-kind="note" data-index="14" data-lyric-index="11" >
+<ellipse class="notehead" cx="713.0" cy="76.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 713.0 76.0)"/>
+<line class="stem stem-up voice-S" data-voice="S" x1="718.6" y1="76.0" x2="718.6" y2="40.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-S whole" data-voice="S" data-kind="whole" data-index="15" data-lyric-index="12" >
+<ellipse class="notehead" cx="785.0" cy="82.0" rx="8.0" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 785.0 82.0)"/>
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="0" data-lyric-index="0" >
+<ellipse class="notehead" cx="126.0" cy="88.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 126.0 88.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="120.4" y1="88.0" x2="120.4" y2="124.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A breve" data-voice="A" data-kind="breve" data-index="1" data-lyric-index="1" >
+<line class="breve-bar" x1="151.8" y1="69.4" x2="151.8" y2="106.6" stroke="black" stroke-width="1.6"/>
+<line class="breve-bar" x1="172.2" y1="69.4" x2="172.2" y2="106.6" stroke="black" stroke-width="1.6"/>
+<ellipse class="breve-head" cx="162.0" cy="88.0" rx="5.4" ry="4.2" fill="none" stroke="black" stroke-width="1.4"/>
+</g>
+<g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="2" data-lyric-index="2" >
+</g>
+<g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="3" data-lyric-index="3" >
+</g>
+<g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="4" data-lyric-index="4" >
+</g>
+<g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="5" data-lyric-index="5" >
+</g>
+<g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="6" data-lyric-index="6" >
+</g>
+<g class="note voice-A spacer" data-voice="A" data-kind="spacer" data-index="7" data-lyric-index="7" >
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="8" data-lyric-index="8" >
+<ellipse class="notehead" cx="425.0" cy="88.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 425.0 88.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="419.4" y1="88.0" x2="419.4" y2="124.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="9" data-lyric-index="9" >
+<ellipse class="notehead" cx="461.0" cy="88.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 461.0 88.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="455.4" y1="88.0" x2="455.4" y2="124.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="10" data-lyric-index="10" >
+<ellipse class="notehead" cx="497.0" cy="94.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 497.0 94.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="491.4" y1="94.0" x2="491.4" y2="130.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="11" >
+<ellipse class="notehead" cx="569.0" cy="106.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 569.0 106.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="563.4" y1="106.0" x2="563.4" y2="142.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="12" >
+<ellipse class="notehead" cx="605.0" cy="100.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 605.0 100.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="599.4" y1="100.0" x2="599.4" y2="136.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="13" >
+<ellipse class="notehead" cx="641.0" cy="94.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 641.0 94.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="635.4" y1="94.0" x2="635.4" y2="130.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A note" data-voice="A" data-kind="note" data-index="14" data-lyric-index="11" >
+<ellipse class="notehead" cx="713.0" cy="88.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 713.0 88.0)"/>
+<line class="stem stem-down voice-A" data-voice="A" x1="707.4" y1="88.0" x2="707.4" y2="124.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-A whole" data-voice="A" data-kind="whole" data-index="15" data-lyric-index="12" >
+<ellipse class="notehead" cx="785.0" cy="100.0" rx="8.0" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 785.0 100.0)"/>
+</g>
+<g class="note voice-T note" data-voice="T" data-kind="note" data-index="0" data-lyric-index="0" >
+<line class="ledger" x1="115.0" y1="268.0" x2="137.0" y2="268.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="126.0" cy="262.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 126.0 262.0)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="131.6" y1="262.0" x2="131.6" y2="226.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-T breve" data-voice="T" data-kind="breve" data-index="1" data-lyric-index="1" >
+<line class="ledger" x1="151.0" y1="268.0" x2="173.0" y2="268.0" stroke="black" stroke-width="1"/>
+<line class="breve-bar" x1="151.8" y1="243.4" x2="151.8" y2="280.6" stroke="black" stroke-width="1.6"/>
+<line class="breve-bar" x1="172.2" y1="243.4" x2="172.2" y2="280.6" stroke="black" stroke-width="1.6"/>
+<ellipse class="breve-head" cx="162.0" cy="262.0" rx="5.4" ry="4.2" fill="none" stroke="black" stroke-width="1.4"/>
+</g>
+<g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="2" data-lyric-index="2" >
+</g>
+<g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="3" data-lyric-index="3" >
+</g>
+<g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="4" data-lyric-index="4" >
+</g>
+<g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="5" data-lyric-index="5" >
+</g>
+<g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="6" data-lyric-index="6" >
+</g>
+<g class="note voice-T spacer" data-voice="T" data-kind="spacer" data-index="7" data-lyric-index="7" >
+</g>
+<g class="note voice-T note" data-voice="T" data-kind="note" data-index="8" data-lyric-index="8" >
+<line class="ledger" x1="414.0" y1="268.0" x2="436.0" y2="268.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="425.0" cy="262.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 425.0 262.0)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="430.6" y1="262.0" x2="430.6" y2="226.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-T note" data-voice="T" data-kind="note" data-index="9" data-lyric-index="9" >
+<line class="ledger" x1="450.0" y1="268.0" x2="472.0" y2="268.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="461.0" cy="268.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 461.0 268.0)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="466.6" y1="268.0" x2="466.6" y2="232.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-T note" data-voice="T" data-kind="note" data-index="10" data-lyric-index="10" >
+<line class="ledger" x1="486.0" y1="268.0" x2="508.0" y2="268.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="497.0" cy="268.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 497.0 268.0)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="502.6" y1="268.0" x2="502.6" y2="232.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-T note" data-voice="T" data-kind="note" data-index="11" >
+<ellipse class="notehead" cx="569.0" cy="280.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 569.0 280.0)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="574.6" y1="280.0" x2="574.6" y2="244.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-T note" data-voice="T" data-kind="note" data-index="12" >
+<line class="ledger" x1="594.0" y1="268.0" x2="616.0" y2="268.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="605.0" cy="268.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 605.0 268.0)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="610.6" y1="268.0" x2="610.6" y2="232.0" stroke="black" stroke-width="1.3"/>
+<circle class="dot" cx="619.2" cy="265.0" r="2.1" fill="black"/>
+</g>
+<g class="note voice-T note" data-voice="T" data-kind="note" data-index="13" data-lyric-index="11" >
+<line class="ledger" x1="702.0" y1="268.0" x2="724.0" y2="268.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="713.0" cy="262.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 713.0 262.0)"/>
+<line class="stem stem-up voice-T" data-voice="T" x1="718.6" y1="262.0" x2="718.6" y2="226.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-T whole" data-voice="T" data-kind="whole" data-index="14" data-lyric-index="12" >
+<line class="ledger" x1="774.0" y1="268.0" x2="796.0" y2="268.0" stroke="black" stroke-width="1"/>
+<ellipse class="notehead" cx="785.0" cy="268.0" rx="8.0" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 785.0 268.0)"/>
+<text class="accidental" data-voice="T" x="769.0" y="273.0" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="16">&#9839;</text>
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="0" data-lyric-index="0" >
+<ellipse class="notehead" cx="126.0" cy="286.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 126.0 286.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="120.4" y1="286.0" x2="120.4" y2="322.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B breve" data-voice="B" data-kind="breve" data-index="1" data-lyric-index="1" >
+<line class="breve-bar" x1="151.8" y1="267.4" x2="151.8" y2="304.6" stroke="black" stroke-width="1.6"/>
+<line class="breve-bar" x1="172.2" y1="267.4" x2="172.2" y2="304.6" stroke="black" stroke-width="1.6"/>
+<ellipse class="breve-head" cx="162.0" cy="286.0" rx="5.4" ry="4.2" fill="none" stroke="black" stroke-width="1.4"/>
+</g>
+<g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="2" data-lyric-index="2" >
+</g>
+<g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="3" data-lyric-index="3" >
+</g>
+<g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="4" data-lyric-index="4" >
+</g>
+<g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="5" data-lyric-index="5" >
+</g>
+<g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="6" data-lyric-index="6" >
+</g>
+<g class="note voice-B spacer" data-voice="B" data-kind="spacer" data-index="7" data-lyric-index="7" >
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="8" data-lyric-index="8" >
+<ellipse class="notehead" cx="425.0" cy="286.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 425.0 286.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="419.4" y1="286.0" x2="419.4" y2="322.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="9" data-lyric-index="9" >
+<ellipse class="notehead" cx="461.0" cy="298.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 461.0 298.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="455.4" y1="298.0" x2="455.4" y2="334.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="10" data-lyric-index="10" >
+<ellipse class="notehead" cx="497.0" cy="292.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 497.0 292.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="491.4" y1="292.0" x2="491.4" y2="328.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="11" >
+<ellipse class="notehead" cx="569.0" cy="304.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 569.0 304.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="563.4" y1="304.0" x2="563.4" y2="340.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="12" >
+<ellipse class="notehead" cx="605.0" cy="310.0" rx="6.2" ry="4.6" fill="black" stroke="black" stroke-width="1.4" transform="rotate(-20 605.0 310.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="599.4" y1="310.0" x2="599.4" y2="346.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="13" >
+<ellipse class="notehead" cx="641.0" cy="292.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 641.0 292.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="635.4" y1="292.0" x2="635.4" y2="328.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B note" data-voice="B" data-kind="note" data-index="14" data-lyric-index="11" >
+<ellipse class="notehead" cx="713.0" cy="286.0" rx="6.2" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 713.0 286.0)"/>
+<line class="stem stem-down voice-B" data-voice="B" x1="707.4" y1="286.0" x2="707.4" y2="322.0" stroke="black" stroke-width="1.3"/>
+</g>
+<g class="note voice-B whole" data-voice="B" data-kind="whole" data-index="15" data-lyric-index="12" >
+<ellipse class="notehead" cx="785.0" cy="280.0" rx="8.0" ry="4.6" fill="none" stroke="black" stroke-width="1.4" transform="rotate(-20 785.0 280.0)"/>
+</g>
+<path class="melisma-slur" data-voice="S" data-from="10" data-to="13" d="M 497.0 38.0 Q 569.0 24.0 641.0 38.0" fill="none" stroke="black" stroke-width="1.3"/>
+<path class="melisma-slur" data-voice="A" data-from="10" data-to="13" d="M 497.0 150.0 Q 569.0 158.0 641.0 150.0" fill="none" stroke="black" stroke-width="1.3"/>
+<path class="melisma-slur" data-voice="T" data-from="10" data-to="12" d="M 497.0 224.0 Q 551.0 216.0 605.0 224.0" fill="none" stroke="black" stroke-width="1.3"/>
+<path class="melisma-slur" data-voice="B" data-from="10" data-to="13" d="M 497.0 354.0 Q 569.0 364.0 641.0 354.0" fill="none" stroke="black" stroke-width="1.3"/>
+<line class="barline" data-style="light-light" x1="915.0" y1="52.0" x2="915.0" y2="328.0" stroke="black" stroke-width="1.2"/>
+<line class="barline barline-double" x1="920.0" y1="52.0" x2="920.0" y2="328.0" stroke="black" stroke-width="1.2"/>
+<text class="lyric" data-lyric-index="0" x="126.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Al</text>
+<text class="lyric" data-lyric-index="1" x="162.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">le</text>
+<text class="lyric spacer-lyric" data-lyric-index="2" x="198.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">lu</text>
+<text class="lyric spacer-lyric" data-lyric-index="3" x="232.8" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">ia,</text>
+<text class="lyric spacer-lyric" data-lyric-index="4" x="276.8" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Al</text>
+<text class="lyric spacer-lyric" data-lyric-index="5" x="311.5" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">le</text>
+<text class="lyric spacer-lyric" data-lyric-index="6" x="346.2" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">lu</text>
+<text class="lyric spacer-lyric" data-lyric-index="7" x="381.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">ia,</text>
+<text class="lyric" data-lyric-index="8" x="425.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Al</text>
+<text class="lyric" data-lyric-index="9" x="461.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">le</text>
+<text class="lyric" data-lyric-index="10" x="497.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">lu</text>
+<line class="melisma-extend" data-lyric-index="10" x1="510.4" y1="202.0" x2="647.2" y2="202.0" stroke="black" stroke-width="1.1"/>
+<text class="lyric" data-lyric-index="11" x="713.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">i</text>
+<text class="lyric" data-lyric-index="12" x="785.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">a</text>
+<text class="hyphen" x="144.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<text class="hyphen" x="180.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<text class="hyphen" x="215.4" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<text class="hyphen" x="294.2" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<text class="hyphen" x="328.9" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<text class="hyphen" x="363.6" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<text class="hyphen" x="443.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<text class="hyphen" x="479.0" y="208.0" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="18">-</text>
+<line class="vsa-accent vsa-glyph vsa-upper-glyph vsa-glyph-rise" x1="116.55" y1="190.25" x2="135.45" y2="181.75" stroke="black" stroke-width="1.05" stroke-linecap="round"/>
+</svg>
