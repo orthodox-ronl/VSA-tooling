@@ -33,11 +33,17 @@ vastliggen, moeten in die tekening terecht kunnen. Nieuwe smaak
 (pixelgelijk aan MuseScore, een tweede notenbalkmodel, OSMD nu
 uitschakelen) hoort er niet bij.
 
-Het lettertype voor zangtekst, cues en woorden is al gekozen:
-**Source Sans 3**. Dat is de Style van de MuseScore-partituur
-(checklist S7, leesbaarheid L2) en het lettertype in de OSMD-SVG
-(`scripts/osmd-svg/fonts/`, gewichten 400, 600 en cursief).
-De spike zette DejaVu Sans. DejaVu wordt niet het productlettertype.
+Het lettertype voor zangtekst, cues en woorden is **Source Sans 3**,
+gewicht 400, in de maten van MuseScore (checklist S7, leesbaarheid L2:
+zangtekst 13 pt, cues 12 pt). De bestanden liggen in
+`scripts/osmd-svg/fonts/`. De spike zette DejaVu Sans. DejaVu wordt
+niet het productlettertype. Of een zwaarder gewicht later prettiger
+leest, blijft open; de tekening volgt MuseScore tot dat opnieuw
+bekeken wordt.
+
+Een tropaar (en elk ander stuk) moet in meer dan één beeld op het
+scherm kunnen. De pagina-Markdown zet het startbeeld. De lezer wisselt
+in de UI. De tekening kiest dat beeld niet zelf. Zie §4.
 
 ---
 
@@ -152,10 +158,11 @@ lijnen. Daar is geen glyph voor nodig; MuseScore doet dat ook zo.
 | Checklist S10, leesbaarheid M1                     | Maatnummer bij de eerste maat van elk systeem                                                         | nee                                                                        | 2    |
 | Leesbaarheid M3, schermeis O4                      | Geen maatsoort op het blad                                                                            | ja (niet gezet)                                                            | 2    |
 
-De VSA-strepen uit de spike zijn een extra laag, geen vervanging van
-checklist S13. De muzieklaag tekent de extender en de slur.
-De VSA-laag tekent de hoogte van de sopraan en de lengte-onderstreping.
-Zie §4 voor wanneer die laag aan staat.
+De VSA-strepen uit de spike zijn een beeld, geen vervanging van
+checklist S13. In het beeld «noten met VSA» tekent de muzieklaag de
+extender en de slur, en de VSA-laag de hoogte van de sopraan plus de
+lengte-onderstreping. In het beeld «noten zonder strepen» ontbreekt
+die VSA-laag. In het beeld «kale VSA» ontbreken de balken. Zie §4.2.
 
 ### 3.4 Cues, systeem, accolade
 
@@ -202,35 +209,69 @@ Een stuk met volta of Segno hoort in de proefset vóórdat checklist S20
 | Scherm is geen MuseScore-pagina                                             | [kale muziek §4](kale-muziek-svg-en-uitgaven.md)          | De tekening is één of meer systemen, geen A4-pagina                                                     |
 | Afdruk bouwt op een hoge kale SVG, gesneden naar A4                         | dezelfde afspraak                                         | Blijft MuseScore tot fase 6 een eigen besluit is                                                        |
 | Oefenen (CoriB) gebruikt hetzelfde beeld; solo en cursor zijn een laag erop | [CoriB](corib-mvp.md), [partituur-ir §7](partituur-ir.md) | De noten krijgen stabiele kenmerken (`data-voice`, maat, index). De speler zelf is een ander werkplan   |
-| Telefoon en tablet zonder handmatig zoomen                                  | [gebruikseisen §2](gebruikseisen-dragers.md)              | Meeschalen is fase 1-bewijs. Opnieuw afbreken bij een smal venster is fase 5                            |
+| Telefoon en tablet zonder handmatig zoomen                                  | [gebruikseisen §2](gebruikseisen-dragers.md)              | Meeschalen is het spike-bewijs. Opnieuw afbreken bij een smal venster is fase 5                         |
 | Vier losse partijen voor Coria                                              | checklist M-reeks                                         | Blijft het afspeelbestand voor Coria. De eigen tekening is de partituur (twee balken), niet dat bestand |
 
 ---
 
-## 4. Voorgestelde productkeuzes
+## 4. Keuzes
 
-Vier punten zijn nog een bevestiging waard. De rest van §3 is overnemen,
-niet opnieuw kiezen.
+### 4.1 Lettertype en muziektekens
 
-| #   | Voorstel                                                                       | Waarom                                                                                                                  | Alternatief                                                                             |
-| -   | --------                                                                       | ------                                                                                                                  | -----------                                                                             |
-| K1  | Zangtekst en cues in Source Sans 3, gewicht 400, maten uit L2 (13 pt en 12 pt) | Gelijk aan MuseScore en aan de OSMD-SVG                                                                                 | Gewicht 600 (het bestand ligt al in de repo) als de vette spike-tekst de voorkeur houdt |
-| K2  | Muziektekens als Bravura-contouren                                             | Geen ontbrekend lettertype; spike doet dit al                                                                           | Leland, dichter bij MuseScore 4, tweede licentie en tweede contourset                   |
-| K3  | VSA-laag uit, tenzij de aanroep die laag vraagt                                | De koormap toont vandaag geen schuine strepen boven de lettergrepen. Kale muziek blijft daardoor vergelijkbaar met OSMD | Altijd aan, omdat de spike juist dáár meer kan dan OSMD                                 |
-| K4  | OSMD en MuseScore blijven staan tot fase 4                                     | De site en de afdruk hebben een werkend pad. De eigen tekening moet de tabel in §3 eerst halen                          | OSMD nu al uit het scherm halen                                                         |
+| #   | Stand        | Keuze                                                                                                                                                                        |
+| --- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| K1  | gekozen      | Zangtekst en cues in Source Sans 3, gewicht 400, maten uit leesbaarheid L2 (13 pt en 12 pt). Gelijk aan MuseScore. Een zwaarder gewicht kan later, als de platen dat vragen. |
+| K2  | aanbeveling  | Notenkoppen, sleutels, voortekens, accolade en herhaalpuntjes als Bravura-contouren. Leland (MuseScore 4) blijft mogelijk, maar vraagt een tweede contourset.                |
+| K4  | uitgangspunt | OSMD en MuseScore blijven staan tot fase 4. De site en de afdruk hebben een werkend pad.                                                                                     |
 
-VSA-laag, wanneer K3 aan staat (zoals de spike, als voorstel voor die laag):
+### 4.2 Drie beelden, plus schrift
+
+K3 als «VSA aan of uit» is de verkeerde vraag. Een stuk, bijvoorbeeld
+een tropaar, moet in drie beelden kunnen. De pagina die op het scherm
+staat (de Markdown van die pagina) noemt het startbeeld. De UI laat de
+lezer wisselen. De schilder levert de beelden; de schilder kiest niet
+welk beeld de pagina opent.
+
+| Beeld                  | Wat de lezer ziet                                                                 | Waar dat vandaag al bestaat                                      |
+| ---------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Kale VSA               | Lettergrepen met hoogte- en lengtestrepen. Geen notenbalk.                        | [`vsa svg`](../formats/vsa-svg.md) voor eenstemmige `.vsa`       |
+| VSA met noten          | Dezelfde strepen, plus de partituur (twee balken, recite, melisma).               | De spike                                                         |
+| Noten zonder strepen   | De partituur zonder die VSA-strepen.                                              | OSMD en de MuseScore-SVG                                         |
+
+Regels voor de strepen, in de twee beelden die ze tonen:
 
 - Hoogte van de sopraan, niet vier rijen.
 - Een kale `-` blijft weg. Die streep komt alleen in een melisma dat ook
   stijgt of daalt (`-&/` of `-&\`).
 - Een onderstreping staat op de nootpositie waar de bron een lengteteken
   heeft (`_`, `__`). Bij «lu_&~&~&_» zijn dat de eerste en de laatste noot.
-- De laag vervangt de extender van checklist S13 niet.
+- De strepen vervangen de extender van checklist S13 niet. Die extender
+  hoort bij «noten zonder strepen» en bij «VSA met noten».
 
-Gewicht van de zangtekst (K1) en de VSA-standaard (K3) zijn de twee
-punten waarop een beheerder dit werkplan kan bijsturen zonder de
-architectuur te wijzigen.
+Transliteratie is een tweede as, geen vierde beeld. Dezelfde drie
+beelden moeten kunnen met de brontekst en met de getranslitereerde
+tekst. Het schrift volgt het besluit in
+[kerkslavisch-transliteratie §5a](kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu):
+zelfde lettergrepen, ander schrift, geen nieuwe melodie, en vandaag een
+bestand mét en een bestand zonder de tweede tekstregel. «Alleen de
+transliteratie, zonder de bronregel» staat daar als later. De drie
+beelden gelden voor elk van die schriftvormen. Nederlands en
+kerkslavisch met een andere lettergreepdeling blijven aparte
+uitvoeringsvormen, geen weergave van elkaar.
+
+De pagina en de UI horen bij de bibliotheek, niet bij een nieuwe
+checklist hier.
+
+| Wie                    | Wat                                                                                                       |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| Tooling                | Maakt de afgeleiden: drie beelden, en per beeld de schriftvariant die §5a al kent.                        |
+| Markdown van de pagina | Noemt het startbeeld (een tropaar opent bijvoorbeeld als kale VSA, een litanie als noten zonder strepen). |
+| UI                     | Wisselt beeld en schrift. Download en print volgen het gekozen bestand.                                   |
+
+Aanbeveling voor de bestanden: aparte SVG’s, dezelfde werkwijze als de
+bestaande schakelaar met/zonder transliteratie. Eén SVG met verborgen
+lagen kan later, als de wissel zonder nieuw bestand moet. De pagina
+ziet hoe dan ook drie beelden van dezelfde bron, niet drie zangstukken.
 
 ---
 
@@ -248,7 +289,7 @@ eerder:
 | Onderwerp               | Waarom een zin, geen nieuwe checklist                                                                                                                                       |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Spacer van checklist S8 | De schilder zet geen nootkop. OSMD heeft daar een marker plus een adapter voor nodig (`notehead none`). Die adapter is een OSMD-oplossing, geen eigenschap van de partituur |
-| Extender en VSA         | Twee lagen. De extender hoort bij checklist S13. De VSA-strepen horen bij een vlag, beschreven in dit werkplan tot de vlag een product is                                   |
+| Extender en VSA         | Twee lagen in het beeld «VSA met noten». De extender hoort bij checklist S13. De strepen horen bij het beeld uit §4.2, niet bij een aparte checklist.                       |
 | Maatstreep              | Lijn plus, bij herhaling, Bravura-puntjes. Geen aparte glyph-norm                                                                                                           |
 | Accolade                | Bravura-teken, opgerekt over de twee balken, alleen aan het systeembegin (checklist S18)                                                                                    |
 
@@ -289,8 +330,9 @@ De schilder weigert een onbekende `format` of een onbekende major van
 | 5             | Hetzelfde SVG, met systeemafbreuk voor een smal venster                | Tablet en telefoon              |
 | 6             | Alleen na een apart besluit: hoge SVG die de paginasnijder kan snijden | `index.md.pdf`                  |
 
-Het SVG van fase 2 en 3 heeft een viewBox en `width="100%"`, zodat een
-venster het beeld kleiner maakt zonder de noten te herrekenen.
+Fase 2 levert per stuk de drie beelden uit §4.2, als aparte SVG's.
+Elk bestand heeft een viewBox en `width="100%"`, zodat een venster het
+beeld kleiner maakt zonder de noten te herrekenen.
 Achtergrond wit, met een latere vlag voor transparant, gelijk aan
 [`mvsa svg`](../formats/mvsa-svg.md).
 
@@ -313,14 +355,13 @@ Klaar wanneer het plan in [Plannen](README.md) staat en de
 productiezin in kale muziek §4 ongewijzigd is.
 Geen renderer, geen CLI, geen contract-hub.
 
-### Fase 1 — de vier voorstellen in §4 bevestigen
+### Fase 1 — lettertype en beelden
 
-K1 tot en met K4 staan als voorstel. Een beheerder zet in dit bestand
-de gekozen kolom op «gekozen» of wijzigt K1 of K3.
-Klaar wanneer die vier rijen geen «voorstel» meer zijn.
-Tot die tijd mag fase 2 de spike wel laten staan, maar geen Source Sans 3
-inbouwen op een gok over het gewicht, en de VSA-laag niet tot standaard
-maken.
+K1 is gekozen: Source Sans 3 zoals MuseScore (gewicht 400, L2).
+Het weergavemodel is gekozen: drie beelden, schrift als aparte as,
+startbeeld in de pagina-Markdown, wissel in de UI (§4.2).
+K2 (Bravura) blijft de aanbeveling. K4 blijft het uitgangspunt.
+Deze fase is daarmee klaar. Fase 2 hoeft niet op een extra ja te wachten.
 
 ### Fase 2 — de schilder dekt de tabel
 
@@ -332,13 +373,15 @@ De test controleert geen pixels.
 
 Proefset, in deze volgorde:
 
-1. Alleluia toon 8 en toon 2 (recite, melisma, VSA-vlag).
-2. Vredeslitanie (1a) (strepen, herhaling, cues).
-3. `examples/bug-cases/trisagion-8a-hemelum.mvsa` (`@nieuw-systeem` en herhaling).
+1. Alleluia toon 8 en toon 2 (recite, melisma, de twee notenbeelden).
+2. Vredeslitanie (1a) (maatstrepen, herhaling, cues), als noten zonder strepen.
+3. `examples/bug-cases/trisagion-8a-hemelum.mvsa` (`@nieuw-systeem` en herhaling), ook als kale VSA.
 4. Eén speelplan-stuk met Segno of volta, vóór checklist S20.
 
-Klaar wanneer die vier bronnen de fase-2-rijen halen en de VSA-laag
-uit dezelfde Score-IR aan en uit kan.
+Klaar wanneer die bronnen de fase-2-rijen halen en elk stuk de drie
+beelden uit §4.2 kan leveren vanuit dezelfde Score-IR. Kale VSA voor
+een eenstemmige `.vsa` blijft de bestaande `vsa svg`; de nieuwe eis is
+dat een `.mvsa`-tropaar hetzelfde soort beeld krijgt, zonder notenbalk.
 
 Buiten fase 2: site, `products`, OSMD uitschakelen, A4, cursor.
 
@@ -517,11 +560,12 @@ dan een ander programma bijsturen.
 
 ## 12. Open punten
 
-| Punt                                                             | Waar het landt                                                                                                           |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| K1 gewicht 400 of 600                                            | Bevestigen in fase 1                                                                                                     |
-| K3 VSA standaard uit of aan                                      | Bevestigen in fase 1                                                                                                     |
-| «ont» als `syllabic: single` terwijl de bron `ont-ferm` schrijft | Score-IR / parser, niet de schilder. De schilder zet een koppelteken alleen bij `begin`/`middle`/`end` (leesbaarheid L3) |
-| Meerdere cues in één maat, of een cue midden in de maat          | Al open in [partituur-ir §9](partituur-ir.md). De schilder volgt het anker dat de IR geeft                               |
-| Afspelen van een spacer (klinkt niet) tegenover de layout        | Blijft de vraag uit CoriB. De tekening volgt `print.spacer`                                                              |
-| Of fase 6 ooit de MuseScore-SVG als afdrukbouwsteen vervangt     | Apart besluit, niet stil meenemen met fase 4                                                                             |
+| Punt                                                             | Waar het landt                                                                                                                                            |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| K1 zwaarder dan MuseScore (gewicht 600)                          | Later, als de platen in Source Sans 3 400 dat vragen. Niet in fase 2                                                                                      |
+| Alleen transliteratie, zonder de bronregel                       | Al «bewust later» in [kerkslavisch-transliteratie §5a](kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu). De drie beelden wachten daar niet op |
+| Welk startbeeld een pagina krijgt                                | De Markdown van die pagina (bibliotheek), niet de schilder                                                                                                |
+| «ont» als `syllabic: single` terwijl de bron `ont-ferm` schrijft | Score-IR / parser, niet de schilder. De schilder zet een koppelteken alleen bij `begin`/`middle`/`end` (leesbaarheid L3)                                  |
+| Meerdere cues in één maat, of een cue midden in de maat          | Al open in [partituur-ir §9](partituur-ir.md). De schilder volgt het anker dat de IR geeft                                                                |
+| Afspelen van een spacer (klinkt niet) tegenover de layout        | Blijft de vraag uit CoriB. De tekening volgt `print.spacer`                                                                                               |
+| Of fase 6 ooit de MuseScore-SVG als afdrukbouwsteen vervangt     | Apart besluit, niet stil meenemen met fase 4                                                                                                              |
