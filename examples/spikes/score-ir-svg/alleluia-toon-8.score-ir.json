@@ -339,7 +339,7 @@
           {
             "pitch": {
               "step": "C",
-              "octave": 4
+              "octave": 5
             },
             "duration": {
               "elm": "~"

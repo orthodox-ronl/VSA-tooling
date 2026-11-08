@@ -6,7 +6,7 @@ product-CLI. Contracten die deze tekening laat zien:
 - S4  stok S/T omhoog, A/B omlaag
 - S8  recite 1–(n−2)–1: randnoten, stokloze ||O||, spacers alleen als tekst
 - S13 melisma: lyric + extender; bij toonwissel een slur alleen over die noten
-- één VSA-hoogteaccent (EHM ``/``) via een spike-overlay, geen Score-IR-veld
+- VSA-hoogtestrepen van de sopraanlijn (echte beweging, geen losse overlay)
 
 Het SVG heeft een viewBox en width="100%" zodat het in een venster meeschaalt.
 """
@@ -15,18 +15,130 @@ from __future__ import annotations
 
 import argparse
 import html
+import importlib.util
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from vsa.music import Pitch
+from vsa.mvsa_normalize import format_ehm
+from vsa.pitch_resolver import _SCALE_INTERVALS, pitch_to_degree_and_chrom
 from vsa.svg_glyphs import SVGGlyphRenderer
+
+_GLYPH_SPEC = importlib.util.spec_from_file_location(
+    "score_ir_svg_bravura_glyphs",
+    Path(__file__).with_name("bravura_glyphs.py"),
+)
+assert _GLYPH_SPEC and _GLYPH_SPEC.loader
+_bravura = importlib.util.module_from_spec(_GLYPH_SPEC)
+sys.modules[_GLYPH_SPEC.name] = _bravura
+_GLYPH_SPEC.loader.exec_module(_bravura)
+GLYPHS: dict[str, tuple[str, float, float, float, float]] = _bravura.GLYPHS
+STAFF_UNITS = _bravura.STAFF_UNITS
 
 SP = 12.0
 PX_QUARTER = 36.0
 LYRIC_FONT = 18.0
-NOTE_RX = 6.2
-NOTE_RY = 4.6
+# Bravura: één staff space = 250 font-eenheden.
+GLYPH_SCALE = SP / STAFF_UNITS
+
+
+def _half_width(name: str) -> float:
+    _d, x0, _y0, x1, _y1 = GLYPHS[name]
+    return (x1 - x0) * GLYPH_SCALE / 2.0
+
+
+def _paint_glyph(
+    name: str,
+    x: float,
+    y: float,
+    css: str,
+    *,
+    center: bool = False,
+) -> str:
+    """Zet een Bravura-contour op (x, y). Zonder center ligt font-oorsprong (0, 0) daar."""
+    d, x0, y0, x1, y1 = GLYPHS[name]
+    if center:
+        ox = x - (x0 + x1) / 2.0 * GLYPH_SCALE
+        oy = y + (y0 + y1) / 2.0 * GLYPH_SCALE
+    else:
+        ox = x
+        oy = y
+    return (
+        f'<path class="{css}" d="{d}" fill="black" fill-rule="nonzero" '
+        f'transform="translate({ox:.2f},{oy:.2f}) scale({GLYPH_SCALE:.5f},{-GLYPH_SCALE:.5f})"/>'
+    )
+
+
+def _head_name(ev: Ev) -> str:
+    if ev.breve:
+        return "noteheadDoubleWhole"
+    if _whole(ev.elm):
+        return "noteheadWhole"
+    if _note_open(ev.elm):
+        return "noteheadHalf"
+    return "noteheadBlack"
+
+
+def _ehm_glyph(token: str) -> str:
+    """``/2`` en ``\\\\2`` uit format_ehm → gestapelde strepen die de VSA-tekenaar kent."""
+    prefix = ""
+    body = token
+    if body[:1] in {"#", "b"}:
+        prefix = body[0]
+        body = body[1:]
+    if body in {"-", "~"}:
+        base = "-" if body == "-" else "~"
+    elif body.startswith("/"):
+        n = int(body[1:]) if len(body) > 1 else 1
+        base = "/" * n
+    elif body.startswith("\\"):
+        n = int(body[1:]) if len(body) > 1 else 1
+        base = "\\" * n
+    else:
+        base = body
+    return prefix + base
+
+
+def soprano_vsa_tokens(doc: dict[str, Any]) -> list[tuple[int, str, str]]:
+    """Echte VSA-beweging van de sopraan: (event-index, mvsa-token, glyph).
+
+    Eerste noot en elke gelijkblijvende toon krijgen een liggende streep (``-``).
+    """
+    ctx = doc.get("pitchContext") or {}
+    do = _parse_do(str(ctx.get("do") or "F4"))
+    mode = str(ctx.get("mode") or "major")
+    intervals = _SCALE_INTERVALS.get(mode, _SCALE_INTERVALS["major"])
+    prev: int | None = None
+    out: list[tuple[int, str, str]] = []
+    for measure in doc.get("measures") or []:
+        events = _events_for_voice(list((measure.get("voices") or {}).get("S") or []), "S")
+        for ev in events:
+            if ev.step is None or ev.octave is None:
+                continue
+            pitch = Pitch(step=ev.step, octave=ev.octave, alter=ev.alter)
+            degree, _chrom = pitch_to_degree_and_chrom(do, pitch, intervals)
+            token = "-" if prev is None else format_ehm(prev, pitch, do, intervals)
+            prev = degree
+            out.append((ev.index, token, _ehm_glyph(token)))
+    return out
+
+
+def _parse_do(raw: str) -> Pitch:
+    text = raw.strip()
+    step = text[0].upper()
+    rest = text[1:]
+    alter = 0.0
+    if rest.startswith("#"):
+        alter = 1.0
+        rest = rest[1:]
+    elif rest.startswith("b"):
+        alter = -1.0
+        rest = rest[1:]
+    octave = int(rest) if rest else 4
+    return Pitch(step=step, octave=octave, alter=alter)
 
 _ELM_QUARTERS: dict[str, float] = {
     "~": 1.0,
@@ -228,7 +340,7 @@ def _cx(x_at: dict[float, float], ev: Ev, lyrics: list[dict[str, Any]]) -> float
     return x_at[ev.start] + max(14.0, lyric_w / 2.0)
 
 
-def render_score_ir_svg(doc: dict[str, Any], accent: dict[str, Any] | None = None) -> str:
+def render_score_ir_svg(doc: dict[str, Any]) -> str:
     """Teken partituur-Score-IR als één SVG-systeem."""
     if doc.get("format") != "score-ir":
         raise ValueError("verwacht format score-ir")
@@ -299,7 +411,7 @@ def render_score_ir_svg(doc: dict[str, Any], accent: dict[str, Any] | None = Non
         _draw_slurs(svg, voices, note_centers, lyric_y)
         bar_x = max(x_at.values(), default=end_x)
         _draw_barline(svg, measure, bar_x, treble_bottom, bass_bottom)
-        _draw_lyrics(svg, lyrics, lyric_centers, voices, note_centers, lyric_y, glyphs, accent, measure)
+        _draw_lyrics(svg, lyrics, lyric_centers, voices, note_centers, lyric_y, glyphs, doc)
 
     title = html.escape(str((doc.get("meta") or {}).get("title") or "partituur"))
     body = "\n".join(svg.parts)
@@ -319,16 +431,15 @@ def _draw_clefs_and_signature(
     bass_bottom: float,
     f_major: bool,
 ) -> None:
-    treble_y = treble_bottom - 1.15 * SP
-    bass_y = bass_bottom - 2.55 * SP
-    svg.add(
-        f'<text class="clef" data-staff="treble" x="{left + 8:.1f}" y="{treble_y:.1f}" '
-        f'font-family="Noto Music, serif" font-size="38">&#119070;</text>'
-    )
-    svg.add(
-        f'<text class="clef" data-staff="bass" x="{left + 8:.1f}" y="{bass_y:.1f}" '
-        f'font-family="Noto Music, serif" font-size="34">&#119074;</text>'
-    )
+    # G-sleutel: font-oorsprong op de g-lijn. F-sleutel: oorsprong op de f-lijn.
+    g_y, _gpos = _pitch_y(treble_bottom, _diatonic("E", 4), "G", 4)
+    f_y, _fpos = _pitch_y(bass_bottom, _diatonic("G", 2), "F", 3)
+    svg.add(_paint_glyph("gClef", left + 2.0, g_y, "clef", center=False).replace(
+        'class="clef"', 'class="clef" data-staff="treble"', 1
+    ))
+    svg.add(_paint_glyph("fClef", left + 2.0, f_y, "clef", center=False).replace(
+        'class="clef"', 'class="clef" data-staff="bass"', 1
+    ))
     if not f_major:
         return
     # F-groot: één mol op de b-lijn. Toon B met alter -1 krijgt dan geen tweede mol.
@@ -337,10 +448,12 @@ def _draw_clefs_and_signature(
         ("bass", bass_bottom, _diatonic("G", 2), "B", 2),
     ):
         y, _pos = _pitch_y(bottom, dia, step, octave)
-        svg.add(
-            f'<text class="key-signature" data-staff="{staff}" x="{left + 40:.1f}" y="{y + 5:.1f}" '
-            f'font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="20">&#9837;</text>'
-        )
+        # Rechterrand van de mol vlak voor de eerste nootkolom.
+        _d, _x0, _y0, x1, _y1 = GLYPHS["accidentalFlat"]
+        ox = left + 46.0 - x1 * GLYPH_SCALE
+        svg.add(_paint_glyph("accidentalFlat", ox, y, "key-signature").replace(
+            'class="key-signature"', f'class="key-signature" data-staff="{staff}"', 1
+        ))
 
 
 def _stem_end(cy: float, voice: str, lyric_y: float) -> float:
@@ -365,6 +478,11 @@ def _draw_note(svg: _Svg, ev: Ev, cx: float, cy: float, pos: int, f_major: bool,
         f'<g class="note voice-{ev.voice} {kind}" data-voice="{ev.voice}" '
         f'data-kind="{kind}" data-index="{ev.index}" '
         + (
+            f'data-step="{ev.step}" data-octave="{ev.octave}" data-cy="{cy:.1f}" '
+            if ev.step is not None and ev.octave is not None
+            else ""
+        )
+        + (
             f'data-lyric-index="{ev.lyric_index}" '
             if ev.lyric_index is not None
             else ""
@@ -380,57 +498,33 @@ def _draw_note(svg: _Svg, ev: Ev, cx: float, cy: float, pos: int, f_major: bool,
             f'<line class="ledger" x1="{cx - 11:.1f}" y1="{y:.1f}" x2="{cx + 11:.1f}" y2="{y:.1f}" '
             f'stroke="black" stroke-width="1"/>'
         )
-    if ev.breve:
-        _draw_breve(svg, cx, cy)
-    else:
-        fill = "none" if _note_open(ev.elm) else "black"
-        rx = NOTE_RX + 1.8 if _whole(ev.elm) else NOTE_RX
-        svg.add(
-            f'<ellipse class="notehead" cx="{cx:.1f}" cy="{cy:.1f}" rx="{rx:.1f}" ry="{NOTE_RY:.1f}" '
-            f'fill="{fill}" stroke="black" stroke-width="1.4" transform="rotate(-20 {cx:.1f} {cy:.1f})"/>'
-        )
-        if not ev.stemless and not _whole(ev.elm):
-            y2 = _stem_end(cy, ev.voice, lyric_y)
-            if stem_dir == "up":
-                x = cx + rx - 0.6
-                svg.add(
-                    f'<line class="stem stem-up voice-{ev.voice}" data-voice="{ev.voice}" '
-                    f'x1="{x:.1f}" y1="{cy:.1f}" x2="{x:.1f}" y2="{y2:.1f}" stroke="black" stroke-width="1.3"/>'
-                )
-            else:
-                x = cx - rx + 0.6
-                svg.add(
-                    f'<line class="stem stem-down voice-{ev.voice}" data-voice="{ev.voice}" '
-                    f'x1="{x:.1f}" y1="{cy:.1f}" x2="{x:.1f}" y2="{y2:.1f}" stroke="black" stroke-width="1.3"/>'
-                )
-        for dot in range(_dots(ev.elm)):
-            dx = cx + rx + 8.0 + dot * 7.0
-            svg.add(f'<circle class="dot" cx="{dx:.1f}" cy="{cy - 3:.1f}" r="2.1" fill="black"/>')
+    head = _head_name(ev)
+    svg.add(_paint_glyph(head, cx, cy, "notehead breve-head" if ev.breve else "notehead", center=True))
+    rx = _half_width(head)
+    if not ev.breve and not ev.stemless and not _whole(ev.elm):
+        y2 = _stem_end(cy, ev.voice, lyric_y)
+        if stem_dir == "up":
+            x = cx + rx - 0.8
+            svg.add(
+                f'<line class="stem stem-up voice-{ev.voice}" data-voice="{ev.voice}" '
+                f'x1="{x:.1f}" y1="{cy:.1f}" x2="{x:.1f}" y2="{y2:.1f}" stroke="black" stroke-width="1.35"/>'
+            )
+        else:
+            x = cx - rx + 0.8
+            svg.add(
+                f'<line class="stem stem-down voice-{ev.voice}" data-voice="{ev.voice}" '
+                f'x1="{x:.1f}" y1="{cy:.1f}" x2="{x:.1f}" y2="{y2:.1f}" stroke="black" stroke-width="1.35"/>'
+            )
+    dot_y = cy - (SP / 4.0 if pos % 2 == 0 else 0.0)
+    for dot in range(_dots(ev.elm)):
+        dx = cx + rx + 7.0 + dot * 8.0
+        svg.add(_paint_glyph("augmentationDot", dx, dot_y, "dot", center=True))
     if ev.alter and not (f_major and ev.step == "B" and ev.alter < 0):
-        symbol = "&#9839;" if ev.alter > 0 else "&#9837;" if ev.alter < 0 else "&#9838;"
-        svg.add(
-            f'<text class="accidental" data-voice="{ev.voice}" x="{cx - 16:.1f}" y="{cy + 5:.1f}" '
-            f'text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="16">{symbol}</text>'
-        )
+        name = "accidentalSharp" if ev.alter > 0 else "accidentalFlat"
+        _d, _x0, _y0, x1, _y1 = GLYPHS[name]
+        right = cx - rx - 3.0
+        svg.add(_paint_glyph(name, right - x1 * GLYPH_SCALE, cy, "accidental"))
     svg.add("</g>")
-
-
-def _draw_breve(svg: _Svg, cx: float, cy: float) -> None:
-    """Stokloze ||O|| (S8): twee strepen en een open kop, geen gewone nootstok."""
-    h = SP * 1.55
-    gap = SP * 0.85
-    svg.add(
-        f'<line class="breve-bar" x1="{cx - gap:.1f}" y1="{cy - h:.1f}" x2="{cx - gap:.1f}" y2="{cy + h:.1f}" '
-        f'stroke="black" stroke-width="1.6"/>'
-    )
-    svg.add(
-        f'<line class="breve-bar" x1="{cx + gap:.1f}" y1="{cy - h:.1f}" x2="{cx + gap:.1f}" y2="{cy + h:.1f}" '
-        f'stroke="black" stroke-width="1.6"/>'
-    )
-    svg.add(
-        f'<ellipse class="breve-head" cx="{cx:.1f}" cy="{cy:.1f}" rx="5.4" ry="4.2" '
-        f'fill="none" stroke="black" stroke-width="1.4"/>'
-    )
 
 
 def _draw_slurs(
@@ -503,8 +597,7 @@ def _draw_lyrics(
     note_centers: dict[tuple[str, int], tuple[float, float]],
     lyric_y: float,
     glyphs: SVGGlyphRenderer,
-    accent: dict[str, Any] | None,
-    measure: dict[str, Any],
+    doc: dict[str, Any],
 ) -> None:
     sop = voices.get("S") or []
     for index, lyric in enumerate(lyrics):
@@ -525,7 +618,7 @@ def _draw_lyrics(
             stop = next((e for e in sop if e.slur_stop and e.index > ev.index), None)
             end_x = cx + _text_width(text)
             if stop is not None and ("S", stop.index) in note_centers:
-                end_x = note_centers[("S", stop.index)][0] + NOTE_RX
+                end_x = note_centers[("S", stop.index)][0] + _half_width("noteheadHalf")
             y = lyric_y - 6.0
             svg.add(
                 f'<line class="melisma-extend" data-lyric-index="{index}" '
@@ -541,34 +634,37 @@ def _draw_lyrics(
                 f'<text class="hyphen" x="{hx:.1f}" y="{lyric_y:.1f}" text-anchor="middle" '
                 f'font-family="DejaVu Sans, sans-serif" font-size="{LYRIC_FONT:.0f}">-</text>'
             )
-    if not accent:
-        return
-    if int(accent.get("measure", 0)) != _measure_ordinal(measure):
-        return
-    lyric_index = accent.get("lyricIndex")
-    ehm = str(accent.get("ehm") or "")
-    if not isinstance(lyric_index, int) or lyric_index not in centers or not ehm:
-        return
-    width = max(_text_width(_lyric_text(lyrics[lyric_index])), 44.0)
-    x = centers[lyric_index] - width / 2.0
-    y = lyric_y - 22.0
-    for fragment in glyphs.render_height_modifier([ehm], x, y, width):
-        svg.add(fragment.replace('class="vsa-glyph ', 'class="vsa-accent vsa-glyph ', 1))
+    _draw_soprano_vsa(svg, glyphs, doc, note_centers, lyric_y)
 
 
-def _measure_ordinal(measure: dict[str, Any]) -> int:
-    raw = str(measure.get("id") or "")
-    digits = "".join(ch for ch in raw if ch.isdigit())
-    if digits:
-        return max(0, int(digits) - 1)
-    return 0
+def _draw_soprano_vsa(
+    svg: _Svg,
+    glyphs: SVGGlyphRenderer,
+    doc: dict[str, Any],
+    note_centers: dict[tuple[str, int], tuple[float, float]],
+    lyric_y: float,
+) -> None:
+    """Hoogtestrepen van de sopraan, boven de lettergrepen. Dat is de VSA van dit stuk."""
+    width = 36.0
+    y = lyric_y - 30.0
+    for index, token, glyph in soprano_vsa_tokens(doc):
+        center = note_centers.get(("S", index))
+        if center is None:
+            continue
+        x = center[0] - width / 2.0
+        svg.add(
+            f'<g class="vsa-mark" data-voice="S" data-index="{index}" '
+            f'data-ehm="{html.escape(token, quote=True)}">'
+        )
+        for fragment in glyphs.render_height_modifier([glyph], x, y, width):
+            svg.add(fragment)
+        svg.add("</g>")
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Spike: Score-IR naar eigen partituur-SVG")
     parser.add_argument("score_ir", type=Path, help="Score-IR JSON, of .mvsa met --from-mvsa")
     parser.add_argument("-o", "--output", type=Path, required=True)
-    parser.add_argument("--accent", type=Path, help="Spike-overlay: één VSA-accent, geen Score-IR-veld")
     parser.add_argument(
         "--from-mvsa",
         action="store_true",
@@ -584,8 +680,7 @@ def main(argv: list[str] | None = None) -> None:
         )
     else:
         doc = json.loads(args.score_ir.read_text(encoding="utf-8"))
-    accent = json.loads(args.accent.read_text(encoding="utf-8")) if args.accent else None
-    svg = render_score_ir_svg(doc, accent)
+    svg = render_score_ir_svg(doc)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(svg, encoding="utf-8")
 

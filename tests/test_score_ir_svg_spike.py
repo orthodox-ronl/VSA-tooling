@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import importlib.util
-import json
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -12,7 +11,8 @@ from vsa.score_ir import export_mvsa_to_score_ir
 
 ROOT = Path(__file__).resolve().parents[1]
 SPIKE = ROOT / "examples" / "spikes" / "score-ir-svg"
-MVSA = ROOT / "examples" / "mvsa" / "alleluia-toon-8.mvsa"
+# corib-bron: sopraan «le» is `so` = C5, boven de alt-G. examples/mvsa heeft `so-` (C4).
+MVSA = ROOT / "examples" / "bug-cases" / "corib" / "alleluia-toon-8.mvsa"
 
 
 def _render():
@@ -38,8 +38,7 @@ def _local(tag: str) -> str:
 def test_alleluia_toon_8_svg_shows_s4_s8_s13_and_one_accent() -> None:
     module = _render()
     doc = export_mvsa_to_score_ir(MVSA.read_text(encoding="utf-8"), title="Alleluia - Toon 8")
-    accent = json.loads((SPIKE / "accent.json").read_text(encoding="utf-8"))
-    svg = module.render_score_ir_svg(doc, accent)
+    svg = module.render_score_ir_svg(doc)
 
     assert 'width="100%"' in svg
     assert "viewBox=" in svg
@@ -100,5 +99,24 @@ def test_alleluia_toon_8_svg_shows_s4_s8_s13_and_one_accent() -> None:
     ]
     assert texts == ["".join(s["text"] for s in ly["syllables"]) for ly in lyrics]
 
-    accents = [el for el in root.iter() if "vsa-accent" in _classes(el) and "vsa-glyph-rise" in _classes(el)]
-    assert len(accents) == 1
+    # Laatste «le» (na de recite) is C5 en staat boven de G van de alt.
+    le_index = next(
+        i
+        for i, ly in enumerate(lyrics)
+        if "".join(s["text"] for s in ly["syllables"]) == "le"
+        and not any(
+            (ev.get("print") or {}).get("spacer")
+            for ev in sop
+            if ev.get("lyricIndex") == i
+        )
+        and any(ev.get("lyricIndex") == i and ev["pitch"]["octave"] == 5 for ev in sop)
+    )
+    s_le = next(el for el in notes if el.attrib.get("data-voice") == "S" and el.attrib.get("data-lyric-index") == str(le_index))
+    a_le = next(el for el in notes if el.attrib.get("data-voice") == "A" and el.attrib.get("data-lyric-index") == str(le_index))
+    assert s_le.attrib["data-step"] == "C" and s_le.attrib["data-octave"] == "5"
+    assert float(s_le.attrib["data-cy"]) < float(a_le.attrib["data-cy"])
+
+    marks = [el for el in root.iter() if "vsa-mark" in _classes(el)]
+    tokens = [el.attrib["data-ehm"] for el in marks]
+    assert tokens == [token for _i, token, _glyph in module.soprano_vsa_tokens(doc)]
+    assert "/" in tokens and "\\2" in tokens and tokens.count("-") >= 6
