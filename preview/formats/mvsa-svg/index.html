@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-plan-cabd</code>
-  , gebouwd 2026-11-09 00:00 CET.
+   — branch <code>cursor/eigen-partituur-svg-cabd</code>
+  , gebouwd 2026-11-09 00:36 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5003,6 +5003,10 @@ in het SVG-product.</p>
 <td>Score-IR → from-ir MusicXML → headless OSMD + S8 A1-adapter (<a href="https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg"><code>scripts/osmd-svg</code></a>); witte <code>vsa-page-bg</code></td>
 </tr>
 <tr>
+<td><code>--engine eigen</code></td>
+<td>Score-IR → eigen schilder. <code>--view notes</code> (default), <code>vsa-notes</code> of <code>vsa</code>. Geen standaardproduct; zie <a href="../../plans/eigen-partituur-svg/">het werkplan</a></td>
+</tr>
+<tr>
 <td>Score-IR / schermpad</td>
 <td><a href="../score-ir/">score-ir</a> · <a href="../../plans/partituur-ir/">partituur-ir</a> §7</td>
 </tr>
@@ -5042,7 +5046,13 @@ SVG via headless OSMD uit Score-IR (geen MuseScore; vereist Node +
 cd scripts\osmd-svg &amp;&amp; npm install &amp;&amp; npx puppeteer browsers install chrome
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --engine eigen --view notes
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa-notes
 </code></pre></div>
+<p><code>--engine eigen</code> schrijft een sibling <code>lied.mvsa.eigen-notes.svg</code>
+(of <code>eigen-vsa-notes</code> / <code>eigen-vsa</code>) en laat <code>lied.mvsa.svg</code> en
+products-meta met rust. Het bestand bevat Source Sans 3 en schaalt mee
+met de vensterbreedte. Het productiescherm blijft OSMD.</p>
 
 
 
@@ -5079,7 +5089,7 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg 
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-02
+        Bijgewerkt: 2026-11-08
         
       </p>
       

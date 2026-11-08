@@ -93,8 +93,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-plan-cabd</code>
-  , gebouwd 2026-11-09 00:00 CET.
+   — branch <code>cursor/eigen-partituur-svg-cabd</code>
+  , gebouwd 2026-11-09 00:36 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5315,6 +5315,7 @@
   ending?: { start?, stop? }    # volta-nummers (MusicXML ``&lt;ending&gt;``)
   repeatTimes?: number          # alleen bij herhaal &gt; 2×
   navigation?: [ string, … ]    # segno | fine | to_coda | coda | ds_al_* | dc_al_*
+  newSystem?: true              # @nieuw-systeem; ontbreekt of false op de eerste maat
   cues: [ Cue, … ]              # @tekst die bij déze maat hoort (vaak 0 of 1)
   lyrics: [ LyricPos, … ]       # gedeelde L-lijn voor partituur
   voices: { S, A, T, B }        # elk: [ VoiceEvent, … ] synchroon in de maat
@@ -5333,7 +5334,7 @@ from-ir emitteert de navigatiemarkeringen voor OSMD.</p>
 <h3 id="43-lyricpos">4.3 LyricPos<a class="headerlink" href="#43-lyricpos" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>LyricPos
   syllables: [ { text, syllabic } ]   # single|begin|middle|end
-  layers?: { "1": …, "2": … }         # v0.1: alleen laag "1" verplicht; "2" = hulptekst later
+  layers?: { "1": …, "2": … }         # v0.1: laag "1" altijd; "2" bij export met translit
   marksBefore?: [ MarkRef ]
   marksAfter?: [ MarkRef ]
   recite?: bool

@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-plan-cabd</code>
-  , gebouwd 2026-11-09 00:00 CET.
+   — branch <code>cursor/eigen-partituur-svg-cabd</code>
+  , gebouwd 2026-11-09 00:36 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -7793,7 +7793,7 @@ mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--translit] [--translit-modus {nls,ksl}] [--no-trim]
-         [--transparent] [--engine {musescore,osmd}] [--compact]
+         [--transparent] [--engine {musescore,osmd,eigen}] [--view {notes,vsa-notes,vsa}] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
@@ -7840,7 +7840,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 </tr>
 <tr>
 <td><a href="#mvsa-svg"><code>svg</code></a></td>
-<td>Exporteer <code>.mvsa</code> naar muziek-only partituur-SVG (koormap). Merget <code>svg</code> / <code>svg-N</code>.</td>
+<td>Exporteer <code>.mvsa</code> naar muziek-only partituur-SVG (koormap). <code>musescore</code> en <code>osmd</code> mergen <code>svg</code>. <code>eigen</code> niet.</td>
 </tr>
 <tr>
 <td><a href="#mvsa-mp3"><code>mp3</code></a> / <code>ogg</code> / <code>wav</code></td>
@@ -8689,13 +8689,18 @@ mscz pdf lied.mscz -o lied.pdf
 <p>Exporteer <strong><code>.mvsa</code></strong> naar partituur-SVG voor koormap-pagina’s. Voor bron
 <code>.mscz</code>: <a href="../mscz/"><code>mscz svg</code></a>. Default: MuseScore tall-SVG (print/fallback).
 Optioneel <code>--engine osmd</code>: Score-IR → from-ir MusicXML → headless OSMD +
-S8 A1-adapter (<a href="https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg"><code>scripts/osmd-svg</code></a>). Formaatpagina:
-<a href="../../../formats/mvsa-svg/">mvsa-svg</a>.</p>
+S8 A1-adapter (<a href="https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg"><code>scripts/osmd-svg</code></a>).
+Optioneel <code>--engine eigen</code>: dezelfde Score-IR, getekend door de eigen
+schilder. Drie beelden (<code>--view notes</code>, <code>vsa-notes</code>, <code>vsa</code>). Geen
+standaardproduct, geen products-meta, geen vervanging van
+<code>lied.mvsa.svg</code>. Formaatpagina: <a href="../../../formats/mvsa-svg/">mvsa-svg</a>.
+Werkplan: <a href="../../../plans/eigen-partituur-svg/">eigen partituur-SVG</a>.</p>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH]
              [--translit] [--translit-modus {nls,ksl}] [--no-trim]
-             [--transparent] [--engine {musescore,osmd}]
+             [--transparent] [--engine {musescore,osmd,eigen}]
+             [--view {notes,vsa-notes,vsa}]
              [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
@@ -8720,6 +8725,10 @@ S8 A1-adapter (<a href="https://github.com/orthodox-ronl/VSA-tooling/tree/main/s
 <td><code>osmd</code></td>
 <td>Score-IR → from-ir MusicXML → headless OSMD (Node; geen MuseScore/Style-CLI)</td>
 </tr>
+<tr>
+<td><code>eigen</code></td>
+<td>Score-IR → eigen schilder. <code>--view notes</code> (default), <code>vsa-notes</code> of <code>vsa</code>. Geen products-meta</td>
+</tr>
 </tbody>
 </table>
 <p>Bij <code>musescore</code>: <strong>één tall-SVG</strong> (compact Style) — scherm-fallback én
@@ -8727,6 +8736,16 @@ bouwsteen voor <code>index.md.pdf</code>. Zie
 <a href="../../../plans/kale-muziek-svg-en-uitgaven/">kale-muziek-svg-en-uitgaven</a>.
 Bij <code>osmd</code>: optioneel bestand voor inspectie/scherm; site-embed blijft
 Score-IR/OSMD in de browser.
+Bij <code>eigen</code>: drie losse SVG's van dezelfde Score-IR. <code>notes</code> is de
+partituur zonder VSA-strepen (met S13-extender). <code>vsa-notes</code> zet de
+sopraan-VSA erbij. <code>vsa</code> is kale VSA, zonder notenbalk.
+<code>--translit</code> zet lyric-laag 2 eronder, net als bij MuseScore.
+Source Sans 3 (13 pt zangtekst, 12 pt cues) zit in het bestand.
+Sibling zonder <code>-o</code>: <code>lied.mvsa.eigen-notes.svg</code>,
+<code>lied.mvsa.eigen-vsa-notes.svg</code>, <code>lied.mvsa.eigen-vsa.svg</code>.
+Met <code>--translit-modus nls</code> wordt dat
+<code>lied.mvsa.eigen-notes.translit-nls.svg</code>.
+<code>--view</code> bij <code>musescore</code> of <code>osmd</code> is een fout.
 Na trim (<code>musescore</code>): <strong>witte achtergrond</strong> (default); <code>--transparent</code>
 voor geen achtergrondvlak. Met <code>--translit</code> / <code>--translit-modus</code>:
 tweede tekstregel (lyric 2), gefilterd op richting (<code>nls</code> / <code>ksl</code>) — zie
@@ -8757,7 +8776,11 @@ gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p>
 </tr>
 <tr>
 <td><code>--engine</code></td>
-<td><code>musescore</code> (default) of <code>osmd</code>.</td>
+<td><code>musescore</code> (default), <code>osmd</code> of <code>eigen</code>.</td>
+</tr>
+<tr>
+<td><code>--view</code></td>
+<td>Alleen <code>eigen</code>: <code>notes</code> (default), <code>vsa-notes</code> of <code>vsa</code>.</td>
 </tr>
 <tr>
 <td><code>--musescore</code></td>
@@ -8773,11 +8796,11 @@ gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p>
 </tr>
 <tr>
 <td><code>--translit</code></td>
-<td>Tweede lyric-laag in tussen-MXL/MSCZ (koormap «met translit»; alleen <code>musescore</code>).</td>
+<td>Tweede lyric-laag (koormap «met translit»; <code>musescore</code> en <code>eigen</code>, niet <code>osmd</code>).</td>
 </tr>
 <tr>
 <td><code>--translit-modus</code></td>
-<td>Filter lyric 2: <code>nls</code> of <code>ksl</code> (alleen <code>musescore</code>; impliceert <code>--translit</code>).</td>
+<td>Filter lyric 2: <code>nls</code> of <code>ksl</code> (<code>musescore</code> en <code>eigen</code>; impliceert <code>--translit</code>).</td>
 </tr>
 <tr>
 <td><code>--no-trim</code></td>
@@ -8817,19 +8840,19 @@ gebruik <a href="../mscz/"><code>mscz svg</code></a>.</p>
 </tr>
 <tr>
 <td><code>--lyrics-font FACE</code></td>
-<td>Lettertype zangtekst (alleen <code>musescore</code>).</td>
+<td>Lettertype zangtekst. <code>musescore</code>: vrij. <code>eigen</code>: alleen Source Sans 3.</td>
 </tr>
 <tr>
 <td><code>--lyrics-font-size PT</code></td>
-<td>Puntgrootte zangtekst (alleen <code>musescore</code>).</td>
+<td>Puntgrootte zangtekst (<code>musescore</code> en <code>eigen</code>; default 13).</td>
 </tr>
 <tr>
 <td><code>--cue-font FACE</code></td>
-<td>Lettertype cues/<code>@tekst</code> (alleen <code>musescore</code>).</td>
+<td>Lettertype cues/<code>@tekst</code>. <code>musescore</code>: vrij. <code>eigen</code>: alleen Source Sans 3.</td>
 </tr>
 <tr>
 <td><code>--cue-font-size PT</code></td>
-<td>Puntgrootte cues (alleen <code>musescore</code>).</td>
+<td>Puntgrootte cues (<code>musescore</code> en <code>eigen</code>; default 12).</td>
 </tr>
 <tr>
 <td><code>--measure-spacing F</code></td>
@@ -8847,6 +8870,8 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
 cd scripts\osmd-svg &amp;&amp; npm install &amp;&amp; npx puppeteer browsers install chrome
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --engine eigen --view vsa-notes
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa
 mscz svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 </code></pre></div>
 <h3 id="exit-status_4">Exit status<a class="headerlink" href="#exit-status_4" title="Permanent link">&para;</a></h3>
@@ -9437,7 +9462,7 @@ mvsa products examples\mvsa --dry-run --skip-svg
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-06
+        Bijgewerkt: 2026-11-08
         
       </p>
       

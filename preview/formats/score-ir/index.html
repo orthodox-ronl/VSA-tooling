@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-plan-cabd</code>
-  , gebouwd 2026-11-09 00:00 CET.
+   — branch <code>cursor/eigen-partituur-svg-cabd</code>
+  , gebouwd 2026-11-09 00:36 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4976,6 +4976,8 @@ bronstraat bepaalt alleen de CLI (<code>vsa score-ir</code> / <code>mvsa score-i
 <a href="../contract-index/#universele-productcatalogus">contract-index — universele productcatalogus</a>.</p>
 <p><strong>Productieschermpad:</strong> Score-IR → MusicXML (uit IR) → OSMD. Print/blad blijft
 MuseScore. Brugcontract: <a href="../../plans/partituur-ir/">partituur-ir §7</a>.
+Optioneel, geen standaardproduct: <code>mvsa svg --engine eigen</code> tekent dezelfde
+Score-IR zelf (<a href="../../plans/eigen-partituur-svg/">eigen partituur-SVG</a>).
 Bedoelde printvorm = checklists; OSMD-emit: <a href="../../plans/osmd-s8-recite/">osmd-s8-recite</a>.</p>
 <p><strong>Sibling-artifacts</strong> (naamgeving <code>{bron}.score-ir.json</code> /
 <code>{bron}.from-ir.musicxml</code>):</p>
@@ -5041,6 +5043,10 @@ from-ir: <code>notehead breve</code> + <code>stem none</code> (geen <code>type=b
 <td><code>vsa.score_ir_musicxml</code> · CLI <code>--musicxml</code></td>
 </tr>
 <tr>
+<td>Score-IR → eigen SVG (optioneel)</td>
+<td><code>vsa.eigen_svg</code> · <a href="../../reference/cli/mvsa/#mvsa-svg"><code>mvsa svg --engine eigen</code></a></td>
+</tr>
+<tr>
 <td>Browser-spike</td>
 <td><code>examples/spikes/partituur-browser/</code></td>
 </tr>
@@ -5087,7 +5093,7 @@ mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a.score
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-02
+        Bijgewerkt: 2026-11-08
         
       </p>
       

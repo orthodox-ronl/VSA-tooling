@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-plan-cabd</code>
-  , gebouwd 2026-11-09 00:00 CET.
+   — branch <code>cursor/eigen-partituur-svg-cabd</code>
+  , gebouwd 2026-11-09 00:36 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5233,10 +5233,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#zolang-de-schilder-een-spike-is" class="md-nav__link">
+  <a href="#de-platen-bekijken" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Zolang de schilder een spike is
+        De platen bekijken
       
     </span>
   </a>
@@ -5244,10 +5244,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#als-fase-3-er-is" class="md-nav__link">
+  <a href="#naast-osmd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Als fase 3 er is
+        Naast OSMD
       
     </span>
   </a>
@@ -5768,10 +5768,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#zolang-de-schilder-een-spike-is" class="md-nav__link">
+  <a href="#de-platen-bekijken" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Zolang de schilder een spike is
+        De platen bekijken
       
     </span>
   </a>
@@ -5779,10 +5779,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#als-fase-3-er-is" class="md-nav__link">
+  <a href="#naast-osmd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Als fase 3 er is
+        Naast OSMD
       
     </span>
   </a>
@@ -5946,7 +5946,7 @@
 <tbody>
 <tr>
 <td><strong>Status</strong></td>
-<td>werkplan; <strong>niet normatief</strong>; geen productcode in deze stap</td>
+<td>werkplan; <strong>niet normatief</strong>. Schilder en <code>mvsa svg --engine eigen</code> bestaan. Nog geen standaardproduct en geen wijziging van het productiescherm.</td>
 </tr>
 <tr>
 <td><strong>Doel</strong></td>
@@ -6029,9 +6029,13 @@ pull request 75. Drie stukken, elk als één SVG:</p>
 <p>Wat op die platen al op een partituur lijkt: notenkoppen, sleutels,
 voortekens, stokrichting, de stokloze <code>||O||</code>, de accolade, de
 maatstrepen en de herhaalpuntjes.</p>
-<p>Wat nog een schets is: de bogen zijn eenvoudige krommen, de afstand
-tussen noten is grof, er is één systeem per stuk (ook waar de bron
-<code>@nieuw-systeem</code> zet), en de zangtekst is nog niet Source Sans 3.
+<p>Wat op de spike nog een schets was: de bogen zijn eenvoudige krommen,
+de afstand tussen noten is grof, er was één systeem per stuk (ook waar
+de bron <code>@nieuw-systeem</code> zet), en de zangtekst was nog niet Source Sans 3.
+De schilder in <code>src/vsa/eigen_svg.py</code> heeft die drie punten inmiddels:
+Source Sans 3 (gewicht 400, ingebed vanuit <code>scripts/osmd-svg/fonts/</code>),
+een nieuw systeem waar Score-IR <code>newSystem</code> zet, en de S13-extender
+op de notenbeelden. De bogen en de nootafstand blijven grof.
 Een koppelteken in «ont-ferm» ontbreekt omdat Score-IR «ont» als losse
 lettergreep noteert (<code>syllabic: single</code>), niet als begin van een woord.</p>
 <p>Het SVG-bestand schaalt mee met de vensterbreedte (<code>width="100%"</code> en
@@ -6060,8 +6064,13 @@ Dit werkplan herhaalt de regels niet. Een testrun noemt het contract-id
 <hr />
 <h2 id="3-keuzes-die-mee-moeten">3. Keuzes die mee moeten<a class="headerlink" href="#3-keuzes-die-mee-moeten" title="Permanent link">&para;</a></h2>
 <p>Elke rij is een keuze die voor MuseScore of voor OSMD al gemaakt is.
-De kolom «Spike» zegt of pull request 75 die keuze al tekent.
-«Fase» wijst naar §7.</p>
+De kolom «Spike» zegt of pull request 75 die keuze al tekende.
+«Fase» wijst naar §7. De schilder in <code>src/vsa/eigen_svg.py</code> dekt de
+fase-2-rijen die <code>tests/test_eigen_svg.py</code> vastzet: drie beelden,
+Source Sans 3, stokrichting, recite, extender, herhaling, cues,
+maatnummer, <code>@nieuw-systeem</code>, en de woorden Segno / Fine / D.S.
+Een volledige volta-haak is dat nog niet: de schilder zet het
+voltanummer en een kort streepje. Checklist S20 blijft daarmee open.</p>
 <h3 id="31-bladbeeld">3.1 Bladbeeld<a class="headerlink" href="#31-bladbeeld" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -6599,7 +6608,7 @@ regel als bij elke export-wijziging
 </tr>
 <tr>
 <td>3</td>
-<td>Optioneel naast OSMD, nog geen vervanging van <code>lied.mvsa.svg</code></td>
+<td><code>lied.mvsa.eigen-notes.svg</code> (en <code>eigen-vsa-notes</code>, <code>eigen-vsa</code>); geen vervanging van <code>lied.mvsa.svg</code></td>
 <td>Vergelijken op dezelfde stukken</td>
 </tr>
 <tr>
@@ -6659,14 +6668,25 @@ De test controleert geen pixels.</p>
 beelden uit §4.2 kan leveren vanuit dezelfde Score-IR. Kale VSA voor
 een eenstemmige <code>.vsa</code> blijft de bestaande <code>vsa svg</code>; de nieuwe eis is
 dat een <code>.mvsa</code>-tropaar hetzelfde soort beeld krijgt, zonder notenbalk.</p>
+<p>Die zin is waar voor de proefset in <code>tests/test_eigen_svg.py</code>.
+Open binnen deze fase: een volta-haak over de hele maat (nu een kort
+streepje met het nummer), bundels, en bogen die de melodie volgen.</p>
 <p>Buiten fase 2: site, <code>products</code>, OSMD uitschakelen, A4, cursor.</p>
 <h3 id="fase-3-naast-osmd-kunnen-draaien">Fase 3 — naast OSMD kunnen draaien<a class="headerlink" href="#fase-3-naast-osmd-kunnen-draaien" title="Permanent link">&para;</a></h3>
-<p>Een aanroep, nog geen standaardproduct. Voorstel voor de vlag, pas
-invullen als de man-pagina meegaat: <code>mvsa svg --engine eigen</code>, naast
-het bestaande <code>--engine osmd</code>. De default blijft de huidige engine.</p>
+<p>De aanroep is <code>mvsa svg --engine eigen</code>, naast <code>--engine osmd</code>.
+De default blijft MuseScore. <code>--view</code> is <code>notes</code> (default),
+<code>vsa-notes</code> of <code>vsa</code>. Zonder <code>-o</code> heet het bestand
+<code>lied.mvsa.eigen-notes.svg</code> (of <code>eigen-vsa-notes</code> / <code>eigen-vsa</code>).
+Met <code>--translit</code> komt daar het bestaande translit-stuk bij, bijvoorbeeld
+<code>lied.mvsa.eigen-notes.translit-nls.svg</code>.
+<code>--lyrics-font-size</code> en <code>--cue-font-size</code> gelden.
+Een ander <code>--lyrics-font</code> of <code>--cue-font</code> dan Source Sans 3 weigert
+de aanroep. MuseScore-Style (afstand, marges, compact) weigert ook.
+De aanroep schrijft geen products-meta en overschrijft <code>lied.mvsa.svg</code> niet.</p>
 <p>Klaar wanneer dezelfde drie spike-stukken én de trisagion via die
 aanroep een SVG geven, de test in CI draait, en de bibliotheek nog
-steeds OSMD toont.</p>
+steeds OSMD toont. Die aanroep en die test zijn er. Het productiescherm
+is OSMD gebleven.</p>
 <h3 id="fase-4-besluit">Fase 4 — besluit<a class="headerlink" href="#fase-4-besluit" title="Permanent link">&para;</a></h3>
 <p>Vergelijk de eigen SVG met de OSMD-SVG en met de MuseScore-SVG op de
 proefset. Het besluit wijzigt <a href="../kale-muziek-svg-en-uitgaven/">kale muziek §4</a>
@@ -6694,18 +6714,21 @@ dezelfde stukken kan snijden. Checklist P6 (A4 staand) en de marges uit
 checklist S7 horen bij die fase, niet bij het scherm.</p>
 <hr />
 <h2 id="8-gebruik">8. Gebruik<a class="headerlink" href="#8-gebruik" title="Permanent link">&para;</a></h2>
-<h3 id="zolang-de-schilder-een-spike-is">Zolang de schilder een spike is<a class="headerlink" href="#zolang-de-schilder-een-spike-is" title="Permanent link">&para;</a></h3>
-<p>De platen opnieuw maken, op een Windows-pc met deze repo:</p>
+<h3 id="de-platen-bekijken">De platen bekijken<a class="headerlink" href="#de-platen-bekijken" title="Permanent link">&para;</a></h3>
+<p>Voorbeelden staan in <code>examples/spikes/eigen-svg/</code> (<code>index.html</code>).
+Opnieuw maken, op een Windows-pc met deze repo:</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-set PYTHONPATH=src
-python examples\spikes\score-ir-svg\render_score_ir_svg.py examples\bug-cases\corib\alleluia-toon-8.mvsa -o examples\spikes\score-ir-svg\alleluia-toon-8.svg --from-mvsa
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa-notes -o examples\spikes\eigen-svg\alleluia-toon-8.vsa-notes.svg
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view notes -o examples\spikes\eigen-svg\alleluia-toon-8.notes.svg
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa -o examples\spikes\eigen-svg\alleluia-toon-8.vsa.svg
 </code></pre></div>
-<p>Die aanroep bestaat alleen op de branch van pull request 75.
-<code>index.html</code> naast die SVG laat het beeld meeschalen. Versmal het
-venster: de tekening wordt kleiner, de regelindeling blijft één systeem.</p>
-<h3 id="als-fase-3-er-is">Als fase 3 er is<a class="headerlink" href="#als-fase-3-er-is" title="Permanent link">&para;</a></h3>
-<p>De beheerder draait de gewone straat, met de nieuwe engine-vlag, en
-legt het bestand naast de OSMD-SVG en de MuseScore-SVG.
+<p>De default-sibling zonder <code>-o</code> is <code>alleluia-toon-8.mvsa.eigen-vsa-notes.svg</code>
+naast de bron, niet het product <code>alleluia-toon-8.mvsa.svg</code>.
+Versmal het venster: de tekening wordt kleiner. De regelindeling volgt
+<code>@nieuw-systeem</code> en breekt niet opnieuw af als het venster smal wordt.</p>
+<h3 id="naast-osmd">Naast OSMD<a class="headerlink" href="#naast-osmd" title="Permanent link">&para;</a></h3>
+<p>De beheerder draait de gewone straat, met <code>--engine eigen</code>, en legt
+het bestand naast de OSMD-SVG en de MuseScore-SVG.
 De site verandert niet vanzelf.</p>
 <h3 id="voor-een-koorlid">Voor een koorlid<a class="headerlink" href="#voor-een-koorlid" title="Permanent link">&para;</a></h3>
 <p>Op de site blijft OSMD het beeld, tot fase 5. Een telefoon krijgt pas
@@ -6731,13 +6754,13 @@ noten, geen tweede partituur.</p>
 <tbody>
 <tr>
 <td>Schilder</td>
-<td><code>examples/spikes/score-ir-svg/render_score_ir_svg.py</code> op de spike-branch</td>
-<td>Module onder <code>src/vsa/</code> pas in fase 2, als de spike de proefset haalt</td>
+<td><code>src/vsa/eigen_svg.py</code> (<code>render_score_ir_svg</code>, <code>mvsa svg --engine eigen</code>)</td>
+<td>Blijft één codepad voor de drie beelden</td>
 </tr>
 <tr>
 <td>Bravura-contouren</td>
-<td><code>bravura_glyphs.py</code> in de spike (paden, niet het fontbestand)</td>
-<td>Zelfde: paden in de repo, het OTF niet als productafhankelijkheid</td>
+<td><code>src/vsa/bravura_glyphs.py</code> (paden, niet het fontbestand)</td>
+<td>Het OTF blijft buiten de repo</td>
 </tr>
 <tr>
 <td>Source Sans 3</td>
@@ -6765,8 +6788,8 @@ proefset laadt en per contract-id een bewering doet, is genoeg.
 Naam van het id in de test (<code>S8</code>, <code>S13</code>, <code>L2</code>), niet alleen een vrije zin.</p>
 <p>Geen pixelvergelijking met MuseScore. De acceptatie is de tabel in §3
 plus het oog van een beheerder op de platen in fase 4.</p>
-<p>CI draait die test in de bestaande Python-run (<code>vsa-ci</code>). Geen extra
-workflow tot fase 3 een CLI heeft die op Linux én Windows moet.</p>
+<p>CI draait <code>tests/test_eigen_svg.py</code> in de bestaande Python-run (<code>vsa-ci</code>).
+Geen extra workflow: de aanroep is Python, zonder Node en zonder MuseScore.</p>
 <h3 id="wat-een-beheerder-bijhoudt">Wat een beheerder bijhoudt<a class="headerlink" href="#wat-een-beheerder-bijhoudt" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -6822,15 +6845,15 @@ beschrijft.</p>
 <tbody>
 <tr>
 <td>Nu (fase 0)</td>
-<td>Dit bestand, <a href="../">Plannen</a>, de navigatie, een verwijzing vanuit <a href="../kale-muziek-svg-en-uitgaven/">kale muziek §4</a> en <a href="../partituur-ir/">partituur-ir §8</a>. Geen man-pagina, geen contract-hub</td>
+<td>Dit bestand, <a href="../">Plannen</a>, de navigatie, een verwijzing vanuit <a href="../kale-muziek-svg-en-uitgaven/">kale muziek §4</a> en <a href="../partituur-ir/">partituur-ir §8</a></td>
 </tr>
 <tr>
 <td>Fase 2</td>
-<td>De spike-README op die branch. Nog steeds geen product-CLI-pagina</td>
+<td>De schilder en <code>tests/test_eigen_svg.py</code>. Voorbeelden in <code>examples/spikes/eigen-svg/</code></td>
 </tr>
 <tr>
 <td>Fase 3</td>
-<td>Man-pagina van <code>mvsa svg</code>, <a href="../../formats/mvsa-svg/">mvsa-svg</a>, één rij in de contract-index («eigen SVG», link naar de bestaande id's)</td>
+<td>Man-pagina van <code>mvsa svg</code>, <a href="../../formats/mvsa-svg/">mvsa-svg</a>, één rij in de contract-index («eigen SVG», link naar de bestaande id's). Die drie zijn bijgewerkt</td>
 </tr>
 <tr>
 <td>Fase 4</td>
