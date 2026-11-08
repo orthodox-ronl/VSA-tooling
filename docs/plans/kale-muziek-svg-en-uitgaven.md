@@ -97,6 +97,11 @@ voor canonieke `.mvsa` (S8: A1-adapter, geen SVG-bypass —
 §4:** o.a. `.vsa` zonder Score-IR, cue-/SVG-pariteit, CoriB. MuseScore-SVG
 blijft fallback/print, niet het S8-schermpad.
 
+**Verkenning, geen besluit:** [eigen partituur-SVG](eigen-partituur-svg.md)
+beschrijft een schilder die Score-IR zelf tekent, met dezelfde
+MuseScore- en OSMD-keuzes (waaronder Source Sans 3). De productiezin
+hierboven blijft OSMD tot dat werkplan in fase 4 expliciet anders besluit.
+
 **Herinneringsborging (naast dit plan):**
 
 - Cursor-regel `.cursor/rules/kale-muziek-svg-uitgaven.mdc` — bij werk aan
