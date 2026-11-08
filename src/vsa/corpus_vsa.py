@@ -23,7 +23,7 @@ CORPUS_ENTRIES: tuple[tuple[str, str, str], ...] = (
     ("T4-12", "engelen-maandag", "Engelen (Maandag)"),
 )
 
-_STANZA_TRAIL = re.compile(r"\*+\s*$")
+_STANZA_TRAIL = re.compile(r"(?:\*\*|//|\*|/)\s*$")
 _FRONTMATTER = re.compile(r"^---\s*\n.*?\n---\s*\n", re.DOTALL)
 
 
@@ -47,17 +47,19 @@ def strip_frontmatter(text: str) -> str:
 
 
 def count_stanzas(body: str) -> int:
-    """Tel tekstregels (template-frasen): `*` aan regel-einde; laatste regel telt mee."""
+    """Tel tekstfrasen: scheiders `*`/`**`/`/`/`//`; indent-wraps =zelfde frase.
+
+    Zie ``vsa.vsa_stanzas`` (frasescheidingsconventie) en
+    ``docs/specification-vsa-templates/mapping-vsa.md``.
+    """
+    from .vsa_stanzas import music_phrase_lines
+
     body = strip_frontmatter(body)
-    lines = [
-        ln.strip()
-        for ln in body.splitlines()
-        if ln.strip() and not ln.strip().startswith("<!--")
-    ]
+    lines = music_phrase_lines(body)
     if not lines:
         return 0
-    count = sum(1 for ln in lines if _STANZA_TRAIL.search(ln))
-    if not _STANZA_TRAIL.search(lines[-1]):
+    count = sum(1 for ln in lines if _STANZA_TRAIL.search(ln.strip()))
+    if not _STANZA_TRAIL.search(lines[-1].strip()):
         count += 1
     return count
 

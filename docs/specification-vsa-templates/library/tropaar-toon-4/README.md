@@ -4,33 +4,50 @@
 (`also_used_as: [kondak]`). Canonieke id: `tropaar-toon-4`. Playbook-alias
 voor CLI: `hemelum-tropaar-toon-4` → dit id (default bij `vsa mvsa`).
 
+Groningen toon 4: aparte formule
+[`groningen-tropaar-toon-4`](../groningen-tropaar-toon-4/) (expliciet
+`--template groningen-tropaar-toon-4`).
+
+**Frase 1 B-pad:** Hemelum zet `/2` → `mi-1` zodra de mi-cadens na de
+recite begint, dan `\` → `re-1` (hold) → `la-2`. Groningen houdt B op
+`do-1` tot de fa (`/` → `re-1`). Bron: klaar Nikolaas + gecorrigeerde
+`kondak-zondag-toon-4-hemelum.mvsa`. Tempo (`@tempo 180`) hoort in het
+stuk, niet in deze formule.
+
 > **Herstart 2026-11:** formule+tekst-verkenning in de repo-map
 > `examples/formule-tekst/tropaar-toon-4/` (niet op de documentatiesite).
 > Playbook: `examples/formule-tekst/PLAYBOOK.md`.
 > Snapshot oude aanpak: `examples/formule-tekst/.archief/tropaar-toon-4-oud/`.
 
-| Veld              | Waarde                                                              |
-| ----------------- | ------------------------------------------------------------------- |
-| Formule-bron      | [`template.yaml`](template.yaml)                                    |
-| Traditie / genres | Hemelum; tropaar + kondak                                           |
-| `laatste` cadens  | `of:` `re-close` (pad 0, formuleblad) · `fa-close` (mi–fa–mi)       |
-| Formule-MSCZ      | [`template.mscz`](template.mscz) (MuseScore; toont pad 0)           |
-| Formule-MXL       | [`template.mxl`](template.mxl) (delen / Coria-achtig)               |
-| Formule-PDF       | `template.pdf` (lokaal; niet in git)                                |
-| Status pitches    | `provisional`                                                       |
-| Mapping           | S=VSA, A/T/B=template ([mapping-vsa.md](../../mapping-vsa.md))      |
+| Veld              | Waarde                                                                                       |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| Formule-bron      | [`template.yaml`](template.yaml) — **bewerk dit**                                            |
+| Traditie / genres | Hemelum; tropaar + kondak                                                                    |
+| `laatste` cadens  | `of:` `re-close` (pad 0, formuleblad) · `fa-close` (mi–fa–mi)                                |
+| Formule-MSCZ/MXL  | [`template.mscz`](template.mscz) / [`template.mxl`](template.mxl) — afgeleid uit *deze* YAML |
+| Formule-PDF       | `template.pdf` (lokaal via MuseScore; niet in git)                                           |
+| Status pitches    | `provisional`                                                                                |
+| Mapping           | S=VSA, A/T/B=template ([mapping-vsa.md](../../mapping-vsa.md))                               |
 
 ## Wat hoort in deze map
 
 ```text
 tropaar-toon-4/
   template.yaml          ← canonieke formule (bewerk hier)
-  template.mscz          ← afgeleid: formuleblad MuseScore
-  template.mxl           ← afgeleid: formule MusicXML
+  template.mscz          ← afgeleid uit template.yaml (Hemelum)
+  template.mxl           ← afgeleid uit template.yaml (Hemelum)
   template.pdf           ← lokaal afgeleid (print; .gitignore)
   README.md
   notes/                 ← corpus-notities, mappinglessen
   examples/corpus/       ← .vsa + afgeleide .mscz/.mxl (+ lokale .pdf)
+```
+
+Na elke wijziging in `template.yaml` (zelfde voor Groningen):
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+python scripts\sync_library_templates.py tropaar-toon-4
+python scripts\sync_library_templates.py --check tropaar-toon-4
 ```
 
 **Niet** committen / niet bewaren: MuseScore-rommel (`.mscbackup/`,
@@ -56,7 +73,7 @@ Alleen formuleblad:
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-python scripts\render_tropaar_toon4_corpus.py --template
+python scripts\sync_library_templates.py tropaar-toon-4
 python scripts\render_tropaar_toon4_corpus.py --template --pdf
 ```
 

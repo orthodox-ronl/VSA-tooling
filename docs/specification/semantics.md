@@ -593,8 +593,16 @@ Bepaalde tekstfragmenten buiten [scopes](@) kunnen door implementaties semantisc
 | `*`   | rustpunt of ademhaling       | ademteken          |
 | `/`   | frasescheiding of maatstreep | maatstreep         |
 | `//`  | sterke frasescheiding        | dubbele maatstreep |
+| `**`  | sterke frasescheiding (blad) | (vaak als `*`)     |
 
 Deze markeringen maken geen deel uit van de kernsyntax van [VSA-scopes](@),
 maar mogen door [renderers](@) of weergavecomponenten en exporteurs semantisch worden verwerkt.
+
+Voor **template-mapping** (`vsa mvsa`): tokens `*` / `**` scheiden
+tekstfrasen; trailing `/` of `//` tellen mee bij ensure/telling. Leidende
+`//` op de laatste frase blijft de bestaande blad-/EHM-conventie. Zonder
+markeringen: elke niet-ingesprongen regel = één frase; ingesprongen
+vervolg = print-wrap. Details:
+[mapping-vsa — frasescheiders](../specification-vsa-templates/mapping-vsa.md#frasescheiders-en-print-wraps).
 
 ---

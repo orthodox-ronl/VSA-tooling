@@ -200,7 +200,10 @@ lezen (maatstrepen, collapse-regels, MuseScore `position`, Coria vs print).
 **MVSA → MXL/MSCZ:** checklists in
 [`docs/formats/canonical-checklists.md`](docs/formats/canonical-checklists.md)
 (M-reeks Coria, S-reeks partituur). Same-pitch melisma samentrekken geldt voor
-**beide** (M5a/S13); recite-print-collapse alleen partituur (M10). Cursor-regels:
+**beide** (M5a/S13); recite-print-collapse alleen partituur (M10).
+**VSA + template → MVSA:** T1–T7 in
+[`docs/specification-vsa-templates/vsa-mvsa-contract.md`](docs/specification-vsa-templates/vsa-mvsa-contract.md)
+(melodiestem default S, override A/T/B). Cursor-regels:
 `contracten-eerst.mdc`, `mvsa-export-contracten.mdc`.
 
 ### Belangrijke grenzen

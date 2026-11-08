@@ -392,6 +392,84 @@ def test_normalize_fixes_already_four_part_staff_two():
     assert bass_notes[0].findtext("pitch/octave") == "2"
 
 
+def test_capella_sa_tb_chords_explode_by_pitch_height():
+    """M2: Capella SA/TB (één voice + chord) → hoogste S/T, laagste A/B.
+
+    MuseScore exporteert vaak de onderste noot als primaire (zonder ``<chord/>``)
+    en de bovenste als chord-lid. Explode mag die primaire níet op S én A
+    verdubbelen — anders klinken alleen unisons.
+    """
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <work><work-title>Capella</work-title></work>
+  <part-list>
+    <score-part id="P1"><part-name></part-name></score-part>
+    <score-part id="P2"><part-name></part-name></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <key><fifths>-1</fifths></key>
+        <clef><sign>G</sign><line>2</line></clef>
+      </attributes>
+      <note>
+        <pitch><step>F</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>1</voice><type>whole</type>
+        <lyric number="1"><syllabic>single</syllabic><text>Als</text></lyric>
+      </note>
+      <note>
+        <chord/>
+        <pitch><step>A</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>1</voice><type>whole</type>
+      </note>
+    </measure>
+  </part>
+  <part id="P2">
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <key><fifths>-1</fifths></key>
+        <clef><sign>F</sign><line>4</line></clef>
+      </attributes>
+      <note>
+        <pitch><step>F</step><octave>3</octave></pitch>
+        <duration>4</duration><voice>1</voice><type>whole</type>
+      </note>
+      <note>
+        <chord/>
+        <pitch><step>C</step><octave>4</octave></pitch>
+        <duration>4</duration><voice>1</voice><type>whole</type>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+"""
+    cleaned = normalize_playback_musicxml(xml, apply_timing=False)
+    findings = validate_playback_musicxml(cleaned, profile="satb")
+    assert findings == [], findings
+    root = ET.fromstring(cleaned.split("?>", 1)[-1].lstrip())
+
+    def first_pitch(pid: str) -> tuple[str, str]:
+        part = root.find(f"./part[@id='{pid}']")
+        assert part is not None
+        note = next(
+            n for n in part.findall(".//note") if n.find("pitch") is not None
+        )
+        assert note.find("chord") is None
+        return note.findtext("pitch/step") or "", note.findtext("pitch/octave") or ""
+
+    assert first_pitch("P1") == ("A", "4")  # S = hoogste
+    assert first_pitch("P2") == ("F", "4")  # A = laagste
+    assert first_pitch("P3") == ("C", "4")  # T = hoogste
+    assert first_pitch("P4") == ("F", "3")  # B = laagste
+    sop = root.find("./part[@id='P1']")
+    assert sop is not None
+    sop_note = next(n for n in sop.findall(".//note") if n.find("pitch") is not None)
+    assert sop_note.findtext("lyric/text") == "Als"
+
+
 def test_meta_source_looks_like_license():
     findings = validate_playback_musicxml(_LICENSE_AS_SOURCE, profile="satb")
     assert any(f.code == "META" for f in findings)

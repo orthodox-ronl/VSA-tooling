@@ -1,9 +1,4 @@
 # tropaar-toon-5
 
-| Veld | Waarde |
-| ---- | ------ |
-| Template | [	emplate.yaml](template.yaml) |
-| Formule-MXL | [	emplate.musicxml](template.musicxml) |
-| Status pitches | provisional |
-
-Zie gedeelde afspraken: [../README.md](../README.md).
+Groningen tropaar toon 5 = formule [kondak-toon-5](../kondak-toon-5/)
+(`same_as`). PDF-stichier toon 5: [stichier-toon-5](../stichier-toon-5/).

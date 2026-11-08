@@ -1,0 +1,11 @@
+# Groningen tropaar toon 8 = zelfde formule als kondak-toon-8 (do=F4 major).
+
+spec_version: draft-v0
+id: tropaar-toon-8
+genre: tropaar
+tone: 8
+do: F4
+mode: major
+pitches_status: provisional
+source: "Koormap Groningen — tropaar zondag toon 8 (= kondak-toon-8)"
+same_as: kondak-toon-8

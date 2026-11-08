@@ -1,9 +1,10 @@
-"""VSA→template-instance: VSA-S-noten → template-events; A/T/B lopen synchroon mee."""
+"""VSA→template-instance: VSA-melodie → template-events; overige stemmen synchroon (T2)."""
 
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from contextvars import ContextVar
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -28,8 +29,50 @@ CODE_MODE_MISMATCH = "VSA-TEMPLATE-MODE-MISMATCH"
 CODE_DO_MISMATCH = "VSA-TEMPLATE-DO-MISMATCH"
 CODE_TEXT_MAPPING = "VSA-TEMPLATE-TEXT-MAPPING"
 CODE_CADENCE_PATH = "VSA-TEMPLATE-CADENCE-PATH"
+CODE_MELODY_VOICE = "VSA-TEMPLATE-MELODY-VOICE"
 
 CANON_ANCHORS = ("e.st.", "l.st.", "vl.st.", "l.lgr.")
+MELODY_VOICES = frozenset({"S", "A", "T", "B"})
+
+# Actieve melodiestem tijdens mapping (T2); default S.
+_melody_voice_var: ContextVar[str] = ContextVar("vsa_template_melody_voice", default="S")
+
+
+def get_melody_voice() -> str:
+    return _melody_voice_var.get()
+
+
+def _is_long_template_duration(token: str) -> bool:
+    """Half/heel (eventueel gestippeld) — geen default-kwart ``~``/leeg."""
+    base = str(token or "").rstrip(".")
+    return base in {"_", "__"}
+
+
+def _duration_from_template_token(token: str) -> Duration:
+    raw = str(token or "")
+    dots = raw.count(".")
+    base = raw.rstrip(".")
+    if base == "__":
+        return Duration(note_type="whole", dots=min(dots, 2))
+    if base == "_":
+        return Duration(note_type="half", dots=min(dots, 2))
+    return Duration(note_type="quarter", dots=0)
+
+
+def melody_degree(event: dict[str, Any], *, melody_voice: str | None = None) -> str:
+    """Template-laddergraad van de VSA-melodiestem op dit event (T2)."""
+    voice = melody_voice if melody_voice is not None else get_melody_voice()
+    pitches = event.get("pitches") or {}
+    if voice not in pitches:
+        raise TemplateInstanceError(
+            f"template-event mist pitches.{voice} (melody_voice={voice!r})",
+            code=CODE_MELODY_VOICE,
+            hint_nl=(
+                "Elk event moet een laddergraad hebben voor de gekozen melodiestem "
+                "(default S). Of kies --melody die wél in pitches staat."
+            ),
+        )
+    return str(pitches[voice])
 
 
 class TemplateInstanceError(Exception):
@@ -99,10 +142,11 @@ class TemplateInstanceError(Exception):
 class MappedNote:
     lyric: str
     duration: Duration
-    s_pitch: Pitch
+    s_pitch: Pitch  # VSA-melodiepitch (ook als melody_voice ≠ S; historische naam)
     template_event: dict[str, Any]
     syllabic: str = "single"
     show_anchor: bool = False
+    melody_voice: str = "S"  # T2: welke MVSA-stem de VSA-pitch krijgt
 
 
 def midi_of(pitch: Pitch) -> int:
@@ -230,39 +274,75 @@ def map_stanza(
     do: str,
     mode: str,
     source: str = "",
+    melody_voice: str | None = None,
 ) -> list[MappedNote]:
     """Koppel één VSA-regel aan de events van één template-frase (H1, H4–H8).
 
     Bij ``of``: eerste pad dat de VSA-hoogten accepteert wint; geen pad →
     hoogte-mismatch (geen stille keuze).
+
+    ``melody_voice`` (T2): optioneel; anders actieve context / default ``S``.
     """
-    phrase_id = str(phrase.get("id", "?"))
-    raw_events = list(phrase.get("events") or [])
-    candidates = expand_of_candidates(raw_events)
-    if len(candidates) == 1:
-        return _map_stanza_linear(
-            notes, candidates[0], phrase_id=phrase_id, do=do, mode=mode, source=source
-        )
-    last_error: TemplateInstanceError | None = None
-    retry_codes = {CODE_PITCH_MISMATCH, CODE_REQUIRED_SKIPPED, CODE_REQUIRED_UNUSED}
-    for cand in candidates:
-        try:
-            return _map_stanza_linear(
-                notes, cand, phrase_id=phrase_id, do=do, mode=mode, source=source
+    token = None
+    if melody_voice is not None:
+        voice = str(melody_voice).upper()
+        if voice not in MELODY_VOICES:
+            raise TemplateInstanceError(
+                f"ongeldige melody_voice {melody_voice!r}",
+                code=CODE_MELODY_VOICE,
+                hint_nl=f"Gebruik een van: {', '.join(sorted(MELODY_VOICES))}.",
+                source=source,
             )
-        except TemplateInstanceError as exc:
-            last_error = exc
-            if exc.code not in retry_codes:
-                raise
-    assert last_error is not None
-    last_error.hint_nl = (
-        (last_error.hint_nl + " ") if last_error.hint_nl else ""
-    ) + (
-        "Deze frase heeft meerdere cadenspaden (`of`); geen pad past bij de "
-        "VSA-hoogten. Pas de VSA aan of voeg het ontbrekende pad toe in de template."
-    )
-    last_error.code = CODE_CADENCE_PATH if last_error.code == CODE_PITCH_MISMATCH else last_error.code
-    raise last_error
+        token = _melody_voice_var.set(voice)
+    try:
+        phrase_id = str(phrase.get("id", "?"))
+        raw_events = list(phrase.get("events") or [])
+        candidates = expand_of_candidates(raw_events)
+        if len(candidates) == 1:
+            return _map_stanza_linear(
+                notes,
+                candidates[0],
+                phrase_id=phrase_id,
+                do=do,
+                mode=mode,
+                source=source,
+            )
+        last_error: TemplateInstanceError | None = None
+        retry_codes = {
+            CODE_PITCH_MISMATCH,
+            CODE_REQUIRED_SKIPPED,
+            CODE_REQUIRED_UNUSED,
+        }
+        for cand in candidates:
+            try:
+                return _map_stanza_linear(
+                    notes,
+                    cand,
+                    phrase_id=phrase_id,
+                    do=do,
+                    mode=mode,
+                    source=source,
+                )
+            except TemplateInstanceError as exc:
+                last_error = exc
+                if exc.code not in retry_codes:
+                    raise
+        assert last_error is not None
+        last_error.hint_nl = (
+            (last_error.hint_nl + " ") if last_error.hint_nl else ""
+        ) + (
+            "Deze frase heeft meerdere cadenspaden (`of`); geen pad past bij de "
+            "VSA-hoogten. Pas de VSA aan of voeg het ontbrekende pad toe in de template."
+        )
+        last_error.code = (
+            CODE_CADENCE_PATH
+            if last_error.code == CODE_PITCH_MISMATCH
+            else last_error.code
+        )
+        raise last_error
+    finally:
+        if token is not None:
+            _melody_voice_var.reset(token)
 
 
 def _map_stanza_linear(
@@ -294,20 +374,24 @@ def _map_stanza_linear(
     index = 0
     out: list[MappedNote] = []
 
-    for event in prefix:
-        index = _take_prefix_event(notes, index, event, out, do, mode)
+    for i, event in enumerate(prefix):
+        index = _take_prefix_event(
+            notes,
+            index,
+            event,
+            out,
+            do,
+            mode,
+            later_prefix=prefix[i + 1 :],
+            recite=recite,
+        )
 
     if recite is not None:
-        while index < len(notes) and not notes[index].scoped:
-            out.append(_assign(notes[index], recite, show_anchor=False))
-            index += 1
-        if not any(n.template_event is recite for n in out) and index < len(notes):
-            # Geen ongemarkeerde recite-syllaben: recite-slot overslaan (H1).
-            pass
+        index = _consume_recite(notes, index, recite, out, do, mode)
 
     last_degree: str | None = None
     if out:
-        last_degree = str(out[-1].template_event["pitches"]["S"])
+        last_degree = melody_degree(out[-1].template_event)
 
     _map_tail(
         notes,
@@ -336,8 +420,21 @@ def map_vsa_to_template(
     vsa_text: str,
     *,
     source: str = "",
+    melody_voice: str = "S",
 ) -> list[tuple[str, list[MappedNote]]]:
-    """Volledige instance-mapping: tekstregels → (frase-id, mapped notes)."""
+    """Volledige instance-mapping: tekstregels → (frase-id, mapped notes).
+
+    ``melody_voice`` (T2): template-``pitches``-sleutel + MVSA-stem voor de
+    VSA-melodie; default ``S``.
+    """
+    voice = str(melody_voice or "S").upper()
+    if voice not in MELODY_VOICES:
+        raise TemplateInstanceError(
+            f"ongeldige melody_voice {melody_voice!r}",
+            code=CODE_MELODY_VOICE,
+            hint_nl=f"Gebruik een van: {', '.join(sorted(MELODY_VOICES))}.",
+            source=source,
+        )
     do = str(template["do"])
     mode = str(template.get("mode", "major"))
     vsa_do, vsa_mode = _vsa_frontmatter_do_mode(vsa_text)
@@ -369,26 +466,64 @@ def map_vsa_to_template(
             str(exc),
             code=CODE_TEXT_MAPPING,
             hint_nl=(
-                "Het aantal VSA-regels (`*`-frasen) moet passen bij sequence / "
-                "text_mapping / mapping_plans van de template."
+                "Het aantal VSA-frasen moet passen bij sequence / text_mapping / "
+                "mapping_plans van de template. Tel frasen via `*`/`**` (sterke "
+                "`**` vóór laatste); zonder scheiders telt elke niet-ingesprongen "
+                "regel als frase. Ingesprongen vervolgregels horen bij dezelfde "
+                "frase (print-wrap)."
             ),
             source=source,
         ) from exc
     by_id = {str(p["id"]): p for p in template["phrases"]}
-    mapped: list[tuple[str, list[MappedNote]]] = []
-    for pid, notes in zip(phrase_ids, stanzas, strict=True):
-        if pid not in by_id:
-            raise TemplateInstanceError(
-                f"onbekende frase-id {pid!r}",
-                code="VSA-TEMPLATE-UNKNOWN-PHRASE",
-                hint_nl="Controleer cycle/final in template.yaml t.o.v. het aantal VSA-regels.",
-                source=source,
-                phrase_id=pid,
+    token = _melody_voice_var.set(voice)
+    try:
+        mapped: list[tuple[str, list[MappedNote]]] = []
+        for pid, notes in zip(phrase_ids, stanzas, strict=True):
+            if pid not in by_id:
+                raise TemplateInstanceError(
+                    f"onbekende frase-id {pid!r}",
+                    code="VSA-TEMPLATE-UNKNOWN-PHRASE",
+                    hint_nl="Controleer cycle/final in template.yaml t.o.v. het aantal VSA-regels.",
+                    source=source,
+                    phrase_id=pid,
+                )
+            mapped.append(
+                (pid, map_stanza(notes, by_id[pid], do=do, mode=mode, source=source))
             )
-        mapped.append(
-            (pid, map_stanza(notes, by_id[pid], do=do, mode=mode, source=source))
-        )
-    return mapped
+        return mapped
+    finally:
+        _melody_voice_var.reset(token)
+
+
+def _prefix_unscoped_is_open_run(
+    notes: list[VsaNote],
+    index: int,
+    event: dict[str, Any],
+    later_prefix: list[dict[str, Any]],
+    do: str,
+    mode: str,
+) -> bool:
+    """True als ongemarkeerde open-aanloop gevolgd wordt door scoped latere opens.
+
+    Groningen: ``o Ge{/bie}{/der}`` — o/Ge ongemarkeerd op do, daarna scoped re/mi.
+    Elia: ongemarkeerde recite op open-toon zonder latere prefix-scopes → False (H1).
+    """
+    if not later_prefix:
+        return False
+    open_deg = melody_degree(event)
+    j = index
+    while (
+        j < len(notes)
+        and not notes[j].scoped
+        and pitches_match(notes[j].pitch, open_deg, do, mode)
+    ):
+        j += 1
+    if j >= len(notes) or not notes[j].scoped:
+        return False
+    return any(
+        pitches_match(notes[j].pitch, melody_degree(ev), do, mode)
+        for ev in later_prefix
+    )
 
 
 def _take_prefix_event(
@@ -398,21 +533,108 @@ def _take_prefix_event(
     out: list[MappedNote],
     do: str,
     mode: str,
+    *,
+    later_prefix: list[dict[str, Any]] | None = None,
+    recite: dict[str, Any] | None = None,
 ) -> int:
+    del recite  # API-symmetrie met aanroeper; open-run kijkt naar later_prefix.
     if index >= len(notes):
         return index
-    # H1: ongemarkeerde syllaben vallen op recite, niet op prefix (open/link).
-    if not notes[index].scoped:
-        return index
-    matches = pitches_match(notes[index].pitch, event["pitches"]["S"], do, mode)
+    matches = pitches_match(notes[index].pitch, melody_degree(event), do, mode)
     if not matches:
         return index
-    out.append(_assign(notes[index], event, show_anchor=True))
-    return index + 1
+    note = notes[index]
+    degree = melody_degree(event)
+    role = str(event.get("role") or "")
+    # Holds alleen op open/link — niet op e.st.-cadens (anders verdwijnt recite).
+    allow_holds = role in ("open", "link")
+    if note.scoped:
+        _append_mapped(out, note, event, prefer_scoped_anchor=True)
+        index += 1
+        if allow_holds:
+            while (
+                index < len(notes)
+                and not notes[index].scoped
+                and pitches_match(notes[index].pitch, degree, do, mode)
+            ):
+                _append_mapped(out, notes[index], event, prefer_scoped_anchor=True)
+                index += 1
+        return index
+    # H1: ongemarkeerd hoort bij recite — behalve open-aanloop vóór latere scopes.
+    if _prefix_unscoped_is_open_run(
+        notes, index, event, later_prefix or [], do, mode
+    ):
+        _append_mapped(out, note, event, prefer_scoped_anchor=True)
+        index += 1
+        while (
+            index < len(notes)
+            and not notes[index].scoped
+            and pitches_match(notes[index].pitch, degree, do, mode)
+        ):
+            _append_mapped(out, notes[index], event, prefer_scoped_anchor=True)
+            index += 1
+        return index
+    return index
+
+
+def _consume_recite(
+    notes: list[VsaNote],
+    index: int,
+    recite: dict[str, Any],
+    out: list[MappedNote],
+    do: str,
+    mode: str,
+) -> int:
+    """H1: recite-toon; scoped mag starten/meedoen tot na ongemarkeerde recite cadens begint.
+
+    Groningen ``{\\zijt} Gij uit het``: scoped do opent recite, daarna ongemarkeerd.
+    Elia: na ongemarkeerde recite stopt scoped (zelfde toon) → cadens (H2).
+    """
+    took_unscoped = False
+    while index < len(notes):
+        note = notes[index]
+        if not pitches_match(note.pitch, melody_degree(recite), do, mode):
+            break
+        if note.scoped and took_unscoped:
+            break
+        _append_mapped(out, note, recite, prefer_scoped_anchor=True)
+        if not note.scoped:
+            took_unscoped = True
+        index += 1
+    return index
+
+
+def _append_mapped(
+    out: list[MappedNote],
+    note: VsaNote,
+    event: dict[str, Any],
+    *,
+    prefer_scoped_anchor: bool,
+) -> None:
+    """Voeg mapped noot toe; bij e.st./l.st./vl.st. wint een scoped VSA-noot (nadruk)."""
+    anchor = event.get("anchor")
+    stress = anchor in ("e.st.", "l.st.", "vl.st.")
+    if not stress or not prefer_scoped_anchor:
+        show = bool(anchor) and not any(
+            n.template_event is event and n.show_anchor for n in out
+        )
+        out.append(_assign(note, event, show_anchor=show))
+        return
+    if note.scoped:
+        for i, existing in enumerate(out):
+            if existing.template_event is event and existing.show_anchor:
+                out[i] = replace(existing, show_anchor=False)
+        out.append(_assign(note, event, show_anchor=True))
+        return
+    show = not any(n.template_event is event and n.show_anchor for n in out)
+    out.append(_assign(note, event, show_anchor=show))
 
 
 def _slot_label(event: dict[str, Any]) -> str:
-    degree = str(event.get("pitches", {}).get("S", "?"))
+    try:
+        degree = melody_degree(event)
+    except TemplateInstanceError:
+        degree = str(event.get("pitches", {}).get("S", "?"))
     bits = [degree]
     if event.get("anchor"):
         bits.append(str(event["anchor"]))
@@ -442,7 +664,7 @@ def _map_tail(
     def _pitch_mismatch(note: VsaNote, note_i: int, *, remaining: list[dict[str, Any]]) -> TemplateInstanceError:
         got = f"{note.pitch}"
         expected = [
-            str(ev.get("pitches", {}).get("S"))
+            melody_degree(ev)
             for ev in remaining
             if not ev.get("optional")
         ]
@@ -509,9 +731,9 @@ def _map_tail(
                     note_index=index,
                 )
             last = out[-1].template_event
-            if pitches_match(note.pitch, last["pitches"]["S"], do, mode):
+            if pitches_match(note.pitch, melody_degree(last), do, mode):
                 # H6: extra syllabe opzelfde slot-akkoord.
-                out.append(_assign(note, last, show_anchor=False))
+                _append_mapped(out, note, last, prefer_scoped_anchor=True)
                 index += 1
                 continue
             raise _pitch_mismatch(note, index, remaining=[])
@@ -532,22 +754,50 @@ def _map_tail(
             raise _pitch_mismatch(note, index, remaining=tail[event_i:])
         event_i = matched
         event = tail[event_i]
-        out.append(_assign(note, event, show_anchor=not any(
-            n.template_event is event and n.show_anchor for n in out
-        )))
-        last_consumed_degree = str(event["pitches"]["S"])
+        _append_mapped(out, note, event, prefer_scoped_anchor=True)
+        last_consumed_degree = melody_degree(event)
         index += 1
-        if index < len(notes) and pitches_match(
-            notes[index].pitch, event["pitches"]["S"], do, mode
+        # Ondergevulde zelfde-S-run met half/heel: volgende VSA-syllabe is al
+        # een andere graad (bijv. le_ → na_ @l.st.). Vul tussenliggende
+        # half-slots als leeg melisma (le_&_na_), i.p.v. stil H4/H7-weglaten.
+        if index < len(notes) and not pitches_match(
+            notes[index].pitch, last_consumed_degree, do, mode
         ):
-            # Zelfde graad: liever volgend zelfde-S-slot vullen (l.st. e.d.)
+            while event_i + 1 < len(tail):
+                nxt = tail[event_i + 1]
+                nxt_deg = melody_degree(nxt)
+                if nxt_deg != last_consumed_degree:
+                    break
+                if pitches_match(notes[index].pitch, nxt_deg, do, mode):
+                    break
+                dur_tok = str(nxt.get("duration") or "")
+                if not _is_long_template_duration(dur_tok):
+                    break
+                if nxt.get("anchor") in ("l.st.", "vl.st.", "e.st."):
+                    break
+                event_i += 1
+                out.append(
+                    MappedNote(
+                        lyric="",
+                        duration=_duration_from_template_token(dur_tok),
+                        s_pitch=degree_pitch(nxt_deg, do, mode),
+                        template_event=nxt,
+                        syllabic="end",
+                        show_anchor=False,
+                        melody_voice=get_melody_voice(),
+                    )
+                )
+        if index < len(notes) and pitches_match(
+            notes[index].pitch, melody_degree(event), do, mode
+        ):
+            # Zelfde graad: liever volgend zelfde-melodie-slot vullen (l.st. e.d.)
             # dan eindeloos H6-holden op het eerste slot.
             if event_i + 1 < len(tail) and pitches_match(
-                notes[index].pitch, tail[event_i + 1]["pitches"]["S"], do, mode
+                notes[index].pitch, melody_degree(tail[event_i + 1]), do, mode
             ):
                 event_i += 1
                 continue
-            # H6: geen volgend zelfde-S-slot → hold; event_i blijft staan.
+            # H6: geen volgend zelfde-melodie-slot → hold; event_i blijft staan.
             continue
         event_i += 1
 
@@ -556,7 +806,7 @@ def _map_tail(
     if notes and event_i < len(tail) and llgr_from is not None and event_i >= llgr_from:
         last_lyric_used = True
         for extra in tail[event_i:]:
-            s_pitch = degree_pitch(extra["pitches"]["S"], do, mode)
+            s_pitch = degree_pitch(melody_degree(extra), do, mode)
             out.append(
                 MappedNote(
                     lyric="" if last_lyric_used else notes[-1].lyric,
@@ -565,6 +815,7 @@ def _map_tail(
                     template_event=extra,
                     syllabic="end" if last_lyric_used else "single",
                     show_anchor=extra.get("anchor") == "l.lgr.",
+                    melody_voice=get_melody_voice(),
                 )
             )
             last_lyric_used = True
@@ -581,7 +832,9 @@ def _map_tail(
             hint_nl=(
                 "Breid de VSA-cadens uit zodat elke verplichte laddergraad voorkomt "
                 "(syllabe, hold H6, of l.lgr.-melisma H8), of zet optionele slots op "
-                "optional: true in de template."
+                "optional: true in de template. Controleer ook of de frasegrenzen "
+                "kloppen: een te korte «frase» door een harde regeleinde i.p.v. "
+                "ingesprongen wrap (of een ontbrekende `*`) geeft vaak precies deze fout."
             ),
             source=source,
             line=notes[-1].line if notes else 0,
@@ -605,10 +858,13 @@ def _may_skip_intermediate(
     *,
     last_consumed_degree: str | None,
 ) -> bool:
-    """H4/H7: optional altijd; zelfde S als laatst gebruikt = rest van ondergevulde run."""
+    """H4/H7: optional altijd; zelfde melodie-graad als laatst = rest ondergevulde run."""
     if event.get("optional"):
         return True
-    degree = str(event.get("pitches", {}).get("S", ""))
+    try:
+        degree = melody_degree(event)
+    except TemplateInstanceError:
+        return False
     return bool(last_consumed_degree) and degree == last_consumed_degree
 
 
@@ -623,7 +879,7 @@ def _next_matching_event(
 ) -> int | None:
     """Zoek slot vanaf ``start``. Andere toon overslaan alleen als optional (H4/H7)."""
     for i in range(start, len(tail)):
-        if pitches_match(note.pitch, tail[i]["pitches"]["S"], do, mode):
+        if pitches_match(note.pitch, melody_degree(tail[i]), do, mode):
             skipped = tail[start:i]
             blocked = [
                 ev
@@ -652,4 +908,5 @@ def _assign(note: VsaNote, event: dict[str, Any], *, show_anchor: bool) -> Mappe
         template_event=event,
         syllabic=note.syllabic,
         show_anchor=show_anchor and bool(event.get("anchor")),
+        melody_voice=get_melody_voice(),
     )

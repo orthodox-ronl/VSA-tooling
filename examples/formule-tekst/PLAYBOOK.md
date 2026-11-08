@@ -23,14 +23,19 @@ vsa mvsa [--template {template-id}] [-o OUT] {vsa-bestand}
 | `-o OUT`               | Optioneel; anders sibling `<bronnaam>.mvsa` (zelfde patroon als import)   |
 | `{vsa-bestand}`        | Pad naar één `.vsa`                                                       |
 
-Voorbeelden (nog niet geïmplementeerd — vastgelegd als contract voor de CLI):
+Voorbeelden (CLI geïmplementeerd — schets, geen catalogus-publicatie):
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa mvsa --list-templates
 vsa mvsa examples\formule-tekst\vsa-bestanden\tropaar-profeet-elia-toon-4.vsa
 vsa mvsa --template hemelum-tropaar-toon-4 tropaar-nikolaas-van-myra-toon-4-hemelum.vsa
 vsa mvsa --template groningen-tropaar-toon-4 lied.vsa -o generated\lied.schets.mvsa
 ```
+
+Lessen uit eerdere tonen (octaven, B-paden, tempo, `same_as`):
+[`docs/specification-vsa-templates/conversion-lessons.md`](../../docs/specification-vsa-templates/conversion-lessons.md).
+Man-pagina: [`docs/reference/cli/vsa-mvsa.md`](../../docs/reference/cli/vsa-mvsa.md).
 
 **Nog niet in scope van dit playbook:** platte tekst / `.ftxt` → `.mvsa`.
 Dat blijft een apart auteurspad; hoofdpad is **VSA + template**.
@@ -51,21 +56,27 @@ Voorstel (invullen naarmate library groeit):
 
 **Default (nu):** Hemelum tropaar/kondak toon 4.
 
-| String                         | Betekenis                                                                 |
-| ------------------------------ | ------------------------------------------------------------------------- |
-| `tropaar-toon-4`               | Canonieke library-`id` (bestand in `library/tropaar-toon-4/`)             |
-| `hemelum-tropaar-toon-4`       | Playbook-alias → zelfde template (voor CLI `--template`)                  |
-| (geen `--template`)            | Zelfde default: Hemelum tropaar/kondak; toon uit VSA of dit toon-4-pad    |
+| String                         | Betekenis                                                                  |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| `tropaar-toon-4`               | Canonieke library-`id` Hemelum (map `library/tropaar-toon-4/`)             |
+| `hemelum-tropaar-toon-4`       | Playbook-alias → zelfde Hemelum-template                                   |
+| `groningen-tropaar-toon-4`     | Canonieke library-`id` Groningen (map `library/groningen-tropaar-toon-4/`) |
+| (geen `--template`)            | **Default:** Hemelum tropaar/kondak toon 4 (`tropaar-toon-4`)              |
 
-Library:
-[`docs/specification-vsa-templates/library/tropaar-toon-4/`](../../docs/specification-vsa-templates/library/tropaar-toon-4/).
-Mensformule (pad 0): [`tropaar-toon-4/formules/`](tropaar-toon-4/formules/).
-`laatste` heeft twee `of:`-paden (re / fa); formuleblad toont re-close.
+Library Hemelum:
+[`docs/.../library/tropaar-toon-4/`](../../docs/specification-vsa-templates/library/tropaar-toon-4/).
+Mensformule: [`tropaar-toon-4/formules/`](tropaar-toon-4/formules/).
 
-**Niet:** Groningen als default. Groningen alleen met expliciet `--template`.
+Library Groningen:
+[`docs/.../library/groningen-tropaar-toon-4/`](../../docs/specification-vsa-templates/library/groningen-tropaar-toon-4/).
+Mensformule: [`groningen-tropaar-toon-4/formules/`](groningen-tropaar-toon-4/formules/).
 
-Tradities = **aparte** template-ids. Binnen één Hemelum-formule wél beperkte
-`of:`-takken (alleen herhaalde, getelde cadensvarianten).
+**Niet:** Groningen als default. Groningen alleen met expliciet
+`--template groningen-tropaar-toon-4`.
+
+Tradities = **aparte** template-ids (nieuwe formules:
+`{traditie}-{genre}-toon-{n}`). Binnen één formule wél beperkte `of:`-takken
+(alleen herhaalde, getelde cadensvarianten).
 
 ## Wat succes betekent
 
@@ -99,15 +110,15 @@ geen andere tonen»*.
 
 ## Valkuilen (levend — bijwerken na chats)
 
-| Les         | Wel                                                            | Niet                                               |
-| ----------- | -------------------------------------------------------------- | -------------------------------------------------- |
-| Invoer      | VSA + template als hoofdpad                                    | Platte tekst als migratiebrug voor bestaand corpus |
-| Cadens      | `laatste` `of:` re-close + fa-close in Hemelum toon-4-template | Eén pad forceren en de rest stil “dichtstbij”      |
-| Optionals   | `a?` / ankers uit klemtoon; recite ≠ open-slot print           | `[open]` als synoniem voor recite 1-n-1            |
-| Formulebron | Eén uitvoerbare bron tot `.formule.mvsa` compileert            | YAML én `.formule.mvsa` als twee waarheden         |
-| Scope chat  | Eén genre×traditie×toon                                        | Alle tonen/varianten in één run                    |
-| Output      | Schets + disclaimer; unieke `@blok` + `&`-melisma              | Catalogus-commit zonder check; bron-VSA overschrijven |
-| Emitter L   | Melisma-vervolg als `li_&_` op vorige lettergreep              | Losse `-_` / `__` (telt niet als L-slot)              |
+| Les         | Wel                                                                                                   | Niet                                                  |
+| ----------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Invoer      | VSA + template als hoofdpad                                                                           | Platte tekst als migratiebrug voor bestaand corpus    |
+| Cadens      | `laatste` `of:` re-close + fa-close in Hemelum toon-4-template                                        | Eén pad forceren en de rest stil “dichtstbij”         |
+| Optionals   | `a?` / ankers uit klemtoon; recite ≠ open-slot print                                                  | `[open]` als synoniem voor recite 1-n-1               |
+| Formulebron | Eén uitvoerbare bron tot `.formule.mvsa` compileert                                                   | YAML én `.formule.mvsa` als twee waarheden            |
+| Scope chat  | Eén genre×traditie×toon                                                                               | Alle tonen/varianten in één run                       |
+| Output      | Schets + disclaimer; secties `cyclus-1`/`herhaling`/`laatste`; geen `@speelplan`/`@blok`; `&`-melisma | Catalogus-commit zonder check; bron-VSA overschrijven |
+| Emitter L   | Melisma-vervolg als `li_&_` op vorige lettergreep                                                     | Losse `-_` / `__` (telt niet als L-slot)              |
 
 Uit Fase A/B (toon 4): zie
 [`vsa-bestanden/FASE-A-B-RAPPORT-VSA-TEMPLATE.md`](vsa-bestanden/FASE-A-B-RAPPORT-VSA-TEMPLATE.md).
@@ -126,10 +137,11 @@ Uit Fase A/B (toon 4): zie
 | Onderwerp                         | Status / besluit                                         |
 | --------------------------------- | -------------------------------------------------------- |
 | Exacte default-`template-id`      | `tropaar-toon-4`; alias `hemelum-tropaar-toon-4`         |
-| Alias `hemelum` → toon uit VSA?   | TBD (nu alleen toon 4 vastgelegd)                        |
-| Kondak = zelfde id als tropaar?   | Ja: `also_used_as: [kondak]` op `tropaar-toon-4`         |
-| Exitcode bij mapping-fout         | Voorstel: non-zero + geen stille half-schets             |
-| Man-pagina / formats-hub          | Bij echte CLI, zelfde ronde als code (`docs-sync`)       |
+| Alias `hemelum` → toon uit VSA?   | Nog niet; kies expliciet id per toon                     |
+| Kondak = zelfde id als tropaar?   | Ja via `also_used_as` of `same_as` (toon 2/6/8)          |
+| Exitcode bij mapping-fout         | non-zero; geen uitvoerbestand bij harde fout             |
+| Man-pagina / formats-hub          | [`vsa-mvsa.md`](../../docs/reference/cli/vsa-mvsa.md)    |
+| Emit-octaven                      | `@oct S=0 A=0 T=-1 B=-1` (vast in `template_library`)    |
 
 ## Zie ook
 

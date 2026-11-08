@@ -78,6 +78,31 @@ def _is_syllable_char(c: str) -> bool:
     return c.isalpha() or c in "ëïöüáéíóúýčšžňĚĎŤ#№"
 
 
+def _attach_lyric_punct(s: str, i: int, syll: str) -> tuple[str, int]:
+    """Hang leesteken aan de lettergreep; ``\\.`` = letterlijke punt (geen ELM).
+
+    Een kale ``.`` is ELM (duur). Zinspunten schrijf je als ``woord_\\.`` of
+    ``woord\\.`` zodat de noot niet gestippeld/verkort wordt.
+    """
+    n = len(s)
+    while i < n:
+        if s[i] in ",;:!?":
+            syll += s[i]
+            i += 1
+            continue
+        if s[i] == "\\" and i + 1 < n and s[i + 1] == ".":
+            syll += "."
+            i += 2
+            continue
+        break
+    return syll, i
+
+
+def escape_lyric_periods_for_mvsa(text: str) -> str:
+    """Zinspunten in lettergreeptekst als ``\\.`` schrijven (na ELM of kaal)."""
+    return text.replace(".", "\\.")
+
+
 @dataclass
 class StickyContext:
     do: str = "F4"
@@ -997,9 +1022,7 @@ def parse_l_positions(measure: str) -> list[LPosition]:
             syll = s[start:i]
             if not syll:
                 break
-            while i < n and s[i] in ",;:!?":
-                syll += s[i]
-                i += 1
+            syll, i = _attach_lyric_punct(s, i, syll)
 
             piece_elms, i = _read_elms(s, i)
 
@@ -1020,9 +1043,9 @@ def parse_l_positions(measure: str) -> list[LPosition]:
             else:
                 elms.append("~")
 
-            while i < n and s[i] in ",;:!?":
-                syllables[-1] += s[i]
-                i += 1
+            syll_tail, i = _attach_lyric_punct(s, i, "")
+            if syll_tail:
+                syllables[-1] += syll_tail
 
             if (
                 i < n
@@ -1116,9 +1139,7 @@ def _parse_recite_interior(
         if not syll:
             i += 1
             continue
-        while i < n and s[i] in ",;:!?":
-            syll += s[i]
-            i += 1
+        syll, i = _attach_lyric_punct(s, i, syll)
         if syllables:
             link = True if pending_link is None else pending_link
             links.append(link)

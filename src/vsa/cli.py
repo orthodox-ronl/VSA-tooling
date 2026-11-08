@@ -1143,6 +1143,10 @@ def _build_parser():
         help="template.yaml of map met template.yaml-bestanden.",
     )
 
+    from .cli_vsa_mvsa import add_vsa_mvsa_parser
+
+    add_vsa_mvsa_parser(subparsers)
+
     pdf = subparsers.add_parser(
         "pdf",
         help="Print-PDF uit .vsa (partituur via MuseScore).",
@@ -1252,6 +1256,10 @@ def _run(args):
 
     if args.command == "template":
         return _cmd_template(args)
+    if args.command == "mvsa":
+        from .cli_vsa_mvsa import run_vsa_mvsa
+
+        return run_vsa_mvsa(args)
 
 
     if args.command == "pdf":

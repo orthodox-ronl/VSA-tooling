@@ -435,7 +435,9 @@ voor duur `_`, `~`, `.`, `-.`, …
 
 Leestekens mogen **achter** de lettergreep of **achter** de ELM staan en horen
 bij de tekst van die lettergreep (`Komt_,`, `ia,`, `tus_,`). Binnen `(…)` horen
-komma’s bij de lettergreep vóór de `)`.
+komma’s bij de lettergreep vóór de `)`. Een **zinspunt** schrijf je als
+geëscapete punt `\.` (`schaamd_\.` of `eind\.`): een kale `.` is ELM-duur
+(gestipte of verkorte noot), geen leesteken.
 
 ## 7. Stemregel
 
