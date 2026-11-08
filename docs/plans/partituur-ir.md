@@ -279,6 +279,7 @@ catalogus-MXL of MuseScore-SVG.
 8. ~~Optionele OSMD-SVG CLI~~ (`mvsa svg --engine osmd`; D2-vergelijking in
    `examples/spikes/partituur-osmd-svg/README.md`)
 9. CoriB-MVP (speler op §7-brug) — plan: [corib-mvp.md](corib-mvp.md) (M1–M4; branch `corib`)
+10. Verkenning eigen schilder uit Score-IR — [eigen partituur-SVG](eigen-partituur-svg.md). Geen vervanging van de OSMD-brug in §7 tot fase 4 van dat werkplan.
 
 ---
 
