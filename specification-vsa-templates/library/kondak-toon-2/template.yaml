@@ -1,0 +1,127 @@
+# Groningen toon 2 (kondak + tropaar zondag) — do=F4 major.
+# Bron: geaccepteerde MVSA kondak-zondag-toon-2-groningen
+#   (content-source/input/_klaar_voor_acceptatie/).
+# Speelplan |: 1, 2 :| laatste.
+# Frase 1: open re–re–mi, recite mi, cadens fa–sol–fa–mi (@l.st.); T op sol: bti.
+# Frase 2: recite mi, cadens re (opt. hold) → do (@l.st.).
+# laatste: mi–re–mi–(fa–mi–fa)–mi–re–do (@l.st.); melisma op fa-slot.
+
+spec_version: draft-v0
+id: kondak-toon-2
+genre: kondak
+also_used_as:
+  - tropaar
+tone: 2
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: "Koormap Groningen — kondak/tropaar zondag toon 2 (MVSA-acceptatie)"
+# SATB-schrijfoctaven zoals in de geaccepteerde MVSA.
+voice_oct:
+  S: 0
+  A: 0
+  T: -1
+  B: -1
+cycle:
+  - "1"
+  - "2"
+final: laatste
+
+mapping_plans:
+  - id: standard
+    label: "|: 1, 2 :| laatste"
+    when:
+      default: true
+    steps:
+      - repeat: ["1", "2"]
+        until: final
+      - phrase: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - role: open
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+      - role: open
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+      - role: open
+        duration: "_"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: sol, A: do, T: bti-1, B: mi-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+
+  - id: "2"
+    events:
+      - role: cadence
+        duration: "_"
+        optional: true
+        anchor: e.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: ti-1, T: fa-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: fa-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+
+  - id: laatste
+    # recite-mi zodat opening (Gij / O Christus) + H6 op cadens-re (zij) via
+    # de tail-mapper lopen — niet als prefix-only (anders sneuvelt {\U_}).
+    events:
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: la-1, T: fa-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: mi, A: do, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: ti-1, T: fa-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }

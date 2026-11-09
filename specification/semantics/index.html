@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -3026,6 +3026,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../specification-vsa-templates/rendering-pitfalls/" class="md-nav__link">
         
   
@@ -4308,6 +4364,34 @@
     
   
     vsa musicxml
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
   
 
     
@@ -6493,10 +6577,20 @@ EHM’s op het eerste woord.</p>
 <td>sterke frasescheiding</td>
 <td>dubbele maatstreep</td>
 </tr>
+<tr>
+<td><code>**</code></td>
+<td>sterke frasescheiding (blad)</td>
+<td>(vaak als <code>*</code>)</td>
+</tr>
 </tbody>
 </table>
 <p>Deze markeringen maken geen deel uit van de kernsyntax van <a class="og-termref" href="/VSA-tooling/terminologie/vsa-scope" title="VSA-scope: een tekstfragment dat met <code>{</code> begint, met <code>}</code> eindigt, geen whitespace binnen de accolades bevat en door de Parser kan worden opgesplitst in optionele Hoogte-modifier, verplicht zangelement en optionele Lengte-modifier.">VSA-scopes</a>,
 maar mogen door <a class="og-termref" href="/VSA-tooling/terminologie/renderer" title="Renderer: een component die een gevalideerde AST / Syntactische Boom of daarvan afgeleid layoutmodel omzet naar concrete uitvoer, zoals SVG, JSON, Markdown, Hugo-output of MusicXML, zonder de AST semantisch te wijzigen.">renderers</a> of weergavecomponenten en exporteurs semantisch worden verwerkt.</p>
+<p>Voor <strong>template-mapping</strong> (<code>vsa mvsa</code>): losse tokens <code>*</code> / <code>/</code> / <code>**</code> /
+<code>//</code> buiten scopes scheiden tekstfrasen (EHMs in <code>{…}</code> niet). Zonder
+<code>*</code>/<code>**</code>: elke niet-ingesprongen regel = één frase; ingesprongen vervolg
+= print-wrap. Details:
+<a href="../../specification-vsa-templates/mapping-vsa/#frasescheiders-en-print-wraps">mapping-vsa — frasescheiders</a>.</p>
 <hr />
 
 
@@ -6534,7 +6628,7 @@ maar mogen door <a class="og-termref" href="/VSA-tooling/terminologie/renderer" 
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-03
+        Bijgewerkt: 2026-11-09
         
       </p>
       
@@ -6554,7 +6648,7 @@ maar mogen door <a class="og-termref" href="/VSA-tooling/terminologie/renderer" 
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Gekopieerd naar klembord", "clipboard.copy": "Kopi\u00ebren naar klembord", "search.result.more.one": "1 extra overeenkomst op deze pagina", "search.result.more.other": "# extra overeenkomsten op deze pagina", "search.result.none": "Geen overeenkomende documenten", "search.result.one": "1 overeenkomende document", "search.result.other": "# overeenkomende documenten", "search.result.placeholder": "Typ om te beginnen met zoeken", "search.result.term.missing": "Ontbreekt", "select.version": "Selecteer versie"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

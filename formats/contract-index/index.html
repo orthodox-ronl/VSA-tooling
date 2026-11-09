@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -2772,6 +2772,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../specification-vsa-templates/rendering-pitfalls/" class="md-nav__link">
         
   
@@ -4074,6 +4130,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/products/" class="md-nav__link">
         
   
@@ -5111,9 +5195,10 @@
 
 
 <h1 id="contract-index-canonieke-afspraken">Contract-index (canonieke afspraken)<a class="headerlink" href="#contract-index-canonieke-afspraken" title="Permanent link">&para;</a></h1>
-<p><strong>Start hier</strong> als je export, normalize, layout, Score-IR/from-ir of OSMD
-aanraakt. Normatieve regels staan <strong>alleen</strong> in de hubs hieronder. Elders
-(man-pages, plans, bibliotheek-specs) <strong>linken</strong> — niet herformuleren.</p>
+<p><strong>Start hier</strong> als je export, normalize, layout, Score-IR/from-ir, OSMD,
+<strong>of VSA+template→MVSA</strong> (<code>vsa mvsa</code> / mapper / emit) aanraakt. Normatieve
+regels staan <strong>alleen</strong> in de hubs hieronder. Elders (man-pages, plans,
+bibliotheek-specs) <strong>linken</strong> — niet herformuleren.</p>
 <h2 id="regels">Regels<a class="headerlink" href="#regels" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Wijzig een afspraak alleen in de canonieke hub; elders alleen een link.</li>
@@ -5131,7 +5216,8 @@ aanraakt. Normatieve regels staan <strong>alleen</strong> in de hubs hieronder. 
    Partituur-PDF (P*) is <strong>geen</strong> standaardproduct: alleen los gereedschap.</li>
 </ol>
 <p>Agent-regel in de repo: <code>.cursor/rules/contracten-eerst.mdc</code> (en voor
-mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
+mvsa-export: <code>mvsa-export-contracten.mdc</code>). VSA↔template / <code>vsa mvsa</code>:
+T-reeks in <a href="../../specification-vsa-templates/vsa-mvsa-contract/">vsa-mvsa-contract.md</a>.</p>
 <h2 id="hubs-onderwerp-canonieke-plek">Hubs (onderwerp → canonieke plek)<a class="headerlink" href="#hubs-onderwerp-canonieke-plek" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -5206,6 +5292,11 @@ mvsa-export: <code>mvsa-export-contracten.mdc</code>).</p>
 <td>Eenstemmig <code>.vsa</code></td>
 <td><a href="../vsa/">vsa.md</a> · <a href="../../specification/">specification</a></td>
 <td><code>vsa …</code></td>
+</tr>
+<tr>
+<td><strong>VSA + template → MVSA</strong> (T1–T7: template-id, melodiestem, emit, corpus)</td>
+<td><a href="../../specification-vsa-templates/vsa-mvsa-contract/">vsa-mvsa-contract.md</a> · <a href="../../specification-vsa-templates/conversion-lessons/">conversion-lessons.md</a> · <a href="../../specification-vsa-templates/mapping-vsa/">mapping-vsa.md</a></td>
+<td><code>vsa mvsa</code> / <code>vsa.vsa_mvsa</code> / template-instance</td>
 </tr>
 <tr>
 <td>MusicXML-exportprofielen (playback e.d.)</td>
@@ -5426,7 +5517,7 @@ punt, geen excuus voor een parallelle checklist in de site-repo.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-01
+        Bijgewerkt: 2026-11-09
         
       </p>
       
@@ -5446,7 +5537,7 @@ punt, geen excuus voor een parallelle checklist in de site-repo.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Gekopieerd naar klembord", "clipboard.copy": "Kopi\u00ebren naar klembord", "search.result.more.one": "1 extra overeenkomst op deze pagina", "search.result.more.other": "# extra overeenkomsten op deze pagina", "search.result.none": "Geen overeenkomende documenten", "search.result.one": "1 overeenkomende document", "search.result.other": "# overeenkomende documenten", "search.result.placeholder": "Typ om te beginnen met zoeken", "search.result.term.missing": "Ontbreekt", "select.version": "Selecteer versie"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

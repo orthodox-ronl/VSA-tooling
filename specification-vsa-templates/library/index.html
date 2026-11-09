@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -2653,6 +2653,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../rendering-pitfalls/" class="md-nav__link">
         
   
@@ -2776,6 +2832,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Mapstructuur">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traditie-in-het-template-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traditie in het template-id
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4173,6 +4246,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/products/" class="md-nav__link">
         
   
@@ -5127,6 +5228,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Mapstructuur">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traditie-in-het-template-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traditie in het template-id
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5315,20 +5433,29 @@
 
 
 <h1 id="library-vsa-templates-per-genre-toon">Library: vsa-templates per genre × toon<a class="headerlink" href="#library-vsa-templates-per-genre-toon" title="Permanent link">&para;</a></h1>
-<p>Werkmap per formule. Gedeelde afspraken staan hier; per combinatie staat
-alles onder <code>&lt;genre&gt;-toon-&lt;n&gt;/</code>.</p>
+<p>Werkmap per formule. Gedeelde afspraken staan hier. <strong>Nieuwe</strong> formules:
+map + id <code>{traditie}-{genre}-toon-{n}</code>. Legacy zonder traditie-prefix blijft
+geldig.</p>
 <h2 id="mapstructuur">Mapstructuur<a class="headerlink" href="#mapstructuur" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>library/
-  README.md                 ← dit bestand (geldt voor alle formules)
-  tropaar-toon-4/
-    template.yaml           ← canonieke formule
-    template.mscz           ← formuleblad MuseScore (één bestand, geen .mscx)
-    template.mxl            ← formule MusicXML (delen)
-    README.md               ← kort: status, bron, pijplijn
-    examples/corpus/        ← .vsa + afgeleide .mscz/.mxl
-    notes/                  ← corpus, mappinglessen, besluiten
+  README.md                      ← dit bestand (geldt voor alle formules)
+  tropaar-toon-4/                ← legacy-id (Hemelum)
+  groningen-tropaar-toon-4/      ← traditie in de id (voorkeur nieuw)
+    template.yaml                ← canonieke formule
+    template.mscz                ← formuleblad MuseScore (één bestand, geen .mscx)
+    template.mxl                 ← formule MusicXML (delen)
+    README.md                    ← kort: status, bron, pijplijn
+    examples/corpus/             ← .vsa + afgeleide .mscz/.mxl
+    notes/                       ← corpus, mappinglessen, besluiten
   …
 </code></pre></div>
+<h3 id="traditie-in-het-template-id">Traditie in het template-id<a class="headerlink" href="#traditie-in-het-template-id" title="Permanent link">&para;</a></h3>
+<p>Nieuwe formules: id en mapnaam <code>{traditie}-{genre}-toon-{n}</code> (bijv.
+<code>groningen-tropaar-toon-4</code>; later <code>hemelum-…</code> als die traditie een eigen YAML
+krijgt). Zo is een tweede traditie een aparte map, geen stille overwrite.</p>
+<p>Bestaande ids zonder prefix (<code>kondak-toon-1</code>, <code>tropaar-toon-4</code>, …) blijven;
+de map-README noemt de traditie (meestal Groningen; <code>tropaar-toon-4</code> =
+Hemelum). Playbook-aliassen wijzen naar het canonieke YAML-<code>id</code>.</p>
 <p>Invalid schema-cases blijven in
 <code>examples/invalid/</code> (geen formule-werkmap).</p>
 <h2 id="gedeelde-afspraken">Gedeelde afspraken<a class="headerlink" href="#gedeelde-afspraken" title="Permanent link">&para;</a></h2>
@@ -5342,7 +5469,19 @@ alles onder <code>&lt;genre&gt;-toon-&lt;n&gt;/</code>.</p>
 <tbody>
 <tr>
 <td>Architectuur</td>
-<td><strong>VSA→template-instance</strong>: S uit VSA, A/T/B uit template (synchroon)</td>
+<td><strong>VSA→template-instance</strong> (<a href="../vsa-mvsa-contract/">T1–T7</a>): melodie uit VSA (default S), overige stemmen uit template</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>vsa mvsa --template &lt;id&gt;</code> — zie <a href="../../reference/cli/vsa-mvsa/">vsa-mvsa.md</a></td>
+</tr>
+<tr>
+<td>Lessen / checklist</td>
+<td><a href="../conversion-lessons/">conversion-lessons.md</a> (octaven, tempo, B-paden, same_as, nieuwe tonen)</td>
+</tr>
+<tr>
+<td>Contract</td>
+<td><a href="../vsa-mvsa-contract/">vsa-mvsa-contract.md</a> · <a href="../mapping-vsa/">mapping-vsa.md</a> · <a href="../../formats/contract-index/">contract-index</a></td>
 </tr>
 <tr>
 <td>MusicXML-balken</td>
@@ -5361,8 +5500,8 @@ alles onder <code>&lt;genre&gt;-toon-&lt;n&gt;/</code>.</p>
 <td>PDF/PNG = featurebron; menselijke MuseScore-edit → YAML</td>
 </tr>
 <tr>
-<td>Renderer</td>
-<td><code>python scripts/render_vsa_template_musicxml.py --all</code> (hulp, niet bron)</td>
+<td>Renderer / sync</td>
+<td>Na YAML-wijziging: <code>python scripts\sync_library_templates.py [&lt;id&gt;…]</code> · check: <code>--check</code> · of <code>render_vsa_template_musicxml.py --all</code></td>
 </tr>
 <tr>
 <td>Validatie</td>
@@ -5572,9 +5711,64 @@ S/A-partij volstaat.</p>
 </thead>
 <tbody>
 <tr>
+<td><a href="kondak-toon-1/"><code>kondak-toon-1</code></a></td>
+<td>cycle</td>
+<td>Groningen; also tropaar</td>
+</tr>
+<tr>
+<td><a href="kondak-toon-2/"><code>kondak-toon-2</code></a></td>
+<td>cycle</td>
+<td>Groningen; also tropaar</td>
+</tr>
+<tr>
+<td><a href="kondak-toon-5/"><code>kondak-toon-5</code></a></td>
+<td>cycle</td>
+<td>Groningen; also tropaar</td>
+</tr>
+<tr>
+<td><a href="kondak-toon-6/"><code>kondak-toon-6</code></a></td>
+<td>cycle</td>
+<td>Groningen; also tropaar</td>
+</tr>
+<tr>
+<td><a href="kondak-toon-7/"><code>kondak-toon-7</code></a></td>
+<td>cycle</td>
+<td>Groningen; also tropaar</td>
+</tr>
+<tr>
+<td><a href="kondak-toon-8/"><code>kondak-toon-8</code></a></td>
+<td>cycle</td>
+<td>Groningen; also tropaar</td>
+</tr>
+<tr>
 <td><a href="tropaar-toon-1/"><code>tropaar-toon-1</code></a></td>
 <td>cycle</td>
 <td></td>
+</tr>
+<tr>
+<td><a href="tropaar-toon-2/"><code>tropaar-toon-2</code></a></td>
+<td><code>same_as</code></td>
+<td>→ kondak-toon-2</td>
+</tr>
+<tr>
+<td><a href="tropaar-toon-5/"><code>tropaar-toon-5</code></a></td>
+<td><code>same_as</code></td>
+<td>→ kondak-toon-5</td>
+</tr>
+<tr>
+<td><a href="tropaar-toon-6/"><code>tropaar-toon-6</code></a></td>
+<td><code>same_as</code></td>
+<td>→ kondak-toon-6</td>
+</tr>
+<tr>
+<td><a href="tropaar-toon-7/"><code>tropaar-toon-7</code></a></td>
+<td><code>same_as</code></td>
+<td>→ kondak-toon-7</td>
+</tr>
+<tr>
+<td><a href="tropaar-toon-8/"><code>tropaar-toon-8</code></a></td>
+<td><code>same_as</code></td>
+<td>→ kondak-toon-8</td>
 </tr>
 <tr>
 <td><a href="tropaar-toon-3/"><code>tropaar-toon-3</code></a></td>
@@ -5584,17 +5778,17 @@ S/A-partij volstaat.</p>
 <tr>
 <td><a href="tropaar-toon-4/"><code>tropaar-toon-4</code></a></td>
 <td>cycle</td>
-<td>Elia-mapping + corpus</td>
+<td>Hemelum; Elia-mapping + corpus</td>
 </tr>
 <tr>
-<td><a href="tropaar-toon-5/"><code>tropaar-toon-5</code></a></td>
-<td><code>same_as</code></td>
-<td>→ stichier-toon-5</td>
+<td><a href="groningen-tropaar-toon-4/"><code>groningen-tropaar-toon-4</code></a></td>
+<td>cycle</td>
+<td>Groningen; also kondak; uit Nicolaas-schets</td>
 </tr>
 <tr>
 <td><a href="stichier-toon-5/"><code>stichier-toon-5</code></a></td>
 <td>cycle</td>
-<td>ook als tropaar</td>
+<td>PDF-stichier (niet Groningen kondak-5)</td>
 </tr>
 <tr>
 <td><a href="vers-toon-1/"><code>vers-toon-1</code></a></td>
@@ -5646,7 +5840,7 @@ S/A-partij volstaat.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-19
+        Bijgewerkt: 2026-11-09
         
       </p>
       
@@ -5666,7 +5860,7 @@ S/A-partij volstaat.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Gekopieerd naar klembord", "clipboard.copy": "Kopi\u00ebren naar klembord", "search.result.more.one": "1 extra overeenkomst op deze pagina", "search.result.more.other": "# extra overeenkomsten op deze pagina", "search.result.none": "Geen overeenkomende documenten", "search.result.one": "1 overeenkomende document", "search.result.other": "# overeenkomende documenten", "search.result.placeholder": "Typ om te beginnen met zoeken", "search.result.term.missing": "Ontbreekt", "select.version": "Selecteer versie"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

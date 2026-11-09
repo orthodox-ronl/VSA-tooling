@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -2644,6 +2644,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../rendering-pitfalls/" class="md-nav__link">
         
   
@@ -3946,6 +4002,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../reference/cli/vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../reference/cli/products/" class="md-nav__link">
         
   
@@ -4975,6 +5059,14 @@
 <p><strong>Traditie:</strong> Hemelum (niet Groningen). <strong>Ook voor kondak</strong> toon 4
 (<code>also_used_as: [kondak]</code>). Canonieke id: <code>tropaar-toon-4</code>. Playbook-alias
 voor CLI: <code>hemelum-tropaar-toon-4</code> → dit id (default bij <code>vsa mvsa</code>).</p>
+<p>Groningen toon 4: aparte formule
+<a href="../groningen-tropaar-toon-4/"><code>groningen-tropaar-toon-4</code></a> (expliciet
+<code>--template groningen-tropaar-toon-4</code>).</p>
+<p><strong>Frase 1 B-pad:</strong> Hemelum zet <code>/2</code> → <code>mi-1</code> zodra de mi-cadens na de
+recite begint, dan <code>\</code> → <code>re-1</code> (hold) → <code>la-2</code>. Groningen houdt B op
+<code>do-1</code> tot de fa (<code>/</code> → <code>re-1</code>). Bron: klaar Nikolaas + gecorrigeerde
+<code>kondak-zondag-toon-4-hemelum.mvsa</code>. Tempo (<code>@tempo 180</code>) hoort in het
+stuk, niet in deze formule.</p>
 <blockquote>
 <p><strong>Herstart 2026-11:</strong> formule+tekst-verkenning in de repo-map
 <code>examples/formule-tekst/tropaar-toon-4/</code> (niet op de documentatiesite).
@@ -4991,7 +5083,7 @@ Snapshot oude aanpak: <code>examples/formule-tekst/.archief/tropaar-toon-4-oud/<
 <tbody>
 <tr>
 <td>Formule-bron</td>
-<td><a href="template.yaml"><code>template.yaml</code></a></td>
+<td><a href="template.yaml"><code>template.yaml</code></a> — <strong>bewerk dit</strong></td>
 </tr>
 <tr>
 <td>Traditie / genres</td>
@@ -5002,16 +5094,12 @@ Snapshot oude aanpak: <code>examples/formule-tekst/.archief/tropaar-toon-4-oud/<
 <td><code>of:</code> <code>re-close</code> (pad 0, formuleblad) · <code>fa-close</code> (mi–fa–mi)</td>
 </tr>
 <tr>
-<td>Formule-MSCZ</td>
-<td><a href="template.mscz"><code>template.mscz</code></a> (MuseScore; toont pad 0)</td>
-</tr>
-<tr>
-<td>Formule-MXL</td>
-<td><a href="template.mxl"><code>template.mxl</code></a> (delen / Coria-achtig)</td>
+<td>Formule-MSCZ/MXL</td>
+<td><a href="template.mscz"><code>template.mscz</code></a> / <a href="template.mxl"><code>template.mxl</code></a> — afgeleid uit <em>deze</em> YAML</td>
 </tr>
 <tr>
 <td>Formule-PDF</td>
-<td><code>template.pdf</code> (lokaal; niet in git)</td>
+<td><code>template.pdf</code> (lokaal via MuseScore; niet in git)</td>
 </tr>
 <tr>
 <td>Status pitches</td>
@@ -5026,12 +5114,17 @@ Snapshot oude aanpak: <code>examples/formule-tekst/.archief/tropaar-toon-4-oud/<
 <h2 id="wat-hoort-in-deze-map">Wat hoort in deze map<a class="headerlink" href="#wat-hoort-in-deze-map" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>tropaar-toon-4/
   template.yaml          ← canonieke formule (bewerk hier)
-  template.mscz          ← afgeleid: formuleblad MuseScore
-  template.mxl           ← afgeleid: formule MusicXML
+  template.mscz          ← afgeleid uit template.yaml (Hemelum)
+  template.mxl           ← afgeleid uit template.yaml (Hemelum)
   template.pdf           ← lokaal afgeleid (print; .gitignore)
   README.md
   notes/                 ← corpus-notities, mappinglessen
   examples/corpus/       ← .vsa + afgeleide .mscz/.mxl (+ lokale .pdf)
+</code></pre></div>
+<p>Na elke wijziging in <code>template.yaml</code> (zelfde voor Groningen):</p>
+<div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
+python scripts\sync_library_templates.py tropaar-toon-4
+python scripts\sync_library_templates.py --check tropaar-toon-4
 </code></pre></div>
 <p><strong>Niet</strong> committen / niet bewaren: MuseScore-rommel (<code>.mscbackup/</code>,
 <code>Thumbnails/</code>, losse <code>META-INF/</code>, <code>audiosettings.json</code>, <code>viewsettings.json</code>,
@@ -5048,7 +5141,7 @@ python scripts\render_tropaar_toon4_corpus.py --pdf
 </code></pre></div>
 <p>Alleen formuleblad:</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-python scripts\render_tropaar_toon4_corpus.py --template
+python scripts\sync_library_templates.py tropaar-toon-4
 python scripts\render_tropaar_toon4_corpus.py --template --pdf
 </code></pre></div>
 <p>Alleen PDF’s opnieuw uit bestaande <code>.mscz</code>:</p>
@@ -5144,7 +5237,7 @@ bestand heeft niet alle 13 blokken, o.a. T4-07a).</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-06
+        Bijgewerkt: 2026-11-09
         
       </p>
       
@@ -5164,7 +5257,7 @@ bestand heeft niet alle 13 blokken, o.a. T4-07a).</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Gekopieerd naar klembord", "clipboard.copy": "Kopi\u00ebren naar klembord", "search.result.more.one": "1 extra overeenkomst op deze pagina", "search.result.more.other": "# extra overeenkomsten op deze pagina", "search.result.none": "Geen overeenkomende documenten", "search.result.one": "1 overeenkomende document", "search.result.other": "# overeenkomende documenten", "search.result.placeholder": "Typ om te beginnen met zoeken", "search.result.term.missing": "Ontbreekt", "select.version": "Selecteer versie"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>
