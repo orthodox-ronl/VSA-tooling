@@ -21,6 +21,23 @@ from typing import Iterator
 
 _SVG_PAGE_INDEX_RE = re.compile(r"-(\d+)\.svg$", re.IGNORECASE)
 
+
+def _musescore_page_svgs(dest: Path) -> list[Path]:
+    """Alleen ``{stem}-1.svg`` / ``{stem}-2.svg`` …, niet ``{stem}-nls.svg``.
+
+    Nodig omdat ``lied.mvsa.translit.svg`` als stem ``….translit`` heeft;
+    een brede glob ``….translit-*.svg`` zou anders
+    ``….translit-nls.svg`` / ``….translit-ksl.svg`` wissen of meenemen.
+    """
+    dest = Path(dest)
+    prefix = f"{dest.stem}-"
+    out: list[Path] = []
+    for path in dest.parent.glob(f"{dest.stem}-*.svg"):
+        rest = path.name[len(prefix) : -len(path.suffix)]
+        if rest.isdigit():
+            out.append(path)
+    return sorted(out, key=_svg_page_index)
+
 MUSESCORE_CANDIDATES = (
     Path(r"C:\Program Files\MuseScore 4\bin\MuseScore4.exe"),
     Path(r"C:\Program Files\MuseScore 3\bin\MuseScore3.exe"),
@@ -189,9 +206,10 @@ def convert_with_musescore(
     dest.parent.mkdir(parents=True, exist_ok=True)
     with musescore_exclusive():
         _unlink_with_retry(dest)
-        # MuseScore SVG: wis eventuele oude pagina-bestanden (stem-1.svg, …).
+        # MuseScore SVG: wis oude pagina-bestanden (stem-1.svg, …) — niet
+        # translit-nls/ksl-siblings van een ``….translit.svg``-doel.
         if dest.suffix.lower() == ".svg":
-            for stale in dest.parent.glob(f"{dest.stem}-*.svg"):
+            for stale in _musescore_page_svgs(dest):
                 _unlink_with_retry(stale)
         cmd = [str(exe), "-f"]
         if musicxml_infer_text_type:
@@ -232,11 +250,7 @@ def _svg_page_index(path: Path) -> int:
 
 def list_musescore_svg_pages(dest: Path) -> list[Path]:
     """Return MuseScore page SVGs for ``dest`` stem (``stem-1.svg``, …)."""
-    dest = Path(dest)
-    return sorted(
-        dest.parent.glob(f"{dest.stem}-*.svg"),
-        key=_svg_page_index,
-    )
+    return _musescore_page_svgs(dest)
 
 
 def _resolve_musescore_svg_pages(dest: Path) -> list[Path]:

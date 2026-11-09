@@ -10,9 +10,11 @@ import sys
 from .mvsa_parse import (
     LPosition,
     _ELMS,
+    _attach_lyric_punct,
     _is_syllable_char,
     _is_woordstreepje,
     _read_elms,
+    escape_lyric_periods_for_mvsa,
     parse_l_positions,
 )
 from .mvsa_validate import is_lyrics_stem, parse_regelidentifier, _split_bars
@@ -47,6 +49,15 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
             if not is_elm_dot:
                 i += 1
                 continue
+        # Stray woordstreepje vóór '(' of andere non-letter: zelfde als
+        # parse_l_positions. Anders wordt ``mach_-(ti`` / ``)-(de)`` een
+        # wees-token ``-`` en verdwijnt de laatste lettergreep bij align (T5 /
+        # MVSA-SYNC).
+        if _is_woordstreepje(stripped[i]) and not (
+            i + 1 < n and _is_syllable_char(stripped[i + 1])
+        ):
+            i += 1
+            continue
         start = i
         if stripped[i] == "(":
             close = stripped.find(")", i + 1)
@@ -54,6 +65,7 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
                 close = n - 1
             i = close + 1
             _, i = _read_elms(stripped, i, allow_bare_dash=False)
+            _, i = _attach_lyric_punct(stripped, i, "")
             spans.append((start + offset, i + offset))
             pi += 1
             continue
@@ -64,11 +76,9 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
                 _is_syllable_char(stripped[i]) or stripped[i] in "'’ʹ"
             ):
                 i += 1
-            while i < n and stripped[i] in ",;:!?":
-                i += 1
+            _, i = _attach_lyric_punct(stripped, i, "")
             _, i = _read_elms(stripped, i)
-            while i < n and stripped[i] in ",;:!?":
-                i += 1
+            _, i = _attach_lyric_punct(stripped, i, "")
             if (
                 i < n
                 and _is_woordstreepje(stripped[i])
@@ -90,6 +100,9 @@ def _l_tokens(measure: str) -> list[str]:
 
 
 def _format_lpos(p: LPosition) -> str:
+    def _syl(s: str) -> str:
+        return escape_lyric_periods_for_mvsa(s)
+
     if p.recite:
         parts: list[str] = []
         for i, syl in enumerate(p.syllables):
@@ -99,7 +112,7 @@ def _format_lpos(p: LPosition) -> str:
                     parts.append("=" if hard else "-")
                 else:
                     parts.append(" ")
-            parts.append(syl)
+            parts.append(_syl(syl))
         return "(" + "".join(parts) + ")" + _format_elms(p.elms)
     if p.continues_word:
         prefix = "=" if p.continues_word_hard else "-"
@@ -107,15 +120,30 @@ def _format_lpos(p: LPosition) -> str:
         prefix = ""
     if not p.syllables:
         return prefix + _format_elms(p.elms)
-    body = p.syllables[0]
+    # Zinspunt ná ELM: ``schaamd_.`` ≠ gestipte half → ``schaamd_\\.``.
+    core0, dots0 = _split_trailing_periods(p.syllables[0])
+    body = _syl(core0) if dots0 else _syl(p.syllables[0])
+    trailing_dots = dots0
     for i, syl in enumerate(p.syllables[1:]):
         link = p.links[i] if i < len(p.links) else True
+        core, dots = _split_trailing_periods(syl)
+        piece = _syl(core) if dots else _syl(syl)
         if link:
             hard = i < len(p.hard_links) and p.hard_links[i]
-            body += ("=" if hard else "-") + syl
+            body += ("=" if hard else "-") + piece
         else:
-            body += " " + syl
-    return prefix + body + _format_elms(p.elms)
+            body += " " + piece
+        trailing_dots = dots
+    return prefix + body + _format_elms(p.elms) + trailing_dots
+
+
+def _split_trailing_periods(syll: str) -> tuple[str, str]:
+    n = 0
+    while n < len(syll) and syll[-(n + 1)] == ".":
+        n += 1
+    if n == 0:
+        return syll, ""
+    return syll[:-n], "\\." * n
 
 
 def _format_elms(elms: list[str]) -> str:

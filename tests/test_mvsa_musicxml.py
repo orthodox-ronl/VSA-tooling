@@ -127,6 +127,21 @@ def test_parse_l_punct_after_elm_and_hyphen_continue():
     assert pos[2].continues_word is True
 
 
+def test_parse_l_escaped_period_is_punct_not_dotted_elm():
+    """Zinspunt ``\\.`` ≠ ELM ``.`` — voorkomt gestipte/te korte noot."""
+    dotted = parse_l_positions("schaamd_.")
+    assert dotted[0].syllables == ["schaamd"]
+    assert dotted[0].elms == ["_."]
+
+    escaped = parse_l_positions("schaamd_\\.")
+    assert escaped[0].syllables == ["schaamd."]
+    assert escaped[0].elms == ["_"]
+
+    bare = parse_l_positions("eind\\.")
+    assert bare[0].syllables == ["eind."]
+    assert bare[0].elms == ["~"]
+
+
 def test_parse_l_recite_spaces_between_words():
     pos = parse_l_positions("(laat ons aan-bid-den voor)")
     assert len(pos) == 1

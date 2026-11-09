@@ -153,6 +153,8 @@ nav:
     - Semantiek: specification-vsa-templates/semantics.md
     - Validatie: specification-vsa-templates/validation.md
     - Mapping VSA: specification-vsa-templates/mapping-vsa.md
+    - Contract VSA→MVSA: specification-vsa-templates/vsa-mvsa-contract.md
+    - Conversielessen: specification-vsa-templates/conversion-lessons.md
     - Rendering-valkuilen: specification-vsa-templates/rendering-pitfalls.md
     - Voorbeelden: specification-vsa-templates/examples.md
     - Library: specification-vsa-templates/library/README.md
@@ -195,6 +197,7 @@ nav:
       - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
       - reference/cli/musicxml.md
+      - reference/cli/vsa-mvsa.md
       - reference/cli/products.md
       - reference/cli/audio.md
       - reference/cli/mvsa.md

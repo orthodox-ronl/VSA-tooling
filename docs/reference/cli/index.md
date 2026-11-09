@@ -79,6 +79,7 @@ echo %ERRORLEVEL%
 | [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`); playback + Coria-finalize; optioneel `--syllabify`. |
 | [`products`](products.md)                        | Standaardproducten + `*.products-meta.json` (geen partituur-PDF); ook `mvsa`/`mscz products`.                 |
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                                       |
+| [`vsa mvsa`](vsa-mvsa.md)                        | `.vsa` + formule-template → schets-`.mvsa` (T1–T7; default Hemelum toon 4).                                   |
 | [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3 (`mvsa`).                                 |
 | [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: `mxl mvsa`; `mxl mscz`; validate/normalize.                                          |
 | [`mscz`](mscz.md)                                | Bron `.mscz`: `mvsa`; `mxl`; `svg`; `pdf`; `normalize`; text; `compare`; `products`.                          |

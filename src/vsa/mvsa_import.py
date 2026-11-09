@@ -322,6 +322,11 @@ def import_score_to_mvsa(
             )
         elif suffix in {".mxl", ".musicxml", ".xml"}:
             xml = read_musicxml_file(path)
+            # Capella SA/TB (2 parts / chord-stokken) → P1–P4 (M2), ook zonder
+            # MuseScore-rondje. Al vierstemmig playback-MXL blijft ongemoeid.
+            from .musicxml_satb_layout import ensure_playback_musicxml
+
+            xml = ensure_playback_musicxml(xml)
         else:
             raise MvsaImportError(
                 f"verwacht .mxl, .musicxml, .xml of .mscz; kreeg {suffix!r}"

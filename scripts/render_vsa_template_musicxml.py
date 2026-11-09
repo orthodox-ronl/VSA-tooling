@@ -1937,11 +1937,17 @@ def main() -> int:
 
     if args.all:
         for yaml_path in sorted(LIBRARY.glob("*/template.yaml")):
+            doc_raw = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
+            if isinstance(doc_raw, dict) and "same_as" in doc_raw:
+                print(f"skip alias {yaml_path.parent.name} (same_as)")
+                continue
             doc = load_resolved(yaml_path, LIBRARY)
-            xml = render_template_musicxml(doc)
             out_mxl = yaml_path.with_name("template.mxl")
-            write_musicxml_output(out_mxl, xml)
+            out_mscz = yaml_path.with_name("template.mscz")
+            write_musicxml_output(out_mxl, render_template_musicxml(doc))
+            write_mscx_output(out_mscz, render_template_mscx(doc))
             print(f"wrote {out_mxl.relative_to(REPO)}")
+            print(f"wrote {out_mscz.relative_to(REPO)}")
         return 0
 
     if not args.template:

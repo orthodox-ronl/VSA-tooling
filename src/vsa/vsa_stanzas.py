@@ -1,7 +1,8 @@
-"""VSA-tekst → noten per tekstregel (`*` / `**` als frasegrens)."""
+"""VSA-tekst → noten per tekstfrase (`*` / `**` / `/` / `//` als frasegrens)."""
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, replace
 
 from .ast import Document, PitchMarkerNode, PitchTransitionNode, ScopeNode, TextNode
@@ -14,12 +15,152 @@ from .parser import Parser
 from .pitch_resolver import PitchResolver
 from .yaml_frontmatter import parse_vsa_frontmatter_with_body_offset
 
-_STANZA_MARKERS = frozenset({"*", "**"})
-# Losse EHM/barline-tokens in platte tekst zijn geen gezongen woorden.
-_BARE_EHM_TOKENS = frozenset(
+# Frasescheiders: losse tokens buiten scopes (EHMs in `{…}` blijven scopes).
+# `*` / `/` = frasescheiding; `**` / `//` = sterke scheiding vóór laatste.
+_STANZA_MARKERS = frozenset({"*", "**", "/", "//"})
+_BARE_EHM_ALL = frozenset(
     v for v in VALID_EHM_VALUES if v and all(ch in "/\\-~#♯+b♭" for ch in v)
 )
-_BARE_EHM_SORTED = sorted(_BARE_EHM_TOKENS, key=len, reverse=True)
+# Losse EHM-tokens die géén frasescheider zijn (bijv. `\`, `~`).
+_BARE_EHM_TOKENS = _BARE_EHM_ALL - _STANZA_MARKERS
+# Prefix-strip op woorden (`//Toen` → `Toen`) — inclusief `/` en `//`.
+_BARE_EHM_SORTED = sorted(_BARE_EHM_ALL, key=len, reverse=True)
+_PHRASE_SEP_TRAIL = re.compile(r"(?:\*\*|//|\*|/)\s*$")
+_HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+
+
+
+def strip_html_comments(text: str) -> str:
+    """Verwijder ``<!-- … -->`` (ook over regels) voor frase-telling."""
+    return _HTML_COMMENT.sub("", text)
+
+
+def fold_indent_continuations(lines: list[str]) -> list[str]:
+    """Voeg ingesprongen vervolgregels samen met de vorige frase-regel.
+
+    Conventie voor te lange frasen op papier: volgende delen op een nieuwe
+    regel, maar ingesprongen — hoort bij dezelfde frase, geen nieuwe grens.
+    """
+    if not lines:
+        return []
+    out: list[str] = []
+    for ln in lines:
+        if out and ln[:1].isspace():
+            prev = out[-1].rstrip()
+            cont = ln.strip()
+            out[-1] = f"{prev} {cont}" if cont else prev
+        else:
+            out.append(ln.rstrip())
+    return out
+
+
+def music_phrase_lines(body: str) -> list[str]:
+    """Niet-lege muziekregels, HTML-commentaar weg, indent-wraps samengevoegd."""
+    cleaned = strip_html_comments(body)
+    raw = [
+        ln
+        for ln in cleaned.splitlines()
+        if ln.strip() and not ln.strip().startswith("#")
+    ]
+    return fold_indent_continuations(raw)
+
+
+def has_phrase_separators(body: str) -> bool:
+    """True als de bron al expliciete `*` / `**` als frasescheiding gebruikt.
+
+    Alleen ster-markers schakelen ensure uit. Kale `/` of `//` komen ook
+    voor als enige scheiding vóór laatste (of als bladteken); zonder `*`/`**`
+    blijft regel-per-frase (+ indent-wrap) de ensure-route, daarna splitst
+    extract ook op `/`/`//`.
+    """
+    cleaned = strip_html_comments(body)
+    for ln in cleaned.splitlines():
+        s = ln.strip()
+        if not s or s.startswith("#"):
+            continue
+        for tok in s.split():
+            if tok in {"*", "**"}:
+                return True
+    return False
+
+
+def ensure_stanza_stars(body: str) -> tuple[str, list[str]]:
+    """Normaliseer naar `*`-frasen voor template-mapping indien nodig.
+
+    - HTML-commentaar en ``#``-regels tellen niet mee.
+    - Ingesprongen vervolgregels horen bij de vorige frase (print-wrap).
+    - Zonder frasescheiders: één ``*`` per logische (niet-ingesprongen) regel.
+    - Met scheiders: body ongewijzigd (``extract_stanza_notes`` splitst zelf).
+
+    Returns ``(normalized_body, notes_for_report)``.
+    """
+    notes: list[str] = []
+    if has_phrase_separators(body):
+        return body, notes
+
+    phrases = music_phrase_lines(body)
+    if len(phrases) <= 1:
+        notes.append("geen multi-regel frase-splits nodig")
+        return body, notes
+
+    notes.append(
+        f"geen frasescheiding in bron → {len(phrases)} logische regels "
+        f"genormaliseerd tot frasen met `*` (ingesprongen wraps samengevoegd)"
+    )
+
+    # Classificeer bronregels; voeg `*` toe op het laatste lid van elke
+    # frase-groep (niet-ingesprongen start + indent-vervolgen), behalve de laatste groep.
+    class _Item:
+        __slots__ = ("kind", "raw", "group")
+
+        def __init__(self, kind: str, raw: str, group: int | None = None) -> None:
+            self.kind = kind
+            self.raw = raw
+            self.group = group
+
+    items: list[_Item] = []
+    in_comment = False
+    group_id = -1
+    for ln in body.splitlines():
+        s = ln.strip()
+        if in_comment:
+            items.append(_Item("keep", ln))
+            if "-->" in ln:
+                in_comment = False
+            continue
+        if "<!--" in s:
+            items.append(_Item("keep", ln))
+            if "-->" not in s[s.find("<!--") + 4 :]:
+                in_comment = True
+            continue
+        if not s or s.startswith("#"):
+            items.append(_Item("keep", ln))
+            continue
+        if ln[:1].isspace() and group_id >= 0:
+            items.append(_Item("music", ln, group_id))
+            continue
+        group_id += 1
+        items.append(_Item("music", ln, group_id))
+
+    n_groups = group_id + 1
+    last_music_index: dict[int, int] = {}
+    for i, it in enumerate(items):
+        if it.kind == "music" and it.group is not None:
+            last_music_index[it.group] = i
+
+    rebuilt: list[str] = []
+    for i, it in enumerate(items):
+        if it.kind != "music" or it.group is None:
+            rebuilt.append(it.raw)
+            continue
+        raw = it.raw.rstrip()
+        is_group_end = last_music_index.get(it.group) == i
+        is_last_group = it.group == n_groups - 1
+        if is_group_end and not is_last_group and not _PHRASE_SEP_TRAIL.search(raw):
+            rebuilt.append(raw + " *")
+        else:
+            rebuilt.append(raw)
+    return "\n".join(rebuilt) + "\n", notes
 
 
 @dataclass(frozen=True)

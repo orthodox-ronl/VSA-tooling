@@ -363,10 +363,17 @@ def _set_element_staff(el: ET.Element, staff: str) -> None:
 def _split_staff_measure(
     meas: ET.Element | None,
 ) -> tuple[list[ET.Element], list[ET.Element]]:
-    """Split one staff measure into (upper, lower) — voices or legacy chords.
+    """Split one staff measure into (upper, lower) — voices or Capella chords.
 
     MuseScore SATB-on-two-staves uses voices 1/2 on staff 1 and 5/6 on staff 2;
     the lowest voice number is treated as upper, the rest as lower.
+
+    Capella-achtige SA/TB (één voice + ``<chord/>``-leden op één stok): hoogste
+    toon → upper (S/T), laagste → lower (A/B). Lyrics van de primaire noot
+    gaan mee naar beide stromen (M3; import leest lyrics van S). Één losse
+    noot zonder chord → unisono op beide. Octaven *binnen* een al gesplitste
+    voice (proper SATB) blijven hier ongemoeid; monofone cleanup (M18) haalt
+    die chord-leden later weg.
     """
     if meas is None:
         return [], []
@@ -379,27 +386,114 @@ def _split_staff_measure(
         upper = [n for n in notes if (_voice_num(n) or upper_v) == upper_v]
         lower = [n for n in notes if (_voice_num(n) or upper_v) != upper_v]
         return upper, lower
-    if len(voice_nums) == 1:
-        return notes, [copy.deepcopy(n) for n in notes]
+    return _split_capella_chord_notes(notes)
+
+
+def _split_capella_chord_notes(
+    notes: list[ET.Element],
+) -> tuple[list[ET.Element], list[ET.Element]]:
+    """Split a single-voice note stream into (upper, lower) by pitch height."""
     upper: list[ET.Element] = []
     lower: list[ET.Element] = []
     i = 0
     while i < len(notes):
         n = notes[i]
         if _is_rest(n):
-            upper.append(n)
-            lower.append(n)
+            u = _strip_chord_voice(n)
+            upper.append(u)
+            lower.append(copy.deepcopy(u))
             i += 1
             continue
-        if i + 1 < len(notes) and _has_chord(notes[i + 1]):
-            upper.append(n)
-            lower.append(notes[i + 1])
-            i += 2
-        else:
-            upper.append(n)
-            lower.append(copy.deepcopy(n))
-            i += 1
+        group = [n]
+        j = i + 1
+        while j < len(notes) and _has_chord(notes[j]):
+            group.append(notes[j])
+            j += 1
+        u_note, l_note = _capella_chord_to_voices(group)
+        upper.append(u_note)
+        lower.append(l_note)
+        i = j
     return upper, lower
+
+
+def _capella_chord_to_voices(
+    group: list[ET.Element],
+) -> tuple[ET.Element, ET.Element]:
+    """Highest pitch → upper stem; lowest → lower; lyrics copied to both."""
+    lyric_src = next((n for n in group if _note_has_lyric(n)), None)
+    pitched: list[tuple[ET.Element, int]] = []
+    for n in group:
+        if _is_rest(n):
+            continue
+        midi = _note_midi(n)
+        if midi is not None:
+            pitched.append((n, midi))
+    if not pitched:
+        u = _playback_voice_note(group[0], lyrics_from=lyric_src)
+        return u, copy.deepcopy(u)
+    pitched.sort(key=lambda item: item[1])
+    low_n = pitched[0][0]
+    high_n = pitched[-1][0]
+    if low_n is high_n:
+        u = _playback_voice_note(high_n, lyrics_from=lyric_src)
+        return u, copy.deepcopy(u)
+    return (
+        _playback_voice_note(high_n, lyrics_from=lyric_src),
+        _playback_voice_note(low_n, lyrics_from=lyric_src),
+    )
+
+
+def _playback_voice_note(
+    note: ET.Element, *, lyrics_from: ET.Element | None
+) -> ET.Element:
+    """Deep-copy without ``<chord/>``; ensure lyrics for muted/solo parts."""
+    n = _strip_chord_voice(note)
+    if lyrics_from is not None and not _note_has_lyric(n):
+        for child in lyrics_from:
+            if local(child.tag) == "lyric":
+                n.append(copy.deepcopy(child))
+    return n
+
+
+def _note_has_lyric(note: ET.Element) -> bool:
+    return any(local(c.tag) == "lyric" for c in note)
+
+
+_STEP_SEMITONE = {
+    "C": 0,
+    "D": 2,
+    "E": 4,
+    "F": 5,
+    "G": 7,
+    "A": 9,
+    "B": 11,
+}
+
+
+def _note_midi(note: ET.Element) -> int | None:
+    pitch = next((c for c in note if local(c.tag) == "pitch"), None)
+    if pitch is None:
+        return None
+    step = None
+    octave = None
+    alter = 0
+    for child in pitch:
+        tag = local(child.tag)
+        if tag == "step":
+            step = (child.text or "").strip().upper()
+        elif tag == "octave":
+            try:
+                octave = int((child.text or "").strip())
+            except ValueError:
+                return None
+        elif tag == "alter":
+            try:
+                alter = int(float((child.text or "0").strip()))
+            except ValueError:
+                alter = 0
+    if step not in _STEP_SEMITONE or octave is None:
+        return None
+    return (octave + 1) * 12 + _STEP_SEMITONE[step] + alter
 
 
 def _ensure_lyrics_from(

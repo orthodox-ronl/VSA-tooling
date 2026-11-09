@@ -22,7 +22,7 @@ Kolommen:
 | Herhalingscyclus                | `\|\|: 1, 2 :\|\| laatste`          | `cycle` + `final`                   | required   |
 | Langere cyclus                  | `\|\|: 1,2,3 :\|\| laatste`         | zelfde `cycle`-model                | required   |
 | Vaste frasevolgorde             | toon 3: `1,3,1,2,3,1,2a,4`          | `sequence` (sequence-form)          | required   |
-| Genre-equivalentie              | toon 5: tropaar = stichier          | `same_as` / `also_used_as`          | required   |
+| Genre-equivalentie              | Groningen toon 5: tropaar = kondak; PDF-stichier blijft apart | `same_as` / `also_used_as` | required   |
 | Herhaalpunten / dubbele streep  | begin/eind van cycle-blok           | impliciet via `cycle`               | required   |
 
 ## Muzikale events

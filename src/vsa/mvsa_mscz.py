@@ -336,7 +336,11 @@ def export_mscz_to_svg(
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists():
         out.unlink()
-    for stale in out.parent.glob(f"{out.stem}-*.svg"):
+    # Alleen MuseScore-pagina’s ``stem-1.svg`` / ``stem-2.svg`` (niet
+    # ``….translit-nls.svg`` naast doel ``….translit.svg``).
+    from .musescore_cli import _musescore_page_svgs
+
+    for stale in _musescore_page_svgs(out):
         stale.unlink(missing_ok=True)
 
     fd, tmp_name = tempfile.mkstemp(suffix=".mscz", prefix="mscz-svg-")

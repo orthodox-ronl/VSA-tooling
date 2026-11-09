@@ -1,37 +1,52 @@
 # Library: vsa-templates per genre × toon
 
-Werkmap per formule. Gedeelde afspraken staan hier; per combinatie staat
-alles onder `<genre>-toon-<n>/`.
+Werkmap per formule. Gedeelde afspraken staan hier. **Nieuwe** formules:
+map + id `{traditie}-{genre}-toon-{n}`. Legacy zonder traditie-prefix blijft
+geldig.
 
 ## Mapstructuur
 
 ```text
 library/
-  README.md                 ← dit bestand (geldt voor alle formules)
-  tropaar-toon-4/
-    template.yaml           ← canonieke formule
-    template.mscz           ← formuleblad MuseScore (één bestand, geen .mscx)
-    template.mxl            ← formule MusicXML (delen)
-    README.md               ← kort: status, bron, pijplijn
-    examples/corpus/        ← .vsa + afgeleide .mscz/.mxl
-    notes/                  ← corpus, mappinglessen, besluiten
+  README.md                      ← dit bestand (geldt voor alle formules)
+  tropaar-toon-4/                ← legacy-id (Hemelum)
+  groningen-tropaar-toon-4/      ← traditie in de id (voorkeur nieuw)
+    template.yaml                ← canonieke formule
+    template.mscz                ← formuleblad MuseScore (één bestand, geen .mscx)
+    template.mxl                 ← formule MusicXML (delen)
+    README.md                    ← kort: status, bron, pijplijn
+    examples/corpus/             ← .vsa + afgeleide .mscz/.mxl
+    notes/                       ← corpus, mappinglessen, besluiten
   …
 ```
+
+### Traditie in het template-id
+
+Nieuwe formules: id en mapnaam `{traditie}-{genre}-toon-{n}` (bijv.
+`groningen-tropaar-toon-4`; later `hemelum-…` als die traditie een eigen YAML
+krijgt). Zo is een tweede traditie een aparte map, geen stille overwrite.
+
+Bestaande ids zonder prefix (`kondak-toon-1`, `tropaar-toon-4`, …) blijven;
+de map-README noemt de traditie (meestal Groningen; `tropaar-toon-4` =
+Hemelum). Playbook-aliassen wijzen naar het canonieke YAML-`id`.
 
 Invalid schema-cases blijven in
 `examples/invalid/` (geen formule-werkmap).
 
 ## Gedeelde afspraken
 
-| Onderwerp       | Afspraak                                                                                  |
-| --------------- | ----------------------------------------------------------------------------------------- |
-| Architectuur    | **VSA→template-instance**: S uit VSA, A/T/B uit template (synchroon)                      |
-| MusicXML-balken | 2 partijen: P1 `S/A` (G), P2 `T/B` (F); per partij voice1=S of T, voice2=A of B; `backup` |
-| Maatsoort       | bij voorkeur `senza-misura`; 4/4 tolereren in MuseScore-exports                           |
-| Optionele noten | YAML `optional: true` ↔ MusicXML notehead parentheses                                     |
-| Pitches         | PDF/PNG = featurebron; menselijke MuseScore-edit → YAML                                   |
-| Renderer        | `python scripts/render_vsa_template_musicxml.py --all` (hulp, niet bron)                  |
-| Validatie       | `vsa template validate <pad>`                                                             |
+| Onderwerp          | Afspraak                                                                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Architectuur       | **VSA→template-instance** ([T1–T7](../vsa-mvsa-contract.md)): melodie uit VSA (default S), overige stemmen uit template                   |
+| CLI                | `vsa mvsa --template <id>` — zie [vsa-mvsa.md](../../reference/cli/vsa-mvsa.md)                                                           |
+| Lessen / checklist | [conversion-lessons.md](../conversion-lessons.md) (octaven, tempo, B-paden, same_as, nieuwe tonen)                                        |
+| Contract           | [vsa-mvsa-contract.md](../vsa-mvsa-contract.md) · [mapping-vsa.md](../mapping-vsa.md) · [contract-index](../../formats/contract-index.md) |
+| MusicXML-balken    | 2 partijen: P1 `S/A` (G), P2 `T/B` (F); per partij voice1=S of T, voice2=A of B; `backup`                                                 |
+| Maatsoort          | bij voorkeur `senza-misura`; 4/4 tolereren in MuseScore-exports                                                                           |
+| Optionele noten    | YAML `optional: true` ↔ MusicXML notehead parentheses                                                                                     |
+| Pitches            | PDF/PNG = featurebron; menselijke MuseScore-edit → YAML                                                                                   |
+| Renderer / sync    | Na YAML-wijziging: `python scripts\sync_library_templates.py [<id>…]` · check: `--check` · of `render_vsa_template_musicxml.py --all`     |
+| Validatie          | `vsa template validate <pad>`                                                                                                             |
 
 ## Formuleblad vs instance
 
@@ -42,7 +57,7 @@ Invalid schema-cases blijven in
 | `template.mxl`              | formule MusicXML    | ja (afgeleid) | idem / `render_vsa_template_musicxml.py --all`  |
 | `template.pdf`              | formule print       | nee           | `--template --pdf`                              |
 | corpus `.vsa`               | zangstuk-bron       | ja            | curated                                         |
-| corpus `.mscz` / `.mxl`     | instance            | ja (afgeleid) | `render_tropaar_toon4_corpus.py`                    |
+| corpus `.mscz` / `.mxl`     | instance            | ja (afgeleid) | `render_tropaar_toon4_corpus.py`                |
 | corpus `*.pdf`              | print               | nee           | `--pdf` / `--pdf-only`                          |
 
 Formuleblad: ankers, frase-ids, cycle-frames, `||O||` zonder VSA-lyrics.
@@ -187,15 +202,26 @@ S/A-partij volstaat.
 
 ## Formules aanwezig
 
-| Map                                            | Vorm      | Opmerking             |
-| ---------------------------------------------- | --------- | --------------------- |
-| [`tropaar-toon-1`](tropaar-toon-1/README.md)   | cycle     |                       |
-| [`tropaar-toon-3`](tropaar-toon-3/README.md)   | sequence  |                       |
-| [`tropaar-toon-4`](tropaar-toon-4/README.md)   | cycle     | Elia-mapping + corpus |
-| [`tropaar-toon-5`](tropaar-toon-5/README.md)   | `same_as` | → stichier-toon-5     |
-| [`stichier-toon-5`](stichier-toon-5/README.md) | cycle     | ook als tropaar       |
-| [`vers-toon-1`](vers-toon-1/README.md)         | cycle     |                       |
-| [`vers-toon-5`](vers-toon-5/README.md)         | cycle     |                       |
+| Map                                                              | Vorm      | Opmerking                                   |
+| ---------------------------------------------------------------- | --------- | ------------------------------------------- |
+| [`kondak-toon-1`](kondak-toon-1/README.md)                       | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-2`](kondak-toon-2/README.md)                       | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-5`](kondak-toon-5/README.md)                       | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-6`](kondak-toon-6/README.md)                       | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-7`](kondak-toon-7/README.md)                       | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-8`](kondak-toon-8/README.md)                       | cycle     | Groningen; also tropaar                     |
+| [`tropaar-toon-1`](tropaar-toon-1/README.md)                     | cycle     |                                             |
+| [`tropaar-toon-2`](tropaar-toon-2/README.md)                     | `same_as` | → kondak-toon-2                             |
+| [`tropaar-toon-5`](tropaar-toon-5/README.md)                     | `same_as` | → kondak-toon-5                             |
+| [`tropaar-toon-6`](tropaar-toon-6/README.md)                     | `same_as` | → kondak-toon-6                             |
+| [`tropaar-toon-7`](tropaar-toon-7/README.md)                     | `same_as` | → kondak-toon-7                             |
+| [`tropaar-toon-8`](tropaar-toon-8/README.md)                     | `same_as` | → kondak-toon-8                             |
+| [`tropaar-toon-3`](tropaar-toon-3/README.md)                     | sequence  |                                             |
+| [`tropaar-toon-4`](tropaar-toon-4/README.md)                     | cycle     | Hemelum; Elia-mapping + corpus              |
+| [`groningen-tropaar-toon-4`](groningen-tropaar-toon-4/README.md) | cycle     | Groningen; also kondak; uit Nicolaas-schets |
+| [`stichier-toon-5`](stichier-toon-5/README.md)                   | cycle     | PDF-stichier (niet Groningen kondak-5)      |
+| [`vers-toon-1`](vers-toon-1/README.md)                           | cycle     |                                             |
+| [`vers-toon-5`](vers-toon-5/README.md)                           | cycle     |                                             |
 
 Normatieve syntax/semantiek: map erboven
 ([`../README.md`](../README.md)).

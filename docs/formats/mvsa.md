@@ -38,12 +38,13 @@ Tekstbron met lyrics-regel(s) en stemregels (typisch L + SATB). Draft-spec:
 | `.mxl` / `.musicxml` / `.xml` | `mxl mvsa`   | `<bronnaam>.mvsa` (bijv. `lied.mxl.mvsa`)  |
 | `.mscz`                       | `mscz mvsa`  | `<bronnaam>.mvsa` (bijv. `lied.mscz.mvsa`) |
 
-`.mxl` gaat rechtstreeks naar de SATB-parser (P1–P4); `.mscz` eerst via
-MuseScore naar temp-`.mxl` en dezelfde SATB-explode als
-[`mscz mxl`](../reference/cli/mscz.md). Default: **canonieke schrijfvorm**
-(kuiser-normaalvorm), `--pitch ag-vsa`, `--section schets`. Soft-wrap,
-`#maat N`, eindankers: zie hieronder en
-[Canonieke maatnummers](#canonieke-maatnummers). Tutorial:
+`.mxl` en `.mscz` landen beide op vier parts vóór de SATB-parser: `.mscz`
+eerst via MuseScore naar temp-`.mxl`, daarna dezelfde SATB-explode als
+[`mscz mxl`](../reference/cli/mscz.md); `.mxl` krijgt die explode ook
+(checklist M2: Capella-akkoorden op één stok → hoogste/laagste toon naar
+S/A of T/B). Default: **canonieke schrijfvorm** (kuiser-normaalvorm),
+`--pitch ag-vsa`, `--section schets`. Soft-wrap, `#maat N`, eindankers: zie
+hieronder en [Canonieke maatnummers](#canonieke-maatnummers). Tutorial:
 [mvsa schrijven 101 — bladmuziek](../guides/mvsa-schrijven-101.md#7-taak-bladmuziek--mvsa).
 
 Man-pagina’s: [`mxl mvsa`](../reference/cli/mxl.md) ·
