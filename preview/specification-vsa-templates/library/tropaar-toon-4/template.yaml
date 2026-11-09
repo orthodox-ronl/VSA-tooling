@@ -6,13 +6,6 @@
 # haakjes = optional; staff text = ankers.
 # laatste: twee cadenspaden (of:) — pad 0 = mi–re–mi (formuleblad);
 # pad fa-close = mi–fa–mi (o.a. Hemelum-corpus). Mapper kiest via VSA-hoogte.
-#
-# Frase 1 B (bron: klaar Nikolaas Hemelum + gecorrigeerde zondag-kondak):
-# zodra de mi-cadens na recite begint: /2 → mi-1; daarna \ → re-1 (hold),
-# \3 → la-2. Groningen houdt B op do-1 tot de fa (/ → re-1).
-# Frase 2 B: na recite op fa meteen \4 → sol-2 (hold), dan /3 → do-1
-# (niet eerst re-1 aanhouden). Groningen: re-1 tot @l.st. sol-2.
-# Dat B-padonderscheid blijft — koorleden oefenen erop.
 
 spec_version: draft-v0
 id: tropaar-toon-4
@@ -24,7 +17,7 @@ do: F4
 mode: major
 duration-model: default
 pitches_status: provisional
-source: "Hemelum tropaar/kondak toon 4; _klaar kondak-zondag-toon-4-hemelum.mvsa (frase-1+2 B)"
+source: "Hemelum tropaar/kondak toon 4; MuseScore Template - Tropaar (Toon 4).musicxml + corpus cadens fa"
 cycle:
   - "1"
   - "2"
@@ -41,16 +34,13 @@ phrases:
         pitches: { S: mi, A: do, T: sol-1, B: do-1 }
       - role: cadence
         duration: "~"
-        pitches: { S: mi, A: do, T: sol-1, B: mi-1 }
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
       - role: cadence
         duration: "_"
         anchor: l.st.
-        pitches: { S: mi, A: do, T: sol-1, B: mi-1 }
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
       - role: cadence
         duration: "_"
-        pitches: { S: fa, A: re, T: la-1, B: re-1 }
-      - role: cadence
-        duration: "~"
         pitches: { S: fa, A: re, T: la-1, B: re-1 }
       - role: cadence
         duration: "_"
@@ -74,7 +64,7 @@ phrases:
         pitches: { S: fa, A: re, T: la-1, B: re-1 }
       - role: cadence
         duration: "~"
-        pitches: { S: fa, A: re, T: la-1, B: sol-2 }
+        pitches: { S: fa, A: re, T: la-1, B: re-1 }
       - role: cadence
         duration: "_"
         anchor: l.st.

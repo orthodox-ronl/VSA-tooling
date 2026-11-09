@@ -1,10 +1,10 @@
-# Tropaar toon 3 — do=F4 major (praktijk/Groningen; was G4). Sequence-form. Incl. ELM "." (achtste).
+# Tropaar toon 3 — do=G4 major. Sequence-form. Incl. ELM "." (achtste).
 
 spec_version: draft-v0
 id: tropaar-toon-3
 genre: tropaar
 tone: 3
-do: F4
+do: G4
 mode: major
 duration-model: default
 pitches_status: provisional

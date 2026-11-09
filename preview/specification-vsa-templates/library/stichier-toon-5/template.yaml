@@ -1,5 +1,4 @@
-# Stichier toon 5 (PDF-formuleblad). do=F4 major.
-# Groningen tropaar/kondak toon 5: kondak-toon-5 (niet deze melodie).
+# Stichier toon 5 (= tropaar). do=F4 major.
 
 spec_version: draft-v0
 id: stichier-toon-5
@@ -10,6 +9,8 @@ mode: major
 duration-model: default
 pitches_status: provisional
 source: "tonen (vers, stichier, tropaar).pdf — Toon 5 Stichiermelodie"
+also_used_as:
+  - tropaar
 cycle:
   - "1"
   - "2"

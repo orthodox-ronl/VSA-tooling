@@ -1,6 +1,3 @@
-# Groningen tropaar toon 5 = zelfde formule als kondak-toon-5 (do=F4 major).
-# (Niet de PDF-stichiermelodie; die blijft stichier-toon-5.)
-
 spec_version: draft-v0
 id: tropaar-toon-5
 genre: tropaar
@@ -8,5 +5,5 @@ tone: 5
 do: F4
 mode: major
 pitches_status: provisional
-source: "Koormap Groningen — tropaar zondag toon 5 (= kondak-toon-5)"
-same_as: kondak-toon-5
+source: "tonen (vers, stichier, tropaar).pdf — Toon 5: Tropaarmelodie = Stichiermelodie"
+same_as: stichier-toon-5
