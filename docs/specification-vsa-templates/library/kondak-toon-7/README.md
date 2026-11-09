@@ -18,4 +18,4 @@ Groningen toon 7 (`do=F4` major): kondak én tropaar zondag (via
 Bron-MVSA:
 `bibliotheek/.../_klaar_voor_acceptatie/kondak-zondag-toon-7-groningen.mvsa`
 (alleen referentie; niet wijzigen vanuit tooling).
-Zuster: [tropaar-toon-7](../tropaar-toon-7/). Status: `pitches_status: provisional`.
+Zuster: [tropaar-toon-7](../tropaar-toon-7/README.md). Status: `pitches_status: provisional`.
