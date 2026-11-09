@@ -83,6 +83,8 @@ Geen toon-specifieke if-takken in de motor tenzij YAML tekortschiet (T7).
 ## Zie ook
 
 - Contract T1–T7: [vsa-mvsa-contract.md](vsa-mvsa-contract.md)
-- Playbook: [examples/formule-tekst/PLAYBOOK.md](../../examples/formule-tekst/PLAYBOOK.md)
+- Playbook (repo, niet op Pages):
+  `examples/formule-tekst/PLAYBOOK.md`
+  ([GitHub](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/formule-tekst/PLAYBOOK.md))
 - Library: [library/README.md](library/README.md)
 - CLI: [docs/reference/cli/vsa-mvsa.md](../reference/cli/vsa-mvsa.md)

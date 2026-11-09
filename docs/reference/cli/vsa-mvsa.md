@@ -84,6 +84,8 @@ geschreven (niet `f+`), zodat Coria-`.mxl` F4 speelt, niet F5.
 
 ## Zie ook
 
-- Playbook: [examples/formule-tekst/PLAYBOOK.md](../../../examples/formule-tekst/PLAYBOOK.md)
+- Playbook (repo, niet op Pages):
+  `examples/formule-tekst/PLAYBOOK.md`
+  ([GitHub](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/formule-tekst/PLAYBOOK.md))
 - `mvsa mxl` (playback): [mvsa.md](mvsa.md#mvsa-mxl)
 - `vsa template validate`

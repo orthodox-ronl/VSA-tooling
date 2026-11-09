@@ -73,11 +73,12 @@ def test_mvsa_validate_success_prints_single_ok(capsys):
     assert out == "OK"
     assert ": OK" not in out
 
-def test_vsa_rejects_nested_mvsa(capsys):
+def test_vsa_mvsa_is_not_mvsa_validate_cli(capsys):
+    """``vsa mvsa`` = VSA→schets; ``mvsa validate`` blijft de losse .mvsa-CLI."""
     from vsa.cli import main as vsa_main
 
     with pytest.raises(SystemExit) as exc:
         vsa_main(["mvsa", "validate", "examples/mvsa/alleluia-toon-8.mvsa"])
     assert exc.value.code == 2
     err = capsys.readouterr().err
-    assert "invalid choice: 'mvsa'" in err
+    assert "unrecognized arguments" in err

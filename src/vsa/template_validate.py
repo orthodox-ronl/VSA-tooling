@@ -246,6 +246,7 @@ def validate_template(doc: Any, *, known_ids: set[str] | None = None) -> None:
         "mapping_plans",
         "default_mapping_plan",
         "phrases",
+        "voice_oct",
     }
     extra = set(doc) - allowed
     if extra:
