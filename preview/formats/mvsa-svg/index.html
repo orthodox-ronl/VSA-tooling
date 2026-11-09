@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/eigen-partituur-svg-cabd</code>
-  , gebouwd 2026-11-09 00:36 CET.
+  , gebouwd 2026-11-09 08:34 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5051,8 +5051,10 @@ mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa
 </code></pre></div>
 <p><code>--engine eigen</code> schrijft een sibling <code>lied.mvsa.eigen-notes.svg</code>
 (of <code>eigen-vsa-notes</code> / <code>eigen-vsa</code>) en laat <code>lied.mvsa.svg</code> en
-products-meta met rust. Het bestand bevat Source Sans 3 en schaalt mee
-met de vensterbreedte. Het productiescherm blijft OSMD.</p>
+products-meta met rust. Het bestand bevat Source Sans 3.
+<code>--system-width</code> (default 760) breekt een langere regel af, ook midden
+in een maat. Het SVG heeft de eigen breedte; een pagina verkleint het
+met <code>max-width: 100%</code>. Het productiescherm blijft OSMD.</p>
 
 
 
@@ -5089,7 +5091,7 @@ met de vensterbreedte. Het productiescherm blijft OSMD.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-08
+        Bijgewerkt: 2026-11-09
         
       </p>
       

@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>cursor/eigen-partituur-svg-cabd</code>
-  , gebouwd 2026-11-09 00:36 CET.
+  , gebouwd 2026-11-09 08:34 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -6032,15 +6032,19 @@ maatstrepen en de herhaalpuntjes.</p>
 <p>Wat op de spike nog een schets was: de bogen zijn eenvoudige krommen,
 de afstand tussen noten is grof, er was één systeem per stuk (ook waar
 de bron <code>@nieuw-systeem</code> zet), en de zangtekst was nog niet Source Sans 3.
-De schilder in <code>src/vsa/eigen_svg.py</code> heeft die drie punten inmiddels:
-Source Sans 3 (gewicht 400, ingebed vanuit <code>scripts/osmd-svg/fonts/</code>),
-een nieuw systeem waar Score-IR <code>newSystem</code> zet, en de S13-extender
-op de notenbeelden. De bogen en de nootafstand blijven grof.
-Een koppelteken in «ont-ferm» ontbreekt omdat Score-IR «ont» als losse
-lettergreep noteert (<code>syllabic: single</code>), niet als begin van een woord.</p>
-<p>Het SVG-bestand schaalt mee met de vensterbreedte (<code>width="100%"</code> en
-een viewBox). De indeling breekt niet opnieuw af als het venster smal
-wordt. Voor papier en voor een telefoon is dat niet genoeg; zie §7 (fase 5) en §8.</p>
+De schilder in <code>src/vsa/eigen_svg.py</code> zet Source Sans 3 (gewicht 400,
+ingebed vanuit <code>scripts/osmd-svg/fonts/</code>), een nieuw systeem waar
+Score-IR <code>newSystem</code> zet, de S13-extender, een volta-haak over het
+slot, bundels op achtsten en korter, en een boog die de stokken volgt.
+Een regel die langer is dan <code>--system-width</code> (default 760) breekt af,
+ook midden in een maat. De nootafstand blijft grof.
+Het koppelteken in «ont-ferm» volgt het woordstreepje in de bron
+(<code>syllabic</code> begin/end), ook als die lettergreep één noot is.</p>
+<p>Het SVG heeft een viewBox en de eigen breedte. Een pagina mag het
+verkleinen (<code>max-width: 100%</code>); het rekt niet uit. Een regel die langer
+is dan de regelbreedte breekt af. Een venster dat ná het tekenen nog
+smaller wordt, verkleint de plaat. Opnieuw tekenen op die breedte is
+<code>--system-width</code>. Zie §7 en §8.</p>
 <hr />
 <h2 id="2-uitgangspunt">2. Uitgangspunt<a class="headerlink" href="#2-uitgangspunt" title="Permanent link">&para;</a></h2>
 <p>Eén bedoelde partituurvorm. Drie manieren om die vorm uit te voeren:</p>
@@ -6629,8 +6633,9 @@ regel als bij elke export-wijziging
 </tbody>
 </table>
 <p>Fase 2 levert per stuk de drie beelden uit §4.2, als aparte SVG's.
-Elk bestand heeft een viewBox en <code>width="100%"</code>, zodat een venster het
-beeld kleiner maakt zonder de noten te herrekenen.
+Elk bestand heeft een viewBox en de eigen breedte. Een venster dat
+smaller is verkleint de plaat; de regelindeling ligt vast bij het
+tekenen (<code>--system-width</code>).
 Achtergrond wit, met een latere vlag voor transparant, gelijk aan
 <a href="../../formats/mvsa-svg/"><code>mvsa svg</code></a>.</p>
 <p>Geen titelblok in het bestand. De pagina-Markdown zet de titel.</p>
@@ -6669,8 +6674,9 @@ beelden uit §4.2 kan leveren vanuit dezelfde Score-IR. Kale VSA voor
 een eenstemmige <code>.vsa</code> blijft de bestaande <code>vsa svg</code>; de nieuwe eis is
 dat een <code>.mvsa</code>-tropaar hetzelfde soort beeld krijgt, zonder notenbalk.</p>
 <p>Die zin is waar voor de proefset in <code>tests/test_eigen_svg.py</code>.
-Open binnen deze fase: een volta-haak over de hele maat (nu een kort
-streepje met het nummer), bundels, en bogen die de melodie volgen.</p>
+De volta-haak loopt over de maten van het slot, alleen boven de
+sopraan-alt-balk. Achtsten en korter in dezelfde tel krijgen een balk;
+een losse achtste krijgt een vlag. De melismaboog volgt de stokpunten.</p>
 <p>Buiten fase 2: site, <code>products</code>, OSMD uitschakelen, A4, cursor.</p>
 <h3 id="fase-3-naast-osmd-kunnen-draaien">Fase 3 — naast OSMD kunnen draaien<a class="headerlink" href="#fase-3-naast-osmd-kunnen-draaien" title="Permanent link">&para;</a></h3>
 <p>De aanroep is <code>mvsa svg --engine eigen</code>, naast <code>--engine osmd</code>.
@@ -6680,6 +6686,10 @@ De default blijft MuseScore. <code>--view</code> is <code>notes</code> (default)
 Met <code>--translit</code> komt daar het bestaande translit-stuk bij, bijvoorbeeld
 <code>lied.mvsa.eigen-notes.translit-nls.svg</code>.
 <code>--lyrics-font-size</code> en <code>--cue-font-size</code> gelden.
+<code>--system-width</code> zet de regelbreedte (default 760). <code>none</code> breekt
+alleen op <code>@nieuw-systeem</code>. Het SVG heeft de eigen breedte; een pagina
+mag het verkleinen met <code>max-width: 100%</code>. Het rekt niet meer uit tot
+de volle vensterbreedte.
 Een ander <code>--lyrics-font</code> of <code>--cue-font</code> dan Source Sans 3 weigert
 de aanroep. MuseScore-Style (afstand, marges, compact) weigert ook.
 De aanroep schrijft geen products-meta en overschrijft <code>lied.mvsa.svg</code> niet.</p>
@@ -6724,8 +6734,9 @@ mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa
 </code></pre></div>
 <p>De default-sibling zonder <code>-o</code> is <code>alleluia-toon-8.mvsa.eigen-vsa-notes.svg</code>
 naast de bron, niet het product <code>alleluia-toon-8.mvsa.svg</code>.
-Versmal het venster: de tekening wordt kleiner. De regelindeling volgt
-<code>@nieuw-systeem</code> en breekt niet opnieuw af als het venster smal wordt.</p>
+De regelindeling volgt <code>@nieuw-systeem</code> en <code>--system-width</code>.
+Een smaller venster verkleint de plaat; een andere regelbreedte
+maak je met <code>--system-width</code>.</p>
 <h3 id="naast-osmd">Naast OSMD<a class="headerlink" href="#naast-osmd" title="Permanent link">&para;</a></h3>
 <p>De beheerder draait de gewone straat, met <code>--engine eigen</code>, en legt
 het bestand naast de OSMD-SVG en de MuseScore-SVG.
@@ -6830,8 +6841,8 @@ beschrijft.</p>
 <li>MuseScore uit de afdruk halen.</li>
 <li>De catalogus opnieuw genereren.</li>
 <li>Een tweede Score-IR voor «oefenen».</li>
-<li>Optische spatiering, bundels en bogen die de melodiecontour volgen,
-  vóórdat de contractrijen kloppen. Dat is de grens uit §10.</li>
+<li>Optische spatiering. Een eerste balk, een boog buiten de stok en
+  <code>--system-width</code> zitten al in de schilder; de fijne spatiering niet.</li>
 </ul>
 <hr />
 <h2 id="10-documentatie">10. Documentatie<a class="headerlink" href="#10-documentatie" title="Permanent link">&para;</a></h2>
@@ -6873,13 +6884,15 @@ bibliotheek, niet bij dit plan.</p>
 contracten uit §3 kan het beeld voor dit SATB-repertoire als partituur
 gelden. Dat is het doel van fase 2 en het materiaal voor het besluit
 in fase 4.</p>
-<p>Daarboven wordt het duur, en dat hoort niet in fase 2:</p>
+<p>Daarboven wordt het duur, en dat hoort niet in deze ronde:</p>
 <ul>
 <li>noten en lettergrepen die elkaar ontwijken in plaats van op een vast raster staan;</li>
-<li>bogen die om stokken heen lopen;</li>
-<li>bundels (achtsten aan één balk);</li>
-<li>een systeem dat op een smal venster opnieuw afbreekt (dat is fase 5,
-  en alleen na het besluit);</li>
+<li>een boog die om elke stok heen slaat zoals een graveur dat doet
+  (de schilder volgt de stokpunten al, zonder die fijnere vorm);</li>
+<li>een balk die de helling per noot optisch bijstelt
+  (achtsten en korter delen al één balk);</li>
+<li>een venster dat de regel opnieuw afbreekt zonder het bestand opnieuw
+  te tekenen (<code>--system-width</code> kiest de breedte bij het maken);</li>
 <li>gelijkheid op de pixel met een MuseScore-export.</li>
 </ul>
 <p>Als fase 2 die eerste lijst nodig blijkt te hebben om überhaupt
@@ -6909,8 +6922,8 @@ dan een ander programma bijsturen.</p>
 <td>De Markdown van die pagina (bibliotheek), niet de schilder</td>
 </tr>
 <tr>
-<td>«ont» als <code>syllabic: single</code> terwijl de bron <code>ont-ferm</code> schrijft</td>
-<td>Score-IR / parser, niet de schilder. De schilder zet een koppelteken alleen bij <code>begin</code>/<code>middle</code>/<code>end</code> (leesbaarheid L3)</td>
+<td>«ont-ferm» zonder koppelteken</td>
+<td>Opgelost: de export houdt <code>syllabic</code> begin/end van het woordstreepje, ook als de lettergreep één noot is (leesbaarheid L3, checklist K4). De schilder zet dan het streepje</td>
 </tr>
 <tr>
 <td>Meerdere cues in één maat, of een cue midden in de maat</td>
@@ -6962,7 +6975,7 @@ dan een ander programma bijsturen.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-08
+        Bijgewerkt: 2026-11-09
         
       </p>
       
