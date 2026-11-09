@@ -30,8 +30,9 @@ Afgeleid uit
 
 Vergelijk met de Hemelum-sibling `…-hemelum.mvsa` (B-pad in frase 1).
 
-Mensformule (zonder lyrics):  
-[`examples/formule-tekst/groningen-tropaar-toon-4/`](../../../../examples/formule-tekst/groningen-tropaar-toon-4/).
+Mensformule (zonder lyrics), in de repo (niet op Pages):
+`examples/formule-tekst/groningen-tropaar-toon-4/`
+([GitHub](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/formule-tekst/groningen-tropaar-toon-4)).
 
 ## Wat hoort in deze map
 
