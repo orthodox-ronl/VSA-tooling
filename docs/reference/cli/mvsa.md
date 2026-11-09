@@ -581,8 +581,11 @@ sopraan-VSA erbij. `vsa` is kale VSA, zonder notenbalk.
 `--translit` zet lyric-laag 2 eronder, net als bij MuseScore.
 Source Sans 3 (13 pt zangtekst, 12 pt cues) zit in het bestand.
 `--system-width` (default 760) breekt een langere regel af, ook midden
-in een maat. Achtsten en korter delen een balk. Een volta-haak loopt
-over de maten van het slot.
+in een maat. Maten plakken aan elkaar tot die breedte of tot
+`@nieuw-systeem`; tussen lettergrepen blijft een klein gat.
+Achtsten en korter delen een balk. De melismaboog loopt in één boog
+van de eerste stok naar de laatste. Een volta-haak loopt over het slot.
+VSA-strepen staan dicht op de tekst, zoals bij `vsa svg`.
 Sibling zonder `-o`: `lied.mvsa.eigen-notes.svg`,
 `lied.mvsa.eigen-vsa-notes.svg`, `lied.mvsa.eigen-vsa.svg`.
 Met `--translit-modus nls` wordt dat

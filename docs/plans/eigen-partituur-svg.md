@@ -68,9 +68,13 @@ de bron `@nieuw-systeem` zet), en de zangtekst was nog niet Source Sans 3.
 De schilder in `src/vsa/eigen_svg.py` zet Source Sans 3 (gewicht 400,
 ingebed vanuit `scripts/osmd-svg/fonts/`), een nieuw systeem waar
 Score-IR `newSystem` zet, de S13-extender, een volta-haak over het
-slot, bundels op achtsten en korter, en een boog die de stokken volgt.
+slot, bundels op achtsten en korter (balkdikte 0,5 spatium), en één
+melismaboog van de eerste stok naar de laatste. Maten plakken aan
+elkaar tot de regel vol is of `@nieuw-systeem` zegt. Tussen
+lettergrepen blijft een klein gat, zodat ze niet op elkaar vallen.
+VSA-strepen staan op één em boven de tekst, zoals de kale VSA.
 Een regel die langer is dan `--system-width` (default 760) breekt af,
-ook midden in een maat. De nootafstand blijft grof.
+ook midden in een maat.
 Het koppelteken in «ont-ferm» volgt het woordstreepje in de bron
 (`syllabic` begin/end), ook als die lettergreep één noot is.
 
@@ -550,8 +554,8 @@ beschrijft.
 - MuseScore uit de afdruk halen.
 - De catalogus opnieuw genereren.
 - Een tweede Score-IR voor «oefenen».
-- Optische spatiering. Een eerste balk, een boog buiten de stok en
-  `--system-width` zitten al in de schilder; de fijne spatiering niet.
+- Optische spatiering per nootkop. De schilder houdt al een klein gat
+  tussen lettergrepen en plakt maten aan elkaar; fijnere ontwijking niet.
 
 ---
 
@@ -579,9 +583,9 @@ in fase 4.
 
 Daarboven wordt het duur, en dat hoort niet in deze ronde:
 
-- noten en lettergrepen die elkaar ontwijken in plaats van op een vast raster staan;
-- een boog die om elke stok heen slaat zoals een graveur dat doet
-  (de schilder volgt de stokpunten al, zonder die fijnere vorm);
+- noten die elkaar per kop ontwijken, voorbij het kleine gat tussen lettergrepen;
+- een boog die om elke tussenstok heen slaat
+  (de schilder zet één boog van de eerste stok naar de laatste);
 - een balk die de helling per noot optisch bijstelt
   (achtsten en korter delen al één balk);
 - een venster dat de regel opnieuw afbreekt zonder het bestand opnieuw

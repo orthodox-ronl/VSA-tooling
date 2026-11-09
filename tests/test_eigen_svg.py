@@ -225,8 +225,12 @@ B: mi ||
         r'class="volta"[^>]*d="M ([0-9.]+) [^"]* H ([0-9.]+)',
         svg,
     )
+    bars = [float(x) for x in re.findall(r'class="barline"[^>]*x1="([0-9.]+)"', svg)]
     assert spans
-    assert all(float(right) - float(left) > 48 for left, right in spans)
+    for left, right in spans:
+        width = float(right) - float(left)
+        assert width > 24
+        assert any(abs(float(right) - bar) < 1.0 for bar in bars)
     assert ">1,2<" in svg
     assert ">3<" in svg
 
@@ -262,7 +266,7 @@ def test_long_line_breaks_before_the_window_does() -> None:
     assert float(narrow_box.group(1)) < float(wide_box.group(1))
 
 
-def test_slur_stays_outside_the_beam() -> None:
+def test_slur_is_one_arc_from_stem_to_stem() -> None:
     text = """\
 @do F4
 @mode major
@@ -279,34 +283,40 @@ B: sol&la&si&do ||
         system_width=None,
     )
     slur = re.search(r'class="melisma-slur" data-voice="S"[^>]*d="([^"]+)"', svg)
+    assert slur
+    path = slur.group(1)
+    assert path.count(" Q ") == 1
+    assert " C " not in f" {path} "
     beam = re.search(
-        r'class="beam" data-voice="S" data-level="1" '
-        r'x1="([-0-9.]+)" y1="([-0-9.]+)" x2="([-0-9.]+)" y2="([-0-9.]+)"',
+        r'class="beam" data-voice="S" data-level="1"[^>]*stroke-width="([0-9.]+)"',
         svg,
     )
-    assert slur and beam
-    numbers = [float(value) for value in re.findall(r"-?\d+(?:\.\d+)?", slur.group(1))]
-    points = list(zip(numbers[0::2], numbers[1::2]))
-    x1, y1, x2, y2 = (float(value) for value in beam.groups())
-
-    def beam_at(x: float) -> float:
-        if abs(x2 - x1) < 1:
-            return min(y1, y2)
-        return y1 + (x - x1) / (x2 - x1) * (y2 - y1)
-
-    compared = 0
-    for x, y in points:
-        if min(x1, x2) - 8 <= x <= max(x1, x2) + 8:
-            assert y < beam_at(x) - 4
-            compared += 1
-    assert compared >= 2
+    assert beam
+    assert float(beam.group(1)) >= 5.0
 
 
-def test_melisma_slur_follows_the_notes() -> None:
-    svg = render_score_ir_svg(_doc(ALLELUIA), view="notes", system_width=None)
-    slur = re.search(r'class="melisma-slur" data-voice="S"[^>]*d="([^"]+)"', svg)
-    assert slur
-    assert " C " in f" {slur.group(1)} "
+def test_vsa_marks_sit_near_the_lyric() -> None:
+    svg = render_score_ir_svg(_doc(ALLELUIA), view="vsa-notes", system_width=None)
+    lyric = re.search(r'class="lyric"[^>]*y="([0-9.]+)"', svg)
+    mark = re.search(r'class="vsa-glyph vsa-upper-glyph[^"]*" x1="[0-9.]+" y1="([0-9.]+)"', svg)
+    assert lyric and mark
+    # Eén em (13 pt) boven de regel, zoals de kale VSA op corps 20 / offset −20.
+    assert 12.0 <= float(lyric.group(1)) - float(mark.group(1)) <= 24.0
+
+
+def test_syllables_keep_a_small_gap() -> None:
+    svg = render_score_ir_svg(_doc(LITANIE), view="notes", system_width=None)
+    centers = [
+        (float(x), text)
+        for x, text in re.findall(r'class="lyric"[^>]*x="([0-9.]+)"[^>]*>([^<]+)', svg)
+    ]
+    heer = next(x for x, text in centers if text == "Heer")
+    ont = next(x for x, text in centers if text == "ont")
+    ferm = next(x for x, text in centers if text == "ferm")
+    gap_ont = ont - heer
+    gap_ferm = ferm - ont
+    assert 24.0 <= gap_ont <= 70.0
+    assert 28.0 <= gap_ferm <= 80.0
 
 
 def test_cli_rejects_a_different_lyric_font(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

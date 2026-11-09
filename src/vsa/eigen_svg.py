@@ -36,8 +36,14 @@ CUE_PT = 12.0
 LYRIC_WEIGHT = "400"
 _PT = 96.0 / 72.0
 SP = 12.0
-PX_QUARTER = 36.0
 LYRIC_FONT = LYRIC_PT * _PT
+# Klein wit tussen lettergrepen: MuseScore-nabewerking houdt ~0,45 spatium,
+# plus ruimte voor het koppelteken. Geen tijd-raster dat de maat oprekt.
+LYRIC_GAP = 10.0
+MEASURE_GLUE = 4.0
+# MuseScore beamWidth is 0,5 spatium. De balk was 2,4 px; dit zit daar tegenaan.
+BEAM_WIDTH = 6.0
+BEAM_SHIFT = 9.0
 # Bravura: één staff space = 250 font-eenheden.
 GLYPH_SCALE = SP / STAFF_UNITS
 
@@ -365,49 +371,60 @@ class _Svg:
         self.parts.append(fragment)
 
 
+def _lyric_width(ev: Ev, lyrics: list[dict[str, Any]]) -> float:
+    if ev.lyric_index is None or not 0 <= ev.lyric_index < len(lyrics):
+        return 0.0
+    return _text_width(_lyric_text(lyrics[ev.lyric_index]))
+
+
+def _column_gap(starters: list[Ev]) -> float:
+    """Kleinste hartafstand van nootkoppen. Achtsten blijven zoals ze goed stonden."""
+    sounding = [ev for ev in starters if not ev.rest and not ev.spacer]
+    if not sounding:
+        return 0.0
+    if any(_whole(ev.elm) or ev.breve or _note_open(ev.elm) for ev in sounding):
+        return 26.0
+    if all(_elm_quarters(ev.elm) <= 0.5 for ev in sounding):
+        return 18.0
+    return 22.0
+
+
 def _layout_times(voices: dict[str, list[Ev]], lyrics: list[dict[str, Any]], x0: float) -> dict[float, float]:
-    times = {0.0}
-    for evs in voices.values():
-        for ev in evs:
-            times.add(ev.start)
-            times.add(ev.end)
-    ordered = sorted(times)
-    x_at = {ordered[0]: x0}
-    x = x0
-    for t0, t1 in zip(ordered, ordered[1:]):
-        starters = [
-            ev
-            for evs in voices.values()
-            for ev in evs
-            if ev.start == _q(t0)
-        ]
-        active = [
-            ev
-            for evs in voices.values()
-            for ev in evs
-            if ev.start <= _q(t0) and ev.end > _q(t0)
-        ]
-        lyric_w = 0.0
-        for ev in starters:
-            if ev.lyric_index is not None and 0 <= ev.lyric_index < len(lyrics):
-                lyric_w = max(lyric_w, _text_width(_lyric_text(lyrics[ev.lyric_index])) + 16.0)
-        all_spacer = bool(active) and all(ev.spacer for ev in active)
-        if all_spacer:
-            width = max(lyric_w, 24.0)
+    """Hart van de noot per starttijd. Lettergrepen krijgen een klein gat, geen maat-rek."""
+    starts = sorted({ev.start for evs in voices.values() for ev in evs})
+    x_at: dict[float, float] = {}
+    prev_x: float | None = None
+    prev_right: float | None = None
+    for t0 in starts:
+        starters = [ev for evs in voices.values() for ev in evs if ev.start == t0]
+        lyric_w = max((_lyric_width(ev, lyrics) for ev in starters), default=0.0)
+        if prev_x is None:
+            x = x0 + max(10.0, lyric_w / 2.0)
         else:
-            width = max((t1 - t0) * PX_QUARTER, lyric_w, 28.0)
-            if any(ev.breve for ev in starters):
-                width = max(width, 36.0)
-        x += width
-        x_at[_q(t1)] = x
+            x = prev_x + _column_gap(starters)
+            if lyric_w and prev_right is not None:
+                x = max(x, prev_right + LYRIC_GAP + lyric_w / 2.0)
+        x_at[t0] = x
+        prev_x = x
+        if lyric_w:
+            prev_right = x + lyric_w / 2.0
     return x_at
 
 
-def _cx(x_at: dict[float, float], ev: Ev, lyrics: list[dict[str, Any]]) -> float:
-    lyric_w = 16.0
-    if ev.lyric_index is not None and 0 <= ev.lyric_index < len(lyrics):
-        lyric_w = _text_width(_lyric_text(lyrics[ev.lyric_index]))
-    return x_at[ev.start] + max(14.0, lyric_w / 2.0)
+def _content_right(voices: dict[str, list[Ev]], lyrics: list[dict[str, Any]], x_at: dict[float, float]) -> float:
+    right = max(x_at.values(), default=0.0)
+    for evs in voices.values():
+        for ev in evs:
+            cx = x_at.get(ev.start)
+            if cx is None:
+                continue
+            hang = max(12.0, _lyric_width(ev, lyrics) / 2.0 + 3.0)
+            right = max(right, cx + hang)
+    return right
+
+
+def _cx(x_at: dict[float, float], ev: Ev) -> float:
+    return x_at[ev.start]
 
 
 def _font_css() -> str:
@@ -454,7 +471,7 @@ def _measure_end(measure: dict[str, Any], x: float) -> tuple[dict[str, list[Ev]]
     origin = x + (36.0 if left_style in {"repeat-start", "heavy-light", "heavy-heavy"} else 0.0)
     x_at = _layout_times(voices, lyrics, origin)
     right_style = str((measure.get("bar") or {}).get("right") or "")
-    end_x = max(x_at.values(), default=origin) + 22.0 + _bar_tail(right_style)
+    end_x = _content_right(voices, lyrics, x_at) + _bar_tail(right_style)
     if not measure.get("_continuation"):
         cue_w = max((_text_width(line, CUE_PT) for line in _cue_lines(measure)), default=0.0)
         if cue_w:
@@ -517,7 +534,7 @@ def _cut_times(measure: dict[str, Any], budget: float) -> list[tuple[float, floa
     if not sop:
         return [(0.0, 1.0e9)]
     total = max((ev.end for evs in voices.values() for ev in evs), default=0.0)
-    if max(x_at.values(), default=0.0) + 32.0 <= budget:
+    if _content_right(voices, lyrics, x_at) <= budget:
         return [(0.0, total + 1.0)]
     cuts: list[tuple[float, float]] = []
     t0 = 0.0
@@ -589,7 +606,7 @@ def _systems(
                 flush()
             if si > 0 and current:
                 flush()
-            span = _measure_end(sl, 0.0)[3] + 10.0
+            span = _measure_end(sl, 0.0)[3] + MEASURE_GLUE
             if current and system_width is not None and used + span > system_width:
                 flush()
             current.append((index, sl))
@@ -637,7 +654,7 @@ def _render_score_ir_svg(
     chunks: list[str] = []
     width = 240.0
     y = 0.0
-    gap = 36.0
+    gap = 22.0
     show_music = chosen != "vsa"
     groups = _systems(
         list(doc.get("measures") or []),
@@ -684,13 +701,13 @@ def _render_system(
     show_vsa = view != "notes"
     f_major = _f_major(doc)
     svg = _Svg()
-    glyphs = SVGGlyphRenderer(unit=12.0)
+    glyphs = SVGGlyphRenderer(unit=max(6.0, LYRIC_PT * 0.40))
 
     if show_music:
-        treble_bottom = 88.0
-        lyric_y = treble_bottom + 96.0
-        bass_bottom = lyric_y + 64.0 + 4.0 * SP
-        height = bass_bottom + 3.0 * SP + 28.0
+        treble_bottom = 76.0
+        lyric_y = treble_bottom + 70.0
+        bass_bottom = lyric_y + 56.0 + 4.0 * SP
+        height = bass_bottom + 2.0 * SP + 16.0
     else:
         treble_bottom = 48.0
         lyric_y = 72.0
@@ -711,7 +728,7 @@ def _render_system(
     for measure in measures:
         voices, x_at, origin, end_x = _measure_end(measure, x)
         prepared.append((measure, voices, x_at, origin, end_x))
-        x = end_x + 10.0
+        x = end_x + MEASURE_GLUE
 
     width = max(end_x + 24.0, 240.0)
     if show_music:
@@ -743,7 +760,7 @@ def _render_system(
             _draw_barline(svg, left_style, measure_x - 34.0, treble_bottom, bass_bottom, staff_bottom)
         for letter, evs in voices.items():
             for ev in evs:
-                cx = _cx(x_at, ev, lyrics)
+                cx = _cx(x_at, ev)
                 if show_music and not ev.rest and ev.step is not None and ev.octave is not None:
                     cy, pos = _pitch_y(staff_bottom[_STAFF_OF[letter]], bottom_dia[_STAFF_OF[letter]], ev.step, ev.octave)
                     note_centers[(letter, ev.index)] = (cx, cy)
@@ -755,7 +772,9 @@ def _render_system(
         if show_music:
             tips, stem_top = _draw_stems_and_beams(svg, voices, note_centers, lyric_y)
             slur_top = _draw_slurs(svg, voices, note_centers, tips)
-            ink_top = min(ink_top, stem_top, slur_top)
+            ink_top = min(ink_top, stem_top, slur_top, _cue_top(measure, treble_bottom))
+            if (measure.get("ending") or {}).get("start"):
+                ink_top = min(ink_top, treble_bottom - 4 * SP - 32.0)
             right_style = str((measure.get("bar") or {}).get("right") or "")
             if right_style:
                 _draw_barline(
@@ -792,7 +811,7 @@ def _render_system(
     if show_music:
         _draw_voltas(svg, volta_boxes, treble_bottom)
     body = "\n".join(svg.parts)
-    pad = max(0.0, 18.0 - ink_top)
+    pad = max(0.0, 4.0 - ink_top)
     if pad > 0.4:
         body = f'<g class="headroom" transform="translate(0,{pad:.1f})">{body}</g>'
         height += pad
@@ -838,11 +857,14 @@ def _stem_end(cy: float, voice: str, lyric_y: float) -> float:
     if voice in _STEM_UP:
         y2 = cy - reach
         if _STAFF_OF[voice] == "bass":
-            y2 = max(y2, lyric_y + 14.0)
+            # Niet door de lettergreep, ook als de noot dicht onder de tekst staat.
+            y2 = max(y2, lyric_y + 12.0)
+            return min(y2, cy - 8.0)
         return min(y2, cy - short)
     y2 = cy + reach
     if _STAFF_OF[voice] == "treble":
-        y2 = min(y2, lyric_y - 46.0)
+        y2 = min(y2, lyric_y - 28.0)
+        return max(y2, cy + 8.0)
     return max(y2, cy + short)
 
 
@@ -1043,7 +1065,7 @@ def _draw_stems_and_beams(
                 ink_top = min(ink_top, tip)
             _beam_segments(svg, group, xs, beam_y, level=1, shift=0.0, voice=letter)
             if any(_short_level(ev) >= 2 for ev in group):
-                shift = 4.4 if up else -4.4
+                shift = BEAM_SHIFT if up else -BEAM_SHIFT
                 _beam_segments(svg, group, xs, beam_y, level=2, shift=shift, voice=letter)
                 if shift < 0:
                     ink_top = min(ink_top, beam_y(xs[0], shift), beam_y(xs[-1], shift))
@@ -1074,7 +1096,7 @@ def _beam_segments(
             x1, x2 = xs[i], xs[j]
             svg.add(
                 f'<line class="beam" data-voice="{voice}" data-level="{level}" x1="{x1:.1f}" y1="{beam_y(x1, shift):.1f}" '
-                f'x2="{x2:.1f}" y2="{beam_y(x2, shift):.1f}" stroke="black" stroke-width="2.4" '
+                f'x2="{x2:.1f}" y2="{beam_y(x2, shift):.1f}" stroke="black" stroke-width="{BEAM_WIDTH:.1f}" '
                 f'stroke-linecap="butt"/>'
             )
         else:
@@ -1084,10 +1106,43 @@ def _beam_segments(
             x2 = xs[i] + step
             svg.add(
                 f'<line class="beam" data-voice="{voice}" data-level="{level}" x1="{x1:.1f}" y1="{beam_y(x1, shift):.1f}" '
-                f'x2="{x2:.1f}" y2="{beam_y(x2, shift):.1f}" stroke="black" stroke-width="2.4" '
+                f'x2="{x2:.1f}" y2="{beam_y(x2, shift):.1f}" stroke="black" stroke-width="{BEAM_WIDTH:.1f}" '
                 f'stroke-linecap="butt"/>'
             )
         i = j + 1
+
+
+def _slur_anchor(
+    letter: str,
+    index: int,
+    centers: dict[tuple[str, int], tuple[float, float]],
+    tips: dict[tuple[str, int], float],
+    *,
+    up: bool,
+) -> tuple[float, float] | None:
+    """Stokpunt, of net boven/onder de nootkop als er geen stok is."""
+    center = centers.get((letter, index))
+    if center is None:
+        return None
+    cx, cy = center
+    tip = tips.get((letter, index))
+    clearance = 3.0
+    if tip is None:
+        return cx, cy - SP * 0.7 if up else cy + SP * 0.7
+    return cx, tip - clearance if up else tip + clearance
+
+
+def _one_slur(x1: float, y1: float, x2: float, y2: float, *, up: bool) -> tuple[str, float]:
+    """Eén kwadratische boog. De top blijft laag, zodat het systeem niet groeit."""
+    span = abs(x2 - x1)
+    peak = min(9.0, max(4.0, span * 0.08))
+    # Op t=0,5 ligt de kromme halverwege het controlepunt en de koorde.
+    lift = peak * 2.0
+    cx = (x1 + x2) / 2.0
+    cy = (y1 + y2) / 2.0 + (-lift if up else lift)
+    path = f"M {x1:.1f} {y1:.1f} Q {cx:.1f} {cy:.1f} {x2:.1f} {y2:.1f}"
+    top = min(y1, y2, cy) if up else min(y1, y2)
+    return path, top
 
 
 def _draw_slurs(
@@ -1096,7 +1151,7 @@ def _draw_slurs(
     centers: dict[tuple[str, int], tuple[float, float]],
     tips: dict[tuple[str, int], float],
 ) -> float:
-    """Boog buiten de echte stokpunt, niet door de balk."""
+    """Van de eerste stok naar de laatste stok. Eén boog, geen knik per noot."""
     ink_top = 10_000.0
     for letter, evs in voices.items():
         starts = [ev.index for ev in evs if ev.slur_start]
@@ -1105,67 +1160,24 @@ def _draw_slurs(
         for start, stop in zip(starts, stops):
             if stop <= start:
                 continue
-            anchors: list[tuple[float, float]] = []
-            for i in range(start, stop + 1):
-                center = centers.get((letter, i))
-                if center is None:
-                    continue
-                cx, cy = center
-                tip = tips.get((letter, i))
-                if tip is None:
-                    tip = cy - 2.0 * SP if up else cy + 2.0 * SP
-                gap = 12.0
-                anchors.append((cx, tip - gap if up else tip + gap))
-            if len(anchors) < 2:
+            present = [
+                i
+                for i in range(start, stop + 1)
+                if (letter, i) in centers
+            ]
+            if len(present) < 2:
                 continue
-            anchors = _arc_outward(anchors, up=up)
-            path = _contour_slur(anchors, up=up)
+            a = _slur_anchor(letter, present[0], centers, tips, up=up)
+            b = _slur_anchor(letter, present[-1], centers, tips, up=up)
+            if a is None or b is None:
+                continue
+            path, top = _one_slur(a[0], a[1], b[0], b[1], up=up)
             svg.add(
                 f'<path class="melisma-slur" data-voice="{letter}" data-from="{start}" data-to="{stop}" '
                 f'd="{path}" fill="none" stroke="black" stroke-width="1.3"/>'
             )
-            ink_top = min(ink_top, min(y for _x, y in anchors))
+            ink_top = min(ink_top, top)
     return ink_top
-
-
-def _arc_outward(
-    anchors: list[tuple[float, float]],
-    *,
-    up: bool,
-) -> list[tuple[float, float]]:
-    """Extra welving in het midden, zodat een vlakke balk geen tweede balk wordt."""
-    count = len(anchors)
-    if count < 3:
-        return anchors
-    bowed: list[tuple[float, float]] = []
-    for index, (x, y) in enumerate(anchors):
-        t = index / (count - 1)
-        bow = 4.0 * t * (1.0 - t) * 16.0
-        bowed.append((x, y - bow if up else y + bow))
-    return bowed
-
-
-def _contour_slur(anchors: list[tuple[float, float]], *, up: bool) -> str:
-    """Gladde boog langs de stokpunten, niet één vlakke kwadraat."""
-    if len(anchors) == 2:
-        (x1, y1), (x2, y2) = anchors
-        bow = -12.0 if up else 12.0
-        cx = (x1 + x2) / 2.0
-        cy = (y1 + y2) / 2.0 + bow
-        return f"M {x1:.1f} {y1:.1f} Q {cx:.1f} {cy:.1f} {x2:.1f} {y2:.1f}"
-    pts = anchors
-    parts = [f"M {pts[0][0]:.1f} {pts[0][1]:.1f}"]
-    for i in range(len(pts) - 1):
-        p0 = pts[i - 1] if i > 0 else pts[i]
-        p1 = pts[i]
-        p2 = pts[i + 1]
-        p3 = pts[i + 2] if i + 2 < len(pts) else p2
-        c1x = p1[0] + (p2[0] - p0[0]) / 6.0
-        c1y = p1[1] + (p2[1] - p0[1]) / 6.0
-        c2x = p2[0] - (p3[0] - p1[0]) / 6.0
-        c2y = p2[1] - (p3[1] - p1[1]) / 6.0
-        parts.append(f"C {c1x:.1f} {c1y:.1f} {c2x:.1f} {c2y:.1f} {p2[0]:.1f} {p2[1]:.1f}")
-    return " ".join(parts)
 
 
 def _draw_brace(svg: _Svg, x_right: float, y_top: float, y_bottom: float) -> None:
@@ -1235,6 +1247,16 @@ def _cue_lines(measure: dict[str, Any]) -> list[str]:
             if text:
                 lines.append(text)
     return lines
+
+
+def _cue_top(measure: dict[str, Any], treble_bottom: float) -> float:
+    """Bovenkant van de hoogste priesterregel, of ver onder de rand als er geen is."""
+    lines = _cue_lines(measure)
+    if not lines:
+        return 10_000.0
+    step = CUE_PT * _PT + 2.0
+    baseline = treble_bottom - 4 * SP - 8.0 - step * (len(lines) - 1)
+    return baseline - CUE_PT * _PT * 0.8
 
 
 def _draw_cues(svg: _Svg, measure: dict[str, Any], x: float, treble_bottom: float) -> None:
@@ -1420,8 +1442,11 @@ def _draw_soprano_vsa(
     measure_i: int,
 ) -> None:
     """Hoogtestrepen boven de noot, onderstreping eronder. Alleen de sopraan."""
-    width = 36.0
-    y = lyric_y - 36.0
+    width = 16.0
+    # Zelfde verhouding als de kale VSA: accent op één em boven de regel
+    # (offset −20 bij corps 20), onderstreping op een kwart em eronder.
+    em = LYRIC_PT * _PT
+    y = lyric_y - em
     for mark_measure, index, token, glyph in vsa_marks:
         if mark_measure != measure_i:
             continue
@@ -1447,7 +1472,7 @@ def _draw_soprano_vsa(
             f'<g class="vsa-underline" data-voice="S" data-index="{index}" '
             f'data-elm="{html.escape(elm, quote=True)}">'
         )
-        for fragment in glyphs.render_length_modifier([elm], x, lyric_y + 8.0, width):
+        for fragment in glyphs.render_length_modifier([elm], x, lyric_y + em * 0.25, width):
             svg.add(fragment)
         svg.add("</g>")
 
