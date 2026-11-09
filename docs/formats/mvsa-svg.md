@@ -71,5 +71,7 @@ mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa
 
 `--engine eigen` schrijft een sibling `lied.mvsa.eigen-notes.svg`
 (of `eigen-vsa-notes` / `eigen-vsa`) en laat `lied.mvsa.svg` en
-products-meta met rust. Het bestand bevat Source Sans 3 en schaalt mee
-met de vensterbreedte. Het productiescherm blijft OSMD.
+products-meta met rust. Het bestand bevat Source Sans 3.
+`--system-width` (default 760) breekt een langere regel af, ook midden
+in een maat. Het SVG heeft de eigen breedte; een pagina verkleint het
+met `max-width: 100%`. Het productiescherm blijft OSMD.

@@ -65,16 +65,20 @@ maatstrepen en de herhaalpuntjes.
 Wat op de spike nog een schets was: de bogen zijn eenvoudige krommen,
 de afstand tussen noten is grof, er was één systeem per stuk (ook waar
 de bron `@nieuw-systeem` zet), en de zangtekst was nog niet Source Sans 3.
-De schilder in `src/vsa/eigen_svg.py` heeft die drie punten inmiddels:
-Source Sans 3 (gewicht 400, ingebed vanuit `scripts/osmd-svg/fonts/`),
-een nieuw systeem waar Score-IR `newSystem` zet, en de S13-extender
-op de notenbeelden. De bogen en de nootafstand blijven grof.
-Een koppelteken in «ont-ferm» ontbreekt omdat Score-IR «ont» als losse
-lettergreep noteert (`syllabic: single`), niet als begin van een woord.
+De schilder in `src/vsa/eigen_svg.py` zet Source Sans 3 (gewicht 400,
+ingebed vanuit `scripts/osmd-svg/fonts/`), een nieuw systeem waar
+Score-IR `newSystem` zet, de S13-extender, een volta-haak over het
+slot, bundels op achtsten en korter, en een boog die de stokken volgt.
+Een regel die langer is dan `--system-width` (default 760) breekt af,
+ook midden in een maat. De nootafstand blijft grof.
+Het koppelteken in «ont-ferm» volgt het woordstreepje in de bron
+(`syllabic` begin/end), ook als die lettergreep één noot is.
 
-Het SVG-bestand schaalt mee met de vensterbreedte (`width="100%"` en
-een viewBox). De indeling breekt niet opnieuw af als het venster smal
-wordt. Voor papier en voor een telefoon is dat niet genoeg; zie §7 (fase 5) en §8.
+Het SVG heeft een viewBox en de eigen breedte. Een pagina mag het
+verkleinen (`max-width: 100%`); het rekt niet uit. Een regel die langer
+is dan de regelbreedte breekt af. Een venster dat ná het tekenen nog
+smaller wordt, verkleint de plaat. Opnieuw tekenen op die breedte is
+`--system-width`. Zie §7 en §8.
 
 ---
 
@@ -340,8 +344,9 @@ De schilder weigert een onbekende `format` of een onbekende major van
 | 6             | Alleen na een apart besluit: hoge SVG die de paginasnijder kan snijden                               | `index.md.pdf`                  |
 
 Fase 2 levert per stuk de drie beelden uit §4.2, als aparte SVG's.
-Elk bestand heeft een viewBox en `width="100%"`, zodat een venster het
-beeld kleiner maakt zonder de noten te herrekenen.
+Elk bestand heeft een viewBox en de eigen breedte. Een venster dat
+smaller is verkleint de plaat; de regelindeling ligt vast bij het
+tekenen (`--system-width`).
 Achtergrond wit, met een latere vlag voor transparant, gelijk aan
 [`mvsa svg`](../formats/mvsa-svg.md).
 
@@ -393,8 +398,9 @@ een eenstemmige `.vsa` blijft de bestaande `vsa svg`; de nieuwe eis is
 dat een `.mvsa`-tropaar hetzelfde soort beeld krijgt, zonder notenbalk.
 
 Die zin is waar voor de proefset in `tests/test_eigen_svg.py`.
-Open binnen deze fase: een volta-haak over de hele maat (nu een kort
-streepje met het nummer), bundels, en bogen die de melodie volgen.
+De volta-haak loopt over de maten van het slot, alleen boven de
+sopraan-alt-balk. Achtsten en korter in dezelfde tel krijgen een balk;
+een losse achtste krijgt een vlag. De melismaboog volgt de stokpunten.
 
 Buiten fase 2: site, `products`, OSMD uitschakelen, A4, cursor.
 
@@ -407,6 +413,10 @@ De default blijft MuseScore. `--view` is `notes` (default),
 Met `--translit` komt daar het bestaande translit-stuk bij, bijvoorbeeld
 `lied.mvsa.eigen-notes.translit-nls.svg`.
 `--lyrics-font-size` en `--cue-font-size` gelden.
+`--system-width` zet de regelbreedte (default 760). `none` breekt
+alleen op `@nieuw-systeem`. Het SVG heeft de eigen breedte; een pagina
+mag het verkleinen met `max-width: 100%`. Het rekt niet meer uit tot
+de volle vensterbreedte.
 Een ander `--lyrics-font` of `--cue-font` dan Source Sans 3 weigert
 de aanroep. MuseScore-Style (afstand, marges, compact) weigert ook.
 De aanroep schrijft geen products-meta en overschrijft `lied.mvsa.svg` niet.
@@ -466,8 +476,9 @@ mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa
 
 De default-sibling zonder `-o` is `alleluia-toon-8.mvsa.eigen-vsa-notes.svg`
 naast de bron, niet het product `alleluia-toon-8.mvsa.svg`.
-Versmal het venster: de tekening wordt kleiner. De regelindeling volgt
-`@nieuw-systeem` en breekt niet opnieuw af als het venster smal wordt.
+De regelindeling volgt `@nieuw-systeem` en `--system-width`.
+Een smaller venster verkleint de plaat; een andere regelbreedte
+maak je met `--system-width`.
 
 ### Naast OSMD
 
@@ -539,8 +550,8 @@ beschrijft.
 - MuseScore uit de afdruk halen.
 - De catalogus opnieuw genereren.
 - Een tweede Score-IR voor «oefenen».
-- Optische spatiering, bundels en bogen die de melodiecontour volgen,
-  vóórdat de contractrijen kloppen. Dat is de grens uit §10.
+- Optische spatiering. Een eerste balk, een boog buiten de stok en
+  `--system-width` zitten al in de schilder; de fijne spatiering niet.
 
 ---
 
@@ -566,13 +577,15 @@ contracten uit §3 kan het beeld voor dit SATB-repertoire als partituur
 gelden. Dat is het doel van fase 2 en het materiaal voor het besluit
 in fase 4.
 
-Daarboven wordt het duur, en dat hoort niet in fase 2:
+Daarboven wordt het duur, en dat hoort niet in deze ronde:
 
 - noten en lettergrepen die elkaar ontwijken in plaats van op een vast raster staan;
-- bogen die om stokken heen lopen;
-- bundels (achtsten aan één balk);
-- een systeem dat op een smal venster opnieuw afbreekt (dat is fase 5,
-  en alleen na het besluit);
+- een boog die om elke stok heen slaat zoals een graveur dat doet
+  (de schilder volgt de stokpunten al, zonder die fijnere vorm);
+- een balk die de helling per noot optisch bijstelt
+  (achtsten en korter delen al één balk);
+- een venster dat de regel opnieuw afbreekt zonder het bestand opnieuw
+  te tekenen (`--system-width` kiest de breedte bij het maken);
 - gelijkheid op de pixel met een MuseScore-export.
 
 Als fase 2 die eerste lijst nodig blijkt te hebben om überhaupt
@@ -584,12 +597,12 @@ dan een ander programma bijsturen.
 
 ## 12. Open punten
 
-| Punt                                                             | Waar het landt                                                                                                                                            |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| K1 zwaarder dan MuseScore (gewicht 600)                          | Later, als de platen in Source Sans 3 400 dat vragen. Niet in fase 2                                                                                      |
-| Alleen transliteratie, zonder de bronregel                       | Al «bewust later» in [kerkslavisch-transliteratie §5a](kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu). De drie beelden wachten daar niet op |
-| Welk startbeeld een pagina krijgt                                | De Markdown van die pagina (bibliotheek), niet de schilder                                                                                                |
-| «ont» als `syllabic: single` terwijl de bron `ont-ferm` schrijft | Score-IR / parser, niet de schilder. De schilder zet een koppelteken alleen bij `begin`/`middle`/`end` (leesbaarheid L3)                                  |
-| Meerdere cues in één maat, of een cue midden in de maat          | Al open in [partituur-ir §9](partituur-ir.md). De schilder volgt het anker dat de IR geeft                                                                |
-| Afspelen van een spacer (klinkt niet) tegenover de layout        | Blijft de vraag uit CoriB. De tekening volgt `print.spacer`                                                                                               |
-| Of fase 6 ooit de MuseScore-SVG als afdrukbouwsteen vervangt     | Apart besluit, niet stil meenemen met fase 4                                                                                                              |
+| Punt                                                             | Waar het landt                                                                                                                                                             |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| K1 zwaarder dan MuseScore (gewicht 600)                          | Later, als de platen in Source Sans 3 400 dat vragen. Niet in fase 2                                                                                                       |
+| Alleen transliteratie, zonder de bronregel                       | Al «bewust later» in [kerkslavisch-transliteratie §5a](kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu). De drie beelden wachten daar niet op                  |
+| Welk startbeeld een pagina krijgt                                | De Markdown van die pagina (bibliotheek), niet de schilder                                                                                                                 |
+| «ont-ferm» zonder koppelteken                                    | Opgelost: de export houdt `syllabic` begin/end van het woordstreepje, ook als de lettergreep één noot is (leesbaarheid L3, checklist K4). De schilder zet dan het streepje |
+| Meerdere cues in één maat, of een cue midden in de maat          | Al open in [partituur-ir §9](partituur-ir.md). De schilder volgt het anker dat de IR geeft                                                                                 |
+| Afspelen van een spacer (klinkt niet) tegenover de layout        | Blijft de vraag uit CoriB. De tekening volgt `print.spacer`                                                                                                                |
+| Of fase 6 ooit de MuseScore-SVG als afdrukbouwsteen vervangt     | Apart besluit, niet stil meenemen met fase 4                                                                                                                               |

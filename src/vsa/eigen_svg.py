@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import base64
 import html
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,9 @@ from .pitch_resolver import _SCALE_INTERVALS, pitch_to_degree_and_chrom
 from .svg_glyphs import SVGGlyphRenderer
 
 EIGEN_VIEWS: tuple[str, ...] = ("notes", "vsa-notes", "vsa")
+# Regelbreedte in tekening-eenheden (ongeveer CSS-pixels). Een langere
+# regel breekt af, ook midden in een maat. None: alleen @nieuw-systeem.
+DEFAULT_SYSTEM_WIDTH = 760.0
 FONT_FAMILY = "Source Sans 3"
 # Zelfde maten als MuseScore-Style (checklist S7, leesbaarheid L2).
 LYRIC_PT = 13.0
@@ -278,6 +282,8 @@ def _events_for_voice(raw: list[dict[str, Any]], voice: str) -> list[Ev]:
     out: list[Ev] = []
     cursor = 0.0
     for index, ev in enumerate(raw):
+        if isinstance(ev.get("sourceIndex"), int):
+            index = ev["sourceIndex"]
         elm = str((ev.get("duration") or {}).get("elm") or "~")
         dur = _elm_quarters(elm)
         pitch = ev.get("pitch")
@@ -427,16 +433,168 @@ def _font_css() -> str:
     )
 
 
-def _systems(measures: list[dict[str, Any]]) -> list[list[tuple[int, dict[str, Any]]]]:
+def _voice_map(measure: dict[str, Any]) -> dict[str, list[Ev]]:
+    return {
+        letter: _events_for_voice(list((measure.get("voices") or {}).get(letter) or []), letter)
+        for letter in ("S", "A", "T", "B")
+    }
+
+
+def _bar_tail(style: str) -> float:
+    if style in {"repeat-end", "repeat-end-section", "light-heavy", "light-light", "heavy-heavy"}:
+        return 18.0
+    return 0.0
+
+
+def _measure_end(measure: dict[str, Any], x: float) -> tuple[dict[str, list[Ev]], dict[float, float], float, float]:
+    """Stemmen, x per tijd, x van de eerste noot, x van de rechterstreep."""
+    lyrics = list(measure.get("lyrics") or [])
+    voices = _voice_map(measure)
+    left_style = str((measure.get("bar") or {}).get("left") or "")
+    origin = x + (36.0 if left_style in {"repeat-start", "heavy-light", "heavy-heavy"} else 0.0)
+    x_at = _layout_times(voices, lyrics, origin)
+    right_style = str((measure.get("bar") or {}).get("right") or "")
+    end_x = max(x_at.values(), default=origin) + 22.0 + _bar_tail(right_style)
+    if not measure.get("_continuation"):
+        cue_w = max((_text_width(line, CUE_PT) for line in _cue_lines(measure)), default=0.0)
+        if cue_w:
+            end_x = max(end_x, origin + cue_w + 14.0)
+    return voices, x_at, origin, end_x
+
+
+def _slice_voice(raw: list[dict[str, Any]], t0: float, t1: float) -> list[dict[str, Any]]:
+    cursor = 0.0
+    kept: list[dict[str, Any]] = []
+    for index, ev in enumerate(raw):
+        elm = str((ev.get("duration") or {}).get("elm") or "~")
+        start = _q(cursor)
+        if t0 - 1e-4 <= start < t1 - 1e-4:
+            copy = dict(ev)
+            copy["sourceIndex"] = index
+            kept.append(copy)
+        cursor += _elm_quarters(elm)
+    return kept
+
+
+def _slice_measure(measure: dict[str, Any], t0: float, t1: float, *, first: bool, last: bool) -> dict[str, Any]:
+    sl: dict[str, Any] = {
+        "id": measure.get("id"),
+        "lyrics": list(measure.get("lyrics") or []),
+        "voices": {
+            letter: _slice_voice(list(events), t0, t1)
+            for letter, events in (measure.get("voices") or {}).items()
+        },
+        "bar": {
+            "left": (measure.get("bar") or {}).get("left") if first else None,
+            "right": (measure.get("bar") or {}).get("right") if last else None,
+        },
+    }
+    if first:
+        if measure.get("cues"):
+            sl["cues"] = measure["cues"]
+        if measure.get("navigation"):
+            sl["navigation"] = measure["navigation"]
+        if measure.get("newSystem"):
+            sl["newSystem"] = True
+    else:
+        sl["_continuation"] = True
+    ending = dict(measure.get("ending") or {})
+    if not first:
+        ending.pop("start", None)
+    if not last:
+        ending.pop("stop", None)
+    if ending:
+        sl["ending"] = ending
+    return sl
+
+
+def _cut_times(measure: dict[str, Any], budget: float) -> list[tuple[float, float]]:
+    """Knippunten zodat elk stuk binnen ``budget`` blijft. Liever op een lettergreep."""
+    voices = _voice_map(measure)
+    lyrics = list(measure.get("lyrics") or [])
+    x_at = _layout_times(voices, lyrics, 0.0)
+    sop = voices.get("S") or []
+    if not sop:
+        return [(0.0, 1.0e9)]
+    total = max((ev.end for evs in voices.values() for ev in evs), default=0.0)
+    if max(x_at.values(), default=0.0) + 32.0 <= budget:
+        return [(0.0, total + 1.0)]
+    cuts: list[tuple[float, float]] = []
+    t0 = 0.0
+    guard = 0
+    while t0 < total - 1e-4 and guard < 64:
+        guard += 1
+        x0 = x_at.get(_q(t0), 0.0)
+        best: float | None = None
+        overflow: float | None = None
+        for ev in sop:
+            if ev.start <= t0 + 1e-4:
+                continue
+            x = x_at.get(ev.start, x0)
+            if x - x0 <= budget:
+                if ev.lyric_index is not None:
+                    best = ev.start
+            else:
+                overflow = ev.start
+                break
+        if overflow is None:
+            cuts.append((t0, total + 1.0))
+            break
+        cut = best if best is not None and best > t0 + 1e-4 else overflow
+        if cut <= t0 + 1e-4:
+            cut = overflow
+        cuts.append((t0, cut))
+        t0 = cut
+    if not cuts or cuts[-1][1] <= total:
+        cuts.append((t0, total + 1.0))
+    return cuts
+
+
+def _systems(
+    measures: list[dict[str, Any]],
+    *,
+    system_width: float | None,
+    show_music: bool,
+    f_major: bool,
+) -> list[list[tuple[int, dict[str, Any]]]]:
+    prefix = 36.0 + (54.0 if show_music else 8.0)
+    if show_music and f_major:
+        prefix += 22.0
     groups: list[list[tuple[int, dict[str, Any]]]] = []
     current: list[tuple[int, dict[str, Any]]] = []
-    for index, measure in enumerate(measures):
-        if measure.get("newSystem") and current:
+    used = prefix
+
+    def flush() -> None:
+        nonlocal current, used
+        if current:
             groups.append(current)
             current = []
-        current.append((index, measure))
-    if current:
-        groups.append(current)
+            used = prefix
+
+    for index, measure in enumerate(measures):
+        if system_width is None:
+            slices = [measure]
+        else:
+            budget = max(180.0, system_width - prefix)
+            spans = _cut_times(measure, budget)
+            if len(spans) == 1:
+                slices = [measure]
+            else:
+                slices = [
+                    _slice_measure(measure, t0, t1, first=si == 0, last=si == len(spans) - 1)
+                    for si, (t0, t1) in enumerate(spans)
+                ]
+        for si, sl in enumerate(slices):
+            if measure.get("newSystem") and si == 0 and current:
+                flush()
+            if si > 0 and current:
+                flush()
+            span = _measure_end(sl, 0.0)[3] + 10.0
+            if current and system_width is not None and used + span > system_width:
+                flush()
+            current.append((index, sl))
+            used += span
+    flush()
     return groups or [[]]
 
 
@@ -446,8 +604,13 @@ def render_score_ir_svg(
     view: str = "notes",
     lyric_pt: float | None = None,
     cue_pt: float | None = None,
+    system_width: float | None = DEFAULT_SYSTEM_WIDTH,
 ) -> str:
-    """Teken Score-IR. ``view`` is ``notes``, ``vsa-notes`` of ``vsa``."""
+    """Teken Score-IR. ``view`` is ``notes``, ``vsa-notes`` of ``vsa``.
+
+    ``system_width`` is de regelbreedte. ``None`` breekt alleen op
+    ``@nieuw-systeem``.
+    """
     global LYRIC_PT, CUE_PT, LYRIC_FONT
     if doc.get("format") != "score-ir":
         raise EigenSvgError("verwacht format score-ir")
@@ -459,25 +622,34 @@ def render_score_ir_svg(
     if cue_pt is not None:
         CUE_PT = float(cue_pt)
     try:
-        return _render_score_ir_svg(doc, chosen)
+        return _render_score_ir_svg(doc, chosen, system_width=system_width)
     finally:
         LYRIC_PT, CUE_PT, LYRIC_FONT = saved
 
 
-def _render_score_ir_svg(doc: dict[str, Any], chosen: str) -> str:
+def _render_score_ir_svg(
+    doc: dict[str, Any],
+    chosen: str,
+    *,
+    system_width: float | None,
+) -> str:
     marks, underlines = soprano_vsa_plan(doc)
     chunks: list[str] = []
     width = 240.0
     y = 0.0
     gap = 36.0
-    for group in _systems(list(doc.get("measures") or [])):
-        sub = dict(doc)
-        sub["measures"] = [measure for _i, measure in group]
-        offset = group[0][0] if group else 0
+    show_music = chosen != "vsa"
+    groups = _systems(
+        list(doc.get("measures") or []),
+        system_width=system_width,
+        show_music=show_music,
+        f_major=_f_major(doc),
+    )
+    for group in groups:
         system_w, system_h, body = _render_system(
-            sub,
+            doc,
+            indexed=group,
             view=chosen,
-            measure_offset=offset,
             vsa_marks=marks,
             vsa_underlines=underlines,
         )
@@ -489,7 +661,8 @@ def _render_score_ir_svg(doc: dict[str, Any], chosen: str) -> str:
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.1f} {height:.1f}" '
-        f'width="100%" preserveAspectRatio="xMinYMin meet" role="img" data-view="{chosen}">\n'
+        f'width="{width:.0f}" height="{height:.0f}" '
+        f'preserveAspectRatio="xMinYMin meet" role="img" data-view="{chosen}">\n'
         f"<title>{title}</title>\n"
         f"{_font_css()}\n"
         f'<rect class="page" x="0" y="0" width="{width:.1f}" height="{height:.1f}" fill="white"/>\n'
@@ -501,8 +674,8 @@ def _render_score_ir_svg(doc: dict[str, Any], chosen: str) -> str:
 def _render_system(
     doc: dict[str, Any],
     *,
+    indexed: list[tuple[int, dict[str, Any]]],
     view: str,
-    measure_offset: int,
     vsa_marks: list[tuple[int, int, str, str]],
     vsa_underlines: list[tuple[int, int, str]],
 ) -> tuple[float, float, str]:
@@ -526,32 +699,18 @@ def _render_system(
     staff_bottom = {"treble": treble_bottom, "bass": bass_bottom}
     bottom_dia = {"treble": _diatonic("E", 4), "bass": _diatonic("G", 2)}
 
-    measures = doc.get("measures") or []
+    measures = [measure for _index, measure in indexed]
+    measure_ids = [index for index, _measure in indexed]
     left = 36.0 if show_music else 16.0
     x = left + (54.0 if show_music else 8.0)
     if show_music and f_major:
         x += 22.0
     end_x = x
 
-    prepared: list[tuple[dict[str, Any], dict[str, list[Ev]], dict[float, float], float]] = []
+    prepared: list[tuple[dict[str, Any], dict[str, list[Ev]], dict[float, float], float, float]] = []
     for measure in measures:
-        lyrics = list(measure.get("lyrics") or [])
-        voices = {
-            letter: _events_for_voice(list((measure.get("voices") or {}).get(letter) or []), letter)
-            for letter in ("S", "A", "T", "B")
-        }
-        left_style = str((measure.get("bar") or {}).get("left") or "")
-        if left_style in {"repeat-start", "heavy-light", "heavy-heavy"}:
-            x += 36.0
-        x_at = _layout_times(voices, lyrics, x)
-        prepared.append((measure, voices, x_at, x))
-        right_style = str((measure.get("bar") or {}).get("right") or "single")
-        tail = 18.0 if right_style in {"repeat-end", "repeat-end-section", "light-heavy", "light-light", "heavy-heavy"} else 0.0
-        end_x = max(x_at.values(), default=x) + 22.0 + tail
-        # De priesterregel boven de balk mag niet in de volgende maat doorlopen.
-        cue_w = max((_text_width(line, CUE_PT) for line in _cue_lines(measure)), default=0.0)
-        if cue_w:
-            end_x = max(end_x, x + cue_w + 14.0)
+        voices, x_at, origin, end_x = _measure_end(measure, x)
+        prepared.append((measure, voices, x_at, origin, end_x))
         x = end_x + 10.0
 
     width = max(end_x + 24.0, 240.0)
@@ -565,14 +724,17 @@ def _render_system(
                     f'x2="{end_x:.1f}" y2="{y:.1f}" stroke="black" stroke-width="1"/>'
                 )
         _draw_clefs_and_signature(svg, left, treble_bottom, bass_bottom, f_major)
-        number = measure_offset + 1
-        svg.add(
-            f'<text class="measure-number" data-number="{number}" x="8" y="{treble_bottom - 2 * SP:.1f}" '
-            f'font-family="{FONT_FAMILY}, sans-serif" font-size="12pt" font-weight="400">{number}</text>'
-        )
+        if measures and not measures[0].get("_continuation"):
+            number = measure_ids[0] + 1
+            svg.add(
+                f'<text class="measure-number" data-number="{number}" x="8" y="{treble_bottom - 2 * SP:.1f}" '
+                f'font-family="{FONT_FAMILY}, sans-serif" font-size="12pt" font-weight="400">{number}</text>'
+            )
 
-    for local_i, (measure, voices, x_at, measure_x) in enumerate(prepared):
-        measure_i = measure_offset + local_i
+    volta_boxes: list[tuple[dict[str, Any], float, float]] = []
+    ink_top = 12.0
+    for local_i, (measure, voices, x_at, measure_x, bar_x) in enumerate(prepared):
+        measure_i = measure_ids[local_i]
         lyrics = list(measure.get("lyrics") or [])
         note_centers: dict[tuple[str, int], tuple[float, float]] = {}
         lyric_centers: dict[int, float] = {}
@@ -585,23 +747,27 @@ def _render_system(
                 if show_music and not ev.rest and ev.step is not None and ev.octave is not None:
                     cy, pos = _pitch_y(staff_bottom[_STAFF_OF[letter]], bottom_dia[_STAFF_OF[letter]], ev.step, ev.octave)
                     note_centers[(letter, ev.index)] = (cx, cy)
-                    _draw_note(svg, ev, cx, cy, pos, f_major, lyric_y)
+                    _draw_note(svg, ev, cx, cy, pos, f_major, lyric_y, draw_stem=False)
                 elif not show_music and letter == "S":
                     note_centers[(letter, ev.index)] = (cx, lyric_y)
                 if letter == "S" and ev.lyric_index is not None:
                     lyric_centers[ev.lyric_index] = cx
         if show_music:
-            _draw_slurs(svg, voices, note_centers, lyric_y)
-            bar_x = max(x_at.values(), default=end_x)
-            _draw_barline(
-                svg,
-                str((measure.get("bar") or {}).get("right") or "single"),
-                bar_x,
-                treble_bottom,
-                bass_bottom,
-                staff_bottom,
-            )
+            tips, stem_top = _draw_stems_and_beams(svg, voices, note_centers, lyric_y)
+            slur_top = _draw_slurs(svg, voices, note_centers, tips)
+            ink_top = min(ink_top, stem_top, slur_top)
+            right_style = str((measure.get("bar") or {}).get("right") or "")
+            if right_style:
+                _draw_barline(
+                    svg,
+                    right_style,
+                    bar_x,
+                    treble_bottom,
+                    bass_bottom,
+                    staff_bottom,
+                )
             _draw_navigation(svg, measure, measure_x, treble_bottom)
+            volta_boxes.append((measure, measure_x, bar_x))
         _draw_cues(
             svg,
             measure,
@@ -623,7 +789,14 @@ def _render_system(
             show_extend=show_music,
         )
 
-    return width, height, "\n".join(svg.parts)
+    if show_music:
+        _draw_voltas(svg, volta_boxes, treble_bottom)
+    body = "\n".join(svg.parts)
+    pad = max(0.0, 18.0 - ink_top)
+    if pad > 0.4:
+        body = f'<g class="headroom" transform="translate(0,{pad:.1f})">{body}</g>'
+        height += pad
+    return width, height, body
 
 
 def _draw_clefs_and_signature(
@@ -673,7 +846,17 @@ def _stem_end(cy: float, voice: str, lyric_y: float) -> float:
     return max(y2, cy + short)
 
 
-def _draw_note(svg: _Svg, ev: Ev, cx: float, cy: float, pos: int, f_major: bool, lyric_y: float) -> None:
+def _draw_note(
+    svg: _Svg,
+    ev: Ev,
+    cx: float,
+    cy: float,
+    pos: int,
+    f_major: bool,
+    lyric_y: float,
+    *,
+    draw_stem: bool = True,
+) -> None:
     kind = "spacer" if ev.spacer else "breve" if ev.breve else "whole" if _whole(ev.elm) else "note"
     stem_dir = "up" if ev.voice in _STEM_UP else "down"
     svg.add(
@@ -703,7 +886,7 @@ def _draw_note(svg: _Svg, ev: Ev, cx: float, cy: float, pos: int, f_major: bool,
     head = _head_name(ev)
     svg.add(_paint_glyph(head, cx, cy, "notehead breve-head" if ev.breve else "notehead", center=True))
     rx = _half_width(head)
-    if not ev.breve and not ev.stemless and not _whole(ev.elm):
+    if draw_stem and not ev.breve and not ev.stemless and not _whole(ev.elm):
         y2 = _stem_end(cy, ev.voice, lyric_y)
         if stem_dir == "up":
             x = cx + rx - 0.8
@@ -729,51 +912,260 @@ def _draw_note(svg: _Svg, ev: Ev, cx: float, cy: float, pos: int, f_major: bool,
     svg.add("</g>")
 
 
-def _draw_slurs(
+def _stem_x(ev: Ev, cx: float) -> float:
+    rx = _half_width(_head_name(ev))
+    if ev.voice in _STEM_UP:
+        return cx + rx - 0.8
+    return cx - rx + 0.8
+
+
+def _short_level(ev: Ev) -> int:
+    """1 = achtste, 2 = zestiende, 3 = korter. 0 = geen vlag of balk."""
+    if ev.rest or ev.spacer or ev.stemless or ev.breve or _whole(ev.elm) or _note_open(ev.elm):
+        return 0
+    quarters = _elm_quarters(ev.elm)
+    if quarters <= 0.125:
+        return 3
+    if quarters <= 0.25:
+        return 2
+    if quarters <= 0.5:
+        return 1
+    return 0
+
+
+def _beam_groups(evs: list[Ev]) -> list[list[Ev]]:
+    """Achtsten en korter, aaneengesloten, binnen dezelfde kwarttel."""
+    groups: list[list[Ev]] = []
+    current: list[Ev] = []
+    beat: int | None = None
+    for ev in evs:
+        level = _short_level(ev)
+        gap = current and abs(ev.start - current[-1].end) > 0.02
+        if level == 0 or gap:
+            if len(current) >= 2:
+                groups.append(current)
+            current = []
+            beat = None
+            if level == 0:
+                continue
+        ev_beat = math.floor(ev.start + 1e-4)
+        if current and ev_beat != beat:
+            if len(current) >= 2:
+                groups.append(current)
+            current = []
+        if not current:
+            beat = ev_beat
+        current.append(ev)
+    if len(current) >= 2:
+        groups.append(current)
+    return groups
+
+
+def _draw_stem_line(svg: _Svg, ev: Ev, x: float, y1: float, y2: float) -> None:
+    direction = "up" if ev.voice in _STEM_UP else "down"
+    svg.add(
+        f'<line class="stem stem-{direction} voice-{ev.voice}" data-voice="{ev.voice}" '
+        f'data-index="{ev.index}" x1="{x:.1f}" y1="{y1:.1f}" x2="{x:.1f}" y2="{y2:.1f}" '
+        f'stroke="black" stroke-width="1.35"/>'
+    )
+
+
+def _draw_flag(svg: _Svg, ev: Ev, x: float, y: float) -> None:
+    level = _short_level(ev)
+    if level <= 0:
+        return
+    up = ev.voice in _STEM_UP
+    if level >= 2:
+        name = "flag16thUp" if up else "flag16thDown"
+    else:
+        name = "flag8thUp" if up else "flag8thDown"
+    svg.add(_paint_glyph(name, x, y, "flag", center=False))
+
+
+def _draw_stems_and_beams(
     svg: _Svg,
     voices: dict[str, list[Ev]],
     centers: dict[tuple[str, int], tuple[float, float]],
     lyric_y: float,
+) -> tuple[dict[tuple[str, int], float], float]:
+    """Stokken, balken en vlaggen. Geeft de stokpunt per noot en de hoogste inkt."""
+    tips: dict[tuple[str, int], float] = {}
+    ink_top = 10_000.0
+    for letter, evs in voices.items():
+        drawable = [
+            ev
+            for ev in evs
+            if (letter, ev.index) in centers
+            and not ev.spacer
+            and not ev.rest
+            and not ev.breve
+            and not ev.stemless
+            and not _whole(ev.elm)
+        ]
+        groups = _beam_groups(drawable)
+        beamed = {ev.index for group in groups for ev in group}
+        up = letter in _STEM_UP
+        for ev in drawable:
+            if ev.index in beamed:
+                continue
+            cx, cy = centers[(letter, ev.index)]
+            x = _stem_x(ev, cx)
+            y2 = _stem_end(cy, letter, lyric_y)
+            _draw_stem_line(svg, ev, x, cy, y2)
+            _draw_flag(svg, ev, x, y2)
+            tips[(letter, ev.index)] = y2
+            ink_top = min(ink_top, y2, cy)
+        for group in groups:
+            xs: list[float] = []
+            preferred: list[float] = []
+            for ev in group:
+                cx, cy = centers[(letter, ev.index)]
+                xs.append(_stem_x(ev, cx))
+                preferred.append(_stem_end(cy, letter, lyric_y))
+            x0 = xs[0]
+            span = xs[-1] - x0
+            cys = [centers[(letter, ev.index)][1] for ev in group]
+            slope = 0.0
+            if abs(span) > 1:
+                slope = max(-0.18, min(0.18, (cys[-1] - cys[0]) / span))
+            if up:
+                y0 = min(tip - slope * (x - x0) for tip, x in zip(preferred, xs))
+            else:
+                y0 = max(tip - slope * (x - x0) for tip, x in zip(preferred, xs))
+
+            def beam_y(x: float, shift: float = 0.0) -> float:
+                return y0 + slope * (x - x0) + shift
+
+            for ev, x, cy in zip(group, xs, cys):
+                tip = beam_y(x)
+                _draw_stem_line(svg, ev, x, cy, tip)
+                tips[(letter, ev.index)] = tip
+                ink_top = min(ink_top, tip)
+            _beam_segments(svg, group, xs, beam_y, level=1, shift=0.0, voice=letter)
+            if any(_short_level(ev) >= 2 for ev in group):
+                shift = 4.4 if up else -4.4
+                _beam_segments(svg, group, xs, beam_y, level=2, shift=shift, voice=letter)
+                if shift < 0:
+                    ink_top = min(ink_top, beam_y(xs[0], shift), beam_y(xs[-1], shift))
+    return tips, ink_top
+
+
+def _beam_segments(
+    svg: _Svg,
+    group: list[Ev],
+    xs: list[float],
+    beam_y,
+    *,
+    level: int,
+    shift: float,
+    voice: str,
 ) -> None:
+    """Eén balklaag. Een losse korte noot krijgt een stompje naar de buur."""
+    n = len(group)
+    i = 0
+    while i < n:
+        if _short_level(group[i]) < level:
+            i += 1
+            continue
+        j = i
+        while j + 1 < n and _short_level(group[j + 1]) >= level:
+            j += 1
+        if j > i:
+            x1, x2 = xs[i], xs[j]
+            svg.add(
+                f'<line class="beam" data-voice="{voice}" data-level="{level}" x1="{x1:.1f}" y1="{beam_y(x1, shift):.1f}" '
+                f'x2="{x2:.1f}" y2="{beam_y(x2, shift):.1f}" stroke="black" stroke-width="2.4" '
+                f'stroke-linecap="butt"/>'
+            )
+        else:
+            neighbor = xs[i + 1] if i + 1 < n else xs[i - 1]
+            step = 12.0 if neighbor > xs[i] else -12.0
+            x1 = xs[i]
+            x2 = xs[i] + step
+            svg.add(
+                f'<line class="beam" data-voice="{voice}" data-level="{level}" x1="{x1:.1f}" y1="{beam_y(x1, shift):.1f}" '
+                f'x2="{x2:.1f}" y2="{beam_y(x2, shift):.1f}" stroke="black" stroke-width="2.4" '
+                f'stroke-linecap="butt"/>'
+            )
+        i = j + 1
+
+
+def _draw_slurs(
+    svg: _Svg,
+    voices: dict[str, list[Ev]],
+    centers: dict[tuple[str, int], tuple[float, float]],
+    tips: dict[tuple[str, int], float],
+) -> float:
+    """Boog buiten de echte stokpunt, niet door de balk."""
+    ink_top = 10_000.0
     for letter, evs in voices.items():
         starts = [ev.index for ev in evs if ev.slur_start]
         stops = [ev.index for ev in evs if ev.slur_stop]
+        up = letter in _STEM_UP
         for start, stop in zip(starts, stops):
             if stop <= start:
                 continue
-            pts = [centers[(letter, i)] for i in range(start, stop + 1) if (letter, i) in centers]
-            if len(pts) < 2:
+            anchors: list[tuple[float, float]] = []
+            for i in range(start, stop + 1):
+                center = centers.get((letter, i))
+                if center is None:
+                    continue
+                cx, cy = center
+                tip = tips.get((letter, i))
+                if tip is None:
+                    tip = cy - 2.0 * SP if up else cy + 2.0 * SP
+                gap = 12.0
+                anchors.append((cx, tip - gap if up else tip + gap))
+            if len(anchors) < 2:
                 continue
-            x1 = pts[0][0]
-            x2 = pts[-1][0]
-            ys = [y for _x, y in pts]
-            # S boven de stokken, A onder de altkoppen (boven de tekst),
-            # T vlak boven de tenorkoppen, B onder de baskoppen.
-            # Zo snijdt de slur de nootkoppen van die stem niet.
-            if letter == "S":
-                tip = min(_stem_end(y, "S", lyric_y) for y in ys)
-                base = tip - 8.0
-                arch = -14.0
-            elif letter == "A":
-                tip = max(_stem_end(y, "A", lyric_y) for y in ys)
-                base = tip + 8.0
-                arch = 8.0
-            elif letter == "T":
-                tip = min(_stem_end(y, "T", lyric_y) for y in ys)
-                base = tip - 8.0
-                arch = -8.0
-            else:
-                tip = max(_stem_end(y, "B", lyric_y) for y in ys)
-                base = tip + 8.0
-                arch = 10.0
-            y1 = y2 = base
-            cx = (x1 + x2) / 2.0
-            cy = base + arch
+            anchors = _arc_outward(anchors, up=up)
+            path = _contour_slur(anchors, up=up)
             svg.add(
                 f'<path class="melisma-slur" data-voice="{letter}" data-from="{start}" data-to="{stop}" '
-                f'd="M {x1:.1f} {y1:.1f} Q {cx:.1f} {cy:.1f} {x2:.1f} {y2:.1f}" '
-                f'fill="none" stroke="black" stroke-width="1.3"/>'
+                f'd="{path}" fill="none" stroke="black" stroke-width="1.3"/>'
             )
+            ink_top = min(ink_top, min(y for _x, y in anchors))
+    return ink_top
+
+
+def _arc_outward(
+    anchors: list[tuple[float, float]],
+    *,
+    up: bool,
+) -> list[tuple[float, float]]:
+    """Extra welving in het midden, zodat een vlakke balk geen tweede balk wordt."""
+    count = len(anchors)
+    if count < 3:
+        return anchors
+    bowed: list[tuple[float, float]] = []
+    for index, (x, y) in enumerate(anchors):
+        t = index / (count - 1)
+        bow = 4.0 * t * (1.0 - t) * 16.0
+        bowed.append((x, y - bow if up else y + bow))
+    return bowed
+
+
+def _contour_slur(anchors: list[tuple[float, float]], *, up: bool) -> str:
+    """Gladde boog langs de stokpunten, niet één vlakke kwadraat."""
+    if len(anchors) == 2:
+        (x1, y1), (x2, y2) = anchors
+        bow = -12.0 if up else 12.0
+        cx = (x1 + x2) / 2.0
+        cy = (y1 + y2) / 2.0 + bow
+        return f"M {x1:.1f} {y1:.1f} Q {cx:.1f} {cy:.1f} {x2:.1f} {y2:.1f}"
+    pts = anchors
+    parts = [f"M {pts[0][0]:.1f} {pts[0][1]:.1f}"]
+    for i in range(len(pts) - 1):
+        p0 = pts[i - 1] if i > 0 else pts[i]
+        p1 = pts[i]
+        p2 = pts[i + 1]
+        p3 = pts[i + 2] if i + 2 < len(pts) else p2
+        c1x = p1[0] + (p2[0] - p0[0]) / 6.0
+        c1y = p1[1] + (p2[1] - p0[1]) / 6.0
+        c2x = p2[0] - (p3[0] - p1[0]) / 6.0
+        c2y = p2[1] - (p3[1] - p1[1]) / 6.0
+        parts.append(f"C {c1x:.1f} {c1y:.1f} {c2x:.1f} {c2y:.1f} {p2[0]:.1f} {p2[1]:.1f}")
+    return " ".join(parts)
 
 
 def _draw_brace(svg: _Svg, x_right: float, y_top: float, y_bottom: float) -> None:
@@ -867,21 +1259,55 @@ def _draw_navigation(
         _NAV_LABEL.get(str(key), str(key))
         for key in (measure.get("navigation") or [])
     ]
-    ending = measure.get("ending") or {}
-    if ending.get("start"):
-        labels.insert(0, str(ending["start"]))
     if not labels:
         return
-    y = treble_bottom - 4 * SP - 22.0
+    y = treble_bottom - 4 * SP - 40.0
     face = f'font-family="{FONT_FAMILY}, sans-serif" font-size="12pt" font-weight="{LYRIC_WEIGHT}"'
     svg.add(
         f'<text class="nav-mark" x="{x:.1f}" y="{y:.1f}" {face}>{html.escape("  ".join(labels))}</text>'
     )
-    if ending.get("start") or ending.get("stop"):
+
+
+def _draw_voltas(
+    svg: _Svg,
+    boxes: list[tuple[dict[str, Any], float, float]],
+    treble_bottom: float,
+) -> None:
+    """Haak boven de sopraan-alt-balk, over de maten van het slot."""
+    y = treble_bottom - 4 * SP - 16.0
+    index = 0
+    while index < len(boxes):
+        measure, left, right = boxes[index]
+        ending = measure.get("ending") or {}
+        if not ending.get("start") and not ending.get("stop"):
+            index += 1
+            continue
+        number = str(ending.get("start") or "")
+        last = index
+        while last + 1 < len(boxes):
+            this = boxes[last][0].get("ending") or {}
+            nxt = boxes[last + 1][0].get("ending") or {}
+            if this.get("stop") or not nxt:
+                break
+            if nxt.get("start") and nxt.get("start") != number:
+                break
+            last += 1
+            if (boxes[last][0].get("ending") or {}).get("stop"):
+                break
+        x2 = boxes[last][2]
+        hook = 9.0
         svg.add(
-            f'<line class="volta" x1="{x:.1f}" y1="{y + 4:.1f}" x2="{x + 48:.1f}" y2="{y + 4:.1f}" '
-            f'stroke="black" stroke-width="1"/>'
+            f'<path class="volta" data-number="{html.escape(number)}" '
+            f'd="M {left:.1f} {y + hook:.1f} V {y:.1f} H {x2:.1f} V {y + hook:.1f}" '
+            f'fill="none" stroke="black" stroke-width="1.1"/>'
         )
+        if number:
+            face = f'font-family="{FONT_FAMILY}, sans-serif" font-size="12pt" font-weight="{LYRIC_WEIGHT}"'
+            svg.add(
+                f'<text class="volta-number" x="{left + 4:.1f}" y="{y - 3:.1f}" {face}>'
+                f'{html.escape(number)}</text>'
+            )
+        index = last + 1
 
 
 def _draw_lyrics(
@@ -926,6 +1352,16 @@ def _draw_lyrics(
         nxt = str((lyrics[index + 1].get("syllables") or [{}])[0].get("syllabic") or "")
         if syll in {"begin", "middle"} and nxt in {"middle", "end"} and index in centers and index + 1 in centers:
             hx = (centers[index] + centers[index + 1]) / 2.0
+            svg.add(
+                f'<text class="hyphen" x="{hx:.1f}" y="{lyric_y:.1f}" text-anchor="middle" {face}>-</text>'
+            )
+        elif (
+            syll in {"begin", "middle"}
+            and nxt in {"middle", "end"}
+            and index in centers
+            and index + 1 not in centers
+        ):
+            hx = centers[index] + _text_width(_lyric_text(lyric)) / 2.0 + 8.0
             svg.add(
                 f'<text class="hyphen" x="{hx:.1f}" y="{lyric_y:.1f}" text-anchor="middle" {face}>-</text>'
             )
@@ -1043,6 +1479,7 @@ def export_mvsa_to_eigen_svg(
     translit_modus: str | None = None,
     lyric_pt: float | None = None,
     cue_pt: float | None = None,
+    system_width: float | None = DEFAULT_SYSTEM_WIDTH,
 ) -> Path:
     """``.mvsa`` → Score-IR → eigen SVG. Schrijft ``out`` en geeft dat pad terug."""
     from .atomic_io import write_text
@@ -1059,7 +1496,13 @@ def export_mvsa_to_eigen_svg(
         translit=translit,
         translit_modus=translit_modus,
     )
-    svg = render_score_ir_svg(doc, view=view, lyric_pt=lyric_pt, cue_pt=cue_pt)
+    svg = render_score_ir_svg(
+        doc,
+        view=view,
+        lyric_pt=lyric_pt,
+        cue_pt=cue_pt,
+        system_width=system_width,
+    )
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
     write_text(out, svg, encoding="utf-8", newline="\n")

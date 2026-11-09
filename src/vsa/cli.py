@@ -511,6 +511,17 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "vsa: kale VSA, zonder notenbalk."
         ),
     )
+    m_svg.add_argument(
+        "--system-width",
+        metavar="PX",
+        default=None,
+        dest="system_width",
+        help=(
+            "Alleen bij --engine eigen. Regelbreedte in tekening-eenheden "
+            "(default 760). Een langere regel breekt af. 'none' breekt alleen "
+            "op @nieuw-systeem."
+        ),
+    )
     _add_partituur_style_args(m_svg)
     _add_mvsa_audio_format_parsers(mvsa_sub)
     m_normalize = mvsa_sub.add_parser(
@@ -2948,6 +2959,21 @@ def _cmd_mvsa_svg_eigen(args, files: list[Path], tkw: dict) -> int:
             )
             return 1
     view = getattr(args, "view", None) or "notes"
+    raw_width = getattr(args, "system_width", None)
+    system_width_arg: dict = {}
+    if raw_width is not None and str(raw_width).strip() != "":
+        if str(raw_width).strip().lower() == "none":
+            system_width_arg = {"system_width": None}
+        else:
+            try:
+                system_width_arg = {"system_width": float(raw_width)}
+            except ValueError:
+                print(
+                    f"mvsa svg --engine eigen: --system-width {raw_width!r} "
+                    "is geen getal en niet 'none'.",
+                    file=sys.stderr,
+                )
+                return 1
     exit_code = 0
     for path in files:
         suffix = eigen_svg_suffix(
@@ -2967,6 +2993,7 @@ def _cmd_mvsa_svg_eigen(args, files: list[Path], tkw: dict) -> int:
                 translit_modus=tkw.get("translit_modus"),
                 lyric_pt=getattr(args, "lyrics_font_size", None),
                 cue_pt=getattr(args, "cue_font_size", None),
+                **system_width_arg,
             )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
@@ -3002,10 +3029,9 @@ def _cmd_mvsa_svg(args) -> int:
     }
     if engine == "eigen":
         return _cmd_mvsa_svg_eigen(args, files, tkw)
-    if getattr(args, "view", None):
+    if getattr(args, "view", None) or getattr(args, "system_width", None):
         print(
-            "mvsa svg: --view hoort bij --engine eigen "
-            "(notes, vsa-notes of vsa).",
+            "mvsa svg: --view en --system-width horen bij --engine eigen.",
             file=sys.stderr,
         )
         return 1

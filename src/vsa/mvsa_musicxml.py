@@ -803,13 +803,11 @@ def _add_lyric_layer_to_notes(
     primary_syl = _syllabic_for_position(lpos, opens_hyphen=opens_hyphen)
     if len(lpos.syllables) == 1:
         syl = primary_syl
-        if n > 1 and syl == "single":
-            syl = "begin"
         text = lpos.syllables[0]
         extend = n > 1
     else:
         text = _join_lyric_text(lpos.syllables, lpos.links)
-        syl = primary_syl if primary_syl != "single" else "begin"
+        syl = primary_syl
         extend = n > 1
     notes[0].lyrics.append(
         LyricSyllable(text=text, syllabic=syl, number=number, extend=extend)
@@ -1248,8 +1246,6 @@ def _position_to_notes(
         if si == 0 and lpos.syllables:
             if len(lpos.syllables) == 1:
                 syl = primary_syl
-                if n > 1 and syl == "single":
-                    syl = "begin"
                 lyrics.append(
                     LyricSyllable(
                         text=lpos.syllables[0],
@@ -1260,7 +1256,7 @@ def _position_to_notes(
                 )
             else:
                 text = _join_lyric_text(lpos.syllables, lpos.links)
-                syl = primary_syl if primary_syl != "single" else "begin"
+                syl = primary_syl
                 lyrics.append(
                     LyricSyllable(
                         text=text,
@@ -1488,11 +1484,7 @@ def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
         lyrics = [
             LyricSyllable(
                 text=ly.text,
-                syllabic=(
-                    "single"
-                    if ly.syllabic == "begin" and not ly.extend
-                    else ly.syllabic
-                ),
+                syllabic=ly.syllabic,
                 number=ly.number,
                 extend=ly.extend,
             )
@@ -1529,17 +1521,9 @@ def _finalize_same_pitch_run(packed: list[NoteEvent]) -> list[NoteEvent]:
             lyrics = [
                 LyricSyllable(
                     text=ly.text,
-                    syllabic=(
-                        "begin"
-                        if n_sounding > 1 and ly.syllabic == "single"
-                        else (
-                            "single"
-                            if n_sounding <= 1 and ly.syllabic == "begin"
-                            else ly.syllabic
-                        )
-                    ),
+                    syllabic=ly.syllabic,
                     number=ly.number,
-                    # Geen extender over rustslots.
+                    # Geen extender over rustslots. Koppelteken blijft syllabic.
                     extend=n_sounding > 1,
                 )
                 for ly in lyrics
@@ -1655,11 +1639,7 @@ def _apply_melisma_slurs_by_syllable(notes: list[NoteEvent]) -> list[NoteEvent]:
             lyrics = [
                 LyricSyllable(
                     text=ly.text,
-                    syllabic=(
-                        "begin"
-                        if ly.syllabic == "single"
-                        else ly.syllabic
-                    ),
+                    syllabic=ly.syllabic,
                     number=ly.number,
                     extend=True,
                 )

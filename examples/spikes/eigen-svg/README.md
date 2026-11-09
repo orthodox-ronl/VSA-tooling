@@ -3,8 +3,9 @@
 Geen standaardproduct. Het scherm op de site blijft OSMD.
 Deze platen laten de drie beelden zien die `mvsa svg --engine eigen` tekent.
 
-Open `index.html` in een browser. De SVG's schalen mee met de
-vensterbreedte. Een smal venster zoomt; het breekt de regel niet opnieuw af.
+Open `index.html` in een browser. De plaat heeft de eigen breedte en
+wordt alleen kleiner als het venster smaller is. Een andere regelbreedte
+kies je met `--system-width` (default 760).
 
 Opnieuw maken:
 

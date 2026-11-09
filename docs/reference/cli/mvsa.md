@@ -50,7 +50,8 @@ mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--translit] [--translit-modus {nls,ksl}] [--no-trim]
-         [--transparent] [--engine {musescore,osmd,eigen}] [--view {notes,vsa-notes,vsa}] [--compact]
+         [--transparent] [--engine {musescore,osmd,eigen}] [--view {notes,vsa-notes,vsa}]
+         [--system-width PX] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
@@ -552,7 +553,7 @@ mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH]
              [--translit] [--translit-modus {nls,ksl}] [--no-trim]
              [--transparent] [--engine {musescore,osmd,eigen}]
-             [--view {notes,vsa-notes,vsa}]
+             [--view {notes,vsa-notes,vsa}] [--system-width PX]
              [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
@@ -579,6 +580,9 @@ partituur zonder VSA-strepen (met S13-extender). `vsa-notes` zet de
 sopraan-VSA erbij. `vsa` is kale VSA, zonder notenbalk.
 `--translit` zet lyric-laag 2 eronder, net als bij MuseScore.
 Source Sans 3 (13 pt zangtekst, 12 pt cues) zit in het bestand.
+`--system-width` (default 760) breekt een langere regel af, ook midden
+in een maat. Achtsten en korter delen een balk. Een volta-haak loopt
+over de maten van het slot.
 Sibling zonder `-o`: `lied.mvsa.eigen-notes.svg`,
 `lied.mvsa.eigen-vsa-notes.svg`, `lied.mvsa.eigen-vsa.svg`.
 Met `--translit-modus nls` wordt dat
@@ -601,6 +605,7 @@ gebruik [`mscz svg`](mscz.md).
 | `--section`                  | Deze ``@sectie``-id (niet ``@blok``).                                                            |
 | `--engine`                   | `musescore` (default), `osmd` of `eigen`.                                                        |
 | `--view`                     | Alleen `eigen`: `notes` (default), `vsa-notes` of `vsa`.                                         |
+| `--system-width PX`          | Alleen `eigen`. Regelbreedte (default 760). `none`: alleen `@nieuw-systeem`.                     |
 | `--musescore`                | MuseScore-executable (alleen `musescore`-engine).                                                |
 | `--keep-mscz`                | Bewaar tussenliggende ``.mscz`` (alleen `musescore`).                                            |
 | `--keep-mxl`                 | `musescore`: partituur-``.mxl``; `osmd`: from-ir ``.musicxml``.                                  |
@@ -635,6 +640,7 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --engine eigen --view vsa-notes
 mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --system-width 420
 mscz svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 ```
 

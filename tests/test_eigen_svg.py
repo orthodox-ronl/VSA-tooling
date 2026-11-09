@@ -46,9 +46,9 @@ def test_normalize_eigen_view() -> None:
 
 def test_alleluia_three_views() -> None:
     doc = _doc(ALLELUIA)
-    notes = render_score_ir_svg(doc, view="notes")
-    both = render_score_ir_svg(doc, view="vsa-notes")
-    bare = render_score_ir_svg(doc, view="vsa")
+    notes = render_score_ir_svg(doc, view="notes", system_width=None)
+    both = render_score_ir_svg(doc, view="vsa-notes", system_width=None)
+    bare = render_score_ir_svg(doc, view="vsa", system_width=None)
 
     # S4 stok, S8 spacer/breve, S13 extender, L2 Source Sans 3 (13/12 pt).
     assert 'data-view="notes"' in notes
@@ -57,6 +57,8 @@ def test_alleluia_three_views() -> None:
     assert "melisma-extend" in notes
     assert 'class="staff"' in notes
     assert "Source Sans 3" in notes
+    assert 'width="100%"' not in notes
+    assert 'viewBox="0 0' in notes
     assert 'font-size="13pt"' in notes
     assert 'font-size="12pt"' in notes
     assert 'font-weight="400"' in notes
@@ -91,7 +93,7 @@ def test_alleluia_three_views() -> None:
 
 
 def test_toon2_keeps_the_stay_inside_the_melisma() -> None:
-    both = render_score_ir_svg(_doc(TOON2), view="vsa-notes")
+    both = render_score_ir_svg(_doc(TOON2), view="vsa-notes", system_width=None)
     tokens = re.findall(r'data-ehm="([^"]+)"', both)
     assert tokens[0] == "-"
     assert tokens.count("-") == 1
@@ -107,7 +109,7 @@ def test_litanie_systems_repeats_and_cues() -> None:
         True,
         None,
     ]
-    svg = render_score_ir_svg(doc, view="notes")
+    svg = render_score_ir_svg(doc, view="notes", system_width=None)
     assert svg.count('class="system"') == 3
     assert 'data-style="repeat-start"' in svg
     assert 'data-style="repeat-end"' in svg
@@ -117,20 +119,22 @@ def test_litanie_systems_repeats_and_cues() -> None:
     laat = next(x for x, text in cues if text.startswith("P: Laat ons"))
     gezegend = next(x for x, text in cues if text.startswith("P: Gezegend"))
     assert float(laat) > float(gezegend) + 120
+    assert svg.count('class="hyphen"') >= 4
 
 
 def test_trisagion_splits_on_nieuw_systeem() -> None:
-    svg = render_score_ir_svg(_doc(TRISAGION), view="vsa")
+    svg = render_score_ir_svg(_doc(TRISAGION), view="vsa", system_width=None)
     assert svg.count('class="system"') == 4
     assert 'class="staff"' not in svg
     assert "vsa-mark" in svg
 
 
 def test_translit_is_a_second_lyric_line() -> None:
-    plain = render_score_ir_svg(_doc(SLAV), view="notes")
+    plain = render_score_ir_svg(_doc(SLAV), view="notes", system_width=None)
     translit = render_score_ir_svg(
         _doc(SLAV, translit=True, translit_modus="nls"),
         view="notes",
+        system_width=None,
     )
     assert "lyric-translit" not in plain
     assert "Svja" in translit
@@ -149,7 +153,7 @@ T: do | re | mi ||
 B: do | re | mi ||
 """
     doc = export_mvsa_to_score_ir(text, title="segno")
-    svg = render_score_ir_svg(doc, view="notes")
+    svg = render_score_ir_svg(doc, view="notes", system_width=None)
     assert ">Segno<" in svg
     assert ">Fine<" in svg
     assert ">D.S. al Fine<" in svg
@@ -183,6 +187,126 @@ def test_cli_rejects_musescore_style(tmp_path: Path, capsys: pytest.CaptureFixtu
     )
     assert code == 1
     assert "MuseScore-Style" in capsys.readouterr().err
+
+
+def test_volta_bracket_spans_the_ending() -> None:
+    text = """\
+@do F4
+@mode major
+@speelplan 1, 2, 1, 2, 1, 3
+
+@blok 1
+L: a_ |
+S: do |
+A: do |
+T: do |
+B: do |
+
+@blok 2
+L: b_ |
+S: re |
+A: re |
+T: re |
+B: re |
+
+@blok 3
+L: c_ ||
+S: mi ||
+A: mi ||
+T: mi ||
+B: mi ||
+"""
+    svg = render_score_ir_svg(
+        export_mvsa_to_score_ir(text, title="volta"),
+        view="notes",
+        system_width=None,
+    )
+    spans = re.findall(
+        r'class="volta"[^>]*d="M ([0-9.]+) [^"]* H ([0-9.]+)',
+        svg,
+    )
+    assert spans
+    assert all(float(right) - float(left) > 48 for left, right in spans)
+    assert ">1,2<" in svg
+    assert ">3<" in svg
+
+
+def test_eighths_are_beamed() -> None:
+    text = """\
+@do F4
+@mode major
+@sectie x
+L: a.&. b.&. ||
+S: do&re mi&fa ||
+A: do&re mi&fa ||
+T: do&re mi&fa ||
+B: do&re mi&fa ||
+"""
+    svg = render_score_ir_svg(
+        export_mvsa_to_score_ir(text, title="achtsten"),
+        view="notes",
+        system_width=None,
+    )
+    assert svg.count('class="beam"') >= 4
+    assert 'class="flag"' not in svg
+
+
+def test_long_line_breaks_before_the_window_does() -> None:
+    doc = _doc(ALLELUIA)
+    wide = render_score_ir_svg(doc, view="notes", system_width=None)
+    narrow = render_score_ir_svg(doc, view="notes", system_width=420)
+    assert narrow.count('class="system"') > wide.count('class="system"')
+    wide_box = re.search(r'viewBox="0 0 ([0-9.]+)', wide)
+    narrow_box = re.search(r'viewBox="0 0 ([0-9.]+)', narrow)
+    assert wide_box and narrow_box
+    assert float(narrow_box.group(1)) < float(wide_box.group(1))
+
+
+def test_slur_stays_outside_the_beam() -> None:
+    text = """\
+@do F4
+@mode major
+@sectie x
+L: c..&..&..&.. ||
+S: sol&la&si&do ||
+A: sol&la&si&do ||
+T: sol&la&si&do ||
+B: sol&la&si&do ||
+"""
+    svg = render_score_ir_svg(
+        export_mvsa_to_score_ir(text, title="zestienden"),
+        view="notes",
+        system_width=None,
+    )
+    slur = re.search(r'class="melisma-slur" data-voice="S"[^>]*d="([^"]+)"', svg)
+    beam = re.search(
+        r'class="beam" data-voice="S" data-level="1" '
+        r'x1="([-0-9.]+)" y1="([-0-9.]+)" x2="([-0-9.]+)" y2="([-0-9.]+)"',
+        svg,
+    )
+    assert slur and beam
+    numbers = [float(value) for value in re.findall(r"-?\d+(?:\.\d+)?", slur.group(1))]
+    points = list(zip(numbers[0::2], numbers[1::2]))
+    x1, y1, x2, y2 = (float(value) for value in beam.groups())
+
+    def beam_at(x: float) -> float:
+        if abs(x2 - x1) < 1:
+            return min(y1, y2)
+        return y1 + (x - x1) / (x2 - x1) * (y2 - y1)
+
+    compared = 0
+    for x, y in points:
+        if min(x1, x2) - 8 <= x <= max(x1, x2) + 8:
+            assert y < beam_at(x) - 4
+            compared += 1
+    assert compared >= 2
+
+
+def test_melisma_slur_follows_the_notes() -> None:
+    svg = render_score_ir_svg(_doc(ALLELUIA), view="notes", system_width=None)
+    slur = re.search(r'class="melisma-slur" data-voice="S"[^>]*d="([^"]+)"', svg)
+    assert slur
+    assert " C " in f" {slur.group(1)} "
 
 
 def test_cli_rejects_a_different_lyric_font(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
