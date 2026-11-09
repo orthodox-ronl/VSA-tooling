@@ -42,7 +42,7 @@ def test_ensure_stanza_stars_respects_indent_wrap() -> None:
     assert len(stanzas) == 4
 
 
-def test_extract_splits_on_star_and_double_star() -> None:
+def test_extract_splits_on_star_double_star_and_slash_slash() -> None:
     text = (
         "---\ndo: F4\nmode: major\n---\n"
         "een twee *\n"
@@ -54,19 +54,35 @@ def test_extract_splits_on_star_and_double_star() -> None:
     lyrics = [" ".join(n.lyric for n in s if n.lyric) for s in stanzas]
     assert lyrics[0].startswith("een")
     assert "drie" in lyrics[1]
-    # Leidende // op laatste frase is EHM, geen extra split.
+    # Kale // sluit vorige (al dicht via **) en start niet leeg; vijf blijft frase 3.
     assert "vijf" in lyrics[2]
 
 
+def test_extract_splits_on_bare_slash_token() -> None:
+    text = "---\ndo: F4\nmode: major\n---\neen twee / drie vier\n"
+    stanzas = extract_stanza_notes(text)
+    assert len(stanzas) == 2
+    lyrics = [" ".join(n.lyric for n in s if n.lyric) for s in stanzas]
+    assert lyrics[0] == "een twee"
+    assert lyrics[1] == "drie vier"
+
+
+def test_scoped_slash_is_not_phrase_separator() -> None:
+    """`{/Gij}` is EHM in scope, geen frasescheider."""
+    text = "---\ndo: F4\nmode: major\n---\nIn de hades {/Gij} nedergedaald\n"
+    stanzas = extract_stanza_notes(text)
+    assert len(stanzas) == 1
+
+
 def test_leading_slash_slash_does_not_block_line_ensure() -> None:
-    """K5-stijl: geen `*`, wel leidende `//` op laatste regel → toch per-regel `*`."""
+    """K5-stijl: geen `*`, wel kale `//` op laatste regel → ensure per regel, dan 3 frasen."""
     body = (
         "eerste regel hier\n"
         "tweede regel daar\n"
         "// laatste regel\n"
     )
     norm, notes = ensure_stanza_stars(body)
-    assert notes  # ensure draaide (// leidend telt niet als bron-scheiding)
+    assert notes  # ensure draaide (alleen * /** schakelen ensure uit)
     assert norm.count(" *") == 2
     stanzas = extract_stanza_notes("---\ndo: F4\nmode: major\n---\n" + norm)
     assert len(stanzas) == 3

@@ -47,18 +47,19 @@ aan [template-frase](template-frase@)-ids.
 Zangers zien in een doorlopende tekst waar formulefrasen beginnen/eindigen.
 De mapper volgt dezelfde grenzen.
 
-| Markering                 | Rol voor zangers / blad               | Rol voor `vsa mvsa`                                                                                 |
-| ------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `*`                       | Frasescheiding                        | Sluit de huidige tekstfrase                                                                         |
-| `**`                      | Sterke scheiding vóór **laatste**     | Zelfde split als `*` (vaak genormaliseerd tot één `*` in afgeleide tekst)                           |
-| `/`                       | Frasescheiding of maatstreep (blad)   | Trailing `/` op een regel telt als scheiding voor ensure/telling; losse `/` middenin blijft EHM     |
-| `//`                      | Sterke scheiding / dubbele maatstreep | Trailing `//` idem; **leidende** `//` op de laatste frase is blad-/EHM-conventie (géén extra split) |
-| *(geen markering)*        | —                                     | Elke **niet-ingesprongen** regel = één frase                                                        |
-| Ingesprongen vervolgregel | Te lange frase op papier              | Hoort bij de **vorige** frase (geen nieuwe grens)                                                   |
+| Markering                 | Rol voor zangers / blad             | Rol voor `vsa mvsa`                                               |
+| ------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
+| `*` of `/`                | Frasescheiding                      | Losse token buiten scope → sluit de huidige tekstfrase            |
+| `**` of `//`              | Sterke scheiding vóór **laatste**   | Zelfde split; conventie tussen een-na-laatste en laatste          |
+| *(geen `*` / `**`)*       | —                                   | Ensure: elke **niet-ingesprongen** regel = één frase (+ wraps)    |
+| Ingesprongen vervolgregel | Te lange frase op papier            | Hoort bij de **vorige** frase (geen nieuwe grens)                 |
 
-Markeringen zijn **niet verplicht**. Voor betrouwbare mapping: zet `*` (of
-`**` vóór laatste) aan het eind van elke tekstfrase, of vertrouw op één
-frase per niet-ingesprongen regel.
+EHMs in scopes (`{/…}`, `{//…}`) zijn iets anders: die blijven hoogte. Alleen
+**losse** tokens `/` of `//` (spaties eromheen) zijn frasescheider.
+
+Markeringen zijn **niet verplicht**. Zonder `*`/`**` doet ensure eerst
+regel-per-frase (met indent-wrap); extract splitst daarna ook op kale
+`/`/`//`. Syntaxfouten (vergeten scopes) ziet de beheerder bij validate/convert.
 
 **Print-wrap:** staat het vervolg van dezelfde frase op de volgende regel,
 spring die regel in (spaties/tabs vooraan). Zonder scheiders zou een harde

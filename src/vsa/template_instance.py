@@ -467,10 +467,10 @@ def map_vsa_to_template(
             code=CODE_TEXT_MAPPING,
             hint_nl=(
                 "Het aantal VSA-frasen moet passen bij sequence / text_mapping / "
-                "mapping_plans van de template. Tel frasen via `*`/`**` (sterke "
-                "`**` vóór laatste); zonder scheiders telt elke niet-ingesprongen "
-                "regel als frase. Ingesprongen vervolgregels horen bij dezelfde "
-                "frase (print-wrap)."
+                "mapping_plans van de template. Tel frasen via losse `*`/`/` of "
+                "sterke `**`/`//` (vóór laatste); EHMs in scopes tellen niet mee. "
+                "Zonder `*`/`**` telt elke niet-ingesprongen regel als frase. "
+                "Ingesprongen vervolgregels horen bij dezelfde frase (print-wrap)."
             ),
             source=source,
         ) from exc

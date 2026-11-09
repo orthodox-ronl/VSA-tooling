@@ -15,18 +15,19 @@ from .parser import Parser
 from .pitch_resolver import PitchResolver
 from .yaml_frontmatter import parse_vsa_frontmatter_with_body_offset
 
-# Frasescheiders in extract_stanza_notes (losse tokens).
-# `*` = frasescheiding; `**` = sterke scheiding vóór laatste (zangers).
-# Losse `/` en `//` blijven EHM/maatstreep: leidende `//` op de laatste
-# frase is bladconventie, géén extra split. Trailing `/`/`//` tellen wél
-# mee in has_phrase_separators / ensure (zie mapping-vsa.md).
-_STANZA_MARKERS = frozenset({"*", "**"})
-_BARE_EHM_TOKENS = frozenset(
+# Frasescheiders: losse tokens buiten scopes (EHMs in `{…}` blijven scopes).
+# `*` / `/` = frasescheiding; `**` / `//` = sterke scheiding vóór laatste.
+_STANZA_MARKERS = frozenset({"*", "**", "/", "//"})
+_BARE_EHM_ALL = frozenset(
     v for v in VALID_EHM_VALUES if v and all(ch in "/\\-~#♯+b♭" for ch in v)
 )
-_BARE_EHM_SORTED = sorted(_BARE_EHM_TOKENS, key=len, reverse=True)
+# Losse EHM-tokens die géén frasescheider zijn (bijv. `\`, `~`).
+_BARE_EHM_TOKENS = _BARE_EHM_ALL - _STANZA_MARKERS
+# Prefix-strip op woorden (`//Toen` → `Toen`) — inclusief `/` en `//`.
+_BARE_EHM_SORTED = sorted(_BARE_EHM_ALL, key=len, reverse=True)
 _PHRASE_SEP_TRAIL = re.compile(r"(?:\*\*|//|\*|/)\s*$")
 _HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+
 
 
 def strip_html_comments(text: str) -> str:
@@ -65,11 +66,12 @@ def music_phrase_lines(body: str) -> list[str]:
 
 
 def has_phrase_separators(body: str) -> bool:
-    """True als de bron al `*` / `**` als frasescheiding gebruikt.
+    """True als de bron al expliciete `*` / `**` als frasescheiding gebruikt.
 
-    Trailing `/` of `//` alleen is géén reden om ensure over te slaan:
-    leidende `//` op de laatste frase is bladconventie. Zonder `*`/`**`
-    blijft regel-per-frase (+ indent-wrap) de ensure-route.
+    Alleen ster-markers schakelen ensure uit. Kale `/` of `//` komen ook
+    voor als enige scheiding vóór laatste (of als bladteken); zonder `*`/`**`
+    blijft regel-per-frase (+ indent-wrap) de ensure-route, daarna splitst
+    extract ook op `/`/`//`.
     """
     cleaned = strip_html_comments(body)
     for ln in cleaned.splitlines():
@@ -77,7 +79,7 @@ def has_phrase_separators(body: str) -> bool:
         if not s or s.startswith("#"):
             continue
         for tok in s.split():
-            if tok in _STANZA_MARKERS:
+            if tok in {"*", "**"}:
                 return True
     return False
 
