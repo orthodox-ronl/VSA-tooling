@@ -16,7 +16,7 @@
         <link rel="prev" href="../validation/">
       
       
-        <link rel="next" href="../rendering-pitfalls/">
+        <link rel="next" href="../vsa-mvsa-contract/">
       
       
         
@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-cabd</code>
-  , gebouwd 2026-11-09 08:34 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-11-09 08:50 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2741,6 +2741,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#frasescheiders-en-print-wraps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frasescheiders en print-wraps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#legacy-nog-ondersteund" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2976,6 +2987,62 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -4290,6 +4357,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/cli/vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/cli/products/" class="md-nav__link">
         
   
@@ -5181,34 +5276,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../plans/eigen-partituur-svg/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Eigen partituur-SVG (plan)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5313,6 +5380,17 @@
   
     <nav class="md-nav" aria-label="Tekstregels → template-frasen">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frasescheiders-en-print-wraps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frasescheiders en print-wraps
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#legacy-nog-ondersteund" class="md-nav__link">
@@ -5573,16 +5651,21 @@
 
 <h1 id="mapping-vsa-vsa-template-experimenteel">Mapping VSA ↔ vsa-template (experimenteel)<a class="headerlink" href="#mapping-vsa-vsa-template-experimenteel" title="Permanent link">&para;</a></h1>
 <p>Status: <strong>hypotheses + architectuurkeuze VSA→template-instance</strong>; geen normatieve VSA 1.0-wijziging.</p>
+<p><strong>Normatieve checklist (T1–T7):</strong> <a href="../vsa-mvsa-contract/">vsa-mvsa-contract.md</a>
+(ook in <a href="../../formats/contract-index/">contract-index</a>). Dit document houdt
+de H1–H9-details; de T-reeks is leidend voor CLI/emit/corpus.</p>
 <p>Implementatie: <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/src/vsa/template_mapping.py"><code>src/vsa/template_mapping.py</code></a>
 (frase-toewijzing) en
 <a href="https://github.com/orthodox-ronl/VSA-tooling/blob/main/src/vsa/template_instance.py"><code>src/vsa/template_instance.py</code></a>
-(event-niveau, S uit VSA + A/T/B uit template).</p>
+(event-niveau; melodiestem default S — <strong>T2</strong>).</p>
 <h2 id="doel">Doel<a class="headerlink" href="#doel" title="Permanent link">&para;</a></h2>
-<p>Beschrijven hoe een <a class="og-termref" href="/VSA-tooling/preview/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a>-tekstblok (melodie <strong>S</strong>) op
+<p>Beschrijven hoe een <a class="og-termref" href="/VSA-tooling/preview/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a>-tekstblok (één melodielijn) op
 <a class="og-termref" href="/VSA-tooling/preview/terminologie/template-event" title="Template-event: de kleinste muzikale stap in een Template-frase: een rol (open, Reciteertoon, cadens, link), een duur als Enkelvoudige Lengte-modifier, en SATB-Laddergraden.">template-events</a> van een <a class="og-termref" href="/VSA-tooling/preview/terminologie/vsa-template" title="VSA-template: een machineleesbaar YAML-document dat een formulematige liturgische melodie vastlegt (frasen, herhaling of vaste volgorde, Reciteertoon, ankers, SATB-Laddergraden) binnen een Do-context, bedoeld om later tekst uit VSA erop te mappen.">vsa-template</a> landt, zodat
-<strong>A, T en B</strong> uit de template meegenomen kunnen worden naar een afgeleide
-(bijv. MusicXML) — zonder lyrics in de template-syntax te stoppen.</p>
+de overige stemmen uit de template meegenomen kunnen worden naar een
+afgeleide (bijv. MVSA / MusicXML) — zonder lyrics in de template-syntax.</p>
 <h2 id="architectuur-vsatemplate-instance-besloten">Architectuur: VSA→template-instance (besloten)<a class="headerlink" href="#architectuur-vsatemplate-instance-besloten" title="Permanent link">&para;</a></h2>
+<p>Default (<strong>T2</strong>): VSA = formule-melodie op <strong>S</strong>. Override: VSA matcht
+<code>pitches.A</code> (of T/B) als die de melodielijn is.</p>
 <table>
 <thead>
 <tr>
@@ -5593,14 +5676,14 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>S</strong></td>
+<td><strong>Melodiestem</strong> (default S)</td>
 <td>uit <a class="og-termref" href="/VSA-tooling/preview/terminologie/vsa" title="Vereenvoudigde Slavische Accentnotatie: wordt gebruikt om te verwijzen naar een Formele Notatie voor het vastleggen van Zangstukken en ook naar de Toolset waarmee zulke vastleggingen kunnen worden gevalideerd en naar publiceerbare vormen worden omgezet.">VSA</a> + <a class="og-termref" href="/VSA-tooling/preview/terminologie/do-context" title="Do-context: de grondtooncontext waarbinnen relatieve toonhoogtebewegingen in VSA-notatie en in een Vsa-template worden geïnterpreteerd; voor MusicXML-export of afspelen vastgelegd via blok-Metadata (<code>do</code>, <code>mode</code>), niet via de zangtekst zelf.">do-context</a></td>
 <td>uit VSA (scopes, ELMs, syllaben)</td>
 </tr>
 <tr>
-<td><strong>A/T/B</strong></td>
+<td><strong>Overige</strong></td>
 <td>uit template-<a class="og-termref" href="/VSA-tooling/preview/terminologie/laddergraad" title="Laddergraad: een toonpositie op de ladder binnen een Do-context (<code>do</code>, <code>re</code>, <code>mi</code>, …), optioneel chromatisch (<code>#</code>/<code>b</code>) en met octaafverschuiving (<code>do-1</code>); in een Vsa-template de canonieke vorm van SATB-pitches.">laddergraden</a></td>
-<td><strong>zelfde</strong> eventkeuzes als voor S</td>
+<td><strong>zelfde</strong> eventkeuzes als voor de melodiestem</td>
 </tr>
 </tbody>
 </table>
@@ -5625,8 +5708,52 @@
 </table>
 <p>Kort: duur mag afwijken van de formule; <strong>toonhoogte niet</strong>.</p>
 <h2 id="tekstregels-template-frasen">Tekstregels → template-frasen<a class="headerlink" href="#tekstregels-template-frasen" title="Permanent link">&para;</a></h2>
-<p>Elke VSA-regel (gescheiden door <code>*</code>) is één <strong>tekstfrase</strong>. De mapper wijst
-regels in volgorde toe aan <a class="og-termref" href="/VSA-tooling/preview/terminologie/template-frase" title="Template-frase: een genaamde melodische eenheid binnen een Vsa-template (bijv. id <code>1</code>, <code>2</code>, <code>1a</code> of <code>laatste</code>), opgebouwd uit geordende Template-events.">template-frase</a>-ids.</p>
+<p>Elke <strong>tekstfrase</strong> (zie frasescheiders hieronder) wordt in volgorde toegewezen
+aan <a class="og-termref" href="/VSA-tooling/preview/terminologie/template-frase" title="Template-frase: een genaamde melodische eenheid binnen een Vsa-template (bijv. id <code>1</code>, <code>2</code>, <code>1a</code> of <code>laatste</code>), opgebouwd uit geordende Template-events.">template-frase</a>-ids.</p>
+<h3 id="frasescheiders-en-print-wraps">Frasescheiders en print-wraps<a class="headerlink" href="#frasescheiders-en-print-wraps" title="Permanent link">&para;</a></h3>
+<p>Zangers zien in een doorlopende tekst waar formulefrasen beginnen/eindigen.
+De mapper volgt dezelfde grenzen.</p>
+<table>
+<thead>
+<tr>
+<th>Markering</th>
+<th>Rol voor zangers / blad</th>
+<th>Rol voor <code>vsa mvsa</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*</code> of <code>/</code></td>
+<td>Frasescheiding</td>
+<td>Losse token buiten scope → sluit de huidige tekstfrase</td>
+</tr>
+<tr>
+<td><code>**</code> of <code>//</code></td>
+<td>Sterke scheiding vóór <strong>laatste</strong></td>
+<td>Zelfde split; conventie tussen een-na-laatste en laatste</td>
+</tr>
+<tr>
+<td><em>(geen <code>*</code> / <code>**</code>)</em></td>
+<td>—</td>
+<td>Ensure: elke <strong>niet-ingesprongen</strong> regel = één frase (+ wraps)</td>
+</tr>
+<tr>
+<td>Ingesprongen vervolgregel</td>
+<td>Te lange frase op papier</td>
+<td>Hoort bij de <strong>vorige</strong> frase (geen nieuwe grens)</td>
+</tr>
+</tbody>
+</table>
+<p>EHMs in scopes (<code>{/…}</code>, <code>{//…}</code>) zijn iets anders: die blijven hoogte. Alleen
+<strong>losse</strong> tokens <code>/</code> of <code>//</code> (spaties eromheen) zijn frasescheider.</p>
+<p>Markeringen zijn <strong>niet verplicht</strong>. Zonder <code>*</code>/<code>**</code> doet ensure eerst
+regel-per-frase (met indent-wrap); extract splitst daarna ook op kale
+<code>/</code>/<code>//</code>. Syntaxfouten (vergeten scopes) ziet de beheerder bij validate/convert.</p>
+<p><strong>Print-wrap:</strong> staat het vervolg van dezelfde frase op de volgende regel,
+spring die regel in (spaties/tabs vooraan). Zonder scheiders zou een harde
+regeleinde anders ten onrechte als nieuwe frase tellen — dat geeft vaak
+<code>VSA-TEMPLATE-TEXT-MAPPING</code> of <code>VSA-TEMPLATE-REQUIRED-SLOT-UNUSED</code> op een
+«te korte» frase.</p>
 <h3 id="legacy-nog-ondersteund">Legacy (nog ondersteund)<a class="headerlink" href="#legacy-nog-ondersteund" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -5840,7 +5967,7 @@ met meerdere <a class="og-termref" href="/VSA-tooling/preview/terminologie/muzik
 <tbody>
 <tr>
 <td>H1</td>
-<td>Ongemarkeerde VSA-syllaben vóór cadens-scopes vallen op recite. <code>open</code> (zelfde graad, eigen event op het formuleblad) wordt in de instance <strong>overgeslagen</strong> als de VSA meteen reciteert — geen dubbele noot. YAML blijft twee events.</td>
+<td>Ongemarkeerde VSA-syllaben vóór cadens-scopes vallen op recite. <code>open</code> (zelfde graad, eigen event op het formuleblad) wordt in de instance <strong>overgeslagen</strong> als de VSA meteen reciteert — geen dubbele noot. YAML blijft twee events. <strong>Uitzondering open-aanloop:</strong> ongemarkeerde noten op een open-toon die gevolgd worden door <em>scoped</em> latere opens (bijv. <code>o Ge{/bie}{/der}</code>) horen bij die opens, niet bij recite. <strong>Scoped op recite-toon</strong> mag de recite starten of meedoen (<code>{\\zijt} Gij…</code>); ná minstens één ongemarkeerde recite-syllabe gaat een nieuwe scope naar de cadens (H2), ook op dezelfde toon.</td>
 </tr>
 <tr>
 <td>H2</td>
@@ -5848,7 +5975,7 @@ met meerdere <a class="og-termref" href="/VSA-tooling/preview/terminologie/muzik
 </tr>
 <tr>
 <td>H3</td>
-<td><code>{/…}</code> aan het begin van een regel kan <code>e.st.</code> van frase <code>2</code> (of vergelijkbaar) zijn.</td>
+<td><code>{/…}</code> aan het begin van een regel kan <code>e.st.</code> van frase <code>2</code> (of vergelijkbaar) zijn. Een scoped VSA-noot op een event met <code>e.st.</code> / <code>l.st.</code> / <code>vl.st.</code> krijgt bij voorkeur de anker-weergave (nadruk/klemtoon).</td>
 </tr>
 <tr>
 <td>H4</td>
@@ -5872,7 +5999,7 @@ met meerdere <a class="og-termref" href="/VSA-tooling/preview/terminologie/muzik
 </tr>
 <tr>
 <td>H9</td>
-<td><strong>EHM/hoogte:</strong> VSA-S moet <strong>exact</strong> op een resterend template-S-slot landen (klinkende toon). Mismatch → <code>TemplateInstanceError</code>; geen stil hold, geen “ongeveer”.</td>
+<td><strong>EHM/hoogte:</strong> VSA-melodie moet <strong>exact</strong> op een resterend template-slot van de <strong>melodiestem</strong> landen (<code>pitches.S</code> default; T2: ook A/T/B). Mismatch → <code>TemplateInstanceError</code>; geen stil hold, geen “ongeveer”.</td>
 </tr>
 </tbody>
 </table>
@@ -5904,7 +6031,7 @@ met meerdere <a class="og-termref" href="/VSA-tooling/preview/terminologie/muzik
 <tr>
 <td>rest van een <strong>zelfde-S-run</strong> na de laatste gebruikte syllabe op die graad</td>
 <td>VSA gaat door naar een latere andere toon</td>
-<td>mag stil weg (ondergevulde run; “laatst gebruikt” telt ook de <strong>recite</strong>-graad)</td>
+<td><strong>kwart</strong> (<code>~</code>/leeg): mag stil weg. <strong>Half/heel</strong> (<code>_</code>/<code>__</code>): mapper vult als leeg melisma op de vorige lettergreep (<code>le_&amp;_na_</code>), tenzij het volgende slot al <code>@l.st.</code>/<code>@vl.st.</code>/<code>@e.st.</code> is.</td>
 </tr>
 <tr>
 <td>optional tussenslots bij sprong naar latere toon</td>
@@ -6069,7 +6196,7 @@ instance-lyric-pipeline. Corpus-<code>.vsa</code> heeft geen <code>T.N</code> v�
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-06
+        Bijgewerkt: 2026-11-09
         
       </p>
       

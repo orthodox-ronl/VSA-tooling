@@ -1,0 +1,161 @@
+# Groningen toon 6 (kondak + tropaar zondag) — do=F4 major.
+# Canonieke S/A/T/B: _klaar_voor_acceptatie/kondak-zondag-toon-6-groningen.mvsa.
+# Tropaar deelt dezelfde cycle (also_used_as); melisma-do = cadens (T5/emit).
+# Frase 1: recite do → re → mi_ → (opt. mi_ / #do) → re (@l.st.).
+# Slot-cadens = 3× half (of 2× half + whole): bij 2 VSA-syllaben (le_/na_)
+# wordt de middelste half melisma op de voorlaatste (le_&_na_).
+# Frase 2: inzet ti → opt. do → re (B blijft sol-2) → recite → zig-zag → ti.
+# Laatste: ≈ frase 2 + opt. hold op re na sprong (he-mel).
+# Speelplan |: 1, 2 :| laatste. @oct A=-1 (klaar-kondak).
+
+spec_version: draft-v0
+id: kondak-toon-6
+genre: kondak
+also_used_as:
+  - tropaar
+tone: 6
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: "Koormap Groningen — kondak/tropaar zondag toon 6"
+voice_oct:
+  S: 0
+  A: -1
+  T: -1
+  B: -1
+cycle:
+  - "1"
+  - "2"
+final: laatste
+
+mapping_plans:
+  - id: standard
+    label: "|: 1, 2 :| laatste"
+    when:
+      default: true
+    steps:
+      - repeat: ["1", "2"]
+        until: final
+      - phrase: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - role: open
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: recite
+        duration: "__"
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: sol-1, T: fa-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      # Tweede half op mi (formuleblad); optional — mapper vult als melisma
+      # wanneer de volgende VSA-syllabe al naar @l.st. springt (le_&_na_).
+      - role: cadence
+        duration: "_"
+        optional: true
+        pitches: { S: mi, A: "#do", T: sol-1, B: la-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: re, A: la-1, T: fa-1, B: re-1 }
+
+  - id: "2"
+    events:
+      - role: cadence
+        duration: "_"
+        optional: true
+        anchor: e.st.
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+      # Melisma-vervolg (ti&do): zelfde role als e.st. (anders plakt emit
+      # de lege do aan de volgende lettergreep i.p.v. Gij~&~).
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: sol-2 }
+      # Eerste re: B blijft sol-2 (klaar: geen /2 op do-den / men-se-…).
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+      - role: recite
+        duration: "__"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+
+  - id: laatste
+    # Geen recite-midden: split_phrase_events zou he-mel anders in recite trekken.
+    events:
+      - role: cadence
+        duration: "_"
+        optional: true
+        anchor: e.st.
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
