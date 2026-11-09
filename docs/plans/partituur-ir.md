@@ -104,6 +104,7 @@ Measure
   ending?: { start?, stop? }    # volta-nummers (MusicXML ``<ending>``)
   repeatTimes?: number          # alleen bij herhaal > 2×
   navigation?: [ string, … ]    # segno | fine | to_coda | coda | ds_al_* | dc_al_*
+  newSystem?: true              # @nieuw-systeem; ontbreekt of false op de eerste maat
   cues: [ Cue, … ]              # @tekst die bij déze maat hoort (vaak 0 of 1)
   lyrics: [ LyricPos, … ]       # gedeelde L-lijn voor partituur
   voices: { S, A, T, B }        # elk: [ VoiceEvent, … ] synchroon in de maat
@@ -131,7 +132,7 @@ Geen mid-systeem-HBox, geen spookmaat: anker = maat-id + `measure-start`.
 ```text
 LyricPos
   syllables: [ { text, syllabic } ]   # single|begin|middle|end
-  layers?: { "1": …, "2": … }         # v0.1: alleen laag "1" verplicht; "2" = hulptekst later
+  layers?: { "1": …, "2": … }         # v0.1: laag "1" altijd; "2" bij export met translit
   marksBefore?: [ MarkRef ]
   marksAfter?: [ MarkRef ]
   recite?: bool
@@ -279,6 +280,7 @@ catalogus-MXL of MuseScore-SVG.
 8. ~~Optionele OSMD-SVG CLI~~ (`mvsa svg --engine osmd`; D2-vergelijking in
    `examples/spikes/partituur-osmd-svg/README.md`)
 9. CoriB-MVP (speler op §7-brug) — plan: [corib-mvp.md](corib-mvp.md) (M1–M4; branch `corib`)
+10. Verkenning eigen schilder uit Score-IR — [eigen partituur-SVG](eigen-partituur-svg.md). Geen vervanging van de OSMD-brug in §7 tot fase 4 van dat werkplan.
 
 ---
 

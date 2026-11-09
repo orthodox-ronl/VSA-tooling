@@ -181,6 +181,7 @@ def _measure_from_voices(
     ending_stop: str | None = None,
     repeat_times: int | None = None,
     navigation: list[str] | None = None,
+    new_system: bool = False,
 ) -> dict[str, Any]:
     # Shared lyrics from soprano (same L-line on all singing voices).
     lyrics: list[dict[str, Any]] = []
@@ -236,6 +237,8 @@ def _measure_from_voices(
         out["repeatTimes"] = repeat_times
     if navigation:
         out["navigation"] = list(navigation)
+    if new_system:
+        out["newSystem"] = True
     return out
 
 
@@ -247,6 +250,8 @@ def export_mvsa_to_score_ir(
     source_path: Path | None = None,
     bibliotheek_id: str | None = None,
     allow_import_sync_errors: bool = False,
+    translit: bool = False,
+    translit_modus: str | None = None,
 ) -> dict[str, Any]:
     """Validate + build Score-IR document (profile ``partituur``).
 
@@ -289,15 +294,18 @@ def export_mvsa_to_score_ir(
     bar_styles: list[str] = []
     measure_left_styles: list[str | None] = []
     measure_staff_texts: list[list[str]] = []
+    measure_new_system: list[bool] = []
     blok_measure_range: dict[str, tuple[int, int]] = {}
     pitch_carry: dict[str, Pitch] = {}
+    score_started = False
     for section in sections:
         section_start = len(bar_styles)
         for system in section.systems:
             events_by_voice, pitch_carry = _system_to_events(
                 system,
                 layout="partituur",
-                translit=False,
+                translit=translit,
+                translit_modus=translit_modus,
                 pitch_carry=pitch_carry,
             )
             for voice, measures in events_by_voice.items():
@@ -318,8 +326,13 @@ def export_mvsa_to_score_ir(
                 if mi == 0:
                     texts = list(getattr(system, "staff_texts", None) or [])
                     measure_staff_texts.append(texts)
+                    wants_break = bool(getattr(system, "mscz_newline", False))
+                    measure_new_system.append(wants_break and score_started)
                 else:
                     measure_staff_texts.append([])
+                    measure_new_system.append(False)
+            if system.measures:
+                score_started = True
         if (
             section.origin == "blok"
             and section.id
@@ -393,6 +406,9 @@ def export_mvsa_to_score_ir(
                     repeat_times[mi] if mi < len(repeat_times) else None
                 ),
                 navigation=nav_marks[mi] if mi < len(nav_marks) else None,
+                new_system=bool(
+                    measure_new_system[mi] if mi < len(measure_new_system) else False
+                ),
             )
         )
 
@@ -434,6 +450,8 @@ def export_mvsa_to_score_ir_json(
     bibliotheek_id: str | None = None,
     indent: int = 2,
     allow_import_sync_errors: bool = False,
+    translit: bool = False,
+    translit_modus: str | None = None,
 ) -> str:
     doc = export_mvsa_to_score_ir(
         text,
@@ -442,6 +460,8 @@ def export_mvsa_to_score_ir_json(
         source_path=source_path,
         bibliotheek_id=bibliotheek_id,
         allow_import_sync_errors=allow_import_sync_errors,
+        translit=translit,
+        translit_modus=translit_modus,
     )
     return json.dumps(doc, ensure_ascii=False, indent=indent) + "\n"
 
@@ -453,6 +473,8 @@ def export_mvsa_path_to_score_ir(
     section_id: str | None = None,
     bibliotheek_id: str | None = None,
     allow_import_sync_errors: bool = False,
+    translit: bool = False,
+    translit_modus: str | None = None,
 ) -> None:
     path = Path(path)
     if path.suffix.lower() != ".mvsa":
@@ -467,6 +489,8 @@ def export_mvsa_path_to_score_ir(
         source_path=path,
         bibliotheek_id=bibliotheek_id,
         allow_import_sync_errors=allow_import_sync_errors,
+        translit=translit,
+        translit_modus=translit_modus,
     )
     from .atomic_io import write_text
 

@@ -223,6 +223,7 @@ nav:
     - Straat-CLIs (plan): plans/straat-clis.md
     - OSMD S8-recite (plan): plans/osmd-s8-recite.md
     - CoriB MVP (plan): plans/corib-mvp.md
+    - Eigen partituur-SVG (plan): plans/eigen-partituur-svg.md
     - plans/vsa-polyphony-proposal.md
 
 extra_css:

@@ -50,7 +50,8 @@ mvsa pdf [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
          [--keep-mscz PATH] [--keep-mxl PATH]
          [--translit] [--translit-modus {nls,ksl}] [--no-trim]
-         [--transparent] [--engine {musescore,osmd}] [--compact]
+         [--transparent] [--engine {musescore,osmd,eigen}] [--view {notes,vsa-notes,vsa}]
+         [--system-width PX] [--compact]
          [--min-system-distance SP] [--max-system-distance SP]
          [--staff-distance SP]
          [--page-margin-top MM] [--page-margin-bottom MM]
@@ -76,7 +77,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 | [`score-ir`](#mvsa-score-ir)           | Exporteer `.mvsa` naar Score-IR JSON (partituur; scherm/CoriB). Merget `score-ir` (+ `from-ir` bij `--musicxml`). |
 | [`mscz`](#mvsa-mscz)                   | Exporteer `.mvsa` naar MuseScore (`.mscz`).                                                                       |
 | [`pdf`](#mvsa-pdf)                     | Losse print-PDF (P*). Niet via `products`. Bron `.mscz`: [`mscz pdf`](mscz.md).                                   |
-| [`svg`](#mvsa-svg)                     | Exporteer `.mvsa` naar muziek-only partituur-SVG (koormap). Merget `svg` / `svg-N`.                               |
+| [`svg`](#mvsa-svg)                     | Exporteer `.mvsa` naar muziek-only partituur-SVG (koormap). `musescore` en `osmd` mergen `svg`. `eigen` niet.     |
 | [`mp3`](#mvsa-mp3) / `ogg` / `wav`     | Exporteer naar preview-audio (``.mp3`` / ``.ogg`` / ``.wav``).                                                    |
 | [`normalize`](#mvsa-normalize)         | Canoniseer `.mvsa` (default: behoud noteernamen).                                                                 |
 | [`transpose`](#mvsa-transpose)         | Transponeer naar een andere tonica (`@do`); `@mode` blijft.                                                       |
@@ -202,11 +203,11 @@ pad als part-namen gebruikt (SATB-letters → Soprano/Alto/Tenor/Bass).
 
 **Hulptekst** (kerkslavisch ↔ Latijn / Nederlands ↔ Cyrillisch, parochieschema):
 
-| Vlag                   | Wie               | Effect                                                                                                                                                                                                                   |
-| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--translit`           | Blad én Coria-MXL | Lyric number 2 onder dezelfde noten (transliteratie). Handmatige `L1` wint als lyric 2 al bestaat.                                                                                                                       |
+| Vlag                   | Wie               | Effect                                                                                                                                                                                                                          |
+| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--translit`           | Blad én Coria-MXL | Lyric number 2 onder dezelfde noten (transliteratie). Handmatige `L1` wint als lyric 2 al bestaat.                                                                                                                              |
 | `--translit-modus`     | Blad én Coria-MXL | Filter: `nls` = alleen ksl→Latijn; `ksl` = alleen nl→Cyrillisch. Zonder vlag (met `--translit`): beide. Impliceert `--translit`. Op een hybride blad (NL+Ksl) voorkomt dit dat de «verkeerde» passage ook een hulpregel krijgt. |
-| `--translit-as-parts`  | Alleen Coria-MXL  | Extra parts: zelfde pitches, lyrics van laag 2; part-namen `{stem} ({label})`. Labels uit `@taal` (zie [keywords — @taal](../../specification-mvsa/keywords.md#taal)). Volume 0 op hulp-parts. Impliceert `--translit`.  |
+| `--translit-as-parts`  | Alleen Coria-MXL  | Extra parts: zelfde pitches, lyrics van laag 2; part-namen `{stem} ({label})`. Labels uit `@taal` (zie [keywords — @taal](../../specification-mvsa/keywords.md#taal)). Volume 0 op hulp-parts. Impliceert `--translit`.         |
 
 Richting en Coria-labels sturen met sticky `@taal` (`nl` / `ksl` / `auto`, of
 `Lap=aap Lus=noot` op lyrics-ids). Zonder `@taal`: auto per lettergreep
@@ -538,8 +539,12 @@ mscz pdf lied.mscz -o lied.pdf
 Exporteer **`.mvsa`** naar partituur-SVG voor koormap-pagina’s. Voor bron
 `.mscz`: [`mscz svg`](mscz.md). Default: MuseScore tall-SVG (print/fallback).
 Optioneel `--engine osmd`: Score-IR → from-ir MusicXML → headless OSMD +
-S8 A1-adapter ([`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg)). Formaatpagina:
-[mvsa-svg](../../formats/mvsa-svg.md).
+S8 A1-adapter ([`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg)).
+Optioneel `--engine eigen`: dezelfde Score-IR, getekend door de eigen
+schilder. Drie beelden (`--view notes`, `vsa-notes`, `vsa`). Geen
+standaardproduct, geen products-meta, geen vervanging van
+`lied.mvsa.svg`. Formaatpagina: [mvsa-svg](../../formats/mvsa-svg.md).
+Werkplan: [eigen partituur-SVG](../../plans/eigen-partituur-svg.md).
 
 ### Synopsis
 
@@ -547,7 +552,8 @@ S8 A1-adapter ([`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling
 mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
              [--keep-mscz PATH] [--keep-mxl PATH]
              [--translit] [--translit-modus {nls,ksl}] [--no-trim]
-             [--transparent] [--engine {musescore,osmd}]
+             [--transparent] [--engine {musescore,osmd,eigen}]
+             [--view {notes,vsa-notes,vsa}] [--system-width PX]
              [--bibliotheek-id ID] [--compact]
              [--min-system-distance SP] [--max-system-distance SP]
              [--staff-distance SP]
@@ -558,16 +564,30 @@ mvsa svg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 
 ### Keten
 
-| Engine       | Pad                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------- |
-| `musescore`  | partituur-MXL → MSCZ (layout ``muziek``) → MuseScore SVG → trim (**default**)               |
-| `osmd`       | Score-IR → from-ir MusicXML → headless OSMD (Node; geen MuseScore/Style-CLI)                |
+| Engine       | Pad                                                                                           |
+| ------------ | --------------------------------------------------------------------------------------------- |
+| `musescore`  | partituur-MXL → MSCZ (layout ``muziek``) → MuseScore SVG → trim (**default**)                 |
+| `osmd`       | Score-IR → from-ir MusicXML → headless OSMD (Node; geen MuseScore/Style-CLI)                  |
+| `eigen`      | Score-IR → eigen schilder. `--view notes` (default), `vsa-notes` of `vsa`. Geen products-meta |
 
 Bij `musescore`: **één tall-SVG** (compact Style) — scherm-fallback én
 bouwsteen voor `index.md.pdf`. Zie
 [kale-muziek-svg-en-uitgaven](../../plans/kale-muziek-svg-en-uitgaven.md).
 Bij `osmd`: optioneel bestand voor inspectie/scherm; site-embed blijft
 Score-IR/OSMD in de browser.
+Bij `eigen`: drie losse SVG's van dezelfde Score-IR. `notes` is de
+partituur zonder VSA-strepen (met S13-extender). `vsa-notes` zet de
+sopraan-VSA erbij. `vsa` is kale VSA, zonder notenbalk.
+`--translit` zet lyric-laag 2 eronder, net als bij MuseScore.
+Source Sans 3 (13 pt zangtekst, 12 pt cues) zit in het bestand.
+`--system-width` (default 760) breekt een langere regel af, ook midden
+in een maat. Achtsten en korter delen een balk. Een volta-haak loopt
+over de maten van het slot.
+Sibling zonder `-o`: `lied.mvsa.eigen-notes.svg`,
+`lied.mvsa.eigen-vsa-notes.svg`, `lied.mvsa.eigen-vsa.svg`.
+Met `--translit-modus nls` wordt dat
+`lied.mvsa.eigen-notes.translit-nls.svg`.
+`--view` bij `musescore` of `osmd` is een fout.
 Na trim (`musescore`): **witte achtergrond** (default); ``--transparent``
 voor geen achtergrondvlak. Met ``--translit`` / ``--translit-modus``:
 tweede tekstregel (lyric 2), gefilterd op richting (`nls` / `ksl`) — zie
@@ -583,12 +603,14 @@ gebruik [`mscz svg`](mscz.md).
 | `path`                       | Bron-``.mvsa``, of map met ``.mvsa``-bestanden.                                                  |
 | `-o` / `--output`            | Uitvoer-``.svg``. Default: sibling ``lied.mvsa.svg``. Alleen bij één bron.                       |
 | `--section`                  | Deze ``@sectie``-id (niet ``@blok``).                                                            |
-| `--engine`                   | `musescore` (default) of `osmd`.                                                                 |
+| `--engine`                   | `musescore` (default), `osmd` of `eigen`.                                                        |
+| `--view`                     | Alleen `eigen`: `notes` (default), `vsa-notes` of `vsa`.                                         |
+| `--system-width PX`          | Alleen `eigen`. Regelbreedte (default 760). `none`: alleen `@nieuw-systeem`.                     |
 | `--musescore`                | MuseScore-executable (alleen `musescore`-engine).                                                |
 | `--keep-mscz`                | Bewaar tussenliggende ``.mscz`` (alleen `musescore`).                                            |
 | `--keep-mxl`                 | `musescore`: partituur-``.mxl``; `osmd`: from-ir ``.musicxml``.                                  |
-| `--translit`                 | Tweede lyric-laag in tussen-MXL/MSCZ (koormap «met translit»; alleen `musescore`).               |
-| `--translit-modus`           | Filter lyric 2: `nls` of `ksl` (alleen `musescore`; impliceert `--translit`).                   |
+| `--translit`                 | Tweede lyric-laag (koormap «met translit»; `musescore` en `eigen`, niet `osmd`).                 |
+| `--translit-modus`           | Filter lyric 2: `nls` of `ksl` (`musescore` en `eigen`; impliceert `--translit`).                |
 | `--no-trim`                  | Sla viewBox-trim over (alleen `musescore`).                                                      |
 | `--transparent`              | Geen witte achtergrond na trim (alleen `musescore`). `osmd` schrijft altijd witte `vsa-page-bg`. |
 | `--bibliotheek-id`           | Genegeerd voor layout ``muziek`` / OSMD-chrome.                                                  |
@@ -598,10 +620,10 @@ gebruik [`mscz svg`](mscz.md).
 | `--staff-distance SP`        | Stafafstand in één systeem (alleen `musescore`).                                                 |
 | `--page-margin-top MM`       | Bovenmarge in mm (alleen `musescore`).                                                           |
 | `--page-margin-bottom MM`    | Ondermarge in mm (alleen `musescore`).                                                           |
-| `--lyrics-font FACE`         | Lettertype zangtekst (alleen `musescore`).                                                       |
-| `--lyrics-font-size PT`      | Puntgrootte zangtekst (alleen `musescore`).                                                      |
-| `--cue-font FACE`            | Lettertype cues/`@tekst` (alleen `musescore`).                                                   |
-| `--cue-font-size PT`         | Puntgrootte cues (alleen `musescore`).                                                           |
+| `--lyrics-font FACE`         | Lettertype zangtekst. `musescore`: vrij. `eigen`: alleen Source Sans 3.                          |
+| `--lyrics-font-size PT`      | Puntgrootte zangtekst (`musescore` en `eigen`; default 13).                                      |
+| `--cue-font FACE`            | Lettertype cues/`@tekst`. `musescore`: vrij. `eigen`: alleen Source Sans 3.                      |
+| `--cue-font-size PT`         | Puntgrootte cues (`musescore` en `eigen`; default 12).                                           |
 | `--measure-spacing F`        | Maat-spreiding (alleen `musescore`).                                                             |
 
 ### Voorbeelden
@@ -616,6 +638,9 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --compact
 cd scripts\osmd-svg && npm install && npx puppeteer browsers install chrome
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg --engine osmd
+mvsa svg examples\mvsa\1a-vredeslitanie.mvsa --engine eigen --view vsa-notes
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --view vsa
+mvsa svg examples\bug-cases\corib\alleluia-toon-8.mvsa --engine eigen --system-width 420
 mscz svg generated\spike-mscz\1a.mscz -o generated\spike-svg\1a-from-mscz.svg
 ```
 
