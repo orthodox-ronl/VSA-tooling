@@ -19,7 +19,7 @@ Elk [vsa-template](@) is **één** van drie vormen:
 
 ```yaml
 spec_version: draft-v0
-id: tropaar-toon-4
+id: tropaar-toon-4-hemelum
 genre: tropaar
 tone: 4
 do: F4

@@ -92,7 +92,7 @@ def collect_input_files(
     p = Path(path)
     allowed = normalize_suffixes(suffixes)
     if not p.exists():
-        raise InputPathError(f"Pad niet gevonden: {p}")
+        raise InputPathError("Pad niet gevonden.")
     if p.is_file():
         if p.suffix.lower() not in allowed:
             want = ", ".join(sorted(allowed))
@@ -112,7 +112,7 @@ def collect_input_files(
             and c.suffix.lower() in allowed
             and not is_nested_derived_source(c)
         )
-    raise InputPathError(f"Geen bestand of map: {p}")
+    raise InputPathError("Geen bestand of map.")
 
 
 def collect_cli_sources(
@@ -124,5 +124,5 @@ def collect_cli_sources(
     """Zoals :func:`collect_input_files`, maar lege map → :exc:`InputPathError`."""
     files = collect_input_files(path, suffixes=suffixes, recursive=recursive)
     if not files:
-        raise InputPathError(f"Geen passende bestanden gevonden: {path}")
+        raise InputPathError("Geen passende bestanden gevonden.")
     return files

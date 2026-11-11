@@ -1,12 +1,12 @@
 ---
-title: Tropaar H. Gregorios van Utrecht T.4 (Ksl)
+soort: tropaar
+toon: 4
+template: tropaar-toon-4
+bron: Koorinstructie dinsdag 25 augustus 2026 (Hemelum)
 do: F4
 mode: major
 tempo: 120
-genre: tropaar
-tone: 4
-template: tropaar-toon-4
-bron: Koorinstructie dinsdag 25 augustus 2026 (Hemelum)
+title: Tropaar H. Gregorios van Utrecht T.4 (Ksl)
 ---
 
 # === pad: VSA + template → MVSA (Fase A herstart) ===

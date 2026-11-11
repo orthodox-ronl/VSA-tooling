@@ -13,6 +13,8 @@ from .vsa_comments import (
     semantic_offset_to_source,
     strip_vsa_html_comments_with_offset_map,
 )
+from .yaml_frontmatter import strip_yaml_frontmatter
+
 
 # Characters that form the base of an EHM (direction or same-tone).
 _BASE_MODIFIER_CHARS: frozenset[str] = frozenset("/\\-~")
@@ -122,6 +124,9 @@ def validate_file(path: str | Path, config: VSAConfig | None = None) -> Validati
     if path.suffix.lower() in [".md", ".markdown"]:
         _validate_markdown(path, text, result, config=config)
     else:
+        # Body-regels zijn 1-gebaseerd ná frontmatter; line_base telt alle
+        # regels vóór de body (YAML-kop, lege regels) mee in het bronbestand.
+        _meta, _body, line_base = strip_yaml_frontmatter(text)
         try:
             expanded, warnings = prepare_vsa_body(text, path)
         except IncludeVsaError as exc:
@@ -129,19 +134,27 @@ def validate_file(path: str | Path, config: VSAConfig | None = None) -> Validati
                 source=str(path),
                 code="VSA-INCLUDE-VSA-ERROR",
                 message_nl=exc.message_nl,
-                line=exc.line,
+                line=line_base + max(exc.line, 1),
                 category="include",
                 hint_nl="Controleer @include-vsa id=, lokaal= of zoek= en catalogus-registratie.",
             )
             return result
         for warning in warnings:
-            _add_include_vsa_warning(result, str(path), warning)
+            _add_include_vsa_warning(
+                result,
+                str(path),
+                IncludeVsaWarning(
+                    code=warning.code,
+                    message_nl=warning.message_nl,
+                    line=line_base + max(warning.line, 1),
+                ),
+            )
         _validate_vsa_text(
             str(path),
             expanded,
             result,
             config=config,
-            source_line_offset=0,
+            source_line_offset=line_base,
         )
 
     return result

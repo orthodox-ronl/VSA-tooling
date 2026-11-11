@@ -43,3 +43,28 @@ def test_svg_contains_no_extra_comment_blank_line():
     assert "<!--" not in svg
     assert "broncommentaar" not in svg
     assert svg.count('class="vsa-line"') == 2
+
+
+def test_hash_comment_only_line_is_removed_without_blank_line():
+    source = "eerste\n# broncommentaar\ntweede"
+
+    assert strip_vsa_html_comments(source) == "eerste\ntweede"
+
+
+def test_hash_comment_does_not_strip_halftoon_inside_scope():
+    source = "eerste\n# uitleg\n{#-}tweede"
+
+    assert strip_vsa_html_comments(source) == "eerste\n{#-}tweede"
+    document = Parser(source).parse()
+    kinds = [type(node).__name__ for node in document.nodes]
+    assert "ScopeNode" in kinds
+    assert "".join(text_nodes(document)).replace("\n", "") == "eerstetweede"
+
+
+def test_svg_contains_no_extra_hash_comment_blank_line():
+    document = Parser("eerste\n# broncommentaar\ntweede").parse()
+
+    svg = SVGRenderer().render_document(document)
+
+    assert "broncommentaar" not in svg
+    assert svg.count('class="vsa-line"') == 2

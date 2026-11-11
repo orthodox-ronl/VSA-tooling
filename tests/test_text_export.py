@@ -44,7 +44,7 @@ _FIXTURE_MXL = (
     / "docs"
     / "specification-vsa-templates"
     / "library"
-    / "tropaar-toon-4"
+    / "tropaar-toon-4-hemelum"
     / "examples"
     / "corpus"
     / "T4-01-johannes-voorloper.mxl"

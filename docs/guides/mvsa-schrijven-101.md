@@ -410,7 +410,7 @@ Voorbeeld met meerdere equivalente schetsen:
 | Stap                 | Commando (voorbeeld)                                      |
 | -------------------- | --------------------------------------------------------- |
 | Valideren            | `mvsa validate lied.mvsa`                                 |
-| MusicXML             | `mvsa musicxml lied.mvsa -o generated\lied.mxl`           |
+| MusicXML             | `mvsa mxl lied.mvsa -o generated\lied.mxl`                |
 | MuseScore            | `mvsa mscz lied.mvsa -o generated\lied.mscz`              |
 | Eén sectie           | voeg `--section sectie-id` toe                            |
 | Uitlijnen / kuisen   | `mvsa kuiser lied.mvsa`                                   |
@@ -419,7 +419,7 @@ Voorbeeld met meerdere equivalente schetsen:
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-mvsa musicxml examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
+mvsa mxl examples\mvsa\alleluia-toon-8.mvsa --section schets3-oct-ag -o generated\alleluia-ag.mxl
 ```
 
 CLI-detail: [mvsa-referentie](../reference/cli/mvsa.md). Formaten-hub:

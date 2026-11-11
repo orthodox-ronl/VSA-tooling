@@ -16,7 +16,7 @@ vsa mvsa --list-templates
 | Onderdeel          | Betekenis                                                                                          |
 | ------------------ | -------------------------------------------------------------------------------------------------- |
 | `bestand.vsa`      | Bron: melodie + tekst + frasen                                                                     |
-| `--template`       | Library-id of alias; default `tropaar-toon-4` (Hemelum)                                            |
+| `--template`       | Library-id of alias; default `tropaar-toon-4-hemelum` (Hemelum)                                            |
 | `-o OUT`           | Uitvoerpad; default sibling `<bron>.mvsa`                                                          |
 | `--melody`         | Melodiestem (T2); default `S`                                                                      |
 | `--tempo`          | BPM in de MVSA; default **180** (tropaar/kondak); VSA-frontmatter negeert de converter             |
@@ -44,15 +44,15 @@ De schets-MVSA volgt de gekuiste klaar-vorm (geen speelplan, geen `@blok`):
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa --list-templates
-vsa mvsa docs\specification-vsa-templates\library\tropaar-toon-4\examples\corpus\T4-06-profeet-elia.vsa
-vsa mvsa lied.vsa --template groningen-tropaar-toon-4 -o generated\lied.schets.mvsa
-vsa mvsa lied.vsa --template kondak-toon-1
-vsa mvsa lied.vsa --template tropaar-toon-2
-vsa mvsa lied.vsa --template kondak-toon-5
+vsa mvsa docs\specification-vsa-templates\library\tropaar-toon-4-hemelum\examples\corpus\T4-06-profeet-elia.vsa
+vsa mvsa lied.vsa --template tropaar-toon-4-groningen -o generated\lied.schets.mvsa
+vsa mvsa lied.vsa --template kondak-toon-1-groningen
+vsa mvsa lied.vsa --template tropaar-toon-2-groningen
+vsa mvsa lied.vsa --template kondak-toon-5-groningen
 ```
 
 Groningen toon 4 nooit als stille default — altijd
-`--template groningen-tropaar-toon-4`.
+`--template tropaar-toon-4-groningen`.
 
 Na een geslaagde schets: controle in MuseScore / oor; optioneel
 `mvsa mxl` voor Coria-playback.
@@ -64,17 +64,17 @@ Library:
 
 | Voorbeeld-id               | Opmerking                                        |
 | -------------------------- | ------------------------------------------------ |
-| `tropaar-toon-4`           | Hemelum; default; alias `hemelum-tropaar-toon-4` |
-| `groningen-tropaar-toon-4` | Groningen toon 4 (eigen B-pad frase 1)           |
-| `kondak-toon-1`            | Groningen toon 1 (ook tropaar via plans)         |
-| `tropaar-toon-2`           | `same_as` → `kondak-toon-2`                      |
-| `tropaar-toon-5`           | `same_as` → `kondak-toon-5`                      |
-| `tropaar-toon-6`           | `same_as` → `kondak-toon-6`                      |
-| `tropaar-toon-8`           | `same_as` → `kondak-toon-8`                      |
+| `tropaar-toon-4-hemelum`           | Hemelum; default; alias `hemelum-tropaar-toon-4` |
+| `tropaar-toon-4-groningen` | Groningen toon 4 (eigen B-pad frase 1)           |
+| `kondak-toon-1-groningen`            | Groningen toon 1 (ook tropaar via plans)         |
+| `tropaar-toon-2-groningen`           | `same_as` → `kondak-toon-2-groningen`                      |
+| `tropaar-toon-5-groningen`           | `same_as` → `kondak-toon-5-groningen`                      |
+| `tropaar-toon-6-groningen`           | `same_as` → `kondak-toon-6-groningen`                      |
+| `tropaar-toon-8-groningen`           | `same_as` → `kondak-toon-8-groningen`                      |
 
 Nieuwe formules: nieuwe map + YAML; de CLI vindt ze via
 `--list-templates` zonder codewijziging (behalve optionele alias in
-`template_library.TEMPLATE_ALIASES`).
+`library/aliases.yaml` / `template_library.template_aliases()`).
 
 ## Schrijfoctaven
 

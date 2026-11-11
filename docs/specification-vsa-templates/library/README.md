@@ -1,37 +1,27 @@
-# Library: vsa-templates per genre × toon
+# Library: vsa-templates per soort × toon × bron
 
-Werkmap per formule. Gedeelde afspraken staan hier. **Nieuwe** formules:
-map + id `{traditie}-{genre}-toon-{n}`. Legacy zonder traditie-prefix blijft
-geldig.
+Werkmap per formule. Canonieke id: **`{soort}-toon-{n}-{bron}`**
+(bijv. `kondak-toon-8-hemelum`). Aliassen (oude namen, liturgikon≡hemelum,
+…): [`aliases.yaml`](aliases.yaml). Site-register:
+bibliotheek `content-source/catalogus/formules/`.
 
 ## Mapstructuur
 
 ```text
 library/
-  README.md                      ← dit bestand (geldt voor alle formules)
-  tropaar-toon-4/                ← legacy-id (Hemelum)
-  groningen-tropaar-toon-4/      ← traditie in de id (voorkeur nieuw)
+  README.md                      ← dit bestand
+  aliases.yaml                   ← alias → canonieke map-id
+  tropaar-toon-4-hemelum/        ← Hemelum
+  tropaar-toon-4-groningen/      ← Groningen
     template.yaml                ← canonieke formule
-    template.mscz                ← formuleblad MuseScore (één bestand, geen .mscx)
-    template.mxl                 ← formule MusicXML (delen)
-    README.md                    ← kort: status, bron, pijplijn
-    examples/corpus/             ← .vsa + afgeleide .mscz/.mxl
-    notes/                       ← corpus, mappinglessen, besluiten
+    template.mscz / template.mxl
+    README.md
+    examples/corpus/
+    notes/
   …
 ```
 
-### Traditie in het template-id
-
-Nieuwe formules: id en mapnaam `{traditie}-{genre}-toon-{n}` (bijv.
-`groningen-tropaar-toon-4`; later `hemelum-…` als die traditie een eigen YAML
-krijgt). Zo is een tweede traditie een aparte map, geen stille overwrite.
-
-Bestaande ids zonder prefix (`kondak-toon-1`, `tropaar-toon-4`, …) blijven;
-de map-README noemt de traditie (meestal Groningen; `tropaar-toon-4` =
-Hemelum). Playbook-aliassen wijzen naar het canonieke YAML-`id`.
-
-Invalid schema-cases blijven in
-`examples/invalid/` (geen formule-werkmap).
+Invalid schema-cases blijven in `examples/invalid/` (geen formule-werkmap).
 
 ## Gedeelde afspraken
 
@@ -204,24 +194,26 @@ S/A-partij volstaat.
 
 | Map                                                              | Vorm      | Opmerking                                   |
 | ---------------------------------------------------------------- | --------- | ------------------------------------------- |
-| [`kondak-toon-1`](kondak-toon-1/README.md)                       | cycle     | Groningen; also tropaar                     |
-| [`kondak-toon-2`](kondak-toon-2/README.md)                       | cycle     | Groningen; also tropaar                     |
-| [`kondak-toon-5`](kondak-toon-5/README.md)                       | cycle     | Groningen; also tropaar                     |
-| [`kondak-toon-6`](kondak-toon-6/README.md)                       | cycle     | Groningen; also tropaar                     |
-| [`kondak-toon-7`](kondak-toon-7/README.md)                       | cycle     | Groningen; also tropaar                     |
-| [`kondak-toon-8`](kondak-toon-8/README.md)                       | cycle     | Groningen; also tropaar                     |
-| [`tropaar-toon-1`](tropaar-toon-1/README.md)                     | cycle     |                                             |
-| [`tropaar-toon-2`](tropaar-toon-2/README.md)                     | `same_as` | → kondak-toon-2                             |
-| [`tropaar-toon-5`](tropaar-toon-5/README.md)                     | `same_as` | → kondak-toon-5                             |
-| [`tropaar-toon-6`](tropaar-toon-6/README.md)                     | `same_as` | → kondak-toon-6                             |
-| [`tropaar-toon-7`](tropaar-toon-7/README.md)                     | `same_as` | → kondak-toon-7                             |
-| [`tropaar-toon-8`](tropaar-toon-8/README.md)                     | `same_as` | → kondak-toon-8                             |
-| [`tropaar-toon-3`](tropaar-toon-3/README.md)                     | sequence  |                                             |
-| [`tropaar-toon-4`](tropaar-toon-4/README.md)                     | cycle     | Hemelum; Elia-mapping + corpus              |
-| [`groningen-tropaar-toon-4`](groningen-tropaar-toon-4/README.md) | cycle     | Groningen; also kondak; uit Nicolaas-schets |
-| [`stichier-toon-5`](stichier-toon-5/README.md)                   | cycle     | PDF-stichier (niet Groningen kondak-5)      |
-| [`vers-toon-1`](vers-toon-1/README.md)                           | cycle     |                                             |
-| [`vers-toon-5`](vers-toon-5/README.md)                           | cycle     |                                             |
+| [`kondak-toon-1-groningen`](kondak-toon-1-groningen/README.md)   | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-2-groningen`](kondak-toon-2-groningen/README.md)   | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-5-groningen`](kondak-toon-5-groningen/README.md)   | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-6-groningen`](kondak-toon-6-groningen/README.md)   | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-7-groningen`](kondak-toon-7-groningen/README.md)   | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-8-groningen`](kondak-toon-8-groningen/README.md)   | cycle     | Groningen; also tropaar                     |
+| [`kondak-toon-8-hemelum`](kondak-toon-8-hemelum/README.md)       | cycle     | Hemelum/Liturgikon; also tropaar            |
+| [`tropaar-toon-8-hemelum`](tropaar-toon-8-hemelum/README.md)     | `same_as` | → kondak-toon-8-hemelum                     |
+| [`tropaar-toon-1-groningen`](tropaar-toon-1-groningen/README.md) | cycle     |                                             |
+| [`tropaar-toon-2-groningen`](tropaar-toon-2-groningen/README.md) | `same_as` | → kondak-toon-2-groningen                   |
+| [`tropaar-toon-5-groningen`](tropaar-toon-5-groningen/README.md) | `same_as` | → kondak-toon-5-groningen                   |
+| [`tropaar-toon-6-groningen`](tropaar-toon-6-groningen/README.md) | `same_as` | → kondak-toon-6-groningen                   |
+| [`tropaar-toon-7-groningen`](tropaar-toon-7-groningen/README.md) | `same_as` | → kondak-toon-7-groningen                   |
+| [`tropaar-toon-8-groningen`](tropaar-toon-8-groningen/README.md) | `same_as` | → kondak-toon-8-groningen                   |
+| [`tropaar-toon-3-groningen`](tropaar-toon-3-groningen/README.md) | sequence  |                                             |
+| [`tropaar-toon-4-hemelum`](tropaar-toon-4-hemelum/README.md)     | cycle     | Hemelum; Elia-mapping + corpus              |
+| [`tropaar-toon-4-groningen`](tropaar-toon-4-groningen/README.md) | cycle     | Groningen; also kondak; uit Nicolaas-schets |
+| [`stichier-toon-5-pdf`](stichier-toon-5-pdf/README.md)           | cycle     | PDF-stichier (niet Groningen kondak-5)      |
+| [`vers-toon-1-groningen`](vers-toon-1-groningen/README.md)       | cycle     |                                             |
+| [`vers-toon-5-groningen`](vers-toon-5-groningen/README.md)       | cycle     |                                             |
 
 Normatieve syntax/semantiek: map erboven
 ([`../README.md`](../README.md)).

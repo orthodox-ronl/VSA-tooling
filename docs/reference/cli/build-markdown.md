@@ -53,7 +53,7 @@ Vóór het renderen valideert dit commando dezelfde controles als
   - `.coria.html`-siblings naar `assets_dir/../coria/` (site-URL `/coria/…`).
   - Native `.mxl` / `.musicxml` naar `assets_dir/../mxl/` (site-URL `/mxl/…`).
     Afgeleide MXL uit een vsa-bestand blijft onder `static/vsa/mxl/` (via
-    [`vsa musicxml`](musicxml.md)).
+    [`vsa mxl`](musicxml.md)).
 
 ### Bestandspad versus URL-pad
 

@@ -48,9 +48,9 @@ afgeleide wilt.
 | `syllabify`           | Ja    | `.vsa` (`iter_vsa_files` → ``collect_input_files``)        |
 | `text`                | Ja    | `.vsa` / `.mvsa` / MusicXML / `.mscz`                      |
 | `zoektekst`           | Ja    | `.vsa` / `.mvsa` (`iter_vsa_mvsa_files` → helper)          |
-| `musicxml`            | Deels | map ondersteund in renderer-pad; check man-pagina          |
+| `mxl` (`musicxml`)    | Ja    | alleen `.vsa` (straat-puur; sibling of `-o`)               |
 | `products`            | Ja    | `.vsa` (`collect_cli_sources` / street products)           |
-| `audio`               | Ja    | zelfde bronnen; bij map is `output` een uitvoermap         |
+| `audio`               | Ja    | alleen `.vsa` in code; help/docs nog inhalen (apart)       |
 | `template validate`   | Ja    | `template.yaml` in map                                     |
 
 ### `mvsa` (stap 2: exports via helper)
@@ -88,5 +88,5 @@ top-level `text` / `audio` / `svg`, en de wrappers `collect_mvsa_files` /
 `iter_vsa_files` / `iter_vsa_mvsa_files`.
 
 `markdown pdf` / `markdown svg` / `markdown text` ondersteunen bestand-of-map. Optioneel later:
-`vsa parse` en overige map-scanners (`musicxml`, `validate`, `process`,
-`template`) waar die nog eigen `rglob` hebben.
+`vsa parse` en overige map-scanners (`validate`, `process`, `template`)
+waar die nog eigen `rglob` hebben. `vsa mxl` gebruikt al `collect_cli_sources`.

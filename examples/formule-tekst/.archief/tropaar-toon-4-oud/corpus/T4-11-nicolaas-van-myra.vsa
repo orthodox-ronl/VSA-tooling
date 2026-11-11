@@ -1,11 +1,11 @@
 ---
-title: Nicolaas van Myra
-do: F4
-mode: major
-genre: tropaar
-tone: 4
+soort: tropaar
+toon: 4
 template: tropaar-toon-4
 corpus_id: T4-11
+do: F4
+mode: major
+title: Nicolaas van Myra
 ---
 
 <!-- Bron: feesteigen\12-dec\12-06-nicolaas-van-myra.md | type: chapter -->

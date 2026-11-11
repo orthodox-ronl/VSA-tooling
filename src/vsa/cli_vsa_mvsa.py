@@ -31,8 +31,8 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
         epilog=(
             "voorbeelden:\n"
             "  vsa mvsa lied.vsa\n"
-            "  vsa mvsa lied.vsa --template groningen-tropaar-toon-4\n"
-            "  vsa mvsa lied.vsa --template kondak-toon-1 -o schets.mvsa\n"
+            "  vsa mvsa lied.vsa --template tropaar-toon-4-groningen\n"
+            "  vsa mvsa lied.vsa --template kondak-toon-1-groningen -o schets.mvsa\n"
             "  vsa mvsa lied.vsa --melody A\n"
             "  vsa mvsa --list-templates\n"
         ),
@@ -49,8 +49,8 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
         default=None,
         help=(
             f"Library-template-id of alias (default: {DEFAULT_TEMPLATE_ID}). "
-            "Voorbeelden: tropaar-toon-4, hemelum-tropaar-toon-4, "
-            "groningen-tropaar-toon-4, kondak-toon-1, tropaar-toon-2."
+            "Voorbeelden: tropaar-toon-4-hemelum, hemelum-tropaar-toon-4, "
+            "tropaar-toon-4-groningen, kondak-toon-1-groningen, tropaar-toon-2-groningen."
         ),
     )
     p.add_argument(
@@ -90,6 +90,8 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def run_vsa_mvsa(args: argparse.Namespace) -> int:
+    from .cli_messages import emit_cli_error, emit_cli_exception
+
     library = Path(args.library) if args.library else None
     if args.list_templates:
         for tid in list_template_ids(library):
@@ -97,9 +99,9 @@ def run_vsa_mvsa(args: argparse.Namespace) -> int:
         return 0
 
     if not args.path:
-        print(
-            "vsa mvsa: geef een .vsa-pad, of --list-templates.",
-            file=sys.stderr,
+        emit_cli_error(
+            "Geen .vsa-pad opgegeven.",
+            hint="Gebruik: vsa mvsa <pad.vsa>  of  vsa mvsa --list-templates",
         )
         return 2
 
@@ -115,15 +117,21 @@ def run_vsa_mvsa(args: argparse.Namespace) -> int:
             tempo=args.tempo,
         )
     except TemplateLibraryError as exc:
-        print(f"vsa mvsa: {exc.code}: {exc}", file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=args.path,
+            hint="Controleer --template / --library; zie vsa mvsa -h.",
+        )
         return 2
     except TemplateInstanceError as exc:
-        print(f"vsa mvsa: {exc.code}: {exc.message_nl}", file=sys.stderr)
-        if exc.hint_nl:
-            print(f"Hint: {exc.hint_nl}", file=sys.stderr)
+        emit_cli_exception(exc, path=args.path)
         return 1
     except FileNotFoundError as exc:
-        print(f"vsa mvsa: {exc}", file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=args.path,
+            hint="Controleer of het .vsa-bestand bestaat.",
+        )
         return 2
 
     assert result.output_path is not None

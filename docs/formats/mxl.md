@@ -8,9 +8,9 @@ Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
 
 | Onderwerp                | Waar                                                                                            |
 | ------------------------ | ----------------------------------------------------------------------------------------------- |
-| Export vanuit `.vsa`     | [`vsa musicxml`](../reference/cli/musicxml.md), [MusicXML-export](../guides/musicxml-export.md) |
-| Export vanuit `.mvsa`    | [`mvsa musicxml`](../reference/cli/mvsa.md#mvsa-musicxml)                                   |
-| Import → `.mvsa`         | [`mxl mvsa`](../reference/cli/mxl.md)                                                         |
+| Export vanuit `.vsa`     | [`vsa mxl`](../reference/cli/musicxml.md), [MusicXML-export](../guides/musicxml-export.md)      |
+| Export vanuit `.mvsa`    | [`mvsa mxl`](../reference/cli/mvsa.md#mvsa-mxl)                                                 |
+| Import → `.mvsa`         | [`mxl mvsa`](../reference/cli/mxl.md)                                                           |
 | → `.mscz`                | [`mxl mscz`](../reference/cli/mxl.md)                                                           |
 | Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                           |
 

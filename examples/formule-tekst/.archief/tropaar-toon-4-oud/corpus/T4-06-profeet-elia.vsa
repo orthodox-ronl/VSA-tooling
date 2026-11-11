@@ -1,11 +1,11 @@
 ---
-title: Profeet Elia
-do: F4
-mode: major
-genre: tropaar
-tone: 4
+soort: tropaar
+toon: 4
 template: tropaar-toon-4
 corpus_id: T4-06
+do: F4
+mode: major
+title: Profeet Elia
 ---
 
 <!-- Tropaar Profeet Elia, Toon 4 -->

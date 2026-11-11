@@ -151,7 +151,7 @@ def test_mvsa_mxl_rejects_mscz(tmp_path: Path, capsys) -> None:
 def test_vsa_audio_rejects_mscz(tmp_path: Path, capsys) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
-    assert vsa_main(["audio", str(bron), str(tmp_path / "out.mp3")]) == 1
+    assert vsa_main(["mp3", str(bron)]) == 1
     err = capsys.readouterr().err
     assert "weigert .mscz" in err
     assert "mscz mp3" in err

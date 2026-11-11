@@ -1,12 +1,12 @@
 ---
-title: Tropaar t.4 H. Monnik-martelaar Andreas
+soort: tropaar
+toon: 4
+template: tropaar-toon-4
+bron: Koorinstructie vr 30 okt 2026 (Hemelum)
 do: F4
 mode: major
 tempo: 120
-genre: tropaar
-tone: 4
-template: tropaar-toon-4
-bron: Koorinstructie vr 30 okt 2026 (Hemelum)
+title: Tropaar t.4 H. Monnik-martelaar Andreas
 ---
 
 # === pad: VSA + template → MVSA (Fase A herstart) ===

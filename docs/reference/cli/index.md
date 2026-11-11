@@ -43,7 +43,7 @@ vsa [--config CONFIG] [--version] <subcommando> …
 | `--version`       | Nee       | Toon de geïnstalleerde versie en stop direct (subcommando wordt genegeerd).                                                             |
 | `-h`, `--help`    | Nee       | Toon hulp. Werkt zowel op `vsa --help` als op `vsa <subcommando> --help`.                                                               |
 
-Sommige subcommando's (`svg`, `process`, `build-markdown`, `musicxml`, `pdf`)
+Sommige subcommando's (`svg`, `process`, `build-markdown`, `mxl`, `pdf`)
 accepteren `--config` ook als **subcommando-optie**. Die overschrijft dan de
 globale `--config`.
 
@@ -76,7 +76,7 @@ echo %ERRORLEVEL%
 | [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).                          |
 | [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).                                  |
 | [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).                                 |
-| [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`); playback + Coria-finalize; optioneel `--syllabify`. |
+| [`mxl`](musicxml.md)                             | Exporteer `.vsa` naar MusicXML (`.mxl`/`.musicxml`); `PATH [-o]`; alias `musicxml`; optioneel `--syllabify`.  |
 | [`products`](products.md)                        | Standaardproducten + `*.products-meta.json` (geen partituur-PDF); ook `mvsa`/`mscz products`.                 |
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                                       |
 | [`vsa mvsa`](vsa-mvsa.md)                        | `.vsa` + formule-template → schets-`.mvsa` (T1–T7; default Hemelum toon 4).                                   |

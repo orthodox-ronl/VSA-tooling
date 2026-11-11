@@ -1,4 +1,4 @@
-"""VSA→template-instance: VSA-S + template A/T/B (tropaar-toon-4 / Elia)."""
+"""VSA→template-instance: VSA-S + template A/T/B (tropaar-toon-4-hemelum / Elia)."""
 
 from __future__ import annotations
 
@@ -25,10 +25,10 @@ from vsa.template_instance import (  # noqa: E402
 from vsa.vsa_stanzas import extract_stanza_notes  # noqa: E402
 
 LIBRARY = ROOT / "docs" / "specification-vsa-templates" / "library"
-TEMPLATE_YAML = LIBRARY / "tropaar-toon-4" / "template.yaml"
+TEMPLATE_YAML = LIBRARY / "tropaar-toon-4-hemelum" / "template.yaml"
 ELIA_VSA = (
     LIBRARY
-    / "tropaar-toon-4"
+    / "tropaar-toon-4-hemelum"
     / "examples"
     / "corpus"
     / "T4-06-profeet-elia.vsa"
@@ -188,7 +188,7 @@ def test_collapse_recite_keeps_ni_and_ter_quarter() -> None:
     """``…pries-ter {Ni_}ko{\\laas_}`` → ter kwart, Ni eigen noot, niet onder ||O||."""
     doc = _template()
     text = (
-        Path("docs/specification-vsa-templates/library/tropaar-toon-4")
+        Path("docs/specification-vsa-templates/library/tropaar-toon-4-hemelum")
         / "examples/corpus/T4-11-nicolaas-van-myra.vsa"
     ).read_text(encoding="utf-8")
     mapped = map_vsa_to_template(doc, text)
@@ -264,7 +264,7 @@ def test_collapse_recite_scopes_stay_own_notes() -> None:
     """``{/en} het … zacht{moe_}dig{\\heid_}`` — scopes eigen noten; zacht = slotkwart."""
     doc = _template()
     text = (
-        Path("docs/specification-vsa-templates/library/tropaar-toon-4")
+        Path("docs/specification-vsa-templates/library/tropaar-toon-4-hemelum")
         / "examples/corpus/T4-11-nicolaas-van-myra.vsa"
     ).read_text(encoding="utf-8")
     mapped = map_vsa_to_template(doc, text)
@@ -412,7 +412,7 @@ def test_elia_instance_musicxml_coria_nonempty() -> None:
         assert "<text>Voor</text>" in part.group(1), pid
     path_mxl = (
         LIBRARY
-        / "tropaar-toon-4"
+        / "tropaar-toon-4-hemelum"
         / "examples"
         / "corpus"
         / "T4-06-profeet-elia.mxl"
@@ -652,7 +652,7 @@ def test_elia_instance_s_from_vsa_atb_from_template() -> None:
 def test_elia_instance_mscz_written() -> None:
     path = (
         LIBRARY
-        / "tropaar-toon-4"
+        / "tropaar-toon-4-hemelum"
         / "examples"
         / "corpus"
         / "T4-06-profeet-elia.mscz"
@@ -765,7 +765,7 @@ def test_mode_mismatch_between_vsa_and_template_raises() -> None:
 
 
 def test_sequence_form_rejects_wrong_stanza_count() -> None:
-    path = LIBRARY / "tropaar-toon-3" / "template.yaml"
+    path = LIBRARY / "tropaar-toon-3-groningen" / "template.yaml"
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
     text = "---\ndo: F4\nmode: major\n---\n\n// aa {/b_}. [//:]\n"
     with pytest.raises(TemplateInstanceError) as caught:
@@ -795,11 +795,11 @@ def test_open_skipped_when_vsa_starts_unscoped() -> None:
     assert "open" not in roles
 
 
-# --- kondak-toon-1 (Groningen) -------------------------------------------------
+# --- kondak-toon-1-groningen (Groningen) -------------------------------------------------
 
-KONDAK_T1_YAML = LIBRARY / "kondak-toon-1" / "template.yaml"
+KONDAK_T1_YAML = LIBRARY / "kondak-toon-1-groningen" / "template.yaml"
 KONDAK_T1_VSA_PATH = (
-    LIBRARY / "kondak-toon-1" / "examples" / "corpus" / "K1-groningen-zondag.vsa"
+    LIBRARY / "kondak-toon-1-groningen" / "examples" / "corpus" / "K1-groningen-zondag.vsa"
 )
 
 
@@ -1138,13 +1138,13 @@ def test_emit_warns_on_replicated_melisma_halves() -> None:
     assert "2× ELM '_'" in w[0]
 
 
-KONDAK_T2_YAML = LIBRARY / "kondak-toon-2" / "template.yaml"
+KONDAK_T2_YAML = LIBRARY / "kondak-toon-2-groningen" / "template.yaml"
 KONDAK_T2_VSA_PATH = (
-    LIBRARY / "kondak-toon-2" / "examples" / "corpus" / "K2-groningen-zondag.vsa"
+    LIBRARY / "kondak-toon-2-groningen" / "examples" / "corpus" / "K2-groningen-zondag.vsa"
 )
-TROPAAR_T2_YAML = LIBRARY / "tropaar-toon-2" / "template.yaml"
+TROPAAR_T2_YAML = LIBRARY / "tropaar-toon-2-groningen" / "template.yaml"
 TROPAAR_T2_VSA_PATH = (
-    LIBRARY / "tropaar-toon-2" / "examples" / "corpus" / "T2-groningen-zondag.vsa"
+    LIBRARY / "tropaar-toon-2-groningen" / "examples" / "corpus" / "T2-groningen-zondag.vsa"
 )
 
 
@@ -1166,7 +1166,7 @@ def test_kondak_toon_2_phrase_plan() -> None:
 
 def test_tropaar_toon_2_phrase_plan() -> None:
     alias = yaml.safe_load(TROPAAR_T2_YAML.read_text(encoding="utf-8"))
-    assert alias.get("same_as") == "kondak-toon-2"
+    assert alias.get("same_as") == "kondak-toon-2-groningen"
     doc = yaml.safe_load(KONDAK_T2_YAML.read_text(encoding="utf-8"))
     text = TROPAAR_T2_VSA_PATH.read_text(encoding="utf-8")
     mapped = map_vsa_to_template(doc, text)
@@ -1181,13 +1181,13 @@ def test_tropaar_toon_2_phrase_plan() -> None:
     ]
 
 
-KONDAK_T8_YAML = LIBRARY / "kondak-toon-8" / "template.yaml"
+KONDAK_T8_YAML = LIBRARY / "kondak-toon-8-groningen" / "template.yaml"
 KONDAK_T8_VSA_PATH = (
-    LIBRARY / "kondak-toon-8" / "examples" / "corpus" / "K8-groningen-zondag.vsa"
+    LIBRARY / "kondak-toon-8-groningen" / "examples" / "corpus" / "K8-groningen-zondag.vsa"
 )
-TROPAAR_T8_YAML = LIBRARY / "tropaar-toon-8" / "template.yaml"
+TROPAAR_T8_YAML = LIBRARY / "tropaar-toon-8-groningen" / "template.yaml"
 TROPAAR_T8_VSA_PATH = (
-    LIBRARY / "tropaar-toon-8" / "examples" / "corpus" / "T8-groningen-zondag.vsa"
+    LIBRARY / "tropaar-toon-8-groningen" / "examples" / "corpus" / "T8-groningen-zondag.vsa"
 )
 
 
@@ -1200,20 +1200,20 @@ def test_kondak_toon_8_phrase_plan() -> None:
 
 def test_tropaar_toon_8_phrase_plan() -> None:
     alias = yaml.safe_load(TROPAAR_T8_YAML.read_text(encoding="utf-8"))
-    assert alias.get("same_as") == "kondak-toon-8"
+    assert alias.get("same_as") == "kondak-toon-8-groningen"
     doc = yaml.safe_load(KONDAK_T8_YAML.read_text(encoding="utf-8"))
     text = TROPAAR_T8_VSA_PATH.read_text(encoding="utf-8")
     mapped = map_vsa_to_template(doc, text)
     assert [pid for pid, _ in mapped] == ["1", "1", "1", "laatste"]
 
 
-KONDAK_T6_YAML = LIBRARY / "kondak-toon-6" / "template.yaml"
+KONDAK_T6_YAML = LIBRARY / "kondak-toon-6-groningen" / "template.yaml"
 KONDAK_T6_VSA_PATH = (
-    LIBRARY / "kondak-toon-6" / "examples" / "corpus" / "K6-groningen-zondag.vsa"
+    LIBRARY / "kondak-toon-6-groningen" / "examples" / "corpus" / "K6-groningen-zondag.vsa"
 )
-TROPAAR_T6_YAML = LIBRARY / "tropaar-toon-6" / "template.yaml"
+TROPAAR_T6_YAML = LIBRARY / "tropaar-toon-6-groningen" / "template.yaml"
 TROPAAR_T6_VSA_PATH = (
-    LIBRARY / "tropaar-toon-6" / "examples" / "corpus" / "T6-groningen-zondag.vsa"
+    LIBRARY / "tropaar-toon-6-groningen" / "examples" / "corpus" / "T6-groningen-zondag.vsa"
 )
 
 
@@ -1235,7 +1235,7 @@ def test_kondak_toon_6_phrase_plan() -> None:
 
 def test_tropaar_toon_6_phrase_plan() -> None:
     alias = yaml.safe_load(TROPAAR_T6_YAML.read_text(encoding="utf-8"))
-    assert alias.get("same_as") == "kondak-toon-6"
+    assert alias.get("same_as") == "kondak-toon-6-groningen"
     doc = yaml.safe_load(KONDAK_T6_YAML.read_text(encoding="utf-8"))
     text = TROPAAR_T6_VSA_PATH.read_text(encoding="utf-8")
     mapped = map_vsa_to_template(doc, text)

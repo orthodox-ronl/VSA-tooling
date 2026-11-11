@@ -15,7 +15,7 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
 | Bron ↓ \ Doel → | `.vsa`                          | `.mvsa`                                    | `.mxl`                          | `.mscz`                 | `.mp3` / audio         | `.midi`              |
 | --------------- | ------------------------------- | ------------------------------------------ | ------------------------------- | ----------------------- | ---------------------- | -------------------- |
-| **`.vsa`**      | validate (geen `vsa normalize`) | —                                          | `vsa musicxml` / `vsa products` | `vsa products` → `mscz` | `vsa audio`            | — (niet gepland)     |
+| **`.vsa`**      | validate (geen `vsa normalize`) | —                                          | `vsa mxl` / `vsa products`      | `vsa products` → `mscz` | `vsa audio`            | — (niet gepland)     |
 | **`.mvsa`**     | —                               | `mvsa normalize` / `kuiser` / `transpose`  | `mvsa mxl` · `score-ir`         | `mvsa mscz`             | `mvsa mp3`/`ogg`/`wav` | — (niet gepland)     |
 | **`.mxl`**      | —                               | `mxl mvsa`                                 | `mxl normalize`                 | `mxl mscz`              | via notatiestraat      | — (niet gepland)     |
 | **`.mscz`**     | —                               | `mscz mvsa`                                | `mscz mxl`                      | `mscz mscz` / normalize | `mscz mp3`/`ogg`/`wav` | — (niet gepland)     |

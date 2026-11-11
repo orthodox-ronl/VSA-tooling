@@ -195,11 +195,17 @@ Zie [catalogus-zoek-api — twee contextlagen](https://github.com/orthodox-ronl/
 
 # VSA-commentaar
 
-Binnen een `::: vsa-notatie` blok mag HTML-commentaar voorkomen:
+In `.vsa` en in `::: vsa-notatie` / `.mvsa` mag broncommentaar op twee manieren:
 
 ```text
-<!-- dit is commentaar -->
+<!-- dit is HTML-commentaar (mag ook inline op een regel) -->
+# dit is regelcommentaar (hele regel, zoals in MVSA)
 ```
+
+Beide vormen gelden voor **VSA en MVSA**. Regelcommentaar begint na
+eventuele spaties/tabs met `#`. In VSA blijft `#` **binnen** een scope
+(halftoon, bijvoorbeeld `{#-Cis}`) gewone notatie — alleen een **hele
+regel** die met `#` begint is commentaar.
 
 ## Regels
 
@@ -212,9 +218,10 @@ Binnen een `::: vsa-notatie` blok mag HTML-commentaar voorkomen:
 - Commentaar heeft geen invloed op [afgeleide](@bron) artefacten.
 - Commentaar mag niet als tekstnode worden behandeld.
 - Commentaar mag niet als whitespace worden behandeld.
-- Commentaar mag niet als newline worden behandeld.
+- Commentaar mag niet als newline worden behandeld (geen lege regel in SVG e.d.).
 - Commentaar mag geen invloed hebben op positionering, spacing of layout.
 - Commentaar mag niet in SVG, HTML, JSON, MusicXML of andere [afgeleide](@bron) artefacten terechtkomen.
+- Bij **foutmeldingen** tellen commentaarregels wél mee in regelnummer en kolom (bestand-absoluut).
 
 ---
 
@@ -478,7 +485,7 @@ Authoring-syntax voor **export** (niet conversie) is contractueel vastgelegd in 
   [coria](https://orthodox-ronl.github.io/bron/reference/exporttype-coria/),
   [mxl](https://orthodox-ronl.github.io/bron/reference/exporttype-mxl/)
 
-Conversie ([`vsa svg`](../reference/cli/svg.md), [`vsa musicxml`](../reference/cli/musicxml.md)):
+Conversie ([`vsa svg`](../reference/cli/svg.md), [`vsa mxl`](../reference/cli/musicxml.md)):
 [Conversiemechanismen](https://orthodox-ronl.github.io/bron/reference/conversiemechanismen/)
 ([conversiemechanisme](@bron)).
 

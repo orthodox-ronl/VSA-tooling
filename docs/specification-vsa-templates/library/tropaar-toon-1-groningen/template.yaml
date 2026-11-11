@@ -1,0 +1,98 @@
+# Tropaar toon 1 — do=D4 minor (1 mol). Graden/provisional.
+
+spec_version: draft-v0
+id: tropaar-toon-1-groningen
+genre: tropaar
+tone: 1
+do: D4
+mode: minor
+duration-model: default
+pitches_status: provisional
+source: "tonen (vers, stichier, tropaar).pdf — Tropaarmelodie toon 1"
+cycle:
+  - "1"
+  - "2"
+final: laatste
+
+mapping_plans:
+  - id: standard
+    label: "||: 1, 2 :|| laatste"
+    when:
+      default: true
+    steps:
+      - repeat: ["1", "2"]
+        until: final
+      - phrase: laatste
+  - id: extended-close
+    label: "||: 1, 2 :|| 1, 1a, 1a, 2"
+    when:
+      stanza_count: 5
+    steps:
+      - repeat: ["1", "2"]
+        until:
+          remaining: 4
+      - sequence: ["1", "1a", "1a", "2"]
+
+phrases:
+  - id: "1"
+    events:
+      - role: link
+        duration: "~"
+        optional: true
+        pitches: { S: fa, A: re, T: ti-1, B: ti-2 }
+      - role: open
+        duration: "~"
+        anchor: e.st.
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: re, T: ti-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+
+  - id: "1a"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+
+  - id: "2"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: re, T: ti-1, B: ti-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+
+  - id: laatste
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: fa, A: re, T: ti-1, B: ti-2 }
+      - role: cadence
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }

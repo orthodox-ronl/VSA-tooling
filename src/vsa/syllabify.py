@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .ast import ScopeNode, TextNode
 from .parser import Parser
-from .vsa_comments import COMMENT_ONLY_LINE_RE
+from .vsa_comments import is_vsa_comment_only_line
 from .yaml_frontmatter import parse_vsa_frontmatter_with_body_offset
 
 _BARLINE_TOKENS = frozenset({"/", "//", "*"})
@@ -329,7 +329,7 @@ def _atoms_from_text_with_comments(segment: str) -> list[_Atom]:
             next_index = line_end
 
         line_content = segment[line_start:line_end]
-        if COMMENT_ONLY_LINE_RE.match(line_content + line_ending):
+        if is_vsa_comment_only_line(line_content, line_ending):
             flush_plain()
             atoms.append(_Atom("sep", line_content + line_ending))
             index = next_index

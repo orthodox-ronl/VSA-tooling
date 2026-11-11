@@ -79,4 +79,4 @@ vsa audio generated\lied.mxl generated\lied --format ogg
 - [Invoer bestand of map](input-pad.md)
 - [Formaat `.mp3` / audio](../../formats/audio.md)
 - [`mvsa mp3` / `ogg` / `wav`](mvsa.md#mvsa-mp3)
-- [`vsa musicxml`](musicxml.md) (playback-``.mxl``)
+- [`vsa mxl`](musicxml.md) (playback-``.mxl``)

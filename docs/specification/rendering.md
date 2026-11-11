@@ -135,7 +135,7 @@ Meerdere punten worden verticaal gestapeld.
 
 ### MusicXML-export
 
-> **Implementatiestatus:** geïmplementeerd in `vsa-tool` als [`vsa musicxml`](../reference/cli/musicxml.md).
+> **Implementatiestatus:** geïmplementeerd in `vsa-tool` als [`vsa mxl`](../reference/cli/musicxml.md).
 > Zie `src/vsa/musicxml_renderer.py`, `src/vsa/pitch_resolver.py` en
 > `src/vsa/duration_model.py`.
 
@@ -323,7 +323,9 @@ scopes: alles gezongen (huidig gedrag). Pitched cues met scopes
 Het profiel `engraving` past deze filter niet toe: ongescopte tekst blijft
 daar reciteertoon zoals voorheen.
 
-HTML-commentaar (`<!-- … -->`) is bron-only: niet in SVG en niet in MusicXML.
+Broncommentaar (`<!-- … -->` en hele regels die met `#` beginnen) is
+bron-only: niet in SVG en niet in MusicXML; zie
+[directives.md](directives.md) (sectie VSA-commentaar).
 Commentaar is geen vervanging voor zichtbare blad-aanwijzingen.
 
 #### Conversieregel per muzikale positie
@@ -469,7 +471,7 @@ Coria of MuseScore voor volledige garantie.
 
 ##### Uitvoerformaat: `.mxl` (default) en `.musicxml`
 
-[`vsa musicxml`](../reference/cli/musicxml.md) schrijft standaard **Compressed MusicXML** (`.mxl`). Met
+[`vsa mxl`](../reference/cli/musicxml.md) schrijft standaard **Compressed MusicXML** (`.mxl`). Met
 `--format musicxml` of een uitvoerpad dat op `.musicxml` eindigt, wordt
 ongekomprimeerde MusicXML geschreven.
 
@@ -506,14 +508,14 @@ emitteert `{{< coria-html >}}`.
 Fallback wanneer geen `.coria.html` aanwezig is.
 
 - Uit een vsa-bestand: afgeleide MXL onder `static/vsa/mxl/…` (apart
-  gegenereerd via [`vsa musicxml`](../reference/cli/musicxml.md)).
+  gegenereerd via [`vsa mxl`](../reference/cli/musicxml.md)).
 - Native `.mxl` / `.musicxml`: het bronbestand zelf, gekopieerd naar
   `static/mxl/…` (andere URL-prefix, zodat beide naast elkaar kunnen).
 
 Directive emitteert `{{< coria >}}`.
 
 Site-build: `build-markdown` (directive + `.coria.html`-kopie) vóór
-[`vsa musicxml`](../reference/cli/musicxml.md) (MXL-generatie). Lokaal (`baseURL /`) werkt `play_from_url`
+[`vsa mxl`](../reference/cli/musicxml.md) (MXL-generatie). Lokaal (`baseURL /`) werkt `play_from_url`
 niet: Coria haalt het bestand server-side op.
 
 ### Geïntegreerde partituur-export (HTML/PDF) — voorziene uitbreiding
@@ -534,7 +536,7 @@ behoefte hebben aan de volledige VSA-visuele taal in de lyric-regel:
 
 ```text
 .vsa + frontmatter
-       ├── vsa musicxml   →  MusicXML / MuseScore (bewerken, afspelen)
+       ├── vsa mxl        →  MusicXML / MuseScore (bewerken, afspelen)
        ├── vsa svg        →  tekst + VSA-glyphs (web, Hugo)
        └── vsa score      →  HTML/PDF: notenbalk + VSA-lyrics   [gepland]
 ```

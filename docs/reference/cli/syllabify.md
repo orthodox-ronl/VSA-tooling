@@ -37,7 +37,7 @@ de grens tussen tekst en `{…}`, en tussen opeenvolgende scopes. Zo wordt
   (`me-de=eeu-wi-ge`); `--unsyllabify` houdt `=`; `vsa text` / MusicXML /
   SVG tonen een gewoon streepje. Zachte `-` verdwijnen in zoektekst, `=`
   niet (wordt `-`).
-- Dit is **geen** automatische stap bij `vsa musicxml`: bron en product
+- Dit is **geen** automatische stap bij `vsa mxl`: bron en product
   blijven voorspelbaar. Na schrijven vernieuw je de standaard siblings
   met `vsa products` (er is geen script `vsa-products.cmd`).
 
@@ -124,7 +124,7 @@ vsa syllabify pad\naar\xyz.syl.vsa --unsyllabify --in-place
 ```
 
 Voor Coria-MXL hoef je de bron niet in-place te syllabifyen:
-[`vsa products`](products.md) (en `vsa musicxml --syllabify`) doen tijdelijke
+[`vsa products`](products.md) (en `vsa mxl --syllabify`) doen tijdelijke
 streepjes alleen voor de export. In-place alleen als je de canonieke `.vsa`
 zelf wilt hypheneren:
 
@@ -147,5 +147,5 @@ Voorbeeldtransformatie:
 ## Zie ook
 
 - [`vsa products`](products.md) — MXL met tijdelijke syllabify (bron ongewijzigd)
-- [`vsa musicxml --syllabify`](musicxml.md) — losse MusicXML met dezelfde optie
+- [`vsa mxl --syllabify`](musicxml.md) — losse MusicXML met dezelfde optie
 - [`vsa text`](text.md) — platte gezongen tekst

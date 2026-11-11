@@ -1,4 +1,4 @@
-"""vsa musicxml / svg mergen products-meta (stap 3)."""
+"""vsa mxl / svg mergen products-meta (stap 3)."""
 
 from __future__ import annotations
 
@@ -24,12 +24,12 @@ def _fake_export_mxl(
     return 0
 
 
-def test_vsa_musicxml_merges_mxl_meta(tmp_path: Path) -> None:
+def test_vsa_mxl_merges_mxl_meta(tmp_path: Path) -> None:
     bron = tmp_path / "lied.vsa"
     bron.write_text("L | a\n", encoding="utf-8")
     out = tmp_path / "lied.vsa.mxl"
     with patch("vsa.cli._export_vsa_to_musicxml", side_effect=_fake_export_mxl):
-        assert vsa_main(["musicxml", str(bron), str(out)]) == 0
+        assert vsa_main(["mxl", str(bron), "-o", str(out)]) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert set(data["products"]) == {"mxl"}
     assert data["products"]["mxl"]["sha256"] == sha256_file(out)
@@ -60,7 +60,7 @@ def test_vsa_musicxml_then_svg_merge(tmp_path: Path) -> None:
     bron.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     mxl = tmp_path / f"{bron.name}.mxl"
     with patch("vsa.cli._export_vsa_to_musicxml", side_effect=_fake_export_mxl):
-        assert vsa_main(["musicxml", str(bron), str(mxl)]) == 0
+        assert vsa_main(["mxl", str(bron), "-o", str(mxl)]) == 0
     assert vsa_main(["svg", str(bron)]) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert set(data["products"]) == {"mxl", "svg"}

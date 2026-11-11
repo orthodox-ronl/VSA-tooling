@@ -52,16 +52,16 @@ def test_align_hyphen_before_paren_keeps_sync():
     [
         (
             "kondak/zondag-toon-5/groningen/kondak-zondag-toon-5-groningen.vsa",
-            "kondak-toon-5",
+            "kondak-toon-5-groningen",
         ),
         (
             "tropaar/zaterdag-heiligen-toon-2/hemelum/"
             "tropaar-zaterdag-heiligen-toon-2-hemelum.vsa",
-            "tropaar-toon-2",
+            "tropaar-toon-2-groningen",
         ),
         (
             "kondak/zondag-toon-8/groningen/kondak-zondag-toon-8-groningen.vsa",
-            "kondak-toon-8",
+            "kondak-toon-8-groningen",
         ),
     ],
 )

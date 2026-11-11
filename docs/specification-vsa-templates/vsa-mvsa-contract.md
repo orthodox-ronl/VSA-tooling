@@ -13,7 +13,7 @@ lees de relevante **T-id** hier; wijzig normatieve tekst **alleen** hier
 
 | Laag                           | Rol                                                                        |
 | ------------------------------ | -------------------------------------------------------------------------- |
-| **Template-id**                | Bijv. `kondak-toon-1` (map `library/<id>/`); CLI-alias later (`kondak-t1`) |
+| **Template-id**                | Bijv. `kondak-toon-1-groningen` (map `library/<id>/`); CLI-alias later (`kondak-t1`) |
 | **Template** (`template.yaml`) | Formule: frasen, rollen, ankers, `do`/`mode`, speelplan                    |
 | **Motor**                      | Gedeelde mapper + emit voor alle template-ids                              |
 | **Instance**                   | Afgeleide MVSA (schets tot goedgekeurd in corpus)                          |
@@ -25,7 +25,7 @@ tekortschiet — eerst YAML proberen (T7).
 
 | Id  | Regel                                | Kort                                                                                                                                                                                                                                                          |
 | --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T1  | Template-id                          | Elke afgeleide MVSA noemt template-pad of canonieke id in commentaar/`@`-meta. Geen stille default zonder vermelding.                                                                                                                                         |
+| T1  | Template-id                          | Elke afgeleide MVSA noemt de **feitelijk gebruikte** formule-id in frontmatter (`template:`) én in meta-commentaar. Was de CLI-/infer-id een alias (of `same_as`), dan ook `template_opgegeven:`. Geen stille default zonder vermelding.                      |
 | T2  | Melodiestem uit VSA                  | **Default:** VSA-melodie matcht template-`pitches.S` en vult de MVSA-**S**-regel. **Override:** `--melody A` (enz.) → match op `pitches.A` (of T/B); VSA-pitch vult die MVSA-stem; overige stemmen uit template op hetzelfde event.                           |
 | T3  | Overige stemmen                      | Niet-melodiestemmen: laddergraden uit template-`pitches.*` op het **zelfde** gekoppelde event (synchroon met melodiekeuzes H4–H8).                                                                                                                            |
 | T4  | ELM / EHM                            | **ELM:** VSA wint (duur). **EHM:** exacte match op template-`pitches.<melodiestem>` t.o.v. template-`do`/`mode` (H5/H9). Mismatch → harde fout, geen stil hold.                                                                                               |
@@ -48,8 +48,8 @@ voorkomen). Ontbrekende sleutel → mappingfout met duidelijke hint.
 CLI (geïmplementeerd; schets-output):
 
 ```text
-vsa mvsa pad/naar.vsa --template kondak-toon-1
-vsa mvsa pad/naar.vsa --template kondak-toon-1 --melody A
+vsa mvsa pad/naar.vsa --template kondak-toon-1-groningen
+vsa mvsa pad/naar.vsa --template kondak-toon-1-groningen --melody A
 vsa mvsa --list-templates
 ```
 
@@ -71,11 +71,13 @@ De emit van `vsa mvsa` schrijft een **schets** die dezelfde opbouw volgt
 als de gekuiste bestanden in `bibliotheek/.../_klaar_voor_acceptatie`
 (minus handmatige polish). Volgorde:
 
-1. **Frontmatter** — alleen catalogusvelden (`titel`, `partituur`, `toon`,
-   `taal`, `bron`, `soort`, `gelegenheid`, `zoektekst`). Geen `do` /
-   `mode` / `tempo` / `template` in YAML (playback staat in `@`-regels).
+1. **Frontmatter** — catalogusvelden (`titel`, `partituur`, `toon`,
+   `taal`, `bron`, `soort`, `gelegenheid`, `zoektekst`) plus **`template`**
+   (feitelijk gebruikte formule-id na alias/`same_as`, T1) en zo nodig
+   **`template_opgegeven`** (wat bij conversie werd gevraagd). Geen `do` /
+   `mode` / `tempo` in YAML (playback staat in `@`-regels).
 2. **Oorspronkelijke VSA** als commentaarblok (ELM-foutzoeken).
-3. **Meta-commentaar** — bronpad, template-id (T1), notatie (ag-vsa).
+3. **Meta-commentaar** — bronpad, template-pad/id (T1), notatie (ag-vsa).
 4. **Waarschuwingen** — algemene schets-banner plus eventuele specifieke
    `# WAARSCHUWING:`-regels (o.a. melisma met herhaalde niet-default ELM:
    controleer bron `{/&/x_}` vs `{/&/x_&_}`).

@@ -1,12 +1,12 @@
 ---
-title: Tropaar zaterdag voor kruisverheffing, toon 4
+soort: tropaar
+toon: 4
+template: tropaar-toon-4
+bron: Liturgikon (p.275-278)
 do: F4
 mode: major
 tempo: 120
-genre: tropaar
-tone: 4
-template: tropaar-toon-4
-bron: Liturgikon (p.275-278)
+title: Tropaar zaterdag voor kruisverheffing, toon 4
 ---
 
 # === pad: VSA + template → MVSA (Fase A herstart) ===

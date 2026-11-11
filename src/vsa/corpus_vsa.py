@@ -131,7 +131,7 @@ def write_vsa_file(piece: CorpusPiece, path: Path) -> None:
         "mode: major\n"
         "genre: tropaar\n"
         "tone: 4\n"
-        "template: tropaar-toon-4\n"
+        "template: tropaar-toon-4-hemelum\n"
         f"corpus_id: {piece.piece_id}\n"
         "---\n\n"
         f"{piece.body}\n"

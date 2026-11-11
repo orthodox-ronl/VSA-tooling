@@ -41,6 +41,7 @@ from .template_library import (
     DEFAULT_VOICE_OCT,
     ResolvedTemplate,
     TemplateLibraryError,
+    infer_template_id,
     load_resolved_template,
 )
 from .vsa_stanzas import ensure_stanza_stars, extract_stanza_notes
@@ -78,6 +79,8 @@ def format_emit_warnings(warnings: list[str]) -> list[str]:
 
 
 # Frontmatter-velden die in de afgeleide MVSA blijven (playback → @-regels).
+# ``template`` = feitelijk gebruikte formule-id (T1/T6); niet playback.
+# ``template_opgegeven`` = wat bij conversie werd gevraagd (alias), indien anders.
 _EMIT_FRONTMATTER_KEYS = (
     "titel",
     "partituur",
@@ -87,39 +90,63 @@ _EMIT_FRONTMATTER_KEYS = (
     "soort",
     "gelegenheid",
     "zoektekst",
+    "template",
+    "template_opgegeven",
 )
 
 
-def clean_emit_frontmatter(meta: dict[str, Any]) -> str:
-    """YAML-frontmatter voor schets-MVSA: catalogusvelden, geen do/mode/tempo.
+def clean_emit_frontmatter(
+    meta: dict[str, Any],
+    *,
+    template_id: str | None = None,
+    template_opgegeven: str | None = None,
+) -> str:
+    """YAML-frontmatter voor schets-MVSA: catalogusvelden + formule-id.
 
-    Spiegel van de gekuiste klaar-MVSA's: titel/partituur/toon/taal/bron/soort/
-    gelegenheid/zoektekst. Playback staat in ``@do`` / ``@mode`` / ``@tempo``.
+    Geen ``do`` / ``mode`` / ``tempo`` (playback staat in ``@``-regels).
+    ``template`` = feitelijk gebruikte formule-id (na alias/``same_as``).
+    ``template_opgegeven`` alleen als die afwijkt van ``template``.
     """
-    if not meta:
+    if not meta and not template_id:
         return ""
     out: dict[str, Any] = {}
-    if meta.get("titel") not in (None, ""):
-        out["titel"] = meta["titel"]
-    elif meta.get("title") not in (None, ""):
-        out["titel"] = meta["title"]
+    src = meta or {}
+    if src.get("titel") not in (None, ""):
+        out["titel"] = src["titel"]
+    elif src.get("title") not in (None, ""):
+        out["titel"] = src["title"]
+    skip = {"titel", "template", "template_opgegeven"}
     for key in _EMIT_FRONTMATTER_KEYS:
-        if key == "titel":
+        if key in skip:
             continue
-        val = meta.get(key)
+        val = src.get(key)
         if val is None or val == "":
             continue
         out[key] = val
+    tid = str(template_id or src.get("template") or "").strip()
+    if tid:
+        out["template"] = tid
+    asked = str(
+        template_opgegeven
+        if template_opgegeven is not None
+        else (src.get("template_opgegeven") or "")
+    ).strip()
+    if asked and tid and asked != tid:
+        out["template_opgegeven"] = asked
     if not out:
         return ""
     try:
         import yaml
     except ImportError:
-        # Zeldzaam: zonder PyYAML alleen titel als platte YAML.
-        title = out.get("titel")
-        if not title:
-            return ""
-        return f"---\ntitel: {title}\n---"
+        lines = ["---"]
+        if out.get("titel"):
+            lines.append(f"titel: {out['titel']}")
+        if out.get("template"):
+            lines.append(f"template: {out['template']}")
+        if out.get("template_opgegeven"):
+            lines.append(f"template_opgegeven: {out['template_opgegeven']}")
+        lines.append("---")
+        return "\n".join(lines) if len(lines) > 2 else ""
     dumped = yaml.safe_dump(
         out,
         allow_unicode=True,
@@ -1001,8 +1028,9 @@ def convert_vsa_to_mvsa(
 ) -> VsaMvsaResult:
     """VSA + library-template → schets-MVSA-tekst (T1–T7).
 
-    ``template``: canonieke id of playbook-alias; default Hemelum toon 4.
-    ``same_as``-aliases (tropaar-toon-2 → kondak-toon-2) worden opgelost.
+    ``template``: canonieke id of playbook-alias. Zonder ``--template``:
+    afleiden uit frontmatter/pad (``infer_template_id``), anders Hemelum
+    toon 4. ``same_as``/``aliases.yaml`` worden opgelost.
     """
     src = Path(source)
     if not src.is_file():
@@ -1013,12 +1041,34 @@ def convert_vsa_to_mvsa(
             code="VSA-MVSA-EXT",
         )
 
-    resolved = load_resolved_template(template, library_root=library_root)
     raw = src.read_text(encoding="utf-8")
     fm, body = restore_vsa(raw)
     meta, _ = parse_vsa_frontmatter(fm + body)
     norm_body, _ = ensure_stanza_stars(body)
     vsa_text = fm + norm_body
+
+    tpl_name = template
+    if tpl_name is None or not str(tpl_name).strip():
+        # Frontmatter ``template:`` wint; anders soort/toon/bron uit meta/pad.
+        fm_tpl = meta.get("template")
+        if fm_tpl not in (None, ""):
+            tpl_name = str(fm_tpl)
+        else:
+            bron_u = None
+            bron = meta.get("bron")
+            if isinstance(bron, dict):
+                bron_u = bron.get("uitgangspunt")
+            elif isinstance(bron, str):
+                bron_u = bron
+            tpl_name = infer_template_id(
+                soort=meta.get("soort") or meta.get("genre"),
+                toon=meta.get("toon") or meta.get("tone"),
+                bron=str(bron_u).lower() if bron_u else None,
+                path=src,
+                library_root=library_root,
+            )
+
+    resolved = load_resolved_template(tpl_name, library_root=library_root)
 
     mapped = map_vsa_to_template(
         resolved.doc,
@@ -1063,7 +1113,13 @@ def convert_vsa_to_mvsa(
     formula = resolved.doc
     fm_out = ""
     if include_frontmatter:
-        fm_out = clean_emit_frontmatter(meta)
+        # Feitelijk = formule met frasen; opgegeven = ruwe CLI/FM/infer-string.
+        asked = resolved.requested_raw or tpl_name
+        fm_out = clean_emit_frontmatter(
+            meta,
+            template_id=resolved.formula_id,
+            template_opgegeven=str(asked) if asked else None,
+        )
     text, warnings = emit_mapped_document(
         mapped,
         do=str(formula["do"]),

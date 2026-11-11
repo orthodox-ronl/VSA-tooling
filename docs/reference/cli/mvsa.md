@@ -5,7 +5,7 @@ lyrics-regels en stemregels. Normatieve draft-spec:
 [specification-mvsa](../../specification-mvsa/README.md).
 
 Dit is **niet** hetzelfde als [`vsa validate`](validate.md) /
-[`vsa musicxml`](musicxml.md) voor eenstemmige `.vsa`.
+[`vsa mxl`](musicxml.md) voor eenstemmige `.vsa`.
 
 **Commando:** `mvsa …` (console-script of `scripts\mvsa.cmd`).
 Bron-commands voor andere formaten: [`mxl`](mxl.md), [`mscz`](mscz.md).
@@ -27,7 +27,7 @@ mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,text,normalize,transpo
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
               [--translit-modus {nls,ksl}] [--translit-as-parts]
-              [--bibliotheek-id ID] [--musescore PATH] path
+              [--bibliotheek-id ID] path
 mvsa score-ir [-h] [-o OUTPUT] [--section SECTION] [--bibliotheek-id ID]
               [--musicxml [PATH]] path
 mvsa mscz [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
@@ -72,7 +72,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 | Subcommando                            | Doel                                                                                                              |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | [`validate`](#mvsa-validate)           | Structuur + sync-telling van `.mvsa` controleren.                                                                 |
-| [`mxl`](#mvsa-mxl)                     | Exporteer `.mvsa` / `.mscz` / `.mxl` naar playback-``.mxl``. Bij bron `.mvsa`: merget key `mxl` in products-meta. |
+| [`mxl`](#mvsa-mxl)                     | Exporteer `.mvsa` naar playback-``.mxl`` (straat-puur). Merget key `mxl` in products-meta.                        |
 | [`score-ir`](#mvsa-score-ir)           | Exporteer `.mvsa` naar Score-IR JSON (partituur; scherm/CoriB). Merget `score-ir` (+ `from-ir` bij `--musicxml`). |
 | [`mscz`](#mvsa-mscz)                   | Exporteer `.mvsa` naar MuseScore (`.mscz`).                                                                       |
 | [`pdf`](#mvsa-pdf)                     | Losse print-PDF (P*). Niet via `products`. Bron `.mscz`: [`mscz pdf`](mscz.md).                                   |
@@ -174,18 +174,15 @@ mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
 
 ### Beschrijving
 
-Schrijft een **Coria-playback-``.mxl``** (of `.musicxml`/`.xml`). Bron:
+Schrijft een **Coria-playback-``.mxl``** (of `.musicxml`/`.xml`) uit
+**alleen** `.mvsa` (straat-puur). Andere bronnen: [`mscz mxl`](mscz.md) of
+[`mxl normalize`](mxl.md). Zelfde CLI-vorm als [`vsa mxl`](musicxml.md):
+`PATH [-o OUTPUT]`.
 
-| Bron                          | Gedrag                                                                      |
-| ----------------------------- | --------------------------------------------------------------------------- |
-| `.mvsa`                       | SATB-export (vier parts). Optioneel `--section` / translit-vlaggen.         |
-| `.mscz`                       | MuseScore → playback-normalisatie (zelfde keten als [`mscz mxl`](mscz.md)). |
-| `.mxl` / `.musicxml` / `.xml` | Normaliseer naar playback (SATB-explode, Coria-sanitize).                   |
-
-Bij `.mvsa`: zonder `--section` gaat het hele bestand in één partituur
-(alle named `@sectie`’s achter elkaar, of de ene impliciete sectie, of het
-speelplan volgens layout). Met `--section` alleen die **`@sectie`-id** — niet
-een `@blok`-id.
+Zonder `--section` gaat het hele bestand in één partituur (alle named
+`@sectie`’s achter elkaar, of de ene impliciete sectie, of het speelplan
+volgens layout). Met `--section` alleen die **`@sectie`-id** — niet een
+`@blok`-id.
 
 Kale `-` op een stemregel aan het begin van een nieuw LSATB-systeem houdt de
 lopende toon van het vorige systeem (soft-wrap); een beginanker of expliciete
@@ -202,11 +199,11 @@ pad als part-namen gebruikt (SATB-letters → Soprano/Alto/Tenor/Bass).
 
 **Hulptekst** (kerkslavisch ↔ Latijn / Nederlands ↔ Cyrillisch, parochieschema):
 
-| Vlag                   | Wie               | Effect                                                                                                                                                                                                                   |
-| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--translit`           | Blad én Coria-MXL | Lyric number 2 onder dezelfde noten (transliteratie). Handmatige `L1` wint als lyric 2 al bestaat.                                                                                                                       |
+| Vlag                   | Wie               | Effect                                                                                                                                                                                                                          |
+| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--translit`           | Blad én Coria-MXL | Lyric number 2 onder dezelfde noten (transliteratie). Handmatige `L1` wint als lyric 2 al bestaat.                                                                                                                              |
 | `--translit-modus`     | Blad én Coria-MXL | Filter: `nls` = alleen ksl→Latijn; `ksl` = alleen nl→Cyrillisch. Zonder vlag (met `--translit`): beide. Impliceert `--translit`. Op een hybride blad (NL+Ksl) voorkomt dit dat de «verkeerde» passage ook een hulpregel krijgt. |
-| `--translit-as-parts`  | Alleen Coria-MXL  | Extra parts: zelfde pitches, lyrics van laag 2; part-namen `{stem} ({label})`. Labels uit `@taal` (zie [keywords — @taal](../../specification-mvsa/keywords.md#taal)). Volume 0 op hulp-parts. Impliceert `--translit`.  |
+| `--translit-as-parts`  | Alleen Coria-MXL  | Extra parts: zelfde pitches, lyrics van laag 2; part-namen `{stem} ({label})`. Labels uit `@taal` (zie [keywords — @taal](../../specification-mvsa/keywords.md#taal)). Volume 0 op hulp-parts. Impliceert `--translit`.         |
 
 Richting en Coria-labels sturen met sticky `@taal` (`nl` / `ksl` / `auto`, of
 `Lap=aap Lus=noot` op lyrics-ids). Zonder `@taal`: auto per lettergreep
@@ -214,22 +211,21 @@ Richting en Coria-labels sturen met sticky `@taal` (`nl` / `ksl` / `auto`, of
 worden. Zie
 [kerkslavisch-transliteratie](../../plans/kerkslavisch-transliteratie.md).
 
-Dit is een **aparte** exporter dan [`vsa musicxml`](musicxml.md) (eenstemmig
+Dit is een **aparte** exporter dan [`vsa mxl`](musicxml.md) (eenstemmig
 VSA).
 
 ### Argumenten en opties
 
-| Naam                   | Verplicht | Betekenis                                                                 | Default                                      | Beperkingen                           |
-| ---------------------- | --------- | ------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------- |
-| `path`                 | Ja        | Bron: `.mvsa`, `.mscz` of `.mxl`/`.musicxml`, of map met zulke bestanden. | —                                            | Moet bestaan.                         |
-| `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                               | `<bronnaam>.mxl` (bijv. `lied.mvsa.mxl`)     | Alleen bij één bron; anders → `.mxl`. |
-| `--section SECTION`    | Nee       | Alleen bij `.mvsa`: deze `@sectie`-id (niet `@blok`).                     | Hele bestand                                 | Id moet als `@sectie` voorkomen.      |
-| `--bibliotheek-id ID`  | Nee       | Alleen bij `.mvsa`: bibliotheek-id in identification/rights.              | pad-sniff onder `content-source/bibliotheek` | Optioneel.                            |
-| `--translit`           | Nee       | Alleen bij `.mvsa`: tweede lyric-laag (number=2).                         | uit                                          | Zie beschrijving hierboven.           |
-| `--translit-modus`     | Nee       | Filter lyric 2: `nls` of `ksl`.                                           | beide (met `--translit`)                     | Impliceert `--translit`.              |
-| `--translit-as-parts`  | Nee       | Alleen bij `.mvsa`: Coria-extra parts met translit (volume 0).            | uit                                          | Impliceert `--translit`.              |
-| `--musescore PATH`     | Nee       | Alleen bij `.mscz`: pad naar MuseScore.                                   | auto-detectie                                | —                                     |
-| `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                           | —                                            | —                                     |
+| Naam                   | Verplicht | Betekenis                                                      | Default                                      | Beperkingen                      |
+| ---------------------- | --------- | -------------------------------------------------------------- | -------------------------------------------- | -------------------------------- |
+| `path`                 | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden (recursief).      | —                                            | Alleen `.mvsa` (straat-puur).    |
+| `-o`, `--output`       | Nee       | Uitvoerpad (`.mxl`, `.musicxml` of `.xml`).                    | `<bronnaam>.mvsa.mxl`                        | Alleen bij precies één bron.     |
+| `--section SECTION`    | Nee       | Deze `@sectie`-id (niet `@blok`).                              | Hele bestand                                 | Id moet als `@sectie` voorkomen. |
+| `--bibliotheek-id ID`  | Nee       | Bibliotheek-id in identification/rights.                       | pad-sniff onder `content-source/bibliotheek` | Optioneel.                       |
+| `--translit`           | Nee       | Tweede lyric-laag (number=2).                                  | uit                                          | Zie beschrijving hierboven.      |
+| `--translit-modus`     | Nee       | Filter lyric 2: `nls` of `ksl`.                                | beide (met `--translit`)                     | Impliceert `--translit`.         |
+| `--translit-as-parts`  | Nee       | Coria-extra parts met translit (volume 0).                     | uit                                          | Impliceert `--translit`.         |
+| `-h`, `--help`         | Nee       | Toon hulp voor dit subcommando.                                | —                                            | —                                |
 
 ### Output
 
@@ -264,13 +260,9 @@ Coria met keuze tussen lyrics-lagen (trisagion, kerkslavische sectie):
 mvsa mxl examples\mvsa\trisagion-8a-slav-hemelum.mvsa --section ksl --translit-as-parts -o generated\trisagion-ksl-coria.mxl
 ```
 
-Vanuit MuseScore-partituur (zelfde resultaat als `mscz mxl`):
+Vanuit MuseScore-partituur: gebruik [`mscz mxl`](mscz.md), niet `mvsa mxl`.
 
-```cmd
-mvsa mxl examples\bug-cases\cherubijnenhymne-15c-kastorski-hemelum.mscz -o generated\bug-cases\cherubijnen.mxl
-```
-
-Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mscz --translit`):
+Blad/MSCZ: lyric 2 op partituur-MXL (keten via `mvsa mscz --translit`):
 
 ```cmd
 mvsa mscz examples\mvsa\translit-ksl-mini.mvsa --translit -o generated\translit-ksl.mscz
@@ -588,7 +580,7 @@ gebruik [`mscz svg`](mscz.md).
 | `--keep-mscz`                | Bewaar tussenliggende ``.mscz`` (alleen `musescore`).                                            |
 | `--keep-mxl`                 | `musescore`: partituur-``.mxl``; `osmd`: from-ir ``.musicxml``.                                  |
 | `--translit`                 | Tweede lyric-laag in tussen-MXL/MSCZ (koormap «met translit»; alleen `musescore`).               |
-| `--translit-modus`           | Filter lyric 2: `nls` of `ksl` (alleen `musescore`; impliceert `--translit`).                   |
+| `--translit-modus`           | Filter lyric 2: `nls` of `ksl` (alleen `musescore`; impliceert `--translit`).                    |
 | `--no-trim`                  | Sla viewBox-trim over (alleen `musescore`).                                                      |
 | `--transparent`              | Geen witte achtergrond na trim (alleen `musescore`). `osmd` schrijft altijd witte `vsa-page-bg`. |
 | `--bibliotheek-id`           | Genegeerd voor layout ``muziek`` / OSMD-chrome.                                                  |
@@ -994,5 +986,5 @@ mvsa products examples\mvsa --dry-run --skip-svg
 - Contract-index: [contract-index](../../formats/contract-index.md)
 - Invoer bestand of map: [input-pad.md](input-pad.md)
 - Voorbeelden: [examples/mvsa](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)
-- Eenstemmig: [`vsa validate`](validate.md), [`vsa musicxml`](musicxml.md)
+- Eenstemmig: [`vsa validate`](validate.md), [`vsa mxl`](musicxml.md)
 - Platte gezongen tekst: [`mvsa text`](#mvsa-text) (`.vsa`: [`vsa text`](text.md); `.mscz`: [`mscz text`](mscz.md))

@@ -7,24 +7,26 @@ Per formule: `template.yaml`, plus afgeleide `template.mscz` (MuseScore) en
 `template.mxl` (MusicXML) waar de pijplijn dat al doet; optioneel
 `examples/corpus/` en `notes/`.
 
-| Map                                                                      | Vorm     | Doel                                         |
-| ------------------------------------------------------------------------ | -------- | -------------------------------------------- |
-| [`kondak-toon-1`](library/kondak-toon-1/README.md)                       | cycle    | Groningen F4; also tropaar                   |
-| [`kondak-toon-2`](library/kondak-toon-2/README.md)                       | cycle    | Groningen F4; also tropaar                   |
-| [`kondak-toon-6`](library/kondak-toon-6/README.md)                       | cycle    | Groningen F4; also tropaar                   |
-| [`kondak-toon-8`](library/kondak-toon-8/README.md)                       | cycle    | Groningen F4; also tropaar; `\|: 1 :\|`      |
-| [`tropaar-toon-1`](library/tropaar-toon-1/README.md)                     | cycle    | `1,2` + `laatste`; bibliotheek `1a`          |
-| [`tropaar-toon-2`](library/tropaar-toon-2/README.md)                     | alias    | `same_as: kondak-toon-2`                     |
-| [`tropaar-toon-6`](library/tropaar-toon-6/README.md)                     | alias    | `same_as: kondak-toon-6`                     |
-| [`tropaar-toon-8`](library/tropaar-toon-8/README.md)                     | alias    | `same_as: kondak-toon-8`                     |
-| [`tropaar-toon-3`](library/tropaar-toon-3/README.md)                     | sequence | vaste volgorde + `2a` + ELM `.`              |
-| [`tropaar-toon-4`](library/tropaar-toon-4/README.md)                     | cycle    | Hemelum; Elia-mapping + corpus               |
-| [`groningen-tropaar-toon-4`](library/groningen-tropaar-toon-4/README.md) | cycle    | Groningen tropaar/kondak toon 4              |
-| [`stichier-toon-5`](library/stichier-toon-5/README.md)                   | cycle    | PDF-stichier `1,2,3` + `laatste`             |
-| [`tropaar-toon-5`](library/tropaar-toon-5/README.md)                     | alias    | `same_as: kondak-toon-5` (Groningen)         |
-| [`kondak-toon-5`](library/kondak-toon-5/README.md)                       | cycle    | Groningen; also tropaar                      |
-| [`vers-toon-1`](library/vers-toon-1/README.md)                           | cycle    | vers toon 1; `vl.st.`                        |
-| [`vers-toon-5`](library/vers-toon-5/README.md)                           | cycle    | vers toon 5; ELM `_.`                        |
+| Map                                                                      | Vorm     | Doel                                           |
+| ------------------------------------------------------------------------ | -------- | ---------------------------------------------- |
+| [`kondak-toon-1-groningen`](library/kondak-toon-1-groningen/README.md)   | cycle    | Groningen F4; also tropaar                     |
+| [`kondak-toon-2-groningen`](library/kondak-toon-2-groningen/README.md)   | cycle    | Groningen F4; also tropaar                     |
+| [`kondak-toon-6-groningen`](library/kondak-toon-6-groningen/README.md)   | cycle    | Groningen F4; also tropaar                     |
+| [`kondak-toon-8-groningen`](library/kondak-toon-8-groningen/README.md)   | cycle    | Groningen F4; also tropaar; `\|: 1 :\|`        |
+| [`kondak-toon-8-hemelum`](library/kondak-toon-8-hemelum/README.md)       | cycle    | Hemelum/Liturgikon F4; `laatste` → mi          |
+| [`tropaar-toon-8-hemelum`](library/tropaar-toon-8-hemelum/README.md)     | alias    | `same_as: kondak-toon-8-hemelum`               |
+| [`tropaar-toon-1-groningen`](library/tropaar-toon-1-groningen/README.md) | cycle    | `1,2` + `laatste`; bibliotheek `1a`            |
+| [`tropaar-toon-2-groningen`](library/tropaar-toon-2-groningen/README.md) | alias    | `same_as: kondak-toon-2-groningen`             |
+| [`tropaar-toon-6-groningen`](library/tropaar-toon-6-groningen/README.md) | alias    | `same_as: kondak-toon-6-groningen`             |
+| [`tropaar-toon-8-groningen`](library/tropaar-toon-8-groningen/README.md) | alias    | `same_as: kondak-toon-8-groningen` (Groningen) |
+| [`tropaar-toon-3-groningen`](library/tropaar-toon-3-groningen/README.md) | sequence | vaste volgorde + `2a` + ELM `.`                |
+| [`tropaar-toon-4-hemelum`](library/tropaar-toon-4-hemelum/README.md)     | cycle    | Hemelum; Elia-mapping + corpus                 |
+| [`tropaar-toon-4-groningen`](library/tropaar-toon-4-groningen/README.md) | cycle    | Groningen tropaar/kondak toon 4                |
+| [`stichier-toon-5-pdf`](library/stichier-toon-5-pdf/README.md)           | cycle    | PDF-stichier `1,2,3` + `laatste`               |
+| [`tropaar-toon-5-groningen`](library/tropaar-toon-5-groningen/README.md) | alias    | `same_as: kondak-toon-5-groningen` (Groningen) |
+| [`kondak-toon-5-groningen`](library/kondak-toon-5-groningen/README.md)   | cycle    | Groningen; also tropaar                        |
+| [`vers-toon-1-groningen`](library/vers-toon-1-groningen/README.md)       | cycle    | vers toon 1; `vl.st.`                          |
+| [`vers-toon-5-groningen`](library/vers-toon-5-groningen/README.md)       | cycle    | vers toon 5; ELM `_.`                          |
 
 Alle formules: [vsa-templates](vsa-template@) met `pitches_status: provisional`
 tot PDF-audit. MusicXML regenereren:

@@ -15,6 +15,8 @@ docs/plans/straat-clis.md.
 
 from __future__ import annotations
 
+from .cli_messages import emit_cli_error, emit_cli_exception
+
 import argparse
 import sys
 from pathlib import Path
@@ -33,13 +35,15 @@ def _fmt_exts(suffixes: tuple[str, ...]) -> str:
     return ", ".join(suffixes)
 
 
-def _reject_ext(street: str, path: Path, allowed: tuple[str, ...]) -> str:
+def _reject_ext(street: str, path: Path, allowed: tuple[str, ...]) -> None:
     got = path.suffix.lower() or "(geen extensie)"
-    return (
-        f"{street} import: bestand {path.name} heeft extensie {got}, "
-        f"die hier niet is toegestaan. Toegestaan: {_fmt_exts(allowed)}. "
-        f"Zelfde conversie als '{{bron}} {street}' "
-        f"(zie docs/formats/contract-index.md)."
+    emit_cli_error(
+        f"{street} import weigert {got}; toegestaan: {_fmt_exts(allowed)}.",
+        path=path,
+        hint=(
+            f"Gebruik een toegestaan brontype, of de equivalente "
+            f"{{bron}} {street}-straat (zie docs/formats/contract-index.md)."
+        ),
     )
 
 
@@ -52,24 +56,28 @@ def run_mvsa_import(ns: argparse.Namespace) -> int:
             return run_score_to_mvsa(ns, suffixes=(".mscz",))
         if suf in _MXL_SUFFIXES:
             return run_score_to_mvsa(ns, suffixes=_MXL_SUFFIXES)
-        print(_reject_ext("mvsa", path, _MVSA_IMPORT_SUFFIXES), file=sys.stderr)
+        _reject_ext("mvsa", path, _MVSA_IMPORT_SUFFIXES)
         return 1
     try:
         files = collect_cli_sources(ns.path, suffixes=_MVSA_IMPORT_SUFFIXES)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=ns.path,
+            hint="Geef .mscz/.mxl/.musicxml/.xml of een map met zulke bestanden.",
+        )
         return 1
     if not files:
-        print(
-            f"mvsa import: geen .mscz/.mxl/.musicxml/.xml onder {ns.path}.",
-            file=sys.stderr,
+        emit_cli_error(
+            "Geen .mscz/.mxl/.musicxml/.xml gevonden.",
+            path=ns.path,
+            hint="Zet passende bronbestanden in deze map of geef een bestandspad.",
         )
         return 1
     if len(files) > 1 and ns.output:
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return 1
     # One namespace; process by calling run per suffix group via temp ns.path
@@ -127,24 +135,28 @@ def run_mscz_import(ns: argparse.Namespace) -> int:
             return _mscz_from_mvsa(ns)
         if suf in _MXL_SUFFIXES:
             return _mscz_from_mxl(ns)
-        print(_reject_ext("mscz", path, _MSCZ_IMPORT_SUFFIXES), file=sys.stderr)
+        _reject_ext("mscz", path, _MSCZ_IMPORT_SUFFIXES)
         return 1
     try:
         files = collect_cli_sources(ns.path, suffixes=_MSCZ_IMPORT_SUFFIXES)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=ns.path,
+            hint="Geef .mvsa/.mxl/.musicxml/.xml of een map met zulke bestanden.",
+        )
         return 1
     if not files:
-        print(
-            f"mscz import: geen .mvsa/.mxl/.musicxml/.xml onder {ns.path}.",
-            file=sys.stderr,
+        emit_cli_error(
+            "Geen .mvsa/.mxl/.musicxml/.xml gevonden.",
+            path=ns.path,
+            hint="Zet passende bronbestanden in deze map of geef een bestandspad.",
         )
         return 1
     if len(files) > 1 and getattr(ns, "output", None):
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return 1
     exit_code = 0
@@ -193,12 +205,16 @@ def _mscz_from_mvsa(ns: argparse.Namespace) -> int:
     try:
         files = collect_cli_sources(ns.path, suffixes=_MSCZ_FROM_MVSA)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=ns.path,
+            hint="Geef één .mvsa-bestand of een map met .mvsa-bestanden.",
+        )
         return 1
     if len(files) > 1 and ns.output:
-        print(
+        emit_cli_error(
             "-o/--output is alleen toegestaan bij precies één bronbestand.",
-            file=sys.stderr,
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return 1
     musescore = Path(ns.musescore) if getattr(ns, "musescore", None) else None
@@ -228,12 +244,11 @@ def _mscz_from_mvsa(ns: argparse.Namespace) -> int:
             exit_code = 1
             continue
         except MvsaExportError as exc:
-            loc = f"{path}:{exc.line}: " if getattr(exc, "line", None) else f"{path}: "
-            print(f"{loc}ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except MvsaMsczError as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {out}")

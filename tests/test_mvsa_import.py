@@ -2070,7 +2070,7 @@ def test_read_mscz_key_fifths_from_template_and_wij_hebben():
         / "docs"
         / "specification-vsa-templates"
         / "library"
-        / "tropaar-toon-4"
+        / "tropaar-toon-4-hemelum"
         / "examples"
         / "corpus"
         / "T4-01-johannes-voorloper.mscz"

@@ -13,6 +13,7 @@ from pathlib import Path
 
 from .cli_score_to_mvsa import add_score_to_mvsa_arguments, run_score_to_mvsa
 from .derived_path import derived_output_path
+from .cli_messages import emit_cli_error, emit_cli_exception
 from .input_paths import InputPathError, collect_cli_sources
 
 _MSCZ_SUFFIXES = (".mscz",)
@@ -67,16 +68,19 @@ def _collect(path: str | Path) -> list[Path] | None:
     try:
         return collect_cli_sources(path, suffixes=_MSCZ_SUFFIXES)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=path,
+            hint="Geef één .mscz-bestand of een map met .mscz-bestanden.",
+        )
         return None
 
 
 def _reject_multi_output(files: list[Path], output: str | None) -> bool:
     if len(files) > 1 and output:
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return True
     return False
@@ -483,10 +487,10 @@ def _cmd_mscz_compare(ns: argparse.Namespace) -> int:
             strict_duration=bool(ns.strict_duration),
         )
     except MsczCompareError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(exc)
         return 1
     except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(exc)
         return 1
     sys.stdout.write(format_report(report))
     return 0 if report.musical_ok else 1
@@ -509,11 +513,11 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
         try:
             export_mscz_to_playback_mxl(path, out, musescore=musescore)
         except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {out}")
@@ -548,11 +552,11 @@ def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
                 white_background=white_background,
             )
         except (MvsaMsczError, MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         for written_path in written:
@@ -581,11 +585,11 @@ def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
         try:
             export_mscz_to_pdf(path, out, musescore=musescore)
         except (MvsaMsczError, MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {out}")
@@ -611,7 +615,7 @@ def _cmd_mscz_normalize(ns: argparse.Namespace) -> int:
     try:
         style_overrides = build_partituur_style_overrides(**_partituur_style_kwargs(ns))
     except MsczPartituurError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(exc)
         return 1
     exit_code = 0
     for path in files:
@@ -625,11 +629,11 @@ def _cmd_mscz_normalize(ns: argparse.Namespace) -> int:
                 style_overrides=style_overrides or None,
             )
         except (MsczLayoutError, MsczPartituurError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {written} (layout {profile})")
@@ -656,7 +660,7 @@ def _cmd_mscz_text(ns: argparse.Namespace) -> int:
         try:
             written = write_lyrics_product(path, out, musescore=musescore)
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {written}")
@@ -691,11 +695,11 @@ def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
                 path, out, format_name=fmt, musescore=musescore
             )
         except AudioExportError as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {written}")
@@ -742,11 +746,11 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
             if mxl_path is not None:
                 export_score_ir_path_to_musicxml(out, mxl_path)
         except (StreetProductExportError, ScoreIrMusicxmlError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {out}")
@@ -786,11 +790,11 @@ def _cmd_mscz_product(ns: argparse.Namespace) -> int:
                 path, out, musescore=musescore
             )
         except StreetProductExportError as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {written}")

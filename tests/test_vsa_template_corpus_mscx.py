@@ -19,7 +19,7 @@ from vsa.corpus_vsa import CORPUS_ENTRIES, load_corpus_from_vsa_dir  # noqa: E40
 from vsa.template_mapping import assign_stanzas_to_phrases, select_mapping_plan  # noqa: E402
 
 LIBRARY = ROOT / "docs" / "specification-vsa-templates" / "library"
-TEMPLATE_YAML = LIBRARY / "tropaar-toon-4" / "template.yaml"
+TEMPLATE_YAML = LIBRARY / "tropaar-toon-4-hemelum" / "template.yaml"
 CORPUS_DIR = TEMPLATE_YAML.parent / "examples" / "corpus"
 
 EXPECTED_STANZAS: dict[str, int] = {
@@ -113,7 +113,7 @@ def test_corpus_instances_vsa_mscz_mxl() -> None:
         assert mxl.is_file(), stem
         text = vsa.read_text(encoding="utf-8")
         assert text.startswith("---\n")
-        assert "template: tropaar-toon-4" in text
+        assert "template: tropaar-toon-4-hemelum" in text
         assert "corpus_id:" in text
         assert mscz.stat().st_size > 500
         assert mxl.stat().st_size > 500

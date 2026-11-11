@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import render_vsa_template_musicxml as render  # noqa: E402
 
 LIBRARY = ROOT / "docs" / "specification-vsa-templates" / "library"
-YAML_PATH = LIBRARY / "tropaar-toon-4" / "template.yaml"
+YAML_PATH = LIBRARY / "tropaar-toon-4-hemelum" / "template.yaml"
 
 
 def _tropaar_mscx() -> str:

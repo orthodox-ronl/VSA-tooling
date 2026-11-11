@@ -32,7 +32,7 @@ Mappingcontract: [mapping-vsa.md](mapping-vsa.md).
 - [x] Valkuilen-doc + links in README / AGENTS / MkDocs:
       [rendering-pitfalls.md](rendering-pitfalls.md).
 - [x] PDF-export uit git geweerd (afgeleide); lokaal via `--pdf-only`.
-- [x] Spot-check PDF’s tropaar-toon-4 corpus: recite/scopes/layout kloppen
+- [x] Spot-check PDF’s tropaar-toon-4-hemelum corpus: recite/scopes/layout kloppen
       (menselijke audit).
 - [x] **Instance-foutmeldingen zoals `vsa validate`:** compacte + uitgebreide
       vorm; **bestand:regel:kolom**; foutcode; `Hint:` (H7/H9 e.d.).
@@ -46,14 +46,14 @@ Mappingcontract: [mapping-vsa.md](mapping-vsa.md).
 - [x] **Sequence / text_mapping-lengte:** aantal VSA-regels moet bij het plan
       passen → `VSA-TEMPLATE-TEXT-MAPPING`.
 - [x] **`l.lgr.` (H8):** mapper koppelt geankerd event + rest van de frase aan
-      de laatste VSA-syllabe; stichier-toon-5 `laatste` heeft het anker.
+      de laatste VSA-syllabe; stichier-toon-5-pdf `laatste` heeft het anker.
 - [x] **Anker-normalisatie:** `e. st.` → `e.st.` (zelfde voor `l.st.`,
       `vl.st.`, `l.lgr.`).
 - [x] **Parallelle cadenspaden (`of`):** YAML + mapper; VSA kiest impliciet;
       geen pad → mismatch. **Geen** [uitvoeringsvorm](@bron) (dat is
       zangstuk-niveau). Formuleblad toont pad 0. Tropaar-toon-4 `laatste`
       blijft voorlopig alleen mi–re–mi (fa-tak kan later bij).
-- [x] **Tenor-octaaf tropaar-toon-4:** `sol-1` t.o.v. `do: F4` = **C4**
+- [x] **Tenor-octaaf tropaar-toon-4-hemelum:** `sol-1` t.o.v. `do: F4` = **C4**
       (niet C3). Vastgelegd in YAML + test.
 - [x] CLI `vsa template validate`.
 - [x] Formule-MusicXML: `scripts/render_vsa_template_musicxml.py`
@@ -75,7 +75,7 @@ Mappingcontract: [mapping-vsa.md](mapping-vsa.md).
 
 ### Templates / pitches
 
-- [ ] Overige templates (niet tropaar-toon-4): graden/`do`/`mode`
+- [ ] Overige templates (niet tropaar-toon-4-hemelum): graden/`do`/`mode`
       `provisional` tot PDF-/partituur-audit.
 - [ ] Tropaar-toon-4 `laatste`: fa-cadenspad als tweede `of`-tak encoderen
       zodra SATB van dat pad tegen het bronblad is gezet.

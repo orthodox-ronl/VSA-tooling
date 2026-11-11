@@ -1,0 +1,75 @@
+# Vers toon 1 — do=F4 major; toont o.a. duration "_.", "__", ".".
+
+spec_version: draft-v0
+id: vers-toon-1-groningen
+genre: vers
+tone: 1
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: "tonen (vers, stichier, tropaar).pdf — Versmelodie toon 1"
+cycle:
+  - "1"
+final: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "-"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: ".."
+        pitches: { S: re, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: vl.st.
+        pitches: { S: re, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: la-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: la-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+
+  - id: laatste
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "__"
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }

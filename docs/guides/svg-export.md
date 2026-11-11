@@ -17,8 +17,8 @@ Voor afspelen/oefenen gebruik je in plaats daarvan
 | Notatie tonen naast liturgische tekst (web of print) | Ja                                                                                   |
 | Consistente weergave op elk apparaat                 | Ja                                                                                   |
 | Afdrukbaar boek/deel (A4, `@media print`)            | Ja                                                                                   |
-| Audio afspelen of oefenen                            | Nee — gebruik [`vsa musicxml`](../reference/cli/musicxml.md)                         |
-| Bewerken in MuseScore                                | Nee — gebruik [`vsa musicxml`](../reference/cli/musicxml.md) met profiel `engraving` |
+| Audio afspelen of oefenen                            | Nee — gebruik [`vsa mxl`](../reference/cli/musicxml.md)                              |
+| Bewerken in MuseScore                                | Nee — gebruik [`vsa mxl`](../reference/cli/musicxml.md) met profiel `engraving`      |
 
 ## Drie manieren om SVG te genereren
 

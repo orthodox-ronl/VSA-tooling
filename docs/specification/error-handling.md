@@ -52,6 +52,26 @@ Standaard behoort iedere [diagnostische melding](@) minimaal de volgende informa
 
 ---
 
+## CLI- en omgevingsfouten
+
+Fouten buiten de notatie-diagnostiek (verkeerde extensie, ontbrekend pad,
+MuseScore niet gevonden, CLI-misbruik) volgen dezelfde leesbaarheid voor de
+**beheerder**:
+
+1. **Locatie** — `pad:regel:kolom:` wanneer bekend; anders `pad:regel:` of
+   alleen `pad:`; bij puur CLI-gebruik (geen bronbestand) alleen de tekst.
+2. **Beschrijving** — volledige Nederlandse zin: wat er misgaat.
+3. **Herstel** — tweede regel `Hint: …` met een concrete actie (juiste
+   straat-CLI, ontbrekend programma, `vsa validate`, …).
+
+Geen kale `ERROR:`-prefix zonder pad of herstelhint. Implementatie in tooling:
+`vsa.cli_messages` (`emit_cli_error` / `emit_cli_exception`).
+
+Bronfouten in `.vsa` blijven via `vsa validate` de volle diagnostiekvorm
+gebruiken (foutcode + context); zie hierboven.
+
+---
+
 ## Compacte uitvoer
 
 Implementaties behoren een optie te bieden waarmee [diagnostische meldingen](@) in een compacte, machinevriendelijke vorm worden weergegeven.

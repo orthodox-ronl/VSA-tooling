@@ -21,7 +21,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | Lettergreepstreepjes (bestand of map)                   | [`vsa syllabify <pad>`](../reference/cli/syllabify.md)                                                                                                                                       |
 | Platte gezongen tekst uit `.vsa`                        | [`vsa text <pad.vsa>`](../reference/cli/text.md)                                                                                                                                             |
 | Platte gezongen tekst uit `.mvsa` of `.mscz`            | [`mvsa text`](../reference/cli/mvsa.md#mvsa-text) / [`mscz text`](../reference/cli/mscz.md)                                                                                                  |
-| MusicXML exporteren                                     | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md) (Coria: `--syllabify`)                                                                                               |
+| MusicXML exporteren                                     | [`vsa mxl <pad.vsa> [-o …]`](../reference/cli/musicxml.md) (Coria: `--syllabify`; alias `musicxml`)                                                                                          |
 | Standaardproducten (geen partituur-PDF)                 | [`vsa products`](../reference/cli/products.md) / [`mvsa products`](../reference/cli/mvsa.md#mvsa-products) / [`mscz products`](../reference/cli/mscz.md)                                     |
 | `.vsa` canonieke notatie controleren                    | [`vsa validate`](../reference/cli/validate.md) (geen aparte `vsa normalize`)                                                                                                                 |
 | mvsa valideren (draft)                                  | [`mvsa validate <pad>`](../reference/cli/mvsa.md#mvsa-validate)                                                                                                                              |
@@ -68,7 +68,7 @@ vsa blocks examples\minimal\031_markdown_block_metadata.md --json
 ```
 
 ```cmd
-vsa musicxml mijn-lied.vsa mijn-lied.mxl
+vsa mxl mijn-lied.vsa -o mijn-lied.mxl
 ```
 
 ```cmd

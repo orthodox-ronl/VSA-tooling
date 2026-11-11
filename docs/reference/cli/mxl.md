@@ -64,6 +64,6 @@ scripts\mxl.cmd -h
 - [Invoer bestand of map](input-pad.md)
 - [`mvsa`](mvsa.md) — bron `.mvsa`
 - [`mscz`](mscz.md) — bron `.mscz` (`mscz mvsa` / `mscz mxl`)
-- [`vsa musicxml`](musicxml.md) — eenstemmig `.vsa` → MusicXML
+- [`vsa mxl`](musicxml.md) — eenstemmig `.vsa` → MusicXML
 - [`vsa text`](text.md) — platte gezongen tekst uit `.mxl` / `.musicxml` (zoekindex)
 - [`vsa audio`](audio.md) — `.mscz` → mp3 via genormaliseerde playback-MXL

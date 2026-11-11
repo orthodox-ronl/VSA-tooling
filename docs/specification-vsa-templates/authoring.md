@@ -26,7 +26,7 @@ VSA, A/T/B uit template) klopt nadat de YAML staat.
 ### 1. Start van een mal
 
 Kopieer een bestaande formulemap (bijv.
-[`library/tropaar-toon-4/`](library/tropaar-toon-4/README.md)) naar
+[`library/tropaar-toon-4-hemelum/`](library/tropaar-toon-4-hemelum/README.md)) naar
 `library/<genre>-toon-<n>/`. Pas daarna `id`, `title`, `do`, `mode` en de
 frases aan. Liever knippen in een werkend bestand dan vanaf nul de metamodel-boom
 typen.
@@ -73,7 +73,7 @@ Na elke laag:
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 call .venv\Scripts\activate
-vsa template validate docs\specification-vsa-templates\library\tropaar-toon-4\template.yaml
+vsa template validate docs\specification-vsa-templates\library\tropaar-toon-4-hemelum\template.yaml
 python scripts\render_tropaar_toon4_corpus.py --template
 ```
 

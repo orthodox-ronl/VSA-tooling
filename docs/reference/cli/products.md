@@ -41,12 +41,12 @@ Score-IR-keten. De SVG komt uit de VSA-renderer zelf.
 1. Tijdelijke [syllabify](syllabify.md) (canonieke `.vsa` blijft ongewijzigd).
 2. Export in `playback`-profiel.
 3. Coria-finalize (sanitize + voortekens; geen DOCTYPE) — zelfde nabewerking
-   als bij [`vsa musicxml`](musicxml.md) in playback.
+   als bij [`vsa mxl`](musicxml.md) in playback.
 
 **SVG** komt uit de **ongewijzigde** bron (geen syllabify), via dezelfde
 native renderer als [`vsa svg`](svg.md).
 
-Losse product-subs mergen dezelfde sidecar: [`vsa musicxml`](musicxml.md)
+Losse product-subs mergen dezelfde sidecar: [`vsa mxl`](musicxml.md)
 (key `mxl`) en [`vsa svg`](svg.md) (key `svg`), bij sibling-output naast
 de `.vsa`.
 
@@ -91,7 +91,7 @@ vsa products examples\minimal\valid-demo.vsa --force
 
 ## Zie ook
 
-- [`vsa musicxml`](musicxml.md) — losse MusicXML-export (`--syllabify` optioneel)
+- [`vsa mxl`](musicxml.md) — losse MusicXML-export (`--syllabify` optioneel)
 - [`vsa syllabify`](syllabify.md) — streepjes in de bron zelf schrijven
 - [`vsa svg`](svg.md) — alleen SVG
 - [`mvsa products`](mvsa.md#mvsa-products) · `mscz products` — andere straten

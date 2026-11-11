@@ -11,6 +11,7 @@ from vsa.template_library import (
     DEFAULT_OCT_LINE,
     DEFAULT_TEMPO_TROPAAR_KONDAK,
     DEFAULT_TEMPLATE_ID,
+    infer_template_id,
     load_resolved_template,
     resolve_template_id,
 )
@@ -24,9 +25,9 @@ from vsa.vsa_mvsa import (
 
 ROOT = Path(__file__).resolve().parents[1]
 LIBRARY = ROOT / "docs" / "specification-vsa-templates" / "library"
-ELIA = LIBRARY / "tropaar-toon-4" / "examples" / "corpus" / "T4-06-profeet-elia.vsa"
-T2_VSA = LIBRARY / "tropaar-toon-2" / "examples" / "corpus" / "T2-groningen-zondag.vsa"
-K5_VSA = LIBRARY / "kondak-toon-5" / "examples" / "corpus" / "K5-groningen-zondag.vsa"
+ELIA = LIBRARY / "tropaar-toon-4-hemelum" / "examples" / "corpus" / "T4-06-profeet-elia.vsa"
+T2_VSA = LIBRARY / "tropaar-toon-2-groningen" / "examples" / "corpus" / "T2-groningen-zondag.vsa"
+K5_VSA = LIBRARY / "kondak-toon-5-groningen" / "examples" / "corpus" / "K5-groningen-zondag.vsa"
 
 
 def test_tempo_ignores_vsa_frontmatter() -> None:
@@ -35,27 +36,39 @@ def test_tempo_ignores_vsa_frontmatter() -> None:
     assert _tempo_from_meta({}) == 180
 
 
-def test_clean_emit_frontmatter_drops_playback() -> None:
+def test_clean_emit_frontmatter_drops_playback_keeps_template() -> None:
     fm = clean_emit_frontmatter(
         {
             "do": "F4",
             "mode": "major",
             "tempo": 132,
-            "template": "kondak-toon-5",
             "titel": "Kondak test",
             "toon": 5,
             "taal": "nl",
             "zoektekst": "abc",
-        }
+        },
+        template_id="kondak-toon-5-groningen",
+        template_opgegeven="kondak-toon-5",
     )
     assert fm.startswith("---")
     assert "titel: Kondak test" in fm
     assert "toon: 5" in fm
     assert "zoektekst: abc" in fm
+    assert "template: kondak-toon-5-groningen" in fm
+    assert "template_opgegeven: kondak-toon-5" in fm
     assert "do:" not in fm
     assert "mode:" not in fm
     assert "tempo:" not in fm
-    assert "template:" not in fm
+
+
+def test_clean_emit_frontmatter_omits_opgegeven_when_same() -> None:
+    fm = clean_emit_frontmatter(
+        {"titel": "x"},
+        template_id="kondak-toon-5-groningen",
+        template_opgegeven="kondak-toon-5-groningen",
+    )
+    assert "template: kondak-toon-5-groningen" in fm
+    assert "template_opgegeven" not in fm
 
 
 def test_section_id_for_phrase_index_cycle() -> None:
@@ -74,18 +87,64 @@ def test_emit_sections_disabled_for_tone_3() -> None:
 
 def test_resolve_default_and_alias() -> None:
     assert resolve_template_id(None) == DEFAULT_TEMPLATE_ID
-    assert resolve_template_id("hemelum-tropaar-toon-4") == "tropaar-toon-4"
+    assert resolve_template_id("hemelum-tropaar-toon-4") == "tropaar-toon-4-hemelum"
+    assert resolve_template_id("tropaar-toon-4") == "tropaar-toon-4-hemelum"
     assert resolve_template_id("groningen-tropaar-toon-4") == (
-        "groningen-tropaar-toon-4"
+        "tropaar-toon-4-groningen"
+    )
+    assert resolve_template_id("kondak-toon-8") == "kondak-toon-8-groningen"
+
+
+def test_infer_template_id_from_stem_and_fallback() -> None:
+    assert (
+        infer_template_id(
+            soort="kondak",
+            toon=8,
+            bron="hemelum",
+            path="kondak-zaterdag-gestorvenen-toon-8-hemelum.vsa",
+        )
+        == "kondak-toon-8-hemelum"
+    )
+    # Geen Hemelum-formule voor toon 5 → Groningen-fallback.
+    assert (
+        infer_template_id(soort="kondak", toon=5, bron="hemelum")
+        == "kondak-toon-5-groningen"
+    )
+    assert (
+        infer_template_id(
+            path="kondak-icoon-moeder-gods-vladimir-toon-8-liturgikon.vsa",
+            soort="kondak",
+            toon=8,
+        )
+        == "kondak-toon-8-hemelum"
+    )
+    # Pad-suffix wint op misleidend uitgangspunt; vrije tekst «Koormap Hemelum».
+    assert (
+        infer_template_id(
+            soort="kondak",
+            toon=4,
+            bron="Koormap Groningen",
+            path="kondak-zondag-toon-4-hemelum.mvsa",
+        )
+        == "tropaar-toon-4-hemelum"
+    )
+    assert (
+        infer_template_id(
+            soort="tropaar",
+            toon=4,
+            bron="Koormap Hemelum",
+            path="tropaar-nikolaas-van-myra-toon-4-hemelum.mvsa",
+        )
+        == "tropaar-toon-4-hemelum"
     )
 
 
 def test_load_same_as_tropaar_toon_2() -> None:
-    resolved = load_resolved_template("tropaar-toon-2")
-    assert resolved.canonical_id == "tropaar-toon-2"
-    assert resolved.formula_id == "kondak-toon-2"
+    resolved = load_resolved_template("tropaar-toon-2-groningen")
+    assert resolved.canonical_id == "tropaar-toon-2-groningen"
+    assert resolved.formula_id == "kondak-toon-2-groningen"
     assert "phrases" in resolved.doc
-    assert resolved.doc["id"] == "tropaar-toon-2"
+    assert resolved.doc["id"] == "tropaar-toon-2-groningen"
 
 
 @pytest.mark.skipif(not ELIA.is_file(), reason="corpus Elia ontbreekt")
@@ -96,7 +155,7 @@ def test_convert_elia_default_template_oct_a0(tmp_path: Path) -> None:
     assert out.is_file()
     text = out.read_text(encoding="utf-8")
     assert DEFAULT_OCT_LINE in text
-    assert result.resolved.canonical_id == "tropaar-toon-4"
+    assert result.resolved.canonical_id == "tropaar-toon-4-hemelum"
     # Alt schrijft f (F4), niet f+ (F5 bij A=0).
     a_lines = [ln for ln in text.splitlines() if ln.startswith("A:")]
     assert a_lines
@@ -111,11 +170,11 @@ def test_convert_elia_default_template_oct_a0(tmp_path: Path) -> None:
 def test_convert_tropaar_toon_2_via_same_as(tmp_path: Path) -> None:
     out = tmp_path / "t2.mvsa"
     result = convert_vsa_to_mvsa(
-        T2_VSA, template="tropaar-toon-2", output=out, write=True
+        T2_VSA, template="tropaar-toon-2-groningen", output=out, write=True
     )
-    assert result.resolved.formula_id == "kondak-toon-2"
+    assert result.resolved.formula_id == "kondak-toon-2-groningen"
     assert result.phrase_ids[-1] == "laatste"
-    assert "formule kondak-toon-2" in result.text or "kondak-toon-2" in result.text
+    assert "formule kondak-toon-2-groningen" in result.text or "kondak-toon-2-groningen" in result.text
 
 
 @pytest.mark.skipif(not K5_VSA.is_file(), reason="corpus kondak-5 ontbreekt")
@@ -123,7 +182,7 @@ def test_convert_emit_no_speelplan_blok_has_secties(tmp_path: Path) -> None:
     """T6/emit-vorm: geen @speelplan/@blok; wel secties + VSA-commentaar."""
     out = tmp_path / "k5.mvsa"
     result = convert_vsa_to_mvsa(
-        K5_VSA, template="kondak-toon-5", output=out, write=True
+        K5_VSA, template="kondak-toon-5-groningen", output=out, write=True
     )
     text = result.text
     assert "@speelplan" not in text
@@ -137,11 +196,12 @@ def test_convert_emit_no_speelplan_blok_has_secties(tmp_path: Path) -> None:
     assert "@tempo 180" in text
     assert text.index("@sectie cyclus-1") < text.index("@sectie herhaling")
     assert text.index("@sectie herhaling") < text.index("@sectie laatste")
-    # Gekuiste FM: geen do/mode/tempo in YAML-kop.
+    # Gekuiste FM: geen do/mode/tempo; wel template-formule-id (T1/T6).
     fm = text.split("---", 2)[1]
     assert "do:" not in fm
     assert "tempo:" not in fm
     assert "titel:" in fm
+    assert "template:" in fm
 
 
 def test_cli_list_templates() -> None:
@@ -160,7 +220,7 @@ def test_cli_writes_sibling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
             "list_templates": False,
             "library": None,
             "path": str(src),
-            "template": "tropaar-toon-4",
+            "template": "tropaar-toon-4-hemelum",
             "output": None,
             "melody": "S",
             "tempo": None,

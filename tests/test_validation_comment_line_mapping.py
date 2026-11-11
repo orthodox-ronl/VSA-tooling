@@ -45,6 +45,49 @@ def test_validation_line_mapping_accounts_for_html_comments(tmp_path: Path):
     assert result.messages[0].line == 3
 
 
+def test_validation_line_mapping_accounts_for_frontmatter_and_comments(
+    tmp_path: Path,
+):
+    """Regelnummers zijn bestand-absoluut: YAML-kop + commentaarregels tellen mee."""
+    path = tmp_path / "demo.vsa"
+    path.write_text(
+        "---\n"
+        "title: demo\n"
+        "---\n"
+        "\n"
+        "<!-- broncommentaar -->\n"
+        "{fout/}\n",
+        encoding="utf-8",
+    )
+
+    result = validate_file(path)
+
+    assert not result.ok
+    assert result.messages[0].code == "VSA-SYNTAX-MODIFIER-IN-SUNG-TEXT"
+    # 1=--- 2=title 3=--- 4=leeg 5=comment 6={fout/}
+    assert result.messages[0].line == 6
+    assert result.messages[0].column == 6
+
+
+def test_validation_line_mapping_accounts_for_hash_comments(tmp_path: Path):
+    path = tmp_path / "demo.vsa"
+    path.write_text(
+        "---\n"
+        "title: demo\n"
+        "---\n"
+        "# uitleg voor de beheerder\n"
+        "{fout/}\n",
+        encoding="utf-8",
+    )
+
+    result = validate_file(path)
+
+    assert not result.ok
+    assert result.messages[0].code == "VSA-SYNTAX-MODIFIER-IN-SUNG-TEXT"
+    # 1=--- 2=title 3=--- 4=#-comment 5={fout/}
+    assert result.messages[0].line == 5
+
+
 def test_testm_height_marker_positions():
     path = Path("testm.md")
     if not path.is_file():

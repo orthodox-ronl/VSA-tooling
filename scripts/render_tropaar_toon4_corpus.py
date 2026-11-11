@@ -1,6 +1,6 @@
-"""Genereer tropaar-toon-4: formuleblad en/of corpus VSA → MSCZ/MXL/(PDF).
+"""Genereer tropaar-toon-4-hemelum: formuleblad en/of corpus VSA → MSCZ/MXL/(PDF).
 
-Canonieke artefacten onder ``library/tropaar-toon-4/``:
+Canonieke artefacten onder ``library/tropaar-toon-4-hemelum/``:
 
 - ``template.yaml`` — formule-bron (git)
 - ``template.mscz`` — formuleblad voor MuseScore-controle (git)
@@ -21,7 +21,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 LIBRARY = REPO / "docs" / "specification-vsa-templates" / "library"
-TEMPLATE_DIR = LIBRARY / "tropaar-toon-4"
+TEMPLATE_DIR = LIBRARY / "tropaar-toon-4-hemelum"
 TEMPLATE_YAML = TEMPLATE_DIR / "template.yaml"
 ONDERZOEK = REPO / "docs" / "plans" / "onderzoeks-troparen-en-kondaken.md"
 CORPUS_DIR = TEMPLATE_DIR / "examples" / "corpus"

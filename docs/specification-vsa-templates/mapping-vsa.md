@@ -315,10 +315,10 @@ instance-lyric-pipeline. Corpus-`.vsa` heeft geen `T.N` vóór EHM’s.
 Library-werkmappen: [`library/`](library/README.md).
 
 Corpus Toon 4:
-[`library/tropaar-toon-4/notes/corpus.md`](library/tropaar-toon-4/notes/corpus.md).
+[`library/tropaar-toon-4-hemelum/notes/corpus.md`](library/tropaar-toon-4-hemelum/notes/corpus.md).
 
 Elia regel 1 (instance + MusicXML):
-[`library/tropaar-toon-4/notes/elia-mapping.md`](library/tropaar-toon-4/notes/elia-mapping.md).
+[`library/tropaar-toon-4-hemelum/notes/elia-mapping.md`](library/tropaar-toon-4-hemelum/notes/elia-mapping.md).
 
 ## Wat deze laag niet doet
 

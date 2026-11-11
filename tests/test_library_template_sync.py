@@ -10,7 +10,7 @@ REPO = Path(__file__).resolve().parents[1]
 SCRIPT = REPO / "scripts" / "sync_library_templates.py"
 
 # Toon-4 formules die we actief bijhouden (Hemelum + Groningen).
-TOON4_IDS = ("tropaar-toon-4", "groningen-tropaar-toon-4")
+TOON4_IDS = ("tropaar-toon-4-hemelum", "tropaar-toon-4-groningen")
 
 
 def test_toon4_template_artefacts_in_sync() -> None:

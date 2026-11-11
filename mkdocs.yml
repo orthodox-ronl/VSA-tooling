@@ -108,7 +108,7 @@ nav:
       - mvsa: reference/cli/mvsa.md
       - mxl: reference/cli/mxl.md
       - mscz: reference/cli/mscz.md
-      - vsa musicxml: reference/cli/musicxml.md
+      - vsa mxl: reference/cli/musicxml.md
       - vsa products: reference/cli/products.md
       - vsa audio: reference/cli/audio.md
     - Scripts (cmd): formats/scripts.md

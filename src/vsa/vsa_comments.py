@@ -8,30 +8,38 @@ COMMENT_ONLY_LINE_RE = re.compile(
     r"^[ \t]*<!--.*?-->[ \t]*(?:\r\n|\n|\r|$)",
     re.MULTILINE | re.DOTALL,
 )
+# Hele regel: optionele spaties/tabs, daarna ``#`` (zoals MVSA-regelcommentaar).
+# Geen inline ``#``: in VSA blijft ``#-`` / ``#/`` in scopes halftoon-notatie.
+HASH_COMMENT_LINE_RE = re.compile(r"^[ \t]*#")
+
+
+def is_vsa_comment_only_line(line_content: str, line_ending: str = "") -> bool:
+    """True als de regel alleen broncommentaar is (HTML-regel of ``#``-regel)."""
+    if COMMENT_ONLY_LINE_RE.match(line_content + line_ending):
+        return True
+    return HASH_COMMENT_LINE_RE.match(line_content) is not None
 
 
 def strip_vsa_html_comments(text: str) -> str:
-    """Return VSA text with HTML comments removed.
+    """Return VSA/MVSA-brontekst zonder commentaar (HTML en ``#``-regels).
 
-    The source text itself is not modified by callers. This function is only
-    used for parsing, validation and artifact generation.
+    De bron zelf blijft ongewijzigd bij callers. Alleen voor parsing,
+    validatie en afgeleide artefacten.
 
-    A comment is ignored completely: it is not text, whitespace, newline or
-    rendering metadata.
-
-    Comment-only lines are removed including their line ending, so they do not
-    introduce blank rendered lines. Inline comments are removed in place.
+    Commentaar telt niet als tekst, whitespace, newline of layout.
+    Commentaar-regels verdwijnen inclusief regeleinde (geen lege SVG-regel).
+    Inline HTML-commentaar verdwijnt in-place.
     """
     stripped, _ = strip_vsa_html_comments_with_offset_map(text)
     return stripped
 
 
 def strip_vsa_html_comments_with_offset_map(text: str) -> tuple[str, list[int]]:
-    """Return stripped VSA text and a per-character source offset map.
+    """Return gestripte tekst en een per-karakter bron-offset-map.
 
-    ``offset_map[i]`` is the index in the original ``text`` of stripped
-    character ``i``. Use this to map parser/validator positions in stripped
-    text back to the caller's source text for diagnostics.
+    ``offset_map[i]`` is de index in de oorspronkelijke ``text`` van
+    gestripte karakter ``i``. Zo blijven foutmeldingen bestand-absoluut
+    (commentaarregels tellen mee in regel/kolom).
     """
     offset_map: list[int] = []
     out: list[str] = []
@@ -57,7 +65,7 @@ def strip_vsa_html_comments_with_offset_map(text: str) -> tuple[str, list[int]]:
             line_ending = ""
             next_index = line_end
 
-        if COMMENT_ONLY_LINE_RE.match(line_content + line_ending):
+        if is_vsa_comment_only_line(line_content, line_ending):
             index = next_index
             continue
 

@@ -1,172 +1,187 @@
-# `vsa musicxml` — exporteren naar MusicXML
+# `vsa mxl` — exporteren naar MusicXML
 
-Exporteer [VSA](@) naar gecomprimeerde MusicXML (`.mxl`, standaard) of platte
-MusicXML (`.musicxml`).
+Exporteer eenstemmige [VSA](@) (`.vsa`) naar Coria-playback MusicXML:
+gecomprimeerd **`.mxl`** (standaard) of platte **`.musicxml`**.
+
+Zelfde CLI-vorm als [`mvsa mxl`](mvsa.md#mvsa-mxl) en [`mscz mxl`](mscz.md):
+`PATH [-o OUTPUT]`. Alias: `vsa musicxml` (zelfde argumenten).
 
 ## Synopsis
 
 ```text
-vsa musicxml [-h] [--config CONFIG] [--format {musicxml,mxl}] [--do DO]
-             [--mode MODE] [--tempo TEMPO]
-             [--musicxml-profile {playback,engraving}] [--syllabify]
-             input output
+vsa mxl [-h] [-o OUTPUT] [--config CONFIG] [--format {musicxml,mxl}]
+        [--do DO] [--mode MODE] [--tempo TEMPO]
+        [--musicxml-profile {playback,engraving}] [--syllabify]
+        path
 ```
 
 ## Beschrijving
 
-`vsa musicxml` leest `input` — een `.vsa`-bestand, een Markdownbestand met
-[VSA-blokken](@), of een map — en schrijft één of meer MusicXML-bestanden. De
-gebruikte [metadata](@) (grondtoon, mode, tempo, exportprofiel, …) komt uit de
-YAML-frontmatter van het `.vsa`-bestand (of de [blokmetadata](@) in Markdown); de
-CLI-opties `--do`, `--mode`, `--tempo` en `--musicxml-profile` overschrijven
-die bestand-metadata.
+`vsa mxl` leest **alleen** `.vsa` (straat-puur; bestand of map, recursief).
+Andere bronnen: [`mvsa mxl`](mvsa.md#mvsa-mxl) / [`mscz mxl`](mscz.md).
 
-Gedrag hangt af van het type van `input`:
+Zonder `-o` komt de uitvoer als sibling naast elke bron
+(`lied.vsa` → `lied.vsa.mxl`). `-o` mag alleen bij precies één bronbestand.
+Zie [Invoer bestand of map](input-pad.md).
 
-| `input`-type              | Gedrag van `output`                                                                                                                                               |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.vsa`-bestand            | `output` is het doelbestand. Zonder herkende extensie wordt `--format` (of default `.mxl`) toegevoegd; met een expliciete extensie (`.mxl`/`.musicxml`) wint die. |
-| `.md`/`.markdown`-bestand | `output` is een map; per [VSA-blok](@) komt er één bestand (`<stem>-<n>.<ext>` bij meer dan 1 blok).                                                              |
-| Map                       | `output` is een map; alle `.vsa`- en `.md`-bestanden worden recursief verwerkt, met behoud van relatieve mapstructuur.                                            |
+Metadata (grondtoon, mode, tempo, exportprofiel, …) komt uit de
+YAML-frontmatter van het `.vsa`-bestand; de CLI-opties `--do`, `--mode`,
+`--tempo` en `--musicxml-profile` overschrijven die bestand-metadata.
 
-Standaard gebruikt `vsa musicxml` het `playback`-profiel (bedoeld voor
-afspelen/import in Coria en MuseScore zonder handmatige opschoning). Bij
-`playback` volgt na de export een **Coria-finalize** (sanitize + voortekens;
-geen DOCTYPE in het MusicXML) — checklist M* in
+Standaard gebruikt `vsa mxl` het `playback`-profiel (afspelen/import in
+Coria en MuseScore zonder handmatige opschoning). Bij `playback` volgt na
+de export een **Coria-finalize** (sanitize + voortekens; geen DOCTYPE) —
+checklist M* in
 [canonical-checklists](../../formats/canonical-checklists.md). Kies
 `engraving` (via `--musicxml-profile` of frontmatter
 `muziek.musicxml-profile: engraving`) als je de partituur verder wilt
-bewerken en expliciete maatstrepen of typografie-hints nodig hebt; dan
-blijft finalize uit. Zie [musicxml-export.md](../../guides/musicxml-export.md)
-voor de volledige uitleg van beide profielen en alle frontmatter-instellingen.
+bewerken; dan blijft finalize uit. Zie
+[musicxml-export.md](../../guides/musicxml-export.md) voor beide
+profielen en frontmatter-instellingen.
 
 `--syllabify` voegt tijdelijke lettergreepstreepjes toe vóór de export; de
 canonieke `.vsa` blijft ongewijzigd. [`vsa products`](products.md) doet die
-syllabify altijd voor de MXL-sibling. Losse bron bewerken: [`vsa syllabify`](syllabify.md).
+syllabify altijd voor de MXL-sibling. Losse bron bewerken:
+[`vsa syllabify`](syllabify.md).
 
-Bij bron `.vsa` en sibling-output merget `vsa musicxml` product-key `mxl` in
-`{stam}.vsa.products-meta.json` — zie [products-meta](../../formats/products-meta.md).
+Bij sibling- of expliciete output merget `vsa mxl` product-key `mxl` in
+`{stam}.vsa.products-meta.json` — zie
+[products-meta](../../formats/products-meta.md).
 
 ## Argumenten en opties
 
-| Naam                                          | Verplicht | Betekenis                                                                         | Default                                                         | Beperkingen                            |
-| --------------------------------------------- | --------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------- |
-| `input`                                       | Ja        | VSA-bestand (`.vsa`), Markdown-bestand (`.md`) of map.                            | —                                                               | Moet bestaan; anders `.vsa`/`.md`/map. |
-| `output`                                      | Ja        | Doelbestand (enkel invoerbestand) of doelmap (meerdere bestanden).                | —                                                               | Zie tabel hierboven.                   |
-| `--config CONFIG`                             | Nee       | Pad naar een alternatief `vsa.toml`.                                              | Auto-detectie van `vsa.toml`                                    | —                                      |
-| `--format {musicxml,mxl}`                     | Nee       | Uitvoerformaat wanneer `output` geen expliciete extensie heeft.                   | `mxl`                                                           | Alleen `musicxml` of `mxl`             |
-| `--do DO`                                     | Nee       | Grondtoon, bijv. `F4` (overschrijft bestand-metadata `muziek.do`).                | Bestand-metadata, anders `F4`                                   | —                                      |
-| `--mode MODE`                                 | Nee       | Modus, `major` of `minor` (overschrijft bestand-metadata `muziek.mode`).          | Bestand-metadata, anders `major`                                | —                                      |
-| `--tempo TEMPO`                               | Nee       | Tempo in BPM (overschrijft bestand-metadata `muziek.tempo`).                      | Bestand-metadata; zonder expliciete waarde geen tempo-markering | —                                      |
-| `--musicxml-profile {playback,engraving}`     | Nee       | Exportprofiel (overschrijft bestand-metadata `muziek.musicxml-profile`).          | Bestand-metadata, anders `playback`                             | Alleen `playback` of `engraving`       |
-| `--syllabify`                                 | Nee       | Tijdelijke lettergreepstreepjes vóór export (bronbestand blijft ongewijzigd).     | Uit                                                             | Alleen zinvol bij `.vsa`-invoer        |
-| `-h`, `--help`                                | Nee       | Toon hulp voor dit subcommando.                                                   | —                                                               | —                                      |
+| Naam                                      | Verplicht | Betekenis                                                                     | Default                                                         | Beperkingen                      |
+| ----------------------------------------- | --------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------- |
+| `path`                                    | Ja        | `.vsa`-bestand of map met `.vsa`-bestanden (recursief).                       | —                                                               | Alleen `.vsa` (straat-puur).     |
+| `-o`, `--output`                          | Nee       | Uitvoerpad (`.mxl` / `.musicxml` / `.xml`).                                   | Sibling `<bronnaam>.vsa.mxl` (of `.musicxml` via `--format`)    | Alleen bij precies één bron.     |
+| `--config CONFIG`                         | Nee       | Pad naar een alternatief `vsa.toml`.                                          | Auto-detectie van `vsa.toml`                                    | —                                |
+| `--format {musicxml,mxl}`                 | Nee       | Uitvoerformaat wanneer `-o` geen expliciete extensie heeft, of bij sibling.   | `mxl`                                                           | Alleen `musicxml` of `mxl`       |
+| `--do DO`                                 | Nee       | Grondtoon, bijv. `F4` (overschrijft bestand-metadata `muziek.do`).            | Bestand-metadata, anders `F4`                                   | —                                |
+| `--mode MODE`                             | Nee       | Modus, `major` of `minor` (overschrijft bestand-metadata `muziek.mode`).      | Bestand-metadata, anders `major`                                | —                                |
+| `--tempo TEMPO`                           | Nee       | Tempo in BPM (overschrijft bestand-metadata `muziek.tempo`).                  | Bestand-metadata; zonder expliciete waarde geen tempo-markering | —                                |
+| `--musicxml-profile {playback,engraving}` | Nee       | Exportprofiel (overschrijft bestand-metadata `muziek.musicxml-profile`).      | Bestand-metadata, anders `playback`                             | Alleen `playback` of `engraving` |
+| `--syllabify`                             | Nee       | Tijdelijke lettergreepstreepjes vóór export (bron blijft ongewijzigd).        | Uit                                                             | —                                |
+| `-h`, `--help`                            | Nee       | Toon hulp voor dit subcommando.                                               | —                                                               | —                                |
 
 ## Output
 
-- **stdout (enkel `.vsa`-bestand)**: `MusicXML geschreven naar: <output>`.
-- **stdout (map of Markdown met meerdere blokken)**: `<n> MXL-bestand(en) geschreven` of `<n> MusicXML-bestand(en) geschreven`, afhankelijk van `--format`.
-- **Bestanden**: `.mxl` (standaard) of `.musicxml`, op de locatie(s) bepaald door de tabel in de beschrijving.
-- **stderr**: foutmeldingen (bestand niet gevonden, `@include-vsa`-fout, MusicXML-exportfout, onbekend bestandstype).
+- **stdout (één bron):** `Geschreven: <pad>`; eventueel `Meta: …`.
+- **stdout (meerdere bronnen):** per bestand `Geschreven: …`, daarna
+  `<n> MXL-bestand(en) geschreven` (of MusicXML, afhankelijk van `--format`).
+- **Bestanden:** `.mxl` (standaard) of `.musicxml`.
+- **stderr:** foutmeldingen (verkeerde extensie, parsefout, exportfout).
 
 ## Exit status
 
-| Exitcode | Betekenis                                                               |
-| -------- | ----------------------------------------------------------------------- |
-| `0`      | Alle gevraagde MusicXML-bestanden succesvol geschreven.                 |
-| `1`      | Bestand niet gevonden, parsefout, exportfout, of onbekend bestandstype. |
+| Exitcode | Betekenis                                                    |
+| -------- | ------------------------------------------------------------ |
+| `0`      | Alle gevraagde MusicXML-bestanden succesvol geschreven.      |
+| `1`      | Padfout, verkeerde bronextensie, parsefout, of exportfout.   |
 
 ## Voorbeelden — succes
 
-Enkel bestand, standaard `.mxl`:
+Sibling-default (naast de bron):
 
 ```cmd
-vsa musicxml examples\minimal\050_svg_demo.vsa tmp\demo.mxl
+vsa mxl examples\minimal\050_svg_demo.vsa
 ```
 
-Verwachte output:
+Verwachte output (pad kan afwijken):
 
 ```text
-MusicXML geschreven naar: tmp\demo.mxl
+Geschreven: examples\minimal\050_svg_demo.vsa.mxl
 ```
 
-Zonder extensie krijg je ook `.mxl`:
+Expliciet uitvoerpad:
 
 ```cmd
-vsa musicxml mijn-lied.vsa output\mijn-lied
+vsa mxl examples\minimal\050_svg_demo.vsa -o tmp\demo.mxl
 ```
 
-```text
-MusicXML geschreven naar: output\mijn-lied.mxl
-```
-
-Platte MusicXML, bijvoorbeeld voor bewerking in MuseScore:
+Zonder extensie op `-o` krijg je ook `.mxl`:
 
 ```cmd
-vsa musicxml mijn-lied.vsa mijn-lied.musicxml
-```
-
-Of expliciet via `--format`:
-
-```cmd
-vsa musicxml mijn-lied.vsa mijn-lied --format musicxml
-```
-
-Map-export (standaard `.mxl` per `.vsa`-bestand):
-
-```cmd
-vsa musicxml content-source\praktijk output\mxl
+vsa mxl mijn-lied.vsa -o output\mijn-lied
 ```
 
 ```text
+Geschreven: output\mijn-lied.mxl
+```
+
+Platte MusicXML:
+
+```cmd
+vsa mxl mijn-lied.vsa -o mijn-lied.musicxml
+```
+
+Of via `--format` bij sibling-default:
+
+```cmd
+vsa mxl mijn-lied.vsa --format musicxml
+```
+
+Map-export (sibling `.mxl` per `.vsa`):
+
+```cmd
+vsa mxl content-source\praktijk
+```
+
+```text
+Geschreven: …
 <n> MXL-bestand(en) geschreven
 ```
 
-Met een expliciet exportprofiel:
+Expliciet exportprofiel:
 
 ```cmd
-vsa musicxml lied.vsa lied.mxl --musicxml-profile engraving
+vsa mxl lied.vsa -o lied.mxl --musicxml-profile engraving
 ```
 
 Coria-playback met tijdelijke syllabify (zelfde MXL-keten als `vsa products`,
-zonder SVG/meta):
+zonder SVG):
 
 ```cmd
-vsa musicxml lied.vsa lied.mxl --syllabify
+vsa mxl lied.vsa --syllabify
+```
+
+Alias (zelfde vorm):
+
+```cmd
+vsa musicxml lied.vsa -o lied.mxl
 ```
 
 ## Voorbeelden — falen
 
-Onbekend bestandstype als invoer:
+Verkeerde bronextensie:
 
 ```cmd
-vsa musicxml notities.txt output.mxl
+vsa mxl lied.mvsa
 ```
 
 Verwachte output (stderr):
 
 ```text
-Onbekend bestandstype: '.txt'. Gebruik .vsa, .md of een map.
+vsa mxl weigert .mvsa; gebruik: mvsa mxl …
 ```
 
-Exitcode: `1`. Fix: gebruik een `.vsa`- of `.md`-bestand, of een map.
+Exitcode: `1`. Fix: gebruik `mvsa mxl` voor `.mvsa`, of geef een `.vsa`.
 
-Bij een MusicXML-specifieke exportfout (bijvoorbeeld een VSA-constructie die
-niet naar noten kan worden vertaald):
+Bij een MusicXML-exportfout:
 
 ```text
 mijn-lied.vsa: fout bij MusicXML-export: <uitleg>
 ```
 
-Exitcode: `1`. Fix: controleer de gemelde constructie in het `.vsa`-bestand;
-draai eventueel eerst `vsa validate` om syntax-/semantiekfouten uit te
-sluiten.
+Exitcode: `1`. Fix: controleer de gemelde constructie; draai eventueel eerst
+`vsa validate`.
 
 ## Zie ook
 
-- Volledige workflow, profielen, Coria-integratie en frontmatter-instellingen: [musicxml-export.md](../../guides/musicxml-export.md)
-- [`vsa products`](products.md) — standaardproducten + products-meta (geen `.vsa.pdf`)
+- Workflow, profielen, Coria, frontmatter: [musicxml-export.md](../../guides/musicxml-export.md)
+- [`mvsa mxl`](mvsa.md#mvsa-mxl) · [`mscz mxl`](mscz.md) — andere bronstraten
+- [`vsa products`](products.md) — standaardproducten + products-meta
 - [`vsa syllabify`](syllabify.md) — lettergreepstreepjes in de bron zelf
-- [`vsa validate`](validate.md) — controleer [VSA-notatie](@bron) vóór export.
+- [`vsa validate`](validate.md) — controle vóór export
+- [Invoer bestand of map](input-pad.md)
 - Outputreferentie: [outputs.md](../outputs.md)
 - Bron-contract (exporttype mxl/coria): [exporttype-coria](https://orthodox-ronl.github.io/bron/reference/exporttype-coria/)

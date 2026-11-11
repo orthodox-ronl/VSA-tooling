@@ -663,7 +663,7 @@ def render_template_musicxml(doc: dict) -> str:
 
 
 def render_elia_r1_musicxml() -> str:
-    """Pad-B proof for Elia line 1: S from VSA, A/T/B from tropaar-toon-4 slots."""
+    """Pad-B proof for Elia line 1: S from VSA, A/T/B from tropaar-toon-4-hemelum slots."""
     # (lyric, dur_div, S, A, T, B) with scientific pitches already resolved for do=F4
     notes = [
         ("Gij", 4, ("A", 0, 4), ("F", 0, 4), ("C", 0, 4), ("F", 0, 3)),

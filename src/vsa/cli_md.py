@@ -14,6 +14,7 @@ import re
 import sys
 from pathlib import Path
 
+from .cli_messages import emit_cli_error, emit_cli_exception
 from .derived_path import derived_output_path
 from .input_paths import InputPathError, collect_cli_sources
 
@@ -54,10 +55,10 @@ def run_markdown_pdf_cli(
     from .markdown_processor import ProcessValidationError
 
     if input_path.suffix.lower() not in {".md", ".markdown"}:
-        print(
-            f"markdown pdf weigert {input_path.suffix or '(geen extensie)'}; "
-            f"gebruik een .md-bestand: markdown pdf {input_path}",
-            file=sys.stderr,
+        emit_cli_error(
+            f"markdown pdf weigert {input_path.suffix or '(geen extensie)'}.",
+            path=input_path,
+            hint=f"Gebruik een .md-bestand: markdown pdf {input_path}",
         )
         return 1
     out = (
@@ -85,12 +86,14 @@ def run_markdown_pdf_cli(
                 print(line)
         return 1
     except PdfError as exc:
-        print(f"ERROR: {exc.message_nl}", file=sys.stderr)
-        if exc.hint_nl:
-            print(exc.hint_nl, file=sys.stderr)
+        emit_cli_exception(exc, path=input_path)
         return 1
     except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=input_path,
+            hint="Controleer de Markdown en of Chrome/Edge voor PDF beschikbaar is.",
+        )
         return 1
     print(f"PDF geschreven naar: {result}")
     return 0
@@ -100,16 +103,19 @@ def _collect(path: str | Path) -> list[Path] | None:
     try:
         return collect_cli_sources(path, suffixes=_MD_SUFFIXES)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=path,
+            hint="Geef één .md-bestand of een map met Markdown-bestanden.",
+        )
         return None
 
 
 def _reject_multi_output(files: list[Path], output: str | None) -> bool:
     if len(files) > 1 and output:
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return True
     return False
@@ -309,11 +315,15 @@ def _cmd_md_svg(ns: argparse.Namespace) -> int:
                 config=config,
             )
         except (IncludeError, DirectiveError, ProcessValidationError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(
+                exc,
+                path=path,
+                hint="Controleer :::vsa-notatie-blokken en includes in dit bestand.",
+            )
             exit_code = 1
             continue
         if not svg_paths:
@@ -393,7 +403,11 @@ def _cmd_md_text(ns: argparse.Namespace) -> int:
                 path.read_text(encoding="utf-8")
             )
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(
+                exc,
+                path=path,
+                hint="Controleer of het Markdown-bestand leesbaar is (UTF-8).",
+            )
             exit_code = 1
             continue
         out.parent.mkdir(parents=True, exist_ok=True)
