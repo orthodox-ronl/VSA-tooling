@@ -1,26 +1,25 @@
 ---
-do: F4
-mode: major
-tempo: 180
-template: kondak-toon-5-groningen
 titel: Kondak van de zondag, toon 5
+taal: nl
+soort: kondak
+toon: 5
+template: kondak-toon-5-groningen
 partituur:
   title: Kondak van de zondag, toon 5
   composer: Traditioneel
   arranger: Groningen
-toon: 5
-taal: nl
 bron:
   uitgangspunt: Koormap Groningen
-soort: kondak
 gelegenheid:
 - naam: Zondag
   type: zondag
-zoektekst: >-
-  In de hades zijt Gij nedergedaald Gij, mijn Verlosser, als Almachtige hebt Gij de poorten
-  verbrijzeld, als Schepper hebt Gij de doden opgewekt en de prikkel des doods vernietigd,
-  Gij hebt Adam van de vloek bevrijd, o Menslievende, laat ons daarom tot U roepen: kom en
-  verlos ons, o Heer.
+zoektekst: 'In de hades zijt Gij nedergedaald Gij, mijn Verlosser, als Almachtige
+  hebt Gij de poorten verbrijzeld, als Schepper hebt Gij de doden opgewekt en de prikkel
+  des doods vernietigd, Gij hebt Adam van de vloek bevrijd, o Menslievende, laat ons
+  daarom tot U roepen: kom en verlos ons, o Heer.'
+do: F4
+mode: major
+tempo: 180
 ---
 
 [/:] In de {ha_}des {\zijt} {/Gij} {/ne_}{\\der}ge{daald_}

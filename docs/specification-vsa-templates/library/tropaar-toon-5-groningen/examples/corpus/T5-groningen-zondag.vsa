@@ -1,26 +1,25 @@
 ---
-do: F4
-mode: major
-tempo: 180
-template: kondak-toon-5-groningen
 titel: Tropaar van de zondag, toon 5
+taal: nl
+soort: tropaar
+toon: 5
+template: kondak-toon-5-groningen
 partituur:
   title: Tropaar van de zondag, toon 5
   composer: Traditioneel
   arranger: Groningen
-toon: 5
-taal: nl
 bron:
   uitgangspunt: Koormap Groningen
-soort: tropaar
 gelegenheid:
 - naam: Zondag
   type: zondag
-zoektekst: >-
-  Komt gelovigen laat ons aanbidden en bezingen, het met de Vader en de Geest mede-eeuwige
-  woord, dat uit de Maagd omwille van onze verlossing is geboren want Hij heeft zich verwaardigd,
-  om zich in het vlees aan het Kruis te verheffen, Hij heeft de dood ondergaan. En door Zijn
-  roemrijke verrijzenis heeft Hij de doden opgewekt.
+zoektekst: Komt gelovigen laat ons aanbidden en bezingen, het met de Vader en de Geest
+  mede-eeuwige woord, dat uit de Maagd omwille van onze verlossing is geboren want
+  Hij heeft zich verwaardigd, om zich in het vlees aan het Kruis te verheffen, Hij
+  heeft de dood ondergaan. En door Zijn roemrijke verrijzenis heeft Hij de doden opgewekt.
+do: F4
+mode: major
+tempo: 180
 ---
 
 [/:] {Komt_} ge{/lo_}{\\vi}{gen_}
