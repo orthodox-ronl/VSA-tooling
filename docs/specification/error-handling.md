@@ -60,9 +60,10 @@ MuseScore niet gevonden, CLI-misbruik) volgen dezelfde leesbaarheid voor de
 
 1. **Locatie** — `pad:regel:kolom:` wanneer bekend; anders `pad:regel:` of
    alleen `pad:`; bij puur CLI-gebruik (geen bronbestand) alleen de tekst.
-2. **Beschrijving** — volledige Nederlandse zin: wat er misgaat.
-3. **Herstel** — tweede regel `Hint: …` met een concrete actie (juiste
-   straat-CLI, ontbrekend programma, `vsa validate`, …).
+2. **Beschrijving** — volledige Nederlandse zin: wat er misgaat. Mag over
+   **meerdere regels** (niet alles op één regel proppen).
+3. **Herstel** — daarna een `Hint:`-blok (ook meerregelig) met concrete
+   actie (juiste straat-CLI, andere `--template`, `vsa validate`, …).
 
 Geen kale `ERROR:`-prefix zonder pad of herstelhint. Implementatie in tooling:
 `vsa.cli_messages` (`emit_cli_error` / `emit_cli_exception`).

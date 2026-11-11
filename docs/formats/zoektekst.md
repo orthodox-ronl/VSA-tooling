@@ -85,8 +85,17 @@ HTML-commentaren zonder vast contract.
    elke reeks spaties, tabs of newlines wordt één spatie.
 4. Na normalisatie moeten `zoektekst` en de body-extractie **gelijk** zijn.
 
-Tooling schrijft bij voorkeur `zoektekst: >-` als één doorlopende alinea. Een
-blokscalar `|` met regeleinden mag, zolang de genormaliseerde vorm klopt.
+Tooling schrijft bij voorkeur `zoektekst: |-` met **één frase per regel**,
+volgens de frasering van de grondtekst:
+
+- **`.vsa`:** dezelfde frasescheiders als elders in VSA — `*` / `/` /
+  `**` / `//` (spaties optioneel; ook vastgeplakt aan een punt: `.*`).
+  Zonder die markers: logische bronregels na `ensure_stanza_stars`.
+- **`.mvsa`:** regeleinden uit de L-extractie.
+
+De scheiders zelf horen **niet** in de zoektekst. Equivalentie blijft op
+genormaliseerde spaties (regeleinden tellen als spatie). Een oude
+`>-`-alinea is inhoudelijk oké tot herschrijven.
 
 ## Wat dit niet is
 

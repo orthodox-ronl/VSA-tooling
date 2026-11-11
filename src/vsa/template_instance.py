@@ -467,10 +467,14 @@ def map_vsa_to_template(
             code=CODE_TEXT_MAPPING,
             hint_nl=(
                 "Het aantal VSA-frasen moet passen bij sequence / text_mapping / "
-                "mapping_plans van de template. Tel frasen via losse `*`/`/` of "
-                "sterke `**`/`//` (vóór laatste); EHMs in scopes tellen niet mee. "
-                "Zonder `*`/`**` telt elke niet-ingesprongen regel als frase. "
-                "Ingesprongen vervolgregels horen bij dezelfde frase (print-wrap)."
+                "mapping_plans van de template. Bij een speelplan dat op "
+                "«laatste» eindigt (bijv. toon 3): de eerste frasen volgen het "
+                "prefix; de allerlaatste frase altijd «laatste»; meer frasen "
+                "dan het speelplan is een harde fout. Tel frasen via `*`/`/` of "
+                "sterke `**`/`//` (spaties optioneel; ook na een punt: `.*`). "
+                "EHMs in scopes tellen niet mee. Zonder `*`/`**` telt elke "
+                "niet-ingesprongen regel als frase. Ingesprongen vervolgregels "
+                "horen bij dezelfde frase (print-wrap)."
             ),
             source=source,
         ) from exc
@@ -671,12 +675,16 @@ def _map_tail(
         lyric = note.lyric or "(melisma)"
         expected_txt = ", ".join(expected) if expected else "—"
         return TemplateInstanceError(
-            f"hoogte-mismatch: VSA {lyric!r} = {got}, geen passend template-S-slot "
-            f"meer (verwacht o.a. {expected_txt})",
+            (
+                f"hoogte-mismatch op lettergreep {lyric!r} (klinkend {got}).\n"
+                f"Geen passend slot meer in de melodiestem van de formule "
+                f"(verwacht o.a. {expected_txt})."
+            ),
             code=CODE_PITCH_MISMATCH,
             hint_nl=(
-                "Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden "
-                "van de template volgen, of kies een andere frase/cadenspad."
+                "Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte "
+                "cadensgraden van de template volgen, of kies een andere "
+                "frase/cadenspad."
             ),
             source=source,
             line=note.line,

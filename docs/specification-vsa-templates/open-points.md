@@ -43,8 +43,10 @@ Mappingcontract: [mapping-vsa.md](mapping-vsa.md).
       instance slaat `open` over als VSA meteen reciteert — geen dubbele noot.
 - [x] **`mode` / `do`:** template én VSA-parser alleen `major`/`minor`;
       mismatch → `VSA-TEMPLATE-MODE-MISMATCH` / `VSA-TEMPLATE-DO-MISMATCH`.
-- [x] **Sequence / text_mapping-lengte:** aantal VSA-regels moet bij het plan
-      passen → `VSA-TEMPLATE-TEXT-MAPPING`.
+- [x] **Sequence / text_mapping-lengte:** vaste `sequence` zonder `laatste`
+      eist exacte lengte. Speelplan eindigend op `laatste` (toon 3): prefix +
+      altijd `laatste`; overflow → `VSA-TEMPLATE-TEXT-MAPPING`. Cycle+final
+      variabel. Stichier-toon-5-pdf `laatste` heeft het anker.
 - [x] **`l.lgr.` (H8):** mapper koppelt geankerd event + rest van de frase aan
       de laatste VSA-syllabe; stichier-toon-5-pdf `laatste` heeft het anker.
 - [x] **Anker-normalisatie:** `e. st.` → `e.st.` (zelfde voor `l.st.`,

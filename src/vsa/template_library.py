@@ -2,8 +2,8 @@
 
 Nieuwe formules: map ``library/<id>/template.yaml`` met id
 ``{soort}-toon-{n}-{bron}``. Aliassen staan in ``library/aliases.yaml``
-(+ eventuele ingebouwde fallbacks). Defaultkeuze: zie
-``infer_template_id``.
+(+ eventuele ingebouwde fallbacks). Keuze zonder ``--template``: zie
+``select_template_id`` (soort+toon; geen stille default).
 """
 
 from __future__ import annotations
@@ -166,6 +166,239 @@ def _normalize_bron(value: str | None) -> str | None:
     return None
 
 
+def _parse_toon(toon: int | str | None) -> int | None:
+    if toon is None or str(toon).strip() == "":
+        return None
+    try:
+        n = int(toon)
+    except (TypeError, ValueError):
+        return None
+    if 1 <= n <= 8:
+        return n
+    return None
+
+
+def _soort_from_stem(stem: str) -> str | None:
+    lower = stem.lower()
+    for prefix in ("kondak", "tropaar", "stichier", "vers", "prokimen"):
+        if lower.startswith(prefix + "-") or lower.startswith(prefix + "_"):
+            return prefix
+    return None
+
+
+def _bron_from_path(path: Path | str | None) -> str | None:
+    """Bron uit bestandsnaam-suffix of mapdeel (catalogus-leaf / formule-map)."""
+    if path is None:
+        return None
+    p = Path(path)
+    from_stem = _bron_from_stem(p.stem)
+    if from_stem:
+        return from_stem
+    for part in reversed(p.parts):
+        low = part.lower()
+        parsed = formula_id_parts(low)
+        if parsed[2]:
+            return _normalize_bron(parsed[2]) or parsed[2]
+        norm = _normalize_bron(low)
+        if norm:
+            return norm
+        if low in _BRON_SUFFIXES:
+            return "hemelum" if low == "liturgikon" else low
+    return None
+
+
+def list_templates_for_soort_toon(
+    soort: str,
+    toon: int | str,
+    *,
+    library_root: Path | None = None,
+) -> list[str]:
+    """Canonieke library-ids die bij ``{soort}-toon-{n}`` horen (T1).
+
+    Inclusief ids die alleen via ``aliases.yaml`` bereikbaar zijn
+    (bijv. ``kondak-toon-4-hemelum`` → ``tropaar-toon-4-hemelum``).
+    Tropaar↔kondak: als er voor de gevraagde soort geen map is, ook de
+    andere soort meenemen wanneer die via alias/`same_as` de formule dekt.
+    """
+    root = library_root or default_library_root()
+    soort_s = (soort or "").strip().lower()
+    tone = _parse_toon(toon)
+    if not soort_s or tone is None:
+        return []
+
+    known = set(list_template_ids(root))
+    aliases = template_aliases(root)
+    prefix = f"{soort_s}-toon-{tone}"
+    found: set[str] = set()
+
+    def _add_resolved(name: str) -> None:
+        rid = resolve_template_id(name, library_root=root)
+        if (root / rid / "template.yaml").is_file():
+            found.add(rid)
+        elif rid in known:
+            found.add(rid)
+
+    for tid in known:
+        if tid == prefix or tid.startswith(prefix + "-"):
+            found.add(tid)
+
+    for alias, _target in aliases.items():
+        if alias == prefix or alias.startswith(prefix + "-"):
+            _add_resolved(alias)
+
+    # Korte alias zonder bron: ``kondak-toon-5``
+    _add_resolved(prefix)
+
+    if not found and soort_s in ("tropaar", "kondak"):
+        other = "kondak" if soort_s == "tropaar" else "tropaar"
+        return list_templates_for_soort_toon(
+            other, tone, library_root=root
+        )
+
+    return sorted(found)
+
+
+def _candidate_matches_hint(hint: str, candidates: list[str], *, library_root: Path) -> str | None:
+    """Als ``hint`` (alias of id) bij precies één kandidaat hoort → die id."""
+    raw = hint.strip()
+    if not raw:
+        return None
+    if raw in candidates:
+        return raw
+    resolved = resolve_template_id(raw, library_root=library_root)
+    hits = [c for c in candidates if c == resolved or c == raw]
+    if len(hits) == 1:
+        return hits[0]
+    # Hint is alias naar een kandidaat
+    if resolved in candidates:
+        return resolved
+    return None
+
+
+def _template_hint_from_existing_mvsa(path: Path | None) -> str | None:
+    """Lees ``template_opgegeven`` (voorkeur) of ``template`` uit bestaande MVSA."""
+    if path is None or not path.is_file() or path.suffix.lower() != ".mvsa":
+        return None
+    try:
+        from .yaml_frontmatter import parse_vsa_frontmatter
+
+        meta, _ = parse_vsa_frontmatter(path.read_text(encoding="utf-8"))
+    except OSError:
+        return None
+    asked = meta.get("template_opgegeven")
+    if asked not in (None, ""):
+        return str(asked).strip()
+    tpl = meta.get("template")
+    if tpl not in (None, ""):
+        return str(tpl).strip()
+    return None
+
+
+def select_template_id(
+    *,
+    soort: str | None = None,
+    toon: int | str | None = None,
+    bron: str | None = None,
+    path: Path | str | None = None,
+    output: Path | str | None = None,
+    library_root: Path | None = None,
+    explicit: str | None = None,
+) -> str:
+    """Kies template-id voor ``vsa mvsa`` (T1).
+
+    * ``explicit`` (CLI ``--template``) wint altijd.
+    * Anders: kandidaten uit ``soort``+``toon`` (verplicht).
+    * 0 kandidaten → harde fout; 1 → die gebruiken.
+    * Meerdere: bestaande uitvoer-``.mvsa`` (``template_opgegeven`` /
+      ``template``), anders bron uit leaf/pad/meta, anders harde fout.
+    """
+    root = library_root or default_library_root()
+    if explicit is not None and str(explicit).strip():
+        return str(explicit).strip()
+
+    path_p = Path(path) if path else None
+    out_p = Path(output) if output else None
+    stem = path_p.stem if path_p else ""
+
+    soort_s = (soort or "").strip().lower() or None
+    if not soort_s and stem:
+        soort_s = _soort_from_stem(stem)
+
+    tone = _parse_toon(toon)
+    if tone is None and stem:
+        m = re.search(r"toon-([1-8])", stem.lower())
+        if m:
+            tone = int(m.group(1))
+
+    if not soort_s or tone is None:
+        raise TemplateLibraryError(
+            "vsa mvsa vereist soort en toon in de .vsa-frontmatter "
+            "(of --template). Zie vsa-mvsa-contract.md T1.",
+            code="TEMPLATE-SELECT-META",
+        )
+
+    candidates = list_templates_for_soort_toon(
+        soort_s, tone, library_root=root
+    )
+    if not candidates:
+        raise TemplateLibraryError(
+            f"geen template voor soort={soort_s!r} toon={tone}. "
+            f"Voeg library/{soort_s}-toon-{tone}-… toe of geef --template. "
+            f"Bekend: {', '.join(list_template_ids(root)) or '(geen)'}",
+            code="TEMPLATE-SELECT-MISSING",
+        )
+    if len(candidates) == 1:
+        return candidates[0]
+
+    # Meerdere formules (vaak …-groningen én …-hemelum).
+    existing_hint = _template_hint_from_existing_mvsa(out_p)
+    if existing_hint:
+        hit = _candidate_matches_hint(
+            existing_hint, candidates, library_root=root
+        )
+        if hit:
+            # Behoud de opgegeven string (alias) voor template_opgegeven.
+            return existing_hint
+        raise TemplateLibraryError(
+            f"bestaande MVSA noemt template {existing_hint!r}, maar die "
+            f"hoort niet bij soort={soort_s!r} toon={tone}. "
+            f"Kandidaten: {', '.join(candidates)}",
+            code="TEMPLATE-SELECT-EXISTING-MISMATCH",
+        )
+
+    bron_s = (
+        _bron_from_path(out_p)
+        or _bron_from_path(path_p)
+        or _normalize_bron(bron)
+    )
+    if bron_s:
+        bron_hits = [
+            c
+            for c in candidates
+            if formula_id_parts(c)[2] == bron_s
+            or c.endswith(f"-{bron_s}")
+        ]
+        # liturgikon-alias → hemelum
+        if bron_s == "hemelum" and not bron_hits:
+            bron_hits = [
+                c
+                for c in candidates
+                if formula_id_parts(c)[2] in ("hemelum", "liturgikon")
+            ]
+        if len(bron_hits) == 1:
+            return bron_hits[0]
+        if len(bron_hits) > 1:
+            candidates = bron_hits
+
+    raise TemplateLibraryError(
+        f"meerdere templates voor soort={soort_s!r} toon={tone}: "
+        f"{', '.join(candidates)}. Geef --template, of regenereer een "
+        f"bestaande .mvsa (dan geldt template/template_opgegeven uit die "
+        f"frontmatter).",
+        code="TEMPLATE-SELECT-AMBIGUOUS",
+    )
+
+
 def infer_template_id(
     *,
     soort: str | None = None,
@@ -173,81 +406,17 @@ def infer_template_id(
     bron: str | None = None,
     path: Path | str | None = None,
     library_root: Path | None = None,
+    output: Path | str | None = None,
 ) -> str:
-    """Leid een formule-id af uit meta/pad; fallback Groningen; anders default.
-
-    Liturgikon telt als Hemelum. Bestandsnaam-suffix wint op vrije
-    ``bron.uitgangspunt``-tekst. Ontbrekende bron-specifieke map →
-    ``…-groningen`` als die bestaat.
-    """
-    root = library_root or default_library_root()
-    stem = Path(path).stem if path else ""
-    soort_s = (soort or "").strip().lower() or None
-    # Pad-suffix eerst (klaar-bestanden heten …-hemelum.mvsa).
-    bron_s = _bron_from_stem(stem) or _normalize_bron(bron)
-    if not soort_s and stem:
-        for prefix in (
-            "kondak",
-            "tropaar",
-            "stichier",
-            "vers",
-        ):
-            if stem.lower().startswith(prefix + "-") or stem.lower().startswith(
-                prefix + "_"
-            ):
-                soort_s = prefix
-                break
-
-    tone: int | None = None
-    if toon is not None and str(toon).strip() != "":
-        try:
-            tone = int(toon)
-        except (TypeError, ValueError):
-            tone = None
-    if tone is None and stem:
-        m = re.search(r"toon-([1-8])", stem.lower())
-        if m:
-            tone = int(m.group(1))
-
-    if not soort_s or tone is None:
-        return resolve_template_id(DEFAULT_TEMPLATE_ID, library_root=root)
-
-    bron_try = bron_s or "groningen"
-    candidates = [
-        f"{soort_s}-toon-{tone}-{bron_try}",
-    ]
-    if bron_try == "hemelum":
-        candidates.append(f"{soort_s}-toon-{tone}-liturgikon")
-    # Soort-wissel tropaar↔kondak (zelfde formule via same_as/alias).
-    other = "kondak" if soort_s == "tropaar" else (
-        "tropaar" if soort_s == "kondak" else None
+    """Compat-wrapper: zelfde regels als :func:`select_template_id` (T1)."""
+    return select_template_id(
+        soort=soort,
+        toon=toon,
+        bron=bron,
+        path=path,
+        output=output,
+        library_root=library_root,
     )
-    if other:
-        candidates.append(f"{other}-toon-{tone}-{bron_try}")
-    # Groningen-fallback
-    if bron_try != "groningen":
-        candidates.append(f"{soort_s}-toon-{tone}-groningen")
-        if other:
-            candidates.append(f"{other}-toon-{tone}-groningen")
-
-    known = set(list_template_ids(root))
-    aliases = template_aliases(root)
-    for cand in candidates:
-        resolved = resolve_template_id(cand, library_root=root)
-        if resolved in known or cand in known:
-            return resolved if resolved in known else cand
-        # Alias naar iets dat bestaat
-        if resolved in aliases.values() or resolved in known:
-            if (root / resolved / "template.yaml").is_file():
-                return resolved
-
-    # Laatste poging: bestaand pad na alias
-    for cand in candidates:
-        rid = resolve_template_id(cand, library_root=root)
-        if (root / rid / "template.yaml").is_file():
-            return rid
-
-    return resolve_template_id(DEFAULT_TEMPLATE_ID, library_root=root)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:

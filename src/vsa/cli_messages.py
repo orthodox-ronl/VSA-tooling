@@ -45,24 +45,41 @@ def format_cli_error(
     column: int | None = None,
     hint: str | None = None,
 ) -> str:
-    """Bouw een beheerder-leesbare fouttekst (één of twee regels)."""
-    text = (message or "").strip() or "Onbekende fout."
+    """Bouw een beheerder-leesbare fouttekst (meerdere regels toegestaan).
+
+    Locatie op de eerste regel; verdere regels van ``message`` blijven
+    onder elkaar. Hint-blok daaronder, eveneens regel-per-regel.
+    """
+    raw = (message or "").strip() or "Onbekende fout."
+    msg_lines = raw.splitlines() or [raw]
+    first = (msg_lines[0] if msg_lines else raw).strip() or "Onbekende fout."
+    rest = [ln.rstrip() for ln in msg_lines[1:]]
+
     label = path_label(path) if path is not None else ""
     if label:
         if line is not None and column is not None:
-            head = f"{label}:{int(line)}:{int(column)}: {text}"
+            head = f"{label}:{int(line)}:{int(column)}: {first}"
         elif line is not None:
-            head = f"{label}:{int(line)}: {text}"
+            head = f"{label}:{int(line)}: {first}"
         else:
-            head = f"{label}: {text}"
+            head = f"{label}: {first}"
     else:
-        head = text
+        head = first
+
+    parts = [head]
+    parts.extend(rest)
+
     hint_text = (hint or "").strip()
     if hint_text:
-        if not hint_text.lower().startswith("hint:"):
-            hint_text = f"Hint: {hint_text}"
-        return f"{head}\n{hint_text}"
-    return head
+        hint_lines = hint_text.splitlines()
+        first_hint = hint_lines[0].strip()
+        if not first_hint.lower().startswith("hint:"):
+            first_hint = f"Hint: {first_hint}"
+        parts.append("")
+        parts.append(first_hint)
+        for ln in hint_lines[1:]:
+            parts.append(ln.rstrip())
+    return "\n".join(parts)
 
 
 def emit_cli_error(
@@ -103,7 +120,11 @@ def emit_cli_exception(
     source = path if path is not None else getattr(exc, "source", None) or None
     code = getattr(exc, "code", None)
     if code and not str(message).startswith(str(code)):
-        message = f"{code}: {message}"
+        # Code op eigen regel bij meerregelige beschrijving (leesbaarder).
+        if "\n" in message:
+            message = f"{code}\n{message}"
+        else:
+            message = f"{code}: {message}"
     emit_cli_error(
         message,
         path=source,

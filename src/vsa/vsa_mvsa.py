@@ -41,8 +41,9 @@ from .template_library import (
     DEFAULT_VOICE_OCT,
     ResolvedTemplate,
     TemplateLibraryError,
-    infer_template_id,
+    list_templates_for_soort_toon,
     load_resolved_template,
+    select_template_id,
 )
 from .vsa_stanzas import ensure_stanza_stars, extract_stanza_notes
 from .yaml_frontmatter import parse_vsa_frontmatter
@@ -78,21 +79,27 @@ def format_emit_warnings(warnings: list[str]) -> list[str]:
     return lines
 
 
-# Frontmatter-velden die in de afgeleide MVSA blijven (playback → @-regels).
-# ``template`` = feitelijk gebruikte formule-id (T1/T6); niet playback.
-# ``template_opgegeven`` = wat bij conversie werd gevraagd (alias), indien anders.
+# Catalogusvelden uit de VSA → MVSA-frontmatter (T6). Playback (do/mode/tempo)
+# hoort in ``@``-regels, niet hier. Volgorde: bij elkaar horende sleutels
+# bij elkaar (``soort`` direct boven ``toon``; template-ids bij elkaar).
 _EMIT_FRONTMATTER_KEYS = (
     "titel",
-    "partituur",
-    "toon",
     "taal",
-    "bron",
     "soort",
-    "gelegenheid",
-    "zoektekst",
+    "toon",
     "template",
     "template_opgegeven",
+    "partituur",
+    "bron",
+    "gelegenheid",
+    "gelegenheden",
+    "zoektekst",
+    "gebruikt-in",
+    "corpus_id",
 )
+
+class _LiteralZoektekst(str):
+    """Zoektekst als YAML literal block (``|``), frase per regel."""
 
 
 def clean_emit_frontmatter(
@@ -101,57 +108,81 @@ def clean_emit_frontmatter(
     template_id: str | None = None,
     template_opgegeven: str | None = None,
 ) -> str:
-    """YAML-frontmatter voor schets-MVSA: catalogusvelden + formule-id.
+    """YAML-frontmatter voor schets-MVSA: catalogusvelden + formule-id (T6).
 
-    Geen ``do`` / ``mode`` / ``tempo`` (playback staat in ``@``-regels).
-    ``template`` = feitelijk gebruikte formule-id (na alias/``same_as``).
-    ``template_opgegeven`` alleen als die afwijkt van ``template``.
+    Neemt nuttige VSA-frontmatter over (titel, soort, toon, taal, bron,
+    gelegenheid, zoektekst, …). Geen ``do`` / ``mode`` / ``tempo`` (die
+    staan in ``@``-regels vlak boven ``@oct``). ``template`` = feitelijk
+    gebruikte formule-id (na alias/``same_as``); ``template_opgegeven``
+    alleen als die afwijkt van ``template``.
     """
     if not meta and not template_id:
         return ""
-    out: dict[str, Any] = {}
-    src = meta or {}
-    if src.get("titel") not in (None, ""):
-        out["titel"] = src["titel"]
-    elif src.get("title") not in (None, ""):
-        out["titel"] = src["title"]
-    skip = {"titel", "template", "template_opgegeven"}
-    for key in _EMIT_FRONTMATTER_KEYS:
-        if key in skip:
-            continue
-        val = src.get(key)
-        if val is None or val == "":
-            continue
-        out[key] = val
+    src = dict(meta or {})
+    # Legacy aliassen → canonieke sleutels.
+    if src.get("titel") in (None, "") and src.get("title") not in (None, ""):
+        src["titel"] = src["title"]
+    if src.get("soort") in (None, "") and src.get("genre") not in (None, ""):
+        src["soort"] = src["genre"]
+    if src.get("toon") in (None, "") and src.get("tone") not in (None, ""):
+        src["toon"] = src["tone"]
+
     tid = str(template_id or src.get("template") or "").strip()
-    if tid:
-        out["template"] = tid
     asked = str(
         template_opgegeven
         if template_opgegeven is not None
         else (src.get("template_opgegeven") or "")
     ).strip()
-    if asked and tid and asked != tid:
-        out["template_opgegeven"] = asked
+
+    out: dict[str, Any] = {}
+    for key in _EMIT_FRONTMATTER_KEYS:
+        if key == "template":
+            if tid:
+                out["template"] = tid
+            continue
+        if key == "template_opgegeven":
+            if asked and tid and asked != tid:
+                out["template_opgegeven"] = asked
+            continue
+        val = src.get(key)
+        if val is None or val == "":
+            continue
+        if isinstance(val, (list, dict)) and len(val) == 0:
+            continue
+        out[key] = val
+
     if not out:
         return ""
+
+    zt = out.get("zoektekst")
+    if isinstance(zt, str) and "\n" in zt:
+        out["zoektekst"] = _LiteralZoektekst(zt.replace("\r\n", "\n").strip("\n"))
+
     try:
         import yaml
     except ImportError:
         lines = ["---"]
-        if out.get("titel"):
-            lines.append(f"titel: {out['titel']}")
-        if out.get("template"):
-            lines.append(f"template: {out['template']}")
-        if out.get("template_opgegeven"):
-            lines.append(f"template_opgegeven: {out['template_opgegeven']}")
+        for k, v in out.items():
+            lines.append(f"{k}: {v}")
         lines.append("---")
-        return "\n".join(lines) if len(lines) > 2 else ""
-    dumped = yaml.safe_dump(
+        return "\n".join(lines)
+
+    class _Dumper(yaml.SafeDumper):
+        pass
+
+    def _rep_lit(dumper: yaml.SafeDumper, data: _LiteralZoektekst) -> yaml.Node:
+        return dumper.represent_scalar(
+            "tag:yaml.org,2002:str", str(data), style="|"
+        )
+
+    _Dumper.add_representer(_LiteralZoektekst, _rep_lit)
+    dumped = yaml.dump(
         out,
+        Dumper=_Dumper,
         allow_unicode=True,
         sort_keys=False,
         default_flow_style=False,
+        width=1000,
     ).rstrip()
     return f"---\n{dumped}\n---"
 
@@ -1014,6 +1045,81 @@ def _vsa_body_as_comment(body: str) -> str:
     return "\n".join(lines)
 
 
+def find_fitting_alternate_templates(
+    vsa_text: str,
+    *,
+    failed: ResolvedTemplate,
+    soort: str | None,
+    toon: int | str | None,
+    library_root: Path | None = None,
+    melody_voice: str = "S",
+    source_name: str = "",
+) -> list[str]:
+    """Andere formules voor dezelfde soort+toon die wél mappen (T4-suggestie).
+
+    Schrijft niets. Slaat kandidaten over met dezelfde formule-id als
+    ``failed`` (bijv. tropaar↔kondak via ``same_as``).
+    """
+    soort_s = (soort or "").strip().lower() or None
+    if not soort_s or toon in (None, ""):
+        return []
+    candidates = list_templates_for_soort_toon(
+        soort_s, toon, library_root=library_root
+    )
+    failed_ids = {
+        failed.canonical_id,
+        failed.formula_id,
+        failed.requested_id,
+    }
+    if failed.requested_raw:
+        failed_ids.add(failed.requested_raw)
+    fitting: list[str] = []
+    for cand in candidates:
+        if cand in failed_ids:
+            continue
+        try:
+            alt = load_resolved_template(cand, library_root=library_root)
+        except TemplateLibraryError:
+            continue
+        if alt.formula_id in failed_ids or alt.canonical_id in failed_ids:
+            continue
+        try:
+            map_vsa_to_template(
+                alt.doc,
+                vsa_text,
+                source=source_name or "vsa",
+                melody_voice=melody_voice,
+            )
+        except TemplateInstanceError:
+            continue
+        fitting.append(alt.canonical_id)
+    return fitting
+
+
+def format_alternate_template_hint(
+    *,
+    failed_id: str,
+    fitting: list[str],
+    source: Path | str,
+) -> str:
+    """Beheerderstekst: welke formule wél past + kopieerbaar ``vsa mvsa``-commando."""
+    if not fitting:
+        return ""
+    src = Path(source)
+    # Leesbaar pad; quotes als er spaties inzitten.
+    src_s = str(src)
+    if " " in src_s:
+        src_s = f'"{src_s}"'
+    lines = [
+        f"De gekozen formule {failed_id} past niet op deze VSA.",
+        f"Deze VSA past wél op: {', '.join(fitting)}.",
+        "Opnieuw proberen:",
+    ]
+    for tid in fitting:
+        lines.append(f"  vsa mvsa {src_s} --template {tid}")
+    return "\n".join(lines)
+
+
 def convert_vsa_to_mvsa(
     source: Path | str,
     *,
@@ -1028,9 +1134,10 @@ def convert_vsa_to_mvsa(
 ) -> VsaMvsaResult:
     """VSA + library-template → schets-MVSA-tekst (T1–T7).
 
-    ``template``: canonieke id of playbook-alias. Zonder ``--template``:
-    afleiden uit frontmatter/pad (``infer_template_id``), anders Hemelum
-    toon 4. ``same_as``/``aliases.yaml`` worden opgelost.
+    ``template``: canonieke id of alias (CLI ``--template``). Zonder
+    expliciete keuze: templates zoeken op ``soort``+``toon`` (T1);
+    ontbrekend → harde fout; één → gebruiken; meerdere → bestaande
+    uitvoer-``.mvsa`` of bron/leaf. Geen stille Hemelum-default.
     """
     src = Path(source)
     if not src.is_file():
@@ -1047,35 +1154,69 @@ def convert_vsa_to_mvsa(
     norm_body, _ = ensure_stanza_stars(body)
     vsa_text = fm + norm_body
 
-    tpl_name = template
-    if tpl_name is None or not str(tpl_name).strip():
-        # Frontmatter ``template:`` wint; anders soort/toon/bron uit meta/pad.
-        fm_tpl = meta.get("template")
-        if fm_tpl not in (None, ""):
-            tpl_name = str(fm_tpl)
-        else:
-            bron_u = None
-            bron = meta.get("bron")
-            if isinstance(bron, dict):
-                bron_u = bron.get("uitgangspunt")
-            elif isinstance(bron, str):
-                bron_u = bron
-            tpl_name = infer_template_id(
-                soort=meta.get("soort") or meta.get("genre"),
-                toon=meta.get("toon") or meta.get("tone"),
-                bron=str(bron_u).lower() if bron_u else None,
-                path=src,
-                library_root=library_root,
-            )
+    out_path: Path | None = None
+    if output is not None:
+        out_path = Path(output)
+    elif write:
+        out_path = src.with_suffix(".mvsa")
+
+    bron_u = None
+    bron = meta.get("bron")
+    if isinstance(bron, dict):
+        bron_u = bron.get("uitgangspunt")
+    elif isinstance(bron, str):
+        bron_u = bron
+
+    tpl_name = select_template_id(
+        soort=meta.get("soort") or meta.get("genre"),
+        toon=meta.get("toon") or meta.get("tone"),
+        bron=str(bron_u) if bron_u else None,
+        path=src,
+        output=out_path,
+        library_root=library_root,
+        explicit=template,
+    )
 
     resolved = load_resolved_template(tpl_name, library_root=library_root)
 
-    mapped = map_vsa_to_template(
-        resolved.doc,
-        vsa_text,
-        source=src.name,
-        melody_voice=melody_voice,
-    )
+    try:
+        mapped = map_vsa_to_template(
+            resolved.doc,
+            vsa_text,
+            source=src.name,
+            melody_voice=melody_voice,
+        )
+    except TemplateInstanceError as exc:
+        # T4: harde fout blijft; suggesteer andere soort+toon-formule als die past.
+        fitting = find_fitting_alternate_templates(
+            vsa_text,
+            failed=resolved,
+            soort=meta.get("soort") or meta.get("genre"),
+            toon=meta.get("toon") or meta.get("tone"),
+            library_root=library_root,
+            melody_voice=melody_voice,
+            source_name=src.name,
+        )
+        hint_extra = format_alternate_template_hint(
+            failed_id=resolved.canonical_id,
+            fitting=fitting,
+            source=src,
+        )
+        if hint_extra:
+            base_hint = (exc.hint_nl or "").rstrip()
+            new_hint = f"{base_hint}\n{hint_extra}".strip() if base_hint else hint_extra
+            raise TemplateInstanceError(
+                exc.message_nl,
+                code=exc.code,
+                hint_nl=new_hint,
+                source=exc.source or str(src),
+                line=exc.line,
+                column=exc.column,
+                phrase_id=exc.phrase_id,
+                lyric=exc.lyric,
+                note_index=exc.note_index,
+            ) from exc
+        raise
 
     title = meta.get("title") or meta.get("titel") or src.stem
     if tempo is None:
@@ -1137,12 +1278,6 @@ def convert_vsa_to_mvsa(
         with_sections=emit_sections_enabled(formula),
         final_id=str(formula.get("final") or "laatste"),
     )
-
-    out_path: Path | None = None
-    if output is not None:
-        out_path = Path(output)
-    elif write:
-        out_path = src.with_suffix(".mvsa")
 
     if out_path is not None:
         out_path.parent.mkdir(parents=True, exist_ok=True)

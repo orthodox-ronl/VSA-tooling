@@ -11,27 +11,64 @@ lees de relevante **T-id** hier; wijzig normatieve tekst **alleen** hier
 
 ## Architectuur (T0)
 
-| Laag                           | Rol                                                                        |
-| ------------------------------ | -------------------------------------------------------------------------- |
+| Laag                           | Rol                                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------------------ |
 | **Template-id**                | Bijv. `kondak-toon-1-groningen` (map `library/<id>/`); CLI-alias later (`kondak-t1`) |
-| **Template** (`template.yaml`) | Formule: frasen, rollen, ankers, `do`/`mode`, speelplan                    |
-| **Motor**                      | Gedeelde mapper + emit voor alle template-ids                              |
-| **Instance**                   | Afgeleide MVSA (schets tot goedgekeurd in corpus)                          |
+| **Template** (`template.yaml`) | Formule: frasen, rollen, ankers, `do`/`mode`, speelplan                              |
+| **Motor**                      | Gedeelde mapper + emit voor alle template-ids                                        |
+| **Instance**                   | Afgeleide MVSA (schets tot goedgekeurd in corpus)                                    |
 
 Eén motor, veel templates. Toon-specifieke code alleen als het eventmodel
 tekortschiet — eerst YAML proberen (T7).
 
 ## Checklist T1–T7
 
-| Id  | Regel                                | Kort                                                                                                                                                                                                                                                          |
-| --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T1  | Template-id                          | Elke afgeleide MVSA noemt de **feitelijk gebruikte** formule-id in frontmatter (`template:`) én in meta-commentaar. Was de CLI-/infer-id een alias (of `same_as`), dan ook `template_opgegeven:`. Geen stille default zonder vermelding.                      |
-| T2  | Melodiestem uit VSA                  | **Default:** VSA-melodie matcht template-`pitches.S` en vult de MVSA-**S**-regel. **Override:** `--melody A` (enz.) → match op `pitches.A` (of T/B); VSA-pitch vult die MVSA-stem; overige stemmen uit template op hetzelfde event.                           |
-| T3  | Overige stemmen                      | Niet-melodiestemmen: laddergraden uit template-`pitches.*` op het **zelfde** gekoppelde event (synchroon met melodiekeuzes H4–H8).                                                                                                                            |
-| T4  | ELM / EHM                            | **ELM:** VSA wint (duur). **EHM:** exacte match op template-`pitches.<melodiestem>` t.o.v. template-`do`/`mode` (H5/H9). Mismatch → harde fout, geen stil hold.                                                                                               |
-| T5  | Recite & ELM in emit                 | MVSA-recite `(…)` = standaardkwart per lettergreep; **geen** ELM binnen haakjes. Same-pitch-collapse alleen voor default-kwarten. Halve noten (`_`) blijven eigen L-posities. Melisma: zie ook K2/K3 / mapping H8.                                            |
-| T6  | Schets-documentvorm & waarschuwingen | Afgeleide MVSA: gekuiste frontmatter; VSA-commentaar; bron/template/notatie; schets-banner + `# WAARSCHUWING:`; `@title`/`@do`/`@mode`/`@tempo`/`@oct`; systemen **zonder** `@speelplan`/`@blok`; secties `cyclus-1` / `herhaling` / `laatste` (niet toon 3). |
-| T7  | Corpus & verbetercyclus              | Per template-id: corpus `.vsa` + goedgekeurde `.mvsa`. Eerst template-YAML bijstellen; motor alleen bij structurele gaten. Na wijziging: steekproef/regressie op corpus. Lessen in `library/<id>/notes/`.                                                     |
+| Id  | Regel                                | Kort                                                                                                                                                                                                                                                                                                                              |
+| --- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1  | Template-id                          | Keuze: zie **T1 — templatekeuze** hieronder. Elke afgeleide MVSA noemt de **feitelijk gebruikte** formule-id in frontmatter (`template:`) én in meta-commentaar. Was de CLI-/selectie-id een alias (of `same_as`), dan ook `template_opgegeven:`. Geen stille default.                                                            |
+| T2  | Melodiestem uit VSA                  | **Default:** VSA-melodie matcht template-`pitches.S` en vult de MVSA-**S**-regel. **Override:** `--melody A` (enz.) → match op `pitches.A` (of T/B); VSA-pitch vult die MVSA-stem; overige stemmen uit template op hetzelfde event.                                                                                               |
+| T3  | Overige stemmen                      | Niet-melodiestemmen: laddergraden uit template-`pitches.*` op het **zelfde** gekoppelde event (synchroon met melodiekeuzes H4–H8).                                                                                                                                                                                                |
+| T4  | ELM / EHM                            | **ELM:** VSA wint (duur). **EHM:** exacte match op template-`pitches.<melodiestem>` t.o.v. template-`do`/`mode` (H5/H9). Mismatch → harde fout, geen stil hold. Bij fout: andere formules voor dezelfde `soort`+`toon` stil proberen; als die passen → suggestie + plakbaar `vsa mvsa … --template …` (geen automatische switch). |
+| T5  | Recite & ELM in emit                 | MVSA-recite `(…)` = standaardkwart per lettergreep; **geen** ELM binnen haakjes. Same-pitch-collapse alleen voor default-kwarten. Halve noten (`_`) blijven eigen L-posities. Melisma: zie ook K2/K3 / mapping H8.                                                                                                                |
+| T6  | Schets-documentvorm & waarschuwingen | Afgeleide MVSA: gekuiste frontmatter; VSA-commentaar; bron/template/notatie; schets-banner + `# WAARSCHUWING:`; `@title`/`@do`/`@mode`/`@tempo`/`@oct`; systemen **zonder** `@speelplan`/`@blok`; secties `cyclus-1` / `herhaling` / `laatste` (niet toon 3).                                                                     |
+| T7  | Corpus & verbetercyclus              | Per template-id: corpus `.vsa` + goedgekeurde `.mvsa`. Eerst template-YAML bijstellen; motor alleen bij structurele gaten. Na wijziging: steekproef/regressie op corpus. Lessen in `library/<id>/notes/`.                                                                                                                         |
+
+## T1 — templatekeuze (detail)
+
+`vsa mvsa` zoekt formules in de library op **`soort` + `toon`** uit de
+`.vsa`-frontmatter (verplicht op catalogus-VSA’s).
+
+| Situatie                                                        | Gedrag                                                                             |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| CLI `--template ID`                                             | Die id/alias wint altijd.                                                          |
+| Geen enkele passende formule                                    | **Harde fout** — geen stille Hemelum-/Groningen-default.                           |
+| Precies één formule (`{soort}-toon-{n}-…`, eventueel via alias) | Die gebruiken.                                                                     |
+| Meerdere formules (bijv. `…-groningen` én `…-hemelum`)          | Disambigueren (zie hieronder); lukt dat niet → **harde fout** met kandidatenlijst. |
+
+**Disambiguatie bij meerdere kandidaten**
+
+1. **Bestaande uitvoer-`.mvsa`** (hergeneratie naar hetzelfde pad): gebruik
+   `template_opgegeven` als die staat, anders `template` — dat is de id
+   waarmee de conversie eerder werd aangeroepen (mogelijk een alias). Die
+   hint moet bij de kandidaten voor deze `soort`/`toon` horen.
+2. Anders: **bron** uit catalogus-leaf / bestandsnaam / `bron.uitgangspunt`
+   (Liturgikon ≡ Hemelum), als dat precies één kandidaat overlaat.
+3. Anders: geef `--template` (of regenereer een bestaande `.mvsa`).
+
+Implementatie: `vsa.template_library.select_template_id` /
+`list_templates_for_soort_toon`.
+
+## T4 — suggestie bij mappingfout
+
+Als `map_vsa_to_template` faalt (bijv. hoogte-mismatch) blijft dat een
+**harde fout** (geen stille andere formule). De CLI mag daarna andere
+library-ids voor dezelfde `soort`+`toon` **alleen in het geheugen**
+proberen. Formules met dezelfde `formula_id` (via `same_as`) tellen niet
+als alternatief. Past er minstens één: meld die id’s en een kopieerbaar
+`vsa mvsa … --template …`-commando in de hint. Geen interactieve vraag.
+
+Implementatie: `vsa.vsa_mvsa.find_fitting_alternate_templates` /
+`format_alternate_template_hint`.
 
 ## T2 — melodiestem (detail)
 
@@ -71,19 +108,20 @@ De emit van `vsa mvsa` schrijft een **schets** die dezelfde opbouw volgt
 als de gekuiste bestanden in `bibliotheek/.../_klaar_voor_acceptatie`
 (minus handmatige polish). Volgorde:
 
-1. **Frontmatter** — catalogusvelden (`titel`, `partituur`, `toon`,
-   `taal`, `bron`, `soort`, `gelegenheid`, `zoektekst`) plus **`template`**
-   (feitelijk gebruikte formule-id na alias/`same_as`, T1) en zo nodig
-   **`template_opgegeven`** (wat bij conversie werd gevraagd). Geen `do` /
-   `mode` / `tempo` in YAML (playback staat in `@`-regels).
+1. **Frontmatter** — nuttige catalogusvelden uit de VSA, in vaste volgorde:
+   `titel`, `taal`, `soort`, `toon` (die twee direct onder elkaar), daarna
+   **`template`** (feitelijk gebruikte formule-id na alias/`same_as`, T1) en
+   zo nodig **`template_opgegeven`**, dan `partituur`, `bron`,
+   `gelegenheid` / `gelegenheden`, `zoektekst`, eventueel `gebruikt-in` /
+   `corpus_id`. Geen `do` / `mode` / `tempo` in YAML.
 2. **Oorspronkelijke VSA** als commentaarblok (ELM-foutzoeken).
 3. **Meta-commentaar** — bronpad, template-pad/id (T1), notatie (ag-vsa).
 4. **Waarschuwingen** — algemene schets-banner plus eventuele specifieke
    `# WAARSCHUWING:`-regels (o.a. melisma met herhaalde niet-default ELM:
    controleer bron `{/&/x_}` vs `{/&/x_&_}`).
-5. **`@`-kop** — `@title`, `@do`, `@mode`, `@tempo` (default 180 voor
-   tropaar/kondak; VSA-frontmatter-tempo wordt genegeerd), `@oct` uit
-   template-`voice_oct`.
+5. **`@`-kop** — `@title`; daarna playback **`@do`**, **`@mode`**,
+   **`@tempo`** (default 180 voor tropaar/kondak; VSA-frontmatter-tempo
+   wordt genegeerd) **direct boven** `@oct` (uit template-`voice_oct`).
 6. **Geen** `@speelplan` en **geen** `@blok`.
 7. **Secties** — `@sectie cyclus-1` (eerste cycle-lengte uit
    template-`cycle`), `@sectie herhaling` (midden), `@sectie laatste`

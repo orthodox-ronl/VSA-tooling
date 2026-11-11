@@ -19,7 +19,7 @@ Per formule: `template.yaml`, plus afgeleide `template.mscz` (MuseScore) en
 | [`tropaar-toon-2-groningen`](library/tropaar-toon-2-groningen/README.md) | alias    | `same_as: kondak-toon-2-groningen`             |
 | [`tropaar-toon-6-groningen`](library/tropaar-toon-6-groningen/README.md) | alias    | `same_as: kondak-toon-6-groningen`             |
 | [`tropaar-toon-8-groningen`](library/tropaar-toon-8-groningen/README.md) | alias    | `same_as: kondak-toon-8-groningen` (Groningen) |
-| [`tropaar-toon-3-groningen`](library/tropaar-toon-3-groningen/README.md) | sequence | vaste volgorde + `2a` + ELM `.`                |
+| [`tropaar-toon-3-groningen`](library/tropaar-toon-3-groningen/README.md) | sequence | `1,3,1,2,3,1,4,laatste` (prefix+laatste) + ELM `.` |
 | [`tropaar-toon-4-hemelum`](library/tropaar-toon-4-hemelum/README.md)     | cycle    | Hemelum; Elia-mapping + corpus                 |
 | [`tropaar-toon-4-groningen`](library/tropaar-toon-4-groningen/README.md) | cycle    | Groningen tropaar/kondak toon 4                |
 | [`stichier-toon-5-pdf`](library/stichier-toon-5-pdf/README.md)           | cycle    | PDF-stichier `1,2,3` + `laatste`               |

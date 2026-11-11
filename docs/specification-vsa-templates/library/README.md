@@ -43,12 +43,26 @@ Invalid schema-cases blijven in `examples/invalid/` (geen formule-werkmap).
 | Artefact                    | Rol                 | In git?       | Regenereren                                     |
 | --------------------------- | ------------------- | ------------- | ----------------------------------------------- |
 | `template.yaml`             | formule-bron        | ja            | handmatig                                       |
-| `template.mscz`             | formule MuseScore   | ja (afgeleid) | `render_tropaar_toon4_corpus.py --template`     |
+| `template.mscz`             | formule MuseScore   | ja (afgeleid) | `python scripts\sync_library_templates.py`      |
 | `template.mxl`              | formule MusicXML    | ja (afgeleid) | idem / `render_vsa_template_musicxml.py --all`  |
+| `template.svg`              | formuleblad-SVG     | ja (afgeleid) | MuseScore CLI op `template.mscz` (niet `mscz svg`) |
 | `template.pdf`              | formule print       | nee           | `--template --pdf`                              |
 | corpus `.vsa`               | zangstuk-bron       | ja            | curated                                         |
 | corpus `.mscz` / `.mxl`     | instance            | ja (afgeleid) | `render_tropaar_toon4_corpus.py`                |
 | corpus `*.pdf`              | print               | nee           | `--pdf` / `--pdf-only`                          |
+
+`template.svg` is het volle formuleblad (titel, frase-ids, ankers). Gebruik
+**niet** `mscz svg` daarvoor: die straat stript blad-chrome en trimt de
+viewBox voor kale koormap-SVG’s, waardoor hoge formulepagina’s afgekapt
+raken. Voorbeeld:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+python scripts\sync_library_templates.py kondak-toon-1-groningen
+"C:\Program Files\MuseScore 4\bin\MuseScore4.exe" -f -o docs\specification-vsa-templates\library\kondak-toon-1-groningen\template.svg docs\specification-vsa-templates\library\kondak-toon-1-groningen\template.mscz
+```
+
+(Hernoem `template-1.svg` → `template.svg` als MuseScore een pagina-suffix zet.)
 
 Formuleblad: ankers, frase-ids, cycle-frames, `||O||` zonder VSA-lyrics.
 Instance: VSA-lyrics, recite-collapse, geen formulelabels; titel =

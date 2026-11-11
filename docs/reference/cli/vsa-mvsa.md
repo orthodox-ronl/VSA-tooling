@@ -15,9 +15,9 @@ vsa mvsa --list-templates
 
 | Onderdeel          | Betekenis                                                                                          |
 | ------------------ | -------------------------------------------------------------------------------------------------- |
-| `bestand.vsa`      | Bron: melodie + tekst + frasen                                                                     |
-| `--template`       | Library-id of alias; default `tropaar-toon-4-hemelum` (Hemelum)                                            |
-| `-o OUT`           | Uitvoerpad; default sibling `<bron>.mvsa`                                                          |
+| `bestand.vsa`      | Bron: melodie + tekst + frasen; frontmatter met **`soort`** en **`toon`** (T1)                     |
+| `--template`       | Library-id of alias; zonder vlag: keuze op `soort`+`toon` (T1); ontbrekend/ambigu → fout           |
+| `-o OUT`           | Uitvoerpad; default sibling `<bron>.mvsa`; bij hergeneratie telt bestaande MVSA-`template`         |
 | `--melody`         | Melodiestem (T2); default `S`                                                                      |
 | `--tempo`          | BPM in de MVSA; default **180** (tropaar/kondak); VSA-frontmatter negeert de converter             |
 | `--list-templates` | Toon ids onder de library-map                                                                      |
@@ -26,14 +26,16 @@ vsa mvsa --list-templates
 
 De schets-MVSA volgt de gekuiste klaar-vorm (geen speelplan, geen `@blok`):
 
-1. **Frontmatter** — catalogusvelden: `titel`, `partituur`, `toon`, `taal`,
-   `bron`, `soort`, `gelegenheid`, `zoektekst`. Geen `do` / `mode` / `tempo`
-   (die horen bij de `@`-regels).
+1. **Frontmatter** — nuttige VSA-catalogusvelden in vaste volgorde: `titel`,
+   `taal`, `soort`, `toon`, `template` (+ eventueel `template_opgegeven`),
+   `partituur`, `bron`, `gelegenheid`, `zoektekst`, …. Geen `do` / `mode` /
+   `tempo` in YAML.
 2. **Commentaar** — oorspronkelijke VSA (handig bij ELM-foutzoeken); daarna
    bronpad, template-id en notatie-regel.
 3. **Waarschuwingen** — algemene schets-banner plus eventuele
    `# WAARSCHUWING:`-regels (T6).
-4. **`@`-kop** — `@title`, `@do`, `@mode`, `@tempo` (standaard 180), `@oct`.
+4. **`@`-kop** — `@title`; daarna `@do`, `@mode`, `@tempo` (standaard 180)
+   direct boven `@oct`.
 5. **Systemen** — L + SATB per frase. Geen `@speelplan` en geen `@blok`.
 6. **Secties** — `@sectie cyclus-1` (eerste cycle), `@sectie herhaling`
    (midden), `@sectie laatste` (slotfrase). Bij **toon 3** geen drie
@@ -51,8 +53,15 @@ vsa mvsa lied.vsa --template tropaar-toon-2-groningen
 vsa mvsa lied.vsa --template kondak-toon-5-groningen
 ```
 
-Groningen toon 4 nooit als stille default — altijd
-`--template tropaar-toon-4-groningen`.
+Zonder `--template` zoekt de CLI formules bij `soort`+`toon`. Bestaan er
+meerdere (Hemelum én Groningen), dan: bestaande `.mvsa` op het
+uitvoerpad hergebruikt diens `template_opgegeven`/`template`, of de bron
+uit het leaf-pad; anders moet je `--template` geven. Geen stille default.
+
+Past de gekozen formule niet (hoogte-/mappingfout), dan blijft dat een
+fout. Als een **andere** formule voor dezelfde soort en toon wél past,
+staat in de hint welke dat is, plus een regel om opnieuw te proberen met
+`--template` (T4).
 
 Na een geslaagde schets: controle in MuseScore / oor; optioneel
 `mvsa mxl` voor Coria-playback.
@@ -64,13 +73,13 @@ Library:
 
 | Voorbeeld-id               | Opmerking                                        |
 | -------------------------- | ------------------------------------------------ |
-| `tropaar-toon-4-hemelum`           | Hemelum; default; alias `hemelum-tropaar-toon-4` |
+| `tropaar-toon-4-hemelum`   | Hemelum; alias `hemelum-tropaar-toon-4`          |
 | `tropaar-toon-4-groningen` | Groningen toon 4 (eigen B-pad frase 1)           |
-| `kondak-toon-1-groningen`            | Groningen toon 1 (ook tropaar via plans)         |
-| `tropaar-toon-2-groningen`           | `same_as` → `kondak-toon-2-groningen`                      |
-| `tropaar-toon-5-groningen`           | `same_as` → `kondak-toon-5-groningen`                      |
-| `tropaar-toon-6-groningen`           | `same_as` → `kondak-toon-6-groningen`                      |
-| `tropaar-toon-8-groningen`           | `same_as` → `kondak-toon-8-groningen`                      |
+| `kondak-toon-1-groningen`  | Groningen toon 1 (ook tropaar via plans)         |
+| `tropaar-toon-2-groningen` | `same_as` → `kondak-toon-2-groningen`            |
+| `tropaar-toon-5-groningen` | `same_as` → `kondak-toon-5-groningen`            |
+| `tropaar-toon-6-groningen` | `same_as` → `kondak-toon-6-groningen`            |
+| `tropaar-toon-8-groningen` | `same_as` → `kondak-toon-8-groningen`            |
 
 Nieuwe formules: nieuwe map + YAML; de CLI vindt ze via
 `--list-templates` zonder codewijziging (behalve optionele alias in

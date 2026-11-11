@@ -17,7 +17,10 @@ from .yaml_frontmatter import parse_vsa_frontmatter_with_body_offset
 
 # Frasescheiders: losse tokens buiten scopes (EHMs in `{…}` blijven scopes).
 # `*` / `/` = frasescheiding; `**` / `//` = sterke scheiding vóór laatste.
+# In platte VSA-tekst dienen deze tekens (spaties optioneel) alleen als
+# frasescheiding — ook vastgeplakt aan leesteken (`.*`, `./`).
 _STANZA_MARKERS = frozenset({"*", "**", "/", "//"})
+_STANZA_MARKERS_LONGEST = ("**", "//", "*", "/")
 _BARE_EHM_ALL = frozenset(
     v for v in VALID_EHM_VALUES if v and all(ch in "/\\-~#♯+b♭" for ch in v)
 )
@@ -65,13 +68,23 @@ def music_phrase_lines(body: str) -> list[str]:
     return fold_indent_continuations(raw)
 
 
-def has_phrase_separators(body: str) -> bool:
-    """True als de bron al expliciete `*` / `**` als frasescheiding gebruikt.
+def _token_has_stanza_marker(token: str) -> bool:
+    """True als ``token`` een frasescheider is of eraan vastzit (``.*``, ``woord/``)."""
+    if token in _STANZA_MARKERS:
+        return True
+    for marker in _STANZA_MARKERS_LONGEST:
+        if token.startswith(marker) or token.endswith(marker):
+            return True
+    return False
 
-    Alleen ster-markers schakelen ensure uit. Kale `/` of `//` komen ook
-    voor als enige scheiding vóór laatste (of als bladteken); zonder `*`/`**`
-    blijft regel-per-frase (+ indent-wrap) de ensure-route, daarna splitst
-    extract ook op `/`/`//`.
+
+def has_phrase_separators(body: str) -> bool:
+    """True als de bron al expliciete `*` / `**` / `/` / `//` als frasescheiding gebruikt.
+
+    Inclusief vastgeplakt aan leesteken of woord (`.*`, `./`). Alleen die
+    markers schakelen ``ensure_stanza_stars`` uit; zonder markers blijft
+    regel-per-frase (+ indent-wrap) de ensure-route. ``extract_stanza_notes``
+    splitst sowieso op dezelfde markers.
     """
     cleaned = strip_html_comments(body)
     for ln in cleaned.splitlines():
@@ -79,7 +92,7 @@ def has_phrase_separators(body: str) -> bool:
         if not s or s.startswith("#"):
             continue
         for tok in s.split():
-            if tok in {"*", "**"}:
+            if _token_has_stanza_marker(tok):
                 return True
     return False
 
@@ -301,6 +314,22 @@ def extract_stanza_notes(
     return stanzas
 
 
+def _peel_stanza_marker(
+    token: str, *, where: str
+) -> tuple[str | None, str]:
+    """Haal één frase-scheidingsmarker aan begin of eind van ``token``.
+
+    ``where`` is ``\"start\"`` of ``\"end\"``. Langste match eerst (`**` vóór
+    `*`, `//` vóór `/`), zodat `.**` niet als `*` + `*` wordt gelezen.
+    """
+    for marker in _STANZA_MARKERS_LONGEST:
+        if where == "start" and token.startswith(marker):
+            return marker, token[len(marker) :]
+        if where == "end" and token.endswith(marker):
+            return marker, token[: -len(marker)]
+    return None, token
+
+
 def _consume_text(
     text: str,
     *,
@@ -313,7 +342,11 @@ def _consume_text(
     text_start: int | None,
     loc,
 ) -> None:
-    """Spaties breken woorden; tokens zonder voorafgaande spatie plakken aan het woord."""
+    """Spaties breken woorden; tokens zonder voorafgaande spatie plakken aan het woord.
+
+    ``*`` / ``/`` / ``**`` / ``//`` in platte tekst zijn altijd frasescheiding
+    (T-context / VSA-grondtekst), ook zonder spaties (`ge{\\richt_}.*`).
+    """
     i = 0
     n = len(text)
     while i < n:
@@ -327,33 +360,49 @@ def _consume_text(
         token = text[i:j]
         token_start = None if text_start is None else text_start + i
         i = j
-        if token in _STANZA_MARKERS:
+
+        # Leidende frasescheiders (zeldzaam, wel toegestaan).
+        while token:
+            lead, rest = _peel_stanza_marker(token, where="start")
+            if lead is None:
+                break
             flush_word()
             close_stanza()
-            continue
+            token = rest
+
+        trail: str | None = None
+        if token:
+            trail, token = _peel_stanza_marker(token, where="end")
+
         if token in _BARE_EHM_TOKENS:
-            # Losse hoogtemarkering / barline (``//``, ``\``, …) — geen lyric.
+            # Losse hoogtemarkering (``\``, `~`, …) — geen lyric.
+            if trail is not None:
+                flush_word()
+                close_stanza()
             continue
-        stripped = _strip_leading_ehm(token)
-        if not stripped:
-            continue
-        if _PUNCT_ONLY_RE.match(stripped):
-            append_punct(stripped)
-            continue
-        pitch = resolver.current_pitch
-        dur = elm_to_duration("~", model=duration_model)
-        line, column = loc(token_start)
-        for lyric, _syllabic in recite_syllables(stripped):
-            word.append(
-                VsaNote(
-                    lyric=lyric,
-                    pitch=pitch,
-                    duration=dur,
-                    scoped=False,
-                    line=line,
-                    column=column,
-                )
-            )
+        if token:
+            stripped = _strip_leading_ehm(token)
+            if stripped:
+                if _PUNCT_ONLY_RE.match(stripped):
+                    append_punct(stripped)
+                else:
+                    pitch = resolver.current_pitch
+                    dur = elm_to_duration("~", model=duration_model)
+                    line, column = loc(token_start)
+                    for lyric, _syllabic in recite_syllables(stripped):
+                        word.append(
+                            VsaNote(
+                                lyric=lyric,
+                                pitch=pitch,
+                                duration=dur,
+                                scoped=False,
+                                line=line,
+                                column=column,
+                            )
+                        )
+        if trail is not None:
+            flush_word()
+            close_stanza()
 
 
 def _strip_leading_ehm(token: str) -> str:

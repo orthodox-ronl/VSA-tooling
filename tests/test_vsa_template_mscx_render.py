@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 import sys
 from pathlib import Path
@@ -53,14 +54,24 @@ def test_mscx_has_style_block() -> None:
     assert "<Style>" in mscx
     assert "<enableVerticalSpread>0</enableVerticalSpread>" in mscx
     assert "<maxPageFillSpread>0</maxPageFillSpread>" in mscx
-    assert "<maxSystemDistance>9.64</maxSystemDistance>" in mscx
-    assert "<maxSystemSpread>9.64</maxSystemSpread>" in mscx
-    assert "<minSystemDistance>9.64</minSystemDistance>" in mscx
-    assert "<staffDistance>5</staffDistance>" in mscx or "<staffDistance>5.0</staffDistance>" in mscx
-    assert "<frameSystemDistance>4</frameSystemDistance>" in mscx or "<frameSystemDistance>4.0</frameSystemDistance>" in mscx
+    _staff, _sys, _frame = render._vertical_layout_gaps()
+    assert f"<maxSystemDistance>{_sys}</maxSystemDistance>" in mscx
+    assert f"<maxSystemSpread>{_sys}</maxSystemSpread>" in mscx
+    assert f"<minSystemDistance>{_sys}</minSystemDistance>" in mscx
+    assert f"<staffDistance>{_staff}</staffDistance>" in mscx
+    assert f"<frameSystemDistance>{_frame}</frameSystemDistance>" in mscx
+    assert f"<staffUpperBorder>{render.TEMPLATE_STAFF_UPPER_BORDER_SP:g}</staffUpperBorder>" in mscx
+    assert "<longName></longName>" in mscx
+    assert "S<br/>A" not in mscx
+    assert "T<br/>B" not in mscx
+    # tropaar: 3 frasen → break na 2e → één LayoutBreak.
+    assert mscx.count("<LayoutBreak>") == 1
+    assert render.FRASE_ID_Y == render.MAPPING_TEXT_Y
+    assert f'y="{render.FRASE_ID_Y}"' in mscx
     assert "<enableIndentationOnFirstSystem>0</enableIndentationOnFirstSystem>" in mscx
     assert "<lastSystemFillLimit>1</lastSystemFillLimit>" in mscx
     assert f"<staffFontFace>{render.STAFF_FONT}</staffFontFace>" in mscx
+    assert "Tropaarmelodie (Toon 4)" in mscx
 
 
 def test_mscx_recite_is_stemless_breve_half_note() -> None:
@@ -78,9 +89,26 @@ def test_mscx_recite_is_stemless_breve_half_note() -> None:
 
 
 def test_mscx_has_no_invisible_padding_rests() -> None:
+    """Geen opgeblazen padding-rusten op tropaar (geen e.st. op eerste noot)."""
     mscx = _tropaar_mscx()
     assert "<Rest>" not in mscx
     assert 'len="20/4"' not in mscx
+
+
+def test_mscx_phrase_lead_spacer_when_first_event_has_anchor() -> None:
+    """Kondak: e.st. op eerste noot → onzichtbare spacer-noot, noten naar rechts."""
+    doc = render.load_resolved(
+        LIBRARY / "kondak-toon-1-groningen" / "template.yaml", LIBRARY
+    )
+    mscx = render.render_template_mscx(doc)
+    assert "<Rest>" not in mscx
+    spacers = re.findall(
+        rf"<Chord><durationType>{re.escape(render.PHRASE_LEAD_SPACER_NTYPE)}"
+        r"</durationType><noStem>1</noStem><Note><visible>0</visible><play>0</play>",
+        mscx,
+    )
+    # Frases 2, laatste, 1a × 2 staven × 2 stemmen.
+    assert len(spacers) == 12
 
 
 def test_mscx_anchor_is_abbreviation_plus_arrow() -> None:
@@ -89,15 +117,43 @@ def test_mscx_anchor_is_abbreviation_plus_arrow() -> None:
     assert ">l. st.</text>" in mscx
     assert ">↓</text>" in mscx
     assert f'y="{render.MAPPING_TEXT_Y}"' in mscx
+    assert f'y="{render.FRASE_ID_Y}"' in mscx
     assert f'y="{render.ANCHOR_ARROW_Y}"' in mscx
     assert render.ANCHOR_ARROW_Y == "-1.3"
     pair = re.search(
         r">l\. st\.</text></StaffText>\s*"
-        r'<StaffText>.*?y="-1\.3".*?>↓</text></StaffText>',
+        rf'<StaffText>.*?y="{re.escape(render.ANCHOR_ARROW_Y)}".*?>↓</text></StaffText>',
         mscx,
         re.DOTALL,
     )
     assert pair, "anker-afkorting then arrow below"
+    assert "<showMeasureNumber>0</showMeasureNumber>" in mscx
+    n_sys = math.ceil(3 / render.TEMPLATE_PHRASES_PER_SYSTEM)
+    _h = max(
+        render._PAGE_HEIGHT_A4_IN,
+        render._TEMPLATE_PAGE_TITLE_INCH
+        + n_sys * render._TEMPLATE_PAGE_INCH_PER_SYSTEM,
+    )
+    assert f"<pageHeight>{_h:.2f}</pageHeight>" in mscx
+
+
+def test_mscx_template_page_grows_with_extra_phrases() -> None:
+    doc = render.load_resolved(
+        LIBRARY / "kondak-toon-1-groningen" / "template.yaml", LIBRARY
+    )
+    mscx = render.render_template_mscx(doc)
+    n_sys = math.ceil(4 / render.TEMPLATE_PHRASES_PER_SYSTEM)
+    _h = max(
+        render._PAGE_HEIGHT_A4_IN,
+        render._TEMPLATE_PAGE_TITLE_INCH
+        + n_sys * render._TEMPLATE_PAGE_INCH_PER_SYSTEM,
+    )
+    assert f"<pageHeight>{_h:.2f}</pageHeight>" in mscx
+    # 4 frasen → break na 2e (niet na 4e = laatste).
+    assert mscx.count("<LayoutBreak>") == 1
+    assert "Kondakmelodie (Toon 1)" in mscx
+    assert f'x="{render.FRASE_ID_X_BESIDE_ANCHOR}"' in mscx
+    assert f'x="{render.ANCHOR_LABEL_X_BESIDE_FRASE}"' in mscx
 
 
 def test_mscx_frase_ids_keep_rectangle() -> None:

@@ -37,6 +37,48 @@ def test_normalize_collapses_whitespace() -> None:
     assert normalize_zoektekst("  a\n\tb  c  ") == "a b c"
 
 
+def test_zoektekst_splits_on_star_glued_to_period() -> None:
+    """Zoektekst volgt dezelfde `*`/`/`-frasescheiding als extract (ook ``.*``)."""
+    src = (
+        "---\n"
+        "titel: Test\n"
+        "---\n"
+        "\n"
+        "[:] eerste zin ge{\\richt_}.*\n"
+        "tweede zin hier [:]\n"
+    )
+    text = expected_zoektekst(src, kind="vsa")
+    lines = text.splitlines()
+    assert len(lines) >= 2
+    assert lines[0].endswith("gericht.")
+    assert "*" not in text
+    assert any(ln.startswith("tweede") for ln in lines)
+
+
+def test_apply_writes_phrase_lines_literal() -> None:
+    src = (
+        "---\n"
+        "titel: Test\n"
+        "---\n"
+        "\n"
+        "[:] Eerste frase hier *\n"
+        "tweede frase daar *\n"
+        "derde frase slot [:]\n"
+    )
+    result = apply_zoektekst(src, kind="vsa")
+    assert result.changed
+    assert "zoektekst: |" in result.text or "zoektekst:|-" in result.text.replace(
+        " ", ""
+    )
+    # Frases op eigen regels in het literal-blok
+    fm = result.text.split("---", 2)[1]
+    assert "Eerste frase hier" in fm
+    assert "\n  tweede frase daar\n" in fm or "\n tweede frase daar\n" in fm
+    assert check_zoektekst(result.text, kind="vsa", require=True) == []
+    again = apply_zoektekst(result.text, kind="vsa")
+    assert not again.changed
+
+
 def test_check_missing_on_mvsa() -> None:
     issues = check_zoektekst(_MVSA, kind="mvsa", require=True)
     assert [i.code for i in issues] == ["ZOEKTEKST-MISSING"]

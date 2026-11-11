@@ -147,8 +147,9 @@ def test_template_mscz_and_mxl_exist() -> None:
         mscx = archive.read("score.mscx").decode("utf-8")
     assert "<enableVerticalSpread>0</enableVerticalSpread>" in mscx
     assert "<maxPageFillSpread>0</maxPageFillSpread>" in mscx
-    assert "<minSystemDistance>9.64</minSystemDistance>" in mscx
-    assert "<maxSystemDistance>9.64</maxSystemDistance>" in mscx
-    assert "<staffDistance>5</staffDistance>" in mscx or "<staffDistance>5.0</staffDistance>" in mscx
-    assert "<frameSystemDistance>4</frameSystemDistance>" in mscx or "<frameSystemDistance>4.0</frameSystemDistance>" in mscx
+    _staff, _sys, _frame = render._vertical_layout_gaps(layout="template")
+    assert f"<minSystemDistance>{_sys}</minSystemDistance>" in mscx
+    assert f"<maxSystemDistance>{_sys}</maxSystemDistance>" in mscx
+    assert f"<staffDistance>{_staff}</staffDistance>" in mscx
+    assert f"<frameSystemDistance>{_frame}</frameSystemDistance>" in mscx
     assert "<enableIndentationOnFirstSystem>0</enableIndentationOnFirstSystem>" in mscx

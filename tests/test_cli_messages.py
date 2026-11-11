@@ -25,6 +25,22 @@ def test_format_cli_error_path_only() -> None:
     assert text == "missing.vsa: Pad niet gevonden."
 
 
+def test_format_cli_error_multiline_message_and_hint() -> None:
+    text = format_cli_error(
+        "hoogte-mismatch op lettergreep 'x'.\nGeen passend slot meer.",
+        path="lied.vsa",
+        line=10,
+        column=4,
+        hint="Pas de markeringen aan.\nOf kies --template andere-formule.",
+    )
+    lines = text.splitlines()
+    assert lines[0] == "lied.vsa:10:4: hoogte-mismatch op lettergreep 'x'."
+    assert lines[1] == "Geen passend slot meer."
+    assert lines[2] == ""
+    assert lines[3] == "Hint: Pas de markeringen aan."
+    assert lines[4] == "Of kies --template andere-formule."
+
+
 def test_vsa_mp3_reject_has_path_and_hint(tmp_path: Path, capsys) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04")

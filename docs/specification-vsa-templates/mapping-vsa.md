@@ -121,7 +121,7 @@ Stop met herhalen wanneer nog **N** regels over zijn; die vallen op de tail
 | --------------------------------------- | --------------------------------------------------------------------- |
 | `\|\|: 1, 2 :\|\| laatste`              | `repeat [1,2] until final` + `phrase laatste`                         |
 | `1 \|\|: 2, 3 :\|\| laatste`            | `phrase 1` + `repeat [2,3] until final` + `phrase laatste`            |
-| `1, 3, 1, 2, 3, 1, 2a, 4`               | `sequence: [1, 3, 1, 2, 3, 1, 2a, 4]`                                 |
+| `1, 3, 1, 2, 3, 1, 4, laatste`          | `sequence: [1, 3, 1, 2, 3, 1, 4, laatste]` (prefix + altijd `laatste`) |
 | `1, 2, 3, \|\|: 4, 5, 3a :\|\| laatste` | `sequence [1,2,3]` + `repeat [4,5,3a] until final` + `phrase laatste` |
 
 ## `mapping_plans` (meerdere plannen)
@@ -292,9 +292,19 @@ afwijking.
 
 ## Sequence-form / `text_mapping`-lengte
 
-`sequence: ["1", "2", "3"]` eist precies drie VSA-regels. Cycle+final is
-variabel (herhaling tot de slotfrase past). Past het aantal regels niet bij
-het plan → `VSA-TEMPLATE-TEXT-MAPPING` (zelfde geest als `vsa validate`).
+`sequence: ["1", "2", "3"]` (zonder `laatste` aan het eind) eist precies
+drie VSA-regels.
+
+**Speelplan eindigend op `laatste`** (toon 3 e.d.):
+`sequence: ["1", "3", "1", "2", "3", "1", "4", "laatste"]` — bij *n*+1
+VSA-frasen krijgen de eerste *n* frasen het prefix van het speelplan
+(zonder `laatste`); de allerlaatste frase altijd `laatste`. Voorbeeld bij
+6 frasen: `1, 3, 1, 2, 3, laatste`. Maximum = lengte van het speelplan
+(hier 8). Meer frasen → harde fout `VSA-TEMPLATE-TEXT-MAPPING`.
+
+Cycle+final is variabel (herhaling tot de slotfrase past). Past het aantal
+regels niet bij het plan → `VSA-TEMPLATE-TEXT-MAPPING` (zelfde geest als
+`vsa validate`).
 
 ## Tenor-octaaf (tropaar toon 4)
 

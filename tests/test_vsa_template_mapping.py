@@ -42,8 +42,18 @@ def test_prefix_then_cycle() -> None:
 
 def test_pure_sequence() -> None:
     doc = {
-        "sequence": ["1", "3", "1", "2", "3", "1", "2a", "4"],
-        "phrases": [{"id": x} for x in ["1", "3", "2", "2a", "4"]],
+        "sequence": ["1", "3", "1", "2"],
+        "phrases": [{"id": x} for x in ["1", "3", "2"]],
+    }
+    plan = list_mapping_plans(doc)[0]
+    assert assign_stanzas_to_phrases(plan, 4) == ["1", "3", "1", "2"]
+
+
+def test_sequence_ending_laatste_truncates() -> None:
+    """Toon-3-speelplan: prefix + altijd «laatste»; max = lengte plan."""
+    doc = {
+        "sequence": ["1", "3", "1", "2", "3", "1", "4", "laatste"],
+        "phrases": [{"id": x} for x in ["1", "3", "2", "4", "laatste"]],
     }
     plan = list_mapping_plans(doc)[0]
     assert assign_stanzas_to_phrases(plan, 8) == [
@@ -53,9 +63,32 @@ def test_pure_sequence() -> None:
         "2",
         "3",
         "1",
-        "2a",
         "4",
+        "laatste",
     ]
+    assert assign_stanzas_to_phrases(plan, 6) == [
+        "1",
+        "3",
+        "1",
+        "2",
+        "3",
+        "laatste",
+    ]
+    assert assign_stanzas_to_phrases(plan, 1) == ["laatste"]
+
+
+def test_sequence_ending_laatste_rejects_overflow() -> None:
+    doc = {
+        "sequence": ["1", "3", "1", "2", "3", "1", "4", "laatste"],
+        "phrases": [{"id": x} for x in ["1", "3", "2", "4", "laatste"]],
+    }
+    plan = list_mapping_plans(doc)[0]
+    with pytest.raises(TemplateMappingError) as caught:
+        assign_stanzas_to_phrases(plan, 9)
+    msg = str(caught.value)
+    assert "9 frasen" in msg
+    assert "8 plaatsen" in msg
+    assert "laatste" in msg
 
 
 def test_prefix_cycle_in_middle() -> None:

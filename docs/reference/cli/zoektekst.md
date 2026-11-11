@@ -14,7 +14,7 @@ vsa zoektekst [-h] [--check] [-o OUTPUT] path [path …]
 
 | Modus           | Betekenis                                                                                      |
 | --------------- | ---------------------------------------------------------------------------------------------- |
-| (default)       | Schrijft/update `zoektekst` in-place uit body-extractie (`vsa text`-logica, genormaliseerd).   |
+| (default)       | Schrijft/update `zoektekst: \|-` in-place, **frase per regel**, uit body-extractie.           |
 | `--check`       | Geen schrijven; exit **1** als het veld ontbreekt (bij niet-lege tekst) of afwijkt.            |
 | `-o OUTPUT`     | Schrijf naar dit pad i.p.v. in-place (alleen bij precies één bronbestand).                     |
 

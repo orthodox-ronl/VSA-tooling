@@ -8,7 +8,6 @@ from pathlib import Path
 
 from .template_instance import TemplateInstanceError
 from .template_library import (
-    DEFAULT_TEMPLATE_ID,
     TemplateLibraryError,
     list_template_ids,
 )
@@ -24,7 +23,8 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
             "template (mapper + emit). Uitvoer (T6): gekuiste frontmatter, "
             "VSA-commentaar, waarschuwingen, @-kop; geen @speelplan/@blok; "
             "secties cyclus-1/herhaling/laatste (niet toon 3). "
-            "Default-template: Hemelum tropaar/kondak toon 4. Zie "
+            "Zonder --template: keuze op soort+toon uit de .vsa (T1); "
+            "ontbrekend of ambigu → fout. Zie "
             "docs/specification-vsa-templates/vsa-mvsa-contract.md (T1–T7)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -48,9 +48,9 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
         metavar="ID",
         default=None,
         help=(
-            f"Library-template-id of alias (default: {DEFAULT_TEMPLATE_ID}). "
-            "Voorbeelden: tropaar-toon-4-hemelum, hemelum-tropaar-toon-4, "
-            "tropaar-toon-4-groningen, kondak-toon-1-groningen, tropaar-toon-2-groningen."
+            "Library-template-id of alias. Zonder deze vlag: afleiden uit "
+            "soort+toon in de .vsa (T1). Voorbeelden: tropaar-toon-4-hemelum, "
+            "kondak-toon-8, tropaar-toon-4-groningen."
         ),
     )
     p.add_argument(

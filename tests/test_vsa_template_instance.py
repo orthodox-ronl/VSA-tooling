@@ -764,13 +764,18 @@ def test_mode_mismatch_between_vsa_and_template_raises() -> None:
     assert caught.value.code == "VSA-TEMPLATE-MODE-MISMATCH"
 
 
-def test_sequence_form_rejects_wrong_stanza_count() -> None:
+def test_sequence_form_rejects_overflow_stanza_count() -> None:
+    """Meer frasen dan speelplan-lengte (8) → harde TEXT-MAPPING-fout."""
     path = LIBRARY / "tropaar-toon-3-groningen" / "template.yaml"
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
-    text = "---\ndo: F4\nmode: major\n---\n\n// aa {/b_}. [//:]\n"
+    # Negen mini-frasen (sterke // vóór de laatste).
+    body = " *\n".join(["aa {/b_}."] * 8) + "\n// aa {/b_}. [//:]\n"
+    text = "---\ndo: F4\nmode: major\n---\n\n" + body
     with pytest.raises(TemplateInstanceError) as caught:
         map_vsa_to_template(doc, text, source="seq.vsa")
     assert caught.value.code == "VSA-TEMPLATE-TEXT-MAPPING"
+    assert "9 frasen" in str(caught.value)
+    assert "8 plaatsen" in str(caught.value)
 
 
 def test_tropaar_toon4_tenor_opening_is_c4() -> None:

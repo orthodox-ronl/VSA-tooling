@@ -407,10 +407,13 @@ DUR_FRAC = {
 FRAME_FONT_PT = "14"
 TITLE_FONT_PT = "18"
 # Titel-VBox (spatium). Visuele titel→systeem ≈ VBox + frameSystemDistance.
-TITLE_VBOX_HEIGHT_SP = 3.5
-# Stafafruimte SA↔TB; systeemmafruimte en titel→systeem mikken op 1,5× hiervan.
-STAFF_DISTANCE_SP = 5.0
-VERTICAL_GAP_RATIO = 1.5
+TITLE_VBOX_HEIGHT_SP = 3.0
+# Stafafruimte SA↔TB; systeemmafruimte en titel→systeem = ratio × stafafruimte.
+# Formuleblad: leesbaar maar niet te veel wit; instance blijft compact.
+STAFF_DISTANCE_SP = 6.0
+VERTICAL_GAP_RATIO = 1.55
+INSTANCE_STAFF_DISTANCE_SP = 5.0
+INSTANCE_VERTICAL_GAP_RATIO = 1.5
 # Met setting 1,5×staff maten we ~7/6 i.p.v. 9/6; schaal systemDistance bij.
 SYSTEM_DISTANCE_CALIBRATION = 9 / 7
 # Cycle after last measure: empty spacer HBox + text HBox (approx. centered).
@@ -421,12 +424,27 @@ CYCLE_TEXT_HBOX_WIDTH = "36"
 CYCLE_HBOX_MAX_LAST_QUARTERS = 16
 # Reciteertoon: breve (||O||) on the page; playback/spacing = half (2 beats).
 RECITE_PLAY_DIV = ELM_DIV["_"]  # (8, "half", 0)
-# Spatium above staff; formulelabels share this height.
-# Formulelabels (frase-id + anker-afkorting) share this height.
+# Formulelabels: frase-id en anker-afkorting op dezelfde hoogte.
+FRASE_ID_Y = "-4.5"
 MAPPING_TEXT_Y = "-4.5"
-# Frase-anker arrow sits below formulelabels (Template ≈ −1.3 spatium).
+# Frase-anker arrow sits below anker-label.
 # Anchors never share an event with role: recite in the library templates.
 ANCHOR_ARROW_Y = "-1.3"
+# Bij e.st. op eerste klinkende noot: frase-id links, anker rechts (zelfde y).
+# MuseScore koppelt StaffText op onzichtbare spacers door naar de volgende
+# zichtbare noot — daarom horizontale offsets i.p.v. alleen een spacer.
+FRASE_ID_X_BESIDE_ANCHOR = "-9"
+ANCHOR_LABEL_X_BESIDE_FRASE = "4"
+# Extra onzichtbare spacer-noot (hele) schuift de klinkende noten naar rechts
+# zodat er onder de labels lucht is.
+PHRASE_LEAD_SPACER_NTYPE = "whole"
+PHRASE_LEAD_SPACER_DUR = 16
+# Formuleblad: bij voorkeur twee frasen per systeem.
+TEMPLATE_PHRASES_PER_SYSTEM = 2
+# Ruimte boven de balk voor labels (spatium).
+TEMPLATE_STAFF_UPPER_BORDER_SP = 6.5
+_TEMPLATE_PAGE_INCH_PER_SYSTEM = 2.6
+_TEMPLATE_PAGE_TITLE_INCH = 1.5
 # YAML stores e.st. without spaces; the score shows "e. st.".
 ANCHOR_LABELS = {
     "e.st.": "e. st.",
@@ -749,18 +767,33 @@ _MSCZ_CONTAINER = """\
 """
 
 # A4 in inches (MuseScore Style page* units).
-_PAGE_STYLE = (
-    "<pageWidth>8.27</pageWidth>"
-    "<pageHeight>11.69</pageHeight>"
-    "<pagePrintableWidth>7.0889</pagePrintableWidth>"
-    "<pageEvenLeftMargin>0.590551</pageEvenLeftMargin>"
-    "<pageOddLeftMargin>0.590551</pageOddLeftMargin>"
-    "<pageEvenTopMargin>0.590551</pageEvenTopMargin>"
-    "<pageEvenBottomMargin>0.590551</pageEvenBottomMargin>"
-    "<pageOddTopMargin>0.590551</pageOddTopMargin>"
-    "<pageOddBottomMargin>0.590551</pageOddBottomMargin>"
-    "<pageTwosided>1</pageTwosided>"
-)
+_PAGE_WIDTH_IN = 8.27
+_PAGE_HEIGHT_A4_IN = 11.69
+_PAGE_MARGIN_IN = 0.590551
+def _page_style(*, layout: str = "template", n_systems: int = 1) -> str:
+    """Page size/margins. Template grows with frase-count for single-SVG export."""
+    if layout == "template":
+        height = max(
+            _PAGE_HEIGHT_A4_IN,
+            _TEMPLATE_PAGE_TITLE_INCH
+            + max(1, n_systems) * _TEMPLATE_PAGE_INCH_PER_SYSTEM,
+        )
+    else:
+        height = _PAGE_HEIGHT_A4_IN
+    printable = _PAGE_WIDTH_IN - 2 * _PAGE_MARGIN_IN
+    m = f"{_PAGE_MARGIN_IN:g}"
+    return (
+        f"<pageWidth>{_PAGE_WIDTH_IN:g}</pageWidth>"
+        f"<pageHeight>{height:.2f}</pageHeight>"
+        f"<pagePrintableWidth>{printable:.4f}</pagePrintableWidth>"
+        f"<pageEvenLeftMargin>{m}</pageEvenLeftMargin>"
+        f"<pageOddLeftMargin>{m}</pageOddLeftMargin>"
+        f"<pageEvenTopMargin>{m}</pageEvenTopMargin>"
+        f"<pageEvenBottomMargin>{m}</pageEvenBottomMargin>"
+        f"<pageOddTopMargin>{m}</pageOddTopMargin>"
+        f"<pageOddBottomMargin>{m}</pageOddBottomMargin>"
+        "<pageTwosided>0</pageTwosided>"
+    )
 
 
 def midi_and_tpc(step: str, alter: int, octave: int) -> tuple[int, int]:
@@ -792,8 +825,34 @@ def score_title(doc: dict) -> str:
     genre = str(doc.get("genre", "")).capitalize() or "Template"
     tone = doc.get("tone")
     if tone:
-        return f"{genre} (Toon {tone})"
+        return f"{genre}melodie (Toon {tone})"
     return str(doc.get("id", "vsa-template"))
+
+
+def _phrase_lead_spacer_event() -> dict:
+    """Onzichtbare spacer-noot: ruimte voor frase-id naast e.st. op de eerste noot."""
+    return {
+        "pitches": {
+            "S": ("C", 0, 4),
+            "A": ("C", 0, 4),
+            "T": ("C", 0, 3),
+            "B": ("C", 0, 3),
+        },
+        "dur": PHRASE_LEAD_SPACER_DUR,
+        "ntype": PHRASE_LEAD_SPACER_NTYPE,
+        "dots": 0,
+        "optional": False,
+        "recite": False,
+        "spacer": True,
+        "anchor": None,
+    }
+
+
+def _with_phrase_lead_spacer(events: list[dict]) -> list[dict]:
+    """Voeg voorspacer toe als de eerste noot een anker heeft (e.st. e.d.)."""
+    if events and events[0].get("anchor"):
+        return [_phrase_lead_spacer_event(), *events]
+    return events
 
 
 def _anchor_label(anchor: str) -> str:
@@ -805,6 +864,7 @@ def _mscx_staff_text(
     text: str,
     *,
     rectangle: bool = False,
+    x: str = "0",
     y: str = MAPPING_TEXT_Y,
     align: str | None = None,
 ) -> str:
@@ -820,18 +880,20 @@ def _mscx_staff_text(
         "<placement>above</placement>"
         "<autoplace>0</autoplace>"
         f"{align_xml}"
-        f'<offset x="0" y="{y}"/>'
+        f'<offset x="{x}" y="{y}"/>'
         f"{frame}"
         f"<text>{inner}</text>"
         "</StaffText>"
     )
 
 
-def _mscx_anchor_staff_texts(anchor: str) -> list[str]:
+def _mscx_anchor_staff_texts(anchor: str, *, x: str = "0") -> list[str]:
     """Abbreviation at formulelabel height; arrow below, pointing at the note."""
     return [
-        _mscx_staff_text(_anchor_label(anchor)),
-        _mscx_staff_text("↓", y=ANCHOR_ARROW_Y, align="center,baseline"),
+        _mscx_staff_text(_anchor_label(anchor), x=x),
+        _mscx_staff_text(
+            "↓", x=x, y=ANCHOR_ARROW_Y, align="center,baseline"
+        ),
     ]
 
 
@@ -1102,11 +1164,38 @@ def _mscx_voice(
             "<isCourtesy>0</isCourtesy>"
             f"<sigN>{sig_n}</sigN><sigD>{sig_d}</sigD></TimeSig>"
         )
-    if frase_id is not None:
-        lines.append(_mscx_staff_text(frase_id, rectangle=True))
-    for ev in events:
+    # Eerste klinkende event (na optionele lead-spacer): frase-id + e.st. naast elkaar.
+    first_sounding_i = 0
+    while first_sounding_i < len(events) and (
+        events[first_sounding_i].get("spacer") or events[first_sounding_i].get("rest")
+    ):
+        first_sounding_i += 1
+    pair_frase_with_anchor = bool(
+        frase_id
+        and anchors
+        and first_sounding_i < len(events)
+        and events[first_sounding_i].get("anchor")
+    )
+    if frase_id is not None and not pair_frase_with_anchor:
+        lines.append(_mscx_staff_text(frase_id, rectangle=True, y=FRASE_ID_Y))
+    for ei, ev in enumerate(events):
         if anchors and ev.get("anchor"):
-            lines.extend(_mscx_anchor_staff_texts(str(ev["anchor"])))
+            if pair_frase_with_anchor and ei == first_sounding_i:
+                lines.append(
+                    _mscx_staff_text(
+                        frase_id,
+                        rectangle=True,
+                        x=FRASE_ID_X_BESIDE_ANCHOR,
+                        y=FRASE_ID_Y,
+                    )
+                )
+                lines.extend(
+                    _mscx_anchor_staff_texts(
+                        str(ev["anchor"]), x=ANCHOR_LABEL_X_BESIDE_FRASE
+                    )
+                )
+            else:
+                lines.extend(_mscx_anchor_staff_texts(str(ev["anchor"])))
         if ev.get("rest"):
             vis = ""
             if ev.get("visible") is False:
@@ -1144,16 +1233,21 @@ def _mscx_voice(
     return lines
 
 
-def _vertical_layout_gaps() -> tuple[str, str, str]:
+def _vertical_layout_gaps(*, layout: str = "template") -> tuple[str, str, str]:
     """staffDistance, systemDistance, frameSystemDistance (spatium strings).
 
-    Doel: systeemmafruimte en titel→systeem = ``VERTICAL_GAP_RATIO`` × stafafruimte
+    Doel: systeemmafruimte en titel→systeem = gap-ratio × stafafruimte
     op het scherm. Titelgat ≈ ``TITLE_VBOX_HEIGHT_SP`` + ``frameSystemDistance``.
-    ``systemDistance`` wordt gecorrigeerd met ``SYSTEM_DISTANCE_CALIBRATION``
-    (gemeten 7/6 i.p.v. 9/6 bij naïeve 1,5×-setting).
+    ``systemDistance`` × ``SYSTEM_DISTANCE_CALIBRATION`` (historisch: gemeten
+    7/6 i.p.v. 9/6 bij naïeve 1,5×-setting).
     """
-    staff = STAFF_DISTANCE_SP
-    target = staff * VERTICAL_GAP_RATIO
+    if layout == "instance":
+        staff = INSTANCE_STAFF_DISTANCE_SP
+        ratio = INSTANCE_VERTICAL_GAP_RATIO
+    else:
+        staff = STAFF_DISTANCE_SP
+        ratio = VERTICAL_GAP_RATIO
+    target = staff * ratio
     system = round(target * SYSTEM_DISTANCE_CALIBRATION, 2)
     frame = round(target - TITLE_VBOX_HEIGHT_SP, 2)
     if frame < 0:
@@ -1164,18 +1258,17 @@ def _vertical_layout_gaps() -> tuple[str, str, str]:
     return f"{staff:g}", f"{system:g}", f"{frame:g}"
 
 
-def _mscx_style_block(*, layout: str = "template") -> str:
+def _mscx_style_block(*, layout: str = "template", n_systems: int = 1) -> str:
     """MuseScore layout/fonts — always emitted; MuseScore save may strip it.
 
     ``layout="template"``: formuleblad.
     ``layout="instance"``: zangstuk uit VSA+template.
 
     Verticaal: geen page-fill (`enableVerticalSpread=0`, `maxPageFillSpread=0`).
-    Systeemmafruimte en titel→eerste-systeem mikken op 1,5× stafafruimte
-    (zie ``_vertical_layout_gaps``); min=max zodat de pagina niet wordt
-    uitgevuld.
+    Systeemmafruimte en titel→eerste-systeem via ``_vertical_layout_gaps``;
+    min=max zodat de pagina niet wordt uitgevuld.
     """
-    staff_dist, min_sys, frame_sys = _vertical_layout_gaps()
+    staff_dist, min_sys, frame_sys = _vertical_layout_gaps(layout=layout)
     max_sys = min_sys
     akk_dist = staff_dist
     if layout == "instance":
@@ -1194,12 +1287,12 @@ def _mscx_style_block(*, layout: str = "template") -> str:
         min_note = "0.5"
         lyrics_min = "0.25"
         fill_limit = "1"
-        border = "2.5"
+        border = f"{TEMPLATE_STAFF_UPPER_BORDER_SP:g}"
         lyrics_bottom = "1.0"
         courtesy = ""
     return (
         "<Style>"
-        f"{_PAGE_STYLE}"
+        f"{_page_style(layout=layout, n_systems=n_systems)}"
         "<enableVerticalSpread>0</enableVerticalSpread>"
         "<maxPageFillSpread>0</maxPageFillSpread>"
         f"<minSystemSpread>{min_sys}</minSystemSpread>"
@@ -1212,7 +1305,7 @@ def _mscx_style_block(*, layout: str = "template") -> str:
         f"<minSystemDistance>{min_sys}</minSystemDistance>"
         f"<maxSystemDistance>{max_sys}</maxSystemDistance>"
         f"<staffUpperBorder>{border}</staffUpperBorder>"
-        f"<staffLowerBorder>{border}</staffLowerBorder>"
+        f"<staffLowerBorder>{border if layout == 'instance' else '3'}</staffLowerBorder>"
         f"<frameSystemDistance>{frame_sys}</frameSystemDistance>"
         f"<systemFrameDistance>{frame_sys}</systemFrameDistance>"
         f"<lyricsMinBottomDistance>{lyrics_bottom}</lyricsMinBottomDistance>"
@@ -1220,6 +1313,11 @@ def _mscx_style_block(*, layout: str = "template") -> str:
         "<enableIndentationOnFirstSystem>0</enableIndentationOnFirstSystem>"
         "<firstSystemIndentationValue>0</firstSystemIndentationValue>"
         f"<lastSystemFillLimit>{fill_limit}</lastSystemFillLimit>"
+        # Formuleblad: geen S/A/T/B-namen, geen maatnummers (botsen met [1]/[2]).
+        "<firstSystemInstNameVisibility>0</firstSystemInstNameVisibility>"
+        "<subsSystemInstNameVisibility>0</subsSystemInstNameVisibility>"
+        f"<showMeasureNumber>{0 if layout != 'instance' else 1}</showMeasureNumber>"
+        "<showMeasureNumberOne>0</showMeasureNumberOne>"
         f"{courtesy}"
         f'<staffTextPosAbove x="0" y="{MAPPING_TEXT_Y}"/>'
         f"<staffFontFace>{STAFF_FONT}</staffFontFace>"
@@ -1325,7 +1423,15 @@ def render_mscx(
         "<programVersion>4.7.4</programVersion>",
         "<Score>",
         "<Division>480</Division>",
-        _mscx_style_block(layout=layout),
+        _mscx_style_block(
+            layout=layout,
+            n_systems=max(
+                1,
+                math.ceil(n_phr / TEMPLATE_PHRASES_PER_SYSTEM)
+                if layout == "template"
+                else n_phr,
+            ),
+        ),
         f'<metaTag name="workTitle">{escape(title)}</metaTag>',
         '<metaTag name="platform">Microsoft Windows</metaTag>',
         '<Part id="1">',
@@ -1337,7 +1443,8 @@ def render_mscx(
         "</Staff>",
         "<trackName>Women</trackName>",
         '<Instrument id="women">',
-        "<longName>S<br/>A</longName><shortName>S<br/>A</shortName>",
+        # Formuleblad/instance: geen S/A/T/B-naam links van de balk.
+        "<longName></longName><shortName></shortName>",
         "<trackName>Women</trackName>",
         "<instrumentId>voice.female</instrumentId>",
         "</Instrument>",
@@ -1353,7 +1460,7 @@ def render_mscx(
         "</Staff>",
         "<trackName>Men</trackName>",
         '<Instrument id="men">',
-        "<longName>T<br/>B</longName><shortName>T<br/>B</shortName>",
+        "<longName></longName><shortName></shortName>",
         "<trackName>Men</trackName>",
         "<instrumentId>voice.male</instrumentId>",
         "<clef>F</clef>",
@@ -1380,9 +1487,8 @@ def render_mscx(
                 "</VBox>"
             )
         last_quarters = 0
-        alone_on_system = system_break_each or (
-            layout == "template" and n_phr > 1
-        )
+        # Cycle-HBox: formuleblad mag trailing frames naast de laatste frase.
+        alone_on_system = system_break_each or (layout == "template" and n_phr > 1)
         # Instance: layout-maten binnen strofe; zichtbare maatstreep alleen
         # aan strofe-eind. Template: een maat per frase.
         measure_jobs: list[
@@ -1390,11 +1496,16 @@ def render_mscx(
         ] = []
         for pi, (pid, events) in enumerate(resolved):
             is_last_phrase = pi == n_phr - 1
+            chunk_events = (
+                _with_phrase_lead_spacer(events)
+                if layout == "template" and mapping_labels
+                else events
+            )
             if is_last_phrase:
-                last_quarters = int(round(events_quarters(events)))
+                last_quarters = int(round(events_quarters(chunk_events)))
             # Instance: één maat per strofe — geen binnen-strofe-maatstrepen
             # (recite-tekst + slotnoot + cadens horen visueel bij elkaar).
-            chunks = [events]
+            chunks = [chunk_events]
             for ci, chunk in enumerate(chunks):
                 measure_jobs.append(
                     (
@@ -1415,22 +1526,24 @@ def render_mscx(
             if cycle_repeats and stanza_end:
                 _, end_rep = cycle_repeat_flags(doc, pid or "")
 
-            is_penultimate = False
-            if layout == "template" and n_phr > 1 and stanza_end and not piece_end:
-                remaining_ends = sum(1 for j in measure_jobs[mi:] if j[4])
-                is_penultimate = remaining_ends == 1
-
             len_attr = events_len_attr(events)
             out.append(f'<Measure len="{len_attr}">')
             if layout == "instance":
                 out.append("<stretch>0.85</stretch>")
             if start_rep:
                 out.append("<startRepeat/>")
-            if staff_i == 1 and not piece_end:
-                if system_break_each or is_penultimate:
-                    out.append(
-                        "<LayoutBreak><subtype>line</subtype></LayoutBreak>"
-                    )
+            # Formuleblad: bij voorkeur twee frasen per systeem.
+            if (
+                staff_i == 1
+                and not piece_end
+                and stanza_end
+                and layout == "template"
+                and n_phr > 1
+                and mi % TEMPLATE_PHRASES_PER_SYSTEM == 0
+            ):
+                out.append(
+                    "<LayoutBreak><subtype>line</subtype></LayoutBreak>"
+                )
             if end_rep is not None:
                 out.append(f"<endRepeat>{end_rep}</endRepeat>")
             # MuseScore 4: maatstreep-zichtbaarheid via <BarLine> in de voice,

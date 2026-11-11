@@ -13,26 +13,36 @@ from typing import Any, Literal
 import yaml
 
 from .text_export import plain_text_from_mvsa, plain_text_from_vsa
+from .vsa_stanzas import ensure_stanza_stars
 from .yaml_frontmatter import strip_yaml_frontmatter
 
 SourceKind = Literal["vsa", "mvsa"]
 
 _WS_RE = re.compile(r"\s+")
+_FM_OPEN_RE = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n?", re.DOTALL)
 
 
-class FoldedZoektekst(str):
-    """Marker voor PyYAML: dump als folded block scalar (``>``)."""
+class LiteralZoektekst(str):
+    """Marker voor PyYAML: dump als literal block scalar (``|``), frase per regel."""
 
 
 class _ZoektekstDumper(yaml.SafeDumper):
     pass
 
 
-def _represent_folded(dumper: yaml.SafeDumper, data: FoldedZoektekst) -> yaml.Node:
-    return dumper.represent_scalar("tag:yaml.org,2002:str", str(data), style=">")
+def _represent_literal(
+    dumper: yaml.SafeDumper, data: LiteralZoektekst
+) -> yaml.Node:
+    # Chomp ``-``: geen extra newline na het blok in de YAML-waarde.
+    return dumper.represent_scalar(
+        "tag:yaml.org,2002:str", str(data), style="|"
+    )
 
 
-_ZoektekstDumper.add_representer(FoldedZoektekst, _represent_folded)
+_ZoektekstDumper.add_representer(LiteralZoektekst, _represent_literal)
+
+# Back-compat alias (oude imports/tests).
+FoldedZoektekst = LiteralZoektekst
 
 
 @dataclass(frozen=True)
@@ -51,8 +61,18 @@ class ZoektekstApplyResult:
 
 
 def normalize_zoektekst(text: str) -> str:
-    """Leading/trailing strip; interne witruimte → één spatie."""
+    """Leading/trailing strip; interne witruimte → één spatie (equivalentie)."""
     return _WS_RE.sub(" ", (text or "").strip())
+
+
+def format_zoektekst(text: str) -> str:
+    """Behoud frase-regels; witruimte binnen een regel → één spatie."""
+    lines: list[str] = []
+    for ln in (text or "").replace("\r\n", "\n").split("\n"):
+        cleaned = _WS_RE.sub(" ", ln.strip())
+        if cleaned:
+            lines.append(cleaned)
+    return "\n".join(lines)
 
 
 def kind_from_path(path: Path | str) -> SourceKind:
@@ -65,14 +85,31 @@ def kind_from_path(path: Path | str) -> SourceKind:
 
 
 def plain_text_for_zoektekst(source: str, *, kind: SourceKind) -> str:
-    """Body-extractie (frontmatter/zoektekst telt niet mee)."""
-    if kind == "vsa":
-        return plain_text_from_vsa(source)
-    return plain_text_from_mvsa(source)
+    """Body-extractie met frasering (één regel per frase waar mogelijk).
+
+    Frontmatter/zoektekst telt niet mee. Voor ``.vsa``: zelfde frasescheiding
+    als mapping/validatie — ``*`` / ``/`` / ``**`` / ``//`` (spaties optioneel,
+    ook vastgeplakt: ``.*``) via ``ensure_stanza_stars`` +
+    ``extract_stanza_notes`` / ``plain_text_from_vsa``.
+    """
+    if kind == "mvsa":
+        return plain_text_from_mvsa(source)
+
+    text = source[1:] if source.startswith("\ufeff") else source
+    _meta, body, _base = strip_yaml_frontmatter(text)
+    # Zelfde frasegrenzen als vsa mvsa / extract_stanza_notes (T4 / VSA-stanzas).
+    norm_body, _notes = ensure_stanza_stars(body)
+    m = _FM_OPEN_RE.match(text)
+    if m:
+        rebuilt = text[: m.end()] + norm_body
+    else:
+        rebuilt = norm_body
+    return plain_text_from_vsa(rebuilt)
 
 
 def expected_zoektekst(source: str, *, kind: SourceKind) -> str:
-    return normalize_zoektekst(plain_text_for_zoektekst(source, kind=kind))
+    """Canonieke schrijfvorm: frase per regel (genormaliseerd per regel)."""
+    return format_zoektekst(plain_text_for_zoektekst(source, kind=kind))
 
 
 def zoektekst_from_frontmatter(meta: dict[str, Any]) -> str | None:
@@ -111,7 +148,7 @@ def check_zoektekst(
             ]
         return []
     current = normalize_zoektekst(current_raw)
-    if current != expected:
+    if current != normalize_zoektekst(expected):
         return [
             ZoektekstIssue(
                 "ZOEKTEKST-MISMATCH",
@@ -136,19 +173,27 @@ def apply_zoektekst(source: str, *, kind: SourceKind) -> ZoektekstApplyResult:
     expected = expected_zoektekst(text, kind=kind)
     meta, body, _base = strip_yaml_frontmatter(text)
     previous_raw = zoektekst_from_frontmatter(meta)
+    previous_fmt = (
+        None if previous_raw is None else format_zoektekst(previous_raw)
+    )
     previous = (
         None if previous_raw is None else normalize_zoektekst(previous_raw)
     )
 
     # Ontbrekend veld + geen gezongen tekst → niets te doen.
-    if previous is None and not expected:
+    if previous_fmt is None and not expected:
         return ZoektekstApplyResult(
             text=source,
             changed=False,
             expected=expected,
             previous=previous,
         )
-    if previous == expected:
+    # Ook herschrijven als alleen de frasering/opmaak afwijkt, of als het
+    # veld niet als literal ``|`` / ``|-`` staat (folded/quoted alinea).
+    style_ok = bool(
+        re.search(r"(?m)^zoektekst:\s*\|-?\s*$", text)
+    )
+    if previous_fmt == expected and style_ok:
         return ZoektekstApplyResult(
             text=source,
             changed=False,
@@ -160,7 +205,7 @@ def apply_zoektekst(source: str, *, kind: SourceKind) -> ZoektekstApplyResult:
         k: v for k, v in meta.items() if k != "zoektekst"
     }
     if expected:
-        new_meta["zoektekst"] = FoldedZoektekst(expected)
+        new_meta["zoektekst"] = LiteralZoektekst(expected)
 
     if not new_meta:
         new_text = bom + body
