@@ -93,8 +93,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-cabd</code>
-  , gebouwd 2026-11-09 09:09 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-11-11 10:34 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1289,7 +1289,7 @@
   <span class="md-ellipsis">
     
   
-    vsa musicxml
+    vsa mxl
   
 
     
@@ -2649,6 +2649,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../specification-vsa-templates/rendering-pitfalls/" class="md-nav__link">
         
   
@@ -3930,7 +3986,35 @@
   <span class="md-ellipsis">
     
   
-    vsa musicxml
+    vsa mxl
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
   
 
     
@@ -4842,34 +4926,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../eigen-partituur-svg/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Eigen partituur-SVG (plan)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5315,7 +5371,6 @@
   ending?: { start?, stop? }    # volta-nummers (MusicXML ``&lt;ending&gt;``)
   repeatTimes?: number          # alleen bij herhaal &gt; 2×
   navigation?: [ string, … ]    # segno | fine | to_coda | coda | ds_al_* | dc_al_*
-  newSystem?: true              # @nieuw-systeem; ontbreekt of false op de eerste maat
   cues: [ Cue, … ]              # @tekst die bij déze maat hoort (vaak 0 of 1)
   lyrics: [ LyricPos, … ]       # gedeelde L-lijn voor partituur
   voices: { S, A, T, B }        # elk: [ VoiceEvent, … ] synchroon in de maat
@@ -5334,7 +5389,7 @@ from-ir emitteert de navigatiemarkeringen voor OSMD.</p>
 <h3 id="43-lyricpos">4.3 LyricPos<a class="headerlink" href="#43-lyricpos" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>LyricPos
   syllables: [ { text, syllabic } ]   # single|begin|middle|end
-  layers?: { "1": …, "2": … }         # v0.1: laag "1" altijd; "2" bij export met translit
+  layers?: { "1": …, "2": … }         # v0.1: alleen laag "1" verplicht; "2" = hulptekst later
   marksBefore?: [ MarkRef ]
   marksAfter?: [ MarkRef ]
   recite?: bool
@@ -5522,7 +5577,6 @@ catalogus-MXL of MuseScore-SVG.</p>
 <li>~~Optionele OSMD-SVG CLI~~ (<code>mvsa svg --engine osmd</code>; D2-vergelijking in
    <code>examples/spikes/partituur-osmd-svg/README.md</code>)</li>
 <li>CoriB-MVP (speler op §7-brug) — plan: <a href="../corib-mvp/">corib-mvp.md</a> (M1–M4; branch <code>corib</code>)</li>
-<li>Verkenning eigen schilder uit Score-IR — <a href="../eigen-partituur-svg/">eigen partituur-SVG</a>. Geen vervanging van de OSMD-brug in §7 tot fase 4 van dat werkplan.</li>
 </ol>
 <hr />
 <h2 id="9-open-punten">9. Open punten<a class="headerlink" href="#9-open-punten" title="Permanent link">&para;</a></h2>
@@ -5569,7 +5623,7 @@ catalogus-MXL of MuseScore-SVG.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-08
+        Bijgewerkt: 2026-10-31
         
       </p>
       

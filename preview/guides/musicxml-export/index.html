@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-cabd</code>
-  , gebouwd 2026-11-09 09:09 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-11-11 10:34 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1295,7 +1295,7 @@
   <span class="md-ellipsis">
     
   
-    vsa musicxml
+    vsa mxl
   
 
     
@@ -2860,6 +2860,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specification-vsa-templates/conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../specification-vsa-templates/rendering-pitfalls/" class="md-nav__link">
         
   
@@ -4141,7 +4197,35 @@
   <span class="md-ellipsis">
     
   
-    vsa musicxml
+    vsa mxl
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
   
 
     
@@ -5053,34 +5137,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../plans/eigen-partituur-svg/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Eigen partituur-SVG (plan)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5316,34 +5372,35 @@
 
 
 <h1 id="musicxml-exporteren">MusicXML exporteren<a class="headerlink" href="#musicxml-exporteren" title="Permanent link">&para;</a></h1>
-<p>Met <a href="../../reference/cli/musicxml/"><code>vsa musicxml</code></a> zet je <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> om naar <strong><code>.mxl</code></strong> (gecomprimeerd MusicXML, standaard)
+<p>Met <a href="../../reference/cli/musicxml/"><code>vsa mxl</code></a> zet je <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> om naar <strong><code>.mxl</code></strong> (gecomprimeerd MusicXML, standaard)
 of naar platte <strong><code>.musicxml</code></strong>. Open het in MuseScore of speel af op
 <a href="https://coria.nl">Coria</a>.</p>
 <p>Deze pagina is de workflow-uitleg (profielen, Coria, mappen, opties). Voor de
 volledige CLI-syntax, alle argumenten en foutgevallen: zie de man-pagina
-<a href="../../reference/cli/musicxml/"><code>vsa musicxml</code></a>. Voor siblings + meta in één
+<a href="../../reference/cli/musicxml/"><code>vsa mxl</code></a>. Voor siblings + meta in één
 keer: <a href="../../reference/cli/products/"><code>vsa products</code></a> (tijdelijke syllabify +
 Coria-finalize op de MXL; SVG uit de ongewijzigde bron; geen <code>.vsa.pdf</code>).</p>
-<p>Bij het <strong><code>playback</code></strong>-profiel schrijft <code>vsa musicxml</code> altijd Coria-klare
+<p>Bij het <strong><code>playback</code></strong>-profiel schrijft <code>vsa mxl</code> altijd Coria-klare
 MusicXML (finalize: sanitize + voortekens, geen DOCTYPE). Optioneel
 <code>--syllabify</code> voor tijdelijke lettergreepstreepjes zonder de <code>.vsa</code> te
-wijzigen.</p>
+wijzigen. Vorm: <code>vsa mxl PATH [-o OUTPUT]</code> (gelijk aan <code>mvsa mxl</code> /
+<code>mscz mxl</code>).</p>
 <h2 id="snel-starten">Snel starten<a class="headerlink" href="#snel-starten" title="Permanent link">&para;</a></h2>
-<p>Eén bestand (<a class="og-termref" href="/VSA-tooling/preview/terminologie/fixture" title="Fixture: een vastgelegd voorbeeld of testset (meestal onder <code>examples/</code>) waarmee VSA-gedrag van Parser, Validator, Renderer of CLI reproduceerbaar wordt gecontroleerd; vaak met vaste verwachte uitvoer.">docs-fixture</a>: tropaar zondag toon 3):</p>
+<p>Eén bestand (<a class="og-termref" href="/VSA-tooling/preview/terminologie/fixture" title="Fixture: een vastgelegd voorbeeld of testset (meestal onder <code>examples/</code>) waarmee VSA-gedrag van Parser, Validator, Renderer of CLI reproduceerbaar wordt gecontroleerd; vaak met vaste verwachte uitvoer.">docs-fixture</a>: tropaar zondag toon 3), sibling of <code>-o</code>:</p>
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie.mxl
+vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa -o generated\mxl\oefenmelodie.mxl
 </code></pre></div>
-<p>Zonder extensie krijg je ook <code>.mxl</code>:</p>
-<div class="highlight"><pre><span></span><code>vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie
+<p>Zonder extensie op <code>-o</code> krijg je ook <code>.mxl</code>:</p>
+<div class="highlight"><pre><span></span><code>vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa -o generated\mxl\oefenmelodie
 </code></pre></div>
 <p>Platte MusicXML (bijv. voor MuseScore-bewerking):</p>
-<div class="highlight"><pre><span></span><code>vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie.musicxml
+<div class="highlight"><pre><span></span><code>vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa -o generated\mxl\oefenmelodie.musicxml
 </code></pre></div>
-<p>Of expliciet:</p>
-<div class="highlight"><pre><span></span><code>vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie --format musicxml
+<p>Of via <code>--format</code> bij sibling-default:</p>
+<div class="highlight"><pre><span></span><code>vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa --format musicxml
 </code></pre></div>
-<p>Bij map-export (standaard <code>.mxl</code> per <code>.vsa</code>-bestand):</p>
-<div class="highlight"><pre><span></span><code>vsa musicxml content-source\praktijk output\mxl
+<p>Bij map-export (sibling <code>.mxl</code> naast elk <code>.vsa</code>):</p>
+<div class="highlight"><pre><span></span><code>vsa mxl content-source\praktijk
 </code></pre></div>
 <h2 id="oefenen-in-coria">Oefenen in Coria<a class="headerlink" href="#oefenen-in-coria" title="Permanent link">&para;</a></h2>
 <h3 id="walkthrough-lokale-fixture">Walkthrough (lokale fixture)<a class="headerlink" href="#walkthrough-lokale-fixture" title="Permanent link">&para;</a></h3>
@@ -5559,7 +5616,7 @@ geluidskeuze in de speler (los van dit veld in het bestand).</p>
 <span class="p p-Indicator">[:]</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ter{/&amp;/wijl_&amp;_} ...</span>
 </code></pre></div>
 <h2 id="twee-exportprofielen">Twee exportprofielen<a class="headerlink" href="#twee-exportprofielen" title="Permanent link">&para;</a></h2>
-<p>Standaard gebruikt <a href="../../reference/cli/musicxml/"><code>vsa musicxml</code></a> het <strong><code>playback</code></strong>-profiel. Dat is bedoeld
+<p>Standaard gebruikt <a href="../../reference/cli/musicxml/"><code>vsa mxl</code></a> het <strong><code>playback</code></strong>-profiel. Dat is bedoeld
 voor afspelen en import zonder handmatige opschoning — onder andere Coria en
 MuseScore na roundtrip.</p>
 <p>SVG is het blad: strofenummers en refreincues blijven zichtbaar. Playback-MXL
@@ -5574,7 +5631,7 @@ maatstrepen, typografie-hints of gedetailleerde melisma-lijnen nodig hebt:</p>
 <span class="w">  </span><span class="nt">musicxml-profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">engraving</span>
 </code></pre></div>
 <p>Of via de commandoregel:</p>
-<div class="highlight"><pre><span></span><code>vsa musicxml lied.vsa lied.mxl --musicxml-profile engraving
+<div class="highlight"><pre><span></span><code>vsa mxl lied.vsa -o lied.mxl --musicxml-profile engraving
 </code></pre></div>
 <h2 id="tips">Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
 <ul>
@@ -5636,7 +5693,7 @@ maatstrepen, typografie-hints of gedetailleerde melisma-lijnen nodig hebt:</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-01
+        Bijgewerkt: 2026-11-11
         
       </p>
       

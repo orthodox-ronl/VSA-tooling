@@ -1,0 +1,13 @@
+# Groningen tropaar toon 2 = zelfde formule als kondak-toon-2-groningen (do=F4 major).
+# Frase 2 begint op mi (recite), niet een toon lager — in de VSA dus geen
+# ``{\Gij}`` na een mi-cadens (dat was een toon-1-reflex).
+
+spec_version: draft-v0
+id: tropaar-toon-2-groningen
+genre: tropaar
+tone: 2
+do: F4
+mode: major
+pitches_status: provisional
+source: "Koormap Groningen — tropaar zondag toon 2 (= kondak-toon-2-groningen)"
+same_as: kondak-toon-2-groningen

@@ -1,0 +1,374 @@
+# Tropaar/kondak toon 3 — do=F4 major (praktijk/Groningen).
+# Speelplan eindigend op «laatste»: prefix + altijd laatste; max = lengte plan.
+# Frase-S uit corpus-VSA (klaar kondak-zondag + tropaar-zondag); of:-paden
+# voor waargenomen varianten. A/T/B voorlopig gestapeld (provisional).
+
+spec_version: draft-v0
+id: tropaar-toon-3-groningen
+genre: tropaar
+also_used_as:
+  - kondak
+tone: 3
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: "klaar kondak-zondag-toon-3-groningen + problemen-toon-3 VSA (S); A/T/B provisional"
+sequence:
+  - "1"
+  - "3"
+  - "1"
+  - "2"
+  - "3"
+  - "1"
+  - "4"
+  - "laatste"
+
+phrases:
+  - id: "1"
+    events:
+      - of:
+          - id: stepwise
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: la-1, A: la-1, T: do, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: ti-1, A: la-1, T: re, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: ti-1, A: la-1, T: re, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+          - id: leap-do
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: la-1, A: la-1, T: do, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: ti-1, A: la-1, T: re, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+          - id: mid-rise
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: sol, A: mi, T: ti-1, B: mi-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+          - id: fa-mi
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+  - id: "2"
+    events:
+      - of:
+          - id: down-la
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: ti-1, A: la-1, T: re, B: la-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: la-1, A: la-1, T: do, B: la-1 }
+          - id: fa-mi
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+  - id: "3"
+    events:
+      - of:
+          - id: down-la
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: ti-1, A: la-1, T: re, B: la-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: la-1, A: la-1, T: do, B: la-1 }
+          - id: like-1
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: la-1, A: la-1, T: do, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: ti-1, A: la-1, T: re, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: ti-1, A: la-1, T: re, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+          - id: mid-rise-scoped
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: sol, A: mi, T: ti-1, B: mi-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+          - id: mid-rise
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: sol, A: mi, T: ti-1, B: mi-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+          - id: fa-rise
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: sol, A: mi, T: ti-1, B: mi-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+  - id: "4"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+  - id: "laatste"
+    events:
+      - of:
+          - id: with-recite
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "__"
+                anchor: l.st.
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+          - id: with-recite-scoped
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "__"
+                anchor: l.st.
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+          - id: from-re
+            events:
+              - role: recite
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: fa, A: re, T: la-1, B: re-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: sol-1, B: sol-1 }
+              - role: cadence
+                duration: "__"
+                anchor: l.st.
+                pitches: { S: do, A: la-1, T: mi, B: la-1 }

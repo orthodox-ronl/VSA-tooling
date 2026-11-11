@@ -1,0 +1,159 @@
+# Hemelum / Liturgikon toon 8 (kondak + tropaar) — do=F4 major.
+# Canonieke S/A/T/B: problemen-hoogte/kondak-zaterdag-gestorvenen-toon-8-hemelum.mvsa.
+# Groningen blijft apart: kondak-toon-8-groningen (klim naar fa vóór recite; laatste → do).
+# Hemelum frase 1: open do–re, recite mi, cadens fa → mi → re → do (@l.st.).
+#   (of:) Groningen-achtige klim do–re–mi–fa vóór recite — o.a. Vladimir-cyclus.
+# Laatste: eindigt op mi (@l.st.), niet do — cadens … re–mi–fa–mi.
+# Speelplan |: 1 :| laatste. @oct A=-1.
+
+spec_version: draft-v0
+id: kondak-toon-8-hemelum
+genre: kondak
+also_used_as:
+  - tropaar
+tone: 8
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: >-
+  Liturgikon / Hemelum — kondak toon 8; afgeleid uit
+  kondak-zaterdag-gestorvenen-toon-8-hemelum.mvsa
+voice_oct:
+  S: 0
+  A: -1
+  T: -1
+  B: -1
+cycle:
+  - "1"
+final: laatste
+
+mapping_plans:
+  - id: standard
+    label: "|: 1 :| laatste"
+    when:
+      default: true
+    steps:
+      - repeat: ["1"]
+        until: final
+      - phrase: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - of:
+          # Pad 0 (formuleblad Hemelum): recite mi, dan accent-fa → mi–re–do.
+          - events:
+              - role: open
+                duration: "~"
+                optional: true
+                pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+              - role: open
+                duration: "~"
+                optional: true
+                pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+              - role: recite
+                duration: "__"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "_"
+                pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+              - role: cadence
+                duration: "~"
+                optional: true
+                pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                optional: true
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "~"
+                pitches: { S: re, A: ti-1, T: fa-1, B: sol-2 }
+              - role: cadence
+                duration: "~"
+                optional: true
+                pitches: { S: re, A: ti-1, T: fa-1, B: sol-2 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+          # Pad 1: klim do–re–mi–fa vóór recite (Vladimir e.d.).
+          - events:
+              - role: open
+                duration: "~"
+                optional: true
+                pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+              - role: open
+                duration: "~"
+                optional: true
+                pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+              - role: open
+                duration: "~"
+                optional: true
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: open
+                duration: "~"
+                pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+              - role: open
+                duration: "~"
+                optional: true
+                pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+              - role: recite
+                duration: "__"
+                pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+              - role: cadence
+                duration: "_"
+                pitches: { S: re, A: ti-1, T: fa-1, B: sol-2 }
+              - role: cadence
+                duration: "~"
+                optional: true
+                pitches: { S: re, A: ti-1, T: fa-1, B: sol-2 }
+              - role: cadence
+                duration: "_"
+                anchor: l.st.
+                pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+
+  - id: laatste
+    events:
+      - role: open
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: open
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+      - role: open
+        duration: "~"
+        optional: true
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: open
+        duration: "~"
+        optional: true
+        pitches: { S: fa, A: do, T: la-1, B: fa-2 }
+      - role: recite
+        duration: "__"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      # Optionele re vóór de mi–fa–mi-slot (o.a. Gods / zon).
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: do, T: fa-1, B: fa-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: fa, A: ti-1, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: fa, A: ti-1, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: sol-1, T: sol-1, B: do-1 }

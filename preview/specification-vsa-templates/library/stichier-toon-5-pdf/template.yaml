@@ -1,0 +1,128 @@
+# Stichier toon 5 (PDF-formuleblad). do=F4 major.
+# Groningen tropaar/kondak toon 5: kondak-toon-5-groningen (niet deze melodie).
+
+spec_version: draft-v0
+id: stichier-toon-5-pdf
+genre: stichier
+tone: 5
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: "tonen (vers, stichier, tropaar).pdf — Toon 5 Stichiermelodie"
+cycle:
+  - "1"
+  - "2"
+  - "3"
+final: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: open
+        duration: "~"
+        anchor: e.st.
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: open
+        duration: "~"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: fa, A: la, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: sol, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+
+  - id: "2"
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: fa, A: la, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: sol, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+
+  - id: "3"
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: open
+        duration: "~"
+        anchor: e.st.
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: open
+        duration: "~"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+
+  - id: laatste
+    events:
+      - role: open
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: recite
+        duration: "~"
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: vl.st.
+        pitches: { S: do, A: mi, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: fa, T: la-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: "#re", T: mi-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        anchor: l.lgr.
+        pitches: { S: re, A: fa, T: re-1, B: sol-2 }
+      - role: cadence
+        duration: "__"
+        pitches: { S: do, A: mi, T: do-1, B: do-2 }

@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>cursor/eigen-partituur-svg-cabd</code>
-  , gebouwd 2026-11-09 09:09 CET.
+   — branch <code>development</code>
+  , gebouwd 2026-11-11 10:34 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1295,7 +1295,7 @@
   <span class="md-ellipsis">
     
   
-    vsa musicxml
+    vsa mxl
   
 
     
@@ -2635,6 +2635,62 @@
     
   
     Mapping VSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../specification-vsa-templates/vsa-mvsa-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contract VSA→MVSA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../specification-vsa-templates/conversion-lessons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversielessen
   
 
     
@@ -4081,7 +4137,35 @@
   <span class="md-ellipsis">
     
   
-    vsa musicxml
+    vsa mxl
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vsa-mvsa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vsa mvsa
   
 
     
@@ -4993,34 +5077,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../plans/eigen-partituur-svg/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Eigen partituur-SVG (plan)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../plans/vsa-polyphony-proposal/" class="md-nav__link">
         
   
@@ -5281,9 +5337,9 @@ afgeleide wilt.</p>
 <td><code>.vsa</code> / <code>.mvsa</code> (<code>iter_vsa_mvsa_files</code> → helper)</td>
 </tr>
 <tr>
-<td><code>musicxml</code></td>
-<td>Deels</td>
-<td>map ondersteund in renderer-pad; check man-pagina</td>
+<td><code>mxl</code> (<code>musicxml</code>)</td>
+<td>Ja</td>
+<td>alleen <code>.vsa</code> (straat-puur; sibling of <code>-o</code>)</td>
 </tr>
 <tr>
 <td><code>products</code></td>
@@ -5293,7 +5349,7 @@ afgeleide wilt.</p>
 <tr>
 <td><code>audio</code></td>
 <td>Ja</td>
-<td>zelfde bronnen; bij map is <code>output</code> een uitvoermap</td>
+<td>alleen <code>.vsa</code> in code; help/docs nog inhalen (apart)</td>
 </tr>
 <tr>
 <td><code>template validate</code></td>
@@ -5421,8 +5477,8 @@ afgeleide wilt.</p>
 top-level <code>text</code> / <code>audio</code> / <code>svg</code>, en de wrappers <code>collect_mvsa_files</code> /
 <code>iter_vsa_files</code> / <code>iter_vsa_mvsa_files</code>.</p>
 <p><code>markdown pdf</code> / <code>markdown svg</code> / <code>markdown text</code> ondersteunen bestand-of-map. Optioneel later:
-<code>vsa parse</code> en overige map-scanners (<code>musicxml</code>, <code>validate</code>, <code>process</code>,
-<code>template</code>) waar die nog eigen <code>rglob</code> hebben.</p>
+<code>vsa parse</code> en overige map-scanners (<code>validate</code>, <code>process</code>, <code>template</code>)
+waar die nog eigen <code>rglob</code> hebben. <code>vsa mxl</code> gebruikt al <code>collect_cli_sources</code>.</p>
 
 
 
@@ -5459,7 +5515,7 @@ top-level <code>text</code> / <code>audio</code> / <code>svg</code>, en de wrapp
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-10-28
+        Bijgewerkt: 2026-11-11
         
       </p>
       
