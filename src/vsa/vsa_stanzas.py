@@ -81,10 +81,8 @@ def _token_has_stanza_marker(token: str) -> bool:
 def has_phrase_separators(body: str) -> bool:
     """True als de bron al expliciete `*` / `**` / `/` / `//` als frasescheiding gebruikt.
 
-    Inclusief vastgeplakt aan leesteken of woord (`.*`, `./`). Alleen die
-    markers schakelen ``ensure_stanza_stars`` uit; zonder markers blijft
-    regel-per-frase (+ indent-wrap) de ensure-route. ``extract_stanza_notes``
-    splitst sowieso op dezelfde markers.
+    Inclusief vastgeplakt aan leesteken of woord (`.*`, `./`).
+    ``extract_stanza_notes`` splitst op al deze markers.
     """
     cleaned = strip_html_comments(body)
     for ln in cleaned.splitlines():
@@ -97,18 +95,38 @@ def has_phrase_separators(body: str) -> bool:
     return False
 
 
+def has_star_phrase_separators(body: str) -> bool:
+    """True als de bron al `*` / `**` als frasescheiding gebruikt.
+
+    Alleen die markers schakelen ``ensure_stanza_stars`` uit. Kale `/` / `//`
+    (K5-stijl) blijven ensure toestaan: regel-per-frase + daarna splitsen op
+    slash-scheiders.
+    """
+    cleaned = strip_html_comments(body)
+    for ln in cleaned.splitlines():
+        s = ln.strip()
+        if not s or s.startswith("#"):
+            continue
+        for tok in s.split():
+            for marker in ("**", "*"):
+                if tok == marker or tok.startswith(marker) or tok.endswith(marker):
+                    return True
+    return False
+
+
 def ensure_stanza_stars(body: str) -> tuple[str, list[str]]:
     """Normaliseer naar `*`-frasen voor template-mapping indien nodig.
 
     - HTML-commentaar en ``#``-regels tellen niet mee.
     - Ingesprongen vervolgregels horen bij de vorige frase (print-wrap).
-    - Zonder frasescheiders: één ``*`` per logische (niet-ingesprongen) regel.
-    - Met scheiders: body ongewijzigd (``extract_stanza_notes`` splitst zelf).
+    - Zonder ``*``/``**``: één ``*`` per logische (niet-ingesprongen) regel.
+    - Met ``*``/``**``: body ongewijzigd (``extract_stanza_notes`` splitst zelf).
+    - Kale `/` / `//` schakelen ensure niet uit (K5-stijl).
 
     Returns ``(normalized_body, notes_for_report)``.
     """
     notes: list[str] = []
-    if has_phrase_separators(body):
+    if has_star_phrase_separators(body):
         return body, notes
 
     phrases = music_phrase_lines(body)

@@ -60,9 +60,9 @@ TEMPLATE_DERIVED_WARNING_BANNER = """\
 #  #   DIT BESTAND IS AFGELEID UIT VSA + TEMPLATE EN IS EEN SCHETS.         #  #
 #  #   CONTROLEER VÓÓR OPNAME IN DE CATALOGUS TEN MINSTE:                   #  #
 #  #   - duren (halve noten ``_`` blijven eigen L-posities; recite = kwart) #  #
-#  #   - melisma-ELMs (``{/&/fi~&~}`` vs ``{/&/fi_}`` → parser-verdubbeling)#  #
+#  #   - melisma-slots (``_&_`` / ``~&~`` voor stem-sync; later samentrekken)#  #
 #  #   - recite-haakjes, woordstreepjes, A/T/B t.o.v. S                     #  #
-#  #   - regels hieronder die met ``# WAARSCHUWING:`` beginnen              #  #
+#  #   - eventuele regels hieronder met ``# WAARSCHUWING:``                 #  #
 #  #                                                                        #  #
 #  ##########################################################################  #\
 """
@@ -667,33 +667,14 @@ def collect_emit_warnings(
     *,
     index: int,
 ) -> list[str]:
-    """Detecteer bekende VSA/template-valkuilen die de emit niet stil mag ‘fixen’."""
-    warnings: list[str] = []
-    i = 0
-    while i < len(notes):
-        n = notes[i]
-        if not (n.lyric or "").strip():
-            i += 1
-            continue
-        melisma = [n]
-        j = i + 1
-        while j < len(notes) and not (notes[j].lyric or "").strip():
-            melisma.append(notes[j])
-            j += 1
-        if len(melisma) >= 2:
-            elms = [elm_token(x) or "~" for x in melisma]
-            # Alleen hinten bij verdachte verdubbeling: zelfde niet-default ELM
-            # op alle slots. Expliciet ``_&_`` in de VSA is geldig — controleer
-            # of de bron niet ``{/&/…_}`` (één _) was (parser kopieert dan _).
-            if len(set(elms)) == 1 and elms[0] not in ("", "~"):
-                warnings.append(
-                    f"frase {index}/{phrase_id!r}: melisma op {n.lyric!r} heeft "
-                    f"{len(melisma)}× ELM {elms[0]!r}. Klopt dat met de bron-VSA? "
-                    f"Expliciet `_&_` (enz.) is ok; één `_` bij `/&/` wordt door de "
-                    f"parser verdubbeld (vaak bedoeld als ~&~)."
-                )
-        i = j
-    return warnings
+    """Hook voor specifieke emit-``# WAARSCHUWING:``-regels (T6).
+
+    Geen actieve detecties meer: herhaalde melisma-ELM (``_&_`` / ``~&~``) is
+    normaal bij stem-sync en hoort geen hint. Parameters blijven voor API-
+    stabiliteit / toekomstige checks.
+    """
+    del phrase_id, notes, index
+    return []
 
 
 def _format_syllable_l(

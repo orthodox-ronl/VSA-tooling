@@ -571,7 +571,7 @@ Een kale streep is geen marker (geen VSA-`[:]`-equivalent).
 
 Zelfde bestandsvorm: een `tropaar-toon-4`-stemtemplate is dan een set
 S/A/T/B-regels per frase; per tropaar schrijf je vooral nieuwe L-regels met `~`.
-YAML in [`library/tropaar-toon-4/`](../specification-vsa-templates/library/tropaar-toon-4/README.md)
+YAML in [`library/tropaar-toon-4-hemelum/`](../specification-vsa-templates/library/tropaar-toon-4-hemelum/README.md)
 blijft voorlopig leidend tot mvsa die rol overneemt.
 
 ---
@@ -688,5 +688,5 @@ events heeft, en of `@include` een alias van `=` mag zijn.
 5. §9–§10 (beslissingen + open punten).
 6. §11 blokhergebruik + `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`
    (experimenteel, niet normatief).
-7. Daarna [tropaar-toon-4](../specification-vsa-templates/library/tropaar-toon-4/README.md)
+7. Daarna [tropaar-toon-4-hemelum](../specification-vsa-templates/library/tropaar-toon-4-hemelum/README.md)
    als je stemregels als formule-slots wilt hergebruiken.

@@ -116,9 +116,9 @@ als de gekuiste bestanden in `bibliotheek/.../_klaar_voor_acceptatie`
    `corpus_id`. Geen `do` / `mode` / `tempo` in YAML.
 2. **Oorspronkelijke VSA** als commentaarblok (ELM-foutzoeken).
 3. **Meta-commentaar** — bronpad, template-pad/id (T1), notatie (ag-vsa).
-4. **Waarschuwingen** — algemene schets-banner plus eventuele specifieke
-   `# WAARSCHUWING:`-regels (o.a. melisma met herhaalde niet-default ELM:
-   controleer bron `{/&/x_}` vs `{/&/x_&_}`).
+4. **Waarschuwingen** — algemene schets-banner; specifieke
+   `# WAARSCHUWING:`-regels alleen als er later weer emit-detecties zijn
+   (herhaalde melisma-ELM zoals `_&_` is géén hint meer: stem-sync).
 5. **`@`-kop** — `@title`; daarna playback **`@do`**, **`@mode`**,
    **`@tempo`** (default 180 voor tropaar/kondak; VSA-frontmatter-tempo
    wordt genegeerd) **direct boven** `@oct` (uit template-`voice_oct`).

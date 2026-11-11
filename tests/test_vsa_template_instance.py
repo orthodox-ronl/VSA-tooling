@@ -666,16 +666,17 @@ def test_elia_instance_mscz_written() -> None:
     assert "Profeet Elia" in mscx
     assert "T4-06 —" not in mscx
     assert "<maxPageFillSpread>0</maxPageFillSpread>" in mscx
-    assert "<maxSystemDistance>9.64</maxSystemDistance>" in mscx
-    assert "<maxSystemSpread>9.64</maxSystemSpread>" in mscx
-    assert "<minSystemDistance>9.64</minSystemDistance>" in mscx
-    assert "<staffDistance>5</staffDistance>" in mscx or "<staffDistance>5.0</staffDistance>" in mscx
-    assert "<frameSystemDistance>4</frameSystemDistance>" in mscx or "<frameSystemDistance>4.0</frameSystemDistance>" in mscx
+    staff, sys, frame = render._vertical_layout_gaps(layout="instance")
+    assert f"<maxSystemDistance>{sys}</maxSystemDistance>" in mscx
+    assert f"<maxSystemSpread>{sys}</maxSystemSpread>" in mscx
+    assert f"<minSystemDistance>{sys}</minSystemDistance>" in mscx
+    assert f"<staffDistance>{staff}</staffDistance>" in mscx
+    assert f"<frameSystemDistance>{frame}</frameSystemDistance>" in mscx
     assert f"<height>{render.TITLE_VBOX_HEIGHT_SP:g}</height>" in mscx
-    assert "<maxSystemDistance>9.64</maxSystemDistance>" in mss
+    assert f"<maxSystemDistance>{sys}</maxSystemDistance>" in mss
     assert "<enableVerticalSpread>0</enableVerticalSpread>" in mss
     assert "<enableIndentationOnFirstSystem>0</enableIndentationOnFirstSystem>" in mss
-    assert "<frameSystemDistance>4</frameSystemDistance>" in mss or "<frameSystemDistance>4.0</frameSystemDistance>" in mss
+    assert f"<frameSystemDistance>{frame}</frameSystemDistance>" in mss
 
 
 def _satb(s: str, a: str = "do", t: str = "sol-1", b: str = "do-1") -> dict:
@@ -1011,10 +1012,7 @@ van hun eerbiedwaardige {/moe_}{/der_} {\\\\So}{/&/fi~&~}{/a_} *
 
 def test_emit_keeps_half_notes_out_of_recite() -> None:
     """``{/Ljoe_}{bov_}`` zelfde toon → géén ``(Ljoe_-bov_)`` (ELM in recite sterft)."""
-    from vsa.vsa_mvsa import (
-        collect_emit_warnings,
-        emit_mvsa_block,
-    )
+    from vsa.vsa_mvsa import emit_mvsa_block
     from vsa.music import Duration, Pitch
 
     bb = Pitch(step="B", octave=4, alter=-1.0)
@@ -1115,7 +1113,8 @@ def test_map_melody_voice_a_matches_pitches_a() -> None:
     assert melody_degree(mapped[0].template_event, melody_voice="A") == "mi"
 
 
-def test_emit_warns_on_replicated_melisma_halves() -> None:
+def test_emit_no_longer_warns_on_replicated_melisma_halves() -> None:
+    """``_&_`` / zelfde ELM op melisma-slots → geen emit-hint (stem-sync)."""
     from vsa.vsa_mvsa import collect_emit_warnings
     from vsa.music import Duration, Pitch
 
@@ -1138,9 +1137,7 @@ def test_emit_warns_on_replicated_melisma_halves() -> None:
             template_event={"role": "cadence", "pitches": {}},
         ),
     ]
-    w = collect_emit_warnings("1", notes, index=3)
-    assert w and "melisma op 'fi'" in w[0]
-    assert "2× ELM '_'" in w[0]
+    assert collect_emit_warnings("1", notes, index=3) == []
 
 
 KONDAK_T2_YAML = LIBRARY / "kondak-toon-2-groningen" / "template.yaml"
