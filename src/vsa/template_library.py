@@ -298,6 +298,7 @@ def select_template_id(
     *,
     soort: str | None = None,
     toon: int | str | None = None,
+    formule: str | None = None,
     bron: str | None = None,
     path: Path | str | None = None,
     output: Path | str | None = None,
@@ -307,7 +308,10 @@ def select_template_id(
     """Kies template-id voor ``vsa mvsa`` (T1).
 
     * ``explicit`` (CLI ``--template``) wint altijd.
-    * Anders: kandidaten uit ``soort``+``toon`` (verplicht).
+    * Anders: kandidaten uit **formulekeuze** + ``toon``:
+      - ``formule`` in de VSA = melodieformule (genre of volledige id),
+        los van liturgische ``soort`` (bijv. kondak met stichiermelodie);
+      - zonder ``formule``: liturgische ``soort`` + ``toon``.
     * 0 kandidaten → harde fout; 1 → die gebruiken.
     * Meerdere: bestaande uitvoer-``.mvsa`` (``template_opgegeven`` /
       ``template``), anders bron uit leaf/pad/meta, anders harde fout.
@@ -320,9 +324,21 @@ def select_template_id(
     out_p = Path(output) if output else None
     stem = path_p.stem if path_p else ""
 
+    formule_s = (formule or "").strip().lower() or None
+    # Volledige library-id / alias als formule → direct die gebruiken
+    # (mits die bestaat), zonder soort-lookup.
+    if formule_s and (
+        (root / formule_s / "template.yaml").is_file()
+        or formule_s in template_aliases(root)
+    ):
+        return resolve_template_id(formule_s, library_root=root)
+
     soort_s = (soort or "").strip().lower() or None
     if not soort_s and stem:
         soort_s = _soort_from_stem(stem)
+
+    # formule: stichier → zoek stichier-toon-N-…; soort blijft liturgisch.
+    lookup_soort = formule_s or soort_s
 
     tone = _parse_toon(toon)
     if tone is None and stem:
@@ -330,21 +346,28 @@ def select_template_id(
         if m:
             tone = int(m.group(1))
 
-    if not soort_s or tone is None:
+    if not lookup_soort or tone is None:
         raise TemplateLibraryError(
             "vsa mvsa vereist soort en toon in de .vsa-frontmatter "
-            "(of --template). Zie vsa-mvsa-contract.md T1.",
+            "(of --template). Optioneel formule: voor een andere "
+            "melodieformule dan soort. Zie vsa-mvsa-contract.md T1.",
             code="TEMPLATE-SELECT-META",
         )
 
     candidates = list_templates_for_soort_toon(
-        soort_s, tone, library_root=root
+        lookup_soort, tone, library_root=root
     )
     if not candidates:
+        label = (
+            f"formule={formule_s!r}"
+            if formule_s
+            else f"soort={soort_s!r}"
+        )
         raise TemplateLibraryError(
-            f"geen template voor soort={soort_s!r} toon={tone}. "
-            f"Voeg library/{soort_s}-toon-{tone}-… toe of geef --template. "
-            f"Bekend: {', '.join(list_template_ids(root)) or '(geen)'}",
+            f"geen template voor {label} toon={tone}. "
+            f"Voeg library/{lookup_soort}-toon-{tone}-… toe, zet "
+            f"formule: op een bestaande formule-soort/id, of geef "
+            f"--template. Bekend: {', '.join(list_template_ids(root)) or '(geen)'}",
             code="TEMPLATE-SELECT-MISSING",
         )
     if len(candidates) == 1:
@@ -390,8 +413,13 @@ def select_template_id(
         if len(bron_hits) > 1:
             candidates = bron_hits
 
+    label = (
+        f"formule={formule_s!r}"
+        if formule_s
+        else f"soort={soort_s!r}"
+    )
     raise TemplateLibraryError(
-        f"meerdere templates voor soort={soort_s!r} toon={tone}: "
+        f"meerdere templates voor {label} toon={tone}: "
         f"{', '.join(candidates)}. Geef --template, of regenereer een "
         f"bestaande .mvsa (dan geldt template/template_opgegeven uit die "
         f"frontmatter).",
@@ -403,6 +431,7 @@ def infer_template_id(
     *,
     soort: str | None = None,
     toon: int | str | None = None,
+    formule: str | None = None,
     bron: str | None = None,
     path: Path | str | None = None,
     library_root: Path | None = None,
@@ -412,6 +441,7 @@ def infer_template_id(
     return select_template_id(
         soort=soort,
         toon=toon,
+        formule=formule,
         bron=bron,
         path=path,
         output=output,

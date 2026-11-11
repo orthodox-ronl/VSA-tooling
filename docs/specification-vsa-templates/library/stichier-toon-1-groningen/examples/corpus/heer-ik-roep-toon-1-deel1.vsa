@@ -1,0 +1,27 @@
+---
+titel: Heer ik roep - Toon 1 (deel 1)
+partituur:
+  title: Heer ik roep - Toon 1 (deel 1)
+  arranger: Groningen
+bron:
+  uitgangspunt: stichiertonen/heer_ik_roep_t1.mscz
+soort: stichier
+toon: 1
+formule: stichier
+taal: nl
+do: F4
+mode: major
+tempo: 180
+zoektekst: >-
+  Heer ik roep tot U verhoor mij, verhoor mij o Heer,
+  Heer ik roep tot U verhoor mij, sla acht op de stem van mijn smeking,
+  wanneer ik tot U roep, verhoor mij o Heer.
+---
+
+<!-- Couplet 1 — 6 strofes → 1,2,3,2,voorlaatste,laatste -->
+[///:] Heer ik roep tot U verhoor {\\\mij_},
+{//ver_}-hoor mij o {\Heer_},
+{//Heer_} ik roep tot U verhoor {\\mij_},
+{/sla_} acht op de stem van mijn sme{\king_},
+{//wan_}-neer ik tot U {\\\roep_}, //
+{////ver_} {/hoor_}{\mij_}{\o_}{\&/&\&\Heer__&~&~&~}. [/:]

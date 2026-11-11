@@ -1,7 +1,6 @@
 # Groningen — tropaar/kondak toon 4.
 # CLI/playbook-id: tropaar-toon-4-groningen (map = canonieke id).
-# Bron-instance: bibliotheek …/_klaar_voor_acceptatie/
-#   tropaar-nikolaas-van-myra-toon-4-groningen.mvsa
+# Referentie-instance (catalogus): kondak/zondag-toon-4/groningen
 # do=F4 major. also_used_as kondak (zelfde formule).
 #
 # T.o.v. Hemelum (library/tropaar-toon-4-hemelum): zelfde laddergraden-eindes
@@ -22,8 +21,8 @@ mode: major
 duration-model: default
 pitches_status: provisional
 source: >-
-  Koormap Groningen — tropaar/kondak toon 4; afgeleid uit
-  tropaar-nikolaas-van-myra-toon-4-groningen.mvsa
+  Koormap Groningen — tropaar/kondak toon 4; referentie o.a.
+  bibliotheek catalogus kondak/zondag-toon-4/groningen
 cycle:
   - "1"
   - "2"

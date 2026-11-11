@@ -15,9 +15,9 @@ vsa mvsa --list-templates
 
 | Onderdeel          | Betekenis                                                                                          |
 | ------------------ | -------------------------------------------------------------------------------------------------- |
-| `bestand.vsa`      | Bron: melodie + tekst + frasen; frontmatter met **`soort`** en **`toon`** (T1)                     |
-| `--template`       | Library-id of alias; zonder vlag: keuze op `soort`+`toon` (T1); ontbrekend/ambigu → fout           |
-| `-o OUT`           | Uitvoerpad; default sibling `<bron>.mvsa`; bij hergeneratie telt bestaande MVSA-`template`         |
+| `bestand.vsa`      | Bron: melodie + tekst + frasen; frontmatter met **`soort`** en **`toon`** (T1); optioneel **`formule`** als de melodieformule ≠ `soort` |
+| `--template`       | Library-id of alias; zonder vlag: `formule`+`toon` of `soort`+`toon` (T1); ontbrekend/ambigu → fout |
+| `-o OUT`           | Uitvoerpad; default sibling `<stam>.vsa.mvsa` (naamgeving stem.brontype.doeltype); bij hergeneratie telt bestaande MVSA-`template` |
 | `--melody`         | Melodiestem (T2); default `S`                                                                      |
 | `--tempo`          | BPM in de MVSA; default **180** (tropaar/kondak); VSA-frontmatter negeert de converter             |
 | `--list-templates` | Toon ids onder de library-map                                                                      |
@@ -47,11 +47,13 @@ De schets-MVSA volgt de gekuiste klaar-vorm (geen speelplan, geen `@blok`):
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa --list-templates
 vsa mvsa docs\specification-vsa-templates\library\tropaar-toon-4-hemelum\examples\corpus\T4-06-profeet-elia.vsa
-vsa mvsa lied.vsa --template tropaar-toon-4-groningen -o generated\lied.schets.mvsa
+vsa mvsa lied.vsa --template tropaar-toon-4-groningen -o generated\lied.vsa.mvsa
 vsa mvsa lied.vsa --template kondak-toon-1-groningen
 vsa mvsa lied.vsa --template tropaar-toon-2-groningen
 vsa mvsa lied.vsa --template kondak-toon-5-groningen
 ```
+
+Zonder `-o` schrijft `vsa mvsa` naast de bron: `lied.vsa` → `lied.vsa.mvsa`.
 
 Zonder `--template` zoekt de CLI formules bij `soort`+`toon`. Bestaan er
 meerdere (Hemelum én Groningen), dan: bestaande `.mvsa` op het

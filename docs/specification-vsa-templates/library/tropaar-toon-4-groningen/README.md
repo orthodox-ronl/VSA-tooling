@@ -24,11 +24,11 @@ formule.
 
 ## Bron
 
-Afgeleid uit
+Referentie-instance in de bibliotheek-catalogus:
+`kondak/zondag-toon-4/groningen`
+(`kondak-zondag-toon-4-groningen.vsa`).
 
-`bibliotheek/…/_klaar_voor_acceptatie/tropaar-nikolaas-van-myra-toon-4-groningen.mvsa`
-
-Vergelijk met de Hemelum-sibling `…-hemelum.mvsa` (B-pad in frase 1).
+Vergelijk met Hemelum toon 4 (`tropaar-toon-4-hemelum`; B-pad in frase 1).
 
 Mensformule (zonder lyrics), in de repo (niet op Pages):
 `examples/formule-tekst/tropaar-toon-4-groningen/`

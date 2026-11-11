@@ -23,6 +23,7 @@ from vsa.vsa_mvsa import (
     _tempo_from_meta,
     clean_emit_frontmatter,
     convert_vsa_to_mvsa,
+    default_vsa_mvsa_output,
     emit_sections_enabled,
     find_fitting_alternate_templates,
     format_alternate_template_hint,
@@ -184,6 +185,24 @@ def test_select_template_id_missing() -> None:
         select_template_id(soort="stichier", toon=1)
 
 
+def test_select_template_id_formule_overrides_soort() -> None:
+    """Liturgische soort ≠ melodieformule (T1 formule:)."""
+    assert (
+        select_template_id(soort="kondak", toon=6, formule="stichier")
+        == "stichier-toon-6-groningen"
+    )
+    assert (
+        select_template_id(
+            soort="kondak",
+            toon=6,
+            formule="stichier-toon-6-groningen",
+        )
+        == "stichier-toon-6-groningen"
+    )
+    # Zonder formule: kondak/tropaar toon 6 (Groningen).
+    assert select_template_id(soort="kondak", toon=6) == "kondak-toon-6-groningen"
+
+
 def test_select_template_id_from_existing_mvsa(tmp_path: Path) -> None:
     out = tmp_path / "x.mvsa"
     # template_opgegeven (alias) wint; moet bij soort/toon-kandidaten horen.
@@ -302,6 +321,12 @@ def test_cli_list_templates() -> None:
     assert run_vsa_mvsa(ns) == 0
 
 
+def test_default_vsa_mvsa_output_uses_stem_brontype_doeltype() -> None:
+    assert default_vsa_mvsa_output(Path("lied.vsa")) == Path("lied.vsa.mvsa")
+    nested = Path("catalogus") / "x" / "default" / "lied.vsa"
+    assert default_vsa_mvsa_output(nested) == nested.with_name("lied.vsa.mvsa")
+
+
 @pytest.mark.skipif(not ELIA.is_file(), reason="corpus Elia ontbreekt")
 def test_cli_writes_sibling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     src = tmp_path / "x.vsa"
@@ -320,4 +345,4 @@ def test_cli_writes_sibling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
         },
     )()
     assert run_vsa_mvsa(ns) == 0
-    assert src.with_suffix(".mvsa").is_file()
+    assert src.with_name(f"{src.name}.mvsa").is_file()

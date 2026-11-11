@@ -87,6 +87,7 @@ _EMIT_FRONTMATTER_KEYS = (
     "taal",
     "soort",
     "toon",
+    "formule",
     "template",
     "template_opgegeven",
     "partituur",
@@ -1101,6 +1102,12 @@ def format_alternate_template_hint(
     return "\n".join(lines)
 
 
+def default_vsa_mvsa_output(source: Path | str) -> Path:
+    """Default-uitvoerpad: ``lied.vsa`` → ``lied.vsa.mvsa`` (stem.brontype.doeltype)."""
+    src = Path(source)
+    return src.with_name(f"{src.name}.mvsa")
+
+
 def convert_vsa_to_mvsa(
     source: Path | str,
     *,
@@ -1116,7 +1123,8 @@ def convert_vsa_to_mvsa(
     """VSA + library-template → schets-MVSA-tekst (T1–T7).
 
     ``template``: canonieke id of alias (CLI ``--template``). Zonder
-    expliciete keuze: templates zoeken op ``soort``+``toon`` (T1);
+    expliciete keuze: templates zoeken op ``formule``+``toon`` als
+    ``formule`` in de VSA staat, anders ``soort``+``toon`` (T1);
     ontbrekend → harde fout; één → gebruiken; meerdere → bestaande
     uitvoer-``.mvsa`` of bron/leaf. Geen stille Hemelum-default.
     """
@@ -1139,7 +1147,7 @@ def convert_vsa_to_mvsa(
     if output is not None:
         out_path = Path(output)
     elif write:
-        out_path = src.with_suffix(".mvsa")
+        out_path = default_vsa_mvsa_output(src)
 
     bron_u = None
     bron = meta.get("bron")
@@ -1148,9 +1156,12 @@ def convert_vsa_to_mvsa(
     elif isinstance(bron, str):
         bron_u = bron
 
+    liturgische_soort = meta.get("soort") or meta.get("genre")
+    formule_meta = meta.get("formule")
     tpl_name = select_template_id(
-        soort=meta.get("soort") or meta.get("genre"),
+        soort=liturgische_soort,
         toon=meta.get("toon") or meta.get("tone"),
+        formule=str(formule_meta) if formule_meta not in (None, "") else None,
         bron=str(bron_u) if bron_u else None,
         path=src,
         output=out_path,
@@ -1168,11 +1179,19 @@ def convert_vsa_to_mvsa(
             melody_voice=melody_voice,
         )
     except TemplateInstanceError as exc:
-        # T4: harde fout blijft; suggesteer andere soort+toon-formule als die past.
+        # T4: harde fout blijft; suggesteer andere formules (zelfde lookup) die passen.
+        alt_soort = (
+            str(formule_meta).strip().lower()
+            if formule_meta not in (None, "")
+            else liturgische_soort
+        )
+        # Volledige formule-id: geen zinvolle «andere soort»-suggestie.
+        if alt_soort and "-toon-" in str(alt_soort):
+            alt_soort = liturgische_soort
         fitting = find_fitting_alternate_templates(
             vsa_text,
             failed=resolved,
-            soort=meta.get("soort") or meta.get("genre"),
+            soort=alt_soort,
             toon=meta.get("toon") or meta.get("tone"),
             library_root=library_root,
             melody_voice=melody_voice,

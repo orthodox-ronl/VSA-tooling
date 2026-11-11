@@ -9,7 +9,7 @@ Groningen toon 1 (`do=F4` major): kondak én tropaar zondag.
 
 | Frase     | S-kern                                      | Ankers            |
 | --------- | ------------------------------------------- | ----------------- |
-| `1`       | open do–re–mi (optioneel), recite do → fa   | `l.st.` op fa     |
+| `1`       | open do–re–mi (optioneel), recite do → fa; op re: A sol-1, T fa-1, B do-1 (`- /3` / `/ / /` / `- - \4`) | `l.st.` op fa     |
 | `2`       | `e.st.` + recite mi → do                    | `e.st.` / `l.st.` |
 | `1a`      | recite mi → re–mi–fa                        | idem (tropaar)    |
 | `laatste` | recite mi → fa → mi                         | idem              |

@@ -1,0 +1,146 @@
+# Stichier toon 6 (Groningen) — do=F4 major.
+# Corpus: kondak-moeder-gods-toon-6-groningen.vsa (formule stichier)
+#   + heer-ik-roep toon 6 (twee onderdelen; bij n×3 strofes: voorlaatste-variant).
+# Speelplan standaard: |: 1, 2, 3 :| laatste.
+# Speelplan n×3: |: 1, 2, 3 :| voorlaatste, laatste
+#   (op één na laatste strofe: andere melodie — stichierpraktijk; niet in MG-kondak).
+# A/T/B provisional (gestapeld t.o.v. S). Contract: T1–T7 / mapping-vsa H4–H8.
+
+spec_version: draft-v0
+id: stichier-toon-6-groningen
+genre: stichier
+tone: 6
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: >-
+  Koormap Groningen — stichiermelodie toon 6
+  (Moeder Gods-kondak; Heer ik roep / Laat mijn gebed)
+voice_oct:
+  S: 0
+  A: 0
+  T: -1
+  B: -1
+cycle:
+  - "1"
+  - "2"
+  - "3"
+final: laatste
+
+mapping_plans:
+  # Eerst specifiek (n % 3 == 0), daarna default — zie mapping-vsa.md.
+  - id: triple-close
+    label: "|: 1, 2, 3 :| voorlaatste, laatste"
+    when:
+      stanza_count_mod:
+        mod: 3
+        remainder: 0
+    steps:
+      - repeat: ["1", "2", "3"]
+        until:
+          remaining: 2
+      - phrase: voorlaatste
+      - phrase: laatste
+  - id: standard
+    label: "|: 1, 2, 3 :| laatste"
+    when:
+      default: true
+    steps:
+      - repeat: ["1", "2", "3"]
+        until: final
+      - phrase: laatste
+
+phrases:
+  - id: "1"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }
+
+  - id: "2"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+      # Scoped stay op re (Schep_/roe_/aan_) ná unscoped recite → apart slot vóór do.
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+
+  - id: "3"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+
+  # Bij strofe-aantal veelvoud van 3: melodie van de op één na laatste strofe
+  # (Heer ik roep: «wanneer ik tot U roep»). Contour: re-recite → do → ti.
+  - id: voorlaatste
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+
+  - id: laatste
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }
+      # Optioneel: losse re (kondak «voor»); bij Heer ik roep vaak in recite-melisma.
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: fa-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+      - role: cadence
+        duration: "__"
+        anchor: l.st.
+        pitches: { S: do, A: la-1, T: mi-1, B: do-1 }

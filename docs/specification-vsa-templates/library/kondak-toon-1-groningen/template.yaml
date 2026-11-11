@@ -66,7 +66,9 @@ phrases:
         pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
       - role: cadence
         duration: "~"
-        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
+        # Ref. klaar tropaar/kondak zondag toon-1: A ``- /3``, T ``/ / /``,
+        # B ``- - \4`` (niet A ``/2 /`` / T ``/2 - /`` / B ``\3 /3 \4``).
+        pitches: { S: re, A: sol-1, T: fa-1, B: do-1 }
       - role: cadence
         duration: "~"
         pitches: { S: mi, A: do, T: sol-1, B: do-1 }

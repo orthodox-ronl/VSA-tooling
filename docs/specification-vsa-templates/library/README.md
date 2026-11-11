@@ -216,7 +216,7 @@ S/A-partij volstaat.
 | [`kondak-toon-8-groningen`](kondak-toon-8-groningen/README.md)   | cycle     | Groningen; also tropaar                     |
 | [`kondak-toon-8-hemelum`](kondak-toon-8-hemelum/README.md)       | cycle     | Hemelum/Liturgikon; also tropaar            |
 | [`tropaar-toon-8-hemelum`](tropaar-toon-8-hemelum/README.md)     | `same_as` | → kondak-toon-8-hemelum                     |
-| [`tropaar-toon-1-groningen`](tropaar-toon-1-groningen/README.md) | cycle     |                                             |
+| [`tropaar-toon-1-groningen`](tropaar-toon-1-groningen/README.md) | cycle     | `same_as` → kondak-toon-1-groningen          |
 | [`tropaar-toon-2-groningen`](tropaar-toon-2-groningen/README.md) | `same_as` | → kondak-toon-2-groningen                   |
 | [`tropaar-toon-5-groningen`](tropaar-toon-5-groningen/README.md) | `same_as` | → kondak-toon-5-groningen                   |
 | [`tropaar-toon-6-groningen`](tropaar-toon-6-groningen/README.md) | `same_as` | → kondak-toon-6-groningen                   |
@@ -225,7 +225,10 @@ S/A-partij volstaat.
 | [`tropaar-toon-3-groningen`](tropaar-toon-3-groningen/README.md) | sequence  |                                             |
 | [`tropaar-toon-4-hemelum`](tropaar-toon-4-hemelum/README.md)     | cycle     | Hemelum; Elia-mapping + corpus              |
 | [`tropaar-toon-4-groningen`](tropaar-toon-4-groningen/README.md) | cycle     | Groningen; also kondak; uit Nicolaas-schets |
+| [`stichier-toon-1-groningen`](stichier-toon-1-groningen/README.md) | cycle   | Groningen; Heer-ik-roep (provisional)       |
+| [`stichier-toon-2-groningen`](stichier-toon-2-groningen/README.md) | cycle   | Groningen; Heer-ik-roep (provisional)       |
 | [`stichier-toon-5-pdf`](stichier-toon-5-pdf/README.md)           | cycle     | PDF-stichier (niet Groningen kondak-5)      |
+| [`stichier-toon-6-groningen`](stichier-toon-6-groningen/README.md) | cycle   | Groningen; `formule: stichier` op VSA       |
 | [`vers-toon-1-groningen`](vers-toon-1-groningen/README.md)       | cycle     |                                             |
 | [`vers-toon-5-groningen`](vers-toon-5-groningen/README.md)       | cycle     |                                             |
 

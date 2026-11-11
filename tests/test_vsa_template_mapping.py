@@ -217,3 +217,40 @@ def test_too_few_stanzas_raises() -> None:
     plan = list_mapping_plans(doc)[0]
     with pytest.raises(TemplateMappingError):
         assign_stanzas_to_phrases(plan, 0)
+
+
+def test_stichier_toon_6_triple_close_plan() -> None:
+    """Library-template: n×3 → voorlaatste; anders standaard cycle + laatste."""
+    from vsa.template_library import load_resolved_template
+
+    doc = load_resolved_template("stichier-toon-6-groningen").doc
+    ids = {p["id"] for p in doc["phrases"]}
+    assert "voorlaatste" in ids
+
+    std = select_mapping_plan(doc, 8)  # MG-kondak
+    assert std.id == "standard"
+    assert assign_stanzas_to_phrases(std, 8) == [
+        "1",
+        "2",
+        "3",
+        "1",
+        "2",
+        "3",
+        "1",
+        "laatste",
+    ]
+
+    part2 = select_mapping_plan(doc, 4)  # Laat mijn gebed (1–2–3–laatste)
+    assert part2.id == "standard"
+    assert assign_stanzas_to_phrases(part2, 4) == ["1", "2", "3", "laatste"]
+
+    part1 = select_mapping_plan(doc, 6)  # Heer ik roep (n×3)
+    assert part1.id == "triple-close"
+    assert assign_stanzas_to_phrases(part1, 6) == [
+        "1",
+        "2",
+        "3",
+        "1",
+        "voorlaatste",
+        "laatste",
+    ]

@@ -25,7 +25,7 @@ tekortschiet — eerst YAML proberen (T7).
 
 | Id  | Regel                                | Kort                                                                                                                                                                                                                                                                                                                              |
 | --- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T1  | Template-id                          | Keuze: zie **T1 — templatekeuze** hieronder. Elke afgeleide MVSA noemt de **feitelijk gebruikte** formule-id in frontmatter (`template:`) én in meta-commentaar. Was de CLI-/selectie-id een alias (of `same_as`), dan ook `template_opgegeven:`. Geen stille default.                                                            |
+| T1  | Template-id                          | Keuze: zie **T1 — templatekeuze** hieronder (`soort`+`toon`, of `formule`+`toon` als de melodieformule ≠ liturgische soort). Elke afgeleide MVSA noemt de **feitelijk gebruikte** formule-id in frontmatter (`template:`) én in meta-commentaar. Was de CLI-/selectie-id een alias (of `same_as`), dan ook `template_opgegeven:`. Geen stille default. |
 | T2  | Melodiestem uit VSA                  | **Default:** VSA-melodie matcht template-`pitches.S` en vult de MVSA-**S**-regel. **Override:** `--melody A` (enz.) → match op `pitches.A` (of T/B); VSA-pitch vult die MVSA-stem; overige stemmen uit template op hetzelfde event.                                                                                               |
 | T3  | Overige stemmen                      | Niet-melodiestemmen: laddergraden uit template-`pitches.*` op het **zelfde** gekoppelde event (synchroon met melodiekeuzes H4–H8).                                                                                                                                                                                                |
 | T4  | ELM / EHM                            | **ELM:** VSA wint (duur). **EHM:** exacte match op template-`pitches.<melodiestem>` t.o.v. template-`do`/`mode` (H5/H9). Mismatch → harde fout, geen stil hold. Bij fout: andere formules voor dezelfde `soort`+`toon` stil proberen; als die passen → suggestie + plakbaar `vsa mvsa … --template …` (geen automatische switch). |
@@ -35,22 +35,31 @@ tekortschiet — eerst YAML proberen (T7).
 
 ## T1 — templatekeuze (detail)
 
-`vsa mvsa` zoekt formules in de library op **`soort` + `toon`** uit de
-`.vsa`-frontmatter (verplicht op catalogus-VSA’s).
+`vsa mvsa` zoekt formules in de library op **melodieformule + `toon`**:
 
-| Situatie                                                        | Gedrag                                                                             |
-| --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| CLI `--template ID`                                             | Die id/alias wint altijd.                                                          |
-| Geen enkele passende formule                                    | **Harde fout** — geen stille Hemelum-/Groningen-default.                           |
-| Precies één formule (`{soort}-toon-{n}-…`, eventueel via alias) | Die gebruiken.                                                                     |
-| Meerdere formules (bijv. `…-groningen` én `…-hemelum`)          | Disambigueren (zie hieronder); lukt dat niet → **harde fout** met kandidatenlijst. |
+- Standaard: liturgische **`soort` + `toon`** uit de `.vsa`-frontmatter
+  (verplicht op catalogus-VSA’s).
+- Uitzondering: staat **`formule:`** in de VSA, dan zoekt T1 op die
+  formule-soort (of volledige template-id/alias) + `toon`. Liturgische
+  `soort` blijft ongewijzigd (bijv. `soort: kondak` + `formule: stichier`
+  + `toon: 6` → `stichier-toon-6-…`).
+
+| Situatie                                                              | Gedrag                                                                             |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| CLI `--template ID`                                                   | Die id/alias wint altijd.                                                          |
+| `formule:` = bestaande library-id/alias                               | Die gebruiken (geen kandidatenlijst).                                              |
+| `formule:` = genre (`stichier`, …) of anders `soort` + `toon`         | Kandidaten `{formule\|soort}-toon-{n}-…`.                                          |
+| Geen enkele passende formule                                          | **Harde fout** — geen stille Hemelum-/Groningen-default.                           |
+| Precies één formule                                                   | Die gebruiken.                                                                     |
+| Meerdere formules (bijv. `…-groningen` én `…-hemelum`)                | Disambigueren (zie hieronder); lukt dat niet → **harde fout** met kandidatenlijst. |
 
 **Disambiguatie bij meerdere kandidaten**
 
-1. **Bestaande uitvoer-`.mvsa`** (hergeneratie naar hetzelfde pad): gebruik
-   `template_opgegeven` als die staat, anders `template` — dat is de id
-   waarmee de conversie eerder werd aangeroepen (mogelijk een alias). Die
-   hint moet bij de kandidaten voor deze `soort`/`toon` horen.
+1. **Bestaande uitvoer-`.mvsa`** (hergeneratie naar hetzelfde pad; default
+   sibling is `<stam>.vsa.mvsa`): gebruik `template_opgegeven` als die
+   staat, anders `template` — dat is de id waarmee de conversie eerder
+   werd aangeroepen (mogelijk een alias). Die hint moet bij de kandidaten
+   voor deze formule/soort/`toon` horen.
 2. Anders: **bron** uit catalogus-leaf / bestandsnaam / `bron.uitgangspunt`
    (Liturgikon ≡ Hemelum), als dat precies één kandidaat overlaat.
 3. Anders: geef `--template` (of regenereer een bestaande `.mvsa`).

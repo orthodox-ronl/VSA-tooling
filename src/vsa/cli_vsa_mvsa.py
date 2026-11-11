@@ -11,17 +11,19 @@ from .template_library import (
     TemplateLibraryError,
     list_template_ids,
 )
-from .vsa_mvsa import convert_vsa_to_mvsa
+from .vsa_mvsa import convert_vsa_to_mvsa, default_vsa_mvsa_output
 
 
 def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser(
         "mvsa",
-        help="VSA + formule-template → schets-.mvsa (T1–T7).",
+        help="VSA + formule-template → schets-.vsa.mvsa (T1–T7).",
         description=(
             "Zet een .vsa om naar een SATB-schets-.mvsa via een library-"
-            "template (mapper + emit). Uitvoer (T6): gekuiste frontmatter, "
-            "VSA-commentaar, waarschuwingen, @-kop; geen @speelplan/@blok; "
+            "template (mapper + emit). Default-uitvoer: sibling "
+            "<stam>.vsa.mvsa (naamgeving stem.brontype.doeltype). "
+            "Uitvoer (T6): gekuiste frontmatter, VSA-commentaar, "
+            "waarschuwingen, @-kop; geen @speelplan/@blok; "
             "secties cyclus-1/herhaling/laatste (niet toon 3). "
             "Zonder --template: keuze op soort+toon uit de .vsa (T1); "
             "ontbrekend of ambigu → fout. Zie "
@@ -32,7 +34,8 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
             "voorbeelden:\n"
             "  vsa mvsa lied.vsa\n"
             "  vsa mvsa lied.vsa --template tropaar-toon-4-groningen\n"
-            "  vsa mvsa lied.vsa --template kondak-toon-1-groningen -o schets.mvsa\n"
+            "  vsa mvsa lied.vsa --template kondak-toon-1-groningen "
+            "-o generated\\lied.vsa.mvsa\n"
             "  vsa mvsa lied.vsa --melody A\n"
             "  vsa mvsa --list-templates\n"
         ),
@@ -58,7 +61,7 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
         "--output",
         metavar="PATH",
         default=None,
-        help="Uitvoer-.mvsa (default: sibling <bron>.mvsa).",
+        help="Uitvoer-.mvsa (default: sibling <bron>.vsa.mvsa).",
     )
     p.add_argument(
         "--melody",
@@ -105,7 +108,11 @@ def run_vsa_mvsa(args: argparse.Namespace) -> int:
         )
         return 2
 
-    out = Path(args.output) if args.output else Path(args.path).with_suffix(".mvsa")
+    out = (
+        Path(args.output)
+        if args.output
+        else default_vsa_mvsa_output(args.path)
+    )
     try:
         result = convert_vsa_to_mvsa(
             args.path,
