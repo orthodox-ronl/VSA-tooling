@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-11 23:36 CET.
+  , gebouwd 2026-11-11 23:39 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5219,15 +5219,15 @@ vsa mvsa --list-templates
 <tbody>
 <tr>
 <td><code>bestand.vsa</code></td>
-<td>Bron: melodie + tekst + frasen; frontmatter met <strong><code>soort</code></strong> en <strong><code>toon</code></strong> (T1)</td>
+<td>Bron: melodie + tekst + frasen; frontmatter met <strong><code>soort</code></strong> en <strong><code>toon</code></strong> (T1); optioneel <strong><code>formule</code></strong> als de melodieformule ≠ <code>soort</code></td>
 </tr>
 <tr>
 <td><code>--template</code></td>
-<td>Library-id of alias; zonder vlag: keuze op <code>soort</code>+<code>toon</code> (T1); ontbrekend/ambigu → fout</td>
+<td>Library-id of alias; zonder vlag: <code>formule</code>+<code>toon</code> of <code>soort</code>+<code>toon</code> (T1); ontbrekend/ambigu → fout</td>
 </tr>
 <tr>
 <td><code>-o OUT</code></td>
-<td>Uitvoerpad; default sibling <code>&lt;bron&gt;.mvsa</code>; bij hergeneratie telt bestaande MVSA-<code>template</code></td>
+<td>Uitvoerpad; default sibling <code>&lt;stam&gt;.vsa.mvsa</code> (naamgeving stem.brontype.doeltype); bij hergeneratie telt bestaande MVSA-<code>template</code></td>
 </tr>
 <tr>
 <td><code>--melody</code></td>
@@ -5265,11 +5265,12 @@ vsa mvsa --list-templates
 <div class="highlight"><pre><span></span><code>cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa mvsa --list-templates
 vsa mvsa docs\specification-vsa-templates\library\tropaar-toon-4-hemelum\examples\corpus\T4-06-profeet-elia.vsa
-vsa mvsa lied.vsa --template tropaar-toon-4-groningen -o generated\lied.schets.mvsa
+vsa mvsa lied.vsa --template tropaar-toon-4-groningen -o generated\lied.vsa.mvsa
 vsa mvsa lied.vsa --template kondak-toon-1-groningen
 vsa mvsa lied.vsa --template tropaar-toon-2-groningen
 vsa mvsa lied.vsa --template kondak-toon-5-groningen
 </code></pre></div>
+<p>Zonder <code>-o</code> schrijft <code>vsa mvsa</code> naast de bron: <code>lied.vsa</code> → <code>lied.vsa.mvsa</code>.</p>
 <p>Zonder <code>--template</code> zoekt de CLI formules bij <code>soort</code>+<code>toon</code>. Bestaan er
 meerdere (Hemelum én Groningen), dan: bestaande <code>.mvsa</code> op het
 uitvoerpad hergebruikt diens <code>template_opgegeven</code>/<code>template</code>, of de bron

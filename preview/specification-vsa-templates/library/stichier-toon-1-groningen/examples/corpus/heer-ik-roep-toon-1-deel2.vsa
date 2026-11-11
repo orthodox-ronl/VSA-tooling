@@ -1,0 +1,25 @@
+---
+titel: Heer ik roep - Toon 1 (deel 2, Laat mijn gebed)
+partituur:
+  title: Heer ik roep - Toon 1 (deel 2, Laat mijn gebed)
+  arranger: Groningen
+bron:
+  uitgangspunt: stichiertonen/heer_ik_roep_t1.mscz
+soort: stichier
+toon: 1
+formule: stichier
+taal: nl
+do: F4
+mode: major
+tempo: 180
+zoektekst: >-
+  Laat mijn gebed als wierook opstijgen voor Uw aangezicht,
+  de opheffing van mijn handen zij een avondoffer, verhoor mij o Heer.
+---
+
+<!-- Couplet 2 — 5 strofes → 1,2,3,2,laatste -->
+[///:] Laat mijn ge-bed als wie{\\\rook_},
+{//op_}-stij-gen voor Uw aange{\zicht_},
+{//de_} opheffing van mijn han{\\den_},
+{/zij_} een avond of{\fer_}, //
+{///ver_} {/hoor_}{\mij_}{\o_}{\&/&\&\Heer__&~&~&~}. [/:]

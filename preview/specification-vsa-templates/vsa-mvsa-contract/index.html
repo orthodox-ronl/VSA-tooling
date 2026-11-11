@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-11 23:36 CET.
+  , gebouwd 2026-11-11 23:39 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5331,7 +5331,7 @@ tekortschiet — eerst YAML proberen (T7).</p>
 <tr>
 <td>T1</td>
 <td>Template-id</td>
-<td>Keuze: zie <strong>T1 — templatekeuze</strong> hieronder. Elke afgeleide MVSA noemt de <strong>feitelijk gebruikte</strong> formule-id in frontmatter (<code>template:</code>) én in meta-commentaar. Was de CLI-/selectie-id een alias (of <code>same_as</code>), dan ook <code>template_opgegeven:</code>. Geen stille default.</td>
+<td>Keuze: zie <strong>T1 — templatekeuze</strong> hieronder (<code>soort</code>+<code>toon</code>, of <code>formule</code>+<code>toon</code> als de melodieformule ≠ liturgische soort). Elke afgeleide MVSA noemt de <strong>feitelijk gebruikte</strong> formule-id in frontmatter (<code>template:</code>) én in meta-commentaar. Was de CLI-/selectie-id een alias (of <code>same_as</code>), dan ook <code>template_opgegeven:</code>. Geen stille default.</td>
 </tr>
 <tr>
 <td>T2</td>
@@ -5366,8 +5366,15 @@ tekortschiet — eerst YAML proberen (T7).</p>
 </tbody>
 </table>
 <h2 id="t1-templatekeuze-detail">T1 — templatekeuze (detail)<a class="headerlink" href="#t1-templatekeuze-detail" title="Permanent link">&para;</a></h2>
-<p><code>vsa mvsa</code> zoekt formules in de library op <strong><code>soort</code> + <code>toon</code></strong> uit de
-<code>.vsa</code>-frontmatter (verplicht op catalogus-VSA’s).</p>
+<p><code>vsa mvsa</code> zoekt formules in de library op <strong>melodieformule + <code>toon</code></strong>:</p>
+<ul>
+<li>Standaard: liturgische <strong><code>soort</code> + <code>toon</code></strong> uit de <code>.vsa</code>-frontmatter
+  (verplicht op catalogus-VSA’s).</li>
+<li>Uitzondering: staat <strong><code>formule:</code></strong> in de VSA, dan zoekt T1 op die
+  formule-soort (of volledige template-id/alias) + <code>toon</code>. Liturgische
+  <code>soort</code> blijft ongewijzigd (bijv. <code>soort: kondak</code> + <code>formule: stichier</code></li>
+<li><code>toon: 6</code> → <code>stichier-toon-6-…</code>).</li>
+</ul>
 <table>
 <thead>
 <tr>
@@ -5381,11 +5388,19 @@ tekortschiet — eerst YAML proberen (T7).</p>
 <td>Die id/alias wint altijd.</td>
 </tr>
 <tr>
+<td><code>formule:</code> = bestaande library-id/alias</td>
+<td>Die gebruiken (geen kandidatenlijst).</td>
+</tr>
+<tr>
+<td><code>formule:</code> = genre (<code>stichier</code>, …) of anders <code>soort</code> + <code>toon</code></td>
+<td>Kandidaten <code>{formule\|soort}-toon-{n}-…</code>.</td>
+</tr>
+<tr>
 <td>Geen enkele passende formule</td>
 <td><strong>Harde fout</strong> — geen stille Hemelum-/Groningen-default.</td>
 </tr>
 <tr>
-<td>Precies één formule (<code>{soort}-toon-{n}-…</code>, eventueel via alias)</td>
+<td>Precies één formule</td>
 <td>Die gebruiken.</td>
 </tr>
 <tr>
@@ -5396,10 +5411,11 @@ tekortschiet — eerst YAML proberen (T7).</p>
 </table>
 <p><strong>Disambiguatie bij meerdere kandidaten</strong></p>
 <ol>
-<li><strong>Bestaande uitvoer-<code>.mvsa</code></strong> (hergeneratie naar hetzelfde pad): gebruik
-   <code>template_opgegeven</code> als die staat, anders <code>template</code> — dat is de id
-   waarmee de conversie eerder werd aangeroepen (mogelijk een alias). Die
-   hint moet bij de kandidaten voor deze <code>soort</code>/<code>toon</code> horen.</li>
+<li><strong>Bestaande uitvoer-<code>.mvsa</code></strong> (hergeneratie naar hetzelfde pad; default
+   sibling is <code>&lt;stam&gt;.vsa.mvsa</code>): gebruik <code>template_opgegeven</code> als die
+   staat, anders <code>template</code> — dat is de id waarmee de conversie eerder
+   werd aangeroepen (mogelijk een alias). Die hint moet bij de kandidaten
+   voor deze formule/soort/<code>toon</code> horen.</li>
 <li>Anders: <strong>bron</strong> uit catalogus-leaf / bestandsnaam / <code>bron.uitgangspunt</code>
    (Liturgikon ≡ Hemelum), als dat precies één kandidaat overlaat.</li>
 <li>Anders: geef <code>--template</code> (of regenereer een bestaande <code>.mvsa</code>).</li>

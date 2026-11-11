@@ -1,0 +1,144 @@
+# Stichier toon 2 (Groningen) — do=F4 major.
+# Corpus: heer-ik-roep toon 2 (twee coupletten, MSCZ-schets).
+# Speelplan als toon 1: 1, |: 2, 3 :| … met 4e cyclusfrase = 2;
+# bij n×3 (≥6): … 2, voorlaatste, laatste.
+# Pitches provisional. Contract T1–T7.
+
+spec_version: draft-v0
+id: stichier-toon-2-groningen
+genre: stichier
+tone: 2
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: >-
+  Koormap Groningen — stichiermelodie toon 2
+  (Heer ik roep / Laat mijn gebed; MSCZ-schets)
+voice_oct:
+  S: 0
+  A: 0
+  T: -1
+  B: -2
+cycle:
+  - "1"
+  - "2"
+  - "3"
+final: laatste
+
+mapping_plans:
+  - id: two-couplets
+    label: "couplet1 + couplet2 (11 strofes)"
+    when:
+      stanza_count: 11
+    steps:
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: "3"
+      - phrase: "2"
+      - phrase: voorlaatste
+      - phrase: laatste
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: "3"
+      - phrase: "2"
+      - phrase: laatste
+  - id: triple-close
+    label: "1, |: 2, 3 :| 2, voorlaatste, laatste"
+    when:
+      stanza_count_mod:
+        mod: 3
+        remainder: 0
+      stanza_count_min: 6
+    steps:
+      - phrase: "1"
+      - repeat: ["2", "3"]
+        until:
+          remaining: 3
+      - phrase: "2"
+      - phrase: voorlaatste
+      - phrase: laatste
+  - id: standard
+    label: "1, |: 2, 3 :| …, laatste"
+    when:
+      default: true
+    steps:
+      - phrase: "1"
+      - repeat: ["2", "3"]
+        until:
+          remaining: 1
+      - phrase: laatste
+
+phrases:
+  # Cycle: alleen recite + slotcadens (provisional).
+  - id: "1"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: fa, A: re, T: sol-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: fa, A: re, T: sol-1, B: sol-2 }
+
+  - id: "2"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: fa, A: re, T: sol-1, B: sol-2 }
+
+  - id: "3"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: la, A: fa, T: do, B: fa-2 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+
+  - id: voorlaatste
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: sol, A: mi, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+
+  # laatste — MSCZ: sol/la-recite → … → melisma mi fa mi re
+  - id: laatste
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: la, A: fa, T: do, B: do-1 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: sol, A: mi, T: do, B: do-1 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: fa, A: re, T: do, B: do-1 }
+      - role: cadence
+        duration: "~"
+        anchor: l.lgr.
+        pitches: { S: mi, A: do, T: la-1, B: mi-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: fa, A: re, T: sol-1, B: fa-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: mi, A: do, T: sol-1, B: mi-1 }
+      - role: cadence
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: sol-1, B: sol-2 }
