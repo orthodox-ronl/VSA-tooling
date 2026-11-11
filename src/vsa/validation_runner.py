@@ -118,8 +118,24 @@ def validate_path(path: str | Path, config: VSAConfig | None = None) -> Validati
 
 def validate_file(path: str | Path, config: VSAConfig | None = None) -> ValidationResult:
     path = Path(path)
-    text = path.read_text(encoding="utf-8")
     result = ValidationResult()
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        result.add_error(
+            source=str(path),
+            code="VSA-ENCODING-ERROR",
+            message_nl=(
+                f"Bestand is geen geldige UTF-8-tekst "
+                f"(byte {exc.object[exc.start]:#04x} op positie {exc.start})."
+            ),
+            category="encoding",
+            hint_nl=(
+                "Sla het bestand opnieuw op als UTF-8 "
+                "(bijv. in Cursor/VS Code rechtsonder de encoding kiezen)."
+            ),
+        )
+        return result
 
     if path.suffix.lower() in [".md", ".markdown"]:
         _validate_markdown(path, text, result, config=config)
