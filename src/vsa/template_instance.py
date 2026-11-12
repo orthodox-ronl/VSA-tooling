@@ -147,6 +147,9 @@ class MappedNote:
     syllabic: str = "single"
     show_anchor: bool = False
     melody_voice: str = "S"  # T2: welke MVSA-stem de VSA-pitch krijgt
+    # 1-based bronregel in de VSA (0 = onbekend). Print-wraps → meerdere
+    # maten bij emit (T6); template-mapping blijft één frase.
+    source_line: int = 0
 
 
 def midi_of(pitch: Pitch) -> int:
@@ -784,6 +787,7 @@ def _map_tail(
                 if nxt.get("anchor") in ("l.st.", "vl.st.", "e.st."):
                     break
                 event_i += 1
+                prev_line = out[-1].source_line if out else 0
                 out.append(
                     MappedNote(
                         lyric="",
@@ -793,6 +797,7 @@ def _map_tail(
                         syllabic="end",
                         show_anchor=False,
                         melody_voice=get_melody_voice(),
+                        source_line=prev_line,
                     )
                 )
         if index < len(notes) and pitches_match(
@@ -815,6 +820,11 @@ def _map_tail(
         last_lyric_used = True
         for extra in tail[event_i:]:
             s_pitch = degree_pitch(melody_degree(extra), do, mode)
+            prev_line = (
+                out[-1].source_line
+                if out
+                else int(notes[-1].line or 0)
+            )
             out.append(
                 MappedNote(
                     lyric="" if last_lyric_used else notes[-1].lyric,
@@ -824,6 +834,7 @@ def _map_tail(
                     syllabic="end" if last_lyric_used else "single",
                     show_anchor=extra.get("anchor") == "l.lgr.",
                     melody_voice=get_melody_voice(),
+                    source_line=prev_line,
                 )
             )
             last_lyric_used = True
@@ -917,4 +928,5 @@ def _assign(note: VsaNote, event: dict[str, Any], *, show_anchor: bool) -> Mappe
         syllabic=note.syllabic,
         show_anchor=show_anchor and bool(event.get("anchor")),
         melody_voice=get_melody_voice(),
+        source_line=int(note.line or 0),
     )

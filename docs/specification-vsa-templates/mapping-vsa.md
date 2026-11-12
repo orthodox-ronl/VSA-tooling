@@ -47,12 +47,12 @@ aan [template-frase](template-frase@)-ids.
 Zangers zien in een doorlopende tekst waar formulefrasen beginnen/eindigen.
 De mapper volgt dezelfde grenzen.
 
-| Markering                 | Rol voor zangers / blad             | Rol voor `vsa mvsa`                                               |
-| ------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
-| `*` of `/`                | Frasescheiding                      | Losse token buiten scope → sluit de huidige tekstfrase            |
-| `**` of `//`              | Sterke scheiding vóór **laatste**   | Zelfde split; conventie tussen een-na-laatste en laatste          |
-| *(geen `*` / `**`)*       | —                                   | Ensure: elke **niet-ingesprongen** regel = één frase (+ wraps)    |
-| Ingesprongen vervolgregel | Te lange frase op papier            | Hoort bij de **vorige** frase (geen nieuwe grens)                 |
+| Markering                 | Rol voor zangers / blad             | Rol voor `vsa mvsa`                                                                                         |
+| ------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `*` of `/`                | Frasescheiding                      | Losse token buiten scope → sluit de huidige tekstfrase                                                      |
+| `**` of `//`              | Sterke scheiding vóór **laatste**   | Zelfde split; conventie tussen een-na-laatste en laatste                                                    |
+| *(geen `*` / `**`)*       | —                                   | Ensure: elke **niet-ingesprongen** regel = één frase (+ wraps)                                              |
+| Ingesprongen vervolgregel | Te lange frase op papier            | Zelfde template-frase (geen nieuwe grens); emit: **één maat per fysieke regel** (T6 print-wrap)             |
 
 EHMs in scopes (`{/…}`, `{//…}`) zijn iets anders: die blijven hoogte. Alleen
 **losse** tokens `/` of `//` (spaties eromheen) zijn frasescheider.
@@ -65,7 +65,9 @@ regel-per-frase (met indent-wrap); extract splitst daarna ook op kale
 spring die regel in (spaties/tabs vooraan). Zonder scheiders zou een harde
 regeleinde anders ten onrechte als nieuwe frase tellen — dat geeft vaak
 `VSA-TEMPLATE-TEXT-MAPPING` of `VSA-TEMPLATE-REQUIRED-SLOT-UNUSED` op een
-«te korte» frase.
+«te korte» frase. Bij emit (T6) wordt elke fysieke bronregel van die frase
+een aparte MVSA-maat, zodat `.vsa.mvsa.svg` dezelfde leesbaarheid krijgt
+als een over meerdere regels uitgesmeerde `.vsa` bij `vsa svg`.
 
 ### Legacy (nog ondersteund)
 
@@ -117,12 +119,12 @@ Stop met herhalen wanneer nog **N** regels over zijn; die vallen op de tail
 
 ### Voorbeelden (bladnotatie → `text_mapping`)
 
-| Blad / gewoonte                         | `text_mapping`                                                        |
-| --------------------------------------- | --------------------------------------------------------------------- |
-| `\|\|: 1, 2 :\|\| laatste`              | `repeat [1,2] until final` + `phrase laatste`                         |
-| `1 \|\|: 2, 3 :\|\| laatste`            | `phrase 1` + `repeat [2,3] until final` + `phrase laatste`            |
+| Blad / gewoonte                         | `text_mapping`                                                         |
+| --------------------------------------- | ---------------------------------------------------------------------- |
+| `\|\|: 1, 2 :\|\| laatste`              | `repeat [1,2] until final` + `phrase laatste`                          |
+| `1 \|\|: 2, 3 :\|\| laatste`            | `phrase 1` + `repeat [2,3] until final` + `phrase laatste`             |
 | `1, 3, 1, 2, 3, 1, 4, laatste`          | `sequence: [1, 3, 1, 2, 3, 1, 4, laatste]` (prefix + altijd `laatste`) |
-| `1, 2, 3, \|\|: 4, 5, 3a :\|\| laatste` | `sequence [1,2,3]` + `repeat [4,5,3a] until final` + `phrase laatste` |
+| `1, 2, 3, \|\|: 4, 5, 3a :\|\| laatste` | `sequence [1,2,3]` + `repeat [4,5,3a] until final` + `phrase laatste`  |
 
 ## `mapping_plans` (meerdere plannen)
 

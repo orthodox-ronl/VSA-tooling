@@ -67,7 +67,8 @@ afgeleide wilt.
 | `normalize`       | Ja   | `.mvsa`                                                  |
 | `transpose`       | Ja   | `.mvsa`                                                  |
 | `kuiser`          | Ja   | `.mvsa` (via ``collect_cli_sources``)                    |
-| `products`        | Ja   | `.mvsa`                                                  |
+| `vsa`             | Ja   | `.mvsa` → sibling `.mvsa.vsa` (E1–E6)                    |
+| `products`        | Ja   | `.mvsa` (incl. product-key `vsa`)                        |
 
 ### `mxl` / `mscz` (top-level)
 

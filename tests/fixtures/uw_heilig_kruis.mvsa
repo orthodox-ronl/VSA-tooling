@@ -1,0 +1,20 @@
+#  Uw Heilig Kruis
+
+@do G4
+@mode major
+@tempo 150
+@oct S=0 A=-1 T=-1 B=-2
+
+#maat 1
+L: Uw  hei_-lig_ kruis_ ver~&~ -e-ren wij Ge-bie_&_ der_  |
+S: f#4 /    \    /         /&/  /  \  /   \2    /&\   \   |g4
+A: d#4 /    #\   /         /&/  /  \  /   \2    /&\   \   |e4
+T: b3  -    -    -        /2&-  -  -  -   -     -&#-  \2  |b3
+B: b2  /3   \3   /3        \&-  -  -  -   -    \4&/2  /3  |e3
+
+#maat 2
+L: en Uw hei_-li_-ge ver-rij-.&.&~ -ze-nis_ lo_-ven_ wij__ ||
+S: b4 -  \    \   \  /       /&/&\  \   \   /   \    /     ||g4
+A: g4 -  \    \   #\ /       /&/&\  \   #\  /   #\   /     ||e4
+T: d4 -  #-   \2  -  -      /2&-&-  \2  -   -   -    -     ||b3
+B: g3 -  \5   /3  \3 /3     \&/3&\3 /   \3  /3  \3   \4    ||e2

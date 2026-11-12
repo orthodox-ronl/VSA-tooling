@@ -32,6 +32,8 @@ SVG_KEY = "svg"
 # Aliassen (bestaande imports in CLI/tests).
 MVSA_CORE_KEYS = UNIVERSAL_PRODUCT_KEYS
 MVSA_SVG_KEY = SVG_KEY
+# MVSA-straat-extra: eenstemmige extractie (E1–E6), niet universeel.
+MVSA_VSA_KEY = "vsa"
 MSCZ_CORE_KEYS = UNIVERSAL_PRODUCT_KEYS
 MSCZ_SVG_KEY = SVG_KEY
 MSCZ_PDF_KEY = "pdf"
@@ -149,15 +151,17 @@ def _retire_standard_meta(
     )
 
 
-def _required_keys(*, skip_svg: bool) -> set[str]:
+def _required_keys(*, skip_svg: bool, street: str | None = None) -> set[str]:
     keys = set(UNIVERSAL_PRODUCT_KEYS)
     if not skip_svg:
         keys.add(SVG_KEY)
+    if street == "mvsa":
+        keys.add(MVSA_VSA_KEY)
     return keys
 
 
 def _plan_universal_paths(
-    bron: Path, *, skip_svg: bool
+    bron: Path, *, skip_svg: bool, street: str | None = None
 ) -> dict[str, Path]:
     products: dict[str, Path] = {
         "mxl": derived_output_path(bron, ".mxl"),
@@ -169,6 +173,8 @@ def _plan_universal_paths(
     }
     if not skip_svg:
         products["svg"] = derived_output_path(bron, ".svg")
+    if street == "mvsa":
+        products[MVSA_VSA_KEY] = derived_output_path(bron, ".vsa")
     return products
 
 
@@ -187,6 +193,7 @@ def _log_universal_plan(
         "mp3",
         "lyrics",
         "svg",
+        MVSA_VSA_KEY,
     )
     for key in order:
         path = products.get(key)
@@ -222,18 +229,21 @@ def products_mvsa_one(
         write_lyrics_product,
     )
 
+    from .mvsa_vsa import MvsaVsaError, convert_mvsa_to_vsa
+
     _retire_standard_meta(bron, dry_run=dry_run, quiet=quiet)
-    required = _required_keys(skip_svg=skip_svg)
+    required = _required_keys(skip_svg=skip_svg, street="mvsa")
     if not _need_regen(bron, force=force, required_keys=required):
         _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
         return 0
 
-    products = _plan_universal_paths(bron, skip_svg=skip_svg)
+    products = _plan_universal_paths(bron, skip_svg=skip_svg, street="mvsa")
     _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
     if dry_run:
         return 0
 
     try:
+        convert_mvsa_to_vsa(bron, products[MVSA_VSA_KEY], voice="S")
         export_bron_to_mxl(bron, products["mxl"], musescore=musescore)
         export_bron_to_score_ir(
             bron, products["score-ir"], musescore=musescore
@@ -253,6 +263,9 @@ def products_mvsa_one(
                 bron, products["svg"], musescore=musescore
             )
             _assign_svg_products(products, written)
+    except MvsaVsaError as exc:
+        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        return 1
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
             print(format_diagnostic(d, bron), file=sys.stderr)

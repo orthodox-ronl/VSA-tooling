@@ -24,10 +24,12 @@ from vsa.vsa_mvsa import (
     clean_emit_frontmatter,
     convert_vsa_to_mvsa,
     default_vsa_mvsa_output,
+    emit_mapped_document,
     emit_sections_enabled,
     find_fitting_alternate_templates,
     format_alternate_template_hint,
     section_id_for_phrase_index,
+    split_notes_by_source_line,
 )
 from vsa.template_library import load_resolved_template
 
@@ -346,3 +348,98 @@ def test_cli_writes_sibling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     )()
     assert run_vsa_mvsa(ns) == 0
     assert src.with_name(f"{src.name}.mvsa").is_file()
+
+
+def test_split_notes_by_source_line_print_wrap() -> None:
+    """T6: ingesprongen VSA-vervolgregel → aparte maat-chunk."""
+    from vsa.music import Duration, Pitch
+    from vsa.template_instance import MappedNote
+
+    q = Duration(note_type="quarter")
+    f4 = Pitch(step="F", octave=4, alter=0.0)
+
+    def mn(lyric: str, line: int) -> MappedNote:
+        return MappedNote(
+            lyric=lyric,
+            duration=q,
+            s_pitch=f4,
+            template_event={"role": "recite", "pitches": {"S": "fa"}},
+            source_line=line,
+        )
+
+    notes = [mn("Die", 30), mn("macht", 30), mn("de", 31), mn("rust", 31)]
+    chunks = split_notes_by_source_line(notes)
+    assert len(chunks) == 2
+    assert [n.lyric for n in chunks[0]] == ["Die", "macht"]
+    assert [n.lyric for n in chunks[1]] == ["de", "rust"]
+    # Zonder bronregels: één chunk (handmatige MappedNote / oude tests).
+    assert len(split_notes_by_source_line([mn("x", 0), mn("y", 0)])) == 1
+
+
+def test_emit_mapped_document_print_wrap_two_measures() -> None:
+    """T6: één frase over twee bronregels → twee LSATB-systemen, zelfde sectie."""
+    from vsa.music import Duration, Pitch
+    from vsa.template_instance import MappedNote
+
+    q = Duration(note_type="quarter")
+    f4 = Pitch(step="F", octave=4, alter=0.0)
+
+    def mn(lyric: str, line: int) -> MappedNote:
+        return MappedNote(
+            lyric=lyric,
+            duration=q,
+            s_pitch=f4,
+            template_event={"role": "open", "pitches": {"S": "fa", "A": "re", "T": "do", "B": "do"}},
+            source_line=line,
+        )
+
+    mapped = [
+        ("1", [mn("kort", 10)]),
+        ("laatste", [mn("lang", 20), mn("deel", 20), mn("wrap", 21), mn("eind", 21)]),
+    ]
+    text, _ = emit_mapped_document(
+        mapped,
+        do="F4",
+        mode="major",
+        title="wrap-test",
+        source_path="wrap.vsa",
+        template_path="t.yaml",
+        cycle_len=1,
+        with_sections=True,
+    )
+    l_lines = [ln for ln in text.splitlines() if ln.startswith("L:")]
+    assert len(l_lines) == 3  # frase 1 + twee wrap-maten
+    assert "@sectie laatste" in text
+    # Wrap-maten staan ná @sectie laatste; geen extra sectiekop ertussen.
+    last_sec = text.index("@sectie laatste")
+    assert text.count("@sectie laatste") == 1
+    assert text[last_sec:].count("\nL:") == 2
+
+
+BIB_WRAP_VSA = (
+    Path(__file__).resolve().parents[2]
+    / "bibliotheek"
+    / "content-source"
+    / "catalogus"
+    / "tropaar"
+    / "zaterdag-gestorvenen-toon-2"
+    / "hemelum"
+    / "tropaar-zaterdag-gestorvenen-toon-2-hemelum.vsa"
+)
+
+
+@pytest.mark.skipif(not BIB_WRAP_VSA.is_file(), reason="bibliotheek-voorbeeld ontbreekt")
+def test_convert_print_wrap_last_phrase_two_measures(tmp_path: Path) -> None:
+    """Corpus: laatste frase met indent-wrap → twee maten onder @sectie laatste."""
+    out = tmp_path / "wrap.mvsa"
+    result = convert_vsa_to_mvsa(
+        BIB_WRAP_VSA,
+        template="tropaar-toon-2-groningen",
+        output=out,
+        write=True,
+    )
+    assert result.phrase_ids[-1] == "laatste"
+    after = result.text.split("@sectie laatste", 1)[1]
+    assert after.count("\nL:") == 2
+    assert "gaan" in after
+    assert "rust" in after or "le_" in after

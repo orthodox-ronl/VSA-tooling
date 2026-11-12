@@ -23,7 +23,7 @@ enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
 ## Synopsis
 
 ```text
-mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,text,normalize,transpose,kuiser,import,products} …
+mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,text,vsa,normalize,transpose,kuiser,import,products} …
 mvsa validate [-h] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
               [--translit-modus {nls,ksl}] [--translit-as-parts]
@@ -65,6 +65,7 @@ mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 mvsa transpose [-h] --to TONIC [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
 mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
+mvsa vsa [-h] [-o OUTPUT] [--voice ID|all] path
 ```
 
 ## Subcommando's
@@ -72,6 +73,7 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 | Subcommando                            | Doel                                                                                                              |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | [`validate`](#mvsa-validate)           | Structuur + sync-telling van `.mvsa` controleren.                                                                 |
+| [`vsa`](#mvsa-vsa)                     | Extraheer eenstemmige `.mvsa.vsa` (E1–E6; default stem S). Ook via `mvsa products` (key `vsa`).                    |
 | [`mxl`](#mvsa-mxl)                     | Exporteer `.mvsa` naar playback-``.mxl`` (straat-puur). Merget key `mxl` in products-meta.                        |
 | [`score-ir`](#mvsa-score-ir)           | Exporteer `.mvsa` naar Score-IR JSON (partituur; scherm/CoriB). Merget `score-ir` (+ `from-ir` bij `--musicxml`). |
 | [`mscz`](#mvsa-mscz)                   | Exporteer `.mvsa` naar MuseScore (`.mscz`).                                                                       |
@@ -99,6 +101,7 @@ mvsa mp3 -h
 mvsa ogg -h
 mvsa wav -h
 mvsa text -h
+mvsa vsa -h
 mvsa normalize -h
 mvsa transpose -h
 mvsa kuiser -h
@@ -937,6 +940,43 @@ mvsa text examples\mvsa\alleluia-toon-1.mvsa
 
 ---
 
+## `mvsa vsa`
+
+### Synopsis
+
+```text
+mvsa vsa [-h] [-o OUTPUT] [--voice ID|all] path
+```
+
+### Beschrijving
+
+Extraheert een **eenstemmige** `.vsa` uit een `.mvsa` (product, geen
+tweede canonieke bron). Contract:
+[mvsa-vsa-contract.md](../../formats/mvsa-vsa-contract.md) (E1–E6).
+
+| Onderdeel     | Betekenis |
+| ------------- | --------- |
+| `path`        | Eén `.mvsa` of een map (recursief; alleen kale bron-`.mvsa`, geen `*.mscz.mvsa` in batch). Expliciet `lied.mscz.mvsa` mag wél. |
+| Zonder `--voice` | Stem `S` → sibling `{bronnaam}.vsa` (bijv. `lied.mvsa.vsa`) |
+| `--voice ID`  | Die stem (case-insensitive); uitvoer blijft `{bronnaam}.vsa` |
+| `--voice all` | Alle niet-lyrics-stemmen; per stem `{bronnaam}.{stem}.vsa` (lowercase, ook `.s.vsa`; geen `-o`) |
+| `-o`          | Alleen bij precies één bron én één uitvoerbestand |
+| Frontmatter   | `herkomst.generator: mvsa-vsa`, `herkomst.bron`, `herkomst.stem` |
+| Maten         | Elke MVSA-maat = één VSA-strofe (`*` tussen maten) |
+
+Ook via [`mvsa products`](#mvsa-products) (meta-key `vsa`, default-stem S).
+
+### Voorbeelden
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+mvsa vsa tests\fixtures\mvsa_vsa_mini.mvsa
+mvsa vsa lied.mvsa --voice A
+mvsa vsa catalogus\tropaar\uw-heilig-kruis
+```
+
+---
+
 ## `mvsa products`
 
 ### Synopsis
@@ -958,6 +998,7 @@ Schrijft voor elke `.mvsa` onder `path`:
 | Preview-mp3               | `{stam}.mvsa.mp3`                                                |
 | Gezongen tekst            | `{stam}.mvsa.lyrics.txt`                                         |
 | SVG (tenzij `--skip-svg`) | `{stam}.mvsa.svg` (tall, compact)                                |
+| Eenstemmige VSA (E*)      | `{stam}.mvsa.vsa` (default-stem S; key `vsa`)                    |
 | Meta                      | `{stam}.mvsa.products-meta.json`                                 |
 
 Geen `{stam}.mvsa.pdf`. Die maak je alleen met [`mvsa pdf`](#mvsa-pdf)

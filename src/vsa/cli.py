@@ -168,7 +168,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     mvsa_sub = parser.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,text,import,products}",
+        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,text,vsa,import,products}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
@@ -742,6 +742,50 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         help=(
             "Uitvoer (default: sibling <bronnaam>.lyrics.txt). "
             "Alleen bij precies één bronbestand."
+        ),
+    )
+    m_vsa = mvsa_sub.add_parser(
+        "vsa",
+        help="Extraheer eenstemmige .mvsa.vsa uit .mvsa (E1–E6).",
+        description=(
+            "Zet een .mvsa om naar een eenstemmige .vsa (product). "
+            "Zonder --voice of met één --voice x → sibling "
+            "<bronnaam>.vsa (default-stem S). "
+            "--voice all → per stem <bronnaam>.{stem}.vsa (lowercase). "
+            "Elke MVSA-maat wordt één VSA-strofe (*). "
+            "Contract: docs/formats/mvsa-vsa-contract.md (E1–E6)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  mvsa vsa lied.mvsa\n"
+            "  mvsa vsa lied.mvsa --voice t\n"
+            "  mvsa vsa lied.mvsa --voice all\n"
+            "  mvsa vsa lied.mvsa -o generated\\lied.mvsa.vsa"
+        ),
+    )
+    m_vsa.add_argument(
+        "path",
+        help=".mvsa-bestand of map met .mvsa-bestanden (recursief).",
+    )
+    m_vsa.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help=(
+            "Uitvoerbestand (default: sibling <bronnaam>.vsa). "
+            "Alleen bij precies één bron én één uitvoerbestand "
+            "(niet bij --voice all)."
+        ),
+    )
+    m_vsa.add_argument(
+        "--voice",
+        metavar="ID",
+        default="S",
+        help=(
+            "Stem-id in de MVSA (default: S). Eén stem → altijd "
+            "sibling <bronnaam>.vsa. Met 'all': per stem "
+            "<bronnaam>.{stem}.vsa (stem lowercase, ook .s.vsa)."
         ),
     )
 
@@ -2409,6 +2453,8 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_kuiser(args)
     if getattr(args, "mvsa_command", None) == "text":
         return _cmd_mvsa_text(args)
+    if getattr(args, "mvsa_command", None) == "vsa":
+        return _cmd_mvsa_vsa(args)
     if getattr(args, "mvsa_command", None) == "import":
         from .cli_import import run_mvsa_import
 
@@ -2776,6 +2822,56 @@ def _cmd_mvsa_mscz(args) -> int:
         meta = merge_street_product_meta(path, {MSCZ_PRODUCT_KEY: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
+    return exit_code
+
+
+def _cmd_mvsa_vsa(args) -> int:
+    """``mvsa vsa`` — E1–E6 extractie naar sibling ``.mvsa.vsa``."""
+    from .cli_messages import emit_cli_exception
+    from .mvsa_vsa import (
+        MvsaVsaError,
+        convert_mvsa_path_all_voices,
+        convert_mvsa_to_vsa,
+        default_mvsa_vsa_output,
+    )
+
+    files = _cli_collect_sources(args.path, (".mvsa",))
+    if files is None:
+        return 1
+    voice = str(getattr(args, "voice", "S") or "S").strip()
+    all_voices = voice.lower() == "all"
+    if all_voices and getattr(args, "output", None):
+        print(
+            "ERROR: -o is niet toegestaan bij --voice all "
+            "(meerdere uitvoerbestanden).",
+            file=sys.stderr,
+        )
+        return 2
+    if _cli_reject_multi_single_opts(files, args):
+        return 1
+    exit_code = 0
+    for path in files:
+        try:
+            if all_voices:
+                written = convert_mvsa_path_all_voices(path)
+                for out in written:
+                    print(f"Geschreven: {out}")
+            else:
+                out = (
+                    Path(args.output)
+                    if args.output
+                    else default_mvsa_vsa_output(path)
+                )
+                convert_mvsa_to_vsa(path, out, voice=voice)
+                print(f"Geschreven: {out}")
+        except MvsaVsaError as exc:
+            emit_cli_exception(exc, path=path)
+            exit_code = 1
+            continue
+        except Exception as exc:
+            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            exit_code = 1
+            continue
     return exit_code
 
 

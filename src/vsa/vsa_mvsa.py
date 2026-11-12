@@ -794,6 +794,45 @@ def _stem_groups_from_l_groups(
     return stem_groups
 
 
+def split_notes_by_source_line(
+    notes: list[MappedNote],
+) -> list[list[MappedNote]]:
+    """Splits één frase in maat-chunks op VSA-print-wraps (T6).
+
+    Ingesprongen vervolgregels horen bij **dezelfde** template-frase, maar
+    krijgen elk een eigen MVSA-maat — analoog aan hoe ``vsa svg`` fysieke
+    bronregels als aparte regels tekent. ``source_line == 0`` (synthetische
+    of handmatige noten) blijft bij de lopende chunk.
+    """
+    if not notes:
+        return []
+    known = [n.source_line for n in notes if n.source_line > 0]
+    if len(set(known)) <= 1:
+        return [notes]
+    chunks: list[list[MappedNote]] = []
+    current: list[MappedNote] = []
+    current_line: int | None = None
+    for n in notes:
+        line = n.source_line
+        if not current:
+            current = [n]
+            current_line = line if line > 0 else None
+            continue
+        if line <= 0 or (current_line is not None and line == current_line):
+            current.append(n)
+            continue
+        if current_line is None:
+            current.append(n)
+            current_line = line
+            continue
+        chunks.append(current)
+        current = [n]
+        current_line = line
+    if current:
+        chunks.append(current)
+    return chunks
+
+
 def emit_mvsa_block(
     phrase_id: str,
     notes: list[MappedNote],
@@ -864,23 +903,33 @@ def emit_mapped_document(
     """Volledige MVSA-tekst (T6): commentaar + @-kop + systemen, geen speelplan.
 
     Secties ``cyclus-1`` / ``herhaling`` / ``laatste`` wanneer
-    ``with_sections`` (standaard; uit voor toon 3).
+    ``with_sections`` (standaard; uit voor toon 3). Print-wraps binnen
+    één frase → meerdere maten (systemen) onder dezelfde sectie.
     """
     warnings: list[str] = []
     n = len(mapped)
     phrase_ids = [pid for pid, _ in mapped]
-    systems = [
-        emit_mvsa_block(
-            pid,
-            notes,
-            do=do,
-            mode=mode,
-            index=i,
-            total=n,
-            warnings=warnings,
-        )
-        for i, (pid, notes) in enumerate(mapped, start=1)
-    ]
+    # (phrase_index_0based, system_text) — wrap-chunks delen de frase-index.
+    systems: list[tuple[int, str]] = []
+    for i, (pid, notes) in enumerate(mapped, start=1):
+        chunks = split_notes_by_source_line(notes)
+        for ci, chunk in enumerate(chunks):
+            # Waarschuwingen één keer per frase (niet per wrap-maat).
+            warn_sink = warnings if ci == 0 else None
+            systems.append(
+                (
+                    i - 1,
+                    emit_mvsa_block(
+                        pid,
+                        chunk,
+                        do=do,
+                        mode=mode,
+                        index=i,
+                        total=n,
+                        warnings=warn_sink,
+                    ),
+                )
+            )
     parts: list[str] = []
     if frontmatter.strip():
         parts.append(frontmatter.rstrip())
@@ -905,10 +954,10 @@ def emit_mapped_document(
     parts.append("")
 
     prev_section: str | None = None
-    for i, system in enumerate(systems):
+    for phrase_i, system in systems:
         if with_sections:
             sec = section_id_for_phrase_index(
-                i,
+                phrase_i,
                 phrase_ids,
                 cycle_len=cycle_len,
                 final_id=final_id,
