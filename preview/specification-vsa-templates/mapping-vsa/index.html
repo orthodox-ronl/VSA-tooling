@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-11 23:39 CET.
+  , gebouwd 2026-11-12 21:30 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5740,7 +5740,7 @@ De mapper volgt dezelfde grenzen.</p>
 <tr>
 <td>Ingesprongen vervolgregel</td>
 <td>Te lange frase op papier</td>
-<td>Hoort bij de <strong>vorige</strong> frase (geen nieuwe grens)</td>
+<td>Zelfde template-frase (geen nieuwe grens); emit: <strong>één maat per fysieke regel</strong> (T6 print-wrap)</td>
 </tr>
 </tbody>
 </table>
@@ -5753,7 +5753,9 @@ regel-per-frase (met indent-wrap); extract splitst daarna ook op kale
 spring die regel in (spaties/tabs vooraan). Zonder scheiders zou een harde
 regeleinde anders ten onrechte als nieuwe frase tellen — dat geeft vaak
 <code>VSA-TEMPLATE-TEXT-MAPPING</code> of <code>VSA-TEMPLATE-REQUIRED-SLOT-UNUSED</code> op een
-«te korte» frase.</p>
+«te korte» frase. Bij emit (T6) wordt elke fysieke bronregel van die frase
+een aparte MVSA-maat, zodat <code>.vsa.mvsa.svg</code> dezelfde leesbaarheid krijgt
+als een over meerdere regels uitgesmeerde <code>.vsa</code> bij <code>vsa svg</code>.</p>
 <h3 id="legacy-nog-ondersteund">Legacy (nog ondersteund)<a class="headerlink" href="#legacy-nog-ondersteund" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -6204,7 +6206,7 @@ instance-lyric-pipeline. Corpus-<code>.vsa</code> heeft geen <code>T.N</code> v�
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-11
+        Bijgewerkt: 2026-11-12
         
       </p>
       

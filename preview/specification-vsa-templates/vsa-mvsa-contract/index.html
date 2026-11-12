@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-11 23:39 CET.
+  , gebouwd 2026-11-12 21:30 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5510,9 +5510,15 @@ als de gekuiste bestanden in <code>bibliotheek/.../_klaar_voor_acceptatie</code>
    template-<code>cycle</code>), <code>@sectie herhaling</code> (midden), <code>@sectie laatste</code>
    (frase-id <code>final</code>, meestal <code>laatste</code>). <strong>Uitzondering:</strong> toon 3 —
    geen drie sectiekoppen (zoals in de acceptatie-MVSA’s).</li>
+<li><strong>Print-wrap → maten</strong> — staat één tekstfrase in de VSA over meerdere
+   fysieke regels (ingesprongen vervolg), dan schrijft emit <strong>één maat
+   (LSATB-systeem) per bronregel</strong>. Template-mapping blijft één frase
+   (zelfde frase-id / sectie); alleen de bladindeling splitst. Zonder
+   wrap blijft het <strong>één maat per frase</strong>.</li>
 </ol>
 <p>Implementatie: <code>vsa.vsa_mvsa.emit_mapped_document</code> /
-<code>clean_emit_frontmatter</code> / <code>section_id_for_phrase_index</code>.</p>
+<code>split_notes_by_source_line</code> / <code>clean_emit_frontmatter</code> /
+<code>section_id_for_phrase_index</code>.</p>
 <h2 id="t7-verbetercyclus">T7 — verbetercyclus<a class="headerlink" href="#t7-verbetercyclus" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>VSA → vsa mvsa --template &lt;id&gt; [--melody …]
     → controle (MuseScore / validate / oor)
@@ -5590,7 +5596,7 @@ template-bump is bewust (diff / checklist).</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-11
+        Bijgewerkt: 2026-11-12
         
       </p>
       
