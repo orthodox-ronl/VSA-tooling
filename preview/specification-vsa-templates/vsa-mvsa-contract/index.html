@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-12 21:30 CET.
+  , gebouwd 2026-11-13 09:53 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5415,21 +5415,34 @@ tekortschiet — eerst YAML proberen (T7).</p>
    sibling is <code>&lt;stam&gt;.vsa.mvsa</code>): gebruik <code>template_opgegeven</code> als die
    staat, anders <code>template</code> — dat is de id waarmee de conversie eerder
    werd aangeroepen (mogelijk een alias). Die hint moet bij de kandidaten
-   voor deze formule/soort/<code>toon</code> horen.</li>
-<li>Anders: <strong>bron</strong> uit catalogus-leaf / bestandsnaam / <code>bron.uitgangspunt</code>
-   (Liturgikon ≡ Hemelum), als dat precies één kandidaat overlaat.</li>
+   voor deze formule/soort/<code>toon</code> horen. Schrijven gebeurt atomisch, zodat
+   die hint niet verdwijnt bij een mislukte of onderbroken regenerate.</li>
+<li>Anders: <strong>bron</strong> uit catalogus-leaf / bestandsnaam; levert dat <strong>0</strong>
+   formules op (bijv. leaf <code>asten</code> zonder <code>…-asten</code>-template), dan
+   <code>bron.uitgangspunt</code> uit de VSA-frontmatter (Liturgikon ≡ Hemelum).
+   Precies één kandidaat → die gebruiken.</li>
 <li>Anders: geef <code>--template</code> (of regenereer een bestaande <code>.mvsa</code>).</li>
 </ol>
 <p>Implementatie: <code>vsa.template_library.select_template_id</code> /
 <code>list_templates_for_soort_toon</code>.</p>
 <h2 id="t4-suggestie-bij-mappingfout">T4 — suggestie bij mappingfout<a class="headerlink" href="#t4-suggestie-bij-mappingfout" title="Permanent link">&para;</a></h2>
 <p>Als <code>map_vsa_to_template</code> faalt (bijv. hoogte-mismatch) blijft dat een
-<strong>harde fout</strong> (geen stille andere formule). De CLI mag daarna andere
-library-ids voor dezelfde <code>soort</code>+<code>toon</code> <strong>alleen in het geheugen</strong>
-proberen. Formules met dezelfde <code>formula_id</code> (via <code>same_as</code>) tellen niet
-als alternatief. Past er minstens één: meld die id’s en een kopieerbaar
-<code>vsa mvsa … --template …</code>-commando in de hint. Geen interactieve vraag.</p>
-<p>Implementatie: <code>vsa.vsa_mvsa.find_fitting_alternate_templates</code> /
+<strong>harde fout</strong> (geen stille andere formule; geen stil herschrijven van de
+<code>.vsa</code>). De CLI mag daarna <strong>alleen in het geheugen</strong> herstellen raden en
+dat in de Hint zetten:</p>
+<ol>
+<li><strong>Frasescheiding:</strong> ontbreekt er een <code>*</code> / <code>**</code> tussen twee
+   niet-ingesprongen muziekregels? Probeer die scheidingen; past de
+   mapping dan → Hint met de <strong>werkende</strong> regel(s) (concrete <code>*</code>/<code>**</code>).</li>
+<li><strong>Andere formule:</strong> andere library-ids voor dezelfde <code>soort</code>+<code>toon</code>.
+   Formules met dezelfde <code>formula_id</code> (via <code>same_as</code>) tellen niet als
+   alternatief. Past er minstens één: id’s + kopieerbaar
+   <code>vsa mvsa … --template …</code>.</li>
+</ol>
+<p>Geen interactieve vraag. Geen automatische switch of auto-edit van de bron.</p>
+<p>Implementatie: <code>vsa.vsa_mvsa.find_fitting_phrase_separator_fix</code> /
+<code>format_phrase_separator_hint</code> /
+<code>find_fitting_alternate_templates</code> /
 <code>format_alternate_template_hint</code>.</p>
 <h2 id="t2-melodiestem-detail">T2 — melodiestem (detail)<a class="headerlink" href="#t2-melodiestem-detail" title="Permanent link">&para;</a></h2>
 <p>VSA is één melodielijn. Die lijn is <strong>vaak</strong> de sopraan van de formule, maar
@@ -5596,7 +5609,7 @@ template-bump is bewust (diff / checklist).</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-12
+        Bijgewerkt: 2026-11-13
         
       </p>
       

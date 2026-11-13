@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-12 21:30 CET.
+  , gebouwd 2026-11-13 09:53 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -2802,6 +2802,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#variantfrasen-voor-laatste-2a-voorlaatste" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variantfrasen vóór laatste (2a, voorlaatste, …)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#voorbeelden-bladnotatie-text_mapping" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2822,6 +2833,17 @@
     <span class="md-ellipsis">
       
         mapping_plans (meerdere plannen)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#site-formulepagina-indexmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Site: formulepagina (index.md)
       
     </span>
   </a>
@@ -5443,6 +5465,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#variantfrasen-voor-laatste-2a-voorlaatste" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variantfrasen vóór laatste (2a, voorlaatste, …)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#voorbeelden-bladnotatie-text_mapping" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5463,6 +5496,17 @@
     <span class="md-ellipsis">
       
         mapping_plans (meerdere plannen)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#site-formulepagina-indexmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Site: formulepagina (index.md)
       
     </span>
   </a>
@@ -5816,17 +5860,80 @@ als een over meerdere regels uitgesmeerde <code>.vsa</code> bij <code>vsa svg</c
 <p>Herhaal het patroon <strong>cyclisch</strong> over zoveel regels als nodig, zodat de
 <strong>tail</strong> (alle stappen ná deze <code>repeat</code>) precies overblijft. Typisch eindigt
 de tail op <code>phrase: laatste</code>.</p>
-<p><strong>Geen eis</strong> dat het aantal regels vóór <code>laatste</code> een veelvoud van <code>k</code> is.
-Bij <code>k = 2</code> en <code>n = 7</code> regels: <code>1, 2, 1, 2, 1, 2, laatste</code>.</p>
+<p><strong>Vroeg uit de herhaling springen is toegestaan en normaal.</strong> Er is <strong>geen</strong>
+eis dat het aantal strofes vóór <code>laatste</code> een veelvoud van de cycluslengte
+<code>k</code> is. Zodra alleen de tail nog past, stopt de herhaling — ook midden in
+een theoretische <code>|:</code> … <code>:|</code>-ronde.</p>
+<p>Voorbeelden bij cycle <code>1, 2, 3</code> (<code>k = 3</code>) + <code>laatste</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Aantal strofes <code>n</code></th>
+<th>Toegewezen speelplan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4</td>
+<td><code>1, 2, 3, laatste</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>1, 2, 3, 1, laatste</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>1, 2, 3, 1, 2, 3, laatste</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>1, 2, 3, 1, 2, 3, 1, laatste</code></td>
+</tr>
+</tbody>
+</table>
+<p>Bij <code>k = 2</code> en <code>n = 7</code>: <code>1, 2, 1, 2, 1, 2, laatste</code>.</p>
+<p>Dat is precies wat op het blad gebeurt wanneer <code>laatste</code> niet op positie
+<code>k·m+1</code> valt: de herhaling wordt afgebroken en de laatste tekstfrase krijgt
+formulefrase <code>laatste</code>.</p>
 <h4 id="until-remaining-n"><code>until: { remaining: N }</code><a class="headerlink" href="#until-remaining-n" title="Permanent link">&para;</a></h4>
 <p>Stop met herhalen wanneer nog <strong>N</strong> regels over zijn; die vallen op de tail
-(meestal <code>sequence: [...]</code>). Voorbeeld tropaar toon 1 (variant met slot
-<code>1, 1a, 1a, 2</code>):</p>
+(meestal <code>sequence: [...]</code> of vaste <code>phrase:</code>-stappen). Gebruik dit als de
+<strong>slotformule</strong> meer is dan alleen <code>laatste</code> — bijvoorbeeld een
+variantfrase plus <code>laatste</code>.</p>
+<p>Voorbeeld tropaar toon 1 (variant met slot <code>1, 1a, 1a, 2</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repeat</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"1"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"2"</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="nt">until</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">remaining</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">sequence</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"1"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"1a"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"1a"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"2"</span><span class="p p-Indicator">]</span>
 </code></pre></div>
+<h3 id="variantfrasen-voor-laatste-2a-voorlaatste">Variantfrasen vóór <code>laatste</code> (<code>2a</code>, <code>voorlaatste</code>, …)<a class="headerlink" href="#variantfrasen-voor-laatste-2a-voorlaatste" title="Permanent link">&para;</a></h3>
+<p>Soms is de strofe direct vóór <code>laatste</code> <strong>niet</strong> de gewone cycle-frase, maar
+een vaste variant:</p>
+<table>
+<thead>
+<tr>
+<th>Id (voorbeeld)</th>
+<th>Wanneer typisch</th>
+<th>Betekenis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>2a</code></td>
+<td>o.a. kondak/tropaar toon 6 bij <strong>3n</strong> strofes</td>
+<td>Zelfde contour als <code>2</code>, andere slotcadens (ander akkoord / andere graden)</td>
+</tr>
+<tr>
+<td><code>voorlaatste</code></td>
+<td>o.a. stichier toon 6 bij <strong>3n</strong> strofes</td>
+<td>Eigen melodie voor de op-één-na-laatste strofe</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Regel:</strong> geef die variant een <strong>eigen frase-id</strong> in <code>phrases:</code> en noem die
+id in een apart <code>mapping_plans</code>-plan. Herinterpreteer <code>2</code> niet stil in de
+mapper. Zelfde contour + andere cadens → <code>2a</code> (of <code>3a</code>, …); duidelijk andere
+melodie → <code>voorlaatste</code> (of een andere sprekende id).</p>
 <h3 id="voorbeelden-bladnotatie-text_mapping">Voorbeelden (bladnotatie → <code>text_mapping</code>)<a class="headerlink" href="#voorbeelden-bladnotatie-text_mapping" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -5852,11 +5959,21 @@ Bij <code>k = 2</code> en <code>n = 7</code> regels: <code>1, 2, 1, 2, 1, 2, laa
 <td><code>1, 2, 3, \|\|: 4, 5, 3a :\|\| laatste</code></td>
 <td><code>sequence [1,2,3]</code> + <code>repeat [4,5,3a] until final</code> + <code>phrase laatste</code></td>
 </tr>
+<tr>
+<td><code>\|\|: 1, 2, 3 :\|\| laatste</code> (n≠3m+1)</td>
+<td>zelfde <code>until: final</code> — herhaling stopt vroeg (zie tabel hierboven)</td>
+</tr>
+<tr>
+<td><code>\|\|: 1, 2, 3 :\|\| voorlaatste, laatste</code> (3n)</td>
+<td><code>repeat [1,2,3] until remaining: 2</code> + die twee frasen</td>
+</tr>
 </tbody>
 </table>
 <h2 id="mapping_plans-meerdere-plannen"><code>mapping_plans</code> (meerdere plannen)<a class="headerlink" href="#mapping_plans-meerdere-plannen" title="Permanent link">&para;</a></h2>
 <p>Als één template op het blad <strong>meerdere cycle-notaties</strong> heeft (bijv. tropaar
-toon 1), of de toewijzing <strong>afhangt van het aantal tekstregels</strong>:</p>
+toon 1), of de toewijzing <strong>afhangt van het aantal tekstregels</strong>, zet die
+varianten als aparte plannen. Eén template = één set <code>mapping_plans</code>; de
+mapper kiest op <code>stanza_count</code>, niet op “gevoel”.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">mapping_plans</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard</span>
 <span class="w">    </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="s">"||:</span><span class="nv"> </span><span class="s">1,</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">:||</span><span class="nv"> </span><span class="s">laatste"</span>
@@ -5876,8 +5993,9 @@ toon 1), of de toewijzing <strong>afhangt van het aantal tekstregels</strong>:</
 <span class="w">          </span><span class="nt">remaining</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">sequence</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"1"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"1a"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"1a"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"2"</span><span class="p p-Indicator">]</span>
 </code></pre></div>
-<p>Selectie: <code>select_mapping_plan(doc, stanza_count)</code> — eerste plan waarvan
-<code>when</code> matcht; anders plan met <code>when.default: true</code>.</p>
+<p>Selectie: <code>select_mapping_plan(doc, stanza_count)</code> — <strong>eerste</strong> plan waarvan
+<code>when</code> matcht; anders plan met <code>when.default: true</code>. Zet daarom <strong>specifieke</strong>
+plannen (exact <code>n</code>, <code>mod</code>, min/max) <strong>vóór</strong> het default-plan.</p>
 <table>
 <thead>
 <tr>
@@ -5908,19 +6026,45 @@ toon 1), of de toewijzing <strong>afhangt van het aantal tekstregels</strong>:</
 </tr>
 </tbody>
 </table>
-<p>Voorbeeld <strong>3n regels</strong> met prefix + cycle + afwijkende slot:</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">triple</span>
+<p>Voorbeeld <strong>3n strofes</strong> met cycle + variant + <code>laatste</code> (kondak/tropaar-stijl
+met <code>2a</code>, of stichier-stijl met <code>voorlaatste</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">triple-close</span>
+<span class="w">  </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="s">"|:</span><span class="nv"> </span><span class="s">1,</span><span class="nv"> </span><span class="s">2,</span><span class="nv"> </span><span class="s">3</span><span class="nv"> </span><span class="s">:|</span><span class="nv"> </span><span class="s">2a,</span><span class="nv"> </span><span class="s">laatste"</span><span class="w">   </span><span class="c1"># of: voorlaatste, laatste</span>
 <span class="w">  </span><span class="nt">when</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">stanza_count_mod</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">mod</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 <span class="w">      </span><span class="nt">remainder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">phrase</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repeat</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"2"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"3"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"1"</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">until</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">final</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">phrase</span><span class="p">:</span><span class="w"> </span><span class="s">"2a"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repeat</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"1"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"2"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"3"</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">until</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">remaining</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">phrase</span><span class="p">:</span><span class="w"> </span><span class="s">"2a"</span><span class="w">          </span><span class="c1"># of: voorlaatste</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">phrase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">laatste</span>
 </code></pre></div>
+<p><strong>Let op verzamel-VSA’s</strong> (meerdere <code>[:]</code> … <code>[:]</code> in één bestand): de mapper
+telt standaard <strong>alle</strong> tekstfrasen van het bestand als één <code>stanza_count</code>.
+Twee coupletten van 6+5 worden zo <code>n = 11</code> en kiezen het verkeerde plan.
+Oplossing: ofwel elk stuk apart converteren, ofwel een expliciet plan voor
+die bekende lengte (bijv. <code>when.stanza_count: 11</code>). Zie bibliotheek-handleiding
+<em>Stichieren</em> voor het couplet-/verzamelpatroon.</p>
+<h2 id="site-formulepagina-indexmd">Site: formulepagina (<code>index.md</code>)<a class="headerlink" href="#site-formulepagina-indexmd" title="Permanent link">&para;</a></h2>
+<p>De leesbare ontsluiting van een formule staat in de bibliotheek onder
+<code>catalogus/formules/&lt;formule-id&gt;/index.md</code> (Hugo-special). <strong>Normatieve</strong>
+mappingregels blijven in deze hub en in <code>template.yaml</code>. Op de formulepagina
+schrijf je voor de beheerder, in gewone taal:</p>
+<ol>
+<li><strong>Welke speelplannen</strong> de formule kent (bladnotatie, bijv. <code>|:</code> 1, 2, 3 <code>:|</code>
+   laatste), inclusief wanneer een variant geldt (bijv. “bij een veelvoud van
+   3 strofes: … voorlaatste/2a, laatste”).</li>
+<li><strong>Dat vroeg springen mag:</strong> als het strofe-aantal geen nette cycle-afronding
+   is, stopt de herhaling en volgt <code>laatste</code> — geen fout van de VSA alleen
+   daarom.</li>
+<li><strong>Link</strong> naar het machinebestand
+   (<code>VSA-tooling</code> … <code>/library/&lt;id&gt;/template.yaml</code>) en desgewenst naar deze
+   mapping-hub — <strong>geen</strong> tweede, afwijkende uitleg van <code>until</code>/<code>when</code>.</li>
+</ol>
+<p>Pas die tekst aan zodra <code>mapping_plans</code> of variantfrasen in de YAML wijzigen
+(docs synchroon met code).</p>
 <h2 id="frase-ankers-inclusief-melisma">Frase-ankers (inclusief melisma)<a class="headerlink" href="#frase-ankers-inclusief-melisma" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -6206,7 +6350,7 @@ instance-lyric-pipeline. Corpus-<code>.vsa</code> heeft geen <code>T.N</code> v�
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-12
+        Bijgewerkt: 2026-11-13
         
       </p>
       
