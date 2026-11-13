@@ -27,7 +27,9 @@ from vsa.vsa_mvsa import (
     emit_mapped_document,
     emit_sections_enabled,
     find_fitting_alternate_templates,
+    find_fitting_phrase_separator_fix,
     format_alternate_template_hint,
+    format_phrase_separator_hint,
     section_id_for_phrase_index,
     split_notes_by_source_line,
 )
@@ -184,7 +186,7 @@ def test_select_template_id_ambiguous_without_hint() -> None:
 
 def test_select_template_id_missing() -> None:
     with pytest.raises(TemplateLibraryError, match="geen template"):
-        select_template_id(soort="stichier", toon=1)
+        select_template_id(soort="stichier", toon=3)
 
 
 def test_select_template_id_formule_overrides_soort() -> None:
@@ -218,6 +220,27 @@ def test_select_template_id_from_existing_mvsa(tmp_path: Path) -> None:
     assert (
         select_template_id(soort="kondak", toon=8, output=out)
         == "kondak-toon-8-liturgikon"
+    )
+
+
+def test_select_template_id_path_bron_zero_hits_falls_back_to_meta() -> None:
+    """T1: leaf ``asten`` (geen …-asten-formule) → ``bron: Hemelum``."""
+    path = (
+        Path("catalogus")
+        / "tropaar"
+        / "silouan-de-athoniet-toon-4"
+        / "asten"
+        / "tropaar-silouan-de-athoniet-toon-4-asten.vsa"
+    )
+    assert (
+        select_template_id(
+            soort="tropaar",
+            toon=4,
+            bron="Koorinstructie Hemelum",
+            path=path,
+            output=path.with_name(path.name + ".mvsa"),
+        )
+        == "tropaar-toon-4-hemelum"
     )
 
 
@@ -263,6 +286,41 @@ def test_convert_tropaar_toon_2_via_same_as(tmp_path: Path) -> None:
     assert "formule kondak-toon-2-groningen" in result.text or "kondak-toon-2-groningen" in result.text
 
 
+@pytest.mark.skipif(not T2_VSA.is_file(), reason="corpus toon 2 ontbreekt")
+def test_html_comment_not_in_mvsa_l_lines(tmp_path: Path) -> None:
+    """HTML-comment in VSA mag niet in L-lyrics belanden (lyrics/zoektekst).
+
+    Mag wél als ``#``-spiegel van de VSA-body (``include_vsa_comment``).
+    Regressie: Verzamel-VSA-notities ooit als eerste L-syllaben.
+    """
+    marker = "Verzamel-VSA-REGRESSIE-frasescheider-XYZ"
+    src_text = T2_VSA.read_text(encoding="utf-8")
+    # Zelfde plek als typische stichier-notities: vóór de eerste muziekregel.
+    injected = src_text.replace(
+        "\n\n\n[/:]",
+        f"\n\n<!--\n  {marker}\n  Template: stichier-toon-1-groningen.\n-->\n\n[/:]",
+        1,
+    )
+    assert marker in injected
+    src = tmp_path / "t2-with-comment.vsa"
+    src.write_text(injected, encoding="utf-8")
+    result = convert_vsa_to_mvsa(
+        src, template="tropaar-toon-2-groningen", write=False
+    )
+    l_lines = [
+        ln for ln in result.text.splitlines() if ln.lstrip().startswith("L:")
+    ]
+    assert l_lines
+    for ln in l_lines:
+        assert "Verzamel" not in ln
+        assert "REGRESSIE" not in ln
+        assert "frasescheider" not in ln
+        assert "XYZ" not in ln
+        assert "stichier-toon-1" not in ln
+    # Spiegel als #-comment mag; lyrics-export leest die niet.
+    assert any(marker in ln for ln in result.text.splitlines() if ln.lstrip().startswith("#"))
+
+
 @pytest.mark.skipif(not K8_HEMELUM_VSA.is_file(), reason="corpus kondak-8-hemelum ontbreekt")
 def test_alternate_template_suggestion_on_pitch_mismatch() -> None:
     """T4: Groningen faalt op Hemelum-VSA → suggestie kondak-toon-8-hemelum."""
@@ -289,6 +347,80 @@ def test_alternate_template_suggestion_on_pitch_mismatch() -> None:
         )
     assert "kondak-toon-8-hemelum" in (ei.value.hint_nl or "")
     assert "--template" in (ei.value.hint_nl or "")
+
+
+_T1_FM = """\
+---
+titel: Test tropaar toon 1
+soort: tropaar
+toon: 1
+do: F4
+mode: major
+---
+"""
+
+# Zelfde melodie als hemelum «Heer red Uw volk», maar zonder ** vóór slot.
+_T1_MISSING_SEP_BODY = r"""
+[:] Heer red Uw {/&/volk_&_} {\\en} ze{/gen} {/Uw} {/erf_}{deel_}, *
+{\schenk} de orthodoxe {\chris_}te{\nen_} *
+de over{/win_}{/ning_} {\\o}{/ver} {/Uw} {/vij_}an{den_}
+{\en} bescherm uw gemeente {/door_} {Uw_} {\kruis_}. [//:]
+"""
+
+# Korte vorm: verkeerde pijl op door (\ i.p.v. /) — géén ontbrekende *.
+_T1_WRONG_PITCH_BODY = r"""
+[:] Heer, red Uw {/&/volk_&_} {\\en} ze{/gen} {/Uw} {/erf_}{deel_}; *
+{\en} bescherm Uw Gemeente {\door_} {Uw_} {\Kruis_}. [:]
+"""
+
+
+def test_phrase_separator_fix_for_missing_star_before_final(tmp_path: Path) -> None:
+    """T4: ontbrekende ** vóór slotfrase → Hint met werkende regel."""
+    src = tmp_path / "heer-red.vsa"
+    src.write_text(_T1_FM + _T1_MISSING_SEP_BODY, encoding="utf-8")
+    tpl = load_resolved_template("tropaar-toon-1-groningen")
+    fix = find_fitting_phrase_separator_fix(
+        frontmatter=_T1_FM,
+        body=_T1_MISSING_SEP_BODY,
+        template=tpl.doc,
+        source_name=src.name,
+    )
+    assert fix is not None
+    assert any(m == "**" for m in fix.edits.values())
+    hint = format_phrase_separator_hint(fix)
+    assert "frasescheiding" in hint
+    assert "**" in hint
+    with pytest.raises(TemplateInstanceError) as ei:
+        convert_vsa_to_mvsa(src, template="tropaar-toon-1-groningen", write=False)
+    assert "frasescheiding" in (ei.value.hint_nl or "")
+    assert "**" in (ei.value.hint_nl or "")
+    # Controle: met de voorgestelde edit mapte het écht.
+    from vsa.vsa_stanzas import apply_phrase_separators
+
+    fixed_body = apply_phrase_separators(_T1_MISSING_SEP_BODY, fix.edits)
+    fixed = tmp_path / "heer-red-fixed.vsa"
+    fixed.write_text(_T1_FM + fixed_body, encoding="utf-8")
+    result = convert_vsa_to_mvsa(
+        fixed, template="tropaar-toon-1-groningen", write=False
+    )
+    assert len(result.phrase_ids) == 4
+
+
+def test_phrase_separator_no_false_hint_on_wrong_pitch_mark(tmp_path: Path) -> None:
+    """T4: verkeerde EHM (\\ vs /) → géén valse frasescheidings-Hint."""
+    src = tmp_path / "kort.vsa"
+    src.write_text(_T1_FM + _T1_WRONG_PITCH_BODY, encoding="utf-8")
+    tpl = load_resolved_template("tropaar-toon-1-groningen")
+    fix = find_fitting_phrase_separator_fix(
+        frontmatter=_T1_FM,
+        body=_T1_WRONG_PITCH_BODY,
+        template=tpl.doc,
+        source_name=src.name,
+    )
+    assert fix is None
+    with pytest.raises(TemplateInstanceError) as ei:
+        convert_vsa_to_mvsa(src, template="tropaar-toon-1-groningen", write=False)
+    assert "frasescheiding" not in (ei.value.hint_nl or "")
 
 
 @pytest.mark.skipif(not K5_VSA.is_file(), reason="corpus kondak-5 ontbreekt")

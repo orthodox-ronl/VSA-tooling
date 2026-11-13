@@ -23,6 +23,19 @@ def test_comment_only_line_with_indentation_is_removed_without_blank_line():
     assert strip_vsa_html_comments(source) == "eerste\ntweede"
 
 
+def test_multiline_html_comment_is_removed_without_blank_lines():
+    source = "eerste\n<!--\n  multi\n  koormap: foo\n-->\ntweede"
+
+    assert strip_vsa_html_comments(source) == "eerste\ntweede"
+    assert "koormap" not in strip_vsa_html_comments(source)
+
+
+def test_indented_multiline_html_comment_is_removed_without_blank_lines():
+    source = "eerste\n   <!--\n  multi\n-->\ntweede"
+
+    assert strip_vsa_html_comments(source) == "eerste\ntweede"
+
+
 def test_inline_comment_is_removed_without_removing_surrounding_source_text():
     source = "eerste <!-- broncommentaar --> tweede"
 

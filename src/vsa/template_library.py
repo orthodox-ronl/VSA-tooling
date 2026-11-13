@@ -207,6 +207,22 @@ def _bron_from_path(path: Path | str | None) -> str | None:
     return None
 
 
+def _candidates_for_bron(candidates: list[str], bron_s: str) -> list[str]:
+    """Filter kandidaten op bron-suffix; Liturgikon ≡ Hemelum."""
+    hits = [
+        c
+        for c in candidates
+        if formula_id_parts(c)[2] == bron_s or c.endswith(f"-{bron_s}")
+    ]
+    if bron_s == "hemelum" and not hits:
+        hits = [
+            c
+            for c in candidates
+            if formula_id_parts(c)[2] in ("hemelum", "liturgikon")
+        ]
+    return hits
+
+
 def list_templates_for_soort_toon(
     soort: str,
     toon: int | str,
@@ -389,29 +405,22 @@ def select_template_id(
             code="TEMPLATE-SELECT-EXISTING-MISMATCH",
         )
 
-    bron_s = (
-        _bron_from_path(out_p)
-        or _bron_from_path(path_p)
-        or _normalize_bron(bron)
-    )
-    if bron_s:
-        bron_hits = [
-            c
-            for c in candidates
-            if formula_id_parts(c)[2] == bron_s
-            or c.endswith(f"-{bron_s}")
-        ]
-        # liturgikon-alias → hemelum
-        if bron_s == "hemelum" and not bron_hits:
-            bron_hits = [
-                c
-                for c in candidates
-                if formula_id_parts(c)[2] in ("hemelum", "liturgikon")
-            ]
+    path_bron = _bron_from_path(out_p) or _bron_from_path(path_p)
+    meta_bron = _normalize_bron(bron)
+    # Probeer pad-bron eerst; 0 treffers (bijv. leaf ``asten`` zonder
+    # ``…-asten``-formule) → frontmatter-bron (``Koorinstructie Hemelum``).
+    tried: set[str] = set()
+    for bron_s in (path_bron, meta_bron):
+        if not bron_s or bron_s in tried:
+            continue
+        tried.add(bron_s)
+        bron_hits = _candidates_for_bron(candidates, bron_s)
         if len(bron_hits) == 1:
             return bron_hits[0]
         if len(bron_hits) > 1:
             candidates = bron_hits
+            break
+        # 0 hits: volgende bron-token proberen (niet meteen ambigu).
 
     label = (
         f"formule={formule_s!r}"

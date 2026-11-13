@@ -61,9 +61,14 @@ uitvoerpad hergebruikt diens `template_opgegeven`/`template`, of de bron
 uit het leaf-pad; anders moet je `--template` geven. Geen stille default.
 
 Past de gekozen formule niet (hoogte-/mappingfout), dan blijft dat een
-fout. Als een **andere** formule voor dezelfde soort en toon wél past,
-staat in de hint welke dat is, plus een regel om opnieuw te proberen met
-`--template` (T4).
+fout. De hint kan dan (T4):
+
+- een **werkende frasescheiding** voorstellen (`*` / `**` op een concrete
+  regel), als die gok de mapping wél laat slagen;
+- of een **andere formule** voor dezelfde soort en toon, plus een regel
+  om opnieuw te proberen met `--template`.
+
+Het `.vsa`-bestand wordt niet stil herschreven.
 
 Na een geslaagde schets: controle in MuseScore / oor; optioneel
 `mvsa mxl` voor Coria-playback.

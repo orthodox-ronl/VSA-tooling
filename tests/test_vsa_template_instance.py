@@ -1235,6 +1235,22 @@ def test_kondak_toon_6_phrase_plan() -> None:
     ]
 
 
+def test_kondak_toon_6_triple_close_plan() -> None:
+    """3n strofes → plan triple-close met 2a vóór laatste (mapping-vsa)."""
+    from vsa.template_mapping import assign_stanzas_to_phrases, select_mapping_plan
+
+    doc = yaml.safe_load(KONDAK_T6_YAML.read_text(encoding="utf-8"))
+    assert "2a" in {p["id"] for p in doc["phrases"]}
+    for n, expected in (
+        (3, ["1", "2a", "laatste"]),
+        (6, ["1", "2", "1", "2", "2a", "laatste"]),
+        (9, ["1", "2", "1", "2", "1", "2", "1", "2a", "laatste"]),
+    ):
+        plan = select_mapping_plan(doc, n)
+        assert plan.id == "triple-close"
+        assert assign_stanzas_to_phrases(plan, n) == expected
+
+
 def test_tropaar_toon_6_phrase_plan() -> None:
     alias = yaml.safe_load(TROPAAR_T6_YAML.read_text(encoding="utf-8"))
     assert alias.get("same_as") == "kondak-toon-6-groningen"

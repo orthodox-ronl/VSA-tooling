@@ -59,9 +59,12 @@ tekortschiet — eerst YAML proberen (T7).
    sibling is `<stam>.vsa.mvsa`): gebruik `template_opgegeven` als die
    staat, anders `template` — dat is de id waarmee de conversie eerder
    werd aangeroepen (mogelijk een alias). Die hint moet bij de kandidaten
-   voor deze formule/soort/`toon` horen.
-2. Anders: **bron** uit catalogus-leaf / bestandsnaam / `bron.uitgangspunt`
-   (Liturgikon ≡ Hemelum), als dat precies één kandidaat overlaat.
+   voor deze formule/soort/`toon` horen. Schrijven gebeurt atomisch, zodat
+   die hint niet verdwijnt bij een mislukte of onderbroken regenerate.
+2. Anders: **bron** uit catalogus-leaf / bestandsnaam; levert dat **0**
+   formules op (bijv. leaf `asten` zonder `…-asten`-template), dan
+   `bron.uitgangspunt` uit de VSA-frontmatter (Liturgikon ≡ Hemelum).
+   Precies één kandidaat → die gebruiken.
 3. Anders: geef `--template` (of regenereer een bestaande `.mvsa`).
 
 Implementatie: `vsa.template_library.select_template_id` /
@@ -70,13 +73,23 @@ Implementatie: `vsa.template_library.select_template_id` /
 ## T4 — suggestie bij mappingfout
 
 Als `map_vsa_to_template` faalt (bijv. hoogte-mismatch) blijft dat een
-**harde fout** (geen stille andere formule). De CLI mag daarna andere
-library-ids voor dezelfde `soort`+`toon` **alleen in het geheugen**
-proberen. Formules met dezelfde `formula_id` (via `same_as`) tellen niet
-als alternatief. Past er minstens één: meld die id’s en een kopieerbaar
-`vsa mvsa … --template …`-commando in de hint. Geen interactieve vraag.
+**harde fout** (geen stille andere formule; geen stil herschrijven van de
+`.vsa`). De CLI mag daarna **alleen in het geheugen** herstellen raden en
+dat in de Hint zetten:
 
-Implementatie: `vsa.vsa_mvsa.find_fitting_alternate_templates` /
+1. **Frasescheiding:** ontbreekt er een `*` / `**` tussen twee
+   niet-ingesprongen muziekregels? Probeer die scheidingen; past de
+   mapping dan → Hint met de **werkende** regel(s) (concrete `*`/`**`).
+2. **Andere formule:** andere library-ids voor dezelfde `soort`+`toon`.
+   Formules met dezelfde `formula_id` (via `same_as`) tellen niet als
+   alternatief. Past er minstens één: id’s + kopieerbaar
+   `vsa mvsa … --template …`.
+
+Geen interactieve vraag. Geen automatische switch of auto-edit van de bron.
+
+Implementatie: `vsa.vsa_mvsa.find_fitting_phrase_separator_fix` /
+`format_phrase_separator_hint` /
+`find_fitting_alternate_templates` /
 `format_alternate_template_hint`.
 
 ## T2 — melodiestem (detail)

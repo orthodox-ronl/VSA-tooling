@@ -447,3 +447,84 @@ def _with_word_syllabics(notes: list[VsaNote]) -> list[VsaNote]:
             syl = "middle"
         out[idx] = replace(out[idx], syllabic=syl)
     return out
+
+
+@dataclass(frozen=True)
+class SoftPhraseJoint:
+    """Plek waar een `*`/`**` tussen twee muziekregels zou kunnen horen.
+
+    ``line_index`` is 0-based in ``body.splitlines()``: de regel *vóór* de
+    ontbrekende scheiding (daar `` *`` of `` **`` achter zetten).
+    """
+
+    line_index: int
+    line_text: str
+
+
+def _is_music_body_line(raw: str, *, in_comment: bool) -> bool:
+    if in_comment:
+        return False
+    s = raw.strip()
+    if not s or s.startswith("#"):
+        return False
+    if "<!--" in s:
+        return False
+    return True
+
+
+def soft_phrase_joints(body: str) -> list[SoftPhraseJoint]:
+    """Muziekregels zonder trailing frasescheider, gevolgd door een nieuwe frase-regel.
+
+    Ingesprongen vervolgregels (print-wrap) zijn geen joint: die horen bij
+    dezelfde frase. Alleen niet-ingesprongen opvolgers tellen.
+    """
+    lines = body.splitlines()
+    music_idxs: list[int] = []
+    in_comment = False
+    for i, raw in enumerate(lines):
+        s = raw.strip()
+        if in_comment:
+            if "-->" in raw:
+                in_comment = False
+            continue
+        if "<!--" in s:
+            if "-->" not in s[s.find("<!--") + 4 :]:
+                in_comment = True
+            continue
+        if _is_music_body_line(raw, in_comment=False):
+            music_idxs.append(i)
+
+    joints: list[SoftPhraseJoint] = []
+    for a, b in zip(music_idxs, music_idxs[1:]):
+        next_raw = lines[b]
+        if next_raw[:1].isspace():
+            continue  # indent-wrap → zelfde frase
+        prev = lines[a].rstrip()
+        if _PHRASE_SEP_TRAIL.search(prev):
+            continue
+        joints.append(SoftPhraseJoint(line_index=a, line_text=prev))
+    return joints
+
+
+def apply_phrase_separators(
+    body: str, edits: dict[int, str]
+) -> str:
+    """Zet trailing ``*`` / ``**`` (waarde zonder spaties) op gegeven regelindices."""
+    if not edits:
+        return body
+    lines = body.splitlines()
+    for idx, marker in edits.items():
+        if idx < 0 or idx >= len(lines):
+            continue
+        mark = marker.strip()
+        if mark not in {"*", "**", "/", "//"}:
+            continue
+        raw = lines[idx].rstrip()
+        if _PHRASE_SEP_TRAIL.search(raw):
+            continue
+        lines[idx] = f"{raw} {mark}"
+    # Behoud trailing newline van de bron indien aanwezig.
+    out = "\n".join(lines)
+    if body.endswith("\n"):
+        out += "\n"
+    return out

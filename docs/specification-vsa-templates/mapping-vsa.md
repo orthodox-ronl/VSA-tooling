@@ -101,14 +101,34 @@ Herhaal het patroon **cyclisch** over zoveel regels als nodig, zodat de
 **tail** (alle stappen ná deze `repeat`) precies overblijft. Typisch eindigt
 de tail op `phrase: laatste`.
 
-**Geen eis** dat het aantal regels vóór `laatste` een veelvoud van `k` is.
-Bij `k = 2` en `n = 7` regels: `1, 2, 1, 2, 1, 2, laatste`.
+**Vroeg uit de herhaling springen is toegestaan en normaal.** Er is **geen**
+eis dat het aantal strofes vóór `laatste` een veelvoud van de cycluslengte
+`k` is. Zodra alleen de tail nog past, stopt de herhaling — ook midden in
+een theoretische `|:` … `:|`-ronde.
+
+Voorbeelden bij cycle `1, 2, 3` (`k = 3`) + `laatste`:
+
+| Aantal strofes `n` | Toegewezen speelplan                         |
+| ------------------ | -------------------------------------------- |
+| 4                  | `1, 2, 3, laatste`                           |
+| 5                  | `1, 2, 3, 1, laatste`                        |
+| 7                  | `1, 2, 3, 1, 2, 3, laatste`                  |
+| 8                  | `1, 2, 3, 1, 2, 3, 1, laatste`               |
+
+Bij `k = 2` en `n = 7`: `1, 2, 1, 2, 1, 2, laatste`.
+
+Dat is precies wat op het blad gebeurt wanneer `laatste` niet op positie
+`k·m+1` valt: de herhaling wordt afgebroken en de laatste tekstfrase krijgt
+formulefrase `laatste`.
 
 #### `until: { remaining: N }`
 
 Stop met herhalen wanneer nog **N** regels over zijn; die vallen op de tail
-(meestal `sequence: [...]`). Voorbeeld tropaar toon 1 (variant met slot
-`1, 1a, 1a, 2`):
+(meestal `sequence: [...]` of vaste `phrase:`-stappen). Gebruik dit als de
+**slotformule** meer is dan alleen `laatste` — bijvoorbeeld een
+variantfrase plus `laatste`.
+
+Voorbeeld tropaar toon 1 (variant met slot `1, 1a, 1a, 2`):
 
 ```yaml
 - repeat: ["1", "2"]
@@ -116,6 +136,21 @@ Stop met herhalen wanneer nog **N** regels over zijn; die vallen op de tail
     remaining: 4
 - sequence: ["1", "1a", "1a", "2"]
 ```
+
+### Variantfrasen vóór `laatste` (`2a`, `voorlaatste`, …)
+
+Soms is de strofe direct vóór `laatste` **niet** de gewone cycle-frase, maar
+een vaste variant:
+
+| Id (voorbeeld)   | Wanneer typisch                                      | Betekenis                                                                 |
+| ---------------- | ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| `2a`             | o.a. kondak/tropaar toon 6 bij **3n** strofes        | Zelfde contour als `2`, andere slotcadens (ander akkoord / andere graden) |
+| `voorlaatste`    | o.a. stichier toon 6 bij **3n** strofes              | Eigen melodie voor de op-één-na-laatste strofe                            |
+
+**Regel:** geef die variant een **eigen frase-id** in `phrases:` en noem die
+id in een apart `mapping_plans`-plan. Herinterpreteer `2` niet stil in de
+mapper. Zelfde contour + andere cadens → `2a` (of `3a`, …); duidelijk andere
+melodie → `voorlaatste` (of een andere sprekende id).
 
 ### Voorbeelden (bladnotatie → `text_mapping`)
 
@@ -125,11 +160,15 @@ Stop met herhalen wanneer nog **N** regels over zijn; die vallen op de tail
 | `1 \|\|: 2, 3 :\|\| laatste`            | `phrase 1` + `repeat [2,3] until final` + `phrase laatste`             |
 | `1, 3, 1, 2, 3, 1, 4, laatste`          | `sequence: [1, 3, 1, 2, 3, 1, 4, laatste]` (prefix + altijd `laatste`) |
 | `1, 2, 3, \|\|: 4, 5, 3a :\|\| laatste` | `sequence [1,2,3]` + `repeat [4,5,3a] until final` + `phrase laatste`  |
+| `\|\|: 1, 2, 3 :\|\| laatste` (n≠3m+1) | zelfde `until: final` — herhaling stopt vroeg (zie tabel hierboven)    |
+| `\|\|: 1, 2, 3 :\|\| voorlaatste, laatste` (3n) | `repeat [1,2,3] until remaining: 2` + die twee frasen            |
 
 ## `mapping_plans` (meerdere plannen)
 
 Als één template op het blad **meerdere cycle-notaties** heeft (bijv. tropaar
-toon 1), of de toewijzing **afhangt van het aantal tekstregels**:
+toon 1), of de toewijzing **afhangt van het aantal tekstregels**, zet die
+varianten als aparte plannen. Eén template = één set `mapping_plans`; de
+mapper kiest op `stanza_count`, niet op “gevoel”.
 
 ```yaml
 mapping_plans:
@@ -152,8 +191,9 @@ mapping_plans:
       - sequence: ["1", "1a", "1a", "2"]
 ```
 
-Selectie: `select_mapping_plan(doc, stanza_count)` — eerste plan waarvan
-`when` matcht; anders plan met `when.default: true`.
+Selectie: `select_mapping_plan(doc, stanza_count)` — **eerste** plan waarvan
+`when` matcht; anders plan met `when.default: true`. Zet daarom **specifieke**
+plannen (exact `n`, `mod`, min/max) **vóór** het default-plan.
 
 | `when`-sleutel       | Match                                     |
 | -------------------- | ----------------------------------------- |
@@ -163,21 +203,50 @@ Selectie: `select_mapping_plan(doc, stanza_count)` — eerste plan waarvan
 | `stanza_count_min`   | minimaal n regels                         |
 | `stanza_count_max`   | maximaal n regels                         |
 
-Voorbeeld **3n regels** met prefix + cycle + afwijkende slot:
+Voorbeeld **3n strofes** met cycle + variant + `laatste` (kondak/tropaar-stijl
+met `2a`, of stichier-stijl met `voorlaatste`):
 
 ```yaml
-- id: triple
+- id: triple-close
+  label: "|: 1, 2, 3 :| 2a, laatste"   # of: voorlaatste, laatste
   when:
     stanza_count_mod:
       mod: 3
       remainder: 0
   steps:
-    - phrase: "1"
-    - repeat: ["2", "3", "1"]
-      until: final
-    - phrase: "2a"
+    - repeat: ["1", "2", "3"]
+      until:
+        remaining: 2
+    - phrase: "2a"          # of: voorlaatste
     - phrase: laatste
 ```
+
+**Let op verzamel-VSA’s** (meerdere `[:]` … `[:]` in één bestand): de mapper
+telt standaard **alle** tekstfrasen van het bestand als één `stanza_count`.
+Twee coupletten van 6+5 worden zo `n = 11` en kiezen het verkeerde plan.
+Oplossing: ofwel elk stuk apart converteren, ofwel een expliciet plan voor
+die bekende lengte (bijv. `when.stanza_count: 11`). Zie bibliotheek-handleiding
+*Stichieren* voor het couplet-/verzamelpatroon.
+
+## Site: formulepagina (`index.md`)
+
+De leesbare ontsluiting van een formule staat in de bibliotheek onder
+`catalogus/formules/<formule-id>/index.md` (Hugo-special). **Normatieve**
+mappingregels blijven in deze hub en in `template.yaml`. Op de formulepagina
+schrijf je voor de beheerder, in gewone taal:
+
+1. **Welke speelplannen** de formule kent (bladnotatie, bijv. `|:` 1, 2, 3 `:|`
+   laatste), inclusief wanneer een variant geldt (bijv. “bij een veelvoud van
+   3 strofes: … voorlaatste/2a, laatste”).
+2. **Dat vroeg springen mag:** als het strofe-aantal geen nette cycle-afronding
+   is, stopt de herhaling en volgt `laatste` — geen fout van de VSA alleen
+   daarom.
+3. **Link** naar het machinebestand
+   (`VSA-tooling` … `/library/<id>/template.yaml`) en desgewenst naar deze
+   mapping-hub — **geen** tweede, afwijkende uitleg van `until`/`when`.
+
+Pas die tekst aan zodra `mapping_plans` of variantfrasen in de YAML wijzigen
+(docs synchroon met code).
 
 ## Frase-ankers (inclusief melisma)
 

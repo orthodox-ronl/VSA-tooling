@@ -45,7 +45,13 @@ from .template_library import (
     load_resolved_template,
     select_template_id,
 )
-from .vsa_stanzas import ensure_stanza_stars, extract_stanza_notes
+from .vsa_stanzas import (
+    SoftPhraseJoint,
+    apply_phrase_separators,
+    ensure_stanza_stars,
+    extract_stanza_notes,
+    soft_phrase_joints,
+)
 from .yaml_frontmatter import parse_vsa_frontmatter
 
 # Schrijfoctaven synchroon met @oct-regel (T5 emit / Coria-MXL).
@@ -1151,6 +1157,125 @@ def format_alternate_template_hint(
     return "\n".join(lines)
 
 
+@dataclass(frozen=True)
+class PhraseSeparatorFix:
+    """Werkende gok: ontbrekende `*`/`**` op één of meer soft joints."""
+
+    edits: dict[int, str]
+    joints: tuple[SoftPhraseJoint, ...]
+    phrase_ids: tuple[str, ...]
+
+
+def _phrase_separator_candidates(
+    joints: list[SoftPhraseJoint],
+) -> list[dict[int, str]]:
+    """Kleine zoekruimte: eerst één joint, daarna paren (max 3 joints)."""
+    if not joints:
+        return []
+    limited = joints[:3]
+    out: list[dict[int, str]] = []
+    # Laatste soft joint: ** eerst (vaak vóór slotfrase); elders * eerst.
+    last_i = limited[-1].line_index
+    for j in reversed(limited):
+        markers = ("**", "*") if j.line_index == last_i else ("*", "**")
+        for mark in markers:
+            out.append({j.line_index: mark})
+    if len(limited) >= 2:
+        a, b = limited[-2], limited[-1]
+        out.append({a.line_index: "*", b.line_index: "**"})
+        out.append({a.line_index: "*", b.line_index: "*"})
+    # Uniek houden, volgorde bewaren.
+    seen: set[tuple[tuple[int, str], ...]] = set()
+    unique: list[dict[int, str]] = []
+    for edits in out:
+        key = tuple(sorted(edits.items()))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(edits)
+    return unique
+
+
+def find_fitting_phrase_separator_fix(
+    *,
+    frontmatter: str,
+    body: str,
+    template: dict[str, Any],
+    melody_voice: str = "S",
+    source_name: str = "vsa",
+) -> PhraseSeparatorFix | None:
+    """T4: gok ontbrekende frasescheiders; return eerste edit die wél mappt.
+
+    Geen stille auto-fix van het bronbestand — alleen diagnose voor de Hint.
+    """
+    joints = soft_phrase_joints(body)
+    if not joints:
+        return None
+    joint_by_idx = {j.line_index: j for j in joints}
+    for edits in _phrase_separator_candidates(joints):
+        trial_body = apply_phrase_separators(body, edits)
+        norm_body, _ = ensure_stanza_stars(trial_body)
+        trial_text = frontmatter + norm_body
+        try:
+            mapped = map_vsa_to_template(
+                template,
+                trial_text,
+                source=source_name,
+                melody_voice=melody_voice,
+            )
+        except TemplateInstanceError:
+            continue
+        used: list[SoftPhraseJoint] = []
+        for idx, mark in sorted(edits.items()):
+            base = joint_by_idx.get(idx)
+            if base is None:
+                continue
+            used.append(
+                SoftPhraseJoint(
+                    line_index=idx,
+                    line_text=f"{base.line_text.rstrip()} {mark}",
+                )
+            )
+        return PhraseSeparatorFix(
+            edits=dict(edits),
+            joints=tuple(used),
+            phrase_ids=tuple(pid for pid, _ in mapped),
+        )
+    return None
+
+
+def format_phrase_separator_hint(fix: PhraseSeparatorFix) -> str:
+    """Beheerderstekst: ontbrekende `*`/`**` + werkende regel(s)."""
+    if not fix.joints:
+        return ""
+    n = len(fix.phrase_ids)
+    ids = ", ".join(fix.phrase_ids) if fix.phrase_ids else "—"
+    lines = [
+        "Waarschijnlijk ontbreekt een frasescheiding (`*` of `**`) tussen "
+        "twee regels die nu als één frase worden gelezen.",
+        f"Met deze wijziging paste de mapping wél ({n} frasen: {ids}):",
+    ]
+    for joint in fix.joints:
+        lines.append(f"  {joint.line_text}")
+    marks = sorted({m for m in fix.edits.values()})
+    if marks == ["**"]:
+        lines.append(
+            "Zet `**` (sterke scheiding, vaak vóór de slotfrase) aan het "
+            "eind van die regel in het .vsa-bestand."
+        )
+    elif marks == ["*"]:
+        lines.append(
+            "Zet `*` (frasescheiding) aan het eind van die regel in het "
+            ".vsa-bestand."
+        )
+    else:
+        lines.append(
+            "Zet de getoonde `*` / `**` aan het eind van die regel(s) in "
+            "het .vsa-bestand."
+        )
+    return "\n".join(lines)
+
+
 def default_vsa_mvsa_output(source: Path | str) -> Path:
     """Default-uitvoerpad: ``lied.vsa`` → ``lied.vsa.mvsa`` (stem.brontype.doeltype)."""
     src = Path(source)
@@ -1228,7 +1353,24 @@ def convert_vsa_to_mvsa(
             melody_voice=melody_voice,
         )
     except TemplateInstanceError as exc:
-        # T4: harde fout blijft; suggesteer andere formules (zelfde lookup) die passen.
+        # T4: harde fout blijft; eerst frasescheiding gokken, dan andere formules.
+        hint_parts: list[str] = []
+        base_hint = (exc.hint_nl or "").rstrip()
+        if base_hint:
+            hint_parts.append(base_hint)
+
+        sep_fix = find_fitting_phrase_separator_fix(
+            frontmatter=fm,
+            body=norm_body,
+            template=resolved.doc,
+            melody_voice=melody_voice,
+            source_name=src.name,
+        )
+        if sep_fix is not None:
+            sep_hint = format_phrase_separator_hint(sep_fix)
+            if sep_hint:
+                hint_parts.append(sep_hint)
+
         alt_soort = (
             str(formule_meta).strip().lower()
             if formule_meta not in (None, "")
@@ -1246,18 +1388,19 @@ def convert_vsa_to_mvsa(
             melody_voice=melody_voice,
             source_name=src.name,
         )
-        hint_extra = format_alternate_template_hint(
+        alt_hint = format_alternate_template_hint(
             failed_id=resolved.canonical_id,
             fitting=fitting,
             source=src,
         )
-        if hint_extra:
-            base_hint = (exc.hint_nl or "").rstrip()
-            new_hint = f"{base_hint}\n{hint_extra}".strip() if base_hint else hint_extra
+        if alt_hint:
+            hint_parts.append(alt_hint)
+
+        if len(hint_parts) > (1 if base_hint else 0):
             raise TemplateInstanceError(
                 exc.message_nl,
                 code=exc.code,
-                hint_nl=new_hint,
+                hint_nl="\n".join(hint_parts).strip(),
                 source=exc.source or str(src),
                 line=exc.line,
                 column=exc.column,
@@ -1329,8 +1472,17 @@ def convert_vsa_to_mvsa(
     )
 
     if out_path is not None:
+        # Atomisch schrijven: bestaande ``.vsa.mvsa`` (met template:) blijft
+        # staan tot de nieuwe inhoud klaar is — nodig voor T1-disambiguatie
+        # bij een volgende products-run.
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(text, encoding="utf-8", newline="\n")
+        tmp = out_path.with_name(out_path.name + ".tmp")
+        try:
+            tmp.write_text(text, encoding="utf-8", newline="\n")
+            tmp.replace(out_path)
+        finally:
+            if tmp.is_file():
+                tmp.unlink(missing_ok=True)
 
     return VsaMvsaResult(
         text=text,
