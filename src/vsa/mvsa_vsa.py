@@ -5,6 +5,7 @@ Default: stem ``S`` → sibling ``{bron}.mvsa.vsa``. Elke maat = één strofe.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -143,27 +144,41 @@ def _normalize_elm_token(elm: str) -> list[str]:
     return [elm]
 
 
-def _meaningful_elms(elms: list[str]) -> list[str]:
-    """Duur-ELMs voor VSA-tekst; ``~`` (default) weglaten."""
+def _normalized_elms(elms: list[str]) -> list[str]:
+    """Normaliseer ELM-tokens (o.a. ``-.`` → ``.``); behoud ``~``."""
     out: list[str] = []
     for raw in elms:
         for e in _normalize_elm_token(raw):
-            if e and e != "~":
+            if e:
                 out.append(e)
     return out
+
+
+def _meaningful_elms(elms: list[str]) -> list[str]:
+    """Duur-ELMs zonder default ``~`` (één toon / kale tekst)."""
+    return [e for e in _normalized_elms(elms) if e != "~"]
 
 
 def _format_lyric_with_elms(
     syl: str, elms: list[str], *, melisma: bool
 ) -> str:
-    """Lettergreep + duurmarkering; bij melisma ELMs met ``&`` (E4)."""
+    """Lettergreep + duurmarkering; bij melisma ELMs met ``&`` (E4).
+
+    Eenstemmig: ``~`` weglaten. Melisma: ``~`` behouden wanneer er ook
+    niet-default duuren zijn (anders mismatch hoogte/lengte, bijv.
+    ``_&~`` → ``hoor_&~``). Uitsluitend-``~``-melisma → geen duurtekst
+    (zoals ``ver~&~`` → ``ver`` bij ``{/&/ver}``).
+    """
     text = (syl or "").strip()
+    if melisma:
+        chain = _normalized_elms(elms)
+        if not chain or all(e == "~" for e in chain):
+            return text
+        body = chain[0] + "".join(f"&{e}" for e in chain[1:])
+        return f"{text}{body}"
     cleaned = _meaningful_elms(elms)
     if not cleaned:
         return text
-    if melisma:
-        body = cleaned[0] + "".join(f"&{e}" for e in cleaned[1:])
-        return f"{text}{body}"
     # Eén toon: eerste betekenisvolle ELM (meestal ``_`` / ``.`` / ``-``).
     return f"{text}{cleaned[0]}"
 
@@ -172,6 +187,23 @@ def _scope(ehm_chain: str, text: str) -> str:
     if not text:
         return f"{{{ehm_chain}}}"
     return f"{{{ehm_chain}{text}}}"
+
+
+def _lyric_has_duration_mark(text: str) -> bool:
+    """True als de lyric-tekst een VSA-duurmarker bevat (``_``/``.``/``-``/``~``)."""
+    if not text:
+        return False
+    # Duur zit achter de lettergreep; leesteken mag volgen (``Heer,_``).
+    for i, ch in enumerate(text):
+        if ch in "_~.":
+            return True
+        if ch == "-" and i > 0:
+            # Soft hyphen in lettergreep ≠ duur-``-``; duur-``-`` komt na letters.
+            # Echte duur-ELM ``-`` / ``-.`` staat typisch na de syllabe-kern.
+            rest = text[i:]
+            if rest == "-" or rest.startswith("-.") or rest.startswith("-&"):
+                return True
+    return False
 
 
 @dataclass
@@ -368,12 +400,32 @@ def _emit_phrase(
             intervals=intervals,
             prev_degree=degree,
         )
-        # Zelfde toon zonder melisma → kale tekst (zoals ``Uw`` na ``en``).
+        # Zelfde toon zonder melisma → kale tekst (geen ``{-…}``, E4).
+        # Wel scope als er een duur-ELM op de lettergreep staat (``{hoor_}``),
+        # anders lekt ``_``/``.`` in zoektekst als kale ``hoor_``.
         if chain in ("-", "~") and len(group) == 1:
-            piece = head.text
+            if _lyric_has_duration_mark(head.text):
+                piece = _scope("", head.text)
+            else:
+                piece = head.text
         else:
             piece = _scope(chain, head.text)
         if head.continues_word and tokens:
+            # Soft lettergreepstreepje behouden (MVSA ``ge-bed`` → ``ge-bed``).
+            # Geen brugstreepje vóór/na scopes (syllabificatie.md:
+            # ``ver{/hoor}``, niet ``ver-{/hoor}``).
+            if not head.hard_link:
+                prev = tokens[-1]
+                next_is_scope = piece.startswith("{")
+                prev_is_scope = prev.endswith("}")
+                if (
+                    prev
+                    and prev not in (" ",)
+                    and not prev.endswith("-")
+                    and not next_is_scope
+                    and not prev_is_scope
+                ):
+                    tokens.append("-")
             tokens.append(piece)
         else:
             if tokens:
@@ -431,6 +483,41 @@ def _copy_useful_frontmatter(src: dict[str, Any]) -> dict[str, Any]:
         if val is None or val == "" or val == {} or val == []:
             continue
         out[key] = val
+    return out
+
+
+_SOORT_NAME_PREFIXES = (
+    "kondak",
+    "tropaar",
+    "stichier",
+    "vers",
+    "prokimen",
+    "derde-antifoon",
+    "eerste-antifoon",
+    "tweede-antifoon",
+)
+
+
+def _soort_toon_from_source_name(source_name: str) -> dict[str, Any]:
+    """Leid ``soort`` / ``toon`` af uit bestandsnaam (catalogus-conventie).
+
+    Voorbeeld: ``stichier-heer-ik-roep-toon-1-groningen.mvsa`` →
+    ``soort: stichier``, ``toon: 1``.
+    """
+    stem = Path(source_name).name
+    for suf in (".mvsa", ".vsa", ".mscz", ".mxl"):
+        if stem.lower().endswith(suf):
+            stem = stem[: -len(suf)]
+            break
+    lower = stem.lower()
+    out: dict[str, Any] = {}
+    for prefix in _SOORT_NAME_PREFIXES:
+        if lower == prefix or lower.startswith(prefix + "-"):
+            out["soort"] = prefix
+            break
+    m = re.search(r"(?:^|-)toon-([1-8])(?:-|$)", lower)
+    if m:
+        out["toon"] = int(m.group(1))
     return out
 
 
@@ -566,6 +653,9 @@ def convert_mvsa_to_vsa_text(
         comment_title = _title_from_comment_header(text)
         if comment_title:
             fm["titel"] = comment_title
+    # Ontbrekende soort/toon: uit bestandsnaam (E5), bron-YAML wint.
+    for key, val in _soort_toon_from_source_name(source_name).items():
+        fm.setdefault(key, val)
     if last_ctx is not None:
         fm.setdefault("do", last_ctx.do)
         fm.setdefault("mode", last_ctx.mode)

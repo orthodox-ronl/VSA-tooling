@@ -402,6 +402,7 @@ def _omit_implicit_lone_tildes(content: str) -> str:
     drop: list[tuple[int, int]] = []
     i = 0
     while i < n:
+        progress_at = i
         bar = _bar_starts_at(s, i)
         if bar:
             i += len(bar)
@@ -472,6 +473,10 @@ def _omit_implicit_lone_tildes(content: str) -> str:
                 continue
             break
 
+        if i == progress_at:
+            # Onverwacht teken (bijv. wees-``&``): voorkom oneindige lus.
+            i += 1
+
     if not drop:
         return content
     parts: list[str] = []
@@ -489,6 +494,7 @@ def _bare_elm_dash_indices(s: str) -> list[int]:
     i = 0
     n = len(s)
     while i < n:
+        progress_at = i
         bar = _bar_starts_at(s, i)
         if bar:
             i += len(bar)
@@ -553,6 +559,9 @@ def _bare_elm_dash_indices(s: str) -> list[int]:
                 i += 1
                 continue
             break
+
+        if i == progress_at:
+            i += 1
     return found
 
 
@@ -580,9 +589,27 @@ def _read_elms_dash_indices(
         if elm == "-":
             dash_at.append(i)
         i += len(elm)
-        if i < n and s[i] == "&":
-            i += 1
-            continue
+        # Spaties rond ``&`` (zelfde als ``_read_elms``).
+        j = i
+        while j < n and s[j].isspace():
+            j += 1
+        if j < n and s[j] == "&":
+            k = j + 1
+            while k < n and s[k].isspace():
+                k += 1
+            next_elm = None
+            for e in _ELMS:
+                if not s.startswith(e, k):
+                    continue
+                if e == "-" and k + 1 < n and _is_syllable_char(s[k + 1]):
+                    continue
+                if e == "-" and not allow_bare_dash:
+                    continue
+                next_elm = e
+                break
+            if next_elm is not None:
+                i = k
+                continue
         break
     return dash_at, i
 

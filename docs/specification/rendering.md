@@ -685,32 +685,29 @@ De [renderer](@) mag:
 
 ## Woordverbindingen en wrapping
 
-Een expliciete woordverbindingsmarkering verhindert automatische wrapping tussen gekoppelde render-runs.
+Soft `-` hoort **niet** tussen platte tekst en `{…}`, en **niet** tussen
+twee opeenvolgende scopes — de accolade is al een lettergreep-/woordgrens
+(zie [syllabificatie](../formats/syllabificatie.md)).
 
-Voorbeeld:
+Tussen twee opeenvolgende scopes **mag** de SVG-renderer wrappen (afbreken):
+dat is een lettergreepgrens.
+
+Voorbeeld (bron zonder brugstreepje):
 
 ```text
-[:] Heer, {\ont}-{/ferm} U [:]
+[:] Heer, {\ont}{/ferm} U [:]
 ```
 
-Hier vormt:
+Automatische wrapping is toegestaan:
 
-```text
-{\ont}-{/ferm}
-```
-
-één visuele woordgroep.
-
-Automatische wrapping is daarom niet toegestaan:
-
-* tussen `{\ont}` en `-`;
-* tussen `-` en `{/ferm}`.
-
-Wel toegestaan:
-
+* tussen `{\ont}` en `{/ferm}` (scopegrens = lettergreepgrens);
 * na `Heer,`;
 * vóór `{\ont}`;
 * na `{/ferm}`.
+
+Een orthografisch koppelteken schrijf je als hard `=` (niet als soft `-`
+naast een scope). Non-breaking groepen (`[= … =]`) blijven beschikbaar
+wanneer een stuk tekst visueel op één regel moet blijven.
 
 ## Expliciete wrapcontrole
 
@@ -855,43 +852,26 @@ Non-breaking groups zijn bedoeld voor:
 * korte vaste tekstgroepen;
 * samengestelde woorden;
 * woordgroepen die visueel bij elkaar moeten blijven;
-* constructies met zichtbare woordverbindingen zoals `{\ont}-{/ferm}`.
+* korte vaste groepen die je met `[= … =]` markeert.
 
 ---
 
-## Zichtbare woordverbindingen
+## Scopes en wrapping
 
-Een zichtbare woordverbindingsmarkering zoals `-` legt standaard een non-breaking relatie tussen omliggende render-runs.
+Opeenvolgende scopes (`{\ont}{/ferm}`) zijn aparte lettergrepen. De
+renderer mag daar wrappen. Zet geen soft `-` tussen die scopes.
 
-Voorbeeld:
+Wil je een stuk tekst **niet** laten wrappen, gebruik dan een
+non-breaking group:
 
 ```text id="r3x4y4"
-[:] Heer, {\ont}-{/ferm} U [:]
+[:] [= Heer, {\ont}{/ferm} U =] [:]
 ```
 
-Hier vormt:
-
-```text id="scy4w0"
-{\ont}-{/ferm}
-```
-
-één visuele woordgroep.
-
-Automatische wrapping is daarom niet toegestaan:
-
-* tussen `{\ont}` en `-`;
-* tussen `-` en `{/ferm}`.
-
-Wel toegestaan:
-
-* na `Heer,`;
-* vóór `{\ont}`;
-* na `{/ferm}`.
-
-Als een gebruiker toch expliciet na een zichtbaar koppelteken wil afbreken, kan dat met een forced line break:
+Expliciet afbreken blijft mogelijk met een forced line break:
 
 ```text id="u9okbh"
-[:] Heer, {\ont}-[/]{/ferm} U [:]
+[:] Heer, {\ont}[/]{/ferm} U [:]
 ```
 
 De forced line break marker wordt niet zichtbaar gerenderd.

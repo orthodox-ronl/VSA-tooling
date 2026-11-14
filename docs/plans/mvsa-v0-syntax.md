@@ -13,6 +13,9 @@ experimenten en eerdere beslissingen. De **draft-specificatie** staat in
 [`docs/specification-mvsa/`](../specification-mvsa/README.md). Bij conflict over
 mvsa-regels wint die draft. Wat uit de oude polyfonie-schets nog open is, staat
 in §10 en in [specification-mvsa/open-points.md](../specification-mvsa/open-points.md).
+Actueel: spaties rond `&` in melisma zijn toegestaan voor
+[canonieke `&`-kolommen](../specification-mvsa/syntax.md#canonieke-kolomuitlijning-lsatb)
+(semantisch neutraal); compacte voorbeelden hieronder (`ziel~&~`) blijven geldig.
 
 Templates (laag 2/3) komen alleen aan bod waar de syntax daarop moet anticiperen
 (`~` voor de [reciteertoon](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)).

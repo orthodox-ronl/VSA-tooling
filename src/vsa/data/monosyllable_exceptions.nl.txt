@@ -1,0 +1,4 @@
+# Bewust eenlettergrepige woorden (zing-deling), ondanks Pyphen nl_NL.
+# Norm: docs/formats/syllabificatie.md
+# Vorm: één woord per regel, kleine letters; # = commentaar.
+# Voeg hier alleen toe als het woord in de bron zonder soft '-' mag blijven.

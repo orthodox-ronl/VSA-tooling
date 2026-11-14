@@ -87,6 +87,41 @@ def test_parse_l_hyphen_after_recite_is_word_link():
     assert cont[2].elms == ["_", "-", "-", "_"]
 
 
+def test_parse_l_leading_hyphen_inside_recite_continues_word():
+    """``(-lijkt …)`` na cadens: continues_word op de recite (T5/R8 brug)."""
+    pos = parse_l_positions(
+        "(Gij werd ver)-heer~&~ (-lijkt op de berg, o Chris)-tus God_,"
+    )
+    assert pos[0].syllables == ["Gij", "werd", "ver"]
+    assert pos[0].continues_word is False
+    assert pos[1].syllables == ["heer"]
+    assert pos[1].continues_word is True
+    assert pos[2].syllables[0] == "lijkt"
+    assert pos[2].continues_word is True
+    assert pos[2].continues_word_hard is False
+    assert pos[3].syllables == ["tus"]
+    assert pos[3].continues_word is True
+
+
+def test_export_hyphen_into_recite_partituur_bridge():
+    """Cadens → recite ``(-lijkt)``: middle/end syllabic op partituur (R8 brug)."""
+    text = """\
+@do F4
+@mode major
+L: (Gij werd ver)-heer_ (-lijkt op) |
+S: -             a4   -             |
+A: -             f4   -             |
+T: -             -    -             |
+B: -             f3   -             |
+"""
+    for layout in ("playback", "partituur"):
+        lyrics = _part_lyrics(export_mvsa_to_musicxml(text, layout=layout), "P1")
+        assert ("begin", "ver") in lyrics, layout
+        assert ("middle", "heer") in lyrics, layout
+        assert ("end", "lijkt") in lyrics, layout
+        assert ("single", "lijkt") not in lyrics, layout
+
+
 def test_export_hyphen_after_recite_opens_begin():
     """Woordstreepje na ``)`` → laatste recite-greep ``begin``, vervolg ``end``.
 
@@ -107,8 +142,32 @@ B: -             f3  -   |
         assert ("begin", "ge") in lyrics, layout
         assert ("end", "ko") in lyrics or ("middle", "ko") in lyrics, layout
         assert ("end", "men") in lyrics, layout
-        # Geen single op de greep die het woordstreepje opent.
-        assert ("single", "ge") not in lyrics, layout
+
+
+def test_partituur_recite_hides_internal_hyphens_keeps_bridge():
+    """R8: binnen recite geen hyphen-glyphs; brug na ``)`` blijft."""
+    text = """\
+@do F4
+@mode major
+L: (wan-neer ge)-ko_-men |
+S: -             a4  -   |
+A: -             f4  -   |
+T: -             -   -   |
+B: -             f3  -   |
+"""
+    playback = _part_lyrics(
+        export_mvsa_to_musicxml(text, layout="playback"), "P1"
+    )
+    partituur = _part_lyrics(
+        export_mvsa_to_musicxml(text, layout="partituur"), "P1"
+    )
+    assert ("begin", "wan") in playback
+    assert ("middle", "neer") in playback or ("end", "neer") in playback
+    assert ("single", "wan") in partituur
+    assert ("single", "neer") in partituur
+    assert ("begin", "ge") in partituur
+    assert ("end", "ko") in partituur or ("middle", "ko") in partituur
+    assert ("single", "ge") not in partituur
 
 
 def test_parse_l_recite_optional_elm():

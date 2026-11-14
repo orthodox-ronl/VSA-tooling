@@ -33,7 +33,7 @@ from .mvsa_validate import is_lyrics_stem
 from .mvsa_validate import MvsaValidationError
 from .mvsa_validate import resolve_stem_map_key
 from .mvsa_validate import split_directive_assignments
-from .syllabify import display_lyric_text
+from .syllabify import display_lyric_text, strip_soft_hyphens
 from .musicxml_renderer import _visible_accidental
 from .pitch_resolver import (
     PitchResolver,
@@ -773,6 +773,7 @@ def _add_lyric_layer_to_notes(
     *,
     opens_hyphen: bool,
     number: int,
+    layout: MvsaLayout = "playback",
 ) -> None:
     """Voeg één parallelle lyrics-laag toe aan bestaande noten (zelfde positie)."""
     if not notes:
@@ -786,11 +787,17 @@ def _add_lyric_layer_to_notes(
             syl_text = syllables[i]
             if not syl_text:
                 continue
+            text = (
+                strip_soft_hyphens(syl_text) if layout == "partituur" else syl_text
+            )
             note.lyrics.append(
                 LyricSyllable(
-                    text=syl_text,
+                    text=text,
                     syllabic=_syllabic_for_recite_index(
-                        lpos, i, opens_hyphen=opens_hyphen
+                        lpos,
+                        i,
+                        opens_hyphen=opens_hyphen,
+                        layout=layout,
                     ),
                     number=number,
                 )
@@ -1059,19 +1066,32 @@ def _syllabic_for_recite_index(
     index: int,
     *,
     opens_hyphen: bool,
+    layout: MvsaLayout = "playback",
 ) -> str:
     """MusicXML syllabic for one lettergreep inside a recite position.
 
     ``opens_hyphen`` is True when the *next L-positie* continues the word
     (woordstreepje na ``)``, bv. ``(… ge)-ko``).
+
+    Partituur (R8): geen zichtbare streepjes *binnen* de recite; wel de
+    brug naar de volgende L-positie (en vanuit een vorige).
     """
     n = len(lpos.syllables) if lpos.syllables else 0
-    opens = (index + 1 < n and index < len(lpos.links) and lpos.links[index]) or (
-        index == n - 1 and opens_hyphen
-    )
-    continues = (index == 0 and lpos.continues_word) or (
+    opens_within = index + 1 < n and index < len(lpos.links) and lpos.links[index]
+    opens_to_next_pos = index == n - 1 and opens_hyphen
+    continues_within = (
         index > 0 and index - 1 < len(lpos.links) and lpos.links[index - 1]
     )
+    continues_from_prev_pos = index == 0 and lpos.continues_word
+
+    if layout == "partituur":
+        # Alleen bruggen over L-grenzen; interne zing-deling zonder hyphen-glyph.
+        opens = opens_to_next_pos
+        continues = continues_from_prev_pos
+    else:
+        opens = opens_within or opens_to_next_pos
+        continues = continues_within or continues_from_prev_pos
+
     if continues and opens:
         return "middle"
     if continues:
@@ -1195,11 +1215,19 @@ def _position_to_notes(
         for i, syl_text in enumerate(syllables):
             lyrics: list[LyricSyllable] = []
             if syl_text:
+                text = (
+                    strip_soft_hyphens(syl_text)
+                    if layout == "partituur"
+                    else syl_text
+                )
                 lyrics.append(
                     LyricSyllable(
-                        text=syl_text,
+                        text=text,
                         syllabic=_syllabic_for_recite_index(
-                            lpos, i, opens_hyphen=opens_hyphen
+                            lpos,
+                            i,
+                            opens_hyphen=opens_hyphen,
+                            layout=layout,
                         ),
                         number=lyric_number,
                     )
@@ -1214,7 +1242,11 @@ def _position_to_notes(
             )
         for num, plpos in extra_lyric_layers:
             _add_lyric_layer_to_notes(
-                out_notes, plpos, opens_hyphen=opens_hyphen, number=num
+                out_notes,
+                plpos,
+                opens_hyphen=opens_hyphen,
+                number=num,
+                layout=layout,
             )
         if layout == "partituur" and n >= RECITE_PRINT_COLLAPSE_MIN:
             return _collapse_recite_for_partituur(out_notes, edge_dur=base_dur)
@@ -1281,7 +1313,11 @@ def _position_to_notes(
         )
     for num, plpos in extra_lyric_layers:
         _add_lyric_layer_to_notes(
-            notes, plpos, opens_hyphen=opens_hyphen, number=num
+            notes,
+            plpos,
+            opens_hyphen=opens_hyphen,
+            number=num,
+            layout=layout,
         )
     # Same-pitch melisma (S13/R7 / M5a). Partituur: I1 ongestipte pack + ties.
     # Playback/Coria: gestipte ELM's behouden; same-pitch → één noot zolang

@@ -47,8 +47,9 @@ def export_bron_to_score_ir(
     musescore: Path | None = None,
     section_id: str | None = None,
     bibliotheek_id: str | None = None,
+    allow_noncanonical: bool = False,
 ) -> None:
-    """Score-IR JSON uit ``.vsa`` / ``.mvsa`` / ``.mscz``."""
+    """Score-IR JSON uit ``.vsa`` / ``.mvsa`` / ``.mscz`` (C4 in write-pad)."""
     from .mvsa_import import MvsaImportError, import_score_path
     from .mvsa_musicxml import MvsaExportError
     from .score_ir import export_mvsa_path_to_score_ir
@@ -63,6 +64,7 @@ def export_bron_to_score_ir(
             out,
             section_id=section_id,
             bibliotheek_id=bibliotheek_id,
+            allow_noncanonical=allow_noncanonical,
         )
         return
 
@@ -77,7 +79,8 @@ def export_bron_to_score_ir(
             fd2, mxl_name = tempfile.mkstemp(suffix=".mxl", prefix="score-ir-vsa-")
             os.close(fd2)
             tmp_mxl = Path(mxl_name)
-            export_vsa_to_musicxml(bron, tmp_mxl, syllabify=True)
+            # Deling staat in de bron ([syllabificatie]); geen stille Pyphen.
+            export_vsa_to_musicxml(bron, tmp_mxl, syllabify=False)
             import_score_path(tmp_mxl, tmp_mvsa, musescore=musescore)
         else:
             raise StreetProductExportError(
@@ -90,6 +93,7 @@ def export_bron_to_score_ir(
             section_id=section_id,
             bibliotheek_id=bibliotheek_id,
             allow_import_sync_errors=True,
+            allow_noncanonical=allow_noncanonical,
         )
     except (MvsaImportError, MvsaExportError, MusicXMLExportError) as exc:
         raise StreetProductExportError(str(exc)) from exc
@@ -124,7 +128,7 @@ def export_bron_to_mscz_product(
         os.close(fd)
         tmp_mxl = Path(name)
         try:
-            export_vsa_to_musicxml(bron, tmp_mxl, syllabify=True)
+            export_vsa_to_musicxml(bron, tmp_mxl, syllabify=False)
             convert_with_musescore(tmp_mxl, out, musescore=musescore)
             written, _ = normalize_mscz_path(out, out, layout="partituur")
             return written
@@ -177,8 +181,10 @@ def export_bron_to_mxl(
     out: Path,
     *,
     musescore: Path | None = None,
+    allow_noncanonical: bool = False,
 ) -> Path:
-    """Coria/playback-``.mxl`` uit notatiebron."""
+    """Coria/playback-``.mxl`` uit notatiebron (daarna C4-steekproef)."""
+    from .canonicity_gate import require_canonical_mxl_target
     from .musicxml_playback_normalize import export_mscz_to_playback_mxl
     from .mvsa_musicxml import export_mvsa_path
     from .vsa_musicxml_export import export_vsa_to_musicxml
@@ -188,13 +194,16 @@ def export_bron_to_mxl(
     suffix = bron.suffix.lower()
     if suffix == ".mvsa":
         export_mvsa_path(bron, out, layout="playback")
-        return out
-    if suffix == ".mscz":
+    elif suffix == ".mscz":
         export_mscz_to_playback_mxl(bron, out, musescore=musescore)
-        return out
-    if suffix == ".vsa":
-        export_vsa_to_musicxml(bron, out, syllabify=True)
-        return out
-    raise StreetProductExportError(
-        f"mxl-product verwacht .vsa/.mvsa/.mscz, kreeg {bron.name}"
+    elif suffix == ".vsa":
+        # Zing-deling in de bron; zie docs/formats/syllabificatie.md.
+        export_vsa_to_musicxml(bron, out, syllabify=False)
+    else:
+        raise StreetProductExportError(
+            f"mxl-product verwacht .vsa/.mvsa/.mscz, kreeg {bron.name}"
+        )
+    require_canonical_mxl_target(
+        out, bron=bron, allow_noncanonical=allow_noncanonical
     )
+    return out

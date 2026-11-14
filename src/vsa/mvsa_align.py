@@ -16,6 +16,7 @@ from .mvsa_parse import (
     _read_elms,
     escape_lyric_periods_for_mvsa,
     parse_l_positions,
+    split_voice_measure_tokens,
 )
 from .mvsa_validate import is_lyrics_stem, parse_regelidentifier, _split_bars
 
@@ -154,7 +155,13 @@ def _format_elms(elms: list[str]) -> str:
 
 
 def _voice_tokens(measure: str) -> list[str]:
-    return [t for t in measure.split() if t]
+    """Stem tokens; compact ``&``-padding so slot-align starts clean."""
+    out: list[str] = []
+    for raw in split_voice_measure_tokens(measure):
+        compact = "&".join(p.strip() for p in raw.split("&"))
+        if compact:
+            out.append(compact)
+    return out
 
 
 def _place_at_anchors(tokens: list[str], anchors: list[int]) -> str:
@@ -168,6 +175,55 @@ def _place_at_anchors(tokens: list[str], anchors: list[int]) -> str:
     return "".join(buf).rstrip()
 
 
+def _pad_ampersand_slots(parts: list[str], widths: list[int]) -> str:
+    """Left-align each ``&``-slot in ``widths`` so ``&`` columns line up."""
+    if len(parts) <= 1:
+        return parts[0] if parts else ""
+    out: list[str] = []
+    for i, part in enumerate(parts):
+        if i < len(parts) - 1:
+            out.append(part.ljust(widths[i]))
+        else:
+            out.append(part)
+    return "&".join(out)
+
+
+def _align_ampersands_in_position(
+    l_tok: str, voice_toks: list[str]
+) -> tuple[str, list[str]]:
+    """Pad L and stem tokens so each ``&`` shares a column (when L has ``&``).
+
+    Leading woordstreepje ``-`` op L (``-neer_&_``) hoort bij de lijm tussen
+    posities, niet bij de slotbreedte vóór ``&`` — anders schuift de stem-``&``
+    één kolom te ver t.o.v. de L-``&`` na het terugplaatsen van die ``-``.
+    """
+    if "&" not in l_tok:
+        return l_tok, voice_toks
+    prefix = ""
+    core = l_tok
+    if core.startswith("-"):
+        prefix = "-"
+        core = core[1:]
+    if "&" not in core:
+        return l_tok, voice_toks
+    l_parts = core.split("&")
+    v_parts_rows = [vt.split("&") for vt in voice_toks]
+    n_slots = len(l_parts)
+    for row in v_parts_rows:
+        if len(row) != n_slots:
+            # Slot-telling verschilt: geen &-pad (validate vangt SYNC).
+            return l_tok, voice_toks
+    widths = [len(l_parts[i]) for i in range(n_slots)]
+    for row in v_parts_rows:
+        for i, part in enumerate(row):
+            if len(part) > widths[i]:
+                widths[i] = len(part)
+    # Laatste slot: geen trailing pad nodig voor &-align.
+    new_l = prefix + _pad_ampersand_slots(l_parts, widths)
+    new_v = [_pad_ampersand_slots(row, widths) for row in v_parts_rows]
+    return new_l, new_v
+
+
 def _build_aligned_measure(
     l_tokens: list[str], voice_rows: list[list[str]]
 ) -> tuple[str, list[str]]:
@@ -177,6 +233,9 @@ def _build_aligned_measure(
     stem-token needs an extra column so voice tokens stay space-separated).
     Extra width for long stem-tokens is absorbed in gaps, never by turning
     the joining '-' into an ELM (no ``le-  lu``).
+
+    When an L-token contains ``&``, each ``&`` is aligned under the matching
+    ``&`` on S/A/T/B (padding slots with spaces; see syntax.md).
     """
     n = len(l_tokens)
     if n == 0:
@@ -185,9 +244,19 @@ def _build_aligned_measure(
         if len(row) != n:
             raise ValueError(f"positietelling L={n} vs stem={len(row)}")
 
+    # Eerst &-slots binnen posities uitlijnen (kan L en stemtokens verbreden).
+    padded_l: list[str] = []
+    padded_voices: list[list[str]] = [list(row) for row in voice_rows]
+    for i in range(n):
+        v_at_i = [row[i] for row in padded_voices]
+        new_l, new_v = _align_ampersands_in_position(l_tokens[i], v_at_i)
+        padded_l.append(new_l)
+        for ri, vt in enumerate(new_v):
+            padded_voices[ri][i] = vt
+
     contents: list[str] = []
     glues: list[str] = []
-    for i, raw in enumerate(l_tokens):
+    for i, raw in enumerate(padded_l):
         if i == 0:
             glues.append("")
             contents.append(raw)
@@ -198,8 +267,10 @@ def _build_aligned_measure(
             glues.append(" ")
             contents.append(raw)
 
-    if voice_rows:
-        voice_w = [max(len(row[i]) for row in voice_rows) for i in range(n)]
+    if padded_voices:
+        voice_w = [
+            max(len(row[i]) for row in padded_voices) for i in range(n)
+        ]
     else:
         voice_w = [len(contents[i]) for i in range(n)]
 
@@ -247,7 +318,7 @@ def _build_aligned_measure(
         col += len(contents[i])
 
     l_out = "".join(parts).rstrip()
-    voice_out = [_place_at_anchors(row, out_anchors) for row in voice_rows]
+    voice_out = [_place_at_anchors(row, out_anchors) for row in padded_voices]
     return l_out, voice_out
 
 

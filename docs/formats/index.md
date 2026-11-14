@@ -4,9 +4,11 @@ Overzicht van de **bronformaten** die de toolchain leest of schrijft, en de
 **commando’s / `.cmd`-scripts** per bron. Normatieve details staan in de
 specificaties; dit is de navigatiehub.
 
-**Contracten (checklists, layoutprofielen, Score-IR/OSMD):** start bij de
-[contract-index](contract-index.md). Herkomst van `products`-siblings:
-[products-meta](products-meta.md). Straat-CLI’s / producten (plan):
+**Contracten:** start bij de
+[contract-index](contract-index.md) (§Contract-skelet, §C*, §Dekkingsmatrix,
+§Nieuwe regel). Elke formatpagina volgt dezelfde H2-volgorde. Herkomst:
+[products-meta](products-meta.md). CLI vs C3/C4:
+[cli-canoniciteit-audit](cli-canoniciteit-audit.md). Straat-CLI’s (plan):
 [straat-CLIs](../plans/straat-clis.md).
 
 ## Conversiematrix (kort)
@@ -27,14 +29,17 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 - **Zoektekst / lyrics:** YAML-`zoektekst` in canonieke `.vsa`/`.mvsa`
   ([zoektekst](zoektekst.md)); sibling-product `*.lyrics.txt` via
   `{straat} text` / `{straat} products` (meta-key `lyrics`).
+- **Syllabificatie (zing-deling):** soft `-` in de bron;
+  [syllabificatie](syllabificatie.md) · schrijfhulp
+  [`vsa syllabify`](../reference/cli/syllabify.md).
 - **PDF:** pagina-afdruk is `index.md.pdf` (`markdown pdf`).
   Partituur-PDF’s (`.vsa.pdf` / `.mvsa.pdf` / `.mscz.pdf`) maak je los
   met `vsa pdf` / `mvsa pdf` / `mscz pdf`; ze zijn geen standaardproduct
   ([contract-index](contract-index.md#universele-productcatalogus)).
 - Volledige matrix / keuzes: [mvsa-conversies](../plans/mvsa-conversions.md).
 - **Score → `.mvsa`** (`.mxl` / `.mscz`): **werkbank-bewerkvorm** (niet
-  catalogus-klaar); soft-wrap, holds, recite; default `--pitch ag-vsa` (a–g
-  per systeem + EHM + eindankers) — zie
+  catalogus-klaar); soft-wrap, holds, recite; default `--pitch ag-vsa` +
+  `--octave-style @oct` (relatieve a–g per systeem + EHM + eindankers) — zie
   [`mxl mvsa`](../reference/cli/mxl.md) / [`mscz mvsa`](../reference/cli/mscz.md).
 - Normaalvorm-checklists MXL / MSCZ / PDF: [canonieke checklists](canonical-checklists.md)
   (MXL = vier parts; MSCZ = twee balken SA/TB zonder stem-labels).
@@ -42,17 +47,21 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 
 ## Bestandsformaten
 
-| Extensie                       | Rol                                 | Spec / profiel                                                                          | CLI (bron = command)                                                                     |
-| ------------------------------ | ----------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [`.vsa`](vsa.md)               | Eenstemmige VSA-bron                | [Specificatie VSA](../specification/README.md)                                          | [`vsa`](../reference/cli/index.md)                                                       |
-| [`.mvsa`](mvsa.md)             | Meerstemmige tekstbron (draft)      | [specification-mvsa](../specification-mvsa/README.md)                                   | [`mvsa`](../reference/cli/mvsa.md)                                                       |
-| [Score-IR](score-ir.md)        | Scherm-JSON uit `.mvsa` (draft)     | [partituur-ir](../plans/partituur-ir.md)                                                | [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir)                                |
-| [vsa-SVG](vsa-svg.md)          | Muziek-only SVG uit `.vsa` (scherm) | Native VSA-renderer; sibling ``.vsa.svg``                                               | [`vsa svg`](../reference/cli/svg.md)                                                     |
-| [mvsa-SVG](mvsa-svg.md)        | Muziek-only partituur-SVG (koormap) | MuseScore-brug; layout ``muziek``; Style o.a. ``--compact``                             | [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg) / [`mscz svg`](../reference/cli/mscz.md) |
-| [`.mxl` / `.musicxml`](mxl.md) | MusicXML (Coria / bewerking)        | [checklists](canonical-checklists.md) · [MusicXML-export](../guides/musicxml-export.md) | [`mxl`](../reference/cli/mxl.md)                                                         |
-| [`.mscz`](mscz.md)             | MuseScore-partituur                 | [checklists](canonical-checklists.md) · templates                                       | [`mscz`](../reference/cli/mscz.md)                                                       |
-| [`.mp3` / audio](audio.md)     | Preview-luisteren (afgeleide)       | dunne checklist; MuseScore                                                              | [`vsa audio`](../reference/cli/audio.md)                                                 |
-| [`.midi` / `.mid`](midi.md)    | Los MIDI (niet gepland)             | superseded door audio                                                                   | —                                                                                        |
+| Extensie                          | Rol                                 | Spec / profiel                                                                          | CLI (bron = command)                                                                     |
+| --------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [`.vsa`](vsa.md)                  | Eenstemmige VSA-bron                | [Specificatie VSA](../specification/README.md)                                          | [`vsa`](../reference/cli/index.md)                                                       |
+| [`.mvsa`](mvsa.md)                | Meerstemmige tekstbron (draft)      | [specification-mvsa](../specification-mvsa/README.md)                                   | [`mvsa`](../reference/cli/mvsa.md)                                                       |
+| [Score-IR](score-ir.md)           | Scherm-JSON (draft)                 | [partituur-ir](../plans/partituur-ir.md)                                                | `{straat} score-ir`                                                                      |
+| [from-ir](from-ir.md)             | MusicXML uit IR → OSMD              | S8/S13 emit                                                                             | `{straat} score-ir --musicxml`                                                           |
+| [vsa-SVG](vsa-svg.md)             | Muziek-only SVG uit `.vsa` (scherm) | Native VSA-renderer; sibling ``.vsa.svg``                                               | [`vsa svg`](../reference/cli/svg.md)                                                     |
+| [mvsa-SVG](mvsa-svg.md)           | Muziek-only partituur-SVG (koormap) | MuseScore-brug; layout ``muziek``; Style o.a. ``--compact``                             | [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg) / [`mscz svg`](../reference/cli/mscz.md) |
+| [translit-SVG](translit-svg.md)   | Transliteratie-SVG                  | tweede schriftlaag                                                                      | `--translit` / consumer                                                                  |
+| [`.mxl` / `.musicxml`](mxl.md)    | MusicXML (Coria / bewerking)        | [checklists](canonical-checklists.md) · [MusicXML-export](../guides/musicxml-export.md) | [`mxl`](../reference/cli/mxl.md)                                                         |
+| [`.mscz`](mscz.md)                | MuseScore-partituur                 | [checklists](canonical-checklists.md) · templates                                       | [`mscz`](../reference/cli/mscz.md)                                                       |
+| [lyrics.txt](lyrics.txt.md)       | Platte gezongen tekst               | strip soft `-`                                                                          | `{straat} text`                                                                          |
+| [`.mp3` / audio](audio.md)        | Preview-luisteren (afgeleide)       | checklist A\*                                                                           | [`vsa audio`](../reference/cli/audio.md)                                                 |
+| [products-meta](products-meta.md) | Herkomst-sidecar                    | schema 2                                                                                | `{straat} products`                                                                      |
+| [`.midi` / `.mid`](midi.md)       | Los MIDI (niet gepland)             | superseded door audio                                                                   | —                                                                                        |
 
 ## Commando’s
 

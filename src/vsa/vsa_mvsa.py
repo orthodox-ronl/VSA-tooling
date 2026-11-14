@@ -19,14 +19,13 @@ from typing import Any
 from .music import Pitch
 from .mvsa_align import align_mvsa_text
 from .mvsa_normalize import (
+    format_abc_writing_oct,
     format_ehm,
     pitch_to_degree_and_chrom,
 )
 from .pitch_resolver import (
     PitchResolver,
-    _pitch_to_midi,
     degree_to_pitch,
-    pitch_in_do_octave,
 )
 from .template_instance import (
     MappedNote,
@@ -322,38 +321,6 @@ def _continues_word(prev_syl: str, cur_syl: str) -> bool:
     return prev_syl in ("begin", "middle") and cur_syl in ("middle", "end")
 
 
-def _abc_body(pitch: Pitch) -> str:
-    alter = int(pitch.alter)
-    step = pitch.step
-    if alter == -2:
-        return f"{step.lower()}bb"
-    if alter == -1:
-        return "Bb" if step == "B" else f"{step.lower()}b"
-    if alter == 1:
-        return f"{step.lower()}#"
-    if alter == 2:
-        return f"{step.lower()}##"
-    return step.lower()
-
-
-def format_abc_writing_oct(pitch: Pitch, schrijf_do: Pitch) -> str:
-    """a–g t.o.v. schrijf-do: ``f``, ``c``, ``f+``, ``Bb`` — geen ``f4``."""
-    body = _abc_body(pitch)
-    base = pitch_in_do_octave(
-        schrijf_do, pitch.step, float(pitch.alter), oct_delta=0
-    )
-    delta = (_pitch_to_midi(pitch) - _pitch_to_midi(base)) // 12
-    if delta == 0:
-        return body
-    if delta == 1:
-        return f"{body}+"
-    if delta == -1:
-        return f"{body}-"
-    if delta > 1:
-        return f"{body}+{delta}"
-    return f"{body}{delta}"
-
-
 def _escape_lyric_punct(core_with_elm: str, punct: str) -> str:
     """Zinspunt ``.`` escapen (`\\.`) zodat het geen ELM-duur wordt."""
     if not punct:
@@ -377,8 +344,26 @@ def _lyric_core_and_punct(lyric: str) -> tuple[str, str]:
 @dataclass
 class _LAtom:
     text: str
-    syllabic: str
+    syllabic: str  # laatste lettergreep (woorddoorloop ná dit atom)
     role: str
+    first_syllabic: str = ""  # eerste lettergreep (woorddoorloop in dit atom)
+
+    def __post_init__(self) -> None:
+        if not self.first_syllabic:
+            self.first_syllabic = self.syllabic
+
+
+def _prefix_recite_word_continuation(recite_txt: str) -> str:
+    """``(lijkt …)`` → ``(-lijkt …)``: soft ``-`` hoort ín de haakjes (T5).
+
+    Geen wees-``-`` vóór ``(`` (dat breekt MVSA-SYNC na align). Hard ``=``
+    idem: ``(=…)``.
+    """
+    if not recite_txt.startswith("(") or len(recite_txt) < 2:
+        return recite_txt
+    if recite_txt[1] in "-=":
+        return recite_txt
+    return f"(-{recite_txt[1:]}"
 
 
 def _melisma_pitch_slot(
@@ -446,26 +431,32 @@ def _emit_voice_ag_vsa(
 
 
 def _join_l_atoms(atoms: list[_LAtom]) -> str:
-    """Lettergreepstreepjes; recite-atom heeft al ``(…)``; woord over grens → ``)-``."""
+    """Lettergreepstreepjes; recite-atom heeft al ``(…)``.
+
+    Woord over grens recite→cadens: ``)-heer``. Woord cadens→recite (of
+    recite→recite): soft ``-`` **in** de volgende haakjes ``(-lijkt …)`` —
+    geen wees-``-`` vóór ``(`` (T5 / MVSA-SYNC).
+    """
     if not atoms:
         return ""
     parts: list[str] = []
     i = 0
+    prev_end_syl: str | None = None
     while i < len(atoms):
         if atoms[i].role == "recite":
-            # text is al "(Al-le-lu-ia)"; eventueel woord doorloop ná ')'
-            # Alleen non-recite-vervolg (``)-mach_``). Een volgend recite-atom
-            # niet met ``-(…`` plakken: dat maakt wees-``-`` vóór ``(`` en
-            # breekt MVSA-SYNC na kolomalign (T5).
             recite_txt = atoms[i].text
+            if prev_end_syl is not None and _continues_word(
+                prev_end_syl, atoms[i].first_syllabic
+            ):
+                recite_txt = _prefix_recite_word_continuation(recite_txt)
+            # Alleen non-recite-vervolg (``)-mach_``). Volgend recite krijgt
+            # desnoods ``(-…`` via prev_end_syl hierboven — niet ``)-(``.
             j = i + 1
             if (
                 j < len(atoms)
                 and atoms[j].role != "recite"
                 and _continues_word(atoms[i].syllabic, atoms[j].syllabic)
             ):
-                # Zeldzaam: syllabic op recite-stuk is 'single'; doorloop via
-                # laatste lettergreep in de haakjes — gebruik cadence-syllabic.
                 cont = [atoms[j]]
                 k = j + 1
                 while (
@@ -477,22 +468,32 @@ def _join_l_atoms(atoms: list[_LAtom]) -> str:
                 ):
                     cont.append(atoms[k])
                     k += 1
-                # "(…ver)-nie" — strip sluit-haakje, plak )-vervolg
                 if recite_txt.endswith(")"):
                     parts.append(
                         f"{recite_txt[:-1]})-{_hyphen_join_texts(cont)}"
                     )
                 else:
                     parts.append(f"{recite_txt}-{_hyphen_join_texts(cont)}")
+                prev_end_syl = cont[-1].syllabic
                 i = k
             else:
                 parts.append(recite_txt)
+                prev_end_syl = atoms[i].syllabic
                 i = j
             continue
         j = i + 1
         while j < len(atoms) and atoms[j].role != "recite":
             j += 1
-        parts.append(_hyphen_join_texts(atoms[i:j]))
+        chunk = atoms[i:j]
+        text = _hyphen_join_texts(chunk)
+        if prev_end_syl is not None and _continues_word(
+            prev_end_syl, chunk[0].first_syllabic
+        ):
+            # Cadens-vervolg ná eerdere cadens/recite zonder )-join-pad.
+            if not text.startswith(("-", "=")):
+                text = f"-{text}"
+        parts.append(text)
+        prev_end_syl = chunk[-1].syllabic
         i = j
     return " ".join(parts)
 
@@ -717,6 +718,7 @@ def _group_l_atom(group: list[MappedNote]) -> _LAtom:
     text_notes = [n for n in group if (n.lyric or "").strip()]
     head = text_notes[0] if text_notes else group[0]
     role = str(head.template_event.get("role") or "")
+    first_syl = (text_notes[0].syllabic if text_notes else head.syllabic) or "single"
     if role == "recite":
         last_syl = "single"
         for n in reversed(group):
@@ -727,6 +729,7 @@ def _group_l_atom(group: list[MappedNote]) -> _LAtom:
             text=_recite_l_text(group),
             syllabic=last_syl,
             role="recite",
+            first_syllabic=first_syl,
         )
     melisma_elms: list[str] = []
     if text_notes:
@@ -756,9 +759,18 @@ def _group_l_atom(group: list[MappedNote]) -> _LAtom:
                     )
                 )
             text = _hyphen_join_texts(bits)
+            last_syl = (extra[-1].syllabic or "single")
+        else:
+            last_syl = text_notes[0].syllabic or "single"
     else:
         text = "-"
-    return _LAtom(text=text, syllabic=head.syllabic or "single", role=role)
+        last_syl = head.syllabic or "single"
+    return _LAtom(
+        text=text,
+        syllabic=last_syl,
+        role=role,
+        first_syllabic=first_syl,
+    )
 
 
 def _stem_groups_from_l_groups(

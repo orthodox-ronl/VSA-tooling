@@ -808,18 +808,59 @@ def _slot_seq(bundle: MeasureBundle, marker: str) -> list[int]:
 # ---------------------------------------------------------------------------
 
 
+def split_voice_measure_tokens(measure: str) -> list[str]:
+    """Split a stem measure into position tokens.
+
+    Whitespace separates positions, but spaces around ``&`` stay inside one
+    melisma-token (``Bb4  &/`` = één positie, twee slots).
+    """
+    s = measure
+    n = len(s)
+    tokens: list[str] = []
+    i = 0
+    while i < n:
+        while i < n and s[i].isspace():
+            i += 1
+        if i >= n:
+            break
+        start = i
+        while i < n:
+            if not s[i].isspace():
+                i += 1
+                continue
+            j = i
+            while j < n and s[j].isspace():
+                j += 1
+            if j < n and s[j] == "&":
+                i = j
+                continue
+            k = i - 1
+            while k >= start and s[k].isspace():
+                k -= 1
+            if k >= start and s[k] == "&":
+                i = j
+                continue
+            break
+        tokens.append(s[start:i])
+    return tokens
+
+
 def parse_voice_positions(measure: str) -> list[VoicePosition]:
     out: list[VoicePosition] = []
-    for token in measure.split():
+    for token in split_voice_measure_tokens(measure):
         if not token:
             continue
+        # Compact alignment-padding around ``&`` before slot-split.
+        compact = "&".join(p.strip() for p in re.split(r"\s*&\s*", token))
         # Strip trailing ELMs glued to pitch (intocht: a4_, g4__)
-        core = _strip_trailing_elms(token)
-        parts = core.split("&") if core else token.split("&")
+        core = _strip_trailing_elms(compact)
+        parts = core.split("&") if core else compact.split("&")
         # If whole token was ELM-only after strip failure, keep raw split
         if not parts or parts == [""]:
-            parts = token.split("&")
-        out.append(VoicePosition(slots=[p for p in parts if p != ""]))
+            parts = compact.split("&")
+        out.append(
+            VoicePosition(slots=[p.strip() for p in parts if p.strip() != ""])
+        )
     return out
 
 
@@ -965,7 +1006,13 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                 close = n
             interior = s[i + 1 : close]
             i = close + 1 if close < n and s[close] == ")" else n
-            syllables, links, hard_links = _parse_recite_interior(interior)
+            (
+                syllables,
+                links,
+                hard_links,
+                cont_word,
+                cont_hard,
+            ) = _parse_recite_interior(interior)
             # After ')': duration ELMs only — bare '-' is woordstreepje, not ELM.
             elm_list, i = _read_elms(s, i, allow_bare_dash=False)
             before = pending_before
@@ -977,7 +1024,8 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                     elms=elm_list,
                     links=links,
                     hard_links=hard_links,
-                    continues_word=False,
+                    continues_word=cont_word,
+                    continues_word_hard=cont_hard,
                     marks_before=before,
                 )
             )
@@ -1103,18 +1151,104 @@ def parse_l_positions(measure: str) -> list[LPosition]:
     return positions
 
 
+def find_recite_interior_elms(interior: str) -> list[tuple[str, int]]:
+    """Verboden duur-/melisma-ELM’s ín een recite-interieur (niet soft ``-``).
+
+    Soft/hard woordstreepjes tussen lettergrepen blijven toegestaan. Kale
+    eind-``-`` vóór ``)`` (dood streepje) telt hier niet mee. Melisma-``&``
+    wél. Contract: ``MVSA-RECITE-INTERIOR-ELM``.
+
+    Returns:
+        Lijst ``(elm, start_index)`` — ``start_index`` is 0-based in
+        ``interior`` (begin van die ELM).
+    """
+    s = interior
+    if not s:
+        return []
+    hits: list[tuple[str, int]] = []
+    i = 0
+    n = len(s)
+    if _is_woordstreepje(s[0]) and n > 1 and _is_syllable_char(s[1]):
+        i = 1
+    while i < n:
+        if s[i].isspace():
+            i += 1
+            continue
+        if _is_woordstreepje(s[i]) and i + 1 < n and _is_syllable_char(s[i + 1]):
+            i += 1
+            continue
+        if s[i] in ",;:!?":
+            i += 1
+            continue
+        if s[i] == "&":
+            hits.append(("&", i))
+            i += 1
+            continue
+        start = i
+        while i < n and (_is_syllable_char(s[i]) or s[i] in "'’ʹ"):
+            i += 1
+        syll = s[start:i]
+        if not syll:
+            elm_at = i
+            elms, j = _read_elms(s, i, allow_bare_dash=True)
+            cursor = elm_at
+            for e in elms:
+                if e != "-":
+                    hits.append((e, cursor))
+                cursor += len(e)
+                # Skip optional ``&`` separators already consumed in ``j``.
+                if cursor < j and s[cursor:j].lstrip().startswith("&"):
+                    amp = s.find("&", cursor, j)
+                    if amp >= 0:
+                        cursor = amp + 1
+                        while cursor < j and s[cursor].isspace():
+                            cursor += 1
+            i = j if elms else i + 1
+            continue
+        _, i = _attach_lyric_punct(s, i, syll)
+        elm_at = i
+        elms, i = _read_elms(s, i, allow_bare_dash=True)
+        cursor = elm_at
+        for e in elms:
+            if e != "-":
+                hits.append((e, cursor))
+            # Advance past this elm token in the source span we just read.
+            if s.startswith(e, cursor):
+                cursor += len(e)
+            while cursor < i and s[cursor].isspace():
+                cursor += 1
+            if cursor < i and s[cursor] == "&":
+                cursor += 1
+                while cursor < i and s[cursor].isspace():
+                    cursor += 1
+        if i < n and s[i] == "&":
+            hits.append(("&", i))
+            i += 1
+    return hits
+
+
 def _parse_recite_interior(
     interior: str,
-) -> tuple[list[str], list[bool], list[bool]]:
-    """Syllables + links inside ``( … )`` (space = word, ``-``/``=`` = hyphen)."""
+) -> tuple[list[str], list[bool], list[bool], bool, bool]:
+    """Syllables + links inside ``( … )`` (space = word, ``-``/``=`` = hyphen).
+
+    Leading ``-``/``=`` (``(-lijkt …)``) → ``continues_word`` op de recite-positie
+    (T5 / R8 brug ná cadens); geen wees-token en geen interne link.
+    """
     s = interior.strip()
     if not s:
-        return [], [], []
+        return [], [], [], False, False
     syllables: list[str] = []
     links: list[bool] = []
     hard_links: list[bool] = []
     i = 0
     n = len(s)
+    continues_word = False
+    continues_word_hard = False
+    if _is_woordstreepje(s[0]) and n > 1 and _is_syllable_char(s[1]):
+        continues_word = True
+        continues_word_hard = _woordstreepje_is_hard(s[0])
+        i = 1
     pending_link: bool | None = None
     pending_hard = False
     while i < n:
@@ -1156,7 +1290,7 @@ def _parse_recite_interior(
             pending_link = True
             pending_hard = _woordstreepje_is_hard(s[i])
             i += 1
-    return syllables, links, hard_links
+    return syllables, links, hard_links, continues_word, continues_word_hard
 
 
 def _read_elms(
@@ -1185,8 +1319,27 @@ def _read_elms(
             break
         i += len(elm)
         piece_elms.append(elm)
-        if i < n and s[i] == "&":
-            i += 1
-            continue
+        # Optionele spaties rond ``&`` (canonieke &-kolomalign), alleen als
+        # daarna nog een ELM volgt — anders ``&`` laten liggen voor de caller.
+        j = i
+        while j < n and s[j].isspace():
+            j += 1
+        if j < n and s[j] == "&":
+            k = j + 1
+            while k < n and s[k].isspace():
+                k += 1
+            next_elm = None
+            for e in _ELMS:
+                if not s.startswith(e, k):
+                    continue
+                if e == "-" and k + 1 < n and _is_syllable_char(s[k + 1]):
+                    continue
+                if e == "-" and not allow_bare_dash:
+                    continue
+                next_elm = e
+                break
+            if next_elm is not None:
+                i = k
+                continue
         break
     return piece_elms, i

@@ -41,6 +41,9 @@ def main(argv: list[str] | None = None) -> int:
             skip_svg=bool(getattr(ns, "skip_svg", False)),
             quiet=bool(getattr(ns, "quiet", False)),
             musescore=musescore,
+            allow_noncanonical=bool(
+                getattr(ns, "allow_noncanonical", False)
+            ),
         )
     if ns.mscz_command == "mxl":
         return _cmd_mscz_to_mxl(ns)
@@ -84,6 +87,19 @@ def _reject_multi_output(files: list[Path], output: str | None) -> bool:
         )
         return True
     return False
+
+
+def _add_allow_noncanonical(parser: argparse.ArgumentParser) -> None:
+    from .canonicity_gate import add_allow_noncanonical_arg
+
+    add_allow_noncanonical_arg(parser)
+
+
+def _gate_mscz_source(ns: argparse.Namespace, path: Path) -> bool:
+    """C3 structureel; True = stop deze bron."""
+    from .canonicity_gate import cli_gate_source
+
+    return cli_gate_source(path, ns)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -170,6 +186,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(mxl)
 
     svg = sub.add_parser(
         "svg",
@@ -219,6 +236,7 @@ def _build_parser() -> argparse.ArgumentParser:
             "Default: witte rechthoek achter de notatie."
         ),
     )
+    _add_allow_noncanonical(svg)
 
     pdf = sub.add_parser(
         "pdf",
@@ -253,6 +271,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(pdf)
 
     from .audio_export import AUDIO_FORMATS
 
@@ -280,6 +299,7 @@ def _build_parser() -> argparse.ArgumentParser:
             default=None,
             help="Pad naar MuseScore-executable (default: auto).",
         )
+        _add_allow_noncanonical(audio_p)
 
     score_ir = sub.add_parser(
         "score-ir",
@@ -312,6 +332,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(score_ir)
 
     mscz_prod = sub.add_parser(
         "mscz",
@@ -336,6 +357,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore (ongebruikt bij pure normalize; default: auto).",
     )
+    _add_allow_noncanonical(mscz_prod)
 
     normalize = sub.add_parser(
         "normalize",
@@ -417,6 +439,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(text)
 
     compare = sub.add_parser(
         "compare",
@@ -497,6 +520,11 @@ def _cmd_mscz_compare(ns: argparse.Namespace) -> int:
 
 
 def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+        require_canonical_mxl_target,
+    )
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .musicxml_playback_normalize import export_mscz_to_playback_mxl
     from .street_products import MSCZ_CORE_KEYS, merge_street_product_meta
@@ -507,11 +535,22 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
     if _reject_multi_output(files, ns.output):
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = Path(ns.output) if ns.output else derived_output_path(path, ".mxl")
         try:
             export_mscz_to_playback_mxl(path, out, musescore=musescore)
+            require_canonical_mxl_target(
+                out, bron=path, allow_noncanonical=allow
+            )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
             emit_cli_exception(exc, path=path)
             exit_code = 1
@@ -542,6 +581,9 @@ def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
     white_background = not bool(ns.transparent)
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = Path(ns.output) if ns.output else derived_output_path(path, ".svg")
         try:
             written = export_mscz_to_svg(
@@ -581,6 +623,9 @@ def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
     musescore = Path(ns.musescore) if ns.musescore else None
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = Path(ns.output) if ns.output else derived_output_path(path, ".pdf")
         try:
             export_mscz_to_pdf(path, out, musescore=musescore)
@@ -652,6 +697,9 @@ def _cmd_mscz_text(ns: argparse.Namespace) -> int:
     musescore = Path(ns.musescore) if ns.musescore else None
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output
@@ -685,6 +733,9 @@ def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
     musescore = Path(ns.musescore) if ns.musescore else None
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output
@@ -715,6 +766,10 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
         ScoreIrMusicxmlError,
         export_score_ir_path_to_musicxml,
     )
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .street_product_export import (
         StreetProductExportError,
         export_bron_to_score_ir,
@@ -728,8 +783,12 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
     mxl_opt = getattr(ns, "musicxml", None)
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output
@@ -742,9 +801,18 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
             else:
                 mxl_path = Path(mxl_opt)
         try:
-            export_bron_to_score_ir(path, out, musescore=musescore)
+            export_bron_to_score_ir(
+                path,
+                out,
+                musescore=musescore,
+                allow_noncanonical=allow,
+            )
             if mxl_path is not None:
                 export_score_ir_path_to_musicxml(out, mxl_path)
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (StreetProductExportError, ScoreIrMusicxmlError) as exc:
             emit_cli_exception(exc, path=path)
             exit_code = 1
@@ -780,6 +848,9 @@ def _cmd_mscz_product(ns: argparse.Namespace) -> int:
     musescore = Path(ns.musescore) if ns.musescore else None
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output

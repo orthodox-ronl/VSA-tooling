@@ -19,13 +19,13 @@ Rijen = **bron**, kolommen = **doel**. De **diagonaal** is normalisatie: een
 bestand waarin iets is gewijzigd of gemengd geschreven weer naar een gekozen
 canonieke vorm brengen (zelfde formaat).
 
-| Bron ↓ \ Doel →          | `.vsa`                          | `.mvsa`                                               | `.mxl` / `.musicxml`                                                                                   | `.mscz`                                                                                                        | `.mp3` / audio         | `.midi` / `.mid`   |
-| ------------------------ | ------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------ |
-| **`.vsa`**               | validate (geen `vsa normalize`) | — (niet v0)                                           | `vsa mxl`                                                                                              | via MXL / templates                                                                                            | `vsa audio`            | — (niet gepland)   |
+| Bron ↓ \ Doel →          | `.vsa`                                      | `.mvsa`                                               | `.mxl` / `.musicxml`                                                                                   | `.mscz`                                                                                                        | `.mp3` / audio         | `.midi` / `.mid`   |
+| ------------------------ | ------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------ |
+| **`.vsa`**               | validate (geen `vsa normalize`)             | — (niet v0)                                           | `vsa mxl`                                                                                              | via MXL / templates                                                                                            | `vsa audio`            | — (niet gepland)   |
 | **`.mvsa`**              | **`mvsa vsa`** (E1–E6; product `.mvsa.vsa`) | **`mvsa normalize`** / **`kuiser`** / **`transpose`** | `mvsa mxl` · `score-ir` · `mvsa svg`                                                                   | **`mvsa mscz`**                                                                                                | `mvsa mp3`             | — (niet gepland)   |
-| **`.mxl` / `.musicxml`** | —                               | **`mxl mvsa`**                                        | **`mxl normalize`** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | `mxl mscz`                                                                                                     | `vsa audio`            | — (niet gepland)   |
-| **`.mscz`**              | —                               | **`mscz mvsa`** (via mxl)                             | `mscz mxl`                                                                                             | **`mscz normalize`** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | `vsa audio` (fallback) | — (niet gepland)   |
-| **`.midi` / `.mid`**     | —                               | —                                                     | —                                                                                                      | —                                                                                                              | —                      | — (niet gepland)   |
+| **`.mxl` / `.musicxml`** | —                                           | **`mxl mvsa`**                                        | **`mxl normalize`** → [checklist MXL](../formats/canonical-checklists.md#checklist-mxl-coria-playback) | `mxl mscz`                                                                                                     | `vsa audio`            | — (niet gepland)   |
+| **`.mscz`**              | —                                           | **`mscz mvsa`** (via mxl)                             | `mscz mxl`                                                                                             | **`mscz normalize`** → [checklist MSCZ](../formats/canonical-checklists.md#checklist-mscz-partituur-musescore) | `vsa audio` (fallback) | — (niet gepland)   |
+| **`.midi` / `.mid`**     | —                                           | —                                                     | —                                                                                                      | —                                                                                                              | —                      | — (niet gepland)   |
 
 **Audio (``.mp3``):** preview-luisteren via MuseScore — zie
 [formats/audio.md](../formats/audio.md). **``.midi``:** **niet gepland**
@@ -46,8 +46,9 @@ Legenda status in dit traject:
 
 - **`.mvsa` → `.mvsa`:** default **behoud noteernamen** (`preserve`); optioneel
   herschrijven naar `doremi` / `a-g` (alias `abc`) / `vsa` / `ag-vsa`; octaafstijl
-  (`@oct` vs. later marker); kolom- + maatstreep-uitlijning (kuiser /
-  `align_mvsa_columns`). **Tonica verzetten:** `mvsa transpose --to …`
+  (`@oct` vs. later marker); kolom- + maatstreep-uitlijning inclusief `&` in
+  melisma (kuiser / `align_mvsa_columns`; spaties rond `&` neutraal).
+  **Tonica verzetten:** `mvsa transpose --to …`
   (andere `@do`; `@mode` blijft; default `--pitch ag-vsa`).
 - **`.vsa` → `.vsa`:** alleen waar tooling al een canonieke schrijfvorm afdwingt
   of gaat afdwingen; geen scope-creep hier.
@@ -74,23 +75,24 @@ Wat **wij** vastleggen vs. externe standaarden:
 
 ### Pitch op stemregels (mvsa; keuze bij export/normalisatie)
 
-| Id         | Betekenis                                                                                            |
-| ---------- | ---------------------------------------------------------------------------------------------------- |
-| `preserve` | **Default** bij `.mvsa` → `.mvsa`: laat bronspelling staan                                           |
-| `ag-vsa`   | **Import-default.** Per systeem: eerste noot absolute a–g, daarna EHM; a–g-eindanker op systeemeinde |
-| `doremi`   | Laddergraden `do` `re` `mi` … (+ octaafsuffix / `#`/`b`)                                             |
-| `a-g`      | Toonnamen `a`–`g` / `bb` / `f#` (+ wetenschappelijk cijfer); CLI-alias: `abc`                        |
-| `vsa`      | Eerste toon absoluut (doremi), daarna EHM; bij import ook a–g-eindankers                             |
+| Id         | Betekenis                                                                                                      |
+| ---------- | -------------------------------------------------------------------------------------------------------------- |
+| `preserve` | **Default** bij `.mvsa` → `.mvsa`: laat bronspelling staan                                                     |
+| `ag-vsa`   | **Import-default.** Per systeem: eerste noot a–g, daarna EHM; a–g-eindanker (octaaf via `--octave-style`)      |
+| `doremi`   | Laddergraden `do` `re` `mi` … (+ octaafsuffix / `#`/`b`); niet met `--octave-style none`                       |
+| `a-g`      | Toonnamen `a`–`g` / `bb` / `f#` (octaaf via `--octave-style`); CLI-alias: `abc`                                |
+| `vsa`      | Eerste toon doremi, daarna EHM; bij import ook a–g-eindankers                                                  |
 
 L-regel (lyrics, ELM, recite, melisma) blijft semantisch gelijk. Alleen bij
 expliciete herschrijf-`pitch` verandert de hoogte-spelling op S/A/T/B.
 
 ### Octaafstijl (mvsa)
 
-| Stijl                             | Betekenis                                                | Rol in gegenereerde output                        |
-| --------------------------------- | -------------------------------------------------------- | ------------------------------------------------- |
-| `@oct`                            | Schrijfoctaaf per stem (`@oct T=-1 B=-1`)                | **Canoniek** in tooling-output                    |
-| Marker (voorstel `T-1:` / `S+1:`) | Zelfde *bedoeling* als schrijfoctaaf — **niet** `@start` | Optionele invoer; kuiser normaliseert naar `@oct` |
+| Stijl                             | Betekenis                                                                 | Rol in gegenereerde output                                      |
+| --------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `@oct`                            | Relatieve a–g t.o.v. schrijf-do (`Bb`, `c+`); `@oct T=-1 B=-1`            | **Default, canoniek**                                           |
+| `none`                            | Wetenschappelijk absoluut (`Bb4`, `c5`); geen bruikbare `@oct` bij import | Alleen a–g / ag-vsa / vsa-eindankers; **niet** met `doremi`     |
+| Marker (voorstel `T-1:` / `S+1:`) | Zelfde *bedoeling* als schrijfoctaaf — **niet** `@start`                  | Nog niet geïmplementeerd                                        |
 
 **Besluit (plan):** `T-1:` (als we die marker later toestaan) = equivalent aan
 `@oct T=-1` (schrijfoctaaf), niet startanker. Huidige marker-grammatica
@@ -149,7 +151,8 @@ verwijzen ernaar; diagonaal is expliciet in de matrix.
 ### Stap 2 — `normalize` (diagonaal `.mvsa` → `.mvsa`) ✅
 
 ```text
-mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa,ag-vsa}] --octave-style @oct
+mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
+                   [--octave-style {@oct,none,marker}]
 ```
 
 - **Default `--pitch preserve`:** noteernamen op S/A/T/B blijven zoals in de
@@ -157,7 +160,13 @@ mvsa normalize PATH [-o OUT] [--pitch {preserve,doremi,abc,vsa,ag-vsa}] --octave
   `vsa` / `ag-vsa` herschrijft hoogten.
 - Import uit `.mxl`/`.mscz` gebruikt **`ag-vsa`** als default (geen bronnotatie
   om te bewaren).
-- Marker-octaaf-schrijven nog niet (`--octave-style marker` → foutmelding).
+- **`--octave-style` (a–g / ag-vsa):**
+  - **`@oct` (default, canoniek):** relatieve toonnamen t.o.v. schrijf-do
+    (`Bb`, `c+`, `c-`); past bij `@oct`-directives. Wetenschappelijk cijfer
+    (`Bb4`) hoort **niet** bij deze stijl.
+  - **`none`:** wetenschappelijk absoluut (`Bb4`, `c5`); `@oct` wordt bij
+    import weggelaten. **Niet** toegestaan met `--pitch doremi`.
+  - **`marker`:** nog niet geïmplementeerd → foutmelding.
 - EHM-cijfervormen `/3` / `\2` worden bij resolve ondersteund.
 
 **Criterium (gehaald):** `preserve` houdt bladcijfer/do-re-mi/mix intact;
@@ -213,19 +222,23 @@ mscz mvsa PATH [-o OUT] …
   [semantics — systeemovergangen](../specification-mvsa/semantics.md#lopende-toon-over-systeemovergangen).
 - Multi-lettergreep lyrics op één noot → recite `( … )`; lone extender →
   lege recite `()~`; trailing `.` gestript.
-- Default `--pitch ag-vsa`: per systeem eerste noot absolute a–g, daarna EHM,
-  a–g-eindanker; daarna **kuiser-normaalvorm** (canonieke `~` op L, bars sync,
-  kolommen). Faalt kuiser op validatie: alsnog kolom-/maatstreep-align.
-  `--no-align` slaat kuiser over maar blijft slots en maatstrepen uitlijnen.
+- Default `--pitch ag-vsa` + `--octave-style @oct`: per systeem eerste noot
+  a–g **relatief** (`Bb`, niet `Bb4`), daarna EHM, a–g-eindanker; daarna
+  **kuiser-normaalvorm** (canonieke `~` op L, bars sync, kolommen inclusief
+  `&` in melisma: spaties rond `&` toegestaan en semantisch neutraal, zodat
+  L- en stem-`&` in dezelfde editor-kolom staan). Faalt kuiser op validatie:
+  alsnog kolom-/maatstreep-align. `--octave-style none` → wetenschappelijke
+  cijfers; `--no-align` slaat kuiser over maar blijft slots en maatstrepen
+  uitlijnen.
 - Score → `.mvsa`: alleen `mxl mvsa` / `mscz mvsa` (geen `mvsa import`; bron = eerste token).
 - `abc` blijft alias van `a-g`. Pyphen-warnings via `kuiser` zijn advies.
 
 **Criterium (gehaald):** roundtrip `mvsa → mxl → mvsa` pitch-equivalent op
 `alleluia-toon-8.canonieke.mvsa` sectie `schets2-oct-doremi` voor `--pitch
 doremi`, `a-g` en `vsa` (`tests/test_mvsa_import.py`). Bij `--pitch ag-vsa`
-(default) en `--pitch vsa` plakt import absolute eindankers (a–g+cijfer) op
-de laatste maatstreep van elk LSATB-systeem (check-only; `MVSA-BAR-ANKER` bij
-mismatch na edits). Niet bij `doremi` / `a-g`.
+(default) en `--pitch vsa` plakt import a–g-eindankers op de laatste
+maatstreep van elk LSATB-systeem (relatief bij `@oct`, cijfer bij `none`;
+check-only; `MVSA-BAR-ANKER` bij mismatch na edits). Niet bij `doremi` / `a-g`.
 
 ### Stap 5 — Bron-commands + man-pagina’s ✅
 

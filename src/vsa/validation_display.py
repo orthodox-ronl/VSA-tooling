@@ -28,6 +28,9 @@ _SHORT_MESSAGES_NL: dict[str, str] = {
     "VSA-BLOCK-PARSE-ERROR": "Markdown VSA-blokfout.",
     "VSA-PATH-NOT-FOUND": "Pad niet gevonden.",
     "VSA-INCLUDE-VSA-ERROR": "Include-vsa-fout.",
+    "VSA-SYLLABIFY-MISSING-HYPHENS": (
+        "Ontbrekende lettergreepstreepjes in platte tekst."
+    ),
 }
 
 

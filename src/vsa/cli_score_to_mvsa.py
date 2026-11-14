@@ -33,7 +33,10 @@ def add_score_to_mvsa_arguments(parser: argparse.ArgumentParser) -> None:
         default="ag-vsa",
         help=(
             "Doel-spelling (default: ag-vsa). "
-            "a-g = toonnamen met cijfer; abc = alias."
+            "doremi = laddergraden; a-g (alias abc) = toonnamen "
+            "(octaaf via --octave-style); "
+            "vsa = doremi-anker + EHM; "
+            "ag-vsa = eerste a–g per systeem + EHM + eindanker."
         ),
     )
     parser.add_argument(
@@ -44,9 +47,14 @@ def add_score_to_mvsa_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--octave-style",
-        choices=["@oct", "marker"],
+        choices=["@oct", "marker", "none"],
         default="@oct",
-        help="Schrijfoctaaf-stijl (default: @oct).",
+        help=(
+            "Octaafschrijfwijze voor a–g/ag-vsa (default: @oct): "
+            "@oct = relatief t.o.v. schrijf-do (Bb, c+); "
+            "none = wetenschappelijk absoluut (Bb4; niet met doremi); "
+            "marker = nog niet geïmplementeerd."
+        ),
     )
     parser.add_argument(
         "--section",

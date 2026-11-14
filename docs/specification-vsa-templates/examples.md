@@ -25,6 +25,7 @@ Per formule: `template.yaml`, plus afgeleide `template.mscz` (MuseScore) en
 | [`stichier-toon-5-pdf`](library/stichier-toon-5-pdf/README.md)           | cycle    | PDF-stichier `1,2,3` + `laatste`               |
 | [`stichier-toon-1-groningen`](library/stichier-toon-1-groningen/README.md) | cycle  | Groningen; Heer-ik-roep (provisional)          |
 | [`stichier-toon-2-groningen`](library/stichier-toon-2-groningen/README.md) | cycle  | Groningen; Heer-ik-roep (provisional)          |
+| [`stichier-toon-3-groningen`](library/stichier-toon-3-groningen/README.md) | cycle  | Groningen; Heer-ik-roep (provisional; 1–2)     |
 | [`stichier-toon-6-groningen`](library/stichier-toon-6-groningen/README.md) | cycle  | Groningen; `formule: stichier` op kondak-VSA   |
 | [`tropaar-toon-5-groningen`](library/tropaar-toon-5-groningen/README.md) | alias    | `same_as: kondak-toon-5-groningen` (Groningen) |
 | [`kondak-toon-5-groningen`](library/kondak-toon-5-groningen/README.md)   | cycle    | Groningen; also tropaar                        |

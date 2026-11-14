@@ -35,6 +35,9 @@ examples\demo.md:blok-1:1:1: VSA-SYNTAX-EMPTY-SCOPE: Scope zonder zangelement.
 | `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`     | Hoogte- en lengteposities passen niet bij elkaar    | Controleer samengestelde [modifiers](@)                   |
 | `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`      | Lokale markering wijkt af van berekende cursor      | Markering of scopes aanpassen                             |
 | `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH`   | Linker-EHM van toonhoogte-overgang klopt niet       | Pas `[oud:nieuw]` of voorgaande notatie aan               |
+| `VSA-SYLLABIFY-MISSING-HYPHENS`            | Plat woord zonder soft `-`, Pyphen ziet wel breuken | Soft `-` zetten, of woord op uitzonderingslijst; [syllabificatie](../formats/syllabificatie.md) |
+| `VSA-SYLLABLE-DICT-MISMATCH`               | Bronvorm wijkt af van canonieke syllable-dictionary | Bron (of lijst) naar de canonieke hyphenvorm; [syllabificatie](../formats/syllabificatie.md) |
+| `VSA-SYLLABLE-DICT-UNKNOWN`                | Lemma ontbreekt in syllable-dictionary              | Vorm toevoegen (TTY-prompt of handmatig in de lijst); [syllabificatie](../formats/syllabificatie.md) |
 
 ## Severity
 

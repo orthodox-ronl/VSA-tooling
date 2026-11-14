@@ -196,7 +196,8 @@ Hergebruik: `docs/guides/reuse-vsa-tooling.md`.
 lezen (maatstrepen, collapse-regels, MuseScore `position`, Coria vs print).
 
 **Contracten (alle formaten / OSMD):** start bij
-[`docs/formats/contract-index.md`](docs/formats/contract-index.md).
+[`docs/formats/contract-index.md`](docs/formats/contract-index.md)
+(§Contract-skelet, §Canoniciteit C1–C4, §Nieuwe regel → naleving).
 **MVSA → MXL/MSCZ:** checklists in
 [`docs/formats/canonical-checklists.md`](docs/formats/canonical-checklists.md)
 (M-reeks Coria, S-reeks partituur). Same-pitch melisma samentrekken geldt voor
@@ -204,7 +205,7 @@ lezen (maatstrepen, collapse-regels, MuseScore `position`, Coria vs print).
 **VSA + template → MVSA:** T1–T7 in
 [`docs/specification-vsa-templates/vsa-mvsa-contract.md`](docs/specification-vsa-templates/vsa-mvsa-contract.md)
 (melodiestem default S, override A/T/B). Cursor-regels:
-`contracten-eerst.mdc`, `mvsa-export-contracten.mdc`.
+`contracten-eerst.mdc`, `canonieke-bestanden.mdc`, `mvsa-export-contracten.mdc`.
 
 ### Belangrijke grenzen
 
@@ -282,6 +283,7 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 | `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken        |
 | `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                           |
 | `contracten-eerst.mdc`                | Altijd [contract-index](docs/formats/contract-index.md) eerst |
+| `canonieke-bestanden.mdc`             | Skelet-H2’s, C1–C4, dekking, nieuwe-regel → naleving          |
 
 Na bulk-tabellen: `python scripts/align_markdown_tables.py <pad>`.
 

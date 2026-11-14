@@ -9,13 +9,13 @@ title: Kondak Geboorte van H. Johannes, Aartsbisschop van Shanghai en San Franci
   Toon 4,
 ---
 
-# === pad: VSA + template → MVSA (Fase A herstart) ===
-# template: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
+# === pad: VSA + tem-pla-te → MV-SA (Fa-se A her-start) ===
+# tem-pla-te: C:/Git/orthodox-ronl/VSA-tooling/docs/specification-vsa-templates/library/tropaar-toon-4/template.yaml
 # formule-notatie (mens): C:/Git/orthodox-ronl/VSA-tooling/examples/formule-tekst/tropaar-toon-4/formules/tropaar-toon-4.formule.mvsa
 #
-# === afgeleide mvsa ===
-# MAPPING MISLUKT: VSA-TEMPLATE-PITCH-MISMATCH
-# hoogte-mismatch: VSA 'zuin' = C5, geen passend template-S-slot meer (verwacht o.a. mi)
+# === af-ge-lei-de mv-sa ===
+# MAP-PING MIS-LUKT: VSA-TEMPLATE-PITCH-MISMATCH
+# hoogte-mismatch: VSA 'zuin' = C5, geen pas-send template-S-slot meer (ver-wacht o.a. mi)
 #
  
 H
@@ -153,12 +153,12 @@ a
 d
 .
 
-# === analyse ===
-# NORMALISATIE: geen `*` in bron → 7 regels genormaliseerd tot frasen met `*`
-# MAPPING: MISLUKT
+# === ana-ly-se ===
+# NOR-MA-LI-SA-TIE: geen `*` in bron → 7 re-gels ge-nor-ma-li-seerd tot fra-sen met `*`
+# MAP-PING: MIS-LUKT
 # kondak-geboorte-van-h-johannes-aartsbisschop-van-shanghai-en-san-francisco-toon-4.vsa:13:37
-# ERROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA 'zuin' = C5, geen passend template-S-slot meer (verwacht o.a. mi)
-# Hint: Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden van de template volgen, of kies een andere frase/cadenspad.
+# ER-ROR: VSA-TEMPLATE-PITCH-MISMATCH: hoogte-mismatch: VSA 'zuin' = C5, geen pas-send template-S-slot meer (ver-wacht o.a. mi)
+# Hint: Pas de VSA-hoogtemarkeringen aan zo-dat ze de ver-plich-te ca-dens-gra-den van de tem-pla-te vol-gen, of kies een an-de-re fra-se/-ca-dens-pad.
 
 # === oorspronkelijke VSA (commentaar) ===
 # <!-- Kondak Geboorte van H. Johannes, Aartsbisschop van Shanghai en San Francisco, Toon 4,  (Hemelum) -->
@@ -167,7 +167,7 @@ d
 # [/:] God-de-lij-ke {/Roe_}per, {/Ba}{/zuin_} {\van} de {\Geest_}
 # en plan-ter {\van_} het ge{\loof_},
 # {//Uit_}roei-er van {/het} {/bij_}{\ge_}{\loof_},
-# Be-min-de der Hei-li-ge Drie-{\een_}{\heid_}
+# Be-min-de der Hei-li-ge Drie{\een_}{\heid_}
 # {/Gro}te {/Va_}der, Hiër-arch {/Jo}{/&\han_&_}{\nes_},
 # gij die voor God staat met de {\En_}ge{\len_}
 # // {//bid} {\zon}{/der} {/op}hou-den {\voor} {/ons} {\&\al_&_}{\len_}. [:]

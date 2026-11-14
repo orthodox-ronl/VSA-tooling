@@ -57,3 +57,11 @@ def test_validate_path_not_found():
 
     assert not result.ok
     assert result.messages[0].code == "VSA-PATH-NOT-FOUND"
+
+
+def test_validate_path_rejects_mvsa(tmp_path: Path):
+    path = tmp_path / "lied.mvsa"
+    path.write_text('@title "x"\n@do F4\n@sectie a\nL: (hallo) |\nS: g |\n', encoding="utf-8")
+    result = validate_path(path)
+    assert not result.ok
+    assert any(m.code == "VSA-WRONG-FILE-TYPE" for m in result.messages)

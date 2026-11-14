@@ -60,22 +60,17 @@ HARD_HYPHEN = "="
 
 
 def hyphenate_dutch_word(word: str) -> str:
-    """Voeg orthografische lettergreepstreepjes toe (Pyphen ``nl_NL``).
+    """Voeg lettergreepstreepjes toe (canonieke lijst, anders Pyphen ``nl_NL``).
 
-    Bestaande zachte ``-`` blijven leidend (geen her-hyphenatie). Hard ``=``
-    splitst het woord in delen die elk apart gehypheneerd worden.
+    Bestaande zachte ``-`` blijven leidend (geen her-hyphenatie), behalve als
+    de canonieke dictionary een andere vorm voor het lemma heeft — dan wint
+    de dictionary. Hard ``=`` splitst het woord in delen die elk apart
+    gehypheneerd worden.
 
     Leidende/sluitende leestekens (``,`` ``.`` enz.) horen niet in de
     Pyphen-kern: anders wordt ``Geest,`` ten onrechte ``Gees-t,``.
     """
     if not word:
-        return word
-    if HARD_HYPHEN in word:
-        return HARD_HYPHEN.join(
-            hyphenate_dutch_word(part) if part else part
-            for part in word.split(HARD_HYPHEN)
-        )
-    if "-" in word:
         return word
     if not any(ch.isalpha() for ch in word):
         return word
@@ -83,7 +78,31 @@ def hyphenate_dutch_word(word: str) -> str:
     prefix, core, suffix = (m.group(1), m.group(2), m.group(3)) if m else ("", word, "")
     if not core or not any(ch.isalpha() for ch in core):
         return word
+    from .syllable_dictionary import canonical_syllable_form
+
+    canonical = canonical_syllable_form(core)
+    if canonical is not None:
+        return f"{prefix}{_transfer_letter_case(core, canonical)}{suffix}"
+    if HARD_HYPHEN in core:
+        return f"{prefix}{HARD_HYPHEN.join(hyphenate_dutch_word(part) if part else part for part in core.split(HARD_HYPHEN))}{suffix}"
+    if "-" in core:
+        return word
     return f"{prefix}{_dutch_dic().inserted(core)}{suffix}"
+
+
+def _transfer_letter_case(source: str, hyphenated: str) -> str:
+    """Kopieer lettercase van *source* naar de hyphenvorm (streepjes negeren)."""
+    letters = [ch for ch in source if ch.isalpha()]
+    out: list[str] = []
+    index = 0
+    for ch in hyphenated:
+        if ch.isalpha() and index < len(letters):
+            src = letters[index]
+            index += 1
+            out.append(ch.upper() if src.isupper() else ch.lower())
+        else:
+            out.append(ch)
+    return "".join(out)
 
 
 def dutch_hyphen_positions(word: str) -> list[int]:
@@ -153,14 +172,17 @@ def transform_vsa_source(text: str, *, unsyllabify: bool = False) -> SyllabifyRe
     return syllabify_vsa_source(text)
 
 
-def iter_vsa_files(path: Path) -> list[Path]:
-    """Geef `.vsa`-bestanden: één bestand, of recursief in een map."""
-    from .input_paths import InputPathError, collect_input_files
+def iter_vsa_files(path: Path | str) -> list[Path]:
+    """Geef `.vsa`-bestanden: één bestand, map, of catalogus-id."""
+    from .input_paths import InputPathError, collect_input_files, looks_like_catalogus_id
 
+    raw = path
     path = Path(path)
     try:
-        return collect_input_files(path, suffixes=(_VSA_SUFFIX,))
+        return collect_input_files(raw, suffixes=(_VSA_SUFFIX,))
     except InputPathError as exc:
+        if looks_like_catalogus_id(raw) and not path.exists():
+            raise ValueError(str(exc)) from exc
         if not path.exists():
             raise FileNotFoundError(str(path)) from exc
         if path.is_file():
@@ -395,7 +417,11 @@ def _content_parts(atoms: list[_Atom]) -> list[_ContentPart]:
 
 
 def _parse_text_part(source: str) -> _ContentPart | None:
-    """Tekstatom zonder brugstreepjes; ``None`` als het atom alleen ``-`` is."""
+    """Tekstatom zonder brugstreepjes; ``None`` als het atom alleen ``-`` is.
+
+    Leidende/sluitende soft ``-`` (brug naar een scope) horen niet in de kern:
+    een scope-accolade is zelf al lettergreep-/woordgrens.
+    """
     if source == "-":
         return None
 
@@ -409,6 +435,11 @@ def _parse_text_part(source: str) -> _ContentPart | None:
         prefix = prefix[1:]
     if suffix and set(suffix) == {"-"}:
         suffix = ""
+    # Brugstreepjes vastgeplakt aan platte tekst (``ver-`` vóór ``{…}``).
+    while core.startswith("-"):
+        core = core[1:]
+    while core.endswith("-"):
+        core = core[:-1]
 
     if not core and not prefix and not suffix:
         return None
@@ -430,14 +461,35 @@ def _syllabify_word_run(atoms: list[_Atom]) -> str:
     if not plain or not any(ch.isalpha() for ch in plain):
         return "".join(atom.source for atom in atoms)
 
-    # Bestaande interne streepjes in één tekstdeel: hergebruik die breekpunten
-    # alleen wanneer het hele woord uit één tekstdeel bestaat (hierboven).
-    # Over scope-grenzen heen altijd Pyphen op het samengestelde woord.
-    positions = set(dutch_hyphen_positions(plain))
+    # Over scope-grenzen: canonieke dictionary (anders Pyphen), daarna streepjes
+    # alleen *binnen* platte tekstdelen (nooit naast ``{``/``}``).
+    form = hyphenate_dutch_word(plain)
+    positions = _break_positions_in_plain(plain, form)
+    if not positions:
+        positions = set(dutch_hyphen_positions(plain))
     return _render_syllabified_parts(parts, positions)
 
 
+def _break_positions_in_plain(plain: str, hyphenated: str) -> set[int]:
+    """Breekpunten in *plain* (zonder ``-``/``=``) afgeleid van een hyphenvorm."""
+    positions: set[int] = set()
+    plain_i = 0
+    for ch in hyphenated:
+        if ch in "-=":
+            if 0 < plain_i < len(plain):
+                positions.add(plain_i)
+            continue
+        if plain_i < len(plain):
+            plain_i += 1
+    return positions
+
+
 def _render_syllabified_parts(parts: list[_ContentPart], positions: set[int]) -> str:
+    """Zet streepjes alleen *binnen* platte tekstdelen.
+
+    Tussen tekst en ``{…}``, of tussen twee scopes, komt **geen** soft ``-``:
+    de accolade markeert al de lettergreep-/woordgrens.
+    """
     out: list[str] = []
     offset = 0
     last_index = len(parts) - 1
@@ -454,7 +506,11 @@ def _render_syllabified_parts(parts: list[_ContentPart], positions: set[int]) ->
             out.append(f"{part.prefix}{chunk}{part.suffix}")
 
         if index < last_index and end in positions:
-            out.append("-")
+            nxt = parts[index + 1]
+            if part.kind == "scope" or nxt.kind == "scope":
+                pass  # scopegrens = al lettergreepgrens
+            else:
+                out.append("-")
 
         offset = end
 

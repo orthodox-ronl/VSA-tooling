@@ -94,13 +94,19 @@ nav:
       - .vsa: formats/vsa.md
       - .mvsa: formats/mvsa.md
       - Score-IR: formats/score-ir.md
+      - from-ir (OSMD MusicXML): formats/from-ir.md
+      - vsa-SVG (scherm): formats/vsa-svg.md
       - mvsa-SVG (koormap): formats/mvsa-svg.md
+      - translit-SVG: formats/translit-svg.md
       - .mxl / .musicxml: formats/mxl.md
       - .mscz: formats/mscz.md
+      - lyrics.txt: formats/lyrics.txt.md
       - .mp3 / audio: formats/audio.md
+      - Products-meta: formats/products-meta.md
       - .midi / .mid: formats/midi.md
-    - Contract-index: formats/contract-index.md
-    - Products-meta (herkomst-sidecar): formats/products-meta.md
+    - Contract-index (skelet, C*, dekking): formats/contract-index.md
+    - CLI-canoniciteit-audit: formats/cli-canoniciteit-audit.md
+    - Syllabificatie (zing-deling): formats/syllabificatie.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
     - Commando's:

@@ -29,6 +29,23 @@ cycle:
 final: laatste
 
 mapping_plans:
+  # Verzamel-VSA met twee coupletten (6+5) achter elkaar — mapping-vsa.
+  - id: two-couplets
+    label: "couplet1 + couplet2 (11 strofes)"
+    when:
+      stanza_count: 11
+    steps:
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: "3"
+      - phrase: "1"
+      - phrase: voorlaatste
+      - phrase: laatste
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: "3"
+      - phrase: "1"
+      - phrase: laatste
   # Eerst specifiek (n % 3 == 0), daarna default — zie mapping-vsa.md.
   - id: triple-close
     label: "|: 1, 2, 3 :| voorlaatste, laatste"

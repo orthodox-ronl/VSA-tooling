@@ -1,4 +1,4 @@
-# Invoer: bestand of map
+# Invoer: bestand, map of catalogus-id
 
 ## Afspraak
 
@@ -6,7 +6,9 @@ Een CLI-``path`` (of ``input``) is:
 
 1. **één bronbestand** met de juiste extensie, of
 2. **een map** waarvan (standaard **recursief**) alle bestanden met die
-   extensie(s) worden meegenomen.
+   extensie(s) worden meegenomen, of
+3. **een catalogus-id** die onder ``content-source/catalogus/`` wordt
+   opgezocht (alleen als het pad **niet** als bestand of map bestaat).
 
 Gedeelde helper: ``vsa.input_paths.collect_input_files`` /
 ``collect_cli_sources`` (lege map = fout). Unit tests:
@@ -18,6 +20,36 @@ Nieuwe of gewijzigde commando’s met bestandsinvoer gebruiken deze helper
 **Meerdere bronnen:** sibling-output per bestand (``derived_output_path``).
 ``-o`` / ``--keep-*`` / vergelijkbare enkelvoudige uitvoerpaden zijn **alleen**
 toegestaan bij precies één bronbestand.
+
+### Catalogus-id
+
+Toegestane vormen (zelfde id-conventie als ``bieb id="…"``):
+
+| Vorm                       | Voorbeeld                               | Resolutie                                                   |
+| -------------------------- | --------------------------------------- | ----------------------------------------------------------- |
+| Slash-pad (leaf)           | `tropaar/transfiguratie-toon-7/hemelum` | Map `catalogus/<id>/` → bestanden met gevraagde extensie(s) |
+| Canonieke stam (`/` → `-`) | `tropaar-transfiguratie-toon-7-hemelum` | Zelfde leaf: uniek bestand met die stem (zonder extensie)   |
+
+De stamvorm is de **canonieke bestandsnaam zonder** `.vsa` / `.mvsa`: de drie
+id-segmenten met `-` i.p.v. `/`. Beide vormen zijn gelijkwaardig.
+
+Zoekvolgorde voor de catalogus-root:
+
+1. Omgevingsvariabele ``VSA_CATALOGUS`` (pad naar ``…/catalogus``)
+2. ``./content-source/catalogus`` t.o.v. de werkmap
+3. Sibling ``../bibliotheek/content-source/catalogus`` (naast VSA-tooling)
+
+Geen match → dezelfde foutklasse als een ontbrekend pad
+(``InputPathError`` / «Pad niet gevonden» / «Catalogus-id … niet gevonden»).
+
+Voorbeelden:
+
+```cmd
+cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa validate tropaar/transfiguratie-toon-7/hemelum
+vsa syllabify tropaar-transfiguratie-toon-7-hemelum --dry-run
+mvsa validate tropaar/transfiguratie-toon-7/hemelum
+```
 
 ### Geneste afgeleiden (batch)
 
@@ -67,6 +99,7 @@ afgeleide wilt.
 | `normalize`       | Ja   | `.mvsa`                                                  |
 | `transpose`       | Ja   | `.mvsa`                                                  |
 | `kuiser`          | Ja   | `.mvsa` (via ``collect_cli_sources``)                    |
+| `syllabify`       | Ja   | `.mvsa`                                                  |
 | `vsa`             | Ja   | `.mvsa` → sibling `.mvsa.vsa` (E1–E6)                    |
 | `products`        | Ja   | `.mvsa` (incl. product-key `vsa`)                        |
 

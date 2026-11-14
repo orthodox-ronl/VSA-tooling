@@ -43,3 +43,24 @@ def test_corpus_phrase_plans() -> None:
         assert plan.id == plan_id
         assert assign_stanzas_to_phrases(plan, len(expected)) == expected
         assert "@sectie laatste" in out.text
+
+
+def test_two_couplets_plan_11() -> None:
+    """Verzamel 6+5 → plan two-couplets (mapping-vsa verzamel-waarschuwing)."""
+    doc = load_resolved_template("stichier-toon-6-groningen").doc
+    expected = [
+        "1",
+        "2",
+        "3",
+        "1",
+        "voorlaatste",
+        "laatste",
+        "1",
+        "2",
+        "3",
+        "1",
+        "laatste",
+    ]
+    plan = select_mapping_plan(doc, 11)
+    assert plan.id == "two-couplets"
+    assert assign_stanzas_to_phrases(plan, 11) == expected

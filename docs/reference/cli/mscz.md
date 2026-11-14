@@ -23,16 +23,18 @@ bron. Zie [Invoer bestand of map](input-pad.md).
 ```text
 mscz [-h] {mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,text,compare,products} …
 mscz mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
-          [--octave-style {@oct,marker}] [--section SECTION]
+          [--octave-style {@oct,none,marker}] [--section SECTION]
           [--musescore PATH] [--no-align] path
 mscz import [-h] [-o OUTPUT] [--layout PROFILE] […] path
-mscz mxl|svg|pdf|mp3|ogg|wav|mscz|text [-h] [-o OUTPUT] [--musescore PATH] path
+mscz mxl [-h] [-o OUTPUT] [--musescore PATH] [--allow-noncanonical] path
+mscz svg|pdf|mp3|ogg|wav|mscz|text [-h] [-o OUTPUT] [--musescore PATH] path
 mscz score-ir [-h] [-o OUTPUT] [--musicxml [PATH]] [--musescore PATH] path
 mscz normalize [-h] [-o OUTPUT] [--layout PROFILE] [--bibliotheek-id ID]
                [--compact] [Style-opties…] path
 mscz compare [-h] [--musescore PATH] [--pitch FORM] [--strict-duration]
              score mvsa
-mscz products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
+mscz products [-h] [--force] [--dry-run] [--quiet] [--allow-noncanonical]
+              [--skip-svg] [--musescore PATH] path
 ```
 
 ## Subcommando's
@@ -41,8 +43,8 @@ mscz products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PAT
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mvsa`            | Naar `.mvsa` (werkbank). Default: `<bronnaam>.mvsa`.                                                                                                          |
 | `import`          | **Naar `.mscz`** uit `.mvsa`/MusicXML (= `mvsa mscz` / `mxl mscz`).                                                                                           |
-| `products`        | **Universele** standaardset + `{stam}.mscz.products-meta.json`. Zie [products-meta](../../formats/products-meta.md).                                          |
-| `mxl`             | Coria-`.mxl`; merget key `mxl`.                                                                                                                               |
+| `products`        | **Universele** standaardset + meta; structurele C3 op bron-`.mscz`. Zie [products-meta](../../formats/products-meta.md).                                      |
+| `mxl`             | Coria-`.mxl`; structurele C3 + C4-steekproef; merget key `mxl`. Zie [contract-index §C*](../../formats/contract-index.md#canoniciteit-en-conversiegates-c).   |
 | `svg`             | Kale tall compacte SVG (key `svg`). Niet via `mvsa svg`.                                                                                                      |
 | `pdf`             | Losse print-PDF (P*); merget key `pdf`. Geen onderdeel van `products`. Niet via `mvsa pdf`.                                                                   |
 | `mp3`/`ogg`/`wav` | Preview-audio; `mp3` merget key `mp3`.                                                                                                                        |
@@ -52,8 +54,10 @@ mscz products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PAT
 | `text`            | Lyrics-product `*.lyrics.txt`; merget key `lyrics`.                                                                                                           |
 | `compare`         | Score (`.mscz` of MusicXML) ↔ `.mvsa`.                                                                                                                        |
 
-**`mvsa`-opties** (`--pitch` default `ag-vsa`, `--do`, `--no-align`, soft-wrap,
-eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zie
+**`mvsa`-opties** (`--pitch` default `ag-vsa`, `--octave-style` default `@oct`
+= relatieve a–g; `none` = `Bb4`-cijfers; `--do`, `--no-align`, soft-wrap,
+eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm inclusief `&`-kolommen met
+padding-spaties rond `&`): zie
 [score naar mvsa](../../formats/mvsa.md#score-naar-mvsa). `@do` komt uit de
 MuseScore-voortekening (`KeySig` / `concertKey`) tenzij je `--do` meegeeft.
 De MSCZ-stap gebruikt dezelfde SATB-explode als `mscz mxl`. Default

@@ -1,0 +1,28 @@
+# Mini-voorbeeld: soft ``-`` in recite + woordstreepje over recite→cadens.
+# Norm: docs/formats/syllabificatie.md · docs/specification-mvsa/syntax.md (recite).
+#
+# In MVSA:
+#   - binnen ``(…)``: soft ``-`` = lettergrepen, spatie = woorden
+#   - ``)-`` + lettergreep = zelfde woord loopt door buiten de recite (cadens)
+#   - géén soft ``-`` tussen VSA-scopes; in MVSA is de L-positie de grens
+#
+# Probeer:  mvsa validate examples\mvsa\syllabificatie-recite-mini.mvsa
+#           mvsa syllabify examples\mvsa\syllabificatie-recite-mini.mvsa
+
+@title "syllabificatie-recite-mini"
+@do F4
+@mode major
+@oct S=0
+
+@sectie demo
+# Meerdere woorden in één recite; soft - tussen lettergrepen
+L: (Leer-lin-gen toon-de Gij Uw) heer_-lijk-heid_\. |
+S: a4                            -    -    -        |
+
+# Woord loopt door: recite eindigt met ver-heer- ; cadens begint met -lijkt
+L: (Gij werd ver-heer)-lijkt_ (op de berg) Chris_-tus_ |
+S: a4                   -      a4          -     -     |
+
+# Recite eindigt op woordgrens; Licht is een nieuw woord (geen )- )
+L: (zon-daars, Uw eeu-wig) Licht_ stra_-len_: |
+S: a4                      -      -     -     |

@@ -12,7 +12,7 @@ Zelfde CLI-vorm als [`mvsa mxl`](mvsa.md#mvsa-mxl) en [`mscz mxl`](mscz.md):
 vsa mxl [-h] [-o OUTPUT] [--config CONFIG] [--format {musicxml,mxl}]
         [--do DO] [--mode MODE] [--tempo TEMPO]
         [--musicxml-profile {playback,engraving}] [--syllabify]
-        path
+        [--allow-noncanonical] path
 ```
 
 ## Beschrijving
@@ -44,6 +44,13 @@ canonieke `.vsa` blijft ongewijzigd. [`vsa products`](products.md) doet die
 syllabify altijd voor de MXL-sibling. Losse bron bewerken:
 [`vsa syllabify`](syllabify.md).
 
+**C3/C4:** vóór schrijven geldt bron-validate (C3); na playback-export
+draait de Coria-checklist op het geschreven bestand (C4, profiel
+`mono`). Bij C4-fout blijft het `.mxl` staan en is de exitcode 1.
+`--musicxml-profile engraving` slaat C4 over. Uitzondering:
+`--allow-noncanonical` (niet voor catalogus). Zie
+[contract-index §C*](../../formats/contract-index.md#canoniciteit-en-conversiegates-c).
+
 Bij sibling- of expliciete output merget `vsa mxl` product-key `mxl` in
 `{stam}.vsa.products-meta.json` — zie
 [products-meta](../../formats/products-meta.md).
@@ -61,6 +68,7 @@ Bij sibling- of expliciete output merget `vsa mxl` product-key `mxl` in
 | `--tempo TEMPO`                           | Nee       | Tempo in BPM (overschrijft bestand-metadata `muziek.tempo`).                  | Bestand-metadata; zonder expliciete waarde geen tempo-markering | —                                |
 | `--musicxml-profile {playback,engraving}` | Nee       | Exportprofiel (overschrijft bestand-metadata `muziek.musicxml-profile`).      | Bestand-metadata, anders `playback`                             | Alleen `playback` of `engraving` |
 | `--syllabify`                             | Nee       | Tijdelijke lettergreepstreepjes vóór export (bron blijft ongewijzigd).        | Uit                                                             | —                                |
+| `--allow-noncanonical`                    | Nee       | C3/C4-uitzondering: negeer bronvalidate- of doel-MXL-fouten.                  | Uit                                                             | Niet voor catalogus              |
 | `-h`, `--help`                            | Nee       | Toon hulp voor dit subcommando.                                               | —                                                               | —                                |
 
 ## Output
@@ -76,7 +84,7 @@ Bij sibling- of expliciete output merget `vsa mxl` product-key `mxl` in
 | Exitcode | Betekenis                                                    |
 | -------- | ------------------------------------------------------------ |
 | `0`      | Alle gevraagde MusicXML-bestanden succesvol geschreven.      |
-| `1`      | Padfout, verkeerde bronextensie, parsefout, of exportfout.   |
+| `1`      | Padfout, verkeerde bronextensie, parse-/export-/C3/C4-fout.  |
 
 ## Voorbeelden — succes
 

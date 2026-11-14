@@ -1,80 +1,98 @@
 # `.mp3` / `.ogg` / `.wav` — preview-luisteren
 
-Rol: een **[variant](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)**
-van een [zangstuk](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)
-**even beluisteren** (idee van de klank), niet partituurlayout en niet
-oefenen-met-stemkeuze (dat blijft Coria).
+Rol: een variant van een zangstuk **even beluisteren** (idee van de klank),
+niet partituurlayout en niet oefenen-met-stemkeuze (dat blijft Coria). Start:
+[contract-index](contract-index.md).
 
-Het bestand is een **afgeleide**: gegenereerd uit playback-``.mxl`` (of
-``.vsa`` / ``.mvsa`` / fallback ``.mscz``) via MuseScore. De toolchain schrijft
-alleen het artefact; de **consumer-site** (bijv. bibliotheek) zet de
+## Identiteit
+
+| Veld     | Waarde                                                |
+| -------- | ----------------------------------------------------- |
+| Extensie | `.mp3` (default) / `.ogg` / `.wav`                    |
+| Rol      | Standaardproduct (meta-key `mp3`; ogg/wav vooral los) |
+| Sibling  | `{stam}.{bron}.mp3` (bijv. `lied.mscz.mp3`)           |
+| Wanneer  | Preview op de consumer-site                           |
+
+Afgeleide via MuseScore uit playback-``.mxl`` (of notatiebron / fallback
+``.mscz``). De toolchain schrijft het artefact; de consumer zet de
 afspeelknop.
 
-## Status
+## Canoniciteit
 
-| Onderwerp                 | Stand                                      |
-| ------------------------- | ------------------------------------------ |
-| Rol in de conversiematrix | Werkend                                    |
-| Canonieke checklist       | Dun — zie hieronder                        |
-| CLI-command               | `vsa audio` / `mvsa mp3` / `ogg` / `wav`   |
+Canoniek = checklist A1–A5 hieronder. C1–C4:
+[contract-index §C\*](contract-index.md#canoniciteit-en-conversiegates-c).
 
-## Checklist (richting)
+## Inhoud en metadata
 
-| #   | Eis                           | Toelichting                                                                                           |
-| --- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
-| A1  | Speelbaar                     | Bestand opent/afspeelt in gangbare spelers / HTML5 ``<audio>``.                                       |
-| A2  | Pitch/duur-equivalent         | Zelfde klinkende noten als playback-``.mxl`` (binnen MuseScore-afronding).                            |
-| A3  | Geen stemkeuze                | Alle parts gemengd (MuseScore-default); geen wizard.                                                  |
-| A4  | Geen partituur-eis            | Lyrics/layout/streepjes geen vereiste voor het audiobestand.                                          |
-| A5  | Geen sleepstilte aan het eind | Na de laatste hoorbare sample hoogstens ~10 ms stilte; MuseScore-napadding wordt weggeknipt (ffmpeg). |
+| Onderwerp     | Regel                                                  |
+| ------------- | ------------------------------------------------------ |
+| Frontmatter   | n.v.t.                                                 |
+| Encoding      | Container (mp3/ogg/wav); geen tekstinhoud              |
+| Tempo / klank | Uit score (MIDI in playback-MXL + `@tempo` in `.mvsa`) |
+
+## Syllabificatie
+
+n.v.t. — geen lyrics in het audiobestand. Bron moet wel canonieke
+zing-deling hebben vóór export (C3); geen soft `-` “in” audio.
+
+## Melisma en binding
+
+n.v.t. op het audiobestand. Klinkende noten volgen playback-MXL (M5a e.d.).
+
+## Transliteratie
+
+n.v.t.
+
+## Stemmen en partijen
+
+Alle parts gemengd (MuseScore-default); geen stemkeuze-wizard (A3).
+
+## Leesbaarheid
+
+n.v.t. (geen blad).
+
+## Herkomst
+
+Merge key `mp3` in [products-meta](products-meta.md).
 
 ## Conversies
 
-| Bron                         | Commando (straat-puur)                                                |
-| ---------------------------- | --------------------------------------------------------------------- |
-| ``.vsa``                     | `vsa audio` (via playback MusicXML)                                   |
-| ``.mvsa``                    | `mvsa mp3` / `ogg` / `wav`                                            |
-| ``.mscz``                    | `mscz mp3` / `ogg` / `wav`                                            |
-| ``.mxl`` / ``.musicxml``     | via `mxl` / import naar notatiestraat; geen cross-street audio        |
+| Bron    | Commando                                               |
+| ------- | ------------------------------------------------------ |
+| `.vsa`  | `vsa audio` (deling in de bron; geen stille syllabify) |
+| `.mvsa` | `mvsa mp3` / `ogg` / `wav`                             |
+| `.mscz` | `mscz mp3` / `ogg` / `wav`                             |
+| `.mxl`  | via notatiestraat; geen cross-street audio             |
 
-Bij ``mvsa`` is het **subcommando het formaat** (``mp3`` / ``ogg`` / ``wav``).
-Bij ``vsa audio``: ``--format`` of ``[audio] format`` in ``vsa.toml``
-(default **``.mp3``**).
+## Validatie
 
-Klank en tempo komen uit de score (MIDI in playback-MXL + tempo). In `.mvsa`
-zet je het afspeeltempo met [`@tempo`](../specification-mvsa/keywords.md)
-(BPM; default **130**); dat gaat mee in MusicXML-`sound tempo` (metronoom
-onzichtbaar op blad/PDF) en dus in `mvsa mp3` / Coria. Gedeelde namen met
-`.vsa`:
-[metadata-brug](../guides/metadata-brug.md). Canonieke playback-MXL gebruikt
-**piano** op elke partij (checklist M8). Na trim hercodeert ffmpeg naar
-preview-bitrate (mp3 LAME ``-q:a 5`` ≈ 80–100 kbps VBR; ogg Vorbis ``-q:a 4``).
-Dat is kleiner dan studiokwaliteit, maar helder genoeg om even mee te
-beluisteren. Extra instrumentkeuze blijft MuseScore-default.
+A1–A5 (hand/CI speelbaarheid + trim). ffmpeg op PATH voor A5.
 
-**Sleepstilte:** MuseScore zet vaak seconden stilte ná de laatste noot in het
-audiobestand. `vsa audio` / `mvsa mp3` knipt die weg en laat ongeveer
-**10 ms** stilte over (A5). Daarvoor is **ffmpeg** op PATH nodig, naast
-MuseScore.
+---
 
-## Bestandsnaamgeving
+## Checklist audio (type-specifiek)
 
-Zonder ``-o``: ``stem.brontype.mp3`` (of ``.ogg`` / ``.wav``), bv.
-``lied.mvsa.mp3``. In ``generated/`` hetzelfde patroon. Expliciet ``-o`` mag
-een korte naam blijven. Zie
-[canonieke checklists — naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie).
+| #   | Eis                   | Toelichting                                |
+| --  | ---                   | -----------                                |
+| A1  | Speelbaar             | Gangbare spelers / HTML5 `<audio>`         |
+| A2  | Pitch/duur-equivalent | Zelfde klinkende noten als playback-`.mxl` |
+| A3  | Geen stemkeuze        | Alle parts gemengd                         |
+| A4  | Geen partituur-eis    | Lyrics/layout geen vereiste                |
+| A5  | Geen sleepstilte      | ≤ ~10 ms stilte na laatste sample (ffmpeg) |
 
-## Ownership
+Preview-bitrate: mp3 LAME `-q:a 5`; ogg Vorbis `-q:a 4`. Canonieke
+playback-MXL: piano per partij (M8).
 
-| Laag        | Verantwoordelijkheid                                      |
-| ----------- | --------------------------------------------------------- |
-| VSA-tooling | Artefact genereren (`vsa audio` / `mvsa mp3`/`ogg`/`wav`) |
-| Consumer    | Afspeelknop / ``:::include mp3-player`` (gepland)         |
-| bron        | Exportcontract ``mp3-player`` (nog afronden)              |
+## Ownership (type-specifiek)
+
+| Laag        | Verantwoordelijkheid                               |
+| ----------- | -------------------------------------------------- |
+| VSA-tooling | Artefact genereren                                 |
+| Consumer    | Afspeelknop                                        |
+| bron        | Exportcontract `mp3-player` (org; afronden elders) |
 
 ## Zie ook
 
 - [CLI — `vsa audio`](../reference/cli/audio.md)
-- [`.mxl`](mxl.md) (playback-bron)
-- [`.midi`](midi.md) (los MIDI — **niet gepland**; preview = audio)
+- [`.mxl`](mxl.md) · [`.midi`](midi.md) (los MIDI — niet gepland)
 - [Formaten & CLI — overzicht](index.md)

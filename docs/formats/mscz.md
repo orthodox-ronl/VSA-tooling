@@ -1,40 +1,126 @@
 # `.mscz` — MuseScore-partituur
 
 Native MuseScore-bestand (zip met o.a. `.mscx`). In deze toolchain vooral
-voor de **partituur-workflow**; Coria gebruikt `.mxl`.
+voor de **partituur-workflow**; Coria gebruikt [`.mxl`](mxl.md).
 
-Contracten: [contract-index](contract-index.md) (leesbaarheid + S* +
-layoutprofielen).
+Start: [contract-index](contract-index.md) (§Contract-skelet, C*, hubs).
 
-## Wat hoort hier
+## Identiteit
 
-| Onderwerp             | Waar                                                                                                                       |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Export vanuit `.mvsa` | [`mvsa mscz`](../reference/cli/mvsa.md#mvsa-mscz) (partituur-mxl → MuseScore)                                              |
-| Print-PDF (zangers)   | [`mscz pdf`](../reference/cli/mscz.md) (bron `.mscz`); vanuit `.mvsa`: [`mvsa pdf`](../reference/cli/mvsa.md#mvsa-pdf)     |
-| Kale muziek-SVG       | [`mscz svg`](../reference/cli/mscz.md); vanuit `.mvsa`: [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg)                    |
-| Normalize (layout)    | [`mscz normalize`](../reference/cli/mscz.md) — zelfde profielen als `--layout` hieronder                                   |
-| Layoutprofiel         | Standaard: [MSCZ-leesbaarheid](mscz-leesbaarheid.md); benoemde keuzes = tooling-taak                                       |
-| Import → `.mvsa`      | [`mscz mvsa`](../reference/cli/mscz.md) (**werkbank**-bewerkvorm; SATB-explode; soft-wrap; default `ag-vsa` = ankers)      |
-| → `.mxl`              | [`mscz mxl`](../reference/cli/mscz.md)                                                                                     |
-| Platte gezongen tekst | [`mscz text`](../reference/cli/mscz.md) / [`vsa text`](../reference/cli/text.md)                                           |
-| Score ↔ `.mvsa`       | [`mscz compare`](../reference/cli/mscz.md#mscz-compare) (t.o.v. verse import; lyrics, toonhoogte, duur-info, import-gaten) |
-| Template-/corpus-MSCZ | [VSA-templates](../specification-vsa-templates/README.md)                                                                  |
+| Veld        | Waarde                                                                    |
+| ----------- | ------------------------------------------------------------------------- |
+| Extensie    | `.mscz`                                                                   |
+| Rol         | Notatiebron **of** standaardproduct (meta-key `mscz`)                     |
+| Sibling     | Product: `{stam}.{bron}.mscz` (bijv. `lied.vsa.mscz`, `lied.mvsa.mscz`)   |
+| Wanneer     | Partituur-print / MuseScore-bewerking; catalogus-leaf als bron of product |
 
 Geen volledige MuseScore-formaat-spec — wel: wat **wij** genereren en
 verwachten voor bruikbare SATB + lyrics.
 
-**CLI-lock:** elke MuseScore-aanroep via `vsa.musescore_cli` wacht tot een
-eventuele vorige conversie (ook in een ander proces) klaar is. Zo botsen
-batch-exports minder op Windows-vergrendelingen.
+## Canoniciteit
 
-**Normaalvorm (checklist):**
-[canonieke checklists — MSCZ](canonical-checklists.md#checklist-mscz-partituur-musescore)
-— **twee balken SA + TB**, **geen** stem-indicaties op de balken,
-**stokken S/T omhoog en A/B omlaag**, **geen mid-systeem-HBox / spookmaten**,
-**`@tekst` als SystemText**, herhalingen zonder lege voorafgaande maat.
-Leesbaarheid (recite, lyrics, slurs, cues, stokken, maatnummers):
-[MSCZ-leesbaarheid](mscz-leesbaarheid.md).
+Canoniek = voldoet aan checklist **S\*** ([canonical-checklists](canonical-checklists.md#checklist-mscz-partituur-musescore))
+en [MSCZ-leesbaarheid](mscz-leesbaarheid.md) (R\*/L\*), bij layout
+`partituur` of `muziek`. C1–C4: [contract-index §C\*](contract-index.md#canoniciteit-en-conversiegates-c).
+
+**C3 vóór conversie (fase 3, structureel):** de bron moet een geldige
+MuseScore-zip zijn met een leesbare ``.mscx`` (codes `MSCZ-ZIP` /
+`MSCZ-MSCX` / …). Geen volle S*-gate op de bron; `--allow-noncanonical`
+slaat deze check over. Aangesloten op `mscz products` en product-subs
+(`mxl`, `svg`, `pdf`, audio, `score-ir`, `mscz`, `text`).
+
+**Kern (S\*):** twee balken SA + TB; geen stem-indicaties op de balken;
+stokken S/T omhoog en A/B omlaag; geen mid-systeem-HBox / spookmaten;
+`@tekst` als SystemText; herhalingen zonder lege voorafgaande maat.
+
+## Inhoud en metadata
+
+| Onderwerp        | Regel                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| Frontmatter      | n.v.t. (binair MuseScore; geen VSA-YAML)                              |
+| Encoding         | MuseScore intern; lyrics UTF-8 in MusicXML-brug                       |
+| Colofon / titel  | Via layout `partituur` + consumer `--bibliotheek-id`                  |
+| Verboden         | Mid-systeem-HBox als “oplossing” voor gaps (zie leesbaarheid C3/C4)   |
+
+## Syllabificatie
+
+Soft `-` hoort in de **bron** (`.vsa` / `.mvsa`), niet als zichtbare glyphs
+binnen elke recite op het blad.
+
+| Regel | Inhoud                                                                                                                                   |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| R8    | Recite-underlay: geen zichtbare soft `-` *binnen* recite; MusicXML `syllabic` begin/middle/end + brugstreepjes over woordgrenzen blijven |
+| Bron  | Zing-deling = noot-aantal; zie [syllabificatie](syllabificatie.md)                                                                       |
+
+Voorbeeld: bron `ver-heer-lijkt` → op blad syllabic begin/middle/end (en
+eventueel brug bij cadens); geen hyphen-glyph op elke lettergreep in de
+recite.
+
+## Melisma en binding
+
+| Id           | Regel                                                                              |
+| ------------ | ---------------------------------------------------------------------------------- |
+| S13 / M5a    | Same-pitch melisma: compacte eindvorm op blad (MSCZ-postprocess); hyphen ≠ melisma |
+| S1 / S4 / R7 | Geen Capella-fraseslur die als melisma oogt                                        |
+
+Diepte: [canonical-checklists](canonical-checklists.md) · [mscz-leesbaarheid](mscz-leesbaarheid.md).
+
+## Transliteratie
+
+n.v.t. op het `.mscz` zelf als tweede lyric-laag. Translit-weergave is een
+apart product ([translit-svg](translit-svg.md)); partituur-`.mscz` volgt
+de bronlyrics.
+
+## Stemmen en partijen
+
+Canoniek: **SA + TB** op twee balken (geen vier labeled parts zoals Coria).
+Stemextractie naar `.vsa`: zie [mvsa-vsa-contract](mvsa-vsa-contract.md) (E\*).
+
+## Leesbaarheid
+
+Fonts, groottes, stacking, cues, slurs, maatnummers, spacers: volledig in
+[MSCZ-leesbaarheid](mscz-leesbaarheid.md). Layoutprofielen hieronder
+(`partituur` / `muziek` / `plain`).
+
+## Herkomst
+
+Als **product** uit `{straat} products` / `{straat} mscz`: merge in
+`{bronnaam}.products-meta.json` (key `mscz`) — [products-meta](products-meta.md).
+Als **catalogusbron** `.mscz`: de bron zelf heeft geen meta-key voor het
+brontype; products naast de bron wel.
+
+## Conversies
+
+| Richting                                      | CLI                                              | Canoniciteit                                                |
+| --------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| `.mvsa` / `.vsa` → `.mscz`                    | `mvsa mscz` / `vsa products` (key `mscz`)        | C3/C4: canonieke bron → canonieke partituur                 |
+| `.mscz` → product `mscz`                      | `mscz mscz` / `mscz normalize`                   | Zelfde-type = partituur-conform maken                       |
+| `.mscz` → `.mxl`                              | `mscz mxl`                                       | Doel: M\* / playback                                        |
+| `.mscz` → `.mvsa`                             | `mscz mvsa`                                      | **Uitzondering:** werkbank-bewerkvorm, niet catalogus-klaar |
+| `.mscz` → SVG / PDF / text / audio / score-ir | `mscz svg` / `pdf` / `text` / `mp3` / `score-ir` | Doel per productcontract                                    |
+
+**CLI-lock:** MuseScore-aanroepen via `vsa.musescore_cli` wachten op elkaar
+(Windows-vergrendelingen).
+
+## Validatie
+
+| Hoe                                 | Wat                                    |
+| ----------------------------------- | -------------------------------------- |
+| Checklist S\* / R\*                 | Hand/CI + exportpad                    |
+| `mscz normalize --layout partituur` | Layout naar normaalvorm                |
+| `mscz compare`                      | Score ↔ `.mvsa` (lyrics, pitch, gaten) |
+
+---
+
+## Recite en print-collapse (type-specifiek)
+
+| Id  | Regel                                                | Hub                                             |
+| --  | -----                                                | ---                                             |
+| S8  | Recite-print spacers / breve bij `n ≥ 6` (partituur) | [canonical-checklists](canonical-checklists.md) |
+| M10 | **Geen** print-collapse in Coria-playback-`.mxl`     | zelfde hub §MXL                                 |
+| R5  | Maatlengte = som noten + spacers; spacers `play=0`   | [mscz-leesbaarheid](mscz-leesbaarheid.md)       |
+| R8  | Geen interne hyphen-glyphs in recite-underlay        | zelfde                                          |
+
 Semantiek deelt de kern met MXL; layout divergeert (Coria = vier parts).
 
 ## Layoutprofielen (`--layout`)
@@ -43,11 +129,11 @@ Na de MuseScore-conversie past VSA-tooling een **benoemd profiel** toe.
 De consumer **kiest**; de tool **handhaaft**. Zie
 [ownership](../guides/reuse-vsa-tooling.md#ownership-tooling-vs-consumer).
 
-| Profiel     | CLI                            | Wat je krijgt                                                                 |
-| ----------- | ------------------------------ | ----------------------------------------------------------------------------- |
-| `partituur` | `--layout partituur` (default) | Canonieke koorprint: [MSCZ-leesbaarheid](mscz-leesbaarheid.md) + checklist    |
-| `muziek`    | `--layout muziek`              | Leesbaarheid zonder titel/footer/colofon — [koormap-SVG](mvsa-svg.md)         |
-| `plain`     | `--layout plain`               | Geen Style-/colofon-/recite-nabewerking; alleen MuseScore-output van de MXL   |
+| Profiel     | CLI                            | Wat je krijgt                                                               |
+| ----------- | ------------------------------ | --------------------------------------------------------------------------- |
+| `partituur` | `--layout partituur` (default) | Canonieke koorprint: [MSCZ-leesbaarheid](mscz-leesbaarheid.md) + checklist  |
+| `muziek`    | `--layout muziek`              | Leesbaarheid zonder titel/footer/colofon — [koormap-SVG](mvsa-svg.md)       |
+| `plain`     | `--layout plain`               | Geen Style-/colofon-/recite-nabewerking; alleen MuseScore-output van de MXL |
 
 ```cmd
 mvsa mscz lied.mvsa -o generated\lied.mscz --layout partituur --bibliotheek-id zangstuk/var/uv
@@ -136,6 +222,6 @@ Vereist MuseScore 4 (of 3) lokaal, tenzij je alleen `.mxl` gebruikt.
 
 - [Formaten & CLI — overzicht](index.md)
 - [`.mxl`](mxl.md) · [`.mvsa`](mvsa.md)
-- Platte tekst: [`vsa text`](../reference/cli/text.md) / [`mscz text`](../reference/cli/mscz.md)
+- Platte tekst: [lyrics.txt](lyrics.txt.md) · [`mscz text`](../reference/cli/mscz.md)
 - Score ↔ `.mvsa`: [`mscz compare`](../reference/cli/mscz.md#mscz-compare)
 - [mvsa-conversies](../plans/mvsa-conversions.md)

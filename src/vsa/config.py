@@ -70,11 +70,21 @@ class AudioConfig:
 
 
 @dataclass
+class SyllabificatieConfig:
+    """Pad naar canonieke syllable-dictionary (content-repo)."""
+
+    dictionary: str | None = None
+
+
+@dataclass
 class VSAConfig:
     rendering: RenderingConfig = field(default_factory=RenderingConfig)
     hugo: HugoConfig = field(default_factory=HugoConfig)
     validation: ValidationConfig = field(default_factory=ValidationConfig)
     audio: AudioConfig = field(default_factory=AudioConfig)
+    syllabificatie: SyllabificatieConfig = field(default_factory=SyllabificatieConfig)
+    # Map van het geladen vsa.toml (voor relatieve dictionary-paden).
+    config_dir: Path | None = None
 
 
 def load_config(path: str | Path | None = None) -> VSAConfig:
@@ -88,12 +98,14 @@ def load_config(path: str | Path | None = None) -> VSAConfig:
     if not path.exists():
         return config
 
+    config.config_dir = path.resolve().parent
     data = tomllib.loads(path.read_text(encoding="utf-8"))
 
     rendering = data.get("rendering", {})
     hugo = data.get("hugo", {})
     validation = data.get("validation", {})
     audio = data.get("audio", {})
+    syllabificatie = data.get("syllabificatie", {})
 
     if "max-line-width" in rendering:
         config.rendering.max_line_width = _positive_float(
@@ -119,6 +131,10 @@ def load_config(path: str | Path | None = None) -> VSAConfig:
 
     if isinstance(audio, dict) and "format" in audio:
         config.audio.format = _normalize_audio_format(audio["format"])
+
+    if isinstance(syllabificatie, dict) and "dictionary" in syllabificatie:
+        value = str(syllabificatie["dictionary"]).strip()
+        config.syllabificatie.dictionary = value or None
 
     return config
 

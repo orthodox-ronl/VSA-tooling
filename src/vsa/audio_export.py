@@ -219,28 +219,18 @@ def _write_playback_mxl(
 
 
 def _export_vsa_to_mxl(path: Path, mxl_path: Path) -> None:
-    from .block_parser import DEFAULT_METADATA
-    from .include_vsa import IncludeVsaError, prepare_vsa_body
-    from .markdown_newline_policy import preserve_vsa_source_newlines
-    from .musicxml_package import write_musicxml_output
-    from .musicxml_renderer import MusicXMLExportError, MusicXMLRenderer
-    from .parser import Parser
-    from .yaml_frontmatter import frontmatter_to_block_metadata, parse_vsa_frontmatter
+    """Zelfde playback-MXL als ``vsa products`` / ``export_bron_to_mxl`` (.vsa).
 
-    text = path.read_text(encoding="utf-8")
-    frontmatter, _vsa_body = parse_vsa_frontmatter(text)
+    Geen stille Pyphen: zing-deling staat in de bron
+    ([syllabificatie](docs/formats/syllabificatie.md)). Wel Coria-finalize.
+    """
+    from .include_vsa import IncludeVsaError
+    from .musicxml_renderer import MusicXMLExportError
+    from .vsa_musicxml_export import export_vsa_to_musicxml
+
     try:
-        vsa_body, _ = prepare_vsa_body(text, path)
+        export_vsa_to_musicxml(path, mxl_path, syllabify=False)
     except IncludeVsaError as exc:
         raise AudioExportError(exc.message_nl) from exc
-    fm_meta = frontmatter_to_block_metadata(frontmatter)
-    metadata = dict(DEFAULT_METADATA)
-    metadata.update(fm_meta)
-    explicit_keys = set(fm_meta.keys())
-    document = Parser(preserve_vsa_source_newlines(vsa_body)).parse()
-    try:
-        renderer = MusicXMLRenderer(metadata=metadata, explicit_keys=explicit_keys)
-        xml_str = renderer.render(document)
     except MusicXMLExportError as exc:
         raise AudioExportError(f"fout bij MusicXML-export: {exc}") from exc
-    write_musicxml_output(mxl_path, xml_str)

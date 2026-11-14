@@ -1,0 +1,47 @@
+---
+description: Canonieke bestanden — skelet, C*-gates, dekking, nieuwe-regel-proces
+alwaysApply: true
+---
+
+# Canonieke bestanden
+
+Geldt voor **alle** chats in VSA-tooling (en spiegel in bibliotheek). De
+gebruiker hoeft dit niet opnieuw te noemen.
+
+Canonieke hub: [`docs/formats/contract-index.md`](docs/formats/contract-index.md)
+(§Contract-skelet, §Canoniciteit C*, §Nieuwe regel).
+
+## Kern
+
+1. **Canoniek** = het bestand voldoet aan het formatcontract van dat type.
+2. **Conversie:** canonieke bron → canonieke doel (C3/C4), tenzij het
+   CLI-contract een **expliciete** uitzondering noemt (`validate`,
+   `syllabify`/`--unsyllabify`, `--syllabify` op export, `import`/werkbank, …).
+3. **Formatpagina’s** volgen de vaste H2-volgorde uit §Contract-skelet.
+   Generiek topic ontbreekt voor een type → «n.v.t.» + één zin.
+4. **Nieuwe generieke topics** eerst in §Contract-skelet op de
+   contract-index, daarna op alle formatpagina’s.
+
+## Volledige afspraak-dekking
+
+Elke normatieve afspraak (checklists M*/S*/R*/P*/T*/E*, leesbaarheid,
+syllabificatie, recite/print-collapse, zoektekst, products-meta,
+naamgeving, …) moet op **alle toepasselijke** formatcontracten staan:
+korte samenvatting + contract-id + link naar de diepte-hub. Geen afspraak
+alleen in plan, chat of één man-pagina.
+
+Wijzig volledige normtekst **alleen** in de canonieke hub; elders linken
+([contracten-eerst](contracten-eerst.mdc)).
+
+## Nieuwe of gewijzigde regel — verplicht proces
+
+1. Hub eerst (nieuw/gewijzigd contract-id).
+2. Alle toepasselijke formatcontracten bijwerken (juiste H2).
+3. Contract-index bijwerken indien nodig.
+4. **Naleving starten:** validate/gates/tests waar mogelijk; expliciete
+   stap om bestaande bestanden van die types compliant te maken (regen /
+   bronfix / steekproef → bulk na OK). Geen stille «alleen docs».
+5. Man-pages en handleidingen synchroon ([docs-sync-with-code](docs-sync-with-code.mdc)).
+
+**Verboden:** alleen code of één formatpagina wijzigen terwijl andere
+toepasselijke types dezelfde regel missen.

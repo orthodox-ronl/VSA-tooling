@@ -13,6 +13,8 @@ tekst, ook als ze de id of mapnaam niet precies kennen.
 In de notatie-body staan woorden vaak onderbroken door lettergreepstreepjes en
 hoogte-/duurmarkeringen. Daarom hoort de **niet-gesyllabiseerde** platte tekst
 ook in het bronbestand zelf — niet als handmatige kopie, maar als afgeleid veld.
+Zing-deling in de body zelf: [syllabificatie](syllabificatie.md) (soft `-`
+strip voor deze extractie).
 
 ## Afspraken
 
@@ -25,7 +27,7 @@ ook in het bronbestand zelf — niet als handmatige kopie, maar als afgeleid vel
 | Bron van waarheid     | De notatie-body (VSA-tekst of L-regel(s)); `zoektekst` is afgeleid                                                                                                                                                                                                                                                                                                                                              |
 | Onderhoud             | Tooling vult of vernieuwt het veld; de beheerder typt `zoektekst` niet handmatig bij                                                                                                                                                                                                                                                                                                                            |
 | Equivalentie          | Genormaliseerd gelijk aan extractie uit de body (zie hieronder) — **zonder** het `zoektekst`-veld zelf mee te lezen                                                                                                                                                                                                                                                                                             |
-| Sibling `.lyrics.txt` | **Standaardproduct** (meta-key `lyrics`): `{straat} text` / `{straat} products` schrijft `*.lyrics.txt` naast elke notatiebron (`.vsa` / `.mvsa` / `.mscz`) voor site-/indexzoeken. YAML-`zoektekst` blijft daarnaast voor editorzoeken *in* canonieke `.vsa`/`.mvsa`. Zie [contract-index](contract-index.md#universele-productcatalogus) · [naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie) |
+| Sibling `.lyrics.txt` | **Standaardproduct** (meta-key `lyrics`): formatcontract [lyrics.txt](lyrics.txt.md). `{straat} text` / `{straat} products` schrijft `*.lyrics.txt` naast elke notatiebron. YAML-`zoektekst` blijft voor editorzoeken *in* `.vsa`/`.mvsa`. Zie [contract-index](contract-index.md#universele-productcatalogus) · [naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie)                             |
 
 ## Schrijfwijze
 

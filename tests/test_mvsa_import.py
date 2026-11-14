@@ -186,10 +186,10 @@ def test_sa_tb_normalize_then_import_keeps_lyric_slots():
     assert not after_ru.startswith("~")
     token = after_ru.split()[0] if after_ru.split() else ""
     assert "&" not in token
-    # Same height as previous position → ``-`` (niet opnieuw ``a4``).
-    assert re.search(r"a4\s+-\s+g4\s+f4&g4\s+a4", first_s)
-    assert "f4" in first_a
-    assert "c4&c4&c4&c4" not in first_a
+    # Same height as previous position → ``-`` (niet opnieuw ``a``).
+    assert re.search(r"a\s+-\s+g\s+f&g\s+a\b", first_s)
+    assert re.search(r"\bf\b", first_a)
+    assert "c&c&c&c" not in first_a.replace(" ", "")
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], diags
 
@@ -291,10 +291,10 @@ def test_repeated_pitch_with_lyrics_collapses_to_recite():
     text = score_to_mvsa(score, pitch_form="abc", system_soft_width=200)
     l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
     s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
-    # maat1: three same-pitch lyrics → one recite; then d on b4
+    # maat1: three same-pitch lyrics → one recite; then d on b
     assert "(a b c)" in l_line
-    assert re.search(r"a4\s+b4", s_line)
-    assert not re.search(r"a4\s+-\s+-", s_line)
+    assert re.search(r"a\s+b\b", s_line)
+    assert not re.search(r"a\s+-\s+-", s_line)
     # maat2: pair f + g stays separate (drempel ≥3); g + lyric-less → melisma
     assert "(f g)" not in l_line
     assert "-&-" in s_line.replace(" ", "") or re.search(r"-\s*&\s*-", s_line)
@@ -524,7 +524,9 @@ def test_simple_flanks_absorb_into_multi_syllable_underlay_recite():
     assert "(Ver-vuld zij on-ze mond met)" in first
     assert "Uw~" in first or "Uw" in first
     s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
-    assert re.search(r"Bb4\s+c5", s_line)
+    # Default octave-style=@oct → relatieve a–g (geen wetenschappelijk cijfer).
+    assert re.search(r"[Bb]b\s+c\b", s_line)
+    assert not re.search(r"[Bb]b4", s_line)
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 
@@ -636,8 +638,8 @@ def test_same_pitch_syllabic_run_collapses_like_musescore_recite():
     assert "-schouwd_" in first_l or "schouwd_" in first_l
     assert "Wij~" not in first_l
     assert "heb~" not in first_l
-    assert re.search(r"Bb4\s+-\s+a4\s+Bb4", first_s) or re.search(
-        r"Bb4\s+a4\s+Bb4", first_s
+    assert re.search(r"[Bb]b\s+-\s+a\s+[Bb]b\b", first_s) or re.search(
+        r"[Bb]b\s+a\s+[Bb]b\b", first_s
     )
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
@@ -1029,15 +1031,17 @@ def test_ag_vsa_import_absolute_first_ehm_and_eindanker_per_system():
     text = score_to_mvsa(score, pitch_form="ag-vsa", system_soft_width=12)
     s_lines = [ln for ln in text.splitlines() if ln.startswith("S:")]
     assert len(s_lines) == 2, text
-    # Eerste noot per systeem absoluut a–g; daarna EHM; eindanker a–g.
+    # Eerste noot per systeem a–g (relatief @oct); daarna EHM; eindanker a–g.
     for ln in s_lines:
         body = ln[2:].lstrip()
         first = body.split()[0].split("&")[0]
-        assert re.fullmatch(r"[a-gA-G][#b]*\d+", first), (first, ln)
+        assert re.fullmatch(r"[a-gA-G][#b]*[+-]?\d*", first), (first, ln)
+        assert not re.fullmatch(r"[a-gA-G][#b]*\d+", first), (first, ln)
         assert re.search(r"[/\\]", body), ln  # EHM ergens in het systeem
-        assert re.search(r"\|+[a-gA-G#b]+\d\s*$", ln), ln
-    # Tweede systeem begint opnieuw met absolute a–g (niet kale hold).
-    assert s_lines[1].lstrip().startswith("S:") 
+        assert re.search(r"\|+[a-gA-G#b]+[+-]?\d*\s*$", ln), ln
+        assert not re.search(r"\|+[a-gA-G#b]+\d\s*$", ln), ln
+    # Tweede systeem begint opnieuw met a–g (niet kale hold).
+    assert s_lines[1].lstrip().startswith("S:")
     second_body = s_lines[1][2:].lstrip()
     assert second_body.split()[0].startswith("g"), second_body
     diags = validate_mvsa_text(text)
@@ -1081,10 +1085,11 @@ def test_import_default_pitch_is_ag_vsa(tmp_path: Path):
     )
     path = tmp_path / "one.musicxml"
     path.write_text(xml, encoding="utf-8")
-    text = import_score_to_mvsa(path)  # default pitch
+    text = import_score_to_mvsa(path)  # default pitch ag-vsa + @oct
     s = next(ln for ln in text.splitlines() if ln.startswith("S:"))
-    assert re.search(r"^S:\s*g4\b", s), s
-    assert re.search(r"\|\|g4\s*$", s), s
+    assert re.search(r"^S:\s*g\b", s), s
+    assert not re.search(r"^S:\s*g4\b", s), s
+    assert re.search(r"\|\|g\s*$", s), s
 
 
 def test_vsa_import_glues_absolute_eindanker_on_last_system_bar():
@@ -1128,22 +1133,31 @@ def test_vsa_import_glues_absolute_eindanker_on_last_system_bar():
     text = score_to_mvsa(score, pitch_form="vsa", system_soft_width=12)
     s_lines = [ln for ln in text.splitlines() if ln.startswith("S:")]
     assert len(s_lines) == 2, text
-    assert s_lines[0].rstrip().endswith("|g4"), s_lines[0]
-    assert s_lines[1].rstrip().endswith("||a4"), s_lines[1]
+    # a–g-eindanker relatief t.o.v. schrijf-do (default @oct).
+    assert s_lines[0].rstrip().endswith("|g"), s_lines[0]
+    assert s_lines[1].rstrip().endswith("||a"), s_lines[1]
     a_lines = [ln for ln in text.splitlines() if ln.startswith("A:")]
-    assert a_lines[0].rstrip().endswith("|e4"), a_lines[0]
-    assert a_lines[1].rstrip().endswith("||f4"), a_lines[1]
+    assert a_lines[0].rstrip().endswith("|e"), a_lines[0]
+    assert a_lines[1].rstrip().endswith("||f"), a_lines[1]
     l_lines = [ln for ln in text.splitlines() if ln.startswith("L:")]
     assert len(l_lines) == 2
     for ln in l_lines:
-        assert not re.search(r"\|[a-gA-G#b]+\d", ln), ln
+        assert not re.search(r"\|[a-gA-G#b]+", ln), ln
 
     # doremi / abc: geen eindankers
     for form in ("doremi", "abc"):
         other = score_to_mvsa(score, pitch_form=form, system_soft_width=12)
         for ln in other.splitlines():
             if ln.startswith(("S:", "A:", "T:", "B:")):
-                assert not re.search(r"\|[a-gA-G#b]+\d", ln), (form, ln)
+                assert not re.search(r"\|[a-gA-G#b]+", ln), (form, ln)
+
+    # octave-style=none → wetenschappelijk eindanker
+    none_txt = score_to_mvsa(
+        score, pitch_form="vsa", octave_style="none", system_soft_width=12
+    )
+    none_s = [ln for ln in none_txt.splitlines() if ln.startswith("S:")]
+    assert none_s[0].rstrip().endswith("|g4"), none_s[0]
+    assert none_s[1].rstrip().endswith("||a4"), none_s[1]
 
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
@@ -1159,10 +1173,11 @@ def test_roundtrip_mvsa_mxl_mvsa_pitch_vsa(tmp_path: Path):
     imported = import_score_to_mvsa(mxl, pitch="vsa", octave_style="@oct")
     diags = validate_mvsa_text(imported)
     assert not [d for d in diags if d.severity == "error"], diags
-    # Elke stemregel eindigt met absolute eindanker (laatste systeem).
+    # Elke stemregel eindigt met a–g-eindanker (relatief @oct).
     for letter in "SATB":
         last = [ln for ln in imported.splitlines() if ln.startswith(f"{letter}:")][-1]
-        assert re.search(r"\|\|[a-gA-G#b]+\d\s*$", last), last
+        assert re.search(r"\|\|[a-gA-G#b]+[+-]?\d*\s*$", last), last
+        assert not re.search(r"\|\|[a-gA-G#b]+\d\s*$", last), last
 
     after = export_mvsa_to_musicxml(imported)
     assert _all_pitches(before) == _all_pitches(after)
@@ -1524,9 +1539,9 @@ def test_mirror_aligns_long_tenor_by_duration_not_lyric_spacer():
     text = score_to_mvsa(score, pitch_form="abc")
     t_line = next(ln for ln in text.splitlines() if ln.startswith("T:"))
     body = t_line.split("|", 1)[0].removeprefix("T:").strip()
-    # Hold after c4&- for S's f4; Bb3 only then (not inside the melisma).
-    assert re.search(r"c4\s*&\s*-\s+-\s+Bb3\s+c4\s+d4", body), body
-    assert "c4&- Bb3" not in body.replace(" ", "")
+    # Hold after c&- for S's f; Bb only then (not inside the melisma).
+    assert re.search(r"c-?\s*&\s*-\s+-\s+[Bb]b-?\s+c-?\s+d-?", body), body
+    assert "c&-Bb" not in body.replace(" ", "").replace("-", "")
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 
@@ -1593,7 +1608,7 @@ def test_leading_hyphen_lyric_keeps_melisma_followers():
     s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
     assert "(- le)" not in l_line
     assert re.search(r"al-?le", l_line, re.I), l_line
-    assert re.search(r"f4\s*&\s*g4", s_line, re.I), s_line
+    assert re.search(r"f\+?\s*&\s*g\+?", s_line, re.I), s_line
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
     # Roundtrip durations: full 4/4 on S.
@@ -1676,7 +1691,7 @@ def test_mirror_pads_understem_slots_by_duration_not_tail_holds():
     b_line = next(ln for ln in text.splitlines() if ln.startswith("B:"))
     # First position under uit.&.&.&. : three D holds then E (duration-weighted).
     first = b_line.split("|", 1)[0]
-    assert re.search(r"d3\s*&\s*-\s*&\s*-\s*&\s*e3", first, re.I), first
+    assert re.search(r"d\+?\s*&\s*-\s*&\s*-\s*&\s*e\+?", first, re.I), first
     exported = export_mvsa_to_musicxml(text, layout="playback")
     root = ET.fromstring(exported)
     for el in root.iter():
@@ -1782,11 +1797,11 @@ def test_mirror_keeps_understem_pitch_changes_beyond_s_slots():
     b_line = next(ln for ln in text.splitlines() if ln.startswith("B:"))
     s_line = next(ln for ln in text.splitlines() if ln.startswith("S:"))
     l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
-    # Second L-position (beel): T must keep A→B; B must keep F→G.
-    assert re.search(r"a3\s*&\s*b3|-\s*&\s*b3", t_line, re.I), t_line
-    assert re.search(r"f3\s*&\s*g3|-\s*&\s*g3", b_line, re.I), b_line
-    # S expanded with hold so slot counts match (f4&-).
-    assert re.search(r"f4\s*&\s*-", s_line, re.I), s_line
+    # Second L-position (beel): T must keep A→B; B must keep F→G (relatief).
+    assert re.search(r"a[+-]?\s*&\s*b|-\s*&\s*b\b", t_line, re.I), t_line
+    assert re.search(r"f[+-]?\s*&\s*g|-\s*&\s*g\b", b_line, re.I), b_line
+    # S expanded with hold so slot counts match (f&-).
+    assert re.search(r"f[+-]?\s*&\s*-", s_line, re.I), s_line
     assert re.search(r"beel[_~.]?\s*&", l_line, re.I), l_line
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
@@ -1848,8 +1863,8 @@ def test_mirror_aligns_bass_without_lyrics_by_duration():
     text = score_to_mvsa(score, pitch_form="abc")
     b_line = next(ln for ln in text.splitlines() if ln.startswith("B:"))
     body = b_line.split("|", 1)[0].removeprefix("B:").strip()
-    # half C covers g4&a4 → c3&-; then f3 for "mijn", Bb2 for "ziel".
-    assert re.search(r"c3\s*&\s*-\s+f3\s+Bb2", body), body
+    # half C covers g&a → c&-; then f for "mijn", Bb for "ziel" (relatief).
+    assert re.search(r"c[+-]?\s*&\s*-\s+f[+-]?\s+[Bb]b[+-]?", body), body
     diags = validate_mvsa_text(text)
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 

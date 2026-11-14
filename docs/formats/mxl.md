@@ -1,44 +1,94 @@
 # `.mxl` / `.musicxml` — MusicXML
 
 Compressed MusicXML (`.mxl`) of platte XML (`.musicxml`). Gebruikt voor
-**Coria-playback** (`playback`-profiel) en partituurbewerking
-(`engraving`).
+**Coria-playback** (`playback`) en partituurbewerking (`engraving`). Start:
+[contract-index](contract-index.md).
 
-## Wat hoort hier
+## Identiteit
 
-| Onderwerp                | Waar                                                                                            |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| Export vanuit `.vsa`     | [`vsa mxl`](../reference/cli/musicxml.md), [MusicXML-export](../guides/musicxml-export.md)      |
-| Export vanuit `.mvsa`    | [`mvsa mxl`](../reference/cli/mvsa.md#mvsa-mxl)                                                 |
-| Import → `.mvsa`         | [`mxl mvsa`](../reference/cli/mxl.md)                                                           |
-| → `.mscz`                | [`mxl mscz`](../reference/cli/mxl.md)                                                           |
-| Normatieve renderdetails | [Rendering — MusicXML](../specification/rendering.md#musicxml-export)                           |
+| Veld     | Waarde                                                 |
+| -------- | ------------------------------------------------------ |
+| Extensie | `.mxl` / `.musicxml` / `.xml`                          |
+| Rol      | Standaardproduct (meta-key `mxl`) of bewerkingsbestand |
+| Sibling  | `{stam}.{bron}.mxl` (bijv. `lied.mvsa.mxl`)            |
+| Wanneer  | Coria-oefenen / MusicXML-brug                          |
 
 Dit is **geen** herdefinitie van de MusicXML-standaard: we documenteren
 **onze** export-/importprofielen.
 
-**Normaalvorm (checklist):**
-[canonieke checklists — MXL](canonical-checklists.md#checklist-mxl-coria-playback)
-(Coria / `playback`) — **vier aparte parts** S/A/T/B met lyrics per part;
-**piano-MIDI** op elke part (`keyboard.piano.grand`, M8);
-**geen** print-recite-collapse (M10). Same-pitch **melisma** samentrekken
-(M5a): één lettergreep op dezelfde toon → **één** noot (gestipte ELM’s zoals
-`_.` blijven intact; Coria stript ties). Semantiek deelt de kern met MSCZ;
-layout divergeert (partituur = twee balken, I1 tie-keten zonder gestipte
-collapse-sommen).
-Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
+## Canoniciteit
 
-**Uitvoeraanwijzingen uit `.mvsa`:** zie
-[uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md).
-Cesuur `[//]` of `[//`+ELM`]` → `<caesura/>` / `<caesura elm="…"/>`
-(Coria: rust met die ELM-duur, default kwart, vóór sanitize). Dynamiek
-`[p]`/`[mf]`/… → `<dynamics>` (playback alle parts; partituur sopraan).
-`[adem]` / `[ferm]` → breath-mark / fermata op het blad; Coria stript
-`<notations>` (geen aparte speelduur). Crescendo/diminuendo
-`[cresc]…[/cresc]` / `[dim]…[/dim]` → `<wedge>` (playback alle parts;
-partituur sopraan; alias `[decresc]` → `[dim]` bij normalize).
-`[rit]` / `[atempo]` → zichtbare `<words>`; `@tempo` → `sound tempo`
-(optioneel tempo-woord zichtbaar).
+Canoniek (Coria/playback) = checklist **M\*** —
+[canonical-checklists §MXL](canonical-checklists.md#checklist-mxl-coria-playback):
+vier parts S/A/T/B; piano-MIDI per part (M8); enz. C1–C4:
+[contract-index §C\*](contract-index.md#canoniciteit-en-conversiegates-c).
+
+## Inhoud en metadata
+
+| Onderwerp                       | Regel                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Frontmatter                     | n.v.t. (XML)                                                                                                |
+| Encoding                        | UTF-8 XML                                                                                                   |
+| Uitvoeraanwijzingen uit `.mvsa` | [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md) (cesuur, dynamiek, cresc/dim, tempo, …) |
+
+## Syllabificatie
+
+Zing-deling komt uit de canonieke bron. Export default **zonder** stille
+syllabify; `--syllabify` = expliciete uitzondering (C3). Op playback:
+syllabic begin/middle/end waar van toepassing. Hub:
+[syllabificatie](syllabificatie.md).
+
+## Melisma en binding
+
+| Id     | Regel                                                                               |
+| --     | -----                                                                               |
+| M5a    | Same-pitch melisma samentrekken (één lettergreep → één noot; gestipte ELM’s intact) |
+| Hyphen | ≠ melisma (L3)                                                                      |
+
+## Transliteratie
+
+n.v.t. als tweede lyric-laag in standaard playback-`.mxl`.
+
+## Stemmen en partijen
+
+**Vier aparte parts** S/A/T/B met lyrics per part (M2) — anders dan
+partituur-`.mscz` (twee balken).
+
+## Leesbaarheid
+
+Playback-layout ≠ blad. Geen partituur-R\* op Coria-`.mxl`. Renderdetails:
+[Rendering — MusicXML](../specification/rendering.md#musicxml-export).
+
+## Herkomst
+
+Product: merge key `mxl` in [products-meta](products-meta.md).
+
+## Conversies
+
+| Richting                        | CLI                                 | Opmerking             |
+| ------------------------------- | ----------------------------------- | --------------------- |
+| `.vsa`/`.mvsa`/`.mscz` → `.mxl` | `vsa mxl` / `mvsa mxl` / `mscz mxl` | C3/C4                 |
+| `.mxl` → `.mvsa`                | `mxl mvsa`                          | Werkbank-uitzondering |
+| `.mxl` → `.mscz`                | `mxl mscz`                          |                       |
+| Normalize                       | `mxl normalize`                     | Naar M\*              |
+
+## Validatie
+
+[`mxl validate`](../reference/cli/mxl.md) — M2/M8 e.d. Zelfde
+checklist als **C4** na `vsa`/`mvsa`/`mscz mxl` en `products` (profiel
+`mono` voor `.vsa`, `satb` anders); zie
+[contract-index §C4](contract-index.md#canoniciteit-en-conversiegates-c).
+
+---
+
+## Recite en print-collapse (type-specifiek)
+
+| Id  | Regel                                                                          |
+| --  | -----                                                                          |
+| M10 | **Geen** print-recite-collapse / breve: elke lettergreep een klinkende noot    |
+| S8  | Print-collapse hoort bij partituur (`.mscz` / Score-IR), niet bij Coria-`.mxl` |
+
+Oefenhoek-Coria-transforms: `VSA-demo/scripts/mscz-product-transforms.md`.
 
 ## Typische commando’s
 

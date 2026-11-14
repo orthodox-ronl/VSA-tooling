@@ -101,4 +101,6 @@ def test_vsa_products_mxl_is_coria_finalized(tmp_path: Path) -> None:
     xml = _score_xml_from_mxl(mxl)
     assert "<!DOCTYPE" not in xml
     texts = re.findall(r"<text[^>]*>([^<]*)</text>", xml)
-    assert "Hei-" in texts
+    # Geen stille products-syllabify: bron-deling blijft (geen auto ``Hei-``).
+    assert "Hei-" not in texts
+    assert texts  # lyrics aanwezig

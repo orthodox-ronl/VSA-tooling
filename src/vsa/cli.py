@@ -140,6 +140,8 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "  kuiser PATH [PATH…] [-o OUTPUT] [--check] [--pitch …]\n"
             "      Authoring-kuiser: strepen syncen, woordstreep-spatie, align "
             "(+ optioneel pitch).\n"
+            "  syllabify PATH [--dry-run] [--extension EXT] [--unsyllabify]\n"
+            "      Soft ``-`` in L-recite/cadens (Pyphen + dictionary; sync-veilig).\n"
             "\n"
             "voorbeelden:\n"
             "  mvsa validate examples\\mvsa\n"
@@ -152,6 +154,7 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "  mvsa transpose lied.mvsa --to F4 -o out.mvsa\n"
             "  mvsa kuiser lied.mvsa\n"
             "  mvsa kuiser examples\\mvsa --check\n"
+            "  mvsa syllabify examples\\mvsa\\syllabificatie-recite-mini.mvsa\n"
             "\n"
             "Andere bronnen: mxl … / mscz …\n"
             "Score → .mvsa: mxl mvsa … / mscz mvsa …\n"
@@ -162,20 +165,22 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "mvsa ogg -h | mvsa wav -h | "
             "mvsa score-ir -h | "
             "mvsa normalize -h | "
-            "mvsa transpose -h | mvsa kuiser -h"
+            "mvsa transpose -h | mvsa kuiser -h | mvsa syllabify -h"
         ),
     )
     mvsa_sub = parser.add_subparsers(
         dest="mvsa_command",
         required=True,
-        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,text,vsa,import,products}",
+        metavar="{validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,normalize,transpose,kuiser,syllabify,text,vsa,import,products}",
     )
     m_validate = mvsa_sub.add_parser(
         "validate",
         help="Valideer .mvsa (structuur + sync-telling; draft-spec).",
         description=(
             "Controleer .mvsa-bestanden op structuur, maatstrepen en "
-            "sync-telling L tegen stemmen (draft-spec docs/specification-mvsa/)."
+            "sync-telling L tegen stemmen (draft-spec docs/specification-mvsa/). "
+            "Ook L-lyrics tegen de canonieke syllable-dictionary "
+            "(warning; zie docs/formats/syllabificatie.md)."
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
@@ -189,6 +194,20 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         help=(
             "Eis genormaliseerde YAML-zoektekst gelijk aan body "
             "(catalogusbronnen; zie docs/formats/zoektekst.md)."
+        ),
+    )
+    m_validate.add_argument(
+        "--config",
+        default=None,
+        help="Pad naar vsa.toml (o.a. [syllabificatie] dictionary).",
+    )
+    m_validate.add_argument(
+        "--syllable-dictionary",
+        metavar="PAD",
+        default=None,
+        help=(
+            "Pad naar canonieke syllable_dictionary.nl.txt "
+            "(overschrijft vsa.toml [syllabificatie] dictionary)."
         ),
     )
     m_musicxml = mvsa_sub.add_parser(
@@ -242,6 +261,9 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     _add_translit_args(m_musicxml, with_as_parts=True)
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_mmxl
+
+    _add_c3_mmxl(m_musicxml)
     m_mscz = mvsa_sub.add_parser(
         "mscz",
         help="Exporteer .mvsa naar MuseScore (.mscz) via MusicXML.",
@@ -318,6 +340,9 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     )
     _add_translit_args(m_mscz)
     _add_partituur_style_args(m_mscz)
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_mmscz
+
+    _add_c3_mmscz(m_mscz)
     m_pdf = mvsa_sub.add_parser(
         "pdf",
         help="Exporteer .mvsa naar print-PDF voor zangers.",
@@ -488,6 +513,9 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         ),
     )
     _add_partituur_style_args(m_svg)
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_msvg
+
+    _add_c3_msvg(m_svg)
     _add_mvsa_audio_format_parsers(mvsa_sub)
     m_normalize = mvsa_sub.add_parser(
         "normalize",
@@ -529,16 +557,23 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         choices=["preserve", "doremi", "a-g", "abc", "vsa", "ag-vsa"],
         default=None,
         help=(
-            "Doel-spelling op stemregels. Default bij .mvsa-bron: preserve "
-            "(namen ongewijzigd). doremi / a-g / vsa / ag-vsa herschrijven "
-            "hoogten; abc is alias van a-g."
+            "Doel-spelling op stemregels. Default bij .mvsa-bron: preserve. "
+            "doremi = laddergraden t.o.v. @do/@oct; "
+            "a-g (alias abc) = toonnamen (octaaf via --octave-style); "
+            "vsa = eerste toon doremi + EHM; "
+            "ag-vsa = per systeem eerste a–g + EHM + eindanker."
         ),
     )
     m_normalize.add_argument(
         "--octave-style",
-        choices=["@oct", "marker"],
+        choices=["@oct", "marker", "none"],
         default="@oct",
-        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+        help=(
+            "Octaafschrijfwijze voor a–g/ag-vsa: "
+            "@oct = relatief (Bb, c+; default); "
+            "none = absoluut (Bb4; niet met --pitch doremi); "
+            "marker = nog niet geïmplementeerd."
+        ),
     )
     m_normalize.add_argument(
         "--no-align",
@@ -588,13 +623,20 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--pitch",
         choices=["doremi", "a-g", "abc", "vsa", "ag-vsa"],
         default="ag-vsa",
-        help="Spelling op stemregels na transpositie (default: ag-vsa).",
+        help=(
+            "Spelling na transpositie (default: ag-vsa). "
+            "doremi / a-g / vsa / ag-vsa; a–g-octaaf via --octave-style."
+        ),
     )
     m_transpose.add_argument(
         "--octave-style",
-        choices=["@oct", "marker"],
+        choices=["@oct", "marker", "none"],
         default="@oct",
-        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+        help=(
+            "Octaafschrijfwijze voor a–g/ag-vsa: "
+            "@oct = relatief (default); none = absoluut (niet met doremi); "
+            "marker = nog niet klaar."
+        ),
     )
     m_transpose.add_argument(
         "--no-align",
@@ -659,6 +701,9 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "map). Met PATH: alleen bij precies één bron."
         ),
     )
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c4_msir
+
+    _add_c4_msir(m_score_ir)
     m_kuiser = mvsa_sub.add_parser(
         "kuiser",
         help="Kuiser: canonieke authoring-vorm (strepen, woordstreep, align).",
@@ -706,20 +751,97 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         choices=["preserve", "doremi", "a-g", "abc", "vsa", "ag-vsa"],
         default="preserve",
         help=(
-            "Doel-spelling op stemregels (default: preserve). "
-            "Zelfde keuzes als normalize."
+            "Doel-spelling (default: preserve). Zelfde als normalize: "
+            "doremi / a-g / vsa / ag-vsa."
         ),
     )
     m_kuiser.add_argument(
         "--octave-style",
-        choices=["@oct", "marker"],
+        choices=["@oct", "marker", "none"],
         default="@oct",
-        help="Schrijfoctaaf-stijl (marker nog niet geïmplementeerd).",
+        help=(
+            "Octaafschrijfwijze voor a–g/ag-vsa: "
+            "@oct = relatief (default); none = absoluut (niet met doremi)."
+        ),
     )
     m_kuiser.add_argument(
         "--no-align",
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
+    )
+    m_syllabify = mvsa_sub.add_parser(
+        "syllabify",
+        help=(
+            "Zet of verwijder lettergreepstreepjes in .mvsa L-tekst "
+            "(recite + cadens; sync-veilig)."
+        ),
+        description=(
+            "Schrijfhulp: soft ``-`` in L-recite ``(…)`` en uitbreiding van "
+            "ongesplitste cadens-woorden naar hyphen-ketens, met ``-``-holds "
+            "op stemmen zodat sync klopt. Zelfde Pyphen/dictionary als "
+            "``vsa syllabify``. Norm: docs/formats/syllabificatie.md."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "voorbeelden:\n"
+            "  mvsa syllabify examples\\mvsa\\syllabificatie-recite-mini.mvsa\n"
+            "  mvsa syllabify lied.mvsa --dry-run\n"
+            "  mvsa syllabify lied.mvsa --extension .syl.mvsa\n"
+            "  mvsa syllabify lied.mvsa --unsyllabify --dry-run"
+        ),
+    )
+    m_syllabify.add_argument(
+        "path",
+        help=".mvsa-bestand of map (recursief alle .mvsa).",
+    )
+    m_syllabify.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Toon resultaat zonder bestanden te schrijven (default: schrijf in-place).",
+    )
+    m_syllabify.add_argument(
+        "--in-place",
+        action="store_true",
+        help=(
+            "Schrijf terug naar elk bronbestand (default-gedrag; "
+            "flag blijft voor expliciete scripts)."
+        ),
+    )
+    m_syllabify.add_argument(
+        "--extension",
+        metavar="EXT",
+        default=None,
+        help=(
+            "Schrijf naast het bronbestand met deze extensie "
+            "(bijv. .syl.mvsa) i.p.v. in-place."
+        ),
+    )
+    m_syllabify.add_argument(
+        "--unsyllabify",
+        action="store_true",
+        help=(
+            "Verwijder soft ``-`` binnen recite ``(…)``. "
+            "Cadens-ketens worden niet samengevoegd."
+        ),
+    )
+    m_syllabify.add_argument(
+        "--no-align",
+        action="store_true",
+        help="Sla kolomuitlijning na herschrijven over.",
+    )
+    m_syllabify.add_argument(
+        "--config",
+        default=None,
+        help="Pad naar vsa.toml (o.a. [syllabificatie] dictionary).",
+    )
+    m_syllabify.add_argument(
+        "--syllable-dictionary",
+        metavar="PAD",
+        default=None,
+        help=(
+            "Pad naar canonieke syllable_dictionary.nl.txt "
+            "(overschrijft vsa.toml [syllabificatie] dictionary)."
+        ),
     )
     m_text = mvsa_sub.add_parser(
         "text",
@@ -744,6 +866,9 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "Alleen bij precies één bronbestand."
         ),
     )
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_mvsa_text
+
+    _add_c3_mvsa_text(m_text)
     m_vsa = mvsa_sub.add_parser(
         "vsa",
         help="Extraheer eenstemmige .mvsa.vsa uit .mvsa (E1–E6).",
@@ -808,6 +933,15 @@ def _build_parser():
     validate.add_argument("path")
     validate.add_argument("--config", default=None)
     validate.add_argument(
+        "--syllable-dictionary",
+        metavar="PAD",
+        default=None,
+        help=(
+            "Pad naar canonieke syllable_dictionary.nl.txt "
+            "(overschrijft vsa.toml [syllabificatie] dictionary)."
+        ),
+    )
+    validate.add_argument(
         "--summary",
         action="store_true",
         help="Compacte eenregelige foutmeldingen (zonder broncontext).",
@@ -854,6 +988,9 @@ def _build_parser():
     )
     svg.add_argument("--config", default=None)
     svg.add_argument("--max-line-width", type=float, default=None)
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_arg
+
+    _add_c3_arg(svg)
     _add_translit_args(svg)
 
     from .street_products import add_products_parser as _add_vsa_products_parser
@@ -875,6 +1012,9 @@ def _build_parser():
         help="Schrijf ook from-ir MusicXML (zonder PATH: sibling).",
     )
     vsa_score_ir.add_argument("--musescore", default=None)
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_sir
+
+    _add_c3_sir(vsa_score_ir)
 
     vsa_mscz = subparsers.add_parser(
         "mscz",
@@ -883,6 +1023,9 @@ def _build_parser():
     vsa_mscz.add_argument("path", help=".vsa-bestand of map (recursief).")
     vsa_mscz.add_argument("-o", "--output", default=None)
     vsa_mscz.add_argument("--musescore", default=None)
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_vmscz
+
+    _add_c3_vmscz(vsa_mscz)
 
     process = subparsers.add_parser("process")
     process.add_argument("input")
@@ -942,16 +1085,18 @@ def _build_parser():
         "path",
         help="VSA-bestand (.vsa) of map (recursief alle .vsa).",
     )
-    syllabify_out = syllabify.add_mutually_exclusive_group()
-    syllabify_out.add_argument(
+    syllabify.add_argument(
         "--dry-run",
         action="store_true",
-        help="Toon resultaat zonder bestanden te schrijven (default zonder schrijfmodus).",
+        help="Toon resultaat zonder bestanden te schrijven (default: schrijf in-place).",
     )
-    syllabify_out.add_argument(
+    syllabify.add_argument(
         "--in-place",
         action="store_true",
-        help="Schrijf het resultaat terug naar elk bronbestand.",
+        help=(
+            "Schrijf terug naar elk bronbestand (default-gedrag; "
+            "flag blijft voor expliciete scripts)."
+        ),
     )
     syllabify.add_argument(
         "--extension",
@@ -959,8 +1104,8 @@ def _build_parser():
         default=None,
         help=(
             "Schrijf naast het bronbestand met deze extensie "
-            "(bijv. .syl.vsa of syl.vsa: xyz.vsa wordt xyz.syl.vsa). "
-            "Niet combineren met --in-place."
+            "(bijv. .syl.vsa of syl.vsa: xyz.vsa wordt xyz.syl.vsa) "
+            "i.p.v. in-place."
         ),
     )
     syllabify.add_argument(
@@ -969,6 +1114,20 @@ def _build_parser():
         help=(
             "Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes; "
             "scope-inhoud en ELM-'-' blijven staan)."
+        ),
+    )
+    syllabify.add_argument(
+        "--config",
+        default=None,
+        help="Pad naar vsa.toml (o.a. [syllabificatie] dictionary).",
+    )
+    syllabify.add_argument(
+        "--syllable-dictionary",
+        metavar="PAD",
+        default=None,
+        help=(
+            "Pad naar canonieke syllable_dictionary.nl.txt "
+            "(overschrijft vsa.toml [syllabificatie] dictionary)."
         ),
     )
 
@@ -1006,6 +1165,9 @@ def _build_parser():
         default=None,
         help="Pad naar MuseScore (alleen bij .mscz; default: auto).",
     )
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_text
+
+    _add_c3_text(text_cmd)
 
     zoektekst_cmd = subparsers.add_parser(
         "zoektekst",
@@ -1114,9 +1276,14 @@ def _build_parser():
         action="store_true",
         help=(
             "Voeg tijdelijke lettergreepstreepjes toe vóór export "
-            "(canonieke .vsa blijft ongewijzigd). Zelfde als vsa products."
+            "(canonieke .vsa blijft ongewijzigd). C3-uitzondering voor "
+            "deling; bronvalidate blijft gelden tenzij "
+            "--allow-noncanonical."
         ),
     )
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c3_mxl
+
+    _add_c3_mxl(musicxml)
 
     _add_vsa_audio_format_parsers(subparsers)
 
@@ -1190,7 +1357,8 @@ def _run(args):
         )
         return 1
 
-    config = load_config(getattr(args, "config", None))
+    config = load_config(_resolve_config_arg(getattr(args, "config", None)))
+    _apply_syllable_dictionary_setting(args, config)
 
     if args.command == "validate":
         return _cmd_validate(args, config)
@@ -1216,6 +1384,9 @@ def _run(args):
             skip_svg=bool(getattr(args, "skip_svg", False)),
             quiet=bool(getattr(args, "quiet", False)),
             musescore=musescore,
+            allow_noncanonical=bool(
+                getattr(args, "allow_noncanonical", False)
+            ),
         )
 
     if args.command == "process":
@@ -1276,7 +1447,37 @@ def _version():
     return "0.2.0"
 
 
+def _resolve_config_arg(explicit: str | None) -> str | None:
+    """Expliciete ``--config``, anders ``vsa.toml`` in de werkmap indien aanwezig."""
+    if explicit:
+        return explicit
+    candidate = Path.cwd() / "vsa.toml"
+    return str(candidate) if candidate.is_file() else None
+
+
+def _apply_syllable_dictionary_setting(args, config) -> None:
+    from .syllable_dictionary import apply_syllable_dictionary_from_config
+
+    apply_syllable_dictionary_from_config(
+        cli_path=getattr(args, "syllable_dictionary", None),
+        config_value=config.syllabificatie.dictionary,
+        config_dir=config.config_dir,
+    )
+
+
 def _cmd_validate(args, config):
+    path = Path(args.path)
+    if path.is_file() and _reject_wrong_street_source(
+        "vsa", "validate", path, wrong_suffix=".mvsa"
+    ):
+        return 1
+    if path.is_file() and _reject_non_street_file(
+        "vsa",
+        "validate",
+        path,
+        allowed=(".vsa", ".md", ".markdown"),
+    ):
+        return 1
     result = validate_path(args.path, config=config)
 
     if result.messages:
@@ -1356,6 +1557,8 @@ def _cmd_blocks(args):
 
 
 def _cmd_svg(args, config):
+    from .canonicity_gate import cli_gate_source
+
     files = _cli_collect_sources(args.input, (".vsa",))
     if files is None:
         return 1
@@ -1376,6 +1579,9 @@ def _cmd_svg(args, config):
 
     exit_code = 0
     for input_path in files:
+        if cli_gate_source(input_path, args, config=config):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -1567,9 +1773,14 @@ def _cmd_text(args) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args):
         return 1
+    from .canonicity_gate import cli_gate_source
+
     musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if getattr(args, "output", None)
@@ -1610,10 +1821,10 @@ def _cmd_text(args) -> int:
 
 def _cmd_syllabify(args) -> int:
     source_path = Path(args.path)
-    if args.in_place and args.extension:
+    if args.extension and args.in_place:
         emit_cli_error(
             "Gebruik --in-place of --extension, niet beide.",
-            hint="Kies één schrijfmodus; zie vsa syllabify -h.",
+            hint="Zonder --extension schrijft syllabify standaard in-place.",
         )
         return 1
 
@@ -1628,9 +1839,8 @@ def _cmd_syllabify(args) -> int:
             )
             return 1
 
-    write_mode = bool(args.in_place or extension)
-    # --dry-run forceert geen schrijven; zonder schrijfmodus is default dry-run.
-    dry_run = args.dry_run or not write_mode
+    # Uniform met kuiser/zoektekst: default schrijven; --dry-run = preview.
+    dry_run = bool(args.dry_run)
 
     try:
         files = iter_vsa_files(source_path)
@@ -1638,14 +1848,20 @@ def _cmd_syllabify(args) -> int:
         emit_cli_error(
             "Pad niet gevonden.",
             path=source_path,
-            hint="Controleer of het bestand of de map bestaat.",
+            hint=(
+                "Controleer of het pad bestaat, of geef een catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
         )
         return 1
     except ValueError as exc:
         emit_cli_exception(
             exc,
             path=source_path,
-            hint="Geef een .vsa-bestand of een map met .vsa-bestanden.",
+            hint=(
+                "Geef een .vsa-bestand, map, of catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
         )
         return 1
 
@@ -1689,6 +1905,22 @@ def _cmd_syllabify(args) -> int:
             any_error = True
             continue
 
+        if not args.unsyllabify:
+            from .syllabify import SyllabifyResult
+
+            dict_rc, gated_text = _syllabify_dictionary_gate(
+                file_path, result.text
+            )
+            if gated_text != result.text:
+                result = SyllabifyResult(
+                    text=gated_text,
+                    changed=True,
+                    replacements=result.replacements,
+                )
+            if dict_rc != 0:
+                any_error = True
+                continue
+
         status = (
             f"{result.replacements} lettergreepstreepje(s) {verb}"
             if result.changed
@@ -1716,6 +1948,75 @@ def _cmd_syllabify(args) -> int:
             print(f"{file_path} -> {target}: {status}")
 
     return 1 if any_error else 0
+
+
+def _syllabify_dictionary_gate(
+    file_path: Path, source_text: str
+) -> tuple[int, str]:
+    """Dictionary-check; op TTY corrigeren (bron + lijst). Retourneert (rc, tekst)."""
+    from .parser import Parser
+    from .syllable_dict_check import (
+        CODE_MISMATCH,
+        CODE_UNKNOWN,
+        apply_replacements_to_source,
+        find_dictionary_syllable_issues,
+        is_interactive_stdin,
+        prompt_dictionary_fixes,
+    )
+    from .vsa_comments import strip_vsa_html_comments_with_offset_map
+    from .yaml_frontmatter import parse_vsa_frontmatter
+
+    _fm, body = parse_vsa_frontmatter(source_text)
+    body, _ = strip_vsa_html_comments_with_offset_map(body)
+    try:
+        document = Parser(body).parse()
+    except Exception as exc:
+        emit_cli_exception(
+            exc,
+            path=file_path,
+            hint="Controleer de VSA-notatie met: vsa validate <pad>",
+        )
+        return 1, source_text
+
+    findings = find_dictionary_syllable_issues(document, source_text=body)
+    if is_interactive_stdin():
+        actionable = [
+            f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
+        ]
+        if actionable:
+            from .input_paths import source_id_for_prompt
+
+            session = prompt_dictionary_fixes(
+                actionable, source_id=source_id_for_prompt(file_path)
+            )
+            if session.replacements:
+                source_text = apply_replacements_to_source(
+                    source_text, session.replacements
+                )
+                _fm2, body = parse_vsa_frontmatter(source_text)
+                body, _ = strip_vsa_html_comments_with_offset_map(body)
+                try:
+                    document = Parser(body).parse()
+                except Exception:
+                    pass
+                findings = find_dictionary_syllable_issues(
+                    document, source_text=body
+                )
+            else:
+                findings = find_dictionary_syllable_issues(
+                    document, source_text=body
+                )
+
+    hard = [f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}]
+    if not hard:
+        return 0, source_text
+    for finding in hard:
+        emit_cli_error(
+            finding.message_nl,
+            path=file_path,
+            hint=finding.hint_nl,
+        )
+    return 1, source_text
 
 
 def _cmd_resolve_catalogus(args) -> int:
@@ -1793,11 +2094,16 @@ def _cmd_musicxml(args, config):
     if args.musicxml_profile:
         cli_overrides["musicxml-profile"] = args.musicxml_profile
 
+    from .canonicity_gate import cli_gate_source
+
     default_suffix = _musicxml_batch_suffix(args)
     syllabify = bool(getattr(args, "syllabify", False))
     exit_code = 0
     written = 0
     for path in files:
+        if cli_gate_source(path, args, config=config):
+            exit_code = 1
+            continue
         if args.output:
             out = Path(args.output)
             if out.suffix.lower() not in _KNOWN_SUFFIXES:
@@ -1810,6 +2116,27 @@ def _cmd_musicxml(args, config):
         if rc != 0:
             exit_code = 1
             continue
+        # C4: Coria/playback-checklist (niet bij engraving-profiel).
+        profile = (args.musicxml_profile or "playback").lower()
+        if profile != "engraving":
+            from .canonicity_gate import (
+                NonCanonicalTargetError,
+                emit_noncanonical_error,
+                require_canonical_mxl_target,
+            )
+
+            try:
+                require_canonical_mxl_target(
+                    out,
+                    bron=path,
+                    allow_noncanonical=bool(
+                        getattr(args, "allow_noncanonical", False)
+                    ),
+                )
+            except NonCanonicalTargetError as exc:
+                emit_noncanonical_error(exc)
+                exit_code = 1
+                continue
         written += 1
         print(f"Geschreven: {out}")
         meta = merge_street_product_meta(path, {"mxl": out})
@@ -1845,9 +2172,14 @@ def _cmd_audio(args, config) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mxl"):
         return 1
+    from .canonicity_gate import cli_gate_source
+
     musescore = Path(args.musescore) if args.musescore else None
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args, config=config):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -2350,6 +2682,9 @@ def _add_vsa_audio_format_parsers(subparsers) -> None:
             default=None,
             help="Bewaar ook het tussenliggende playback-.mxl op dit pad.",
         )
+        from .canonicity_gate import add_allow_noncanonical_arg
+
+        add_allow_noncanonical_arg(parser)
 
 
 def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
@@ -2419,6 +2754,9 @@ def _add_mvsa_audio_format_parsers(mvsa_sub) -> None:
             default=None,
             help="Bewaar ook het tussenliggende playback-.mxl op dit pad.",
         )
+        from .canonicity_gate import add_allow_noncanonical_arg
+
+        add_allow_noncanonical_arg(parser)
 
 
 def run_standalone_mvsa(argv: list[str] | None = None) -> int:
@@ -2451,6 +2789,8 @@ def _cmd_mvsa(args) -> int:
         return _cmd_mvsa_score_ir(args)
     if getattr(args, "mvsa_command", None) == "kuiser":
         return _cmd_mvsa_kuiser(args)
+    if getattr(args, "mvsa_command", None) == "syllabify":
+        return _cmd_mvsa_syllabify(args)
     if getattr(args, "mvsa_command", None) == "text":
         return _cmd_mvsa_text(args)
     if getattr(args, "mvsa_command", None) == "vsa":
@@ -2471,6 +2811,9 @@ def _cmd_mvsa(args) -> int:
             skip_svg=bool(getattr(args, "skip_svg", False)),
             quiet=bool(getattr(args, "quiet", False)),
             musescore=musescore,
+            allow_noncanonical=bool(
+                getattr(args, "allow_noncanonical", False)
+            ),
         )
     # required=True op subparsers voorkomt dit normaal; fallback voor duidelijkheid.
     print(
@@ -2483,17 +2826,19 @@ def _cmd_mvsa(args) -> int:
         "  mvsa pdf PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
         "  mvsa svg PATH [-o OUTPUT] [--section SECTION] [--keep-mscz PATH]\n"
         "  mvsa mp3|ogg|wav PATH [-o OUTPUT]\n"
-        "  mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
-        "  mvsa transpose PATH --to TONIC [-o OUTPUT]\n"
-        "  mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
-        "Score → .mvsa: mxl mvsa … / mscz mvsa …\n"
-        "Hulp: mvsa -h | mvsa kuiser -h",
+            "  mvsa normalize PATH [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] [-o OUTPUT]\n"
+            "  mvsa transpose PATH --to TONIC [-o OUTPUT]\n"
+            "  mvsa kuiser PATH [PATH…] [--check] [-o OUTPUT]\n"
+            "  mvsa syllabify PATH [--dry-run] [--extension EXT]\n"
+            "Score → .mvsa: mxl mvsa … / mscz mvsa …\n"
+            "Hulp: mvsa -h | mvsa kuiser -h | mvsa syllabify -h",
         file=sys.stderr,
     )
     return 1
 
 
 def _cmd_mvsa_validate(args) -> int:
+    from .config import load_config
     from .mvsa_validate import (
         MvsaDiagnostic,
         collect_mvsa_files,
@@ -2502,13 +2847,37 @@ def _cmd_mvsa_validate(args) -> int:
     )
     from .zoektekst import check_zoektekst
 
+    config = load_config(_resolve_config_arg(getattr(args, "config", None)))
+    _apply_syllable_dictionary_setting(args, config)
+
     path = Path(args.path)
-    if not path.exists():
-        emit_cli_error("Pad niet gevonden.", path=path, hint="Controleer of het pad bestaat.")
+    from .input_paths import InputPathError, looks_like_catalogus_id
+
+    if not path.exists() and not looks_like_catalogus_id(args.path):
+        emit_cli_error(
+            "Pad niet gevonden.",
+            path=path,
+            hint=(
+                "Controleer of het pad bestaat, of geef een catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
+        )
         return 1
-    files = collect_mvsa_files(path)
+    try:
+        files = collect_mvsa_files(path if path.exists() else args.path)
+    except InputPathError as exc:
+        emit_cli_error(
+            str(exc),
+            path=path,
+            hint="Geef een .mvsa-bestand, map, of catalogus-id.",
+        )
+        return 1
     if not files:
-        emit_cli_error("Geen .mvsa gevonden.", path=path, hint="Geef een .mvsa-bestand of een map met .mvsa.")
+        emit_cli_error(
+            "Geen .mvsa gevonden.",
+            path=path,
+            hint="Geef een .mvsa-bestand, map met .mvsa, of catalogus-id.",
+        )
         return 1
     errors = 0
     had_messages = False
@@ -2640,6 +3009,10 @@ def _cmd_zoektekst(args) -> int:
 
 
 def _cmd_mvsa_score_ir(args) -> int:
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
     from .score_ir import export_mvsa_path_to_score_ir
@@ -2674,15 +3047,21 @@ def _cmd_mvsa_score_ir(args) -> int:
                 mxl_path = Path(mxl_opt)
                 if mxl_path.suffix.lower() not in {".musicxml", ".xml", ".mxl"}:
                     mxl_path = mxl_path.with_suffix(".musicxml")
+        allow = bool(getattr(args, "allow_noncanonical", False))
         try:
             export_mvsa_path_to_score_ir(
                 path,
                 out,
                 section_id=args.section,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
+                allow_noncanonical=allow,
             )
             if mxl_path is not None:
                 export_score_ir_path_to_musicxml(out, mxl_path)
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
@@ -2711,6 +3090,7 @@ def _cmd_mvsa_score_ir(args) -> int:
 
 
 def _cmd_mvsa_musicxml(args) -> int:
+    from .canonicity_gate import cli_gate_source
     from .musicxml_package import musicxml_output_suffix
     from .mvsa_musicxml import MvsaExportError, export_mvsa_path
     from .mvsa_validate import MvsaValidationError, format_diagnostic
@@ -2727,6 +3107,9 @@ def _cmd_mvsa_musicxml(args) -> int:
         return 1
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -2734,13 +3117,14 @@ def _cmd_mvsa_musicxml(args) -> int:
         )
         if out.suffix.lower() not in {".mxl", ".musicxml", ".xml"}:
             out = out.with_suffix(musicxml_output_suffix(path=out))
+        tkw = _cli_translit_kwargs(args)
         try:
             export_mvsa_path(
                 path,
                 out,
                 section_id=args.section,
                 bibliotheek_id=getattr(args, "bibliotheek_id", None),
-                **_cli_translit_kwargs(args),
+                **tkw,
             )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
@@ -2751,15 +3135,33 @@ def _cmd_mvsa_musicxml(args) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
         # Translit-Coria (``--translit-as-parts`` / ``*.translit.mxl``) is een
         # apart product; niet de canonieke key ``mxl`` overschrijven.
-        tkw = _cli_translit_kwargs(args)
+        # C4 geldt alleen voor de standaard playback-key ``mxl``.
         out_name = out.name.lower()
         if tkw.get("translit_as_parts") or out_name.endswith(".translit.mxl"):
             meta_key = "mxl-translit"
         else:
             meta_key = "mxl"
+            from .canonicity_gate import (
+                NonCanonicalTargetError,
+                emit_noncanonical_error,
+                require_canonical_mxl_target,
+            )
+
+            try:
+                require_canonical_mxl_target(
+                    out,
+                    bron=path,
+                    allow_noncanonical=bool(
+                        getattr(args, "allow_noncanonical", False)
+                    ),
+                )
+            except NonCanonicalTargetError as exc:
+                emit_noncanonical_error(exc)
+                exit_code = 1
+                continue
+        print(f"Geschreven: {out}")
         meta = merge_street_product_meta(path, {meta_key: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -2767,6 +3169,7 @@ def _cmd_mvsa_musicxml(args) -> int:
 
 
 def _cmd_mvsa_mscz(args) -> int:
+    from .canonicity_gate import cli_gate_source
     from .mvsa_mscz import MvsaMsczError, export_mvsa_to_mscz
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
@@ -2779,6 +3182,9 @@ def _cmd_mvsa_mscz(args) -> int:
     musescore = Path(args.musescore) if args.musescore else None
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -2877,6 +3283,7 @@ def _cmd_mvsa_vsa(args) -> int:
 
 def _cmd_mvsa_text(args) -> int:
     """``mvsa text``: alleen ``.mvsa`` → sibling lyrics + meta."""
+    from .canonicity_gate import cli_gate_source
     from .street_product_export import write_lyrics_product
     from .street_products import LYRICS_KEY, merge_street_product_meta
 
@@ -2895,6 +3302,9 @@ def _cmd_mvsa_text(args) -> int:
         return 1
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -2914,6 +3324,10 @@ def _cmd_mvsa_text(args) -> int:
 
 
 def _cmd_vsa_score_ir(args) -> int:
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .score_ir_musicxml import (
         ScoreIrMusicxmlError,
         export_score_ir_path_to_musicxml,
@@ -2933,6 +3347,7 @@ def _cmd_vsa_score_ir(args) -> int:
         return 1
     musescore = Path(args.musescore) if args.musescore else None
     mxl_opt = getattr(args, "musicxml", None)
+    allow = bool(getattr(args, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
         out = (
@@ -2948,9 +3363,18 @@ def _cmd_vsa_score_ir(args) -> int:
                 else Path(mxl_opt)
             )
         try:
-            export_bron_to_score_ir(path, out, musescore=musescore)
+            export_bron_to_score_ir(
+                path,
+                out,
+                musescore=musescore,
+                allow_noncanonical=allow,
+            )
             if mxl_path is not None:
                 export_score_ir_path_to_musicxml(out, mxl_path)
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (StreetProductExportError, ScoreIrMusicxmlError) as exc:
             emit_cli_exception(
                 exc,
@@ -2985,6 +3409,8 @@ def _cmd_vsa_mscz_product(args) -> int:
     )
     from .street_products import MSCZ_PRODUCT_KEY, merge_street_product_meta
 
+    from .canonicity_gate import cli_gate_source
+
     if _reject_non_street_file("vsa", "mscz", args.path, allowed=(".vsa",)):
         return 1
     files = _cli_collect_sources(args.path, (".vsa",))
@@ -2995,6 +3421,9 @@ def _cmd_vsa_mscz_product(args) -> int:
     musescore = Path(args.musescore) if args.musescore else None
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -3136,11 +3565,16 @@ def _cmd_mvsa_svg(args) -> int:
                 file=sys.stderr,
             )
             return 1
+    from .canonicity_gate import cli_gate_source
+
     musescore = Path(args.musescore) if args.musescore else None
     trim = not bool(getattr(args, "no_trim", False))
     white_background = not bool(getattr(args, "transparent", False))
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -3220,9 +3654,14 @@ def _cmd_mvsa_audio(args) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mxl"):
         return 1
+    from .canonicity_gate import cli_gate_source
+
     musescore = Path(args.musescore) if args.musescore else None
     exit_code = 0
     for path in files:
+        if cli_gate_source(path, args):
+            exit_code = 1
+            continue
         out = (
             Path(args.output)
             if args.output
@@ -3399,6 +3838,200 @@ def _cmd_mvsa_kuiser(args) -> int:
     if args.check and would_change:
         return 1
     return 0
+
+
+def _cmd_mvsa_syllabify(args) -> int:
+    from .config import load_config
+    from .mvsa_syllabify import (
+        MvsaSyllabifyError,
+        iter_mvsa_files,
+        mvsa_output_path_for,
+        normalize_mvsa_output_extension,
+        syllabify_mvsa_text,
+    )
+
+    config = load_config(_resolve_config_arg(getattr(args, "config", None)))
+    _apply_syllable_dictionary_setting(args, config)
+
+    source_path = Path(args.path)
+    if args.extension and args.in_place:
+        emit_cli_error(
+            "Gebruik --in-place of --extension, niet beide.",
+            hint="Zonder --extension schrijft syllabify standaard in-place.",
+        )
+        return 1
+
+    extension: str | None = None
+    if args.extension is not None:
+        try:
+            extension = normalize_mvsa_output_extension(args.extension)
+        except ValueError as exc:
+            emit_cli_exception(
+                exc,
+                hint="Geef een extensie zoals .syl.mvsa; zie mvsa syllabify -h.",
+            )
+            return 1
+
+    # Uniform met kuiser/zoektekst: default schrijven; --dry-run = preview.
+    dry_run = bool(args.dry_run)
+
+    try:
+        files = iter_mvsa_files(source_path)
+    except FileNotFoundError:
+        emit_cli_error(
+            "Pad niet gevonden.",
+            path=source_path,
+            hint="Controleer of het bestand of de map bestaat.",
+        )
+        return 1
+    except ValueError as exc:
+        emit_cli_exception(
+            exc,
+            path=source_path,
+            hint="Geef een .mvsa-bestand of een map met .mvsa-bestanden.",
+        )
+        return 1
+
+    if not files:
+        emit_cli_error(
+            "Geen .mvsa-bestanden gevonden.",
+            path=source_path,
+            hint="Zet .mvsa-bestanden in deze map of geef een ander pad.",
+        )
+        return 1
+
+    multi = len(files) > 1 or source_path.is_dir()
+    any_error = False
+    verb = "verwijderd" if args.unsyllabify else "toegevoegd"
+
+    for file_path in files:
+        try:
+            target = mvsa_output_path_for(file_path, extension)
+        except ValueError as exc:
+            emit_cli_exception(exc, path=file_path)
+            any_error = True
+            continue
+
+        if extension is not None and file_path.name.lower().endswith(
+            extension.lower()
+        ):
+            emit_cli_error(
+                f"Overgeslagen: bestandsnaam eindigt al op {extension}.",
+                path=file_path,
+                hint="Kies een andere --extension of hernoem het bronbestand.",
+            )
+            continue
+
+        original = file_path.read_text(encoding="utf-8-sig")
+        try:
+            result = syllabify_mvsa_text(
+                original,
+                unsyllabify=args.unsyllabify,
+                align=not args.no_align,
+            )
+        except MvsaSyllabifyError as exc:
+            emit_cli_exception(
+                exc,
+                path=file_path,
+                hint="Controleer de .mvsa met: mvsa validate <pad>",
+            )
+            any_error = True
+            continue
+        except Exception as exc:
+            emit_cli_exception(
+                exc,
+                path=file_path,
+                hint="Controleer de .mvsa met: mvsa validate <pad>",
+            )
+            any_error = True
+            continue
+
+        if not args.unsyllabify:
+            dict_rc, gated_text = _mvsa_syllabify_dictionary_gate(
+                file_path, result.text
+            )
+            if gated_text != result.text:
+                from .mvsa_syllabify import MvsaSyllabifyResult
+
+                result = MvsaSyllabifyResult(
+                    text=gated_text,
+                    changed=True,
+                    replacements=result.replacements,
+                )
+            if dict_rc != 0:
+                any_error = True
+                continue
+
+        status = (
+            f"{result.replacements} lettergreepstreepje(s) {verb}"
+            if result.changed
+            else "geen wijzigingen"
+        )
+
+        if dry_run:
+            if multi:
+                print(f"{file_path} -> {target}: {status} (dry-run)")
+            else:
+                sys.stdout.write(result.text)
+                if not result.text.endswith("\n"):
+                    sys.stdout.write("\n")
+                print(
+                    f"(dry-run — {status}; bestand niet geschreven)",
+                    file=sys.stderr,
+                )
+            continue
+
+        if result.changed or target != file_path:
+            target.write_text(result.text, encoding="utf-8", newline="\n")
+        if target == file_path:
+            print(f"{file_path}: {status}")
+        else:
+            print(f"{file_path} -> {target}: {status}")
+
+    return 1 if any_error else 0
+
+
+def _mvsa_syllabify_dictionary_gate(
+    file_path: Path, source_text: str
+) -> tuple[int, str]:
+    """Dictionary-check op .mvsa L-lyrics; op TTY corrigeren."""
+    from .syllable_dict_check import (
+        CODE_MISMATCH,
+        CODE_UNKNOWN,
+        apply_replacements_to_source,
+        find_mvsa_dictionary_syllable_issues,
+        is_interactive_stdin,
+        prompt_dictionary_fixes,
+    )
+
+    findings = find_mvsa_dictionary_syllable_issues(source_text)
+    text = source_text
+    if is_interactive_stdin():
+        actionable = [
+            f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
+        ]
+        if actionable:
+            from .input_paths import source_id_for_prompt
+
+            prompt = prompt_dictionary_fixes(
+                actionable, source_id=source_id_for_prompt(file_path)
+            )
+            if prompt.replacements:
+                text = apply_replacements_to_source(text, prompt.replacements)
+                findings = find_mvsa_dictionary_syllable_issues(text)
+
+    fatal = [f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}]
+    for finding in findings:
+        print(
+            f"{file_path}:{finding.line}:{finding.column}: "
+            f"{finding.code}: {finding.message_nl}",
+            file=sys.stderr if finding.code in {CODE_MISMATCH, CODE_UNKNOWN} else sys.stdout,
+        )
+        if finding.hint_nl:
+            print(f"  hint: {finding.hint_nl}", file=sys.stderr)
+    # Zelfde mildheid als mvsa validate: dictionary is warning, geen hard fail.
+    _ = fatal
+    return 0, text
 
 
 def _cmd_template_validate(args) -> int:

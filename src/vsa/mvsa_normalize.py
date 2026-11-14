@@ -27,17 +27,20 @@ from .mvsa_validate import (
 from .pitch_resolver import (
     PitchResolver,
     _SCALE_INTERVALS,
+    _pitch_to_midi,
     parse_pitch_string,
+    pitch_in_do_octave,
     pitch_to_degree_and_chrom as _pitch_to_degree_and_chrom,
 )
 
-# Canonieke interne waarden (``abc`` = a–g mét wetenschappelijk cijfer).
+# Canonieke interne waarden (``abc`` = a–g; octaaf via ``--octave-style``).
 PITCH_FORMS = ("preserve", "doremi", "abc", "vsa", "ag-vsa")
 # Rewrite targets (not ``preserve``); used by import and CLI without preserve.
 REWRITE_PITCH_FORMS = ("doremi", "abc", "vsa", "ag-vsa")
 # CLI/docs-voorkeur: ``a-g``; ``abc`` blijft alias.
 PITCH_FORM_ALIASES = {"a-g": "abc", "ag": "abc"}
-OCTAVE_STYLES = ("@oct", "marker")
+# ``@oct``: relatieve a–g (``Bb``, ``c+``) + schrijfoctaaf; ``none``: ``Bb4``.
+OCTAVE_STYLES = ("@oct", "marker", "none")
 
 _DEGREE_LABELS = ("do", "re", "mi", "fa", "so", "la", "si")
 
@@ -66,6 +69,31 @@ def pitch_form_choices(*, include_preserve: bool) -> list[str]:
     return base
 
 
+def check_octave_style(octave_style: str, pitch: str) -> None:
+    """Validate ``--octave-style`` against ``--pitch``; raise on conflict."""
+    if octave_style not in OCTAVE_STYLES:
+        raise MvsaNormalizeError(
+            f"onbekende --octave-style {octave_style!r}; "
+            f"kies uit {', '.join(OCTAVE_STYLES)}"
+        )
+    if octave_style == "marker":
+        raise MvsaNormalizeError(
+            "octave-style 'marker' is nog niet geïmplementeerd; gebruik @oct"
+        )
+    if octave_style == "none" and pitch == "doremi":
+        raise MvsaNormalizeError(
+            "--octave-style none is niet toegestaan met --pitch doremi "
+            "(doremi is al relatief t.o.v. @oct)"
+        )
+
+
+def schrijf_do_pitch(do: Pitch, writing_oct: int) -> Pitch:
+    """``@do`` verschoven met schrijfoctaaf (zelfde als ``writing_do_pitch``)."""
+    if writing_oct == 0:
+        return do
+    return Pitch(step=do.step, octave=do.octave + writing_oct, alter=do.alter)
+
+
 def normalize_mvsa_text(
     text: str,
     *,
@@ -78,8 +106,9 @@ def normalize_mvsa_text(
     ``pitch=preserve`` (default for ``.mvsa`` → ``.mvsa``) keeps stem token
     spellings unchanged and only applies optional column alignment.
     ``doremi`` / ``abc`` (alias ``a-g``) / ``vsa`` / ``ag-vsa`` rewrite heights.
-    ``octave_style=@oct`` keeps existing ``@oct`` directives when rewriting.
-    ``marker`` is reserved.
+    ``octave_style=@oct`` (default): a–g relatief t.o.v. schrijf-do; bestaande
+    ``@oct``-directives blijven staan. ``none``: wetenschappelijk absoluut
+    (``Bb4``); niet met ``doremi``. ``marker`` is reserved.
     """
     pitch = canonicalize_pitch_form(pitch)
     if pitch not in PITCH_FORMS:
@@ -87,15 +116,7 @@ def normalize_mvsa_text(
             f"onbekende --pitch {pitch!r}; kies uit "
             f"preserve, doremi, a-g (of abc), vsa, ag-vsa"
         )
-    if octave_style not in OCTAVE_STYLES:
-        raise MvsaNormalizeError(
-            f"onbekende --octave-style {octave_style!r}; "
-            f"kies uit {', '.join(OCTAVE_STYLES)}"
-        )
-    if octave_style == "marker":
-        raise MvsaNormalizeError(
-            "octave-style 'marker' is nog niet geïmplementeerd; gebruik @oct"
-        )
+    check_octave_style(octave_style, pitch)
 
     from .mvsa_marks import canonicalize_mark_source
 
@@ -159,14 +180,21 @@ def normalize_mvsa_text(
                                     str(exc),
                                     line=system.line_nos.get(vm, system.start_line),
                                 ) from exc
-                            # ag-vsa: first sounding of the system is absolute a–g
+                            # ag-vsa: first sounding of the system is a–g
                             # (even when the source wrote a hold ``-``).
                             if (
                                 pitch == "ag-vsa"
                                 and prev_degree[letter] is None
                                 and sounding is not None
                             ):
-                                slot_out.append(format_abc_scientific(sounding))
+                                slot_out.append(
+                                    format_abc(
+                                        sounding,
+                                        do=do_p,
+                                        writing_oct=writing_oct,
+                                        octave_style=octave_style,
+                                    )
+                                )
                                 deg, _chrom = pitch_to_degree_and_chrom(
                                     do_p, sounding, intervals
                                 )
@@ -182,6 +210,7 @@ def normalize_mvsa_text(
                                         intervals=intervals,
                                         writing_oct=writing_oct,
                                         prev_degree=prev_degree[letter],
+                                        octave_style=octave_style,
                                     )
                                 )
                                 deg, _chrom = pitch_to_degree_and_chrom(
@@ -195,6 +224,7 @@ def normalize_mvsa_text(
             out_ehm: str | None = "-" if pitch == "vsa" else None
             for vm in voice_markers:
                 letter = vm[0]
+                voice_oct = ctx.oct_for(vm)
                 pitch_carry[letter] = resolvers[letter].current_pitch
                 bars = _split_bars(system.lines[vm])
                 parts: list[str] = []
@@ -209,7 +239,12 @@ def normalize_mvsa_text(
                             and i == len(segs) - 1
                             and end_pitch is not None
                         ):
-                            anchor = format_abc_scientific(end_pitch)
+                            anchor = format_abc(
+                                end_pitch,
+                                do=do_p,
+                                writing_oct=voice_oct,
+                                octave_style=octave_style,
+                            )
                         elif i < len(bars.bar_anchors) and bars.bar_anchors[i]:
                             anchor = bars.bar_anchors[i] or ""
                         parts.append(f" {bars.bar_tokens[i]}{anchor}")
@@ -271,17 +306,22 @@ def _format_pitch(
     intervals: list[int],
     writing_oct: int,
     prev_degree: int | None,
+    octave_style: str = "@oct",
 ) -> str:
     if pitch_form == "abc":
-        return format_abc_scientific(pitch)
+        return format_abc(
+            pitch, do=do, writing_oct=writing_oct, octave_style=octave_style
+        )
     if pitch_form == "doremi":
         return format_doremi(pitch, do, intervals, writing_oct)
     if pitch_form == "ag-vsa":
-        # Absolute a–g on first sounding of the system, then EHM.
+        # a–g on first sounding of the system, then EHM.
         if prev_degree is None:
-            return format_abc_scientific(pitch)
+            return format_abc(
+                pitch, do=do, writing_oct=writing_oct, octave_style=octave_style
+            )
         return format_ehm(prev_degree, pitch, do, intervals)
-    # vsa: absolute doremi anchor, then EHM
+    # vsa: doremi anchor, then EHM
     if prev_degree is None:
         return format_doremi(pitch, do, intervals, writing_oct)
     return format_ehm(prev_degree, pitch, do, intervals)
@@ -308,21 +348,55 @@ def format_doremi(
     return f"{name}{oct_s}{acc}"
 
 
-def format_abc_scientific(pitch: Pitch) -> str:
-    """Scientific octave on a–g (``bb4``, ``c#5``, ``g3``)."""
+def _abc_body(pitch: Pitch) -> str:
+    """a–g letter + accidental without octave (``Bb``, ``c#``, ``g``)."""
     step = pitch.step
     alter = pitch.alter
     if alter == -2.0:
-        body = f"{step.lower()}bb"
-    elif alter == -1.0:
-        body = "Bb" if step == "B" else f"{step.lower()}b"
-    elif alter == 1.0:
-        body = f"{step.lower()}#"
-    elif alter == 2.0:
-        body = f"{step.lower()}##"
-    else:
-        body = step.lower()
-    return f"{body}{pitch.octave}"
+        return f"{step.lower()}bb"
+    if alter == -1.0:
+        return "Bb" if step == "B" else f"{step.lower()}b"
+    if alter == 1.0:
+        return f"{step.lower()}#"
+    if alter == 2.0:
+        return f"{step.lower()}##"
+    return step.lower()
+
+
+def format_abc_scientific(pitch: Pitch) -> str:
+    """Scientific octave on a–g (``bb4``, ``c#5``, ``g3``)."""
+    return f"{_abc_body(pitch)}{pitch.octave}"
+
+
+def format_abc_writing_oct(pitch: Pitch, schrijf_do: Pitch) -> str:
+    """a–g t.o.v. schrijf-do: ``f``, ``c``, ``f+``, ``Bb`` — geen ``f4``."""
+    body = _abc_body(pitch)
+    base = pitch_in_do_octave(
+        schrijf_do, pitch.step, float(pitch.alter), oct_delta=0
+    )
+    delta = (_pitch_to_midi(pitch) - _pitch_to_midi(base)) // 12
+    if delta == 0:
+        return body
+    if delta == 1:
+        return f"{body}+"
+    if delta == -1:
+        return f"{body}-"
+    if delta > 1:
+        return f"{body}+{delta}"
+    return f"{body}{delta}"
+
+
+def format_abc(
+    pitch: Pitch,
+    *,
+    do: Pitch,
+    writing_oct: int,
+    octave_style: str = "@oct",
+) -> str:
+    """a–g: relatief t.o.v. schrijf-do (``@oct``) of wetenschappelijk (``none``)."""
+    if octave_style == "none":
+        return format_abc_scientific(pitch)
+    return format_abc_writing_oct(pitch, schrijf_do_pitch(do, writing_oct))
 
 
 def format_ehm(

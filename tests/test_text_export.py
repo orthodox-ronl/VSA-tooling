@@ -151,6 +151,35 @@ God_, // om aan de wereld te schenken
     assert "om aan de wereld" in text
 
 
+def test_vsa_html_comment_absent_from_plain_text() -> None:
+    """zoektekst.md / lyrics: HTML-comment hoort niet in ``*.lyrics.txt``.
+
+    Regressie: multiline ``<!-- … -->`` (o.a. Verzamel-VSA-notities) mag
+    niet als gezongen tekst in ``plain_text_from_vsa`` belanden.
+    """
+    src = """\
+---
+do: F4
+mode: major
+---
+
+<!--
+  Verzamel-VSA: bekende coupletten. Sterke frasescheider.
+  Template: stichier-toon-1-groningen.
+-->
+
+<!-- Couplet 1 -->
+[:] Heer ik {/roep_} tot U. [/:]
+"""
+    text = plain_text_from_vsa(src)
+    assert "Verzamel" not in text
+    assert "frasescheider" not in text
+    assert "Template" not in text
+    assert "stichier" not in text
+    assert "Couplet" not in text
+    assert "Heer ik roep tot U" in text.replace("\n", " ")
+
+
 def test_hard_hyphen_equals_becomes_visible_dash() -> None:
     vsa = """\
 ---

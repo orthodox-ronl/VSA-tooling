@@ -74,6 +74,28 @@ def test_reciting_quarters_default_one_note_per_word():
     assert not any("jubelen en zich ver" in t for t, _ in lyrics)
 
 
+def test_scope_word_glue_sets_syllabic_across_text_and_scopes():
+    """``ver{/heer}{\\lijkt}`` = één woord → begin/middle/end (K4, vsa mscz)."""
+    doc = Parser(r"[:] Gij werd ver{/&\heer}{\lijkt} op").parse()
+    xml = MusicXMLRenderer(metadata={"do": "F4", "mode": "major"}).render(doc)
+    lyrics = _lyrics(xml)
+    by_text = {t: s for t, s in lyrics}
+    assert by_text.get("ver") == "begin"
+    assert by_text.get("heer") == "middle"
+    assert by_text.get("lijkt") == "end"
+    assert by_text.get("Gij") == "single"
+    assert by_text.get("op") == "single"
+
+
+def test_spaced_text_before_scope_is_new_word():
+    """Spatie vóór scope: ``ver {/eind}`` blijft twee woorden."""
+    doc = Parser("[:] ver {/eind_}").parse()
+    xml = MusicXMLRenderer(metadata={"do": "F4", "mode": "major"}).render(doc)
+    lyrics = _lyrics(xml)
+    assert ("ver", "single") in lyrics
+    assert ("eind", "single") in lyrics
+
+
 def test_reciting_hyphen_in_plain_text():
     doc = Parser("[:] {//he}mel-se {/eind_}").parse()
     xml = MusicXMLRenderer(metadata={"do": "F4", "mode": "major"}).render(doc)

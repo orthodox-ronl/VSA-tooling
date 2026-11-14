@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -20,6 +21,8 @@ from vsa.template_library import (
 )
 from vsa.template_instance import TemplateInstanceError
 from vsa.vsa_mvsa import (
+    _LAtom,
+    _join_l_atoms,
     _tempo_from_meta,
     clean_emit_frontmatter,
     convert_vsa_to_mvsa,
@@ -558,6 +561,49 @@ BIB_WRAP_VSA = (
     / "hemelum"
     / "tropaar-zaterdag-gestorvenen-toon-2-hemelum.vsa"
 )
+
+
+def test_join_l_atoms_word_continuation_into_recite() -> None:
+    """T5: soft ``-`` hoort in ``(-lijkt…)`` ná cadens, niet als wees vóór ``(``."""
+    atoms = [
+        _LAtom("(Gij werd ver)", "begin", "recite", first_syllabic="single"),
+        _LAtom("heer~&~", "middle", "open"),
+        _LAtom(
+            "(lijkt op de berg, o Chris)",
+            "begin",
+            "recite",
+            first_syllabic="end",
+        ),
+        _LAtom("tus", "end", "cadence"),
+        _LAtom("God_", "single", "cadence"),
+    ]
+    joined = _join_l_atoms(atoms)
+    assert "(Gij werd ver)-heer~&~" in joined
+    assert "(-lijkt op de berg, o Chris)-tus" in joined
+    assert ")-(lijkt" not in joined
+    assert re.search(r"(?<!-)\(lijkt", joined) is None
+
+
+BIB_TRANSFIG_VSA = (
+    Path(__file__).resolve().parents[2]
+    / "bibliotheek"
+    / "content-source"
+    / "catalogus"
+    / "tropaar"
+    / "transfiguratie-toon-7"
+    / "hemelum"
+    / "tropaar-transfiguratie-toon-7-hemelum.vsa"
+)
+
+
+@pytest.mark.skipif(
+    not BIB_TRANSFIG_VSA.is_file(), reason="bibliotheek-voorbeeld ontbreekt"
+)
+def test_convert_transfiguratie_keeps_verheerlijkt_one_word() -> None:
+    """Catalogus: ``ver{/&\\heer}{\\lijkt}`` → één woord over cadens+recite (T5)."""
+    result = convert_vsa_to_mvsa(BIB_TRANSFIG_VSA)
+    assert "(-lijkt op de berg, o Chris)-tus" in result.text
+    assert "(lijkt op de berg" not in result.text
 
 
 @pytest.mark.skipif(not BIB_WRAP_VSA.is_file(), reason="bibliotheek-voorbeeld ontbreekt")

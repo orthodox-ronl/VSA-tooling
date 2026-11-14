@@ -825,3 +825,58 @@ T: b3&c4&b3&a3 ||
 B: b2&c3&b2&a2 ||
 """
     assert validate_mvsa_text(text) == []
+
+
+def test_validate_recite_interior_elm_errors():
+    """``MVSA-RECITE-INTERIOR-ELM``: geen ``aan_`` ín de haakjes; kolom op ``_``."""
+    from vsa.mvsa_validate import format_diagnostic
+
+    bad = """\
+@do F4
+@mode major
+
+@sectie demo
+L: (op-stij-gen voor Uw aan_)-ge_-zicht,_ ||
+S: a4                         /   \\2      ||
+A: f4                         /   \\2      ||
+T: c4                         -   -       ||
+B: f3                         \\3  -       ||
+"""
+    diags = validate_mvsa_text(bad)
+    hits = [d for d in diags if d.code == "MVSA-RECITE-INTERIOR-ELM"]
+    assert hits
+    d = hits[0]
+    assert d.column is not None
+    assert d.source_line is not None
+    assert d.source_line[d.column - 1] == "_"
+    rendered = format_diagnostic(d)
+    assert "^" in rendered
+    assert f"{d.line}:{d.column}:" in rendered
+
+
+def test_validate_recite_elm_after_paren_ok():
+    """ELM ná ``)`` of buiten de recite blijft geldig."""
+    ok = """\
+@do F4
+@mode major
+
+@sectie demo
+L: (op-stij-gen voor) Uw aan_-ge_-zicht,_ ||
+S: a4                 \\  /    /   \\2      ||
+A: f4                 \\  /    /   \\2      ||
+T: c4                 -  -    -   -       ||
+B: f3                 \\3 /3   \\3  -       ||
+"""
+    assert validate_mvsa_text(ok) == []
+    ok2 = """\
+@do F4
+@mode major
+
+@sectie demo
+L: (Zoon van God)_ a_ ||
+S: Bb4             -  ||
+A: g4              -  ||
+T: c4              -  ||
+B: c3              -  ||
+"""
+    assert validate_mvsa_text(ok2) == []

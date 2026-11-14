@@ -15,7 +15,7 @@ mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bla
 | [`alleluia-toon-1.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/alleluia-toon-1.mvsa)                             | Vrije SATB, relatief                                                          |
 | [`kleine-intocht-zondag-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/kleine-intocht-zondag-hemelum.mvsa) | Omzetting uit MusicXML; absolute octaafcijfers (`S:` zonder EHM)              |
 | [`trisagion-8a-slav-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/examples/mvsa/trisagion-8a-slav-hemelum.mvsa)         | ELM’s, melisma, recite; experimenteel blokhergebruik (nog **niet** normatief) |
-| [`translit-*-mini.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)                                                 | Translit-export (`--translit`, `@taal`, Coria `--translit-as-parts`)       |
+| [`translit-*-mini.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/examples/mvsa)                                                  | Translit-export (`--translit`, `@taal`, Coria `--translit-as-parts`)          |
 
 Regelidentifiers (`L:`, `S:`, optioneel `S-:` / `T\6:`): zie
 [Syntax — regelidentifier](syntax.md#regelidentifier).
@@ -25,6 +25,7 @@ Werkplan met woordenlijst en achtergrond:
 
 Bij het bijwerken van voorbeelden: streef naar de canonieke vorm uit
 [Syntax](syntax.md) (woordstreepjes, `|` / `||` op alle LSATB-regels,
-[kolomuitlijning L↔SATB](syntax.md#canonieke-kolomuitlijning-lsatb)). Spaties
-bijwerken: `python scripts/align_mvsa_columns.py examples/mvsa`. Oudere
-schetsen in hetzelfde bestand mogen als commentaar blijven staan.
+[kolomuitlijning L↔SATB](syntax.md#canonieke-kolomuitlijning-lsatb) — inclusief
+`&` onder `&`, met spaties rond `&` waar nodig). Spaties bijwerken:
+`python scripts/align_mvsa_columns.py examples/mvsa`. Oudere schetsen in
+hetzelfde bestand mogen als commentaar blijven staan.

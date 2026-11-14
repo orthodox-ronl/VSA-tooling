@@ -6,10 +6,14 @@ import pytest
 
 from vsa.input_paths import (
     InputPathError,
+    catalogus_id_from_path,
     collect_cli_sources,
     collect_input_files,
     is_nested_derived_source,
+    looks_like_catalogus_id,
     normalize_suffixes,
+    resolve_catalogus_id,
+    source_id_for_prompt,
 )
 
 
@@ -109,3 +113,69 @@ def test_collect_cli_sources_only_nested_raises(tmp_path: Path):
     nested.write_bytes(b"PK")
     with pytest.raises(InputPathError, match="Geen passende"):
         collect_cli_sources(tmp_path, suffixes=[".mscz"])
+
+
+def test_looks_like_catalogus_id():
+    assert looks_like_catalogus_id("tropaar/transfiguratie-toon-7/hemelum")
+    assert looks_like_catalogus_id("tropaar-transfiguratie-toon-7-hemelum")
+    assert not looks_like_catalogus_id("lied.vsa")
+    assert not looks_like_catalogus_id(r"C:\Git\orthodox-ronl\x")
+    assert not looks_like_catalogus_id("../bibliotheek")
+
+
+def test_catalogus_id_from_path_and_prompt_label(tmp_path: Path):
+    leaf = (
+        tmp_path
+        / "content-source"
+        / "catalogus"
+        / "tropaar"
+        / "transfiguratie-toon-7"
+        / "hemelum"
+    )
+    leaf.mkdir(parents=True)
+    vsa = leaf / "tropaar-transfiguratie-toon-7-hemelum.vsa"
+    vsa.write_text("x\n", encoding="utf-8")
+    assert (
+        catalogus_id_from_path(vsa)
+        == "tropaar/transfiguratie-toon-7/hemelum"
+    )
+    assert source_id_for_prompt(vsa) == "tropaar/transfiguratie-toon-7/hemelum"
+    assert source_id_for_prompt(tmp_path / "los.vsa") == "los"
+
+
+def test_resolve_catalogus_id_slash_and_stem(tmp_path: Path):
+    root = tmp_path / "content-source" / "catalogus"
+    leaf = root / "tropaar" / "transfiguratie-toon-7" / "hemelum"
+    leaf.mkdir(parents=True)
+    vsa = leaf / "tropaar-transfiguratie-toon-7-hemelum.vsa"
+    mvsa = leaf / "tropaar-transfiguratie-toon-7-hemelum.mvsa"
+    vsa.write_text("v\n", encoding="utf-8")
+    mvsa.write_text("m\n", encoding="utf-8")
+
+    by_slash = resolve_catalogus_id(
+        "tropaar/transfiguratie-toon-7/hemelum",
+        suffixes=[".vsa"],
+        roots=[root],
+    )
+    assert by_slash == [vsa]
+
+    by_stem = resolve_catalogus_id(
+        "tropaar-transfiguratie-toon-7-hemelum",
+        suffixes=[".mvsa"],
+        roots=[root],
+    )
+    assert by_stem == [mvsa]
+
+    via_collect = collect_input_files(
+        "tropaar/transfiguratie-toon-7/hemelum",
+        suffixes=[".vsa", ".mvsa"],
+        catalogus_roots=[root],
+    )
+    assert via_collect == [mvsa, vsa]
+
+
+def test_resolve_catalogus_id_missing(tmp_path: Path):
+    root = tmp_path / "catalogus"
+    root.mkdir()
+    with pytest.raises(InputPathError, match="niet gevonden"):
+        resolve_catalogus_id("tropaar/bestaat-niet/x", suffixes=[".vsa"], roots=[root])

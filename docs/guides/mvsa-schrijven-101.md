@@ -138,8 +138,12 @@ Oefenstuk: `examples/mvsa/uitvoeraanwijzingen-demo.mvsa`.
 1. Tel op de L-regel de **slots** (lettergrepen + melisma-`&`-stukken).
 2. Zet op elke stemregel **evenveel** hoogte-stukken (gescheiden door spaties).
 3. Zet op elke regel dezelfde maatstrepen op dezelfde plekken.
-4. Spaties mogen kolommen uitlijnen; `mvsa kuiser` (of `normalize`) helpt
-   bij uitlijning en eenduidige maatstrepen.
+4. Spaties mogen kolommen uitlijnen; bij melisma staan de `&`-tekens op L en
+   S/A/T/B **onder elkaar**. Spaties tussen een ELM/hoogte en `&`
+   (`Heer_  &_`, `Bb  &/`) zijn toegestaan en veranderen de betekenis niet —
+   tooling zet ze erin voor die kolommen. Compact `Heer_&_` / `Bb&/` mag ook.
+   `mvsa kuiser` (of `normalize`) helpt bij uitlijning en eenduidige
+   maatstrepen. Norm: [syntax — canonieke kolomuitlijning](../specification-mvsa/syntax.md#canonieke-kolomuitlijning-lsatb).
 
 ??? example "Recite + melisma (schets)"
     ```text
@@ -187,19 +191,21 @@ elkaar (per frase één stijl is leesbaarder).
 Bij `mxl mvsa` / `mscz mvsa` / `normalize` / `transpose` kies je een
 **doelspelling**:
 
-| `--pitch`  | Schrijft …                                                              |
-| ---------- | ----------------------------------------------------------------------- |
-| `doremi`   | laddergraden                                                            |
-| `a-g`      | toonnamen met **wetenschappelijk cijfer** (`bb4`, `c5`)                 |
-| `vsa`      | eerste toon absoluut, daarna EHM                                        |
-| `ag-vsa`   | absolute a–g + EHM + eindanker (default bij score→mvsa / transpose)     |
-| `preserve` | (alleen normalize) bronspelling behouden — **default**                  |
+| `--pitch`  | Schrijft …                                                                                |
+| ---------- | ----------------------------------------------------------------------------------------- |
+| `doremi`   | laddergraden (altijd relatief t.o.v. `@oct`; niet met `--octave-style none`)              |
+| `a-g`      | toonnamen; default **relatief** (`bb`, `c+`); met `--octave-style none` → `bb4`, `c5`     |
+| `vsa`      | eerste toon doremi, daarna EHM                                                            |
+| `ag-vsa`   | a–g + EHM + eindanker (default bij score→mvsa / transpose; octaaf via `--octave-style`)   |
+| `preserve` | (alleen normalize) bronspelling behouden — **default**                                    |
 
-`abc` blijft een **alias** van `a-g` (oude scripts).
+`abc` blijft een **alias** van `a-g` (oude scripts). Default
+`--octave-style @oct` (relatief); `none` = bladcijfers.
 
 ```cmd
 mxl mvsa lied.mxl -o lied.mvsa --pitch doremi
 mvsa normalize lied.mvsa --pitch a-g -o lied.ag.mvsa
+mscz mvsa lied.mscz -o lied.mvsa --octave-style none
 ```
 
 Alleen de **spelling** wijzigen (zelfde toonsoort) is `normalize`. De
@@ -269,7 +275,8 @@ niet bij de wetenschappelijke C. Zo blijven `so` en `c` pitch-equivalent.
 ### Wetenschappelijk cijfer (bladcijfers)
 
 `bb4`, `c5`, `g3` zijn absoluut (wrap bij **C**) en **negeren** `@oct`. Handig
-bij overname van bladmuziek. `c4` is C4; `c` zonder cijfer blijft C5.
+bij overname van bladmuziek; bij import/normalize kies je die vorm met
+`--octave-style none`. `c4` is C4; `c` zonder cijfer blijft C5.
 
 ??? example "Zelfde bas, twee schrijfwijzen"
     Met `@oct B=-1`:
@@ -317,8 +324,10 @@ S: fa so- mi&do&re&mi fa mi ||mi
    cd /d C:\Git\orthodox-ronl\VSA-tooling
    mxl mvsa bron.mxl -o lied.mvsa --pitch doremi
    ```
-   Of `--pitch a-g` als je bladcijfers wilt (`bb4`, `c5`).
-3. Zet bovenaan `@do` / `@mode` / `@oct` goed (`mxl`/`mscz mvsa` vult dit grotendeels in).
+   Default `ag-vsa` schrijft relatieve a–g (`bb`, niet `bb4`). Wil je
+   bladcijfers: `--pitch a-g --octave-style none` (of `ag-vsa` + `none`).
+3. Zet bovenaan `@do` / `@mode` / `@oct` goed (`mxl`/`mscz mvsa` vult dit grotendeels in;
+   bij `--octave-style none` blijft `@oct` weg omdat cijfers `@oct` negeren).
 4. Controleer L-tekst (de conversie kan lelijk syllabificeren) en sync.
 5. `mvsa validate lied.mvsa`
 6. Optioneel: controleer of de `.mvsa` nog bij de score past

@@ -213,9 +213,16 @@ def products_mvsa_one(
     skip_svg: bool = False,
     quiet: bool = False,
     musescore: Path | None = None,
+    allow_noncanonical: bool = False,
 ) -> int:
     """Universele producten voor één ``.mvsa``."""
     from .audio_export import AudioExportError, export_to_audio
+    from .canonicity_gate import (
+        NonCanonicalSourceError,
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+        require_canonical_source,
+    )
     from .mvsa_mscz import MvsaMsczError, export_mvsa_to_svg
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
@@ -237,6 +244,14 @@ def products_mvsa_one(
         _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
         return 0
 
+    try:
+        require_canonical_source(
+            bron, allow_noncanonical=allow_noncanonical
+        )
+    except NonCanonicalSourceError as exc:
+        emit_noncanonical_error(exc)
+        return 1
+
     products = _plan_universal_paths(bron, skip_svg=skip_svg, street="mvsa")
     _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
     if dry_run:
@@ -244,9 +259,17 @@ def products_mvsa_one(
 
     try:
         convert_mvsa_to_vsa(bron, products[MVSA_VSA_KEY], voice="S")
-        export_bron_to_mxl(bron, products["mxl"], musescore=musescore)
+        export_bron_to_mxl(
+            bron,
+            products["mxl"],
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
+        )
         export_bron_to_score_ir(
-            bron, products["score-ir"], musescore=musescore
+            bron,
+            products["score-ir"],
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
         )
         export_score_ir_path_to_musicxml(
             products["score-ir"], products["from-ir"]
@@ -263,6 +286,9 @@ def products_mvsa_one(
                 bron, products["svg"], musescore=musescore
             )
             _assign_svg_products(products, written)
+    except NonCanonicalTargetError as exc:
+        emit_noncanonical_error(exc)
+        return 1
     except MvsaVsaError as exc:
         print(f"{bron}: ERROR: {exc}", file=sys.stderr)
         return 1
@@ -298,9 +324,16 @@ def products_mscz_one(
     skip_svg: bool = False,
     quiet: bool = False,
     musescore: Path | None = None,
+    allow_noncanonical: bool = False,
 ) -> int:
     """Universele producten voor één ``.mscz``."""
     from .audio_export import AudioExportError, export_to_audio
+    from .canonicity_gate import (
+        NonCanonicalSourceError,
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+        require_canonical_source,
+    )
     from .mvsa_mscz import MvsaMsczError, export_mscz_to_svg
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .score_ir_musicxml import ScoreIrMusicxmlError, export_score_ir_path_to_musicxml
@@ -318,15 +351,31 @@ def products_mscz_one(
         _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
         return 0
 
+    try:
+        require_canonical_source(
+            bron, allow_noncanonical=allow_noncanonical
+        )
+    except NonCanonicalSourceError as exc:
+        emit_noncanonical_error(exc)
+        return 1
+
     products = _plan_universal_paths(bron, skip_svg=skip_svg)
     _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
     if dry_run:
         return 0
 
     try:
-        export_bron_to_mxl(bron, products["mxl"], musescore=musescore)
+        export_bron_to_mxl(
+            bron,
+            products["mxl"],
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
+        )
         export_bron_to_score_ir(
-            bron, products["score-ir"], musescore=musescore
+            bron,
+            products["score-ir"],
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
         )
         export_score_ir_path_to_musicxml(
             products["score-ir"], products["from-ir"]
@@ -343,6 +392,9 @@ def products_mscz_one(
                 bron, products["svg"], musescore=musescore
             )
             _assign_svg_products(products, written)
+    except NonCanonicalTargetError as exc:
+        emit_noncanonical_error(exc)
+        return 1
     except (
         StreetProductExportError,
         ScoreIrMusicxmlError,
@@ -370,9 +422,16 @@ def products_vsa_one(
     skip_svg: bool = False,
     quiet: bool = False,
     musescore: Path | None = None,
+    allow_noncanonical: bool = False,
 ) -> int:
     """Universele producten voor één ``.vsa``."""
     from .audio_export import AudioExportError, export_to_audio
+    from .canonicity_gate import (
+        NonCanonicalSourceError,
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+        require_canonical_source,
+    )
     from .config import load_config
     from .include_vsa import IncludeVsaError, prepare_vsa_body
     from .markdown_newline_policy import preserve_vsa_source_newlines
@@ -396,15 +455,31 @@ def products_vsa_one(
         _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
         return 0
 
+    try:
+        require_canonical_source(
+            bron, allow_noncanonical=allow_noncanonical
+        )
+    except NonCanonicalSourceError as exc:
+        emit_noncanonical_error(exc)
+        return 1
+
     products = _plan_universal_paths(bron, skip_svg=skip_svg)
     _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
     if dry_run:
         return 0
 
     try:
-        export_bron_to_mxl(bron, products["mxl"], musescore=musescore)
+        export_bron_to_mxl(
+            bron,
+            products["mxl"],
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
+        )
         export_bron_to_score_ir(
-            bron, products["score-ir"], musescore=musescore
+            bron,
+            products["score-ir"],
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
         )
         export_score_ir_path_to_musicxml(
             products["score-ir"], products["from-ir"]
@@ -430,6 +505,9 @@ def products_vsa_one(
             svg_path = products["svg"]
             svg_path.parent.mkdir(parents=True, exist_ok=True)
             write_text(svg_path, svg_text, encoding="utf-8", newline="\n")
+    except NonCanonicalTargetError as exc:
+        emit_noncanonical_error(exc)
+        return 1
     except IncludeVsaError as exc:
         print(f"{bron}: {exc.message_nl}", file=sys.stderr)
         return 1
@@ -461,6 +539,7 @@ def run_street_products(
     skip_svg: bool = False,
     quiet: bool = False,
     musescore: Path | None = None,
+    allow_noncanonical: bool = False,
 ) -> int:
     """Run ``products`` for all sources under *path* for *street*."""
     suffixes = {
@@ -486,6 +565,7 @@ def run_street_products(
                 skip_svg=skip_svg,
                 quiet=quiet,
                 musescore=musescore,
+                allow_noncanonical=allow_noncanonical,
             )
         elif street == "mscz":
             code = products_mscz_one(
@@ -495,6 +575,7 @@ def run_street_products(
                 skip_svg=skip_svg,
                 quiet=quiet,
                 musescore=musescore,
+                allow_noncanonical=allow_noncanonical,
             )
         else:
             code = products_vsa_one(
@@ -504,6 +585,7 @@ def run_street_products(
                 skip_svg=skip_svg,
                 quiet=quiet,
                 musescore=musescore,
+                allow_noncanonical=allow_noncanonical,
             )
         if code:
             exit_code = code
@@ -554,6 +636,9 @@ def add_products_parser(
             "Fouten blijven op stderr."
         ),
     )
+    from .canonicity_gate import add_allow_noncanonical_arg
+
+    add_allow_noncanonical_arg(p)
     if with_skip_svg:
         p.add_argument(
             "--skip-svg",

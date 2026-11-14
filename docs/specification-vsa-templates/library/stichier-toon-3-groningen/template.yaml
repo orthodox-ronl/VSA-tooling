@@ -1,0 +1,124 @@
+# Stichier toon 3 (Groningen) — do=F4 major.
+# Corpus: heer-ik-roep toon 3 (twee coupletten, MSCZ-schets).
+# Speelplan: |: 1, 2 :| …, laatste; bij n×3 (≥6): … voorlaatste, laatste.
+# S-kern op re (g4); open frase eindigt op re, gesloten op ti-1 (e4).
+# Pitches provisional. Contract T1–T7 / mapping-vsa.
+
+spec_version: draft-v0
+id: stichier-toon-3-groningen
+genre: stichier
+tone: 3
+do: F4
+mode: major
+duration-model: default
+pitches_status: provisional
+source: >-
+  Koormap Groningen — stichiermelodie toon 3
+  (Heer ik roep / Laat mijn gebed; MSCZ-schets)
+voice_oct:
+  S: 0
+  A: -1
+  T: -1
+  B: -1
+cycle:
+  - "1"
+  - "2"
+final: laatste
+
+mapping_plans:
+  - id: two-couplets
+    label: "couplet1 + couplet2 (11 strofes)"
+    when:
+      stanza_count: 11
+    steps:
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: voorlaatste
+      - phrase: laatste
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: "1"
+      - phrase: "2"
+      - phrase: laatste
+  - id: triple-close
+    label: "|: 1, 2 :| voorlaatste, laatste"
+    when:
+      stanza_count_mod:
+        mod: 3
+        remainder: 0
+      stanza_count_min: 6
+    steps:
+      - repeat: ["1", "2"]
+        until:
+          remaining: 2
+      - phrase: voorlaatste
+      - phrase: laatste
+  - id: standard
+    label: "|: 1, 2 :| …, laatste"
+    when:
+      default: true
+    steps:
+      - repeat: ["1", "2"]
+        until: final
+      - phrase: laatste
+
+phrases:
+  # Open frase: inzet re → slot re (MSCZ g4 … /).
+  - id: "1"
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: re, A: ti-1, T: sol-1, B: do-1 }
+
+  # Gesloten frase: inzet re → slot ti-1 (MSCZ … |e4).
+  - id: "2"
+    events:
+      - role: recite
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: ti-1, A: sol-1, T: mi-1, B: do-2 }
+
+  # Op-één-na-laatste (wanneer…): open contour als 1.
+  - id: voorlaatste
+    events:
+      - role: recite
+        duration: "~"
+        pitches: { S: re, A: ti-1, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: re, A: ti-1, T: sol-1, B: do-1 }
+
+  # laatste — MSCZ: mi/a4 of voortzetting → melisma → ti-1.
+  - id: laatste
+    events:
+      - role: recite
+        duration: "~"
+        optional: true
+        pitches: { S: mi, A: do, T: sol-1, B: fa-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: fa, A: re, T: sol-1, B: re-1 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: mi, A: do, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: re, A: ti-1, T: sol-1, B: do-1 }
+      - role: cadence
+        duration: "~"
+        anchor: l.lgr.
+        pitches: { S: ti-1, A: sol-1, T: mi-1, B: do-2 }

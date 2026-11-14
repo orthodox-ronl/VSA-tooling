@@ -2,21 +2,67 @@
 
 **Contract-id:** products-meta · schema **2**.  
 Canonieke hub voor versheid/herkomst van street-`products`. Elders alleen
-linken. Overzicht: [contract-index](contract-index.md).
+linken. Start: [contract-index](contract-index.md).
 
-## Waartoe
+## Identiteit
+
+| Veld     | Waarde                                              |
+| -------- | --------------------------------------------------- |
+| Extensie | `.products-meta.json`                               |
+| Rol      | **Sidecar** (herkomst/versheid), geen muziekproduct |
+| Sibling  | `{bronnaam}.products-meta.json`                     |
+| Wanneer  | Na `{straat} products` of individuele product-subs  |
+
+## Canoniciteit
+
+Canoniek = schema **2** + invarianten hieronder. C1–C4:
+[contract-index §C\*](contract-index.md#canoniciteit-en-conversiegates-c).
+
+## Inhoud en metadata
+
+UTF-8 JSON. Velden: zie §Schema 2. Geen muzikale inhoud.
+
+## Syllabificatie
+
+n.v.t.
+
+## Melisma en binding
+
+n.v.t.
+
+## Transliteratie
+
+n.v.t.
+
+## Stemmen en partijen
+
+n.v.t.
+
+## Leesbaarheid
+
+n.v.t.
+
+## Herkomst
+
+Dit bestand **is** de herkomstnorm. Geen parallelle stempel *in*
+`.mxl`/`.svg` als bron van waarheid (zie [straat-CLIs](../plans/straat-clis.md)).
+
+## Conversies
+
+Wordt niet “geconverteerd”; wordt **geschreven/gemerged** door exporters.
+Lezers: `freshness()` / bibliotheek `check_*`.
+
+## Validatie
+
+`freshness()` → `ok` / `missing` / `stale` / `no_meta` (zie hieronder).
+
+---
+
+## Waartoe (type-specifiek)
 
 De CLI die een afgeleid bestand schrijft, is de enige die betrouwbaar weet
-**uit welke bron** dat bestand kwam. Die CLI schrijft daarom een
-**stempelbestand** (sidecar) naast de bron. Daarin staan:
-
-- de bron (bestandsnaam + inhouds-hash);
-- elk afgeleid product (bestandsnaam + inhouds-hash);
-- de koppeling: dit product hoort bij die bron-hash.
-
-Geen parallelle herkomstnorm in bibliotheek-stempels *in* `.mxl`/`.svg`
-als bron van waarheid voor versheid (dat is consumer-restant tot
-afbouw; zie [straat-CLIs](../plans/straat-clis.md)).
+**uit welke bron** dat bestand kwam. Die CLI schrijft daarom dit
+stempelbestand. Daarin staan bron-hash, product-hashes en de koppeling.
 
 ## Bestandslocatie
 

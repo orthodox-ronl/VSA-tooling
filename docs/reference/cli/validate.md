@@ -11,7 +11,7 @@ verdere verwerking (SVG, Hugo-Markdown, MusicXML).
 ## Synopsis
 
 ```text
-vsa validate [-h] [--config CONFIG] [--summary] path
+vsa validate [-h] [--config CONFIG] [--syllable-dictionary PAD] [--summary] path
 ```
 
 ## Beschrijving
@@ -30,6 +30,7 @@ vsa validate [-h] [--config CONFIG] [--summary] path
 | Input          | Voorbeeld                                     | Gedrag                                             |
 | -------------- | --------------------------------------------- | -------------------------------------------------- |
 | `.vsa`-bestand | `examples\minimal\001_plain_text.vsa`         | Controleert één VSA-bestand.                       |
+| Geen `.mvsa`   | (weigert)                                     | Gebruik `mvsa validate` voor `.mvsa`.              |
 | `.md`-bestand  | `pagina.md`                                   | Controleert alle [VSA-blokken](@) in dat bestand.  |
 | Map            | `examples\consumer-minimal\content-source`    | Zoekt recursief naar `.vsa`, `.md` en `.markdown`. |
 
@@ -153,6 +154,9 @@ soort fouten tegelijk wilt zien.
 | `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`     | Aantallen hoogte-/lengteposities passen niet      | Controleer samengestelde [modifiers](@).                                 |
 | `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`      | Berekende hoogte komt niet overeen met marker     | Pas de eindmarkering of de scope-modifiers aan; of gebruik een overgang. |
 | `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH`   | Linkerhoogte van `[oud:nieuw]` klopt niet         | Laat de linker-EHM overeenkomen met de huidige cursor.                   |
+| `VSA-SYLLABIFY-MISSING-HYPHENS`            | Plat woord mist soft `-` terwijl Pyphen splitst   | Soft `-` in de bron, of woord op `monosyllable_exceptions.nl.txt`; zie [syllabificatie](../../formats/syllabificatie.md). Standaard **warning**. |
+| `VSA-SYLLABLE-DICT-MISMATCH`               | Bronvorm ≠ canonieke syllable-dictionary          | Op TTY: Enter = vervang in `.vsa`; `a` = accepteer vorm in lijst. Lijstpad: `vsa.toml` / `--syllable-dictionary`; [syllabificatie](../../formats/syllabificatie.md). Standaard **error**. |
+| `VSA-SYLLABLE-DICT-UNKNOWN`                | Lemma ontbreekt in syllable-dictionary            | Op TTY: Enter = vorm toevoegen (schrijft naar geconfigureerde lijst); `v` = bron + lijst. Standaard **error**. |
 
 Zie [diagnostics.md](../diagnostics.md) voor de volledige lijst en severity-instellingen.
 

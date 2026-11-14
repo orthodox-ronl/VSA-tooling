@@ -6,7 +6,9 @@
 # wordt de middelste half melisma op de voorlaatste (le_&_na_).
 # Frase 2: inzet ti → opt. do → re (B blijft sol-2) → recite → zig-zag → ti.
 # Laatste: ≈ frase 2 + opt. hold op re na sprong (he-mel).
-# Speelplan |: 1, 2 :| laatste. @oct A=-1 (klaar-kondak).
+# Speelplan |: 1, 2 :| laatste; bij 3n strofes: |: 1, 2 :| 2a, laatste.
+# 2a = frase 2 met andere slotcadens (blad in G: [f,dis,b,b-] i.p.v. [a,f,d,d-]).
+# @oct A=-1 (klaar-kondak). Contract: mapping-vsa / T1–T7.
 
 spec_version: draft-v0
 id: kondak-toon-6-groningen
@@ -30,6 +32,19 @@ cycle:
 final: laatste
 
 mapping_plans:
+  # Specifiek vóór default (mapping-vsa): 3n → 2a + laatste.
+  - id: triple-close
+    label: "|: 1, 2 :| 2a, laatste"
+    when:
+      stanza_count_mod:
+        mod: 3
+        remainder: 0
+    steps:
+      - repeat: ["1", "2"]
+        until:
+          remaining: 2
+      - phrase: "2a"
+      - phrase: laatste
   - id: standard
     label: "|: 1, 2 :| laatste"
     when:
@@ -115,6 +130,55 @@ phrases:
         duration: "_"
         anchor: l.st.
         pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+
+  # Zelfde contour als frase 2; andere slotcadens (3n-speelplan).
+  # Bladakkoord in G: [f, dis, b, b-] → do=F spelling hieronder (provisional).
+  - id: "2a"
+    events:
+      - role: cadence
+        duration: "_"
+        optional: true
+        anchor: e.st.
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: ti-1, A: sol-1, T: re-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+      - role: recite
+        duration: "__"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: sol-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: sol-2 }
+      - role: cadence
+        duration: "_"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        optional: true
+        pitches: { S: re, A: sol-1, T: fa-1, B: ti-2 }
+      - role: cadence
+        duration: "~"
+        optional: true
+        pitches: { S: do, A: sol-1, T: mi-1, B: do-1 }
+      - role: cadence
+        duration: "_"
+        anchor: l.st.
+        pitches: { S: do, A: "#la-1", T: "#fa-1", B: "#fa-2" }
 
   - id: laatste
     # Geen recite-midden: split_phrase_events zou he-mel anders in recite trekken.

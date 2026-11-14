@@ -427,6 +427,8 @@ class MusicXMLRenderer:
 
         # Unscopped whitespace tokens accumulated between barlines / scopes.
         pending_tokens: list[str] = []
+        # Lyric-bearing notes of the current glued word (text + scopes).
+        open_word: list[_Note] = []
 
         # Playback: blad-aanwijzing segments → whole rest (no sung text).
         sung_indices: set[int] | None = None
@@ -435,16 +437,51 @@ class MusicXMLRenderer:
             sung_indices = _sung_segment_node_indices(document.nodes)
             rest_indices = _blad_aanwijzing_rest_node_indices(document.nodes)
 
-        def flush_pending_words() -> None:
-            """Emit reciting-tone note(s) for buffered unscopped text."""
-            if not pending_tokens:
+        def _assign_open_word_syllabics() -> None:
+            """K2/K4: begin/middle/end over lettergrepen van één woord (scopes+tekst)."""
+            lyric = [e for e in open_word if (e.get("text") or "").strip()]
+            if len(lyric) <= 1:
+                open_word.clear()
                 return
-            reciting_pitch = resolver.current_pitch  # last sounding, incl. alter
+            for rank, ev in enumerate(lyric):
+                if rank == 0:
+                    ev["syllabic"] = "begin"
+                elif rank == len(lyric) - 1:
+                    ev["syllabic"] = "end"
+                else:
+                    ev["syllabic"] = "middle"
+            open_word.clear()
+
+        def _emit_reciting_token(token: str) -> list[_Note]:
+            reciting_pitch = resolver.current_pitch
+            emitted: list[_Note] = []
+            for text, syllabic in _syllables_from_token(token):
+                ev: _Note = {
+                    "type": "note",
+                    "pitch": reciting_pitch,
+                    "duration": Duration(note_type="quarter"),
+                    "text": text,
+                    "syllabic": syllabic,
+                    "is_melisma": False,
+                }
+                events.append(ev)
+                emitted.append(ev)
+            return emitted
+
+        def flush_pending_words(*, glue_last_to_scope: bool = False) -> None:
+            """Emit buffered unscopped text; optionally keep last token open for scopes."""
+            if not pending_tokens:
+                if not glue_last_to_scope:
+                    _assign_open_word_syllabics()
+                return
+            reciting_pitch = resolver.current_pitch
 
             if (
                 reciting_mode == RECITING_MODE_WHOLE
                 and len(pending_tokens) >= _RECITING_WHOLE_THRESHOLD
+                and not glue_last_to_scope
             ):
+                _assign_open_word_syllabics()
                 events.append({
                     "type": "note",
                     "pitch": reciting_pitch,
@@ -453,16 +490,23 @@ class MusicXMLRenderer:
                     "syllabic": "single",
                     "is_melisma": False,
                 })
-            else:
-                for text, syllabic in _syllables_from_tokens(pending_tokens):
-                    events.append({
-                        "type": "note",
-                        "pitch": reciting_pitch,
-                        "duration": Duration(note_type="quarter"),
-                        "text": text,
-                        "syllabic": syllabic,
-                        "is_melisma": False,
-                    })
+                pending_tokens.clear()
+                return
+
+            if glue_last_to_scope:
+                *complete, last = pending_tokens
+                pending_tokens.clear()
+                for tok in complete:
+                    _assign_open_word_syllabics()
+                    open_word.extend(_emit_reciting_token(tok))
+                    _assign_open_word_syllabics()
+                open_word.extend(_emit_reciting_token(last))
+                return
+
+            for tok in pending_tokens:
+                _assign_open_word_syllabics()
+                open_word.extend(_emit_reciting_token(tok))
+                _assign_open_word_syllabics()
             pending_tokens.clear()
 
         for node_index, node in enumerate(document.nodes):
@@ -504,7 +548,14 @@ class MusicXMLRenderer:
                             events[-1]["text"] += token
                         # else: punctuation at start of measure — discard
                     else:
+                        # Spatie vóór dit woord: open woord uit scopes afsluiten.
+                        if open_word and not pending_tokens:
+                            _assign_open_word_syllabics()
                         pending_tokens.append(token)
+                # Trailing space → woordgrens vóór een volgende scope
+                # (``ver {/eind}`` ≠ ``ver{/eind}``).
+                if node.text and node.text[-1].isspace():
+                    flush_pending_words()
                 continue
 
             if isinstance(node, ControlTokenNode):
@@ -514,7 +565,7 @@ class MusicXMLRenderer:
                 continue
 
             if isinstance(node, ScopeNode):
-                flush_pending_words()
+                flush_pending_words(glue_last_to_scope=True)
 
                 hm = node.height_modifier or ["~"]
                 lm = node.length_modifier or ["~"]
@@ -534,17 +585,22 @@ class MusicXMLRenderer:
                     except UnknownELM as exc:
                         raise MusicXMLExportError(str(exc)) from exc
 
-                    events.append({
+                    text = node.text if (not is_melisma or i == 0) else ""
+                    ev = {
                         "type": "note",
                         "pitch": pitch,
                         "duration": duration,
                         # Text only on the first note of a melisma.
-                        "text": node.text if (not is_melisma or i == 0) else "",
+                        "text": text,
+                        "syllabic": "single",
                         "is_melisma": is_melisma,
                         "melisma_first": is_melisma and i == 0,
                         "melisma_middle": is_melisma and 0 < i < n_positions - 1,
                         "melisma_last": is_melisma and i == n_positions - 1,
-                    })
+                    }
+                    events.append(ev)
+                    if text.strip():
+                        open_word.append(ev)
 
         flush_pending_words()  # flush any trailing unscopped words
 
@@ -733,7 +789,7 @@ class MusicXMLRenderer:
             if language and not self._is_playback:
                 lyric_attrs["xml:lang"] = language
             lyric = ET.SubElement(note_el, "lyric", **lyric_attrs)
-            ET.SubElement(lyric, "syllabic").text = "single"
+            ET.SubElement(lyric, "syllabic").text = ev.get("syllabic", "single")
             ET.SubElement(lyric, "text").text = display_lyric_text(text)
             if self._is_playback:
                 ET.SubElement(lyric, "extend")

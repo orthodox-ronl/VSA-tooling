@@ -11,6 +11,7 @@ from vsa.derived_path import derived_output_path
 from vsa.input_paths import collect_cli_sources, is_nested_derived_source
 from vsa.mvsa_vsa import (
     MvsaVsaError,
+    _format_lyric_with_elms,
     convert_mvsa_to_vsa,
     convert_mvsa_to_vsa_text,
     default_mvsa_vsa_output,
@@ -33,6 +34,56 @@ def test_degree_delta_to_ehm_basics() -> None:
     assert degree_delta_to_ehm(1, 1.0) == "#/"
     assert start_marker_for_degree(0) == "[:]"
     assert start_marker_for_degree(-1) == "[\\:]"
+
+
+def test_format_lyric_melisma_keeps_tilde_for_modifier_parity() -> None:
+    """E4: gemengde melisma-ELM ``_&~`` behoudt ``~`` (geen COUNT-MISMATCH)."""
+    assert _format_lyric_with_elms("hoor", ["_", "~"], melisma=True) == "hoor_&~"
+    assert _format_lyric_with_elms("U", ["_", "~"], melisma=True) == "U_&~"
+    # Uitsluitend-``~`` → geen duurtekst (zoals ``ver~&~`` → ``{/&/ver}``).
+    assert _format_lyric_with_elms("ver", ["~", "~"], melisma=True) == "ver"
+    # Eén toon: ``~`` blijft weg.
+    assert _format_lyric_with_elms("mij", ["~"], melisma=False) == "mij"
+    assert _format_lyric_with_elms("Heer", ["_", "_"], melisma=True) == "Heer_&_"
+
+
+def test_same_pitch_with_duration_uses_scope_not_bare_elm() -> None:
+    """Zelfde toon + ``_`` → ``{hoor_}``, niet kale ``hoor_`` (zoektekst)."""
+    mvsa = """@do F4
+@mode major
+@oct S=0
+
+#maat 1
+L: ver-hoor_ ||
+S: Bb4 -     ||Bb4
+"""
+    body = convert_mvsa_to_vsa_text(mvsa, source_name="t.mvsa")
+    assert "{hoor_}" in body
+    assert "}hoor_" not in body
+    fm, _ = parse_vsa_frontmatter(body)
+    zt = str(fm["zoektekst"])
+    assert "verhoor_" not in zt
+    assert "verhoor" in zt
+
+
+def test_soft_hyphens_preserved_between_plain_syllables() -> None:
+    """E4: MVSA ``ge-bed`` → soft ``-`` in één schrijfslag; soort/toon uit naam."""
+    mvsa = """@do F4
+@mode major
+@oct S=0
+
+#maat 1
+L: Laat (mijn ge-bed) als ||
+S: Bb4  -             -   ||Bb4
+"""
+    text = convert_mvsa_to_vsa_text(
+        mvsa, source_name="stichier-demo-toon-1-groningen.mvsa"
+    )
+    fm, body = parse_vsa_frontmatter(text)
+    assert "ge-bed" in body
+    assert "gebed" not in body
+    assert fm.get("soort") == "stichier"
+    assert fm.get("toon") == 1
 
 
 def test_default_output_paths() -> None:

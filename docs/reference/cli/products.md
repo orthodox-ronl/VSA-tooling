@@ -15,7 +15,8 @@ Contract-matrix: [contract-index](../../formats/contract-index.md). Straatplan:
 ## Synopsis
 
 ```text
-vsa products [-h] [--force] [--dry-run] [--quiet] [--skip-svg] [--musescore PATH] path
+vsa products [-h] [--force] [--dry-run] [--quiet] [--allow-noncanonical]
+             [--skip-svg] [--musescore PATH] path
 ```
 
 ## Beschrijving
@@ -36,15 +37,20 @@ Voor elke `.vsa` onder `path` (bestand of map, recursief):
 Geen `{stam}.vsa.pdf`. MuseScore is nodig voor `.mscz`, `.mp3` en de
 Score-IR-keten. De SVG komt uit de VSA-renderer zelf.
 
-**MXL-keten** (gelijk aan wat bibliotheek-sync eerder zelf deed):
+**MXL-keten** (`.vsa`):
 
-1. Tijdelijke [syllabify](syllabify.md) (canonieke `.vsa` blijft ongewijzigd).
-2. Export in `playback`-profiel.
-3. Coria-finalize (sanitize + voortekens; geen DOCTYPE) — zelfde nabewerking
+1. Export in `playback`-profiel uit de canonieke bron (**geen** stille
+   [syllabify](syllabify.md) — zing-deling hoort in de `.vsa`; zie
+   [syllabificatie](../../formats/syllabificatie.md)).
+2. Coria-finalize (sanitize + voortekens; geen DOCTYPE) — zelfde nabewerking
    als bij [`vsa mxl`](musicxml.md) in playback.
 
-**SVG** komt uit de **ongewijzigde** bron (geen syllabify), via dezelfde
-native renderer als [`vsa svg`](svg.md).
+Hulp vóór products: `vsa syllabify … --in-place` (schrijfhulp), daarna
+handmatig nalopen. Los `vsa mxl --syllabify` blijft beschikbaar voor
+tijdelijke export-experimenten.
+
+**SVG** komt uit dezelfde bron (soft `-` worden bij weergave gestreept waar
+van toepassing), via dezelfde native renderer als [`vsa svg`](svg.md).
 
 Losse product-subs mergen dezelfde sidecar: [`vsa mxl`](musicxml.md)
 (key `mxl`) en [`vsa svg`](svg.md) (key `svg`), bij sibling-output naast
@@ -53,17 +59,32 @@ de `.vsa`.
 Slaat over als de meta-hash van de bron nog klopt en de productbestanden
 er zijn. `--force` regenereert altijd.
 
+**C3 (canonieke bron):** vóór regenereren moet de `.vsa` door
+`vsa validate` (errors) — zie
+[contract-index §C*](../../formats/contract-index.md#canoniciteit-en-conversiegates-c).
+
+**C4 (canonieke doelen):** na schrijven van de playback-``.mxl``
+draait dezelfde steekproef als [`mxl validate`](mxl.md) (profiel `mono`
+voor `.vsa`, `satb` voor `.mvsa`/`.mscz`). Na Score-IR volgt een
+structurele C4 (JSON/`format`/`profile` + from-ir-emit). Bij C4-fout
+blijft het doelbestand op schijf staan; de run stopt met exit 1 en
+schrijft geen products-meta voor die bron.
+
+Uitzondering: `--allow-noncanonical` (C3 én C4; niet voor
+catalogusnaleving).
+
 ## Argumenten en opties
 
-| Naam           | Verplicht | Betekenis                                       | Default | Beperkingen        |
-| -------------- | --------- | ----------------------------------------------- | ------- | ------------------ |
-| `path`         | Ja        | `.vsa`-bestand of map (recursief).              | —       | Moet bestaan.      |
-| `--force`      | Nee       | Regenereer ook als meta zegt dat alles vers is. | Uit     | —                  |
-| `--dry-run`    | Nee       | Alleen tonen wat er zou gebeuren.               | Uit     | Geen bestanden.    |
-| `--quiet`      | Nee       | Geen voortgangsregels op stdout.                | Uit     | Fouten op stderr.  |
-| `--skip-svg`   | Nee       | Sla native SVG over.                            | Uit     | —                  |
-| `--musescore`  | Nee       | Pad naar MuseScore (mscz, mp3, Score-IR).       | auto    | —                  |
-| `-h`, `--help` | Nee       | Toon hulp.                                      | —       | —                  |
+| Naam                     | Verplicht | Betekenis                                            | Default | Beperkingen         |
+| ------------------------ | --------- | ---------------------------------------------------- | ------- | ------------------- |
+| `path`                   | Ja        | `.vsa`-bestand of map (recursief).                   | —       | Moet bestaan.       |
+| `--force`                | Nee       | Regenereer ook als meta zegt dat alles vers is.      | Uit     | —                   |
+| `--dry-run`              | Nee       | Alleen tonen wat er zou gebeuren.                    | Uit     | Geen bestanden.     |
+| `--quiet`                | Nee       | Geen voortgangsregels op stdout.                     | Uit     | Fouten op stderr.   |
+| `--allow-noncanonical`   | Nee       | C3/C4-uitzondering: negeer bron- of doel-MXL-fouten. | Uit     | Niet voor catalogus |
+| `--skip-svg`             | Nee       | Sla native SVG over.                                 | Uit     | —                   |
+| `--musescore`            | Nee       | Pad naar MuseScore (mscz, mp3, Score-IR).            | auto    | —                   |
+| `-h`, `--help`           | Nee       | Toon hulp.                                           | —       | —                   |
 
 ## Output
 
@@ -75,10 +96,10 @@ er zijn. `--force` regenereert altijd.
 
 ## Exit status
 
-| Exitcode | Betekenis                                      |
-| -------- | ---------------------------------------------- |
-| `0`      | Alle bronnen verwerkt (of dry-run / meta-ok).  |
-| `1`      | Geen bronnen, padfout, of exportfout.          |
+| Exitcode | Betekenis                                         |
+| -------- | ------------------------------------------------- |
+| `0`      | Alle bronnen verwerkt (of dry-run / meta-ok).     |
+| `1`      | Geen bronnen, padfout, C3/C4-fout, of exportfout. |
 
 ## Voorbeelden
 

@@ -13,3 +13,7 @@ output-mode = "shortcode"
 # Preview-audio (vsa audio / mvsa mp3):
 # [audio]
 # format = "mp3"
+
+# Canonieke zing-deling (org-lijst in bibliotheek):
+[syllabificatie]
+dictionary = "../bibliotheek/data/syllable_dictionary.nl.txt"

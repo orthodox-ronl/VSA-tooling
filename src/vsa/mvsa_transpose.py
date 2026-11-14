@@ -19,12 +19,13 @@ from .mvsa_musicxml import (
 )
 from .mvsa_normalize import (
     DEFAULT_IMPORT_PITCH,
-    OCTAVE_STYLES,
     REWRITE_PITCH_FORMS,
+    MvsaNormalizeError,
     _apply_rewrites,
     _format_pitch,
     canonicalize_pitch_form,
-    format_abc_scientific,
+    check_octave_style,
+    format_abc,
     pitch_to_degree_and_chrom,
 )
 from .mvsa_parse import parse_mvsa
@@ -159,15 +160,10 @@ def transpose_mvsa_text(
             f"onbekende --pitch {pitch!r}; kies uit "
             f"doremi, a-g (of abc), vsa, ag-vsa"
         )
-    if octave_style not in OCTAVE_STYLES:
-        raise MvsaTransposeError(
-            f"onbekende --octave-style {octave_style!r}; "
-            f"kies uit {', '.join(OCTAVE_STYLES)}"
-        )
-    if octave_style == "marker":
-        raise MvsaTransposeError(
-            "octave-style 'marker' is nog niet geïmplementeerd; gebruik @oct"
-        )
+    try:
+        check_octave_style(octave_style, pitch)
+    except MvsaNormalizeError as exc:
+        raise MvsaTransposeError(str(exc)) from exc
 
     from .mvsa_marks import canonicalize_mark_source
 
@@ -268,7 +264,14 @@ def transpose_mvsa_text(
                                 and prev_degree[letter] is None
                                 and sounding is not None
                             ):
-                                slot_out.append(format_abc_scientific(sounding))
+                                slot_out.append(
+                                    format_abc(
+                                        sounding,
+                                        do=new_do,
+                                        writing_oct=writing_oct,
+                                        octave_style=octave_style,
+                                    )
+                                )
                                 deg, _chrom = pitch_to_degree_and_chrom(
                                     new_do, sounding, intervals
                                 )
@@ -286,6 +289,7 @@ def transpose_mvsa_text(
                                         intervals=intervals,
                                         writing_oct=writing_oct,
                                         prev_degree=prev_degree[letter],
+                                        octave_style=octave_style,
                                     )
                                 )
                                 deg, _chrom = pitch_to_degree_and_chrom(
@@ -303,6 +307,7 @@ def transpose_mvsa_text(
             out_ehm: str | None = "-" if pitch == "vsa" else None
             for vm in voice_markers:
                 letter = vm[0]
+                voice_oct = ctx.oct_for(vm)
                 # Carry blijft in bron-toonsoort: volgende system resolve't
                 # nog tegen de oude sticky context.
                 pitch_carry[letter] = resolvers[letter].current_pitch
@@ -319,7 +324,12 @@ def transpose_mvsa_text(
                             and i == len(segs) - 1
                             and end_pitch is not None
                         ):
-                            anchor = format_abc_scientific(end_pitch)
+                            anchor = format_abc(
+                                end_pitch,
+                                do=new_do,
+                                writing_oct=voice_oct,
+                                octave_style=octave_style,
+                            )
                         elif i < len(bars.bar_anchors) and bars.bar_anchors[i]:
                             # Oude absolute eindanker: verschuif mee.
                             try:
@@ -328,12 +338,16 @@ def transpose_mvsa_text(
                                         bars.bar_anchors[i], old_do
                                     )
                                 )
-                                anchor = format_abc_scientific(
-                                    transpose_pitch(
-                                        old_anchor,
-                                        semitones=semitones,
-                                        letter_shift=letter_shift,
-                                    )
+                                shifted = transpose_pitch(
+                                    old_anchor,
+                                    semitones=semitones,
+                                    letter_shift=letter_shift,
+                                )
+                                anchor = format_abc(
+                                    shifted,
+                                    do=new_do,
+                                    writing_oct=voice_oct,
+                                    octave_style=octave_style,
                                 )
                             except ValueError:
                                 anchor = bars.bar_anchors[i] or ""
