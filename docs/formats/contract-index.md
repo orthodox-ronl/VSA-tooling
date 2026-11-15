@@ -70,7 +70,13 @@ normtekst; formatpagina’s vatten samen en linken.
 | C3  | Een **conversie** verifieert dat de **bron** canoniek is, tenzij het CLI-contract een expliciete uitzondering noemt.                  |
 | C4  | Een conversie levert een **canonieke doel**, tenzij het CLI-contract een expliciete uitzondering noemt.                               |
 
-**Bekende uitzonderingen** (geen stille omzeiling; noem ze in man-pages):
+**CLI-contract** (operationeel: G1–G8, padresolutie, vlaggen, **wie toetst
+C3/C4**, canonieke uitzonderingenlijst):
+[reference/cli/input-pad.md](../reference/cli/input-pad.md).
+Per-commando status: [cli-canoniciteit-audit](cli-canoniciteit-audit.md).
+
+**Bekende uitzonderingen** (samenvatting; volledige lijst + defaults in
+het CLI-contract; geen stille omzeiling; noem ze in man-pages):
 
 | Situatie                         | Waarom toegestaan                                         |
 | -------------------------------- | --------------------------------------------------------- |
@@ -78,7 +84,7 @@ normtekst; formatpagina’s vatten samen en linken.
 | `syllabify` / `--unsyllabify`    | Bewust (on)canoniek maken van zing-deling                 |
 | `--syllabify` op o.a. MXL-export | Expliciete opt-in; default eist zing-deling in de bron    |
 | `import` / werkbank              | Tussenstadium vóór catalogus-canoniciteit                 |
-| `--allow-noncanonical`           | C3-uitzondering op products/product-subs (niet catalogus) |
+| `--allow-noncanonical`           | C3/C4-uitzondering op products/product-subs (niet catalogus) |
 
 **C3 afgedwongen (fase 3):** `.vsa` / `.mvsa` bronnen bij
 `{straat} products` en hoog-prio product-subs (`text`, `mxl`, `svg`,
@@ -144,7 +150,8 @@ id + link). Gat = migratieschuld. Diepte-hubs blijven normtekst.
 | Layoutprofielen `partituur` / `muziek` / `plain`                                                           | [mscz.md](mscz.md)#layoutprofielen---layout                                                                                                                                                                                   | `mvsa mscz` / `{straat} svg` / `{straat} pdf`                                                          |
 | `.mvsa`-syntax                                                                                             | [specification-mvsa](../specification-mvsa/README.md)                                                                                                                                                                         | `mvsa validate`                                                                                        |
 | `.mvsa` normaliseren (spelling / pitch-opties)                                                             | man-page [`mvsa normalize`](../reference/cli/mvsa.md#mvsa-normalize) + conversieplan                                                                                                                                          | `mvsa normalize`                                                                                       |
-| **Kuiser** (authoring → canoniek; Q\* MVSA, V\* VSA, …)                                                    | [kuiser.md](kuiser.md)                                                                                                                                                                                                        | `mvsa kuiser` · `vsa kuiser` · stubs `mscz`/`mxl kuiser`                                               |
+| **Kuiser** (authoring → canoniek; Q\* MVSA, V\* VSA, …)                                                    | [kuiser.md](kuiser.md)                                                                                                                                                                                                        | `mvsa kuiser` (Q\*) · `vsa kuiser` (V1–V8) · stubs `mscz`/`mxl`                                        |
+| **`vsa format`** (body strofe-layout)                                                                      | [vsa-format.md](vsa-format.md) · [format man](../reference/cli/format.md)                                                                                                                                                     | `vsa format` · niet stil vanuit kuiser                                                                 |
 | Conversiematrix bron↔doel                                                                                  | [mvsa-conversions](../plans/mvsa-conversions.md) · [formats-overzicht](index.md)                                                                                                                                              | `mxl mvsa`, `mscz mvsa`, …                                                                             |
 | Score-IR / from-ir (bedoelde printvorm)                                                                    | [score-ir.md](score-ir.md) · [partituur-ir](../plans/partituur-ir.md)                                                                                                                                                         | `{straat} score-ir` (uit `.vsa`/`.mvsa`/`.mscz`)                                                       |
 | OSMD-scherm (S8 e.d.; emit, zelfde bedoeling)                                                              | [osmd-s8-recite](../plans/osmd-s8-recite.md) → checklists S8/R3                                                                                                                                                               | from-ir → OSMD                                                                                         |
@@ -192,7 +199,9 @@ CLI: `{straat} {product}` met alleen de eigen bronextensie
 (`.vsa` / `.mvsa` / `.mscz`). Voorbeeld: `mscz score-ir`, `vsa mp3`,
 `mvsa lyrics` via `mvsa text`. Batch op een map pikt geen geneste
 afgeleiden op (`lied.mvsa.mscz` bij `mscz products`); zie
-[input-pad](../reference/cli/input-pad.md) (bestand / map / **catalogus-id**).
+[input-pad](../reference/cli/input-pad.md) (gedeeld CLI-contract: invoer /
+uitvoer / `--dry-run`; bestand / map / korte lookup / **catalogus-id** incl.
+soort-map).
 
 **Zelfde-type:** `.mscz` → product `mscz` = partituur-conform maken
 (layout `partituur`), niet overslaan. Bron-`.vsa`/`.mvsa` blijven bron
@@ -215,7 +224,8 @@ uit `.vsa`: [`vsa pdf`](../reference/cli/pdf.md).
 | Actie (niet-product) | Straat / CLI                                                                                                     |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | normalize            | `mvsa normalize` · `mscz normalize` · `mxl normalize` (geen `vsa normalize`)                                     |
-| kuiser               | `mvsa kuiser` (Q\*) · `vsa kuiser` (V\* volgt) · `mscz`/`mxl kuiser` (geen spec → fout) — [kuiser.md](kuiser.md) |
+| kuiser               | `mvsa kuiser` · `vsa kuiser` — [kuiser.md](kuiser.md) · [vsa man](../reference/cli/kuiser.md)                    |
+| format               | `vsa format` — [vsa-format.md](vsa-format.md) · [man](../reference/cli/format.md); geen `vsa normalize`          |
 | import               | `mvsa import` · `mscz import`                                                                                    |
 | validate             | `mvsa validate` · `vsa validate` · `mxl validate`                                                                |
 | `manual`             | geen auto-`products`                                                                                             |

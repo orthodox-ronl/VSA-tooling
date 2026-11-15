@@ -152,6 +152,8 @@ Prioriteit fase 3 (uit plan): eerst `products` / `mscz` / `text` / `svg` / `audi
 
 ## Zie ook
 
+- [CLI-contract G1–G8](../reference/cli/input-pad.md) (wie toetst C3/C4;
+  uitzonderingen; pad/vlaggen)
 - [contract-index](contract-index.md) §C* · §Nieuwe regel · §Dekkingsmatrix
 - [syllabificatie](syllabificatie.md) · [products-meta](products-meta.md)
 - Man-pages: [CLI-overzicht](../reference/cli/index.md)

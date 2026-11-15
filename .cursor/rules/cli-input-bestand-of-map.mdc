@@ -1,12 +1,22 @@
-# CLI-invoer: bestand of map
+# Gedeeld CLI-contract (G1–G8)
 
-**Norm:** `docs/reference/cli/input-pad.md`
+**Norm:** `docs/reference/cli/input-pad.md` (straat-puur, padresolutie,
+C3/C4-toets + uitzonderingen, uitvoer, vlaggen, exitcodes, docs-sync).
+Canoniciteit-definities: `docs/formats/contract-index.md` §C*.
+**Handhaving:** `tests/test_cli_input_contract_scan.py` (CI).
 
-Bij **nieuwe of gewijzigde** CLI-handlers met een bron-``path`` / ``input``:
+Bij **nieuwe of gewijzigde** CLI-handlers (`src/vsa/cli*.py`):
 
-1. Gebruik ``vsa.input_paths.collect_input_files`` (geen ad-hoc ``rglob``).
-2. Helptekst: «bestand of map» + welke extensies.
-3. Man-pagina synchroon (``docs/reference/cli/…``).
+1. Pad: ``collect_cli_sources`` / ``_cli_collect_sources`` /
+   ``resolve_cli_path`` / ``_cli_resolve_existing`` / ``validate_path``
+   (geen ad-hoc ``rglob`` of eigen lookup).
+2. Noodzaak voor ``.rglob(``? Alleen met ``# G2-allow: <reden>`` op
+   dezelfde of vorige regel — anders faalt de scan-test.
+3. Conversie/export: C3 vóór schrijven, C4 ná schrijven — tenzij
+   expliciete uitzondering in het CLI-contract + man-pagina.
+4. ``-h`` toont defaults; schrijvend: ``--dry-run`` (of documenteer
+   waarom niet); ``-o`` alleen bij precies één bron.
+5. Man-pagina + inventaris in `input-pad.md` synchroon in dezelfde ronde.
 
-Uitzondering alleen als de man-pagina expliciet «alleen één bestand» zegt
-(én dat in dezelfde wijziging is vastgelegd).
+Uitzondering «alleen één bestand» alleen als de man-pagina dat
+expliciet zegt (én in dezelfde wijziging is vastgelegd).

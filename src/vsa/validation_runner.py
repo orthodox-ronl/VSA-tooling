@@ -46,6 +46,8 @@ class ValidationMessage:
 class ValidationResult:
     ok: bool = True
     messages: list[ValidationMessage] = field(default_factory=list)
+    # Gebruiker stopte TTY-dictionary-check (`q`) — batch niet voortzetten.
+    interactive_aborted: bool = False
 
     def add_error(self, source, code, message_nl, line=1, column=1,
                   category="general", hint_nl="", doc_url=""):
@@ -79,6 +81,8 @@ class ValidationResult:
     def extend(self, other):
         if not other.ok:
             self.ok = False
+        if getattr(other, "interactive_aborted", False):
+            self.interactive_aborted = True
         self.messages.extend(other.messages)
 
     def has_errors(self):
@@ -88,70 +92,65 @@ class ValidationResult:
         return any(message.severity == "warning" for message in self.messages)
 
 
+_VSA_VALIDATE_SUFFIXES = frozenset({".vsa", ".md", ".markdown"})
+_VSA_VALIDATE_SUFFIX_LIST = tuple(sorted(_VSA_VALIDATE_SUFFIXES))
+
+
 def validate_path(path: str | Path, config: VSAConfig | None = None) -> ValidationResult:
-    from .input_paths import InputPathError, collect_input_files, looks_like_catalogus_id
+    """Valideer bestand, map, korte lookup of catalogus-id (G2).
+
+    Lege map / soort-map zonder passende ``.vsa``/``.md`` → OK (zelfde als
+    ``validate.cmd`` op een map zonder VSA-bronnen). Ontbrekend pad → fout.
+    """
+    from .input_paths import InputPathError, collect_input_files, resolve_cli_path
 
     raw = Path(path)
+    target: Path | None
+    if raw.exists():
+        target = raw
+    else:
+        try:
+            target = resolve_cli_path(path)
+        except InputPathError:
+            target = None
 
-    if raw.is_file():
-        return validate_file(raw, config=config)
+    if target is not None and target.is_file():
+        return validate_file(target, config=config)
 
-    if raw.is_dir():
-        result = ValidationResult()
-        files = sorted(
-            list(raw.rglob("*.md"))
-            + list(raw.rglob("*.markdown"))
-            + list(raw.rglob("*.vsa"))
+    if target is not None and target.is_dir():
+        files = collect_input_files(
+            target, suffixes=_VSA_VALIDATE_SUFFIX_LIST, resolve_ids=False
         )
+        result = ValidationResult()
         for file in files:
             result.extend(validate_file(file, config=config))
+            if result.interactive_aborted:
+                break
         return result
 
-    # Catalogus-id (bestand/map bestaat niet): alleen .vsa onder die leaf.
-    if looks_like_catalogus_id(path):
-        try:
-            files = collect_input_files(path, suffixes=(".vsa",))
-        except InputPathError as exc:
-            result = ValidationResult()
-            result.add_error(
-                source=str(path),
-                code="VSA-PATH-NOT-FOUND",
-                message_nl=str(exc),
-                category="path",
-                hint_nl=(
-                    "Gebruik een bestaand pad of een catalogus-id onder "
-                    "content-source/catalogus (zie docs/reference/cli/input-pad.md)."
-                ),
-            )
-            return result
+    # Catalogus-id / stam (geen bestaande map via korte lookup).
+    try:
+        files = collect_input_files(path, suffixes=_VSA_VALIDATE_SUFFIX_LIST)
+    except InputPathError as exc:
         result = ValidationResult()
-        for file in files:
-            result.extend(validate_file(file, config=config))
-        if not files:
-            result.add_error(
-                source=str(path),
-                code="VSA-PATH-NOT-FOUND",
-                message_nl="Geen .vsa-bestanden voor deze catalogus-id.",
-                category="path",
-                hint_nl="Controleer de id of geef een pad naar de leaf-map.",
-            )
+        result.add_error(
+            source=str(path),
+            code="VSA-PATH-NOT-FOUND",
+            message_nl=str(exc),
+            category="path",
+            hint_nl=(
+                "Controleer of het pad bestaat, of geef een catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
+        )
         return result
 
     result = ValidationResult()
-    result.add_error(
-        source=str(path),
-        code="VSA-PATH-NOT-FOUND",
-        message_nl="Pad niet gevonden.",
-        category="path",
-        hint_nl=(
-            "Controleer of het pad bestaat, of geef een catalogus-id "
-            "(docs/reference/cli/input-pad.md)."
-        ),
-    )
+    for file in files:
+        result.extend(validate_file(file, config=config))
+        if result.interactive_aborted:
+            break
     return result
-
-
-_VSA_VALIDATE_SUFFIXES = frozenset({".vsa", ".md", ".markdown"})
 
 
 def validate_file(path: str | Path, config: VSAConfig | None = None) -> ValidationResult:
@@ -602,8 +601,10 @@ def _add_syllable_dictionary_findings(
         prompt_dictionary_fixes,
     )
 
+    # Locate op volledige body (met commentaar in bron, maar _locate negeert
+    # HTML/#-commentaar) → bestand-absolute regels na ``source_line_offset``.
     findings = find_dictionary_syllable_issues(
-        document, source_text=semantic_text
+        document, source_text=text
     )
     if is_interactive_stdin():
         actionable = [
@@ -615,8 +616,20 @@ def _add_syllable_dictionary_findings(
             from .input_paths import source_id_for_prompt
 
             path = Path(source)
+            from dataclasses import replace as _dc_replace
+
+            mapped = [
+                _dc_replace(
+                    f,
+                    line=f.line + source_line_offset,
+                    column=f.column,
+                )
+                for f in actionable
+            ]
             session = prompt_dictionary_fixes(
-                actionable, source_id=source_id_for_prompt(path)
+                mapped,
+                source_id=source_id_for_prompt(path),
+                source_path=path,
             )
             if session.replacements:
                 from .syllable_dict_check import apply_replacements_to_source
@@ -642,8 +655,33 @@ def _add_syllable_dictionary_findings(
                     document = Parser(semantic_text).parse()
                 except Exception:
                     pass
+            if session.aborted:
+                result.interactive_aborted = True
+                # Geen verdere dictionary-/syllabify-meldingen voor dit bestand.
+                result.messages = [
+                    m
+                    for m in result.messages
+                    if m.code
+                    not in {
+                        CODE_MISMATCH,
+                        CODE_UNKNOWN,
+                        "VSA-SYLLABIFY-MISSING-HYPHENS",
+                        "VSA-SYLLABIFY-APPLIED",
+                    }
+                ]
+                result.add_error(
+                    source=source,
+                    code="VSA-SYLLABLE-DICT-ABORTED",
+                    message_nl=(
+                        "Interactieve syllable-dictionary-check afgebroken "
+                        "(Esc/Ctrl+C)."
+                    ),
+                    category="syllabify",
+                    hint_nl="Herstart validate om verder te gaan.",
+                )
+                return
             findings = find_dictionary_syllable_issues(
-                document, source_text=semantic_text
+                document, source_text=text
             )
 
     for finding in findings:
@@ -652,15 +690,9 @@ def _add_syllable_dictionary_findings(
             severity = config.validation.severity.get(finding.code, severity)
         if severity not in {"error", "warning"}:
             severity = "error"
-        # Onbekend op TTY na prompt: als nog unknown, blijft error.
-        line, column = _source_line_column(
-            text,
-            semantic_text,
-            offset_map,
-            finding.line,
-            finding.column,
-            source_line_offset,
-        )
+        # _locate gaf body-relatieve regels; frontmatter-offset erbij.
+        line = finding.line + source_line_offset
+        column = finding.column
         result.add_message(
             source=source,
             code=finding.code,

@@ -3,6 +3,31 @@ from pathlib import Path
 from vsa.validation_runner import validate_path
 
 
+def test_validate_path_soort_map_empty_vsa_ok(tmp_path: Path, monkeypatch):
+    """Soort-map zonder .vsa (alleen .mvsa) → OK, zoals map-scan."""
+    repo = tmp_path / "bieb"
+    leaf = repo / "content-source" / "catalogus" / "alleluia" / "toon-1"
+    leaf.mkdir(parents=True)
+    (leaf / "alleluia-toon-1.mvsa").write_text(
+        '@title "x"\n@do F4\n@sectie a\nL: (ha) |\nS: g |\n',
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(repo)
+    result = validate_path("alleluia")
+    assert result.ok
+    assert result.messages == []
+
+
+def test_validate_path_soort_map_with_vsa(tmp_path: Path, monkeypatch):
+    repo = tmp_path / "bieb"
+    leaf = repo / "content-source" / "catalogus" / "communievers" / "x" / "hemelum"
+    leaf.mkdir(parents=True)
+    (leaf / "communievers-x-hemelum.vsa").write_text("{tekst}", encoding="utf-8")
+    monkeypatch.chdir(repo)
+    result = validate_path("communievers")
+    assert result.ok
+
+
 def test_validate_path_accepts_file(tmp_path: Path):
     file = tmp_path / "valid.vsa"
     file.write_text("{tekst}", encoding="utf-8")

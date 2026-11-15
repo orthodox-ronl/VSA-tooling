@@ -15,8 +15,11 @@ Canonieke hub: [`docs/formats/contract-index.md`](docs/formats/contract-index.md
 
 1. **Canoniek** = het bestand voldoet aan het formatcontract van dat type.
 2. **Conversie:** canonieke bron → canonieke doel (C3/C4), tenzij het
-   CLI-contract een **expliciete** uitzondering noemt (`validate`,
-   `syllabify`/`--unsyllabify`, `--syllabify` op export, `import`/werkbank, …).
+   CLI-contract
+   ([`docs/reference/cli/input-pad.md`](docs/reference/cli/input-pad.md)
+   §G3/G4) een **expliciete** uitzondering noemt (`validate`,
+   `syllabify`/`--unsyllabify`, `--syllabify` op export, `import`/werkbank,
+   `--allow-noncanonical`, …).
 3. **Formatpagina’s** volgen de vaste H2-volgorde uit §Contract-skelet.
    Generiek topic ontbreekt voor een type → «n.v.t.» + één zin.
 4. **Nieuwe generieke topics** eerst in §Contract-skelet op de

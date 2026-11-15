@@ -19,12 +19,13 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 Paden in commando's zijn relatief aan die map, tenzij je een absoluut pad
 opgeeft.
 
-## Invoer: bestand of map
+## Gedeeld CLI-contract (generieke eigenschappen)
 
-Waar een commando bronbestanden leest, is de afspraak: **één bestand** of
-**een map** (recursief alle passende extensies). Gedeelde helper:
-`vsa.input_paths.collect_input_files`. Inventaris (welke commando’s dit al
-doen): [input-pad](input-pad.md).
+Elk (sub)commando deelt vaste eigenschappen G1–G8: straat-puur,
+padresolutie, **C3/C4-toets** (canonieke invoer/uitvoer + uitzonderingen),
+sibling-uitvoer, gedeelde vlaggen (`--dry-run`, `-h` met defaults),
+exitcodes, docs-sync. Norm + inventaris + handhaving (scan-test):
+[input-pad](input-pad.md).
 
 ## Algemene syntax
 
@@ -74,6 +75,8 @@ echo %ERRORLEVEL%
 | [`pdf`](pdf.md)                                  | Partituur-PDF uit `.vsa` (MuseScore). Pagina-PDF: [`markdown pdf`](markdown.md#markdown-pdf).                 |
 | [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).                                  |
 | [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).                          |
+| [`format`](format.md)                            | Strofe-layout in `.vsa` (`*`/`/`/newline; regels of flow; `--dry-run` / `--wrap`).                            |
+| [`kuiser`](kuiser.md)                            | Authoring-opkuis `.vsa` (V1–V8: FM, zoektekst, syllabify, validate).                                          |
 | [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).                                  |
 | [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).                                 |
 | [`mxl`](musicxml.md)                             | Exporteer `.vsa` naar MusicXML (`.mxl`/`.musicxml`); `PATH [-o]`; alias `musicxml`; optioneel `--syllabify`.  |

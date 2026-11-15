@@ -26,7 +26,9 @@ vsa validate [-h] [--config CONFIG] [--syllable-dictionary PAD]
 | [parser](@) | of de [VSA](@) naar interne structuur kan worden omgezet                   |
 | semantiek   | of hoogte- en [lengte-modifiers](@) logisch (in aantal) bij elkaar passen  |
 
-`path` mag verwijzen naar één bestand of naar een map:
+`path` volgt het [gedeelde CLI-contract](input-pad.md) (G2): bestand, map,
+korte lookup of catalogus-id (incl. soort-map zoals `alleluia`). C3/C4
+n.v.t. — validate mag juist niet-canonieke bron tonen.
 
 | Input          | Voorbeeld                                     | Gedrag                                             |
 | -------------- | --------------------------------------------- | -------------------------------------------------- |
@@ -34,6 +36,7 @@ vsa validate [-h] [--config CONFIG] [--syllable-dictionary PAD]
 | Geen `.mvsa`   | (weigert)                                     | Gebruik `mvsa validate` voor `.mvsa`.              |
 | `.md`-bestand  | `pagina.md`                                   | Controleert alle [VSA-blokken](@) in dat bestand.  |
 | Map            | `examples\consumer-minimal\content-source`    | Zoekt recursief naar `.vsa`, `.md` en `.markdown`. |
+| Soort-map / id | `alleluia`, `tropaar/…/hemelum`               | Zelfde G2 als bibliotheek-`validate.cmd`.          |
 
 Als er meerdere fouten zijn, toont de tool ze zoveel mogelijk allemaal in één
 keer — je hoeft niet telkens één fout te herstellen en opnieuw te draaien.
