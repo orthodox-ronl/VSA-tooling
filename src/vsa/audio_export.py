@@ -69,12 +69,16 @@ def export_musicxml_to_audio(
     musescore: Path | None = None,
     format_name: str | None = None,
     trailing_pad_ms: int = DEFAULT_TRAILING_PAD_MS,
+    allow_noncanonical: bool = False,
 ) -> Path:
     """Convert an existing ``.mxl`` / ``.musicxml`` to audio via MuseScore.
 
     MuseScore renders to a temporary ``.wav``; trailing silence is trimmed
     (checklist A5) before encoding to the requested format with ffmpeg.
+    Daarna structurele C4 (container-header).
     """
+    from .canonicity_gate import require_canonical_audio_target
+
     source = Path(source)
     out = resolve_audio_output_path(out, format_name=format_name)
     if not source.is_file():
@@ -101,6 +105,9 @@ def export_musicxml_to_audio(
             raise AudioExportError(str(exc)) from exc
     finally:
         render_wav.unlink(missing_ok=True)
+    require_canonical_audio_target(
+        out, allow_noncanonical=allow_noncanonical
+    )
     return out
 
 
@@ -113,6 +120,7 @@ def export_to_audio(
     section_id: str | None = None,
     keep_mxl: Path | None = None,
     trailing_pad_ms: int = DEFAULT_TRAILING_PAD_MS,
+    allow_noncanonical: bool = False,
 ) -> Path:
     """Export ``.mxl`` / ``.vsa`` / ``.mvsa`` / ``.mscz`` to audio.
 
@@ -142,6 +150,7 @@ def export_to_audio(
             musescore=musescore,
             format_name=format_name,
             trailing_pad_ms=trailing_pad_ms,
+            allow_noncanonical=allow_noncanonical,
         )
 
     tmp_mxl: Path | None = None
@@ -169,6 +178,7 @@ def export_to_audio(
             musescore=musescore,
             format_name=format_name,
             trailing_pad_ms=trailing_pad_ms,
+            allow_noncanonical=allow_noncanonical,
         )
     finally:
         if tmp_mxl is not None:

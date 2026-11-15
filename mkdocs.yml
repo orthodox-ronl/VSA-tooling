@@ -105,6 +105,7 @@ nav:
       - Products-meta: formats/products-meta.md
       - .midi / .mid: formats/midi.md
     - Contract-index (skelet, C*, dekking): formats/contract-index.md
+    - Kuiser (Q*/V*): formats/kuiser.md
     - CLI-canoniciteit-audit: formats/cli-canoniciteit-audit.md
     - Syllabificatie (zing-deling): formats/syllabificatie.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md

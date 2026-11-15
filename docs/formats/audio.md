@@ -68,6 +68,12 @@ Merge key `mp3` in [products-meta](products-meta.md).
 
 A1–A5 (hand/CI speelbaarheid + trim). ffmpeg op PATH voor A5.
 
+**C4 (fase 3, structureel):** na `{straat} mp3`/`ogg`/`wav` en `products`
+(key `mp3`) controleert `require_canonical_audio_target` dat het bestand
+bestaat en een herkenbare container-header heeft (`ID3`/MPEG-sync,
+`OggS`, of `RIFF`+`WAVE`; codes `AUDIO-*`). Geen volle A*-speelcheck.
+Uitzondering: `--allow-noncanonical`.
+
 ---
 
 ## Checklist audio (type-specifiek)

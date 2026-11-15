@@ -391,6 +391,31 @@ def _align_system_contents(contents: dict[str, str], order: list[str]) -> dict[s
 
 
 def align_mvsa_text(text: str) -> str:
+    """Kolomuitlijning; YAML-frontmatter wordt niet aangeraakt."""
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    bom = ""
+    if text.startswith("\ufeff"):
+        bom = "\ufeff"
+        text = text[1:]
+
+    fm, body, _ = strip_yaml_frontmatter(text)
+    aligned_body = _align_mvsa_body(body)
+    if not fm:
+        return bom + aligned_body
+
+    if text.startswith("---"):
+        close = text.find("\n---", 3)
+        if close != -1:
+            fm_bytes = text[: close + len("\n---")]
+            rest = text[close + len("\n---") :]
+            lead = rest[: len(rest) - len(rest.lstrip("\n"))]
+            return bom + fm_bytes + lead + aligned_body
+
+    return bom + aligned_body
+
+
+def _align_mvsa_body(text: str) -> str:
     lines = text.splitlines(keepends=True)
     out: list[str] = []
     i = 0

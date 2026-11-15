@@ -10,6 +10,7 @@ from vsa.syllable_dict_check import (
     append_canonical_form,
     apply_replacements_to_text,
     find_dictionary_syllable_issues,
+    find_dictionary_syllable_issues_from_cores,
     prompt_dictionary_fixes,
     replace_sung_token_in_text,
     set_canonical_form,
@@ -17,6 +18,8 @@ from vsa.syllable_dict_check import (
 from vsa.syllable_dictionary import (
     clear_syllable_dictionary_cache,
     load_syllable_dictionary,
+    set_lyrics_lang,
+    set_syllable_dictionary_path,
     syllable_lemma,
 )
 from vsa.validation_runner import validate_file
@@ -61,6 +64,63 @@ def test_unknown_multisyllable_is_reported() -> None:
     doc = Parser("xyz-zy-xab").parse()
     findings = find_dictionary_syllable_issues(doc, source_text="xyz-zy-xab")
     assert any(f.code == CODE_UNKNOWN for f in findings)
+
+
+def test_ksl_lang_skips_latin_and_flags_cyrillic(tmp_path: Path) -> None:
+    ksl = tmp_path / "syllable_dictionary.ksl.txt"
+    ksl.write_text("# leeg\n", encoding="utf-8")
+    set_syllable_dictionary_path(ksl)
+    set_lyrics_lang("ksl")
+    clear_syllable_dictionary_cache()
+    try:
+        findings = find_dictionary_syllable_issues_from_cores(
+            ["Heer", "Гос-по-ди"],
+            lyrics_lang="ksl",
+        )
+        assert not any(f.surface == "Heer" for f in findings)
+        assert any(
+            f.code == CODE_UNKNOWN and f.surface == "Гос-по-ди" for f in findings
+        )
+        # Geen NL-Pyphen-voorstel: suggestie = surface.
+        hit = next(f for f in findings if f.surface == "Гос-по-ди")
+        assert "Гос-по-ди" in hit.message_nl
+    finally:
+        set_lyrics_lang("nl")
+        set_syllable_dictionary_path(None)
+        clear_syllable_dictionary_cache()
+
+
+def test_nl_lang_skips_cyrillic() -> None:
+    findings = find_dictionary_syllable_issues_from_cores(
+        ["Господи", "xyz-zy-xab"],
+        lyrics_lang="nl",
+    )
+    assert not any("Господи" in f.surface for f in findings)
+    assert any(f.code == CODE_UNKNOWN and f.surface == "xyz-zy-xab" for f in findings)
+
+
+def test_auto_lang_picks_ksl_for_cyrillic(tmp_path: Path) -> None:
+    ksl = tmp_path / "syllable_dictionary.ksl.txt"
+    ksl.write_text("# leeg\n", encoding="utf-8")
+    set_syllable_dictionary_path(ksl)
+    set_lyrics_lang("auto")
+    clear_syllable_dictionary_cache()
+    try:
+        from vsa.syllable_dictionary import apply_syllable_dictionary_from_config
+
+        apply_syllable_dictionary_from_config(cli_path=ksl, lang="auto")
+        findings = find_dictionary_syllable_issues_from_cores(
+            ["Гос-по-ди"],
+            lyrics_lang="auto",
+        )
+        assert any(
+            f.code == CODE_UNKNOWN and f.surface == "Гос-по-ди" for f in findings
+        )
+        assert any("(ksl" in f.message_nl for f in findings)
+    finally:
+        set_lyrics_lang("nl")
+        set_syllable_dictionary_path(None)
+        clear_syllable_dictionary_cache()
 
 
 def test_validate_file_dictionary_mismatch_is_error(tmp_path: Path) -> None:

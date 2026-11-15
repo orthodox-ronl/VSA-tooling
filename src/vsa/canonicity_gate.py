@@ -41,7 +41,7 @@ class NonCanonicalSourceError(Exception):
 
 
 class NonCanonicalTargetError(Exception):
-    """Doel faalt C4 (geschreven ``.mxl`` of Score-IR)."""
+    """Doel faalt C4 (geschreven ``.mxl``, Score-IR of PDF)."""
 
     def __init__(self, path: Path, issues: list[CanonicityIssue]) -> None:
         self.path = Path(path)
@@ -57,7 +57,7 @@ def add_allow_noncanonical_arg(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help=(
             "C3/C4-uitzondering: ga door ondanks validate-fouten in de bron "
-            "of C4-fouten op geschreven .mxl / Score-IR "
+            "of C4-fouten op geschreven .mxl / Score-IR / .pdf / audio "
             "(niet voor catalogus; zie contract-index §C*)."
         ),
     )
@@ -149,6 +149,18 @@ def emit_noncanonical_error(
                 "Geschreven Score-IR faalt structurele C4 (JSON/format/"
                 "from-ir-emit). Herstel de bron of gebruik "
                 "--allow-noncanonical. Zie contract-index §C* · score-ir.md."
+            )
+        elif first.code.startswith("PDF-"):
+            hint = (
+                "Geschreven .pdf faalt structurele C4 (geen geldige "
+                "PDF-header). Herhaal de export of gebruik "
+                "--allow-noncanonical. Zie contract-index §C* · checklist P*."
+            )
+        elif first.code.startswith("AUDIO-"):
+            hint = (
+                "Geschreven audio faalt structurele C4 (geen herkenbare "
+                "mp3/ogg/wav-header). Herhaal de export of gebruik "
+                "--allow-noncanonical. Zie contract-index §C* · audio.md."
             )
         else:
             hint = (
@@ -324,6 +336,156 @@ def require_canonical_score_ir_target(
     if allow_noncanonical:
         return
     issues = check_canonical_score_ir_target(path)
+    if issues:
+        raise NonCanonicalTargetError(Path(path), issues)
+
+
+def check_canonical_pdf_target(path: Path | str) -> list[CanonicityIssue]:
+    """C4 structureel: bestand bestaat, niet leeg, header ``%PDF``."""
+    path = Path(path)
+    if not path.is_file():
+        return [
+            CanonicityIssue(
+                code="PDF-MISS",
+                message_nl=f"{path.name}: PDF-bestand ontbreekt na export",
+            )
+        ]
+    try:
+        size = path.stat().st_size
+    except OSError as exc:
+        return [
+            CanonicityIssue(
+                code="PDF-READ",
+                message_nl=f"{path.name}: kan PDF niet lezen ({exc})",
+            )
+        ]
+    if size < 5:
+        return [
+            CanonicityIssue(
+                code="PDF-EMPTY",
+                message_nl=f"{path.name}: PDF is leeg of te klein ({size} bytes)",
+            )
+        ]
+    try:
+        with path.open("rb") as handle:
+            head = handle.read(8)
+    except OSError as exc:
+        return [
+            CanonicityIssue(
+                code="PDF-READ",
+                message_nl=f"{path.name}: kan PDF-header niet lezen ({exc})",
+            )
+        ]
+    if not head.startswith(b"%PDF"):
+        return [
+            CanonicityIssue(
+                code="PDF-HEADER",
+                message_nl=(
+                    f"{path.name}: geen PDF-header (verwacht %PDF…, "
+                    f"kreeg {head[:8]!r})"
+                ),
+            )
+        ]
+    return []
+
+
+def require_canonical_pdf_target(
+    path: Path | str,
+    *,
+    allow_noncanonical: bool = False,
+) -> None:
+    """Raise :exc:`NonCanonicalTargetError` als PDF-C4 faalt."""
+    if allow_noncanonical:
+        return
+    issues = check_canonical_pdf_target(path)
+    if issues:
+        raise NonCanonicalTargetError(Path(path), issues)
+
+
+def check_canonical_audio_target(path: Path | str) -> list[CanonicityIssue]:
+    """C4 structureel: bestand + container-header (mp3 / ogg / wav)."""
+    path = Path(path)
+    if not path.is_file():
+        return [
+            CanonicityIssue(
+                code="AUDIO-MISS",
+                message_nl=f"{path.name}: audiobestand ontbreekt na export",
+            )
+        ]
+    try:
+        size = path.stat().st_size
+    except OSError as exc:
+        return [
+            CanonicityIssue(
+                code="AUDIO-READ",
+                message_nl=f"{path.name}: kan audio niet lezen ({exc})",
+            )
+        ]
+    if size < 4:
+        return [
+            CanonicityIssue(
+                code="AUDIO-EMPTY",
+                message_nl=(
+                    f"{path.name}: audiobestand is leeg of te klein ({size} bytes)"
+                ),
+            )
+        ]
+    try:
+        with path.open("rb") as handle:
+            head = handle.read(12)
+    except OSError as exc:
+        return [
+            CanonicityIssue(
+                code="AUDIO-READ",
+                message_nl=f"{path.name}: kan audio-header niet lezen ({exc})",
+            )
+        ]
+
+    suffix = path.suffix.lower()
+    ok = False
+    if suffix == ".mp3":
+        # ID3-tag of MPEG-frame sync (11 bits 1).
+        ok = head.startswith(b"ID3") or (
+            len(head) >= 2 and head[0] == 0xFF and (head[1] & 0xE0) == 0xE0
+        )
+    elif suffix == ".ogg":
+        ok = head.startswith(b"OggS")
+    elif suffix == ".wav":
+        ok = head.startswith(b"RIFF") and len(head) >= 12 and head[8:12] == b"WAVE"
+    else:
+        # Onbekende extensie: accepteer bekende headers.
+        ok = (
+            head.startswith(b"ID3")
+            or head.startswith(b"OggS")
+            or (head.startswith(b"RIFF") and head[8:12] == b"WAVE")
+            or (
+                len(head) >= 2
+                and head[0] == 0xFF
+                and (head[1] & 0xE0) == 0xE0
+            )
+        )
+    if not ok:
+        return [
+            CanonicityIssue(
+                code="AUDIO-HEADER",
+                message_nl=(
+                    f"{path.name}: geen herkenbare audio-header voor "
+                    f"{suffix or 'onbekend formaat'} (kreeg {head[:8]!r})"
+                ),
+            )
+        ]
+    return []
+
+
+def require_canonical_audio_target(
+    path: Path | str,
+    *,
+    allow_noncanonical: bool = False,
+) -> None:
+    """Raise :exc:`NonCanonicalTargetError` als audio-C4 faalt."""
+    if allow_noncanonical:
+        return
+    issues = check_canonical_audio_target(path)
     if issues:
         raise NonCanonicalTargetError(Path(path), issues)
 

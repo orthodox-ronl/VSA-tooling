@@ -3,10 +3,19 @@
 from pathlib import Path
 
 from vsa.syllable_dictionary import (
+    apply_syllable_dictionary_from_config,
     clear_syllable_dictionary_cache,
+    core_matches_lyrics_lang,
+    detect_lyrics_lang_from_cores,
+    detect_lyrics_lang_from_text,
+    dictionary_basename,
     dictionary_file_path,
+    ensure_lyrics_lang_for_cores,
+    get_lyrics_lang,
+    get_lyrics_lang_mode,
     load_syllable_dictionary,
     resolve_syllable_dictionary_path,
+    set_lyrics_lang,
     set_syllable_dictionary_path,
 )
 
@@ -52,5 +61,91 @@ def test_set_path_loads_that_file(tmp_path: Path) -> None:
     clear_syllable_dictionary_cache()
     assert dictionary_file_path() == target.resolve()
     assert load_syllable_dictionary().get("lossetest") == "los-se-test"
+    set_syllable_dictionary_path(None)
+    clear_syllable_dictionary_cache()
+
+
+def test_core_matches_lyrics_lang_script_filter() -> None:
+    assert core_matches_lyrics_lang("Heer", "nl")
+    assert not core_matches_lyrics_lang("Господи", "nl")
+    assert core_matches_lyrics_lang("Господи", "ksl")
+    assert not core_matches_lyrics_lang("Heer", "ksl")
+
+
+def test_dictionary_basename_per_lang() -> None:
+    assert dictionary_basename("nl") == "syllable_dictionary.nl.txt"
+    assert dictionary_basename("ksl") == "syllable_dictionary.ksl.txt"
+
+
+def test_resolve_ksl_env(tmp_path: Path) -> None:
+    target = tmp_path / "ksl.txt"
+    target.write_text("# leeg\n", encoding="utf-8")
+    resolved = resolve_syllable_dictionary_path(
+        lang="ksl",
+        environ={"VSA_SYLLABLE_DICTIONARY_KSL": str(target)},
+    )
+    assert resolved == target.resolve()
+
+
+def test_resolve_ksl_ignores_nl_config(tmp_path: Path) -> None:
+    nl = tmp_path / "syllable_dictionary.nl.txt"
+    nl.write_text("a-pos-tel\n", encoding="utf-8")
+    resolved = resolve_syllable_dictionary_path(
+        config_value=str(nl),
+        config_dir=tmp_path,
+        lang="ksl",
+        environ={},
+    )
+    assert resolved is None or resolved.name.endswith(".ksl.txt")
+
+
+def test_apply_lyrics_lang_ksl_loads_empty_file(tmp_path: Path) -> None:
+    ksl = tmp_path / "syllable_dictionary.ksl.txt"
+    ksl.write_text("# leeg stub\n", encoding="utf-8")
+    apply_syllable_dictionary_from_config(cli_path=ksl, lang="ksl")
+    assert get_lyrics_lang() == "ksl"
+    assert dictionary_file_path() == ksl.resolve()
+    assert load_syllable_dictionary() == {}
+    set_lyrics_lang("nl")
+    set_syllable_dictionary_path(None)
+    clear_syllable_dictionary_cache()
+
+
+def test_cli_exposes_lyrics_lang() -> None:
+    from vsa.cli import _build_mvsa_parser, _build_parser
+
+    vsa = _build_parser()
+    mvsa = _build_mvsa_parser()
+    assert vsa.parse_args(["validate", "x.vsa"]).lyrics_lang == "auto"
+    for args in (
+        vsa.parse_args(["validate", "x.vsa", "--lyrics-lang", "ksl"]),
+        vsa.parse_args(["syllabify", "x.vsa", "--lyrics-lang", "ksl"]),
+        mvsa.parse_args(["validate", "x.mvsa", "--lyrics-lang", "ksl"]),
+        mvsa.parse_args(["syllabify", "x.mvsa", "--lyrics-lang", "ksl"]),
+    ):
+        assert args.lyrics_lang == "ksl"
+
+
+def test_detect_and_ensure_auto(tmp_path: Path) -> None:
+    ksl = tmp_path / "syllable_dictionary.ksl.txt"
+    ksl.write_text("# leeg\n", encoding="utf-8")
+    nl = tmp_path / "syllable_dictionary.nl.txt"
+    nl.write_text("a-pos-tel\n", encoding="utf-8")
+    apply_syllable_dictionary_from_config(lang="auto")
+    assert get_lyrics_lang_mode() == "auto"
+    assert detect_lyrics_lang_from_cores(["Heer", "Licht"]) == "nl"
+    assert detect_lyrics_lang_from_cores(["Heer", "Господи"]) == "ksl"
+    assert detect_lyrics_lang_from_text("Господи помилуй") == "ksl"
+    assert detect_lyrics_lang_from_text("Heer ontferm U") == "nl"
+
+    apply_syllable_dictionary_from_config(cli_path=ksl, lang="auto")
+    assert ensure_lyrics_lang_for_cores(["Гос-по-ди"]) == "ksl"
+    assert get_lyrics_lang() == "ksl"
+    assert dictionary_file_path() == ksl.resolve()
+
+    apply_syllable_dictionary_from_config(cli_path=nl, lang="auto")
+    assert ensure_lyrics_lang_for_cores(["a-pos-tel"]) == "nl"
+    assert get_lyrics_lang() == "nl"
+    set_lyrics_lang("auto")
     set_syllable_dictionary_path(None)
     clear_syllable_dictionary_cache()

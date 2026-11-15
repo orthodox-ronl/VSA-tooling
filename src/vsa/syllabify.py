@@ -157,6 +157,9 @@ def unsyllabify_vsa_body(body: str) -> SyllabifyResult:
 
 def syllabify_vsa_source(text: str) -> SyllabifyResult:
     """Hypheneer VSA-brontekst; YAML-frontmatter blijft onaangeroerd."""
+    from .syllable_dictionary import prepare_lyrics_lang_for_source
+
+    prepare_lyrics_lang_for_source(text)
     return _transform_vsa_source(text, syllabify_vsa_body)
 
 

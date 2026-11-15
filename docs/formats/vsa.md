@@ -27,6 +27,7 @@ bibliotheek-frontmatter waar die consumer geldt. C1–C4:
 | Frontmatter    | Consumer: [bibliotheek `vsa-frontmatter`](https://github.com/orthodox-ronl/bibliotheek/blob/main/docs/specs/vsa-frontmatter.md) (`soort`/`toon` e.d.) |
 | Encoding       | UTF-8                                                                                                                                                 |
 | Zoektekst YAML | Optioneel in bron — [zoektekst](zoektekst.md)                                                                                                         |
+| Kuiser         | `vsa kuiser` — checklist **V\*** volgt; tot die tijd weigert de CLI ([kuiser.md](kuiser.md))                                                          |
 | Meerstemmig    | **Niet** in `.vsa` — zie [`.mvsa`](mvsa.md)                                                                                                           |
 
 ## Syllabificatie

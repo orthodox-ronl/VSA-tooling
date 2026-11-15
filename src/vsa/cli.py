@@ -206,10 +206,11 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         metavar="PAD",
         default=None,
         help=(
-            "Pad naar canonieke syllable_dictionary.nl.txt "
-            "(overschrijft vsa.toml [syllabificatie] dictionary)."
+            "Pad naar canonieke syllable_dictionary.nl.txt of .ksl.txt "
+            "(overschrijft auto-detect / vsa.toml)."
         ),
     )
+    _add_lyrics_lang_arg(m_validate)
     m_musicxml = mvsa_sub.add_parser(
         "mxl",
         aliases=["musicxml"],
@@ -418,6 +419,9 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     )
     _add_translit_args(m_pdf)
     _add_partituur_style_args(m_pdf)
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c4_mpdf
+
+    _add_c4_mpdf(m_pdf)
     m_svg = mvsa_sub.add_parser(
         "svg",
         help="Exporteer .mvsa naar partituur-SVG (koormap).",
@@ -706,16 +710,13 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     _add_c4_msir(m_score_ir)
     m_kuiser = mvsa_sub.add_parser(
         "kuiser",
-        help="Kuiser: canonieke authoring-vorm (strepen, woordstreep, align).",
+        help="Kuiser: canonieke authoring-vorm (Q1–Q8 actief; Q9=--check).",
         description=(
-            "Pas kuiser-toleranties toe op .mvsa (draft-spec): "
-            "canonieke L-standaardduur '~' (ELM '-' → '~'), "
-            "waarschuwing bij ambiguë '-' (regel+kolom), "
-            "maatstrepen syncen waar eenduidig, daarna kolomuitlijning. "
-            "Geen stille 'hei- li'→'hei-li'-collapse. "
+            "Pas kuiser toe op .mvsa (contract docs/formats/kuiser.md Q1–Q9). "
+            "Actief: Q6 banners (tenzij --werkbank), Q2/Q3, repair, Q4/Q5, "
+            "Q8 normalize/align, Q1 YAML-FM/zoektekst, Q7 validate-gate. "
             "Default: schrijf in-place. --check = dry-run (exit 1 bij wijziging). "
-            "Optioneel --pitch zoals bij normalize. "
-            "Zie docs/specification-mvsa/syntax.md."
+            "Optioneel --pitch zoals bij normalize."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
@@ -768,6 +769,14 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--no-align",
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
+    )
+    m_kuiser.add_argument(
+        "--werkbank",
+        action="store_true",
+        help=(
+            "Behoud import-/schetsbanners (# Imported:, WAARSCHUWING-box). "
+            "Default (catalogus): strip die banners (Q6)."
+        ),
     )
     m_syllabify = mvsa_sub.add_parser(
         "syllabify",
@@ -839,10 +848,11 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         metavar="PAD",
         default=None,
         help=(
-            "Pad naar canonieke syllable_dictionary.nl.txt "
-            "(overschrijft vsa.toml [syllabificatie] dictionary)."
+            "Pad naar canonieke syllable_dictionary.nl.txt of .ksl.txt "
+            "(overschrijft auto-detect / vsa.toml)."
         ),
     )
+    _add_lyrics_lang_arg(m_syllabify)
     m_text = mvsa_sub.add_parser(
         "text",
         help="Platte gezongen tekst → sibling .lyrics.txt (product lyrics).",
@@ -937,10 +947,11 @@ def _build_parser():
         metavar="PAD",
         default=None,
         help=(
-            "Pad naar canonieke syllable_dictionary.nl.txt "
-            "(overschrijft vsa.toml [syllabificatie] dictionary)."
+            "Pad naar canonieke syllable_dictionary.nl.txt of .ksl.txt "
+            "(overschrijft auto-detect / vsa.toml)."
         ),
     )
+    _add_lyrics_lang_arg(validate)
     validate.add_argument(
         "--summary",
         action="store_true",
@@ -1074,6 +1085,10 @@ def _build_parser():
         help="Toon resultaat zonder bestand te schrijven",
     )
 
+    from .kuiser_cli import add_kuiser_parser, dispatch_kuiser
+
+    add_kuiser_parser(subparsers, street="vsa", implemented=False)
+
     syllabify = subparsers.add_parser(
         "syllabify",
         help=(
@@ -1126,10 +1141,11 @@ def _build_parser():
         metavar="PAD",
         default=None,
         help=(
-            "Pad naar canonieke syllable_dictionary.nl.txt "
-            "(overschrijft vsa.toml [syllabificatie] dictionary)."
+            "Pad naar canonieke syllable_dictionary.nl.txt of .ksl.txt "
+            "(overschrijft auto-detect / vsa.toml)."
         ),
     )
+    _add_lyrics_lang_arg(syllabify)
 
     text_cmd = subparsers.add_parser(
         "text",
@@ -1341,6 +1357,9 @@ def _build_parser():
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    from .canonicity_gate import add_allow_noncanonical_arg as _add_c4_vpdf
+
+    _add_c4_vpdf(pdf)
 
     return parser
 
@@ -1397,6 +1416,11 @@ def _run(args):
 
     if args.command == "resolve-catalogus":
         return _cmd_resolve_catalogus(args)
+
+    if args.command == "kuiser":
+        from .kuiser_cli import dispatch_kuiser
+
+        return dispatch_kuiser(args)
 
     if args.command == "syllabify":
         return _cmd_syllabify(args)
@@ -1455,11 +1479,24 @@ def _resolve_config_arg(explicit: str | None) -> str | None:
     return str(candidate) if candidate.is_file() else None
 
 
+def _add_lyrics_lang_arg(parser) -> None:
+    parser.add_argument(
+        "--lyrics-lang",
+        choices=("auto", "nl", "ksl"),
+        default="auto",
+        help=(
+            "Woordenlijst: auto = Cyrillisch in lyrics → ksl, anders nl; "
+            "of forceer nl / ksl. Default: auto."
+        ),
+    )
+
+
 def _apply_syllable_dictionary_setting(args, config) -> None:
     from .syllable_dictionary import apply_syllable_dictionary_from_config
 
     apply_syllable_dictionary_from_config(
         cli_path=getattr(args, "syllable_dictionary", None),
+        lang=getattr(args, "lyrics_lang", None) or "auto",
         config_value=config.syllabificatie.dictionary,
         config_dir=config.config_dir,
     )
@@ -1682,6 +1719,10 @@ def _cmd_build_markdown(args, config):
 
 def _cmd_pdf(args, config):
     """``vsa pdf``: alleen ``.vsa`` → partituur-PDF (los gereedschap, niet products)."""
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .street_product_export import (
         StreetProductExportError,
@@ -1710,6 +1751,7 @@ def _cmd_pdf(args, config):
     if _cli_reject_multi_single_opts(files, args):
         return 1
     musescore = Path(args.musescore) if getattr(args, "musescore", None) else None
+    allow = bool(getattr(args, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
         out = (
@@ -1719,8 +1761,15 @@ def _cmd_pdf(args, config):
         )
         try:
             written = export_bron_to_partituur_pdf(
-                path, out, musescore=musescore
+                path,
+                out,
+                musescore=musescore,
+                allow_noncanonical=allow,
             )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (
             StreetProductExportError,
             MuseScoreNotFoundError,
@@ -2172,9 +2221,14 @@ def _cmd_audio(args, config) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mxl"):
         return 1
-    from .canonicity_gate import cli_gate_source
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        cli_gate_source,
+        emit_noncanonical_error,
+    )
 
     musescore = Path(args.musescore) if args.musescore else None
+    allow = bool(getattr(args, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
         if cli_gate_source(path, args, config=config):
@@ -2193,7 +2247,12 @@ def _cmd_audio(args, config) -> int:
                 format_name=format_name,
                 musescore=musescore,
                 keep_mxl=keep_mxl,
+                allow_noncanonical=allow,
             )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
@@ -3460,6 +3519,10 @@ def _cmd_vsa_mscz_product(args) -> int:
 
 
 def _cmd_mvsa_pdf(args) -> int:
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .mvsa_mscz import MvsaMsczError, export_mvsa_to_pdf
     from .mvsa_musicxml import MvsaExportError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
@@ -3472,6 +3535,7 @@ def _cmd_mvsa_pdf(args) -> int:
     if _cli_reject_multi_single_opts(files, args, "keep_mscz", "keep_mxl"):
         return 1
     musescore = Path(args.musescore) if args.musescore else None
+    allow = bool(getattr(args, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
         out = (
@@ -3491,6 +3555,7 @@ def _cmd_mvsa_pdf(args) -> int:
                 keep_mxl=keep_mxl,
                 layout=args.layout,
                 bibliotheek_id=args.bibliotheek_id,
+                allow_noncanonical=allow,
                 **{
                     k: v
                     for k, v in _cli_translit_kwargs(args).items()
@@ -3498,6 +3563,10 @@ def _cmd_mvsa_pdf(args) -> int:
                 },
                 **_partituur_style_kwargs(args),
             )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
@@ -3654,9 +3723,14 @@ def _cmd_mvsa_audio(args) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args, "keep_mxl"):
         return 1
-    from .canonicity_gate import cli_gate_source
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        cli_gate_source,
+        emit_noncanonical_error,
+    )
 
     musescore = Path(args.musescore) if args.musescore else None
+    allow = bool(getattr(args, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
         if cli_gate_source(path, args):
@@ -3676,7 +3750,12 @@ def _cmd_mvsa_audio(args) -> int:
                 musescore=musescore,
                 section_id=args.section,
                 keep_mxl=keep_mxl,
+                allow_noncanonical=allow,
             )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
@@ -3811,6 +3890,8 @@ def _cmd_mvsa_kuiser(args) -> int:
                 octave_style=args.octave_style,
                 align=not args.no_align,
                 check=args.check,
+                dict_interactive=None,
+                werkbank=bool(getattr(args, "werkbank", False)),
             )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:

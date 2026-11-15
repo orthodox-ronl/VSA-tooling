@@ -15,11 +15,16 @@ from .syllabify import (
     hyphenate_dutch_word,
 )
 from .syllable_dictionary import (
+    activate_concrete_lyrics_lang,
     canonical_syllable_form,
     clear_syllable_dictionary_cache,
+    core_matches_lyrics_lang,
     dictionary_file_path,
     dictionary_path_label,
+    ensure_lyrics_lang_for_cores,
+    get_lyrics_lang,
     load_syllable_dictionary,
+    normalize_lyrics_lang_mode,
     syllable_lemma,
 )
 
@@ -180,11 +185,13 @@ def find_dictionary_syllable_issues(
     document: Document,
     *,
     source_text: str = "",
+    lyrics_lang: str | None = None,
 ) -> list[DictSyllableFinding]:
     """Vergelijk VSA-lyrics (AST) met de canonieke lijst."""
     return find_dictionary_syllable_issues_from_cores(
         iter_vsa_lyric_word_cores(document),
         source_text=source_text,
+        lyrics_lang=lyrics_lang,
     )
 
 
@@ -192,11 +199,27 @@ def find_dictionary_syllable_issues_from_cores(
     cores: list[str],
     *,
     source_text: str = "",
+    lyrics_lang: str | None = None,
 ) -> list[DictSyllableFinding]:
-    """Vergelijk gegeven lyrics-woordkernen met de canonieke lijst."""
+    """Vergelijk gegeven lyrics-woordkernen met de canonieke lijst.
+
+    ``lyrics_lang``: ``auto`` (schrift-detectie), ``nl`` of ``ksl``.
+    Zonder argument: actieve CLI-modus (default ``auto``).
+    """
+    if lyrics_lang is not None:
+        mode = normalize_lyrics_lang_mode(lyrics_lang)
+        if mode == "auto":
+            lang = ensure_lyrics_lang_for_cores(cores)
+        else:
+            activate_concrete_lyrics_lang(mode)
+            lang = mode
+    else:
+        lang = ensure_lyrics_lang_for_cores(cores)
     findings: list[DictSyllableFinding] = []
     seen: set[str] = set()
     for core in cores:
+        if not core_matches_lyrics_lang(core, lang):
+            continue
         key = syllable_lemma(core)
         if not key or key in seen:
             continue
@@ -217,7 +240,7 @@ def find_dictionary_syllable_issues_from_cores(
                     column=column,
                     message_nl=(
                         f"Woord `{core}` hoort als `{expected}` "
-                        f"(canonieke zing-deling)."
+                        f"(canonieke zing-deling, {lang})."
                     ),
                     hint_nl=(
                         f"Vervang in de bron door `{expected}` (lemma `{key}`), "
@@ -231,7 +254,10 @@ def find_dictionary_syllable_issues_from_cores(
 
         if is_monosyllable_exception(core):
             continue
-        if "-" not in core and HARD_HYPHEN not in core:
+        if lang == "ksl":
+            # Geen NL-Pyphen-voorstel op Cyrillisch.
+            suggestion = surface_norm
+        elif "-" not in core and HARD_HYPHEN not in core:
             if not dutch_hyphen_positions(_alpha_core(core)):
                 continue
             suggestion = hyphenate_dutch_word(_alpha_core(core))
@@ -247,7 +273,7 @@ def find_dictionary_syllable_issues_from_cores(
                 column=column,
                 message_nl=(
                     f"Woord `{core}` staat niet in de canonieke "
-                    f"syllable-dictionary (voorstel: `{suggestion}`)."
+                    f"syllable-dictionary ({lang}; voorstel: `{suggestion}`)."
                 ),
                 hint_nl=(
                     f"Voeg `{suggestion}` (of de huidige vorm) toe aan "
@@ -261,11 +287,14 @@ def find_dictionary_syllable_issues_from_cores(
 
 def find_mvsa_dictionary_syllable_issues(
     source: str,
+    *,
+    lyrics_lang: str | None = None,
 ) -> list[DictSyllableFinding]:
     """Dictionary-check op .mvsa: uitsluitend L-lyrics."""
     return find_dictionary_syllable_issues_from_cores(
         iter_mvsa_lyric_word_cores(source),
         source_text=source,
+        lyrics_lang=lyrics_lang,
     )
 
 
@@ -279,6 +308,9 @@ def set_canonical_form(form: str, *, allow_replace: bool = True) -> str:
     normalized = _normalize_form(form)
     if not normalized or not any(ch.isalpha() for ch in normalized):
         raise ValueError(f"ongeldige hyphenvorm: {form!r}")
+    # Schrijf naar de woordenlijst die bij het schrift van de vorm hoort.
+    target_lang = "ksl" if core_matches_lyrics_lang(normalized, "ksl") else "nl"
+    activate_concrete_lyrics_lang(target_lang)
     key = syllable_lemma(normalized)
     existing = load_syllable_dictionary().get(key)
     if existing is not None and existing == normalized:

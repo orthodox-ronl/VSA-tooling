@@ -278,7 +278,11 @@ def products_mvsa_one(
             bron, products["mscz"], musescore=musescore
         )
         export_to_audio(
-            bron, products["mp3"], format_name="mp3", musescore=musescore
+            bron,
+            products["mp3"],
+            format_name="mp3",
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
         )
         write_lyrics_product(bron, products["lyrics"], musescore=musescore)
         if not skip_svg:
@@ -384,7 +388,11 @@ def products_mscz_one(
             bron, products["mscz"], musescore=musescore
         )
         export_to_audio(
-            bron, products["mp3"], format_name="mp3", musescore=musescore
+            bron,
+            products["mp3"],
+            format_name="mp3",
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
         )
         write_lyrics_product(bron, products["lyrics"], musescore=musescore)
         if not skip_svg:
@@ -488,7 +496,11 @@ def products_vsa_one(
             bron, products["mscz"], musescore=musescore
         )
         export_to_audio(
-            bron, products["mp3"], format_name="mp3", musescore=musescore
+            bron,
+            products["mp3"],
+            format_name="mp3",
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
         )
         write_lyrics_product(bron, products["lyrics"], musescore=musescore)
         if not skip_svg:

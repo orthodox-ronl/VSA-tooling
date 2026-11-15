@@ -144,8 +144,9 @@ def export_bron_to_partituur_pdf(
     out: Path,
     *,
     musescore: Path | None = None,
+    allow_noncanonical: bool = False,
 ) -> Path:
-    """Print-PDF (P*) uit notatiebron.
+    """Print-PDF (P*) uit notatiebron (structurele C4 na schrijven).
 
     Niet aangeroepen door ``{straat} products``. Losse CLI: ``vsa pdf`` /
     ``mvsa pdf`` / ``mscz pdf``. Pagina-PDF: ``markdown pdf``.
@@ -156,10 +157,20 @@ def export_bron_to_partituur_pdf(
     out = Path(out)
     suffix = bron.suffix.lower()
     if suffix == ".mscz":
-        export_mscz_to_pdf(bron, out, musescore=musescore)
+        export_mscz_to_pdf(
+            bron,
+            out,
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
+        )
         return out
     if suffix == ".mvsa":
-        export_mvsa_to_pdf(bron, out, musescore=musescore)
+        export_mvsa_to_pdf(
+            bron,
+            out,
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
+        )
         return out
     if suffix == ".vsa":
         fd, name = tempfile.mkstemp(suffix=".mscz", prefix="vsa-pdf-")
@@ -167,7 +178,12 @@ def export_bron_to_partituur_pdf(
         tmp_mscz = Path(name)
         try:
             export_bron_to_mscz_product(bron, tmp_mscz, musescore=musescore)
-            export_mscz_to_pdf(tmp_mscz, out, musescore=musescore)
+            export_mscz_to_pdf(
+                tmp_mscz,
+                out,
+                musescore=musescore,
+                allow_noncanonical=allow_noncanonical,
+            )
             return out
         finally:
             tmp_mscz.unlink(missing_ok=True)

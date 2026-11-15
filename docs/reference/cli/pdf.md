@@ -10,14 +10,21 @@ Pagina-afdruk van site-Markdown (`index.md.pdf`) gaat via
 ## Synopsis
 
 ```text
-vsa pdf [-h] [-o OUTPUT] [--musescore PATH] path
+vsa pdf [-h] [-o OUTPUT] [--musescore PATH] [--allow-noncanonical] path
 ```
 
-| Argument / optie   | Betekenis                                                              |
-| ------------------ | ---------------------------------------------------------------------- |
-| `path`             | Eén `.vsa` of een map (recursief alle `.vsa`).                         |
-| `-o`, `--output`   | Uitvoer-PDF. Alleen bij precies één bron. Default: sibling `.vsa.pdf`. |
-| `--musescore PATH` | Pad naar MuseScore (default: auto).                                    |
+| Argument / optie           | Betekenis                                                                 |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `path`                     | Eén `.vsa` of een map (recursief alle `.vsa`).                            |
+| `-o`, `--output`           | Uitvoer-PDF. Alleen bij precies één bron. Default: sibling `.vsa.pdf`.    |
+| `--musescore PATH`         | Pad naar MuseScore (default: auto).                                       |
+| `--allow-noncanonical`     | C3/C4-uitzondering (o.a. structurele PDF-C4); niet voor catalogus.        |
+
+**C4 (structureel):** na MuseScore-export moet het bestand bestaan, niet
+leeg zijn, en met `%PDF` beginnen. Geen volle P*-paginacheck. Zelfde gate
+op `mvsa pdf` / `mscz pdf`. Zie
+[contract-index §C*](../../formats/contract-index.md#canoniciteit-en-conversiegates-c)
+en [checklist PDF](../../formats/canonical-checklists.md#checklist-pdf-afgeleide-van-mscz).
 
 Andere extensies worden geweigerd met een tip naar de juiste straat:
 `.md` → `markdown pdf`, `.mvsa` → `mvsa pdf`, `.mscz` → `mscz pdf`.

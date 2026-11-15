@@ -75,12 +75,13 @@ def test_exception_suppresses_pyphen_missing(tmp_path: Path, monkeypatch) -> Non
 
 def test_validate_file_dictionary_mismatch_for_eeuwig(tmp_path: Path) -> None:
     path = tmp_path / "eeuwig.vsa"
-    path.write_text("Uw eeuwig Licht\n", encoding="utf-8")
+    # Foute deling ín scopes → auto-syllabify kan niet stil herstellen.
+    path.write_text("Uw {eeuwi}{ge} Licht\n", encoding="utf-8")
     result = validate_file(path)
     hits = [m for m in result.messages if m.code == CODE_MISMATCH]
     assert hits
     assert hits[0].severity == "error"
-    assert "eeu-wig" in hits[0].message_nl
+    assert "eeu-wi-ge" in hits[0].message_nl
     assert not result.ok
 
 

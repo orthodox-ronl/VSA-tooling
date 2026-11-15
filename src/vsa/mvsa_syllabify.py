@@ -51,7 +51,59 @@ def syllabify_mvsa_text(
     unsyllabify: bool = False,
     align: bool = True,
 ) -> MvsaSyllabifyResult:
-    """Herschrijf L-lyrics met soft ``-``; behoud sync met stemmen."""
+    """Herschrijf L-lyrics met soft ``-``; behoud sync met stemmen.
+
+    YAML-frontmatter blijft onaangeroerd (geneste sleutels mogen niet als
+    stemregel ``B…:`` gelezen worden).
+    """
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    bom = ""
+    original = text
+    if text.startswith("\ufeff"):
+        bom = "\ufeff"
+        text = text[1:]
+
+    fm, body, _ = strip_yaml_frontmatter(text)
+    result = _syllabify_mvsa_body(
+        body, unsyllabify=unsyllabify, align=align
+    )
+    if not fm:
+        out = bom + result.text
+        return MvsaSyllabifyResult(
+            text=out,
+            changed=out != original,
+            replacements=result.replacements,
+        )
+
+    if text.startswith("---"):
+        close = text.find("\n---", 3)
+        if close != -1:
+            fm_bytes = text[: close + len("\n---")]
+            rest = text[close + len("\n---") :]
+            lead = rest[: len(rest) - len(rest.lstrip("\n"))]
+            out = bom + fm_bytes + lead + result.text
+            return MvsaSyllabifyResult(
+                text=out,
+                changed=out != original,
+                replacements=result.replacements,
+            )
+
+    out = bom + result.text
+    return MvsaSyllabifyResult(
+        text=out,
+        changed=out != original,
+        replacements=result.replacements,
+    )
+
+
+def _syllabify_mvsa_body(
+    text: str,
+    *,
+    unsyllabify: bool = False,
+    align: bool = True,
+) -> MvsaSyllabifyResult:
+    """Syllabify alleen de body (geen YAML-FM)."""
     lines = text.splitlines(keepends=True)
     out: list[str] = []
     replacements = 0
@@ -122,6 +174,7 @@ def syllabify_mvsa_text(
         changed=result_text != text,
         replacements=replacements,
     )
+
 
 
 def syllabify_mvsa_path(

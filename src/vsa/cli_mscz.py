@@ -59,6 +59,10 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_mscz_product(ns)
     if ns.mscz_command == "normalize":
         return _cmd_mscz_normalize(ns)
+    if ns.mscz_command == "kuiser":
+        from .kuiser_cli import dispatch_kuiser
+
+        return dispatch_kuiser(ns)
     if ns.mscz_command == "text":
         return _cmd_mscz_text(ns)
     if ns.mscz_command == "compare":
@@ -122,6 +126,8 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Individuele producten (alleen .mscz).\n"
             "  normalize PATH …\n"
             "      Layoutprofiel op bestaand .mscz.\n"
+            "  kuiser PATH …\n"
+            "      Authoring-kuiser (nog geen spec → fout; zie docs/formats/kuiser.md).\n"
             "  compare SCORE MVSA …\n"
             "      SCORE = .mscz of MusicXML.\n"
             "\n"
@@ -137,7 +143,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mscz_command",
         required=True,
-        metavar="{mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,text,compare,products}",
+        metavar="{mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,kuiser,text,compare,products}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -358,6 +364,10 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Pad naar MuseScore (ongebruikt bij pure normalize; default: auto).",
     )
     _add_allow_noncanonical(mscz_prod)
+
+    from .kuiser_cli import add_kuiser_parser
+
+    add_kuiser_parser(sub, street="mscz", implemented=False)
 
     normalize = sub.add_parser(
         "normalize",
@@ -611,6 +621,10 @@ def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
 
 
 def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .mvsa_mscz import MvsaMsczError, export_mscz_to_pdf
     from .street_products import MSCZ_PDF_KEY, merge_street_product_meta
@@ -621,6 +635,7 @@ def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
     if _reject_multi_output(files, ns.output):
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
         if _gate_mscz_source(ns, path):
@@ -628,7 +643,16 @@ def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
             continue
         out = Path(ns.output) if ns.output else derived_output_path(path, ".pdf")
         try:
-            export_mscz_to_pdf(path, out, musescore=musescore)
+            export_mscz_to_pdf(
+                path,
+                out,
+                musescore=musescore,
+                allow_noncanonical=allow,
+            )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (MvsaMsczError, MuseScoreNotFoundError, MuseScoreConvertError) as exc:
             emit_cli_exception(exc, path=path)
             exit_code = 1
@@ -720,6 +744,10 @@ def _cmd_mscz_text(ns: argparse.Namespace) -> int:
 
 def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
     from .audio_export import AUDIO_FORMATS, AudioExportError, export_to_audio
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .street_products import MP3_KEY, merge_street_product_meta
 
     fmt = ns.mscz_command
@@ -731,6 +759,7 @@ def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
     if _reject_multi_output(files, ns.output):
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
         if _gate_mscz_source(ns, path):
@@ -743,8 +772,16 @@ def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
         )
         try:
             written = export_to_audio(
-                path, out, format_name=fmt, musescore=musescore
+                path,
+                out,
+                format_name=fmt,
+                musescore=musescore,
+                allow_noncanonical=allow,
             )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except AudioExportError as exc:
             emit_cli_exception(exc, path=path)
             exit_code = 1

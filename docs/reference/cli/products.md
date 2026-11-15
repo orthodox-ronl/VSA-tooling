@@ -66,7 +66,8 @@ er zijn. `--force` regenereert altijd.
 **C4 (canonieke doelen):** na schrijven van de playback-``.mxl``
 draait dezelfde steekproef als [`mxl validate`](mxl.md) (profiel `mono`
 voor `.vsa`, `satb` voor `.mvsa`/`.mscz`). Na Score-IR volgt een
-structurele C4 (JSON/`format`/`profile` + from-ir-emit). Bij C4-fout
+structurele C4 (JSON/`format`/`profile` + from-ir-emit). Na ``.mp3``
+volgt een structurele C4 (ID3/MPEG-/Ogg-/WAV-header). Bij C4-fout
 blijft het doelbestand op schijf staan; de run stopt met exit 1 en
 schrijft geen products-meta voor die bron.
 

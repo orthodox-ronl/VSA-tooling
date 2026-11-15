@@ -30,6 +30,10 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_mxl_validate(ns)
     if ns.mxl_command == "normalize":
         return _cmd_mxl_normalize(ns)
+    if ns.mxl_command == "kuiser":
+        from .kuiser_cli import dispatch_kuiser
+
+        return dispatch_kuiser(ns)
     parser.print_help()
     return 1
 
@@ -74,6 +78,8 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Checklist Coria/playback (M2/M8/Coria-tags/meta).\n"
             "  normalize PATH [-o OUT] [--apply-timing]\n"
             "      Normaliseer naar playback-profiel.\n"
+            "  kuiser PATH …\n"
+            "      Authoring-kuiser (nog geen spec → fout; zie docs/formats/kuiser.md).\n"
             "\n"
             "PATH = één bronbestand of map (recursief). "
             "-o alleen bij precies één bron.\n"
@@ -89,7 +95,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mxl_command",
         required=True,
-        metavar="{mvsa,mscz,validate,normalize}",
+        metavar="{mvsa,mscz,validate,normalize,kuiser}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -171,6 +177,9 @@ def _build_parser() -> argparse.ArgumentParser:
             "Default uit (MVSA-achtige bron)."
         ),
     )
+    from .kuiser_cli import add_kuiser_parser
+
+    add_kuiser_parser(sub, street="mxl", implemented=False)
     return parser
 
 

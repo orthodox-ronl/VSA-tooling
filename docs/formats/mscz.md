@@ -35,12 +35,13 @@ stokken S/T omhoog en A/B omlaag; geen mid-systeem-HBox / spookmaten;
 
 ## Inhoud en metadata
 
-| Onderwerp        | Regel                                                                 |
-| ---------------- | --------------------------------------------------------------------- |
-| Frontmatter      | n.v.t. (binair MuseScore; geen VSA-YAML)                              |
-| Encoding         | MuseScore intern; lyrics UTF-8 in MusicXML-brug                       |
-| Colofon / titel  | Via layout `partituur` + consumer `--bibliotheek-id`                  |
-| Verboden         | Mid-systeem-HBox als “oplossing” voor gaps (zie leesbaarheid C3/C4)   |
+| Onderwerp        | Regel                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| Frontmatter      | n.v.t. (binair MuseScore; geen VSA-YAML)                                              |
+| Encoding         | MuseScore intern; lyrics UTF-8 in MusicXML-brug                                       |
+| Colofon / titel  | Via layout `partituur` + consumer `--bibliotheek-id`                                  |
+| Verboden         | Mid-systeem-HBox als “oplossing” voor gaps (zie leesbaarheid C3/C4)                   |
+| Kuiser           | Geen spec — `mscz kuiser` weigert ([kuiser.md](kuiser.md)); layout = `mscz normalize` |
 
 ## Syllabificatie
 

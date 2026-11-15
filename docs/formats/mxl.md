@@ -30,6 +30,7 @@ vier parts S/A/T/B; piano-MIDI per part (M8); enz. C1–C4:
 | Frontmatter                     | n.v.t. (XML)                                                                                                |
 | Encoding                        | UTF-8 XML                                                                                                   |
 | Uitvoeraanwijzingen uit `.mvsa` | [uitvoeraanwijzingen](../specification-mvsa/uitvoeraanwijzingen.md) (cesuur, dynamiek, cresc/dim, tempo, …) |
+| Kuiser                          | Geen spec — `mxl kuiser` weigert ([kuiser.md](kuiser.md)); playback = `mxl normalize`                       |
 
 ## Syllabificatie
 

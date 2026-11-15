@@ -14,7 +14,8 @@ resultaat altijd handmatig; Pyphen is geen liturgische eindredacteur.
 
 ```text
 vsa syllabify [-h] [--dry-run] [--in-place] [--extension EXT] [--unsyllabify]
-              [--config PAD] [--syllable-dictionary PAD] path
+              [--config PAD] [--syllable-dictionary PAD]
+              [--lyrics-lang {auto,nl,ksl}] path
 ```
 
 ## Beschrijving
@@ -23,9 +24,10 @@ Reciteertekst staat in veel [vsa-bestanden](@bron) als één woord
 (`lijden`, `onbederfelijke`). Cadensstukken zitten vaak al in scopes
 (`marte{la_}{/ren}`). `vsa syllabify` hypheneert elk woord met Pyphen
 (`nl_NL`), inclusief woorden die over platte tekst en scopes heen lopen.
-Staat het lemma al in `syllable_dictionary.nl.txt`, dan wint die canonieke
-vorm (hoofdletters van de bron blijven). Na hypheneren controleert het
-commando dezelfde dictionary-codes als validate
+Staat het lemma al in de actieve woordenlijst
+(`syllable_dictionary.nl.txt` of `.ksl.txt` via `--lyrics-lang`), dan wint
+die canonieke vorm (hoofdletters van de bron blijven). Na hypheneren
+controleert het commando dezelfde dictionary-codes als validate
 (`VSA-SYLLABLE-DICT-MISMATCH` / `UNKNOWN`). Op een TTY kun je meteen
 corrigeren: bron vervangen naar de canonieke vorm, of een (hyphen-)vorm
 accepteren in de lijst — zie
@@ -90,14 +92,17 @@ bij `--extension .syl.vsa`) worden overgeslagen, zodat je geen
 
 ## Argumenten en opties
 
-| Naam              | Verplicht | Betekenis                                                                               | Default          | Beperkingen                                     |
-| ----------------- | --------- | --------------------------------------------------------------------------------------- | ---------------- | ----------------------------------------------- |
-| `path`            | Ja        | Pad naar een `.vsa`-bestand of een map met `.vsa`-bestanden.                            | —                | Moet bestaan.                                   |
-| `--dry-run`       | Nee       | Toon het resultaat zonder bestanden te schrijven.                                       | Uit (schrijven)  | —                                               |
-| `--in-place`      | Nee       | Schrijf terug naar elk bronbestand (default-gedrag).                                    | Aan (impliciet)  | Niet combineren met `--extension`.              |
-| `--extension EXT` | Nee       | Schrijf naar sibling-bestanden (`.syl.vsa` of `syl.vsa` → `xyz.syl.vsa`).               | Uit              | Moet eindigen op `.vsa`; niet met `--in-place`. |
-| `--unsyllabify`   | Nee       | Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes) i.p.v. ze toe te voegen. | Uit (hypheneren) | Scope-inhoud / ELM-`-` blijven staan.           |
-| `-h`, `--help`    | Nee       | Toon hulp voor dit subcommando.                                                         | —                | —                                               |
+| Naam                          | Verplicht | Betekenis                                                                               | Default          | Beperkingen                                     |
+| ----------------------------- | --------- | --------------------------------------------------------------------------------------- | ---------------- | ----------------------------------------------- |
+| `path`                        | Ja        | Pad naar een `.vsa`-bestand of een map met `.vsa`-bestanden.                            | —                | Moet bestaan.                                   |
+| `--dry-run`                   | Nee       | Toon het resultaat zonder bestanden te schrijven.                                       | Uit (schrijven)  | —                                               |
+| `--in-place`                  | Nee       | Schrijf terug naar elk bronbestand (default-gedrag).                                    | Aan (impliciet)  | Niet combineren met `--extension`.              |
+| `--extension EXT`             | Nee       | Schrijf naar sibling-bestanden (`.syl.vsa` of `syl.vsa` → `xyz.syl.vsa`).               | Uit              | Moet eindigen op `.vsa`; niet met `--in-place`. |
+| `--unsyllabify`               | Nee       | Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes) i.p.v. ze toe te voegen. | Uit (hypheneren) | Scope-inhoud / ELM-`-` blijven staan.           |
+| `--config PAD`                | Nee       | Pad naar `vsa.toml` (o.a. `[syllabificatie] dictionary`).                               | auto             | —                                               |
+| `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt`.                                    | auto             | —                                               |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = Cyrillisch → `ksl`, anders `nl`; of forceer.                                   | `auto`           | —                                               |
+| `-h`, `--help`                | Nee       | Toon hulp voor dit subcommando.                                                         | —                | —                                               |
 
 ## Output
 

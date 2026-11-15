@@ -21,7 +21,7 @@ bron. Zie [Invoer bestand of map](input-pad.md).
 ## Synopsis
 
 ```text
-mscz [-h] {mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,text,compare,products} …
+mscz [-h] {mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,kuiser,text,compare,products} …
 mscz mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
           [--octave-style {@oct,none,marker}] [--section SECTION]
           [--musescore PATH] [--no-align] path
@@ -51,6 +51,7 @@ mscz products [-h] [--force] [--dry-run] [--quiet] [--allow-noncanonical]
 | `score-ir`        | Score-IR (+ `--musicxml` → from-ir); merget `score-ir` / `from-ir`.                                                                                           |
 | `mscz`            | Partituur-sibling `*.mscz.mscz` (layout `partituur`); merget key `mscz`.                                                                                      |
 | `normalize`       | Layoutprofiel in-place of `-o` (geen meta-product tenzij sibling via `mscz mscz`).                                                                            |
+| `kuiser`          | Nog geen spec → foutmelding ([kuiser.md](../../formats/kuiser.md)).                                                                                           |
 | `text`            | Lyrics-product `*.lyrics.txt`; merget key `lyrics`.                                                                                                           |
 | `compare`         | Score (`.mscz` of MusicXML) ↔ `.mvsa`.                                                                                                                        |
 

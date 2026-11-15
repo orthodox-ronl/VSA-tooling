@@ -40,9 +40,9 @@ Prioriteit fase 3 (uit plan): eerst `products` / `mscz` / `text` / `svg` / `audi
 | `mxl` / `musicxml`           | `.mxl`             | ja     | ja     | `--syllabify`; engraving | C4 steekproef na write (mono); engraving slaat C4 over   | —        |
 | `mscz`                       | `.mscz`            | ext    | deel   | via MuseScore-keten      | C3; C4 S*/leesbaarheid                                   | **hoog** |
 | `score-ir`                   | IR (+ from-ir)     | ja     | ja     | `--allow-noncanonical`   | C4 structureel+emit; nog geen S8-gate                    | midden   |
-| `mp3`/`audio`/`ogg`/`wav`    | audio              | ext    | deel   | A5 trim                  | C3; C4 A*                                                | **hoog** |
+| `mp3`/`audio`/`ogg`/`wav`    | audio              | ja     | ja     | `--allow-noncanonical`   | C4 structureel (header); nog geen volle A*               | midden   |
 | `products`                   | universele set     | ja     | ja     | `--allow-noncanonical`   | C4 op mxl-key; overige keys nog geen aparte C4           | midden   |
-| `pdf`                        | partituur-PDF      | ext    | deel   | geen standaardproduct    | C3; C4 P*                                                | midden   |
+| `pdf`                        | partituur-PDF      | ja     | ja     | `--allow-noncanonical`   | C4 structureel (%PDF); nog geen P*                       | midden   |
 | `mvsa`                       | schets `.vsa.mvsa` | ext    | deel   | T6 waarschuwingen        | C3; C4 T1–T7                                             | midden   |
 | `template validate`          | formule-YAML       | n.v.t. | n.v.t. |                          | —                                                        | —        |
 | `process` / `build-markdown` | MD-workflow        | deel   | deel   |                          | per blok; documenteer                                    | laag     |
@@ -60,8 +60,8 @@ Prioriteit fase 3 (uit plan): eerst `products` / `mscz` / `text` / `svg` / `audi
 | `mxl`                                | `.mxl`                     | ja     | ja     | translit-as-parts slaat C4 over  | C4 satb na standaard write | —        |
 | `mscz`                               | `.mscz`                    | ext    | deel   | layout flags                     | C3; C4 S*                  | **hoog** |
 | `svg`                                | `.svg`                     | ext    | deel   | `--engine osmd`                  | C3; C4 mvsa-svg            | **hoog** |
-| `pdf`                                | PDF                        | ext    | deel   |                                  | C3; C4 P*                  | midden   |
-| `mp3`/`ogg`/`wav`                    | audio                      | ext    | deel   |                                  | C3; C4 A*                  | **hoog** |
+| `pdf`                                | PDF                        | ja     | ja     | `--allow-noncanonical`           | C4 structureel (%PDF)      | midden   |
+| `mp3`/`ogg`/`wav`                    | audio                      | ja     | ja     | `--allow-noncanonical`           | C4 structureel (header)    | midden   |
 | `score-ir`                           | IR (+ from-ir)             | ja     | ja     | `--allow-noncanonical`           | C4 structureel+emit        | midden   |
 | `text`                               | lyrics                     | ext    | deel   | strip                            | C3; C4                     | **hoog** |
 | `vsa`                                | `.mvsa.vsa`                | ext    | deel   | E*                               | C3; C4 E1–E6               | midden   |
@@ -78,8 +78,8 @@ Prioriteit fase 3 (uit plan): eerst `products` / `mscz` / `text` / `svg` / `audi
 | `import`→          | `.mscz` uit mvsa/mxl | uitz.  | deel   | destination import     |                                    | midden   |
 | `mxl`              | `.mxl`               | ja     | ja     | `--allow-noncanonical` | structurele C3 (zip+mscx); geen S* | —        |
 | `svg`              | `.svg`               | ja     | deel   | `--allow-noncanonical` | C4 svg-contract                    | midden   |
-| `pdf`              | PDF                  | ja     | deel   | `--allow-noncanonical` | C4 P*                              | midden   |
-| `mp3`/`ogg`/`wav`  | audio                | ja     | deel   | `--allow-noncanonical` | C4 A*                              | midden   |
+| `pdf`              | PDF                  | ja     | ja     | `--allow-noncanonical` | C4 structureel (%PDF); geen P*     | —        |
+| `mp3`/`ogg`/`wav`  | audio                | ja     | ja     | `--allow-noncanonical` | C4 structureel (header)            | —        |
 | `score-ir`         | IR (+ from-ir)       | ja     | ja     | `--allow-noncanonical` | C4 structureel+emit                | —        |
 | `mscz`             | partituur-sibling    | ja     | deel   | `--allow-noncanonical` | C4 S* harder                       | midden   |
 | `normalize`        | layout op bestaand   | ext    | deel   | plain = minder         | C3 structureel?; C4 per layout     | midden   |
@@ -139,9 +139,14 @@ Prioriteit fase 3 (uit plan): eerst `products` / `mscz` / `text` / `svg` / `audi
 5. **Gedaan:** C4 structureel + from-ir-emit op Score-IR na schrijven
    (`export_mvsa_path_to_score_ir` / products / `{straat} score-ir`).
 6. **Gedaan:** man-page `products` + contract-index §C*.
-7. **Open:** overige C4-subs (pdf, …); strengere mscz-C3
-   (S*/leesbaarheid) na aparte OK.
-8. **Open:** bulk-catalogusnaleving (aparte OK).
+7. **Gedaan:** structurele C4 op partituur-PDF (`%PDF`-header) via
+   `export_mscz_to_pdf` / `vsa`/`mvsa`/`mscz pdf`; nog geen P*.
+8. **Gedaan:** structurele C4 op audio (mp3/ogg/wav-headers) via
+   `export_musicxml_to_audio` / products / `{straat} mp3|ogg|wav`.
+9. **Open:** strengere mscz-C3 (S*); markdown-PDF C4; svg/lyrics-C4
+   na aparte OK.
+10. **Open:** bulk-catalogusnaleving — gebruiker voert cmd uit (geen
+    agent-bulk).
 
 ---
 

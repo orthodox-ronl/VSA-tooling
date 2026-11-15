@@ -144,6 +144,7 @@ id + link). Gat = migratieschuld. Diepte-hubs blijven normtekst.
 | Layoutprofielen `partituur` / `muziek` / `plain`                                                           | [mscz.md](mscz.md)#layoutprofielen---layout                                                                                                                                                                                   | `mvsa mscz` / `{straat} svg` / `{straat} pdf`                                                          |
 | `.mvsa`-syntax                                                                                             | [specification-mvsa](../specification-mvsa/README.md)                                                                                                                                                                         | `mvsa validate`                                                                                        |
 | `.mvsa` normaliseren (spelling / pitch-opties)                                                             | man-page [`mvsa normalize`](../reference/cli/mvsa.md#mvsa-normalize) + conversieplan                                                                                                                                          | `mvsa normalize`                                                                                       |
+| **Kuiser** (authoring → canoniek; Q\* MVSA, V\* VSA, …)                                                    | [kuiser.md](kuiser.md)                                                                                                                                                                                                        | `mvsa kuiser` · `vsa kuiser` · stubs `mscz`/`mxl kuiser`                                               |
 | Conversiematrix bron↔doel                                                                                  | [mvsa-conversions](../plans/mvsa-conversions.md) · [formats-overzicht](index.md)                                                                                                                                              | `mxl mvsa`, `mscz mvsa`, …                                                                             |
 | Score-IR / from-ir (bedoelde printvorm)                                                                    | [score-ir.md](score-ir.md) · [partituur-ir](../plans/partituur-ir.md)                                                                                                                                                         | `{straat} score-ir` (uit `.vsa`/`.mvsa`/`.mscz`)                                                       |
 | OSMD-scherm (S8 e.d.; emit, zelfde bedoeling)                                                              | [osmd-s8-recite](../plans/osmd-s8-recite.md) → checklists S8/R3                                                                                                                                                               | from-ir → OSMD                                                                                         |
@@ -211,12 +212,13 @@ geen checklist P*. In de bibliotheek doet `scripts\pdf.cmd` hetzelfde.
 Man-pagina: [`markdown`](../reference/cli/markdown.md). Partituur-PDF
 uit `.vsa`: [`vsa pdf`](../reference/cli/pdf.md).
 
-| Actie (niet-product) | Straat / CLI                                                                 |
-| -------------------- | ---------------------------------------------------------------------------- |
-| normalize            | `mvsa normalize` · `mscz normalize` · `mxl normalize` (geen `vsa normalize`) |
-| import               | `mvsa import` · `mscz import`                                                |
-| validate             | `mvsa validate` · `vsa validate` · `mxl validate`                            |
-| `manual`             | geen auto-`products`                                                         |
+| Actie (niet-product) | Straat / CLI                                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| normalize            | `mvsa normalize` · `mscz normalize` · `mxl normalize` (geen `vsa normalize`)                                     |
+| kuiser               | `mvsa kuiser` (Q\*) · `vsa kuiser` (V\* volgt) · `mscz`/`mxl kuiser` (geen spec → fout) — [kuiser.md](kuiser.md) |
+| import               | `mvsa import` · `mscz import`                                                                                    |
+| validate             | `mvsa validate` · `vsa validate` · `mxl validate`                                                                |
+| `manual`             | geen auto-`products`                                                                                             |
 
 ## Sidecar-meta (herkomst / versheid)
 

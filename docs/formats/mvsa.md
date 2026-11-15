@@ -30,6 +30,7 @@ Canoniek = [syntax](../specification-mvsa/syntax.md) /
 | Encoding                   | UTF-8                                                                                                                                                         |
 | Zoektekst YAML             | [zoektekst](zoektekst.md)                                                                                                                                     |
 | Normalisatie               | Spelling/pitch + kolommen (ook `&` in melisma): [`mvsa normalize`](../reference/cli/mvsa.md#mvsa-normalize) + [mvsa-conversies](../plans/mvsa-conversions.md) |
+| Kuiser                     | Authoring → canoniek (Q1–Q9: FM, `@`-blok, `#maat`, syllabify, normaalvorm): [kuiser.md](kuiser.md) · [`mvsa kuiser`](../reference/cli/mvsa.md#mvsa-kuiser)   |
 
 ## Syllabificatie
 
@@ -112,13 +113,21 @@ Elke **koormaat** heeft in alle vormen waar een maatnummer zichtbaar is
 (MuseScore/`.mscz`, MusicXML `@number`, import-commentaar `#maat N`,
 partituur-PDF) **hetzelfde nummer**.
 
-| Regel        | Toelichting                                                                  |
-| ------------ | ---------------------------------------------------------------------------- |
-| Bron         | Maatnummer = MuseScore-partituur / MusicXML `measure@number` van de koormaat |
-| `#maat N`    | `N` = canonieke nummer van de eerste koormaat in het LSATB-systeem           |
-| Pauzematen   | Coria `[PAUZE]` → afgeleid `Np`; verschuift volgende koormaten **niet**      |
-| Score → mvsa | Geen `[PAUZE]`-maten in authoring-schets                                     |
-| Soft-wrap    | Mag afwijken van MuseScore-systeemovergangen; nummer per maat is gedeeld     |
+| Regel        | Toelichting                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| Bron         | Maatnummer = MuseScore-partituur / MusicXML `measure@number` van de koormaat                     |
+| `#maat N`    | `N` = canonieke nummer van de eerste koormaat in het LSATB-systeem                               |
+| Pauzematen   | Coria `[PAUZE]` → afgeleid `Np`; verschuift volgende koormaten **niet**                          |
+| Score → mvsa | Geen `[PAUZE]`-maten in authoring-schets                                                         |
+| Soft-wrap    | Mag afwijken van MuseScore-systeemovergangen; nummer per maat is gedeeld                         |
+| Kuiser (Q3)  | Per LSATB-systeem precies één `#maat N`; opruimen oude `#maat`/`# maat` — [kuiser.md](kuiser.md) |
+
+## Kuiser (type-specifiek)
+
+Authoring-opkuis naar canonieke `.mvsa`: checklist **Q1–Q9** in
+[kuiser.md](kuiser.md) (frontmatter, `@`-blok met tempo-fingerprint
+131/181, `#maat`, syllabificatie + dictionary, daarna normaalvorm).
+CLI: [`mvsa kuiser`](../reference/cli/mvsa.md#mvsa-kuiser).
 
 ## Typische commando’s
 

@@ -1,17 +1,24 @@
 """Kuiser: canonieke authoring-vorm voor .mvsa (draft-v0).
 
-Past de kuiser-toleranties uit de draft-spec toe:
+Contract: ``docs/formats/kuiser.md`` (Q\\*). Pipeline:
 
-1. op L: eenduidige ELM-``-`` → ``~``; daarna lone standaard-``~`` weglaten
+0. Q6 — strip import-/schetsbanners (:mod:`vsa.mvsa_kuiser_q67`), tenzij
+   ``werkbank``;
+1. Q2/Q3 — document-``@``-blok + ``#maat N`` (:mod:`vsa.mvsa_kuiser_q23`);
+2. op L: eenduidige ELM-``-`` → ``~``; daarna lone standaard-``~`` weglaten
    (impliciete kwart). ``~`` blijft bij ``&``-melisma (``ziel~&~``) en na
    recite-``)`` (``()~`` / ``(ia)~`` — zonder ELM = breve). Samengestelde
    ELM’s zoals ``-.`` blijven;
-2. waarschuwing bij ambiguë ``-`` (regel + kolom) — geen stille
+3. waarschuwing bij ambiguë ``-`` (regel + kolom) — geen stille
    ``hei- li``→``hei-li``-collapse (dat breekt o.a. ``…_&_  -li``);
-3. semantische woordstreepjes: waarschuwing bij ontbrekende streepjes
+4. semantische woordstreepjes: waarschuwing bij ontbrekende streepjes
    wanneer Pyphen de lettergrepen exact zo zou splitsen;
-4. maatstrepen syncen waar eenduidig;
-5. daarna :func:`vsa.mvsa_normalize.normalize_mvsa_text` (pitch + align).
+5. maatstrepen syncen waar eenduidig (nodig vóór Q4);
+6. Q4/Q5 — soft ``-`` op L + dictionary-waarschuwingen
+   (:mod:`vsa.mvsa_kuiser_q45`);
+7. Q8 — :func:`vsa.mvsa_normalize.normalize_mvsa_text` (pitch + align);
+8. Q1 — YAML-FM / zoektekst (:mod:`vsa.mvsa_kuiser_q1`);
+9. Q7 — validate zonder errors; Q9 = ``--check``.
 
 Canonieke woordstreep met extra breedte: spaties **vóór** het streepje
 (``hei_&_&_  -li``), nooit ``hei-_&…`` / ``le-  lu``.
@@ -86,9 +93,33 @@ def kuiser_mvsa_text(
     pitch: str = DEFAULT_MVSA_PITCH,
     octave_style: str = "@oct",
     align: bool = True,
+    source_path: Path | str | None = None,
+    dict_interactive: bool | None = None,
+    werkbank: bool = False,
 ) -> KuiserResult:
-    """Return kuiser-canonieke mvsa-tekst + eventuele waarschuwingen."""
-    repaired, warnings = _repair_systems(text)
+    """Return kuiser-canonieke mvsa-tekst + eventuele waarschuwingen.
+
+    Volgorde: Q6 (banners, tenzij ``werkbank``) → Q2/Q3 → repair →
+    Q4/Q5 → normalize/align (Q8) → Q1 → Q7 (validate zonder errors).
+    Q9 = ``--check``. Zie docs/formats/kuiser.md.
+
+    ``dict_interactive``: zie :func:`vsa.mvsa_kuiser_q45.apply_q4_q5`.
+    """
+    from .mvsa_kuiser_q1 import apply_q1
+    from .mvsa_kuiser_q23 import apply_q2_q3
+    from .mvsa_kuiser_q45 import apply_q4_q5
+    from .mvsa_kuiser_q67 import apply_q6, assert_q7_valid
+
+    prepared = apply_q6(text, werkbank=werkbank)
+    prepared = apply_q2_q3(prepared, source_path=source_path)
+    repaired, repair_warnings = _repair_systems(prepared)
+    repaired, q45_warnings = apply_q4_q5(
+        repaired,
+        align=align,
+        dict_interactive=dict_interactive,
+        source_path=source_path,
+    )
+    warnings = [*repair_warnings, *q45_warnings]
     try:
         out = normalize_mvsa_text(
             repaired, pitch=pitch, octave_style=octave_style, align=align
@@ -98,9 +129,8 @@ def kuiser_mvsa_text(
     except MvsaNormalizeError as exc:
         raise MvsaKuiserError(str(exc), line=exc.line) from exc
 
-    errors = [d for d in validate_mvsa_text(out) if d.severity == "error"]
-    if errors:
-        raise MvsaValidationError(errors)
+    out = apply_q1(out, source_path=source_path)
+    assert_q7_valid(out)
     return KuiserResult(text=out, warnings=warnings)
 
 
@@ -112,14 +142,25 @@ def kuiser_mvsa_path(
     octave_style: str = "@oct",
     align: bool = True,
     check: bool = False,
+    dict_interactive: bool | None = None,
+    werkbank: bool = False,
 ) -> tuple[bool, list[KuiserWarning]]:
     """Kuis ``path``. Returns ``(changed, warnings)``.
 
     ``out`` None → in-place. ``check`` True → geen schrijfactie.
+    ``werkbank`` True → behoud import-/schetsbanners (Q6).
     """
+    from .mvsa_kuiser_q67 import assert_q7_valid
+
     text = path.read_text(encoding="utf-8-sig")
     result = kuiser_mvsa_text(
-        text, pitch=pitch, octave_style=octave_style, align=align
+        text,
+        pitch=pitch,
+        octave_style=octave_style,
+        dict_interactive=dict_interactive,
+        align=align,
+        source_path=path,
+        werkbank=werkbank,
     )
     changed = result.text != text
     if check:
@@ -128,11 +169,43 @@ def kuiser_mvsa_path(
     if changed or out is not None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(result.text, encoding="utf-8", newline="\n")
+        # Q7: na schrijven opnieuw (bestand moet error-vrij openen).
+        assert_q7_valid(target.read_text(encoding="utf-8-sig"))
     return changed, result.warnings
 
 
 def _repair_systems(text: str) -> tuple[str, list[KuiserWarning]]:
-    """L-ELM-canonisatie + ambigu-dash-warnings + maatstreep-sync."""
+    """L-ELM-canonisatie + ambigu-dash-warnings + maatstreep-sync.
+
+    YAML-frontmatter blijft onaangeroerd (geneste sleutels zoals
+    ``bron.bewerking`` lijken anders op een stemregel ``B…:``).
+    """
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    bom = ""
+    if text.startswith("\ufeff"):
+        bom = "\ufeff"
+        text = text[1:]
+
+    fm, body, _ = strip_yaml_frontmatter(text)
+    repaired_body, warnings = _repair_systems_body(body)
+    if not fm:
+        return bom + repaired_body, warnings
+
+    # Behoud bestaande FM-bytes; alleen body repareren.
+    if text.startswith("---"):
+        close = text.find("\n---", 3)
+        if close != -1:
+            fm_bytes = text[: close + len("\n---")]
+            rest = text[close + len("\n---") :]
+            lead = rest[: len(rest) - len(rest.lstrip("\n"))]
+            return bom + fm_bytes + lead + repaired_body, warnings
+
+    return bom + repaired_body, warnings
+
+
+def _repair_systems_body(text: str) -> tuple[str, list[KuiserWarning]]:
+    """Zelfde als vroeger ``_repair_systems``, alleen op de body."""
     lines = text.splitlines(keepends=True)
     out: list[str] = []
     warnings: list[KuiserWarning] = []

@@ -24,7 +24,8 @@ enkelvoudige paden (`--keep-mxl`, …) zijn alleen toegestaan bij precies
 
 ```text
 mvsa [-h] {validate,mxl,mscz,pdf,svg,mp3,ogg,wav,score-ir,text,vsa,normalize,transpose,kuiser,syllabify,import,products} …
-mvsa validate [-h] [--config PAD] [--syllable-dictionary PAD] path
+mvsa validate [-h] [--config PAD] [--syllable-dictionary PAD]
+              [--lyrics-lang {auto,nl,ksl}] path
 mvsa mxl [-h] [-o OUTPUT] [--section SECTION] [--translit]
               [--translit-modus {nls,ksl}] [--translit-as-parts]
               [--bibliotheek-id ID] path
@@ -66,7 +67,8 @@ mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 mvsa transpose [-h] --to TONIC [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
 mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
 mvsa syllabify [-h] [--dry-run] [--in-place] [--extension EXT] [--unsyllabify]
-               [--config PAD] [--syllable-dictionary PAD] path
+               [--config PAD] [--syllable-dictionary PAD]
+               [--lyrics-lang {auto,nl,ksl}] path
 mvsa vsa [-h] [-o OUTPUT] [--voice ID|all] path
 ```
 
@@ -118,7 +120,7 @@ mvsa kuiser -h
 
 ```text
 mvsa validate [-h] [--require-zoektekst] [--config PAD]
-              [--syllable-dictionary PAD] path
+              [--syllable-dictionary PAD] [--lyrics-lang {auto,nl,ksl}] path
 ```
 
 ### Beschrijving
@@ -142,13 +144,14 @@ TTY kun je overige dictionary-findings meteen corrigeren.
 
 ### Argumenten en opties
 
-| Naam                      | Verplicht | Betekenis                                                                        | Default | Beperkingen   |
-| ------------------------- | --------- | -------------------------------------------------------------------------------- | ------- | ------------- |
-| `path`                    | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.                                    | —       | Moet bestaan. |
-| `--require-zoektekst`     | Nee       | Eis YAML-`zoektekst` gelijk aan body (catalogus); zie [zoektekst](zoektekst.md). | Uit     | —             |
-| `--config`                | Nee       | Pad naar `vsa.toml` (o.a. `[syllabificatie] dictionary`).                        | auto    | —             |
-| `--syllable-dictionary`   | Nee       | Pad naar `syllable_dictionary.nl.txt` (overschrijft toml).                       | auto    | —             |
-| `-h`, `--help`            | Nee       | Toon hulp voor dit subcommando.                                                  | —       | —             |
+| Naam                          | Verplicht | Betekenis                                                                        | Default | Beperkingen   |
+| ----------------------------- | --------- | -------------------------------------------------------------------------------- | ------- | ------------- |
+| `path`                        | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.                                    | —       | Moet bestaan. |
+| `--require-zoektekst`         | Nee       | Eis YAML-`zoektekst` gelijk aan body (catalogus); zie [zoektekst](zoektekst.md). | Uit     | —             |
+| `--config`                    | Nee       | Pad naar `vsa.toml` (o.a. `[syllabificatie] dictionary`).                        | auto    | —             |
+| `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt` (overschrijft auto/toml).    | auto    | —             |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = Cyrillisch in lyrics → `ksl`, anders `nl`; of forceer.                  | `auto`  | —             |
+| `-h`, `--help`                | Nee       | Toon hulp voor dit subcommando.                                                  | —       | —             |
 
 ### Output
 
@@ -864,15 +867,35 @@ mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}
 
 ### Beschrijving
 
-Authoring-pad naar de **canonieke schrijfvorm** uit de draft-spec
-([syntax](../../specification-mvsa/syntax.md),
-[semantiek — layout](../../specification-mvsa/semantics.md#canonieke-layout-vs-tolerantie)):
+Authoring-pad naar de **canonieke schrijfvorm**. Contract **Q1–Q9**:
+[kuiser.md](../../formats/kuiser.md).
 
-1. woordstreep-spatie op L (`hei- li` → `hei-li`; `le-  lu` blijft);
-2. maatstrepen syncen waar eenduidig (maximale unieke bar-reeks;
-   herpartitioneren via positietelling);
-3. daarna hetzelfde als `normalize` (default `--pitch preserve` + kolomalign,
-   inclusief `&` onder `&` met padding-spaties).
+**Nu geïmplementeerd:**
+
+1. **Q2** — document-`@title` / `@do` / `@mode` / `@tempo` (fingerprint
+   **131**, of **181** bij tropaar/kondak/stichier; tool-defaults 130/180
+   worden overschreven; bewust ander BPM blijft). `@oct` alleen behouden
+   als die er al stond. Titel uit `@title`, anders bestandsnaam + `(Toon N)`.
+2. **Q3** — per LSATB-systeem `#maat N` (oude `#maat` / `# maat` weg);
+   `N` telt door op maatstrepen.
+3. woordstreep-spatie op L (`hei- li` → `hei-li`; `le-  lu` blijft);
+4. maatstrepen syncen waar eenduidig;
+5. **Q8** — daarna hetzelfde als `normalize` (default `--pitch preserve` +
+   kolomalign, inclusief `&` onder `&`).
+6. **Q1** — YAML-frontmatter (titel/taal/soort/toon/bron/zoektekst/do/mode/tempo);
+   `@`-blok wint; zoektekst uit L; default `taal: nl`.
+7. **Q4** — soft `-` op L (zelfde pad als `mvsa syllabify`).
+8. **Q5** — dictionary-check: waarschuwingen; op TTY interactief corrigeren
+   (zoals validate/syllabify).
+9. **Q6** — strip `# Imported:` / schets-WAARSCHUWING-banners (tenzij
+   `--werkbank`).
+10. **Q7** — na afloop (en na schrijven) geen validate-**errors**.
+
+**Q9:** `--check` (dry-run; exit 1 bij voorgenomen wijziging).
+
+Draft-syntax/layout:
+[syntax](../../specification-mvsa/syntax.md),
+[semantiek — layout](../../specification-mvsa/semantics.md#canonieke-layout-vs-tolerantie).
 
 Default schrijft **in-place**. Gebruik `--check` als dry-run (exit 1 als er
 iets zou wijzigen). Na afloop moet validate geen errors meer geven; bij
@@ -931,7 +954,8 @@ mvsa kuiser lied.mvsa --pitch a-g
 
 ```text
 mvsa syllabify [-h] [--dry-run] [--in-place] [--extension EXT] [--unsyllabify]
-               [--no-align] [--config PAD] [--syllable-dictionary PAD] path
+               [--no-align] [--config PAD] [--syllable-dictionary PAD]
+               [--lyrics-lang {auto,nl,ksl}] path
 ```
 
 ### Beschrijving
@@ -953,16 +977,17 @@ sibling i.p.v. bron.
 
 ### Argumenten en opties
 
-| Naam                    | Verplicht | Betekenis                                       | Default         | Beperkingen             |
-| ----------------------- | --------- | ----------------------------------------------- | --------------- | ----------------------- |
-| `path`                  | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.   | —               | Moet bestaan.           |
-| `--dry-run`             | Nee       | Toon resultaat zonder te schrijven.             | Uit (schrijven) | —                       |
-| `--in-place`            | Nee       | Expliciet in-place (zelfde als default).        | Aan (impliciet) | Niet met `--extension`. |
-| `--extension EXT`       | Nee       | Sibling met deze extensie (eindigt op `.mvsa`). | Uit             | Niet met `--in-place`.  |
-| `--unsyllabify`         | Nee       | Verwijder soft `-` in recite.                   | Uit             | —                       |
-| `--no-align`            | Nee       | Sla kolomuitlijning na herschrijven over.       | Uit             | —                       |
-| `--config`              | Nee       | Pad naar `vsa.toml`.                            | auto            | —                       |
-| `--syllable-dictionary` | Nee       | Pad naar canonieke dictionary.                  | auto            | —                       |
+| Naam                          | Verplicht | Betekenis                                             | Default         | Beperkingen             |
+| ----------------------------- | --------- | ----------------------------------------------------- | --------------- | ----------------------- |
+| `path`                        | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.         | —               | Moet bestaan.           |
+| `--dry-run`                   | Nee       | Toon resultaat zonder te schrijven.                   | Uit (schrijven) | —                       |
+| `--in-place`                  | Nee       | Expliciet in-place (zelfde als default).              | Aan (impliciet) | Niet met `--extension`. |
+| `--extension EXT`             | Nee       | Sibling met deze extensie (eindigt op `.mvsa`).       | Uit             | Niet met `--in-place`.  |
+| `--unsyllabify`               | Nee       | Verwijder soft `-` in recite.                         | Uit             | —                       |
+| `--no-align`                  | Nee       | Sla kolomuitlijning na herschrijven over.             | Uit             | —                       |
+| `--config`                    | Nee       | Pad naar `vsa.toml`.                                  | auto            | —                       |
+| `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt`.  | auto            | —                       |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = Cyrillisch → `ksl`, anders `nl`; of forceer. | `auto`          | —                       |
 
 ### Voorbeelden
 

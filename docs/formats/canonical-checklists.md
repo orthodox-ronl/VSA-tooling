@@ -125,6 +125,12 @@ Transforms: Oefenhoek `mscz-product-transforms.md` (PDF-kolom).
 [`markdown pdf`](../reference/cli/markdown.md#markdown-pdf) is een andere pipeline (Markdown + VSA-SVG,
 geen MuseScore-partituur) maar valt onder **dezelfde** A4-eis (P6).
 
+**C4 (fase 3, structureel):** na `vsa`/`mvsa`/`mscz pdf` controleert
+`require_canonical_pdf_target` dat het doelbestand bestaat, niet leeg is
+en met `%PDF` begint (codes `PDF-MISS` / `PDF-EMPTY` / `PDF-HEADER`).
+Geen automatische P1–P6-paginacheck. Uitzondering:
+`--allow-noncanonical`. Markdown-PDF valt hier nog buiten.
+
 ## Verschillen bewust hangende houden
 
 | Onderwerp          | `.mxl` (Coria)                                                        | `.mscz` / MuseScore-PDF (partituur)                                                                                |

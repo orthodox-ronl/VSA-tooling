@@ -113,6 +113,54 @@ def test_playback_profile_for_bron() -> None:
     assert playback_profile_for_bron(Path("lied.mscz")) == "satb"
 
 
+def test_c4_audio_ok_and_bad(tmp_path: Path) -> None:
+    from vsa.canonicity_gate import (
+        check_canonical_audio_target,
+        require_canonical_audio_target,
+    )
+
+    mp3 = tmp_path / "ok.mp3"
+    mp3.write_bytes(b"ID3\x03\x00\x00\x00\x00\x00\x00")
+    assert check_canonical_audio_target(mp3) == []
+    require_canonical_audio_target(mp3)
+
+    ogg = tmp_path / "ok.ogg"
+    ogg.write_bytes(b"OggS\x00\x02")
+    assert check_canonical_audio_target(ogg) == []
+
+    wav = tmp_path / "ok.wav"
+    wav.write_bytes(b"RIFF....WAVE")
+    assert check_canonical_audio_target(wav) == []
+
+    bad = tmp_path / "bad.mp3"
+    bad.write_bytes(b"not audio")
+    issues = check_canonical_audio_target(bad)
+    assert issues and issues[0].code == "AUDIO-HEADER"
+    with pytest.raises(NonCanonicalTargetError):
+        require_canonical_audio_target(bad)
+    require_canonical_audio_target(bad, allow_noncanonical=True)
+
+
+def test_c4_pdf_ok_and_bad(tmp_path: Path) -> None:
+    from vsa.canonicity_gate import (
+        check_canonical_pdf_target,
+        require_canonical_pdf_target,
+    )
+
+    ok = tmp_path / "ok.pdf"
+    ok.write_bytes(b"%PDF-1.4\n% tail")
+    assert check_canonical_pdf_target(ok) == []
+    require_canonical_pdf_target(ok)
+
+    bad = tmp_path / "bad.pdf"
+    bad.write_bytes(b"not a pdf")
+    issues = check_canonical_pdf_target(bad)
+    assert issues and issues[0].code == "PDF-HEADER"
+    with pytest.raises(NonCanonicalTargetError):
+        require_canonical_pdf_target(bad)
+    require_canonical_pdf_target(bad, allow_noncanonical=True)
+
+
 def test_c4_score_ir_ok_and_bad(tmp_path: Path) -> None:
     import json
 

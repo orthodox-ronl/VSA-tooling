@@ -27,29 +27,24 @@ Triggers (niet uitputtend) — bij twijfel: **stop**:
 - Grote merge/conflict-resolutie + regeneratie + docs in dezelfde run
 - Verwachte herhaalde retries, herstel na eigen fout, of «opnieuw hetzelfde onderzoek»
 - Veel context nodig (grote diffs, lange logs, herlezen van grote files)
-- **Werk hoort in een andere repo** (zie hieronder)
+- **Werk hoort in een andere repo** → niet hier uitvoeren; zie hieronder
+  (geen «Welke stap nu?» — wissel zelf)
 
 «De gebruiker zei doe alles» is **geen** vrijbrief. Eerst goedkoper voorstel, dan pas uitvoeren na OK.
 
-## Verkeerde repo-chat — altijd waarschuwen
+## Verkeerde repo — zelf wisselen (niet vragen)
 
-Zodra duidelijk is dat het **hoofdwerk** in een *andere* orthodox-ronl-repo hoort
-dan de workspace van deze chat (bijv. fix in **bibliotheek** terwijl je in
-**VSA-tooling** zit, of omgekeerd): **stop met dure uitvoering** en waarschuw
-**vóór** je verder spitte of implementeert.
+Zodra duidelijk is dat het **hoofdwerk** in een *andere* orthodox-ronl-repo
+hoort dan de huidige workspace-root: **niet** doorwerken in de verkeerde
+index, **niet** vragen of de gebruiker wil wisselen.
 
-In **één korte reactie**:
+1. Één zin: welke repo + waarom goedkoper.
+2. Direct `move_agent_to_root` naar die map (bijv.
+   `C:\Git\orthodox-ronl\bibliotheek`).
+3. Taak daar hervatten.
 
-1. Welke repo het hoofdwerk is (en waarom deze chat duurder is: verkeerde
-   index/ Grep, omwegen via sibling-paden, extra context).
-2. Voorstel: *nieuwe chat* met die repo als root, of Agent
-   «move to root» naar die map — plus de kleinste opdrachtzin.
-3. Wat je *hier* wél kort mag doen (bijv. 1 zin diagnose, 1 padnoot).
-4. «Wil je hier doorgaan (duurder) of eerst wisselen?» — **wacht op OK**.
-
-Niet stil doorwerken «omdat de sibling-map bereikbaar is». Diagnosedraad in
-de ene repo + implementatie in de andere mag; zeg dat expliciet als
-goedkoper pad.
+Alleen bij mislukte wissel of onduidelijke doelrepo: kort vragen.
+Niet stil via sibling-paden doorwerken «omdat die bereikbaar zijn».
 
 ## Goedkoper pad (standaard voorstel)
 

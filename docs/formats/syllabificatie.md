@@ -74,24 +74,32 @@ Elk lemma (letters zonder soft `-` en zonder hard `=`) heeft **hoogstens één**
 canonieke hyphenvorm. Die lijst is de norm voor gezongen body-tekst (niet
 frontmatter, comments, ids of `lyrics.txt`).
 
-| Afspraak    | Inhoud                                                                              |
-| ----------- | ----------------------------------------------------------------------------------- |
-| Canon (org) | `bibliotheek/data/syllable_dictionary.nl.txt` (content-repo; commit/push daar)      |
-| Config      | `vsa.toml` → `[syllabificatie] dictionary = "…"` (relatief t.o.v. die toml)         |
-| CLI         | `--syllable-dictionary PAD` op `vsa`/`mvsa` `validate` / `syllabify`                |
-| Env         | `VSA_SYLLABLE_DICTIONARY`                                                           |
-| Auto        | `data/syllable_dictionary.nl.txt` in de werkmap, of sibling `bibliotheek/data/…`    |
-| Loader      | `vsa.syllable_dictionary`                                                           |
-| Vorm        | Eén hyphenvorm per regel (kleine letters); soft `-` en hard `=`; `#` = commentaar   |
-| Volgorde    | Entries alfabetisch op **lemma**; TTY/append herschrijft de lijst gesorteerd        |
-| Matching    | Lemma = letters zonder `-`/`=`, case-fold → unieke vorm                             |
-| Onderhoud   | Wijziging in de content-repo, of interactief op TTY (schrijft naar het actieve pad) |
+| Afspraak       | Inhoud                                                                                                                                 |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Talen          | `nl` (Latijn) en `ksl` (Cyrillisch); CLI `--lyrics-lang {auto,nl,ksl}` — default **`auto`**: Cyrillisch in lyrics → `ksl`, anders `nl` |
+| Canon (org)    | `bibliotheek/data/syllable_dictionary.nl.txt` en `.ksl.txt` (content-repo; commit/push daar)                                           |
+| Config         | `vsa.toml` → `[syllabificatie] dictionary = "…"` (historisch NL; bij `--lyrics-lang ksl` alleen als pad al op `.ksl.txt` eindigt)      |
+| CLI            | `--syllable-dictionary PAD` en `--lyrics-lang` op `vsa`/`mvsa` `validate` / `syllabify`                                                |
+| Env            | `VSA_SYLLABLE_DICTIONARY` (nl); `VSA_SYLLABLE_DICTIONARY_KSL` (ksl)                                                                    |
+| Auto           | `data/syllable_dictionary.<lang>.txt` in de werkmap, of sibling `bibliotheek/data/…`                                                   |
+| Loader         | `vsa.syllable_dictionary`                                                                                                              |
+| Vorm           | Eén hyphenvorm per regel (kleine letters); soft `-` en hard `=`; `#` = commentaar                                                      |
+| Volgorde       | Entries alfabetisch op **lemma**; TTY/append herschrijft de lijst gesorteerd                                                           |
+| Matching       | Lemma = letters zonder `-`/`=`, case-fold → unieke vorm                                                                                |
+| Schriftfilter  | `nl`: alleen kernen **zonder** Cyrillisch; `ksl`: alleen kernen **met** Cyrillisch (geen NL-Pyphen-voorstel)                           |
+| Onderhoud      | Wijziging in de content-repo, of interactief op TTY (schrijft naar het actieve pad)                                                    |
 
-Voorrang: CLI → `vsa.toml` → env → auto-detect. Andere repo’s zetten hun
-eigen lijst in hun `vsa.toml`. Zonder pad is de mapping leeg (geen stille
-package-lijst in VSA-tooling).
+Default `--lyrics-lang auto`: per bron kijkt validate/syllabify of de
+lyrics Cyrillisch bevatten → dan `syllable_dictionary.ksl.txt`, anders de
+nl-lijst. Forceer met `--lyrics-lang nl` of `ksl`.
 
-Startset: catalogus-review plus handmatige correcties (o.a. `a-pos-tel`,
+Padvoorrang per gekozen taal: CLI-pad → (nl) `vsa.toml` → env →
+bestands-auto-detect. Andere repo’s zetten hun eigen lijst in hun
+`vsa.toml`. Zonder pad is de mapping leeg (geen stille package-lijst in
+VSA-tooling). De ksl-lijst mag **leeg** starten; vullen via
+TTY/catalogus-review volgt later.
+
+Startset (nl): catalogus-review plus handmatige correcties (o.a. `a-pos-tel`,
 `eeu-wi-ge`, `me-de=eeu-wi-ge`, `o-ver-…`).
 
 ### Dictionary-controle (`validate` / `syllabify`)
@@ -153,6 +161,9 @@ Implementatie: `vsa.syllable_dict_check` + `vsa.syllable_dictionary`.
 | 2    | Validate/syllabify: `MISMATCH` / `UNKNOWN` (+ TTY toevoegen)        | gedaan                                     |
 | 3    | TTY: bron meteen corrigeren of vorm accepteren in de lijst          | gedaan                                     |
 | 4    | Lijst in bibliotheek (of andere content-repo) + pad via config/CLI  | gedaan                                     |
+| 4b   | Lege `syllable_dictionary.ksl.txt` + `--lyrics-lang {nl,ksl}`       | gedaan                                     |
+| 4c   | Default `--lyrics-lang auto` (schrift-detectie per bron)            | gedaan                                     |
+| 4d   | Catalogus-vulling ksl                                               | open                                       |
 | 5.1  | Pitch-fix steekproef-leaf (transfiguratie-toon-7-hemelum)           | gedaan (`vsa mvsa` OK; zie cadens `{/e_}`) |
 | 5.1b | `mvsa validate` / `mvsa syllabify` (L-recite + sync-veilige cadens) | gedaan                                     |
 | 5.2  | Dry-run syllabify+validate die leaf (zonder TTY-auto)               | open (CLI klaar; leaf-dry-run apart)       |
