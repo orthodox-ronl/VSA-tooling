@@ -35,6 +35,12 @@ woordgrens. Zet **geen** soft `-` tussen een letter en een accolade, en
 `ver{/&\heer}{\lijkt}`. Hetzelfde voor `Chris{/tus}` (niet `Chris-{/tus}`)
 en `{/stra_}{len_}` (niet `{/stra_}-{len_}`).
 
+**Elke scope = één lettergreep:** `vsa syllabify` herverdeelt letters
+zodat de tekst ín `{…}` precies één zing-lettergreep is. Restletters
+komen in platte tekst ernaast (geen soft `-` bij de accolade). Voorbeeld:
+`{/sche_}pping` → `{/schep_}ping`; `{/Adam}` → `{/A}dam`. Niet:
+`{/sche_}p-ping` of `{/schep_}-ping`.
+
 Handmatige soft `-` **binnen** platte tekst winnen: geen her-hyphenatie
 van dat token.
 
@@ -44,8 +50,10 @@ van dat token.
    soft `-` op de zing-grenzen (`eeu-wig`, niet `eeuwig`).
 2. Hetzelfde geldt voor L-tekst in `.mvsa` (recite tussen haakjes, cadens
    met hyphen-keten): de zichtbare deling is de canonieke.
-3. Scopes blijven de structurele zangposities; je syllabificeert niet de
-   inhoud van `{…}` opnieuw. Soft `-` naast `{`/`}` hoort niet in de bron.
+3. Scopes blijven de structurele zangposities: één lettergreep per scope.
+   Soft `-` naast `{`/`}` hoort niet in de bron. Tooling mag letters tussen
+   scope en platte tekst herverdelen (`{/A}dam`), maar zet geen soft `-`
+   tegen een accolade.
 
 ### Voorbeeld `.mvsa` (recite + cadens)
 
@@ -70,9 +78,11 @@ altijd: orthografie ≠ liturgische zing-deling.
 
 ## Canonieke woordenlijst (zing-deling)
 
-Elk lemma (letters zonder soft `-` en zonder hard `=`) heeft **hoogstens één**
-canonieke hyphenvorm. Die lijst is de norm voor gezongen body-tekst (niet
-frontmatter, comments, ids of `lyrics.txt`).
+Elk lemma (letters zonder soft `-` en zonder hard `=`) heeft **standaard
+één** canonieke hyphenvorm. Zeldzame uitzonderingen (bijv. alleluia met
+vier of vijf lettergrepen) mogen **expliciete** extra vormen hebben via
+een regel die met `+` begint. Die lijst is de norm voor gezongen body-tekst
+(niet frontmatter, comments, ids of `lyrics.txt`).
 
 | Afspraak       | Inhoud                                                                                                                                 |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -83,9 +93,10 @@ frontmatter, comments, ids of `lyrics.txt`).
 | Env            | `VSA_SYLLABLE_DICTIONARY` (nl); `VSA_SYLLABLE_DICTIONARY_KSL` (ksl)                                                                    |
 | Auto           | `data/syllable_dictionary.<lang>.txt` in de werkmap, of sibling `bibliotheek/data/…`                                                   |
 | Loader         | `vsa.syllable_dictionary`                                                                                                              |
-| Vorm           | Eén hyphenvorm per regel (kleine letters); soft `-` en hard `=`; `#` = commentaar                                                      |
-| Volgorde       | Entries alfabetisch op **lemma**; TTY/append herschrijft de lijst gesorteerd                                                           |
-| Matching       | Lemma = letters zonder `-`/`=`, case-fold → unieke vorm                                                                                |
+| Vorm           | Eén hyphenvorm per regel (kleine letters); soft `-` / hard `=`; `#` = commentaar; `+vorm` = toegestaan alternatief voor het open lemma |
+| Primair / alt  | Regel zonder `+` = primaire vorm (syllabify-default); `+vorm` = zelfde lemma, ook OK bij validate                                      |
+| Volgorde       | Entries alfabetisch op **lemma** (daarna `+`-alts); TTY/append herschrijft gesorteerd                                                  |
+| Matching       | Lemma = letters zonder `-`/`=`, case-fold; validate OK als bronvorm ∈ {primair} ∪ {alts}                                               |
 | Schriftfilter  | `nl`: alleen kernen **zonder** Cyrillisch; `ksl`: alleen kernen **met** Cyrillisch (geen NL-Pyphen-voorstel)                           |
 | Onderhoud      | Wijziging in de content-repo, of interactief op TTY (schrijft naar het actieve pad)                                                    |
 
@@ -115,9 +126,16 @@ als zing-deling: de checker zet daar een virtueel soft `-` voor de
 vergelijking met de lijst. Zo hoort `ver{/heer}{\lijkt}` bij `ver-heer-lijkt`
 zonder dat er een soft `-` naast `{`/`}` in de bron staat.
 
+In `.mvsa` tellen **recite-haakjes** `(…)` (en ELMs) niet mee als
+woordbreuk voor de woordenlijst: `Al-le-(lu-ja` hoort bij `Al-le-lu-ja`
+(canoniek schrijven blijft `Al-le (-lu-ja…)` met soft `-` *in* de haakjes;
+zie [MVSA-syntax](../specification-mvsa/syntax.md)).
+
 Positie-meldingen en dictionary-vervangingen zoeken **alleen** in de
 gezongen body (na strip van YAML-frontmatter inclusief `zoektekst`, en na
-HTML/`#`-commentaar) — nooit in metadata.
+HTML/`#`-commentaar) — nooit in metadata of commentaarregels. Esc of
+**Ctrl+C** in de interactieve check stopt de hele validate-/syllabify-run
+zonder een stapel verdere dictionary-meldingen.
 
 `vsa validate` / `mvsa validate` vullen ontbrekende soft `-` automatisch bij
 (zelfde logica als `vsa syllabify` / `mvsa syllabify`), schrijven het bestand
@@ -129,16 +147,19 @@ terug, en melden `VSA-SYLLABIFY-APPLIED` / `MVSA-SYLLABIFY-APPLIED`.
 | `VSA-SYLLABLE-DICT-MISMATCH` | Lemma staat in de lijst, bronvorm wijkt af (bijv. `eeuwig` i.p.v. `eeu-wig`) | **error** (`.vsa`); op `.mvsa` voorlopig **warning** |
 | `VSA-SYLLABLE-DICT-UNKNOWN`  | Lemma ontbreekt, én het woord heeft soft `-`/`=` óf Pyphen ziet breuken      | **error** (`.vsa`); op `.mvsa` voorlopig **warning** |
 
-Op een **TTY** kun je findings meteen afhandelen. Bij batch (map of
-meerdere bestanden) verschijnt **één keer per stuk** een regel
-`--- <catalogus-id of bestandsstam> ---` vóór de vragen, zodat je ziet
-welk zangstuk je corrigeert.
+Op een **TTY** kun je findings meteen afhandelen. Bij batch verschijnt
+`--- <catalogus-id> ---` per stuk. Elke vraag toont eerst een klikbare
+locatie relatief t.o.v. de werkmap (`pad\bestand.vsa:regel:kolom:`), dan
+de melding, dan de toetsen.
 
-| Situatie                                                   | Enter (voorstel)                                                            | Andere keuzes                                                                                    |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `MISMATCH` (bijv. `eeuwig` ↔ `eeu-wig`)                    | Vervang in de **body** (niet in `zoektekst`) naar de canonieke vorm         | `a` = huidige vorm als canon in de lijst; `s` = overslaan; of typ een andere vorm (lijst + body) |
-| `UNKNOWN` met al streepjes (bijv. `eeu-wig-heids-waar-de`) | Voeg **die** vorm toe aan de lijst                                          | `s` = overslaan; of typ een andere vorm                                                          |
-| `UNKNOWN` zonder streepjes                                 | Voeg Pyphen-/dictionary-voorstel toe                                        | `v` = vervang in bron én voeg toe; `s` = overslaan                                               |
+| Situatie                                | Enter / Spatie                                              | Andere toetsen                                                                   |
+| --------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `MISMATCH`                              | Corrigeer de bron naar de canonieke vorm                    | `+`/`=` = huidige vorm in lijst; Tab = overslaan; Esc = stop; of typ andere vorm |
+| `UNKNOWN` (met of zonder streepjes)     | Voeg voorstel / huidige vorm toe aan de lijst               | `+`/`=` = huidige vorm in lijst; Tab = overslaan; Esc = stop; of typ andere vorm |
+
+Afbreken met **Esc** (of Ctrl+C): exitcode **2**; batch-validate/syllabify/kuiser
+gaan geen volgende bestanden meer langs. `+`/`=` schrijft de huidige vorm
+naar de woordenlijst (nieuw lemma, of `+`-alternatief als het lemma al bestaat).
 
 In CI (geen TTY) blijven `MISMATCH` / `UNKNOWN` fouten tot bron of lijst
 handmatig klopt. Hints noemen dezelfde keuzes.

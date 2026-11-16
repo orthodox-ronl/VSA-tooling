@@ -192,7 +192,9 @@ class SVGRenderer:
         if text == "":
             return x
 
-        shown = display_lyric_text(text)
+        # Standaard .vsa.svg: soft - strippen (contract vsa-svg / syllabificatie).
+        # Translit-product: zichtbare zing-deling behouden (translit-svg).
+        shown = display_lyric_text(text, strip_soft=not self.translit)
         second = self._translit_line(shown)
         parts.append(f'<g class="vsa-unit vsa-unit-text" data-vsa-unit="{item_index}">')
         parts.append(
@@ -247,7 +249,7 @@ class SVGRenderer:
             leading_safety=leading_safety,
             trailing_safety=trailing_safety,
         )
-        shown = display_lyric_text(layout.text)
+        shown = display_lyric_text(layout.text, strip_soft=not self.translit)
         second = self._translit_line(shown)
         translit_dy = self._translit_row_dy if second is not None else 0.0
         upper_y = baseline_y + self.svg_config.upper.offset_y

@@ -14,7 +14,7 @@ vsa zoektekst [-h] [--check] [-o OUTPUT] path [path …]
 
 | Modus           | Betekenis                                                                                      |
 | --------------- | ---------------------------------------------------------------------------------------------- |
-| (default)       | Schrijft/update `zoektekst: \|-` in-place, **frase per regel**, uit body-extractie.           |
+| (default)       | Schrijft/update `zoektekst: \|-` in-place, **frase per regel**, uit body-extractie.            |
 | `--check`       | Geen schrijven; exit **1** als het veld ontbreekt (bij niet-lege tekst) of afwijkt.            |
 | `-o OUTPUT`     | Schrijf naar dit pad i.p.v. in-place (alleen bij precies één bronbestand).                     |
 
@@ -24,11 +24,11 @@ kan PyYAML de opmaak van die sleutels wel normaliseren.
 
 ## Argumenten
 
-| Naam       | Betekenis                                      |
-| ---------- | ---------------------------------------------- |
-| `path`     | `.vsa` / `.mvsa`-bestand of map (recursief).   |
-| `--check`  | Alleen controleren.                            |
-| `-o`       | Optioneel uitvoerpad (één bronbestand).        |
+| Naam       | Betekenis                                                                   |
+| ---------- | --------------------------------------------------------------------------- |
+| `path`     | `.vsa` / `.mvsa`-bestand, map, of catalogus-id ([input-pad](input-pad.md)). |
+| `--check`  | Alleen controleren.                                                         |
+| `-o`       | Optioneel uitvoerpad (één bronbestand).                                     |
 
 ## Voorbeelden
 

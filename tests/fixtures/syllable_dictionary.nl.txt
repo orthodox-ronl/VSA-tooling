@@ -5,6 +5,7 @@
 # Startset: catalogus-review + handmatige correcties (2026-11).
 # Eenlettergrepige uitzonderingen zonder streepjes: monosyllable_exceptions.nl.txt
 #
+a-dam
 a-pos-te-len
 a-pos-tel
 a-pos-to-li-sche
@@ -33,7 +34,8 @@ af-ge-schud
 af-glans
 al-hei-li-ge
 al-le
-al-le-luia
+al-le-lu-ia
++al-le-lu-i-a
 al-leen
 al-len
 al-ler-hoog-ste

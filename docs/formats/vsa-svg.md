@@ -24,8 +24,10 @@ Geen frontmatter in de SVG. Titel/colofon horen in `index.md.pdf`, niet hier.
 
 ## Syllabificatie
 
-**Strip** soft `-` in zichtbare underlay (schermtekst doorlopend), tenzij
-translit-product — zie [syllabificatie](syllabificatie.md) ·
+**Strip** soft `-` in zichtbare underlay: de schermtekst loopt door zonder
+lettergreepstreepjes (`hei-lig` → `heilig`). Hard `=` wordt wel een zichtbaar
+streepje (`mede=eeuwige` → `mede-eeuwige`). Uitzondering: translit-product
+houdt de zing-deling zichtbaar — zie [syllabificatie](syllabificatie.md) ·
 [translit-svg](translit-svg.md).
 
 ## Melisma en binding

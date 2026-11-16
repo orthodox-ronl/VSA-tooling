@@ -427,6 +427,7 @@ def _add_syllable_dictionary_diagnostics(
             session = prompt_dictionary_fixes(
                 actionable,
                 source_id=source_id_for_prompt(path) if path else None,
+                source_path=path,
             )
             if (
                 path is not None
@@ -448,6 +449,17 @@ def _add_syllable_dictionary_diagnostics(
                 findings = find_mvsa_dictionary_syllable_issues(working)
             else:
                 findings = find_mvsa_dictionary_syllable_issues(text)
+            if session.aborted:
+                diagnostics.append(
+                    MvsaDiagnostic(
+                        "VSA-SYLLABLE-DICT-ABORTED",
+                        "Interactieve syllable-dictionary-check afgebroken "
+                        "(Esc/Ctrl+C).",
+                        1,
+                        severity="error",
+                    )
+                )
+                return
     for finding in findings:
         # Voorlopig warning: catalogus/examples zijn nog niet overal
         # dictionary-gesynchroniseerd. Lyrics-only blijft wél hard.

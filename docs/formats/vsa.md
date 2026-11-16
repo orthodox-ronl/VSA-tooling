@@ -27,15 +27,17 @@ bibliotheek-frontmatter waar die consumer geldt. C1–C4:
 | Frontmatter    | Consumer: [bibliotheek `vsa-frontmatter`](https://github.com/orthodox-ronl/bibliotheek/blob/main/docs/specs/vsa-frontmatter.md) (`soort`/`toon` e.d.) |
 | Encoding       | UTF-8                                                                                                                                                 |
 | Zoektekst YAML | Optioneel in bron — [zoektekst](zoektekst.md)                                                                                                         |
-| Kuiser         | `vsa kuiser` — checklist **V\*** volgt; tot die tijd weigert de CLI ([kuiser.md](kuiser.md))                                                          |
+| Kuiser         | [`vsa kuiser`](../reference/cli/kuiser.md) — **V1–V8** ([kuiser.md](kuiser.md#vsa-v))                                                                 |
+| Body-layout    | [`vsa format`](vsa-format.md) / [`format` man](../reference/cli/format.md) — strofen; geen onderdeel van kuiser                                       |
 | Meerstemmig    | **Niet** in `.vsa` — zie [`.mvsa`](mvsa.md)                                                                                                           |
 
 ## Syllabificatie
 
 Soft `-` **vereist** in platte recite-woorden met meerdere lettergrepen;
-hard `=` = orthografisch koppelteken. Scope `{…}` = al grens (geen soft `-`
-naast `{`/`}`). Hub: [syllabificatie](syllabificatie.md). Schrijfhulp:
-[`vsa syllabify`](../reference/cli/syllabify.md). Validate:
+hard `=` = orthografisch koppelteken. Scope `{…}` = al grens én precies
+één lettergreep (geen soft `-` naast `{`/`}`; tooling mag letters
+herverdelen, bv. `{/A}dam`). Hub: [syllabificatie](syllabificatie.md).
+Schrijfhulp: [`vsa syllabify`](../reference/cli/syllabify.md). Validate:
 `VSA-SYLLABLE-DICT-*`, `VSA-SYLLABIFY-MISSING-HYPHENS`.
 
 ## Melisma en binding
@@ -74,7 +76,8 @@ n.v.t. voor het brontype zelf. Afgeleiden: `{naam}.vsa.products-meta.json`
 | `.mscz` / SVG / audio / lyrics / score-ir | via products of losse straat-subs                                 | C3/C4                                             |
 | → `.mvsa`                                 | [`vsa mvsa`](../specification-vsa-templates/vsa-mvsa-contract.md) | T1–T7                                             |
 
-Geen `vsa normalize`.
+Geen `vsa normalize`. Body-layout: [`vsa format`](../reference/cli/format.md).
+Authoring-opkuis: [`vsa kuiser`](../reference/cli/kuiser.md) (V1–V8).
 
 ## Validatie
 

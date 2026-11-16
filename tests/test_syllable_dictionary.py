@@ -1,11 +1,19 @@
 """Canonieke syllable-dictionary (startset)."""
 
+from pathlib import Path
+
 from vsa.syllable_dictionary import (
+    allowed_syllable_forms,
     canonical_syllable_form,
     clear_syllable_dictionary_cache,
+    is_allowed_syllable_form,
     load_syllable_dictionary,
+    parse_syllable_dictionary_text,
+    set_syllable_dictionary_path,
     syllable_lemma,
 )
+from vsa.syllabify import hyphenate_dutch_word
+from vsa.syllable_dict_check import CODE_MISMATCH, find_dictionary_syllable_issues_from_cores
 
 
 def setup_function() -> None:
@@ -36,3 +44,47 @@ def test_dictionary_lemmas_unique() -> None:
     d = load_syllable_dictionary()
     assert len(d) >= 700
     assert len(d) == len(set(d.values()))
+
+
+def test_plus_alt_forms_parse_and_validate(tmp_path: Path) -> None:
+    from vsa.syllable_dictionary import apply_syllable_dictionary_from_config
+
+    data = tmp_path / "dict.txt"
+    data.write_text(
+        "# test\nal-le-lu-ia\n+al-le-lu-i-a\na-men\n",
+        encoding="utf-8",
+    )
+    apply_syllable_dictionary_from_config(cli_path=data, lang="nl")
+    clear_syllable_dictionary_cache()
+    try:
+        assert canonical_syllable_form("alleluia") == "al-le-lu-ia"
+        assert allowed_syllable_forms("alleluia") == frozenset(
+            {"al-le-lu-ia", "al-le-lu-i-a"}
+        )
+        assert is_allowed_syllable_form("al-le-lu-i-a")
+        assert is_allowed_syllable_form("al-le-lu-ia")
+        assert not is_allowed_syllable_form("al-le-lui-a")
+
+        findings = find_dictionary_syllable_issues_from_cores(
+            ["al-le-lu-ia", "al-le-lu-i-a", "al-le-lui-a"],
+            lyrics_lang="nl",
+        )
+        assert not any(f.surface == "al-le-lu-ia" for f in findings)
+        assert not any(f.surface == "al-le-lu-i-a" for f in findings)
+        assert any(
+            f.code == CODE_MISMATCH and f.surface == "al-le-lui-a" for f in findings
+        )
+
+        assert hyphenate_dutch_word("al-le-lu-i-a") == "al-le-lu-i-a"
+        assert hyphenate_dutch_word("Alleluia") == "Al-le-lu-ia"
+    finally:
+        set_syllable_dictionary_path(None)
+        clear_syllable_dictionary_cache()
+
+
+def test_plus_alt_rejects_wrong_lemma() -> None:
+    try:
+        parse_syllable_dictionary_text("a-men\n+al-le-lu-ia\n")
+        assert False, "expected ValueError"
+    except ValueError as exc:
+        assert "open groep" in str(exc) or "hoort bij" in str(exc)

@@ -30,7 +30,6 @@ from .derived_path import derived_output_path, derived_svg_output_path
 from .input_paths import InputPathError, collect_cli_sources
 from .resolve_catalogus import ResolveCatalogusError, write_resolved_markdown
 from .syllabify import (
-    iter_vsa_files,
     normalize_output_extension,
     output_path_for,
     transform_vsa_source,
@@ -1087,7 +1086,86 @@ def _build_parser():
 
     from .kuiser_cli import add_kuiser_parser, dispatch_kuiser
 
-    add_kuiser_parser(subparsers, street="vsa", implemented=False)
+    add_kuiser_parser(subparsers, street="vsa", implemented=True)
+
+    format_cmd = subparsers.add_parser(
+        "format",
+        help=(
+            "Strofe-layout in .vsa-body (* / / / newline; regels of flow; "
+            "--dry-run toont resultaat)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=(
+            "Herschrijf strofegrenzen en regelindeling in de VSA-body. "
+            "YAML-frontmatter blijft onaangeroerd. Geen syllabify/zoektekst. "
+            "--dry-run toont het resultaat zonder te schrijven; "
+            "--check controleert alleen of er iets zou wijzigen. "
+            "Contract: docs/formats/vsa-format.md."
+        ),
+        epilog=(
+            "voorbeelden:\n"
+            "  vsa format lied.vsa\n"
+            "  vsa format communievers/kruisverheffing/hemelum --wrap 20\n"
+            "  vsa format lied.vsa --boundary slash --layout flow\n"
+            "  vsa format lied.vsa --wrap 40\n"
+            "  vsa format lied.vsa --dry-run\n"
+            "  vsa format examples\\minimal --check\n"
+            "  vsa format lied.vsa -o generated\\lied.fmt.vsa"
+        ),
+    )
+    format_cmd.add_argument(
+        "paths",
+        nargs="+",
+        help=(
+            ".vsa-bestand, map (recursief), of catalogus-id "
+            "(zie docs/reference/cli/input-pad.md)."
+        ),
+    )
+    format_cmd.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="Uitvoerpad (alleen bij precies één bronbestand; default: in-place).",
+    )
+    format_cmd.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Geen schrijven; alleen rapporteren of er iets zou wijzigen "
+            "(exit 1 bij wijziging). Niet combineren met --dry-run."
+        ),
+    )
+    format_cmd.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Toon het geformatteerde resultaat op het scherm; schrijf niets. "
+            "Niet combineren met --check of -o."
+        ),
+    )
+    format_cmd.add_argument(
+        "--boundary",
+        choices=["star", "slash", "newline"],
+        default="star",
+        help="Strofegrens in de bron (default: star = *).",
+    )
+    format_cmd.add_argument(
+        "--layout",
+        choices=["lines", "flow"],
+        default="lines",
+        help="lines = één strofe per regel; flow = doorlopend (niet met newline).",
+    )
+    format_cmd.add_argument(
+        "--wrap",
+        type=int,
+        default=0,
+        metavar="N",
+        help=(
+            "Soft-wrap per strofe op zichtbare-tekst-budget N "
+            "(voortzetting: 4 spaties die meetellen; inhoud N-4). "
+            "0 = uit; anders N ≥ 4. Zie docs/formats/vsa-format.md."
+        ),
+    )
 
     syllabify = subparsers.add_parser(
         "syllabify",
@@ -1207,7 +1285,10 @@ def _build_parser():
     zoektekst_cmd.add_argument(
         "paths",
         nargs="+",
-        help=".vsa / .mvsa-bestand of map (recursief).",
+        help=(
+            ".vsa / .mvsa-bestand, map (recursief), of catalogus-id "
+            "(docs/reference/cli/input-pad.md)."
+        ),
     )
     zoektekst_cmd.add_argument(
         "--check",
@@ -1420,7 +1501,10 @@ def _run(args):
     if args.command == "kuiser":
         from .kuiser_cli import dispatch_kuiser
 
-        return dispatch_kuiser(args)
+        return dispatch_kuiser(args, implemented_handler=_cmd_vsa_kuiser)
+
+    if args.command == "format":
+        return _cmd_vsa_format(args)
 
     if args.command == "syllabify":
         return _cmd_syllabify(args)
@@ -1515,7 +1599,22 @@ def _cmd_validate(args, config):
         allowed=(".vsa", ".md", ".markdown"),
     ):
         return 1
-    result = validate_path(args.path, config=config)
+    try:
+        result = validate_path(args.path, config=config)
+    except KeyboardInterrupt:
+        print(
+            "Afgebroken (Ctrl+C).",
+            file=sys.stderr,
+        )
+        return 2
+
+    if result.interactive_aborted:
+        # Geen bak overige findings: gebruiker stopte bewust.
+        print(
+            "Interactieve syllable-dictionary-check afgebroken (Esc/Ctrl+C).",
+            file=sys.stderr,
+        )
+        return 2
 
     if result.messages:
         _print_validation_messages(result.messages, summary=args.summary)
@@ -1529,7 +1628,12 @@ def _cmd_validate(args, config):
 
 
 def _cmd_parse(args):
-    path = Path(args.path)
+    path = _cli_resolve_existing(
+        args.path,
+        hint="Geef één bestaand .vsa-bestand (of korte lookup / catalogus-pad).",
+    )
+    if path is None:
+        return 1
     text = path.read_text(encoding="utf-8")
     if path.suffix.lower() == ".vsa":
         try:
@@ -1552,7 +1656,13 @@ def _cmd_parse(args):
 
 
 def _cmd_blocks(args):
-    text = Path(args.path).read_text(encoding="utf-8")
+    path = _cli_resolve_existing(
+        args.path,
+        hint="Geef één bestaand Markdown-bestand (.md).",
+    )
+    if path is None:
+        return 1
+    text = path.read_text(encoding="utf-8")
     blocks = parse_markdown_blocks(text)
 
     if args.json:
@@ -1868,6 +1978,161 @@ def _cmd_text(args) -> int:
     return exit_code
 
 
+def _cmd_vsa_kuiser(args) -> int:
+    from .vsa_kuiser import VsaKuiserError, kuiser_vsa_path
+
+    files = _collect_paths_unique(
+        [str(p) for p in args.path], suffixes=(".vsa",)
+    )
+    if files is None:
+        return 1
+    if not files:
+        emit_cli_error(
+            "Geen .vsa gevonden.",
+            hint=(
+                "Geef een .vsa-bestand, map, of catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
+        )
+        return 1
+    if args.output is not None and len(files) != 1:
+        emit_cli_error(
+            "-o is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map of catalogus-id met meerdere hits.",
+        )
+        return 1
+
+    would_change = 0
+    errors = 0
+    for path in files:
+        out = Path(args.output) if args.output is not None else None
+        try:
+            changed, warnings = kuiser_vsa_path(
+                path,
+                out,
+                check=args.check,
+                werkbank=bool(getattr(args, "werkbank", False)),
+                dict_interactive=None,
+            )
+        except VsaKuiserError as exc:
+            emit_cli_exception(exc, path=path)
+            errors += 1
+            continue
+        for w in warnings:
+            print(w.format(path), file=sys.stderr)
+        if any("VSA-SYLLABLE-DICT-ABORTED" in w.message for w in warnings):
+            return 2
+        if changed:
+            would_change += 1
+            if args.check:
+                print(f"would change: {path}")
+            else:
+                target = out if out is not None else path
+                print(f"kuiser: {target}")
+        else:
+            print(f"ok: {path}")
+
+    if errors:
+        return 1
+    if args.check and would_change:
+        return 1
+    return 0
+
+
+def _cmd_vsa_format(args) -> int:
+    from .vsa_format import VsaFormatError, format_vsa_path
+
+    dry_run = bool(args.dry_run)
+    check = bool(args.check)
+    if dry_run and check:
+        emit_cli_error(
+            "Gebruik --dry-run of --check, niet beide.",
+            hint=(
+                "--dry-run toont het resultaat; --check controleert alleen "
+                "of er iets zou wijzigen."
+            ),
+        )
+        return 1
+    if dry_run and args.output is not None:
+        emit_cli_error(
+            "--dry-run schrijft niets; combineer niet met -o.",
+            hint="Laat -o weg, of laat --dry-run weg om naar -o te schrijven.",
+        )
+        return 1
+
+    files = _collect_paths_unique(
+        [str(p) for p in args.paths], suffixes=(".vsa",)
+    )
+    if files is None:
+        return 1
+    if not files:
+        emit_cli_error(
+            "Geen .vsa gevonden.",
+            hint=(
+                "Geef een .vsa-bestand, map, of catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
+        )
+        return 1
+    if args.output is not None and len(files) != 1:
+        emit_cli_error(
+            "-o is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map of catalogus-id met meerdere hits.",
+        )
+        return 1
+
+    would_change = 0
+    errors = 0
+    multi = len(files) > 1
+    # --check en --dry-run schrijven nooit.
+    no_write = check or dry_run
+    for path in files:
+        out = Path(args.output) if args.output is not None else None
+        try:
+            changed, result = format_vsa_path(
+                path,
+                out,
+                boundary=args.boundary,
+                layout=args.layout,
+                wrap=args.wrap,
+                check=no_write,
+            )
+        except VsaFormatError as exc:
+            emit_cli_exception(exc, path=path)
+            errors += 1
+            continue
+        if dry_run:
+            if multi:
+                print(f"=== {path} ===")
+            sys.stdout.write(result.text)
+            if not result.text.endswith("\n"):
+                sys.stdout.write("\n")
+            status = "gewijzigd" if changed else "ongewijzigd"
+            if multi:
+                print(f"(dry-run — {status}; bestand niet geschreven)")
+            else:
+                print(
+                    f"(dry-run — {status}; bestand niet geschreven)",
+                    file=sys.stderr,
+                )
+            continue
+        if changed:
+            would_change += 1
+            if check:
+                print(f"would change: {path}")
+            else:
+                target = out if out is not None else path
+                print(f"format: {target}")
+        else:
+            print(f"ok: {path}")
+
+    if errors:
+        return 1
+    if check and would_change:
+        return 1
+    return 0
+
+
 def _cmd_syllabify(args) -> int:
     source_path = Path(args.path)
     if args.extension and args.in_place:
@@ -1891,35 +2156,8 @@ def _cmd_syllabify(args) -> int:
     # Uniform met kuiser/zoektekst: default schrijven; --dry-run = preview.
     dry_run = bool(args.dry_run)
 
-    try:
-        files = iter_vsa_files(source_path)
-    except FileNotFoundError:
-        emit_cli_error(
-            "Pad niet gevonden.",
-            path=source_path,
-            hint=(
-                "Controleer of het pad bestaat, of geef een catalogus-id "
-                "(docs/reference/cli/input-pad.md)."
-            ),
-        )
-        return 1
-    except ValueError as exc:
-        emit_cli_exception(
-            exc,
-            path=source_path,
-            hint=(
-                "Geef een .vsa-bestand, map, of catalogus-id "
-                "(docs/reference/cli/input-pad.md)."
-            ),
-        )
-        return 1
-
-    if not files:
-        emit_cli_error(
-            "Geen .vsa-bestanden gevonden.",
-            path=source_path,
-            hint="Zet .vsa-bestanden in deze map of geef een ander pad.",
-        )
+    files = _cli_collect_sources(args.path, (".vsa",))
+    if files is None:
         return 1
 
     multi = len(files) > 1 or source_path.is_dir()
@@ -1966,6 +2204,8 @@ def _cmd_syllabify(args) -> int:
                     changed=True,
                     replacements=result.replacements,
                 )
+            if dict_rc == 2:
+                return 2
             if dict_rc != 0:
                 any_error = True
                 continue
@@ -2027,7 +2267,10 @@ def _syllabify_dictionary_gate(
         )
         return 1, source_text
 
-    findings = find_dictionary_syllable_issues(document, source_text=body)
+    # Locate in volledig bestand (incl. frontmatter) voor klikbare regelnummers.
+    findings = find_dictionary_syllable_issues(
+        document, source_text=source_text
+    )
     if is_interactive_stdin():
         actionable = [
             f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
@@ -2036,7 +2279,9 @@ def _syllabify_dictionary_gate(
             from .input_paths import source_id_for_prompt
 
             session = prompt_dictionary_fixes(
-                actionable, source_id=source_id_for_prompt(file_path)
+                actionable,
+                source_id=source_id_for_prompt(file_path),
+                source_path=file_path,
             )
             if session.replacements:
                 source_text = apply_replacements_to_source(
@@ -2049,12 +2294,22 @@ def _syllabify_dictionary_gate(
                 except Exception:
                     pass
                 findings = find_dictionary_syllable_issues(
-                    document, source_text=body
+                    document, source_text=source_text
                 )
             else:
                 findings = find_dictionary_syllable_issues(
-                    document, source_text=body
+                    document, source_text=source_text
                 )
+            if session.aborted:
+                from .syllable_dict_check import DICT_PROMPT_ABORT_RC
+
+                emit_cli_error(
+                    "Interactieve syllable-dictionary-check afgebroken "
+                    "(Esc/Ctrl+C).",
+                    path=file_path,
+                    hint="Herstart syllabify/validate om verder te gaan.",
+                )
+                return DICT_PROMPT_ABORT_RC, source_text
 
     hard = [f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}]
     if not hard:
@@ -2069,10 +2324,15 @@ def _syllabify_dictionary_gate(
 
 
 def _cmd_resolve_catalogus(args) -> int:
-    source_path = Path(args.path)
+    source_path = _cli_resolve_existing(
+        args.path,
+        hint="Geef een bestaand Markdown-bestand (.md).",
+    )
+    if source_path is None:
+        return 1
     if not source_path.is_file():
         emit_cli_error(
-            "Bestand niet gevonden.",
+            "Verwacht één Markdown-bestand, geen map.",
             path=source_path,
             hint="Geef een bestaand Markdown-bestand (.md).",
         )
@@ -2430,7 +2690,7 @@ def _cli_collect_sources(
     path: Path | str,
     suffixes: tuple[str, ...] | list[str],
 ) -> list[Path] | None:
-    """Bestand of map → bronlijst; bij fout: stderr + ``None``."""
+    """Bestand, map of catalogus-id → bronlijst; bij fout: stderr + ``None``."""
     try:
         return collect_cli_sources(path, suffixes=suffixes)
     except InputPathError as exc:
@@ -2439,11 +2699,53 @@ def _cli_collect_sources(
             exc,
             path=path,
             hint=(
-                f"Geef één bestand met extensie {want}, of een map die zulke "
-                "bestanden bevat."
+                f"Geef één bestand met extensie {want}, een map met zulke "
+                "bestanden, of een catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
             ),
         )
         return None
+
+
+def _cli_resolve_existing(
+    path: Path | str,
+    *,
+    hint: str,
+) -> Path | None:
+    """G2 korte lookup voor één bestaand pad; bij fout: stderr + ``None``."""
+    from .input_paths import resolve_cli_path
+
+    try:
+        return resolve_cli_path(path)
+    except InputPathError as exc:
+        emit_cli_exception(exc, path=path, hint=hint)
+        return None
+
+
+def _collect_paths_unique(
+    raw_paths: list[str],
+    *,
+    suffixes: tuple[str, ...],
+) -> list[Path] | None:
+    """Meerdere CLI-paden → unieke bronnen (bestand/map/catalogus-id)."""
+    files: list[Path] = []
+    for raw in raw_paths:
+        got = _cli_collect_sources(raw, suffixes=suffixes)
+        if got is None:
+            return None
+        files.extend(got)
+    seen: set[Path] = set()
+    uniq: list[Path] = []
+    for f in files:
+        try:
+            key = f.resolve()
+        except OSError:
+            key = f
+        if key in seen:
+            continue
+        seen.add(key)
+        uniq.append(f)
+    return uniq
 
 
 def _reject_mscz_use_mscz_street(cmd: str, path: Path | str) -> bool:
@@ -2900,7 +3202,6 @@ def _cmd_mvsa_validate(args) -> int:
     from .config import load_config
     from .mvsa_validate import (
         MvsaDiagnostic,
-        collect_mvsa_files,
         format_diagnostic,
         validate_mvsa_path,
     )
@@ -2910,33 +3211,17 @@ def _cmd_mvsa_validate(args) -> int:
     _apply_syllable_dictionary_setting(args, config)
 
     path = Path(args.path)
-    from .input_paths import InputPathError, looks_like_catalogus_id
+    if path.is_file() and _reject_wrong_street_source(
+        "mvsa", "validate", path, wrong_suffix=".vsa", hint_street="vsa"
+    ):
+        return 1
+    if path.is_file() and _reject_non_street_file(
+        "mvsa", "validate", path, allowed=(".mvsa",)
+    ):
+        return 1
 
-    if not path.exists() and not looks_like_catalogus_id(args.path):
-        emit_cli_error(
-            "Pad niet gevonden.",
-            path=path,
-            hint=(
-                "Controleer of het pad bestaat, of geef een catalogus-id "
-                "(docs/reference/cli/input-pad.md)."
-            ),
-        )
-        return 1
-    try:
-        files = collect_mvsa_files(path if path.exists() else args.path)
-    except InputPathError as exc:
-        emit_cli_error(
-            str(exc),
-            path=path,
-            hint="Geef een .mvsa-bestand, map, of catalogus-id.",
-        )
-        return 1
-    if not files:
-        emit_cli_error(
-            "Geen .mvsa gevonden.",
-            path=path,
-            hint="Geef een .mvsa-bestand, map met .mvsa, of catalogus-id.",
-        )
+    files = _cli_collect_sources(args.path, (".mvsa",))
+    if files is None:
         return 1
     errors = 0
     had_messages = False
@@ -2954,6 +3239,13 @@ def _cmd_mvsa_validate(args) -> int:
                         severity=issue.severity,
                     )
                 )
+        if any(d.code == "VSA-SYLLABLE-DICT-ABORTED" for d in diags):
+            print(
+                "Interactieve syllable-dictionary-check afgebroken "
+                "(Esc/Ctrl+C).",
+                file=sys.stderr,
+            )
+            return 2
         fatal = [d for d in diags if d.severity == "error"]
         for d in diags:
             had_messages = True
@@ -2975,53 +3267,30 @@ def _cmd_zoektekst(args) -> int:
     from .zoektekst import (
         apply_zoektekst,
         check_zoektekst,
-        iter_vsa_mvsa_files,
         kind_from_path,
     )
 
-    paths = [Path(p) for p in args.paths]
-    files: list[Path] = []
-    for path in paths:
-        try:
-            files.extend(iter_vsa_mvsa_files(path))
-        except FileNotFoundError:
-            emit_cli_error(
-                "Pad niet gevonden.",
-                path=path,
-                hint="Controleer of het bestand of de map bestaat.",
-            )
-            return 1
-        except ValueError as exc:
-            emit_cli_exception(
-                exc,
-                path=path,
-                hint="Geef .vsa/.mvsa-bestanden of een map met zulke bestanden.",
-            )
-            return 1
-
-    # Uniek, stabiele volgorde
-    seen: set[Path] = set()
-    unique: list[Path] = []
-    for f in files:
-        key = f.resolve()
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(f)
-    files = unique
+    files = _collect_paths_unique(
+        [str(p) for p in args.paths], suffixes=(".vsa", ".mvsa")
+    )
+    if files is None:
+        return 1
 
     if not files:
         emit_cli_error(
             "Geen .vsa / .mvsa gevonden.",
-            hint="Geef een bronbestand of een map met .vsa/.mvsa.",
+            hint=(
+                "Geef een .vsa/.mvsa-bestand, map, of catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
         )
         return 1
 
     if args.output is not None:
-        if len(files) != 1 or not paths[0].is_file():
+        if len(files) != 1:
             emit_cli_error(
                 "-o is alleen toegestaan bij precies één bronbestand.",
-                hint="Laat -o weg bij een map, of geef één bestand.",
+                hint="Laat -o weg bij een map of catalogus-id met meerdere hits.",
             )
             return 1
 
@@ -3904,6 +4173,8 @@ def _cmd_mvsa_kuiser(args) -> int:
             continue
         for w in warnings:
             print(w.format(path), file=sys.stderr)
+        if any("VSA-SYLLABLE-DICT-ABORTED" in w.message for w in warnings):
+            return 2
         if changed:
             would_change += 1
             if args.check:
@@ -3925,7 +4196,6 @@ def _cmd_mvsa_syllabify(args) -> int:
     from .config import load_config
     from .mvsa_syllabify import (
         MvsaSyllabifyError,
-        iter_mvsa_files,
         mvsa_output_path_for,
         normalize_mvsa_output_extension,
         syllabify_mvsa_text,
@@ -3956,29 +4226,8 @@ def _cmd_mvsa_syllabify(args) -> int:
     # Uniform met kuiser/zoektekst: default schrijven; --dry-run = preview.
     dry_run = bool(args.dry_run)
 
-    try:
-        files = iter_mvsa_files(source_path)
-    except FileNotFoundError:
-        emit_cli_error(
-            "Pad niet gevonden.",
-            path=source_path,
-            hint="Controleer of het bestand of de map bestaat.",
-        )
-        return 1
-    except ValueError as exc:
-        emit_cli_exception(
-            exc,
-            path=source_path,
-            hint="Geef een .mvsa-bestand of een map met .mvsa-bestanden.",
-        )
-        return 1
-
-    if not files:
-        emit_cli_error(
-            "Geen .mvsa-bestanden gevonden.",
-            path=source_path,
-            hint="Zet .mvsa-bestanden in deze map of geef een ander pad.",
-        )
+    files = _cli_collect_sources(args.path, (".mvsa",))
+    if files is None:
         return 1
 
     multi = len(files) > 1 or source_path.is_dir()
@@ -4039,6 +4288,8 @@ def _cmd_mvsa_syllabify(args) -> int:
                     changed=True,
                     replacements=result.replacements,
                 )
+            if dict_rc == 2:
+                return 2
             if dict_rc != 0:
                 any_error = True
                 continue
@@ -4095,11 +4346,23 @@ def _mvsa_syllabify_dictionary_gate(
             from .input_paths import source_id_for_prompt
 
             prompt = prompt_dictionary_fixes(
-                actionable, source_id=source_id_for_prompt(file_path)
+                actionable,
+                source_id=source_id_for_prompt(file_path),
+                source_path=file_path,
             )
             if prompt.replacements:
                 text = apply_replacements_to_source(text, prompt.replacements)
                 findings = find_mvsa_dictionary_syllable_issues(text)
+            if prompt.aborted:
+                from .syllable_dict_check import DICT_PROMPT_ABORT_RC
+
+                emit_cli_error(
+                    "Interactieve syllable-dictionary-check afgebroken "
+                    "(Esc/Ctrl+C).",
+                    path=file_path,
+                    hint="Herstart syllabify/validate om verder te gaan.",
+                )
+                return DICT_PROMPT_ABORT_RC, text
 
     fatal = [f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}]
     for finding in findings:
@@ -4123,17 +4386,20 @@ def _cmd_template_validate(args) -> int:
         validate_template,
     )
 
-    path = Path(args.path)
-    if not path.exists():
-        emit_cli_error(
-            "Pad niet gevonden.",
-            path=path,
-            hint="Geef template.yaml of een map met template.yaml-bestanden.",
-        )
+    path = _cli_resolve_existing(
+        args.path,
+        hint="Geef template.yaml of een map met template.yaml-bestanden.",
+    )
+    if path is None:
         return 1
     files: list[Path]
     if path.is_dir():
-        files = sorted(path.rglob("template.yaml"))
+        # Alleen bestanden genaamd template.yaml (niet elke .yaml).
+        files = sorted(
+            p
+            for p in path.rglob("template.yaml")  # G2-allow: basename filter na resolve
+            if p.is_file()
+        )
         known_ids = collect_template_ids(path)
     else:
         files = [path]

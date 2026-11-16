@@ -14,12 +14,11 @@ def test_kuiser_spec_missing_message_mentions_hub():
     assert "mscz" in msg
 
 
-def test_vsa_kuiser_stub(capsys):
-    code = vsa_main(["kuiser", "x.vsa"])
-    out = capsys.readouterr().out
-    assert code == 2
-    assert "kuiser.md" in out
-    assert "V*" in out or "nog niet" in out.lower()
+def test_vsa_kuiser_missing_path(capsys):
+    code = vsa_main(["kuiser", "x-does-not-exist.vsa"])
+    err = capsys.readouterr().err
+    assert code == 1
+    assert "niet gevonden" in err.lower() or "Pad" in err
 
 
 def test_mscz_kuiser_stub(capsys):

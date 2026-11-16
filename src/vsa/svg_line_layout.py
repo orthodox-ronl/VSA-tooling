@@ -140,7 +140,7 @@ def measure_node(
     if isinstance(node, TextNode):
         from .syllabify import display_lyric_text
 
-        shown = display_lyric_text(node.text)
+        shown = display_lyric_text(node.text, strip_soft=not settings.translit)
         base = estimate_text_width(
             shown,
             settings.font_size,
@@ -165,7 +165,7 @@ def measure_node(
             trailing_safety=trail,
         )
         body = layout.width + settings.scope_gap
-        shown = display_lyric_text(layout.text)
+        shown = display_lyric_text(layout.text, strip_soft=not settings.translit)
         second_w = _translit_second_width(shown, settings)
         if second_w is not None:
             # Zelfde width_extra als svg_renderer._render_scope (vorm A-kolom).

@@ -862,7 +862,8 @@ mvsa transpose lied.mvsa --to Bb3 --pitch doremi -o generated\lied.in-Bb.mvsa
 
 ```text
 mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
-                [--octave-style {@oct,none,marker}] [--no-align] path [path …]
+                [--octave-style {@oct,none,marker}] [--no-align] [--werkbank]
+                path [path …]
 ```
 
 ### Beschrijving
@@ -921,14 +922,15 @@ dagelijkse authoring-commando.
 
 ### Argumenten en opties
 
-| Optie            | Verplicht | Beschrijving                                               | Default    |
-| ---------------- | --------- | ---------------------------------------------------------- | ---------- |
-| `path`           | Ja        | `.mvsa`-bestand(en) of map(pen).                           | —          |
-| `-o`, `--output` | Nee       | Uitvoerpad (alleen bij precies één bronbestand).           | in-place   |
-| `--check`        | Nee       | Geen schrijfactie; exit 1 bij wijziging.                   | uit        |
-| `--pitch`        | Nee       | Zelfde als `normalize` (default preserve).                 | `preserve` |
-| `--octave-style` | Nee       | `@oct` / `none` / `marker` (zelfde als `normalize`).       | `@oct`     |
-| `--no-align`     | Nee       | Sla kolomuitlijning over.                                  | uit        |
+| Optie            | Verplicht | Beschrijving                                                 | Default    |
+| ---------------- | --------- | ------------------------------------------------------------ | ---------- |
+| `path`           | Ja        | `.mvsa`-bestand(en) of map(pen).                             | —          |
+| `-o`, `--output` | Nee       | Uitvoerpad (alleen bij precies één bronbestand).             | in-place   |
+| `--check`        | Nee       | Geen schrijfactie; exit 1 bij wijziging.                     | uit        |
+| `--pitch`        | Nee       | Zelfde als `normalize` (default preserve).                   | `preserve` |
+| `--octave-style` | Nee       | `@oct` / `none` / `marker` (zelfde als `normalize`).         | `@oct`     |
+| `--no-align`     | Nee       | Sla kolomuitlijning over.                                    | uit        |
+| `--werkbank`     | Nee       | Behoud import-/schetsbanners (Q6); default = catalogus-strip | uit        |
 
 ### Exit status
 
@@ -944,6 +946,7 @@ mvsa kuiser examples\mvsa\alleluia-toon-8.mvsa
 mvsa kuiser examples\mvsa --check
 mvsa kuiser lied.mvsa -o generated\lied.kuiser.mvsa
 mvsa kuiser lied.mvsa --pitch a-g
+mvsa kuiser schets.mvsa --werkbank
 ```
 
 ---

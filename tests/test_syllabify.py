@@ -35,9 +35,13 @@ def test_hyphenate_strips_trailing_punctuation() -> None:
 def test_hard_hyphen_equals_preserved_through_syllabify() -> None:
     assert hyphenate_dutch_word("mede=eeuwige") == "me-de=eeu-wi-ge"
     assert unsyllabify_plain_text("me-de=eeu-wi-ge") == "mede=eeuwige"
-    from vsa.syllabify import dehyphenate_dutch_word
+    from vsa.syllabify import dehyphenate_dutch_word, display_lyric_text
 
     assert dehyphenate_dutch_word("me-de=eeu-wi-ge") == "mede-eeuwige"
+    assert display_lyric_text("me-de=eeu-wi-ge") == "me-de-eeu-wi-ge"
+    assert display_lyric_text("me-de=eeu-wi-ge", strip_soft=True) == "mede-eeuwige"
+    assert display_lyric_text("hei-lig", strip_soft=True) == "heilig"
+    assert display_lyric_text("e-nig=ge-boren", strip_soft=True) == "enig-geboren"
 
 
 def test_plain_text_preserves_barlines_and_punct() -> None:
@@ -84,6 +88,42 @@ def test_no_hyphen_at_scope_boundaries() -> None:
     assert "}-" not in result.text
     back = unsyllabify_vsa_source(result.text)
     assert back.text == source
+
+
+def test_scope_claims_one_syllable_schepping() -> None:
+    """Letters herverdeeld: scope = één lettergreep, rest in platte tekst."""
+    source = "{/toen} de {/sche_}pping zag\n"
+    result = syllabify_vsa_source(source)
+    assert "{/schep_}ping" in result.text
+    assert "{/sche_}" not in result.text
+    assert "p-ping" not in result.text
+    assert "-{" not in result.text
+    assert "}-" not in result.text
+
+
+def test_scope_claims_one_syllable_adam() -> None:
+    """Meersyllabige scope-inhoud → eerste lettergreep in scope, rest erna."""
+    source = "{/Adam} juicht\n"
+    result = syllabify_vsa_source(source)
+    assert "{/A}dam" in result.text
+    assert "{/Adam}" not in result.text
+    assert "-{" not in result.text
+    assert "}-" not in result.text
+
+
+def test_scope_redistribution_keeps_trailing_punctuation() -> None:
+    """Leestekens ná scopes blijven staan (geen VSA-syntax)."""
+    assert syllabify_vsa_source("{/Adam},\n").text == "{/A}dam,\n"
+    assert (
+        syllabify_vsa_source("Jo{+\\han_}{/nes_}.\n").text
+        == "Jo{+\\han_}{/nes_}.\n"
+    )
+    assert (
+        syllabify_vsa_source("marte{la_}{/ren}!\n").text
+        == "mar-te{la_}{/ren}!\n"
+    )
+    assert syllabify_vsa_source("{/sche_}pping.\n").text == "{/schep_}ping.\n"
+    assert syllabify_vsa_source("lijden,\n").text == "lij-den,\n"
 
 
 def test_unsyllabify_removes_legacy_junction_hyphens() -> None:

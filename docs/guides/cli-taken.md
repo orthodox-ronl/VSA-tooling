@@ -19,6 +19,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | Partituur-PDF uit `.vsa`                                | [`vsa pdf <pad.vsa>`](../reference/cli/pdf.md)                                                                                                                                               |
 | `zoek=`-includes oplossen naar catalogus                | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                                                                                                                |
 | Lettergreepstreepjes (bestand of map)                   | [`vsa syllabify <pad>`](../reference/cli/syllabify.md) (`.vsa`) / [`mvsa syllabify <pad>`](../reference/cli/mvsa.md#mvsa-syllabify) (`.mvsa`)                                                |
+| Strofe-layout in `.vsa` (`*` / `/` / regels; preview)   | [`vsa format`](../reference/cli/format.md) (`--dry-run` toont resultaat) — [vsa-format](../formats/vsa-format.md)                                                                            |
 | Platte gezongen tekst uit `.vsa`                        | [`vsa text <pad.vsa>`](../reference/cli/text.md)                                                                                                                                             |
 | Platte gezongen tekst uit `.mvsa` of `.mscz`            | [`mvsa text`](../reference/cli/mvsa.md#mvsa-text) / [`mscz text`](../reference/cli/mscz.md)                                                                                                  |
 | MusicXML exporteren                                     | [`vsa mxl <pad.vsa> [-o …]`](../reference/cli/musicxml.md) (Coria: `--syllabify`; alias `musicxml`)                                                                                          |
@@ -26,7 +27,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | `.vsa` canonieke notatie controleren                    | [`vsa validate`](../reference/cli/validate.md) (geen aparte `vsa normalize`)                                                                                                                 |
 | mvsa valideren (draft)                                  | [`mvsa validate <pad>`](../reference/cli/mvsa.md#mvsa-validate)                                                                                                                              |
 | `.mvsa` normaliseren (spelling / uitlijning)            | [`mvsa normalize`](../reference/cli/mvsa.md#mvsa-normalize)                                                                                                                                  |
-| `.mvsa` / `.vsa` kuisen (authoring → canoniek)          | [`mvsa kuiser`](../reference/cli/mvsa.md#mvsa-kuiser) (Q\*) · `vsa kuiser` (V\* volgt) — [kuiser](../formats/kuiser.md)                                                                      |
+| `.mvsa` / `.vsa` kuisen (authoring → canoniek)          | [`mvsa kuiser`](../reference/cli/mvsa.md#mvsa-kuiser) (Q\*) · [`vsa kuiser`](../reference/cli/kuiser.md) (V1–V8) — [kuiser](../formats/kuiser.md)                                            |
 | `.mxl` naar Coria/playback-profiel                      | [`mxl normalize`](../reference/cli/mxl.md)                                                                                                                                                   |
 | mvsa → SATB MusicXML (draft)                            | [`mvsa mxl <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#mvsa-mxl)                                                                                                                   |
 | mvsa → Score-IR JSON (partituur; scherm/CoriB)          | [`mvsa score-ir <pad> [-o …]`](../reference/cli/mvsa.md#mvsa-score-ir)                                                                                                                       |
@@ -84,6 +85,7 @@ canonieke `.vsa` of `.mvsa` — zie [zoektekst](../formats/zoektekst.md).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa format examples\minimal\001_plain_text.vsa --dry-run
 vsa zoektekst examples\mvsa\alleluia-toon-1.mvsa
 vsa zoektekst examples\mvsa --check
 ```

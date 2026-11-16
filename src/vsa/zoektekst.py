@@ -230,14 +230,21 @@ def apply_zoektekst(source: str, *, kind: SourceKind) -> ZoektekstApplyResult:
     )
 
 
-def iter_vsa_mvsa_files(path: Path) -> list[Path]:
-    """Bestand of map → gesorteerde ``.vsa`` / ``.mvsa``-paden."""
-    from .input_paths import InputPathError, collect_input_files
+def iter_vsa_mvsa_files(path: Path | str) -> list[Path]:
+    """Bestand, map of catalogus-id → gesorteerde ``.vsa`` / ``.mvsa``-paden."""
+    from .input_paths import (
+        InputPathError,
+        collect_input_files,
+        looks_like_catalogus_id,
+    )
 
+    raw = path
     path = Path(path)
     try:
-        return collect_input_files(path, suffixes=(".vsa", ".mvsa"))
+        return collect_input_files(raw, suffixes=(".vsa", ".mvsa"))
     except InputPathError as exc:
+        if looks_like_catalogus_id(raw) and not path.exists():
+            raise ValueError(str(exc)) from exc
         if not path.exists():
             raise FileNotFoundError(str(path)) from exc
         if path.is_file():

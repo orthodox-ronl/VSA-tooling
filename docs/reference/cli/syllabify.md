@@ -38,17 +38,23 @@ Binnen **platte** tekst komen soft `-` tussen lettergrepen
 streepje: `Jo{+\han_}{/nes_}` blijft zo (niet `Jo-{+\han_}-{/nes_}`), want
 de accolade is al de lettergreepgrens.
 
-- De inhoud van scopes (zangelement, [EHM](@), [ELM](@)) blijft onaangeroerd.
-  Verouderde brugstreepjes `-` naast `{`/`}` worden bij syllabify weggehaald.
+**Elke scope = één lettergreep.** Letters worden herverdeeld zodat de
+tekst ín `{…}` precies één zing-lettergreep is; de rest komt in platte
+tekst ernaast. Voorbeeld: `{/sche_}pping` → `{/schep_}ping`;
+`{/Adam}` → `{/A}dam`. [EHM](@)/[ELM](@)-markering blijft staan; er komt
+geen soft `-` naast `{`/`}`.
+
+- Verouderde brugstreepjes `-` naast `{`/`}` worden bij syllabify
+  weggehaald.
 - Toonhoogtemarkers (`[…:]`), YAML-frontmatter (inclusief `zoektekst`) en
   HTML-comments blijven staan. Interactieve dictionary-vervangingen raken
   alleen de VSA-body — nooit `zoektekst` (die hoort **zonder** soft `-`).
-- Binnen scopes blijft `-` een [ELM](@); daar wordt niets gewijzigd — ook
-  niet bij `--unsyllabify`.
+- Binnen scopes blijft `-` een [ELM](@); dat teken wordt niet als
+  lettergreepstreepje gelezen — ook niet bij `--unsyllabify`.
 - Een woord dat al `-` bevat en helemaal buiten scopes staat (handmatige
   zing-deling) blijft bij hypheneren ongemoeid; bij `--unsyllabify`
-  verdwijnen die streepjes wél. Over scope-grenzen heen worden breekpunten
-  opnieuw uit Pyphen afgeleid.
+  verdwijnen die streepjes wél. Over scope-grenzen heen volgt de deling
+  de canonieke dictionary (anders Pyphen), met herverdeling per scope.
 - **Hard streepje:** schrijf een orthografisch koppelteken als `=` in de
   bron (`mede=eeuwige`). Syllabify hypheneert de delen apart
   (`me-de=eeu-wi-ge`); `--unsyllabify` houdt `=`; `vsa text` / MusicXML /

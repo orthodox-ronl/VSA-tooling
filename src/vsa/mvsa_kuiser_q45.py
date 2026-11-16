@@ -56,7 +56,9 @@ def apply_q4_q5(
         sid = None
         if source_path is not None:
             sid = source_id_for_prompt(Path(source_path))
-        session = prompt_dictionary_fixes(actionable, source_id=sid)
+        session = prompt_dictionary_fixes(
+            actionable, source_id=sid, source_path=source_path
+        )
         if session.replacements:
             out = apply_replacements_to_source(out, session.replacements)
             try:
@@ -66,6 +68,15 @@ def apply_q4_q5(
             except MvsaSyllabifyError as exc:
                 raise MvsaKuiserError(str(exc), line=exc.line or 0) from exc
             findings = find_mvsa_dictionary_syllable_issues(out)
+        if session.aborted:
+            return out, [
+                KuiserWarning(
+                    1,
+                    1,
+                    "VSA-SYLLABLE-DICT-ABORTED: Interactieve "
+                    "syllable-dictionary-check afgebroken (Esc).",
+                )
+            ]
 
     warnings: list[KuiserWarning] = []
     for finding in findings:

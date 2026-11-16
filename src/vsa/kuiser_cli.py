@@ -11,7 +11,7 @@ from collections.abc import Callable
 # Straat → korte status voor help / foutmelding.
 KUISER_STATUS: dict[str, str] = {
     "mvsa": "Q1–Q9 (docs/formats/kuiser.md); bestaande layout-kuiser actief",
-    "vsa": "V*-checklist volgt — spec nog niet vastgelegd",
+    "vsa": "V1–V8 (docs/formats/kuiser.md)",
     "mscz": "geen kuiser-spec",
     "mxl": "geen kuiser-spec",
 }
@@ -49,12 +49,19 @@ def add_kuiser_parser(
             "Voorbeelden:\n"
             f"  {street} kuiser pad\\naar\\bestand\n"
             f"  {street} kuiser pad\\naar\\map --check\n"
+            f"  {street} kuiser communievers/kruisverheffing/hemelum --check\n"
+            "\n"
+            "Invoer: bestand, map of catalogus-id "
+            "(docs/reference/cli/input-pad.md).\n"
         ),
     )
     p.add_argument(
         "path",
         nargs="+" if implemented else "*",
-        help="Bronbestand of map",
+        help=(
+            "Bronbestand, map (recursief), of catalogus-id "
+            "(docs/reference/cli/input-pad.md)."
+        ),
     )
     p.add_argument(
         "-o",
@@ -66,6 +73,15 @@ def add_kuiser_parser(
         action="store_true",
         help="Dry-run: toon of er iets zou wijzigen (standaard: uit)",
     )
+    if street == "vsa" and implemented:
+        p.add_argument(
+            "--werkbank",
+            action="store_true",
+            help=(
+                "Behoud werkbank-FM-skelet / schetscomments (V5). "
+                "Default: catalogus-strip."
+            ),
+        )
     p.set_defaults(_kuiser_street=street, _kuiser_implemented=implemented)
     return p
 

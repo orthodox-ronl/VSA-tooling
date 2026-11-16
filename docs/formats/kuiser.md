@@ -3,6 +3,8 @@
 **Status:** contract vastgelegd. **Geïmplementeerd in `mvsa kuiser`:**
 Q1–Q8 (YAML-FM, `@`-blok, `#maat`, syllabify, dictionary, banners,
 validate-gate, normaalvorm). **Q9** = bestaande `--check`.
+**VSA:** checklist **V1–V8** + **`vsa kuiser` actief**. Body-layout:
+[`vsa format`](vsa-format.md) (apart; CLI actief).
 
 Canonieke hub voor **opkuisen naar canonieke authoring-vorm** per
 bestandstype. Geen product, geen products-meta. Straat-CLI:
@@ -24,7 +26,7 @@ Deze hub legt vast wat **tooling** bij kuiser mag/moet schrijven.
 | Straat / type           | Contract-reeks                 | Status                                    |
 | ----------------------- | ------------------------------ | ----------------------------------------- |
 | `.mvsa` (`mvsa kuiser`) | **Q1–Q9** (hieronder)          | Q1–Q8 actief; Q9 = `--check`              |
-| `.vsa` (`vsa kuiser`)   | **V\*** (apart vast te leggen) | placeholder — CLI weigert tot V\* bestaat |
+| `.vsa` (`vsa kuiser`)   | **V1–V8** (hieronder)          | V1–V8 actief                              |
 | `.mscz` (`mscz kuiser`) | —                              | geen spec → foutmelding                   |
 | `.mxl` (`mxl kuiser`)   | —                              | geen spec → foutmelding                   |
 | Partituur-PDF           | —                              | geen kuiser-straat; geen spec             |
@@ -139,14 +141,99 @@ uitbreiden).
 
 ---
 
-## VSA — V\* (placeholder)
+## VSA — V\* {#vsa-v}
 
-Nog **niet** gespecificeerd. Volgende ronde: `vsa kuiser`-contract (V\*)
-hier of in een sibling-sectie vastleggen. Tot die tijd weigert
-`vsa kuiser` met verwijzing naar deze hub.
+Doel: catalogus-`.vsa` naar **canonieke authoring-vorm** (metadata +
+zing-deling + zoektekst + validate). **Geen** `vsa normalize`. Body-layout
+(strofen op regels / `*` vs `/`) hoort bij
+[`vsa format`](vsa-format.md) — kuiser roept die **niet** stil aan.
 
-Verwachte richting (niet normatief tot V\* landt): frontmatter/`soort`/`toon`,
-zoektekst, syllabificatie + dictionary, daarna canonieke VSA-vorm.
+**Status:** contract hieronder vastgelegd; **CLI actief** (`vsa kuiser`).
+
+### Keuzes (besluit)
+
+| Onderwerp              | Keuze                                                                                                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Playback in bron       | Plat in YAML: `do` / `mode` / `tempo` (geen MVSA-`@`-blok in de body)                                                                                                      |
+| Tempo-fingerprint      | Zelfde als MVSA: ontbrekend of tool-default **130**/**180** → **131**, of **181** bij `soort` ∈ {`tropaar`, `kondak`, `stichier`}; bewust ander BPM blijft                 |
+| Titel                  | Uit FM; anders bestandsnaam + `(Toon N)` indien toon bekend                                                                                                                |
+| `soort` / `toon`       | Strenger dan MVSA: zie bibliotheek [vsa-frontmatter](https://github.com/orthodox-ronl/bibliotheek/blob/main/docs/specs/vsa-frontmatter.md) (verplicht waar van toepassing) |
+| Zoektekst              | Uit VSA-lyrics (hele woorden, geen soft `-`); frasering ≈ strofen; zie [zoektekst](zoektekst.md)                                                                           |
+| Taal                   | Ontbrekend → `nl`                                                                                                                                                          |
+| Syllabificatie         | Eerst waarschuwen; TTY: woorden toevoegen of netjes afbreken — zelfde geest als Q4/Q5                                                                                      |
+| Body-layout            | **Niet** in kuiser → [`vsa format`](vsa-format.md)                                                                                                                         |
+| Lege FM (catalogus)    | Ongedocumenteerde / lege sleutels weg (of gelijkwaardig aan bibliotheek `frontmatter-canoniek`); `--werkbank` behoudt werkbank-skelet/rommel                               |
+
+### V1 — YAML-frontmatter (minimaal)
+
+Schrijf of vul gedocumenteerde sleutels (catalogus: alleen gevulde sleutels).
+Minimaal:
+
+| Sleutel             | Inhoud                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `titel`             | Herkenbare titel; anders bestandsnaam + `(Toon N)`                                 |
+| `taal`              | Default `nl`                                                                       |
+| `soort`             | Uit FM of pad/bestandsnaam; op catalogus-`.vsa` verplicht waar de FM-spec dat eist |
+| `toon`              | 1–8 indien Oktoëchos / `toon-N` in pad                                             |
+| `bron.uitgangspunt` | Behouden indien aanwezig; niet verzinnen                                           |
+| `bron.bewerking`    | Uitvoeringsvorm-label indien afleidbaar (pad)                                      |
+| `do` / `mode`       | Behouden of zinvol aanvullen uit bestaande bron; niet wild verzinnen               |
+| `tempo`             | Volgens tempo-fingerprint (131/181)                                                |
+
+Voorkeursvolgorde: bibliotheek vsa-frontmatter.
+
+### V2 — Zoektekst
+
+Zet of vernieuw `zoektekst` uit de VSA-body (hele woorden; interpunctie en
+hoofdletters volgen de lyrics; frasering ≈ strofen). Onderdeel van kuiser,
+niet optioneel weglaten.
+
+### V3 — Lettergreepstreepjes
+
+Zet soft `-` volgens [syllabificatie](syllabificatie.md) /
+[`vsa syllabify`](../reference/cli/syllabify.md).
+
+### V4 — Dictionary-consistentie
+
+Elke soft-deling moet kloppen met de syllable-dictionary. Bij conflict of
+onbekend woord: **waarschuwing**; op TTY toevoegen of netjes afbreken.
+Geen stille verkeerde deling.
+
+### V5 — Catalogus-FM / werkbank
+
+Catalogus-opkuis: strip lege en ongedocumenteerde frontmatter-sleutels
+(zelfde geest als bibliotheek `frontmatter-canoniek`). Vlag **`--werkbank`**:
+behoud werkbank-skelet / bekende debug-comments. Geen import-boxbanners zoals
+bij MVSA tenzij die in een `.vsa` voorkomen — dan dezelfde strip-regel.
+
+### V6 — (voorbehouden)
+
+Geen lichte body-canon in kuiser. Layout → [`vsa format`](vsa-format.md).
+Id **V6** blijft gereserveerd (niet gebruiken voor iets anders zonder hub-PR).
+
+### V7 — Validatie na schrijven
+
+Na kuiser (en na succesvolle schrijf): `vsa validate` zonder **errors**.
+Warnings (o.a. dictionary) mogen blijven.
+
+### V8 — Dry-run / check
+
+`--check`: geen schrijven; exit 1 als er iets zou wijzigen.
+
+### CLI
+
+Man-pagina: [`vsa kuiser`](../reference/cli/kuiser.md).
+
+```text
+vsa kuiser [-h] [-o OUTPUT] [--check] [--werkbank] path [path …]
+```
+
+Geen `--pitch` / `--octave-style` (MVSA-only).
+
+### Volgorde (implementatie)
+
+Praktisch: V5 (strip) → V3/V4 → V1/V2 → V7 → schrijven; V8 = `--check`.
+Normatieve checklist-volgorde blijft V1…V8 voor documentatie.
 
 ---
 
@@ -162,5 +249,7 @@ Layout/playback blijft bij `mscz normalize` / `mxl normalize`.
 ## Zie ook
 
 - [contract-index](contract-index.md)
-- [mvsa.md](mvsa.md) · [syllabificatie.md](syllabificatie.md) · [zoektekst.md](zoektekst.md)
-- Man-pagina: [`mvsa kuiser`](../reference/cli/mvsa.md#mvsa-kuiser)
+- [mvsa.md](mvsa.md) · [vsa.md](vsa.md) · [`vsa format`](vsa-format.md)
+- [syllabificatie.md](syllabificatie.md) · [zoektekst.md](zoektekst.md)
+- Man-pagina’s: [`mvsa kuiser`](../reference/cli/mvsa.md#mvsa-kuiser) ·
+  [`vsa kuiser`](../reference/cli/kuiser.md)

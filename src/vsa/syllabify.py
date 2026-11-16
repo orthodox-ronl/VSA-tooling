@@ -78,11 +78,20 @@ def hyphenate_dutch_word(word: str) -> str:
     prefix, core, suffix = (m.group(1), m.group(2), m.group(3)) if m else ("", word, "")
     if not core or not any(ch.isalpha() for ch in core):
         return word
-    from .syllable_dictionary import canonical_syllable_form
+    from .syllable_dictionary import (
+        allowed_syllable_forms,
+        canonical_syllable_form,
+    )
 
-    canonical = canonical_syllable_form(core)
-    if canonical is not None:
-        return f"{prefix}{_transfer_letter_case(core, canonical)}{suffix}"
+    forms = allowed_syllable_forms(core)
+    if forms is not None:
+        surface = core.casefold()
+        if surface in forms:
+            # Al een toegestane vorm (primair of ``+``-alternatief): behouden.
+            return word
+        canonical = canonical_syllable_form(core)
+        if canonical is not None:
+            return f"{prefix}{_transfer_letter_case(core, canonical)}{suffix}"
     if HARD_HYPHEN in core:
         return f"{prefix}{HARD_HYPHEN.join(hyphenate_dutch_word(part) if part else part for part in core.split(HARD_HYPHEN))}{suffix}"
     if "-" in core:
@@ -128,9 +137,18 @@ def dehyphenate_dutch_word(word: str) -> str:
     return strip_soft_hyphens(word).replace(HARD_HYPHEN, "-")
 
 
-def display_lyric_text(text: str) -> str:
-    """Bronlyric → weergave: hard ``=`` wordt een zichtbaar streepje."""
-    if not text or HARD_HYPHEN not in text:
+def display_lyric_text(text: str, *, strip_soft: bool = False) -> str:
+    """Bronlyric → weergave.
+
+    Hard ``=`` wordt altijd een zichtbaar streepje. Soft ``-`` (zing-deling)
+    blijft staan tenzij ``strip_soft=True`` — dan zelfde lezersvorm als
+    :func:`dehyphenate_dutch_word` (o.a. standaard ``.vsa.svg`` / lyrics).
+    """
+    if not text:
+        return text
+    if strip_soft:
+        return dehyphenate_dutch_word(text)
+    if HARD_HYPHEN not in text:
         return text
     return text.replace(HARD_HYPHEN, "-")
 
@@ -464,13 +482,20 @@ def _syllabify_word_run(atoms: list[_Atom]) -> str:
     if not plain or not any(ch.isalpha() for ch in plain):
         return "".join(atom.source for atom in atoms)
 
-    # Over scope-grenzen: canonieke dictionary (anders Pyphen), daarna streepjes
-    # alleen *binnen* platte tekstdelen (nooit naast ``{``/``}``).
+    # Canonieke deling; herverdeel letters zodat elke scope precies één
+    # lettergreep heeft. Geen soft ``-`` naast ``{``/``}``.
     form = hyphenate_dutch_word(plain)
-    positions = _break_positions_in_plain(plain, form)
-    if not positions:
-        positions = set(dutch_hyphen_positions(plain))
-    return _render_syllabified_parts(parts, positions)
+    cased = _transfer_letter_case(plain, form)
+    syllables = [s for s in re.split(r"[-|=]+", cased) if s]
+    if not syllables:
+        return "".join(atom.source for atom in atoms)
+    if sum(len(s) for s in syllables) != len(plain.replace("=", "")):
+        # Onverwachte hard-``=``/telling: val terug op oude tekst-only hyphenatie.
+        positions = _break_positions_in_plain(plain, form)
+        if not positions:
+            positions = set(dutch_hyphen_positions(plain))
+        return _render_syllabified_parts_text_only(parts, positions)
+    return _render_scope_aware_syllables(parts, syllables)
 
 
 def _break_positions_in_plain(plain: str, hyphenated: str) -> set[int]:
@@ -487,12 +512,141 @@ def _break_positions_in_plain(plain: str, hyphenated: str) -> set[int]:
     return positions
 
 
-def _render_syllabified_parts(parts: list[_ContentPart], positions: set[int]) -> str:
-    """Zet streepjes alleen *binnen* platte tekstdelen.
+def _render_scope_aware_syllables(
+    parts: list[_ContentPart], syllables: list[str]
+) -> str:
+    """Herverdeel lettergrepen: elke scope = één lettergreep; rest in platte tekst.
 
-    Tussen tekst en ``{…}``, of tussen twee scopes, komt **geen** soft ``-``:
-    de accolade markeert al de lettergreep-/woordgrens.
+    Geen soft ``-`` naast scope-accolades. Voorbeeld:
+    ``{/sche_}pping`` → ``{/schep_}ping``; ``{/Adam}`` → ``{/A}dam``.
     """
+    n = len(syllables)
+    # Karakter-ranges per part in de aaneengesloten plain (zonder soft ``-``/``=``).
+    part_ranges: list[tuple[int, int]] = []
+    offset = 0
+    for part in parts:
+        plen = len(part.plain.replace("=", ""))
+        part_ranges.append((offset, offset + plen))
+        offset += plen
+
+    syl_starts: list[int] = []
+    offset = 0
+    for syl in syllables:
+        syl_starts.append(offset)
+        offset += len(syl)
+
+    def _syl_at(char_index: int) -> int:
+        for i in range(n - 1, -1, -1):
+            if char_index >= syl_starts[i]:
+                return i
+        return 0
+
+    # Elke scope claimt precies één lettergreep (op volgorde, uniek).
+    scope_owner: dict[int, int] = {}  # syllable index → part index
+    used: set[int] = set()
+    for part_index, part in enumerate(parts):
+        if part.kind != "scope" or not part.plain.replace("=", ""):
+            continue
+        start, _end = part_ranges[part_index]
+        preferred = _syl_at(start)
+        while preferred < n and preferred in used:
+            preferred += 1
+        if preferred >= n or preferred in used:
+            # Kan niet veilig herverdelen → tekst-only fallback.
+            positions = set()
+            off = 0
+            for syl in syllables[:-1]:
+                off += len(syl)
+                positions.add(off)
+            return _render_syllabified_parts_text_only(parts, positions)
+        used.add(preferred)
+        scope_owner[preferred] = part_index
+
+    # Bouw output lettergreep-voor-lettergreep.
+    # Leestekens horen buiten de letterkern: bewaar voorloop/achterloop
+    # (ook als aparte tekst-atomen ná een scope, bv. ``{/Adam},``).
+    def _is_letter_part(part: _ContentPart) -> bool:
+        return bool(part.plain) and any(ch.isalpha() for ch in part.plain)
+
+    def _punct_fragment(part: _ContentPart) -> str:
+        return f"{part.prefix}{part.core}{part.suffix}"
+
+    letter_indices = [i for i, p in enumerate(parts) if _is_letter_part(p)]
+    first_letter = letter_indices[0] if letter_indices else -1
+    last_letter = letter_indices[-1] if letter_indices else -1
+
+    leading_punct = ""
+    trailing_punct = ""
+    for i, part in enumerate(parts):
+        if part.kind != "text" or _is_letter_part(part):
+            continue
+        frag = _punct_fragment(part)
+        if not frag:
+            continue
+        if first_letter < 0 or i < first_letter:
+            leading_punct += frag
+        else:
+            trailing_punct += frag
+
+    letter_text_parts = [p for p in parts if p.kind == "text" and _is_letter_part(p)]
+    leading_prefix = letter_text_parts[0].prefix if letter_text_parts else ""
+    trailing_suffix = letter_text_parts[-1].suffix if letter_text_parts else ""
+
+    out: list[str] = []
+    index = 0
+    emitted_leading = False
+
+    while index < n:
+        if index in scope_owner:
+            part = parts[scope_owner[index]]
+            out.append(
+                _rebuild_scope_source(
+                    part.source, part.plain.replace("=", ""), syllables[index]
+                )
+            )
+            index += 1
+            continue
+        run: list[str] = []
+        while index < n and index not in scope_owner:
+            run.append(syllables[index])
+            index += 1
+        core = "-".join(run)
+        prefix = ""
+        suffix = ""
+        if not emitted_leading and leading_prefix:
+            prefix = leading_prefix
+            emitted_leading = True
+        if index >= n and trailing_suffix:
+            suffix = trailing_suffix
+        out.append(f"{prefix}{core}{suffix}")
+        emitted_leading = True
+
+    body = "".join(out)
+    if not body and (leading_prefix or trailing_suffix):
+        body = f"{leading_prefix}{trailing_suffix}"
+    return f"{leading_punct}{body}{trailing_punct}"
+
+
+def _rebuild_scope_source(source: str, old_plain: str, new_plain: str) -> str:
+    """Vervang zangelement in ``{…}``; behoud EHM/ELM."""
+    if not source.startswith("{") or not source.endswith("}"):
+        return source
+    inner = source[1:-1]
+    idx = inner.find(old_plain)
+    if idx < 0:
+        low = inner.casefold()
+        key = old_plain.casefold()
+        idx = low.find(key)
+        if idx < 0:
+            return source
+        return "{" + inner[:idx] + new_plain + inner[idx + len(key) :] + "}"
+    return "{" + inner[:idx] + new_plain + inner[idx + len(old_plain) :] + "}"
+
+
+def _render_syllabified_parts_text_only(
+    parts: list[_ContentPart], positions: set[int]
+) -> str:
+    """Fallback: streepjes alleen in platte tekst; scopes ongewijzigd."""
     out: list[str] = []
     offset = 0
     last_index = len(parts) - 1
@@ -511,7 +665,7 @@ def _render_syllabified_parts(parts: list[_ContentPart], positions: set[int]) ->
         if index < last_index and end in positions:
             nxt = parts[index + 1]
             if part.kind == "scope" or nxt.kind == "scope":
-                pass  # scopegrens = al lettergreepgrens
+                pass
             else:
                 out.append("-")
 

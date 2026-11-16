@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import os
 import re
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
@@ -320,48 +321,136 @@ def syllable_lemma(word: str) -> str:
     return core.casefold()
 
 
-@lru_cache(maxsize=1)
-def load_syllable_dictionary() -> dict[str, str]:
-    """Laad lemma → canonieke hyphenvorm.
+@dataclass(frozen=True)
+class SyllableEntry:
+    """Primaire hyphenvorm plus optionele toegestane alternatieven (``+``-regels)."""
 
-    Lege regels en ``#``-commentaar worden overgeslagen. Dubbele lemma's
-    met verschillende vormen zijn een fout in het databestand.
+    primary: str
+    alts: frozenset[str] = frozenset()
+
+    def allowed(self) -> frozenset[str]:
+        return frozenset({self.primary}) | self.alts
+
+
+@lru_cache(maxsize=1)
+def load_syllable_entries() -> dict[str, SyllableEntry]:
+    """Laad lemma → primaire vorm + optionele ``+``-alternatieven.
+
+    Standaard: één vorm per lemma. Extra vormen alleen via regels die met
+    ``+`` beginnen (zelfde lemma als de open primaire groep).
     """
     path = dictionary_file_path()
     if not path.is_file():
         return {}
-    mapping: dict[str, str] = {}
-    for lineno, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+    return parse_syllable_dictionary_text(
+        path.read_text(encoding="utf-8"), source_name=path.name
+    )[1]
+
+
+def parse_syllable_dictionary_text(
+    text: str,
+    *,
+    source_name: str = "syllable_dictionary",
+) -> tuple[str, dict[str, SyllableEntry]]:
+    """Parse header + entries; retourneer ``(header, lemma → entry)``."""
+    lines = text.splitlines()
+    header_lines: list[str] = []
+    i = 0
+    while i < len(lines):
+        stripped = lines[i].strip()
+        if not stripped or stripped.startswith("#"):
+            header_lines.append(lines[i])
+            i += 1
+            continue
+        break
+    header = "\n".join(header_lines)
+    if header_lines:
+        header += "\n"
+
+    entries: dict[str, SyllableEntry] = {}
+    open_key: str | None = None
+    for lineno, raw in enumerate(lines[i:], start=i + 1):
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        form = line.casefold()
+        is_alt = line.startswith("+")
+        form = line[1:].strip().casefold() if is_alt else line.casefold()
         key = syllable_lemma(form)
         if not key:
             continue
-        existing = mapping.get(key)
-        if existing is not None and existing != form:
-            raise ValueError(
-                f"{path.name}:{lineno}: lemma {key!r} heeft twee vormen: "
-                f"{existing!r} en {form!r}"
+        if is_alt:
+            if open_key is None:
+                raise ValueError(
+                    f"{source_name}:{lineno}: ``+``-vorm zonder primaire "
+                    f"groep: {form!r}"
+                )
+            if key != open_key:
+                raise ValueError(
+                    f"{source_name}:{lineno}: ``+``-vorm {form!r} hoort bij "
+                    f"lemma {key!r}, open groep is {open_key!r}"
+                )
+            current = entries[open_key]
+            if form == current.primary or form in current.alts:
+                continue
+            entries[open_key] = SyllableEntry(
+                current.primary, current.alts | {form}
             )
-        mapping[key] = form
-    return mapping
+            continue
+
+        existing = entries.get(key)
+        if existing is not None and existing.primary != form:
+            raise ValueError(
+                f"{source_name}:{lineno}: lemma {key!r} heeft twee primaire "
+                f"vormen: {existing.primary!r} en {form!r} "
+                f"(gebruik ``+{form}`` voor een toegestaan alternatief)"
+            )
+        if existing is None:
+            entries[key] = SyllableEntry(form, frozenset())
+        open_key = key
+    return header, entries
+
+
+@lru_cache(maxsize=1)
+def load_syllable_dictionary() -> dict[str, str]:
+    """Laad lemma → primaire canonieke hyphenvorm."""
+    return {key: entry.primary for key, entry in load_syllable_entries().items()}
 
 
 def canonical_syllable_form(word: str) -> str | None:
-    """Canonieke hyphenvorm voor ``word``, of ``None`` als onbekend."""
+    """Primaire canonieke hyphenvorm voor ``word``, of ``None`` als onbekend."""
     key = syllable_lemma(word)
     if not key:
         return None
-    return load_syllable_dictionary().get(key)
+    entry = load_syllable_entries().get(key)
+    return entry.primary if entry is not None else None
+
+
+def allowed_syllable_forms(word: str) -> frozenset[str] | None:
+    """Alle toegestane hyphenvormen voor het lemma, of ``None`` als onbekend."""
+    key = syllable_lemma(word)
+    if not key:
+        return None
+    entry = load_syllable_entries().get(key)
+    if entry is None:
+        return None
+    return entry.allowed()
+
+
+def is_allowed_syllable_form(word: str) -> bool:
+    """Of ``word`` (genormaliseerd) een toegestane hyphenvorm van het lemma is."""
+    forms = allowed_syllable_forms(word)
+    if forms is None:
+        return False
+    normalized = word.strip().casefold()
+    return normalized in forms
 
 
 def clear_syllable_dictionary_cache() -> None:
     """Voor tests: cache legen."""
-    clear = getattr(load_syllable_dictionary, "cache_clear", None)
-    if callable(clear):
-        clear()
+    for fn in (load_syllable_dictionary, load_syllable_entries):
+        clear = getattr(fn, "cache_clear", None)
+        if callable(clear):
+            clear()
 
 
 def _file_has_entries(path: Path) -> bool:
