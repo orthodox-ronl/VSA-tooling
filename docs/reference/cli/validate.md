@@ -48,7 +48,7 @@ keer — je hoeft niet telkens één fout te herstellen en opnieuw te draaien.
 | `path`                        | Ja        | Bestand of map om te controleren.                                                                 | —                                     | Moet bestaan. |
 | `--config CONFIG`             | Nee       | Pad naar een alternatief `vsa.toml` (severity-overrides, zie [config.md](../config.md)).          | Auto-detectie van `vsa.toml`          | —             |
 | `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt` (overschrijft auto-detect / toml).            | auto                                  | —             |
-| `--lyrics-lang {auto,nl,ksl}` | Nee       | Woordenlijst: `auto` = Cyrillisch in lyrics → `ksl`, anders `nl`; of forceer.                     | `auto`                                | —             |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | Woordenlijst: `auto` = per woord Latijn→`nl` / Cyrillisch→`ksl`; of forceer één taal.             | `auto`                                | —             |
 | `--summary`                   | Nee       | Compacte, eenregelige foutmeldingen tonen, zonder broncontextregel.                               | Uit (volledige context met bronregel) | —             |
 | `-h`, `--help`                | Nee       | Toon hulp voor dit subcommando.                                                                   | —                                     | —             |
 

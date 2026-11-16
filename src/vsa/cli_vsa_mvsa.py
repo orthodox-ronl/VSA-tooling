@@ -93,7 +93,7 @@ def add_vsa_mvsa_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def run_vsa_mvsa(args: argparse.Namespace) -> int:
-    from .cli_messages import emit_cli_error, emit_cli_exception
+    from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 
     library = Path(args.library) if args.library else None
     if args.list_templates:
@@ -142,7 +142,7 @@ def run_vsa_mvsa(args: argparse.Namespace) -> int:
         return 2
 
     assert result.output_path is not None
-    print(f"Geschreven: {result.output_path}")
+    print(f"Geschreven: {path_label(result.output_path)}")
     print(
         f"template: {result.resolved.canonical_id}"
         + (

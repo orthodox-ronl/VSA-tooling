@@ -5,7 +5,9 @@ from pathlib import Path
 from vsa.parser import Parser
 from vsa.syllabify import hyphenate_dutch_word
 from vsa.syllable_dict_check import (
+    CODE_LANG_SKIPPED,
     CODE_MISMATCH,
+    CODE_TAAL_MISMATCH,
     CODE_UNKNOWN,
     append_canonical_form,
     apply_replacements_to_text,
@@ -16,6 +18,7 @@ from vsa.syllable_dict_check import (
     set_canonical_form,
 )
 from vsa.syllable_dictionary import (
+    apply_syllable_dictionary_from_config,
     clear_syllable_dictionary_cache,
     load_syllable_dictionary,
     set_lyrics_lang,
@@ -69,14 +72,14 @@ def test_unknown_multisyllable_is_reported() -> None:
 def test_ksl_lang_skips_latin_and_flags_cyrillic(tmp_path: Path) -> None:
     ksl = tmp_path / "syllable_dictionary.ksl.txt"
     ksl.write_text("# leeg\n", encoding="utf-8")
-    set_syllable_dictionary_path(ksl)
-    set_lyrics_lang("ksl")
+    apply_syllable_dictionary_from_config(cli_path=ksl, lang="ksl")
     clear_syllable_dictionary_cache()
     try:
         findings = find_dictionary_syllable_issues_from_cores(
             ["Heer", "Гос-по-ди"],
             lyrics_lang="ksl",
         )
+        assert any(f.code == CODE_LANG_SKIPPED for f in findings)
         assert not any(f.surface == "Heer" for f in findings)
         assert any(
             f.code == CODE_UNKNOWN and f.surface == "Гос-по-ди" for f in findings
@@ -99,28 +102,58 @@ def test_nl_lang_skips_cyrillic() -> None:
     assert any(f.code == CODE_UNKNOWN and f.surface == "xyz-zy-xab" for f in findings)
 
 
-def test_auto_lang_picks_ksl_for_cyrillic(tmp_path: Path) -> None:
-    ksl = tmp_path / "syllable_dictionary.ksl.txt"
-    ksl.write_text("# leeg\n", encoding="utf-8")
-    set_syllable_dictionary_path(ksl)
-    set_lyrics_lang("auto")
+def test_auto_lang_checks_cyrillic_and_latin(tmp_path: Path, monkeypatch) -> None:
+    """auto: Latijn én Cyrillisch in één bron → beide dictionaries."""
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "syllable_dictionary.nl.txt").write_text(
+        "heer\n", encoding="utf-8"
+    )
+    (data / "syllable_dictionary.ksl.txt").write_text("# leeg\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    apply_syllable_dictionary_from_config(lang="auto")
     clear_syllable_dictionary_cache()
     try:
-        from vsa.syllable_dictionary import apply_syllable_dictionary_from_config
-
-        apply_syllable_dictionary_from_config(cli_path=ksl, lang="auto")
         findings = find_dictionary_syllable_issues_from_cores(
-            ["Гос-по-ди"],
+            ["xyz-zy-xab", "Гос-по-ди"],
             lyrics_lang="auto",
         )
         assert any(
+            f.code == CODE_UNKNOWN and f.surface == "xyz-zy-xab" for f in findings
+        )
+        assert any("(nl" in f.message_nl for f in findings if f.surface == "xyz-zy-xab")
+        assert any(
             f.code == CODE_UNKNOWN and f.surface == "Гос-по-ди" for f in findings
         )
-        assert any("(ksl" in f.message_nl for f in findings)
+        assert any("(ksl" in f.message_nl for f in findings if f.surface == "Гос-по-ди")
+        assert not any(f.code == CODE_LANG_SKIPPED for f in findings)
     finally:
         set_lyrics_lang("nl")
         set_syllable_dictionary_path(None)
         clear_syllable_dictionary_cache()
+
+
+def test_force_nl_emits_lang_skipped_for_cyrillic() -> None:
+    findings = find_dictionary_syllable_issues_from_cores(
+        ["Господи", "xyz-zy-xab"],
+        lyrics_lang="nl",
+    )
+    assert any(f.code == CODE_LANG_SKIPPED for f in findings)
+    assert "ksl" in next(f for f in findings if f.code == CODE_LANG_SKIPPED).message_nl
+    assert not any("Господи" in f.surface for f in findings)
+    assert any(f.code == CODE_UNKNOWN and f.surface == "xyz-zy-xab" for f in findings)
+
+
+def test_frontmatter_taal_mismatch_warning() -> None:
+    source = "---\ntaal: nl\n---\nГос-по-ди Heer\n"
+    findings = find_dictionary_syllable_issues_from_cores(
+        ["Гос-по-ди", "Heer"],
+        source_text=source,
+        lyrics_lang="auto",
+    )
+    assert any(f.code == CODE_TAAL_MISMATCH for f in findings)
+    hit = next(f for f in findings if f.code == CODE_TAAL_MISMATCH)
+    assert "ksl" in hit.message_nl
 
 
 def test_validate_file_dictionary_mismatch_is_error(
@@ -205,6 +238,100 @@ def test_replace_scope_bridged_eeuwen() -> None:
     assert "{\\eeuw}{\\en}" not in out
 
 
+def test_replace_mvsa_recite_bridged_gezegend() -> None:
+    """Enter op MISMATCH: ``(… gez)-e_-gend_`` → ``(… ge)-ze_-gend_``."""
+    from vsa.syllable_dict_check import (
+        apply_replacements_to_source,
+        find_mvsa_dictionary_syllable_issues,
+    )
+
+    src = """\
+@title "t"
+@do F4
+@mode major
+@oct S=0
+
+L: (De Naam des He-ren zij gez)-e_-gend_ [//.] |
+S: a4                          -   -          |
+"""
+    out = apply_replacements_to_source(src, [("gez-e-gend", "ge-ze-gend")])
+    assert "gez)-e_" not in out
+    assert "ge)-ze_" in out or "(De Naam des He-ren zij ge)-ze_" in out
+    assert "[//.]" in out
+    again = find_mvsa_dictionary_syllable_issues(out)
+    assert not any(
+        f.surface.replace("=", "-").casefold().startswith("gez-e")
+        for f in again
+    )
+
+
+def test_replace_mvsa_elm_bridged_eeuwigheid() -> None:
+    """``eeuw_-ig-heid_`` → ``eeu_-wig-heid_`` over ELM-posities."""
+    from vsa.syllable_dict_check import apply_replacements_to_source
+
+    src = """\
+@title "t"
+@do F4
+@mode major
+@oct S=0
+
+L: in eeuw_-ig-heid_ [//.] |
+S: -  g4 a4  -   -          |
+"""
+    out = apply_replacements_to_source(
+        src, [("eeuw-ig-heid", "eeu-wig-heid")]
+    )
+    assert "eeuw_" not in out or "eeu_" in out
+    assert "eeu_" in out
+    assert "-wig" in out or "wig" in out
+    assert "[//.]" in out
+
+
+def test_replace_mvsa_recite_bridged_eeuwen() -> None:
+    """``eeuw)-en`` → ``eeu)-wen`` over recite-einde."""
+    from vsa.syllable_dict_check import apply_replacements_to_source
+
+    src = """\
+@title "t"
+@do F4
+@mode major
+@oct S=0
+
+L: (Nu en al-tijd en in de eeu-wen de eeuw)-en, a_-men_ |
+S:  a4                                      \\   /   -   |
+"""
+    out = apply_replacements_to_source(src, [("eeuw-en", "eeu-wen")])
+    assert "eeuw)-en" not in out
+    assert "eeu)-wen" in out or "eeu)-wen," in out
+
+
+def test_replace_scope_bridged_inserts_hard_hyphen() -> None:
+    """Enter op MISMATCH zet hard ``=`` tussen scopes (mede=eeuwige)."""
+    from vsa.parser import Parser
+    from vsa.syllable_dict_check import (
+        CODE_MISMATCH,
+        apply_replacements_to_source,
+        find_dictionary_syllable_issues,
+    )
+
+    src = r"het me{\de}{/eeu_}wi{\ge} woord"
+    # Oppervlakte via scopegrenzen = alleen soft ``-``.
+    findings = find_dictionary_syllable_issues(
+        Parser(src).parse(), source_text=src
+    )
+    hit = next(f for f in findings if f.code == CODE_MISMATCH)
+    assert hit.surface == "me-de-eeu-wi-ge"
+    assert hit.expected == "me-de=eeu-wi-ge"
+    out = apply_replacements_to_source(src, [(hit.surface, hit.expected)])
+    assert r"me{\de}={/eeu_}wi{\ge}" in out
+    again = find_dictionary_syllable_issues(
+        Parser(out).parse(), source_text=out
+    )
+    assert not any(
+        f.code == CODE_MISMATCH and f.surface.startswith("me-de") for f in again
+    )
+
+
 def test_replace_scope_plus_text_eeuwigheid() -> None:
     """``{/eeuw}igheid`` → ``{/eeu}wig-heid`` bij dictionary-correctie."""
     from vsa.syllable_dict_check import replace_sung_token_in_text
@@ -286,6 +413,25 @@ def test_locate_never_points_at_html_comment() -> None:
     assert column >= 1
 
 
+def test_locate_mvsa_hyphen_chain_with_space_not_on_title() -> None:
+    """MVSA ``Aan_ -U_`` (spatie tussen posities) → L-regel, niet ``@title``."""
+    from vsa.syllable_dict_check import _locate
+
+    source = (
+        '@oct "G"\n'
+        '@title "Vragende Litanie (16)"\n'
+        "\n"
+        "S:  a4_   a_   |\n"
+        "L:  Aan_ -U_.&-&_   o_, Heer__  |\n"
+    )
+    line, column = _locate(source, "Aan-U")
+    rows = source.splitlines()
+    assert rows[line - 1].lstrip().startswith("L:")
+    assert "Aan" in rows[line - 1]
+    assert not rows[line - 1].lstrip().startswith("@")
+    assert column >= 1
+
+
 def test_prompt_prints_source_id_once(tmp_path: Path, monkeypatch) -> None:
     from io import StringIO
 
@@ -315,6 +461,20 @@ def test_prompt_prints_source_id_once(tmp_path: Path, monkeypatch) -> None:
     )
     text = out.getvalue()
     assert text.count("--- tropaar/transfiguratie-toon-7/hemelum ---") == 1
+    # Zonder source_path: catalogus-id in de locatieregel (niet kale :regel:kolom:).
+    assert "tropaar/transfiguratie-toon-7/hemelum:" in text
+    assert not text.lstrip().startswith(":")
+
+
+def test_format_clickable_location_fallback_never_bare() -> None:
+    from vsa.syllable_dict_check import format_clickable_location
+
+    bare = format_clickable_location(None, 56, 8)
+    assert bare == "?:56:8:"
+    with_id = format_clickable_location(
+        None, 56, 8, fallback="soort/variant/uv"
+    )
+    assert with_id == "soort/variant/uv:56:8:"
 
 
 def test_prompt_mismatch_enter_queues_source_replace(
@@ -697,4 +857,63 @@ def test_set_canonical_form_keeps_alphabetical_order(
         if ln.strip() and not ln.strip().startswith("#")
     ]
     assert entries == ["aan-tal", "mid-den", "zee-man"]
+    clear_syllable_dictionary_cache()
+
+
+def test_mvsa_replace_shrinks_hyphen_chain_and_voice_holds() -> None:
+    """``ge-nee-st`` → ``ge-neest``: L krimpt; extra stem-``-`` verdwijnt."""
+    from vsa.mvsa_align import _voice_tokens
+    from vsa.mvsa_parse import parse_l_positions
+    from vsa.mvsa_validate import _split_bars
+    from vsa.syllable_dict_check import apply_replacements_to_source
+
+    src = (
+        "@oct S=0\n"
+        "L: Hij ge_-nee_-st_ al |\n"
+        "S: a4  /   -    /   -  |\n"
+        "A: f4  -   -    -   -  |\n"
+    )
+    out = apply_replacements_to_source(src, [("ge-nee-st", "ge-neest")])
+    l_line = next(ln for ln in out.splitlines() if ln.lstrip().startswith("L:"))
+    s_line = next(ln for ln in out.splitlines() if ln.lstrip().startswith("S:"))
+    l_body = l_line.split(":", 1)[1]
+    s_body = s_line.split(":", 1)[1]
+    positions = parse_l_positions(_split_bars(l_body).segments[0])
+    s_toks = _voice_tokens(_split_bars(s_body).segments[0])
+    assert [p.syllables for p in positions] == [["Hij"], ["ge"], ["neest"], ["al"]]
+    assert len(s_toks) == len(positions)
+    cores = ["".join(p.syllables) for p in positions]
+    assert any("neest" in c for c in cores)
+    assert "nee" not in cores
+    assert "st" not in cores
+
+
+def test_prompt_unknown_typed_form_queues_replacement(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from io import StringIO
+
+    clear_syllable_dictionary_cache()
+    data = tmp_path / "syllable_dictionary.nl.txt"
+    data.write_text("# test\n", encoding="utf-8")
+    import vsa.syllable_dictionary as dict_mod
+    import vsa.syllable_dict_check as check_mod
+
+    monkeypatch.setattr(dict_mod, "dictionary_file_path", lambda: data)
+    monkeypatch.setattr(check_mod, "dictionary_file_path", lambda: data)
+    clear_syllable_dictionary_cache()
+
+    surface = "xyzzyxab"
+    finding = next(
+        f
+        for f in find_dictionary_syllable_issues(
+            Parser(surface).parse(), source_text=surface
+        )
+        if f.code == CODE_UNKNOWN
+    )
+    session = prompt_dictionary_fixes(
+        [finding], stdin=_Tty("xyz-zy-xab\n"), stdout=StringIO()
+    )
+    assert session.added_or_updated == ["xyz-zy-xab"]
+    assert session.replacements == [(surface, "xyz-zy-xab")]
     clear_syllable_dictionary_cache()

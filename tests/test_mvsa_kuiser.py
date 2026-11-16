@@ -40,7 +40,7 @@ B: re  re  do  ||
     assert not [d for d in diags if d.severity == "error"]
 
 
-def test_kuiser_keeps_tilde_in_melisma_and_after_recite():
+def test_kuiser_keeps_tilde_in_melisma_omits_after_recite():
     text = """\
 @do F4
 @mode major
@@ -53,7 +53,33 @@ B: re&re   re   ||
 """
     result = kuiser_mvsa_text(text, align=False)
     assert "ziel~&~" in result.text
-    assert "(ia)~" in result.text
+    assert "(ia)" in result.text
+    assert "(ia)~" not in result.text
+    diags = validate_mvsa_text(result.text)
+    assert not [d for d in diags if d.severity == "error"]
+
+
+def test_kuiser_omits_lone_tilde_and_elm_dash_keeps_soft_hyphen():
+    """Soft ``ge-neest`` blijft; trailing ELM-``-``/lone ``~`` weg."""
+    text = """\
+@do F4
+@mode major
+@sectie a
+L: Hij~ ge-neest- al~ uw~ kwa_-len_. ||
+S: fa   so so     la  so  fa   mi    ||
+A: re   re re     re  re  re   do    ||
+T: la-  so- so-   so- so- la-  so-   ||
+B: re   re re     re  re  re   do    ||
+"""
+    result = kuiser_mvsa_text(text, align=False)
+    l_line = next(ln for ln in result.text.splitlines() if ln.startswith("L:"))
+    assert re.search(r"\bge-neest\b", l_line)
+    assert "ge-neest-" not in l_line
+    assert "ge-neest~" not in l_line
+    assert "Hij~" not in l_line
+    assert "al~" not in l_line
+    assert "uw~" not in l_line
+    assert "kwa_-len_." in l_line
     diags = validate_mvsa_text(result.text)
     assert not [d for d in diags if d.severity == "error"]
 
@@ -75,19 +101,67 @@ B: re&re&re re ||
 
 
 def test_kuiser_semantic_missing_hyphen_warning():
+    """Alleen bij lemma in de woordenlijst (``vader``), niet bij Pyphen-ruis."""
     text = """\
 @do F4
 @mode major
 @sectie a
-L: Al le lu ||
-S: fa so la ||
-A: re re re ||
-T: la- so- la- ||
-B: re re re ||
+L: Va der ||
+S: fa so ||
+A: re re ||
+T: la- so- ||
+B: re re ||
 """
     result = kuiser_mvsa_text(text, align=False)
-    assert any("ontbrekend woordstreepje" in w.message for w in result.warnings)
-    assert any("Al-le-lu" in w.message for w in result.warnings)
+    assert any("missen woordstreepjes" in w.message for w in result.warnings)
+    assert any("va-der" in w.message.lower() for w in result.warnings)
+
+
+def test_kuiser_warning_line_includes_yaml_frontmatter_offset():
+    """Warning-regelnummers tellen mee vanaf het hele bestand (YAML + body)."""
+    text = """\
+---
+titel: Test
+taal: nl
+---
+
+@do F4
+@mode major
+@sectie a
+L: Va der ||
+S: fa so ||
+A: re re ||
+T: la- so- ||
+B: re re ||
+"""
+    result = kuiser_mvsa_text(text, align=False)
+    miss = [w for w in result.warnings if "missen woordstreepjes" in w.message]
+    assert miss
+    # Regelnummer = L-regel in de tekst ná Q6/Q2/Q3 (YAML + geïnjecteerde @).
+    from vsa.mvsa_kuiser_q23 import apply_q2_q3
+    from vsa.mvsa_kuiser_q67 import apply_q6
+
+    prepared = apply_q2_q3(apply_q6(text, werkbank=False))
+    prep_lines = prepared.splitlines()
+    assert 1 <= miss[0].line <= len(prep_lines)
+    assert "Va der" in prep_lines[miss[0].line - 1]
+
+
+def test_kuiser_semantic_no_false_hyphen_across_words():
+    """Losse woorden (``in eeu…``) → geen Pyphen-ruis-warning."""
+    text = """\
+@do F4
+@mode major
+@sectie a
+L: in eeu_-wig-heid_ ||
+S: fa so   la  si    ||
+A: re re   re  re    ||
+T: la- so- so- so-   ||
+B: re re   re  re    ||
+"""
+    result = kuiser_mvsa_text(text, align=False)
+    assert not any("missen woordstreepjes" in w.message for w in result.warnings)
+    assert not any("in-eeu" in w.message for w in result.warnings)
 
 
 def test_kuiser_semantic_does_not_glue_next_capital_word():
@@ -95,16 +169,16 @@ def test_kuiser_semantic_does_not_glue_next_capital_word():
 @do F4
 @mode major
 @sectie a
-L: Hei li ge God ||
-S: fa so la si ||
-A: re re re re ||
-T: la- so- la- si- ||
-B: re re re re ||
+L: Va der God ||
+S: fa so si ||
+A: re re re ||
+T: la- so- so- ||
+B: re re re ||
 """
     result = kuiser_mvsa_text(text, align=False)
-    msgs = [w.message for w in result.warnings if "ontbrekend" in w.message]
-    assert any("Hei-li-ge" in m for m in msgs)
-    assert not any("God" in m and "ontbrekend" in m for m in msgs)
+    msgs = [w.message for w in result.warnings if "missen woordstreepjes" in w.message]
+    assert any("va-der" in m.lower() for m in msgs)
+    assert not any("God" in m for m in msgs)
 
 
 def test_kuiser_preserves_space_before_word_hyphen():

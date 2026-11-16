@@ -13,9 +13,9 @@ resultaat altijd handmatig; Pyphen is geen liturgische eindredacteur.
 ## Synopsis
 
 ```text
-vsa syllabify [-h] [--dry-run] [--in-place] [--extension EXT] [--unsyllabify]
-              [--config PAD] [--syllable-dictionary PAD]
-              [--lyrics-lang {auto,nl,ksl}] path
+vsa syllabify [-h] [--dry-run] [--verbose] [--in-place] [--extension EXT]
+               [--unsyllabify] [--config PAD] [--syllable-dictionary PAD]
+               [--lyrics-lang {auto,nl,ksl}] path
 ```
 
 ## Beschrijving
@@ -82,12 +82,13 @@ laten zonder die lijst.
 Zelfde patroon als [`vsa zoektekst`](zoektekst.md) / [`mvsa kuiser`](mvsa.md#mvsa-kuiser):
 **default schrijft in-place**; `--dry-run` toont alleen een preview.
 
-| Modus             | Gedrag                                                                  |
-| ----------------- | ----------------------------------------------------------------------- |
-| (geen flag)       | Overschrijf elk bronbestand (in-place).                                 |
-| `--dry-run`       | Niets schrijven. Eén bestand: resultaat op stdout. Map: statusregels.   |
-| `--in-place`      | Expliciet in-place (zelfde als default; handig in scripts).             |
-| `--extension EXT` | Schrijf naast het bronbestand: `xyz.vsa` → `xyz` + genormaliseerde EXT. |
+| Modus             | Gedrag                                                                                          |
+| ----------------- | ----------------------------------------------------------------------------------------------- |
+| (geen flag)       | Overschrijf elk bronbestand (in-place).                                                         |
+| `--dry-run`       | Niets schrijven. Eén bestand: resultaat op stdout. Map: alleen eindsummary (tenzij `--verbose`). |
+| `--verbose` / `-v`| Per bestand een statusregel; zonder deze flag alleen de eindsummary.                            |
+| `--in-place`      | Expliciet in-place (zelfde als default; handig in scripts).                                     |
+| `--extension EXT` | Schrijf naast het bronbestand: `xyz.vsa` → `xyz` + genormaliseerde EXT.                         |
 
 `--in-place` en `--extension` mag je niet combineren. Met `--extension` mag
 je wel `--dry-run` gebruiken om alleen te tonen wat er zou gebeuren.
@@ -102,23 +103,27 @@ bij `--extension .syl.vsa`) worden overgeslagen, zodat je geen
 | ----------------------------- | --------- | --------------------------------------------------------------------------------------- | ---------------- | ----------------------------------------------- |
 | `path`                        | Ja        | Pad naar een `.vsa`-bestand of een map met `.vsa`-bestanden.                            | —                | Moet bestaan.                                   |
 | `--dry-run`                   | Nee       | Toon het resultaat zonder bestanden te schrijven.                                       | Uit (schrijven)  | —                                               |
+| `--verbose`, `-v`             | Nee       | Per bestand een statusregel (anders alleen eindsummary).                                | Uit              | —                                               |
 | `--in-place`                  | Nee       | Schrijf terug naar elk bronbestand (default-gedrag).                                    | Aan (impliciet)  | Niet combineren met `--extension`.              |
 | `--extension EXT`             | Nee       | Schrijf naar sibling-bestanden (`.syl.vsa` of `syl.vsa` → `xyz.syl.vsa`).               | Uit              | Moet eindigen op `.vsa`; niet met `--in-place`. |
 | `--unsyllabify`               | Nee       | Verwijder lettergreepstreepjes (ook brugstreepjes rond scopes) i.p.v. ze toe te voegen. | Uit (hypheneren) | Scope-inhoud / ELM-`-` blijven staan.           |
 | `--config PAD`                | Nee       | Pad naar `vsa.toml` (o.a. `[syllabificatie] dictionary`).                               | auto             | —                                               |
 | `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt`.                                    | auto             | —                                               |
-| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = Cyrillisch → `ksl`, anders `nl`; of forceer.                                   | `auto`           | —                                               |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = per woord Latijn→`nl` / Cyrillisch→`ksl`; of forceer één taal.                 | `auto`           | —                                               |
 | `-h`, `--help`                | Nee       | Toon hulp voor dit subcommando.                                                         | —                | —                                               |
 
 ## Output
 
+- **Eindsummary** (altijd): één regel met aantal bestanden en soort
+  wijzigingen, bijvoorbeeld
+  `syllabify: 119 bestand(en) — 5 met streepjes toegevoegd (12×), 3 met andere tekstwijziging, 111 ongewijzigd`.
+  „Andere tekstwijziging” = bestand gewijzigd zonder netto soft `-`
+  (bijv. scope-herverdeling `{/A}dam`). Bij `--dry-run` eindigt de regel
+  op `(dry-run)`.
+- **`--verbose`**: daarnaast per bestand een statusregel
+  (`<bron>: …` of `<bron> -> <doel>: …`).
 - **Eén bestand, dry-run**: gehypheneerde (of ont-syllabifyde) brontekst op
-  **stdout**; op **stderr** een regel
-  `(dry-run — N lettergreepstreepje(s) toegevoegd|verwijderd; bestand niet geschreven)`.
-- **Map, dry-run**: per bestand een statusregel op stdout, bijv.
-  `pad\a.vsa -> pad\a.syl.vsa: 2 lettergreepstreepje(s) toegevoegd (dry-run)`.
-- **Schrijven (default / `--in-place` / `--extension`)**: per bestand een
-  statusregel op stdout (`<bron>: …` of `<bron> -> <doel>: …`).
+  **stdout**; summary (en optioneel verbose-status) op **stderr**.
 
 ## Exit status
 

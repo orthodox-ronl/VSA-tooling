@@ -880,3 +880,29 @@ T: c4              -  ||
 B: c3              -  ||
 """
     assert validate_mvsa_text(ok2) == []
+
+
+def test_validate_text_without_path_does_not_tty_prompt(monkeypatch):
+    """Interne validate (o.a. na syllabify) mag geen TTY zonder pad starten."""
+    import vsa.mvsa_validate as mv
+    import vsa.syllable_dict_check as check
+
+    calls: list[int] = []
+
+    def boom(*_a, **_k):
+        calls.append(1)
+        raise AssertionError("prompt_dictionary_fixes zonder pad")
+
+    monkeypatch.setattr(check, "is_interactive_stdin", lambda stdin=None: True)
+    monkeypatch.setattr(check, "prompt_dictionary_fixes", boom)
+
+    text = """\
+@do F4
+@mode major
+@oct S=0
+
+L: (ge-nee-st) heer_ |
+S: a4          -    |
+"""
+    validate_mvsa_text(text)
+    assert calls == []

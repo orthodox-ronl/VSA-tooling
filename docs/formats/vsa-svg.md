@@ -34,6 +34,10 @@ houdt de zing-deling zichtbaar — zie [syllabificatie](syllabificatie.md) ·
 
 Volgt VSA-renderregels / K2; hyphen ≠ melisma.
 
+Een opvulstreep rechts van een lettergreep wordt alleen getekend als de
+ELM- en EHM-glyphs van die lettergreep samen breder zijn dan de tekst.
+Norm: [rendering — kolombreedtes](../specification/rendering.md#kolombreedtes-en-rijhoogtes).
+
 ## Transliteratie
 
 n.v.t. op standaard `.vsa.svg`. Tweede schrift: [translit-svg](translit-svg.md).

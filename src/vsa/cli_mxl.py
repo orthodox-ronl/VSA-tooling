@@ -12,7 +12,7 @@ from pathlib import Path
 
 from .cli_score_to_mvsa import add_score_to_mvsa_arguments, run_score_to_mvsa
 from .derived_path import derived_output_path
-from .cli_messages import emit_cli_error, emit_cli_exception
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .input_paths import InputPathError, collect_cli_sources
 
 _MXL_SUFFIXES = (".mxl", ".musicxml", ".xml")
@@ -193,7 +193,7 @@ def _cmd_mxl_validate(ns: argparse.Namespace) -> int:
     for path in files:
         findings = validate_playback_mxl_path(path, profile=ns.profile)
         if not findings:
-            print(f"OK ({ns.profile}): {path}")
+            print(f"OK ({ns.profile}): {path_label(path)}")
             continue
         for f in findings:
             emit_cli_error(
@@ -282,7 +282,7 @@ def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
                 continue
         finally:
             tmp_mxl.unlink(missing_ok=True)
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
     return exit_code
 
 

@@ -71,7 +71,24 @@ def add_kuiser_parser(
     p.add_argument(
         "--check",
         action="store_true",
-        help="Dry-run: toon of er iets zou wijzigen (standaard: uit)",
+        help=(
+            "Geen schrijven; exit 1 als er iets zou wijzigen "
+            "(strikte controle)."
+        ),
+    )
+    p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Schrijf niets; noem doelbestanden die anders zouden worden "
+            "weggeschreven."
+        ),
+    )
+    p.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Met --dry-run: toon ook een begrensde unified diff per bestand.",
     )
     if street == "vsa" and implemented:
         p.add_argument(

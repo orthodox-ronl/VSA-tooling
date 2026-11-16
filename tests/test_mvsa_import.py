@@ -1309,7 +1309,7 @@ def test_hyphen_extender_and_trailing_period_lyrics_validate():
 
 
 def test_lyricless_leading_notes_emit_empty_recite():
-    """Notes without lyrics → empty recite ``()~``, not bare ``~``."""
+    """Notes without lyrics → empty recite ``()``, not bare ``~``."""
     xml = _satb_score_xml(
         {
             "P1": """\
@@ -1357,7 +1357,8 @@ def test_lyricless_leading_notes_emit_empty_recite():
     text = score_to_mvsa(score, pitch_form="abc")
     l_line = next(ln for ln in text.splitlines() if ln.startswith("L:"))
     first = l_line.split("|", 1)[0]
-    assert "()~" in first  # na ``)`` blijft ``~`` (anders breve)
+    assert re.search(r"\(\)", first)  # lege recite; lone ``)~`` is impliciet
+    assert "()~" not in first
     assert re.search(r"\bons\b", first) and "nu_" in first
     assert "ons~" not in first
     assert re.search(r"(^| )~ ons", first) is None
@@ -1365,15 +1366,15 @@ def test_lyricless_leading_notes_emit_empty_recite():
     assert not [d for d in diags if d.severity == "error"], (diags, text)
 
 
-def test_import_omits_lone_tilde_keeps_melisma_and_recite():
-    """Canonieke L: lone ``~`` weg; ``~&~`` en post-``)`` ``~`` blijven."""
+def test_import_omits_lone_tilde_keeps_melisma():
+    """Canonieke L: lone ``~`` weg (ook na ``)``); ``~&~`` blijft."""
     from vsa.mvsa_import import _l_duration_suffix
 
     assert _l_duration_suffix(["~"]) == ""
     assert _l_duration_suffix(["_"]) == "_"
     assert _l_duration_suffix(["~", "~"]) == "~&~"
     assert _l_duration_suffix([".", "."]) == ".&."
-    assert _l_duration_suffix(["~"], after_recite=True) == "~"
+    assert _l_duration_suffix(["~"], after_recite=True) == ""
 
 
 def test_import_output_contains_sketch_warning_banner():

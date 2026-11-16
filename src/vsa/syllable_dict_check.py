@@ -16,6 +16,7 @@ from .syllabify import (
     hyphenate_dutch_word,
 )
 from .syllable_dictionary import (
+    LYRICS_LANGS,
     SyllableEntry,
     activate_concrete_lyrics_lang,
     allowed_syllable_forms,
@@ -24,14 +25,18 @@ from .syllable_dictionary import (
     core_matches_lyrics_lang,
     dictionary_file_path,
     dictionary_path_label,
-    ensure_lyrics_lang_for_cores,
+    get_lyrics_lang_mode,
+    lyrics_lang_for_core,
     normalize_lyrics_lang_mode,
+    parse_frontmatter_lyrics_langs,
     parse_syllable_dictionary_text,
     syllable_lemma,
 )
 
 CODE_MISMATCH = "VSA-SYLLABLE-DICT-MISMATCH"
 CODE_UNKNOWN = "VSA-SYLLABLE-DICT-UNKNOWN"
+CODE_LANG_SKIPPED = "VSA-SYLLABLE-LANG-SKIPPED"
+CODE_TAAL_MISMATCH = "VSA-SYLLABLE-TAAL-MISMATCH"
 DOC_URL = "docs/formats/syllabificatie.md"
 
 _TOKEN_RE = re.compile(r"\S+", re.UNICODE)
@@ -44,6 +49,9 @@ _HINT_TTY = (
 
 # Exitcode voor CLI-gates bij interactieve afbreking (Esc).
 DICT_PROMPT_ABORT_RC = 2
+
+# C3/products e.d.: forceer non-interactief ongeacht TTY of import-binding.
+_force_noninteractive: bool = False
 
 # Interne actiecodes van de TTY-lezer (niet als hyphenvorm typen).
 _ACTION_SKIP = "__skip__"
@@ -80,26 +88,42 @@ def format_clickable_location(
     column: int,
     *,
     cwd: Path | str | None = None,
+    fallback: str | None = None,
 ) -> str:
     """``pad:regel:kolom:`` — klikbaar in de VS Code / Cursor-terminal.
 
-    Pad relatief t.o.v. ``cwd`` (default: werkmap) als het bestand daaronder
-    valt — korter, en VS Code opent het vanuit de repo-root.
+    Gebruikt :func:`vsa.cli_messages.path_label` (korte catalogus-paden:
+    zonder ``content-source/catalogus``). ``cwd`` blijft voor tests die een
+    andere basis willen; anders is de werkmap leidend.
+
+    Zonder pad: ``fallback`` (catalogus-id / bestandsnaam), nooit alleen
+    ``:regel:kolom:`` — dat is onleesbaar in een catalogus-batch.
     """
+    from .cli_messages import path_label
+
     loc_line = line if line and line > 0 else 1
     loc_col = column if column and column > 0 else 1
-    if path is None or str(path).strip() == "":
-        return f":{loc_line}:{loc_col}:"
-    resolved = Path(path).expanduser()
-    try:
-        resolved = resolved.resolve()
-    except OSError:
-        pass
-    base = Path(cwd).resolve() if cwd is not None else Path.cwd()
-    try:
-        display = str(resolved.relative_to(base))
-    except ValueError:
-        display = str(resolved)
+    display = ""
+    if path is not None and str(path).strip() != "":
+        if cwd is not None:
+            # Test-/speciale basis: relatief t.o.v. gegeven cwd, daarna strip.
+            resolved = Path(path).expanduser()
+            try:
+                resolved = resolved.resolve()
+            except OSError:
+                pass
+            base = Path(cwd).resolve()
+            try:
+                display = path_label(resolved.relative_to(base))
+            except ValueError:
+                display = path_label(resolved)
+        else:
+            display = path_label(path)
+        if not display.strip():
+            display = path_label(path) or "?"
+    if not display.strip():
+        fb = (fallback or "").strip()
+        display = fb if fb else "?"
     return f"{display}:{loc_line}:{loc_col}:"
 
 
@@ -300,30 +324,119 @@ def find_dictionary_syllable_issues_from_cores(
 ) -> list[DictSyllableFinding]:
     """Vergelijk gegeven lyrics-woordkernen met de canonieke lijst.
 
-    ``lyrics_lang``: ``auto`` (schrift-detectie), ``nl`` of ``ksl``.
-    Zonder argument: actieve CLI-modus (default ``auto``).
+    ``lyrics_lang``: ``auto`` (per woord Latijn→nl / Cyrillisch→ksl),
+    ``nl`` of ``ksl`` (alleen dat schrift). Zonder argument: actieve
+    CLI-modus (default ``auto``).
     """
     if lyrics_lang is not None:
         mode = normalize_lyrics_lang_mode(lyrics_lang)
-        if mode == "auto":
-            lang = ensure_lyrics_lang_for_cores(cores)
-        else:
-            activate_concrete_lyrics_lang(mode)
-            lang = mode
     else:
-        lang = ensure_lyrics_lang_for_cores(cores)
+        mode = get_lyrics_lang_mode()
+
+    findings: list[DictSyllableFinding] = []
+    findings.extend(_frontmatter_taal_mismatch_findings(cores, source_text))
+
+    if mode == "auto":
+        langs_to_check: tuple[str, ...] = LYRICS_LANGS
+    else:
+        other = "ksl" if mode == "nl" else "nl"
+        if any(core_matches_lyrics_lang(c, other) for c in cores):
+            findings.append(
+                DictSyllableFinding(
+                    code=CODE_LANG_SKIPPED,
+                    surface="",
+                    expected=None,
+                    line=1,
+                    column=1,
+                    message_nl=(
+                        f"Syllable-dictionary: taal `{other}` overgeslagen "
+                        f"(--lyrics-lang {mode}); alleen `{mode}` nagelopen."
+                    ),
+                    hint_nl=(
+                        f"Gebruik `--lyrics-lang auto` om beide talen te "
+                        f"controleren, of `--lyrics-lang {other}` voor alleen "
+                        f"`{other}`. Norm: {DOC_URL}."
+                    ),
+                )
+            )
+        langs_to_check = (mode,)
+
+    for lang in langs_to_check:
+        lang_cores = [c for c in cores if core_matches_lyrics_lang(c, lang)]
+        if not lang_cores:
+            continue
+        activate_concrete_lyrics_lang(lang)
+        findings.extend(
+            _dictionary_findings_for_lang_cores(
+                lang_cores,
+                lang=lang,
+                source_text=source_text,
+            )
+        )
+    return findings
+
+
+def _frontmatter_taal_mismatch_findings(
+    cores: list[str],
+    source_text: str,
+) -> list[DictSyllableFinding]:
+    """Warning als FM ``taal`` niet alle schriften in de lyrics dekt."""
+    declared = parse_frontmatter_lyrics_langs(source_text)
+    if not declared:
+        return []
+    present = sorted(
+        {
+            lyrics_lang_for_core(c)
+            for c in cores
+            if c and any(ch.isalpha() for ch in c)
+        }
+    )
+    if not present:
+        return []
+    missing = [lang for lang in present if lang not in declared]
+    if not missing:
+        return []
+    declared_label = ", ".join(declared)
+    missing_label = ", ".join(missing)
+    return [
+        DictSyllableFinding(
+            code=CODE_TAAL_MISMATCH,
+            surface="",
+            expected=None,
+            line=1,
+            column=1,
+            message_nl=(
+                f"Frontmatter `taal: {declared_label}` dekt niet alle "
+                f"lyrics-schriften in dit bestand (ook aanwezig: "
+                f"{missing_label})."
+            ),
+            hint_nl=(
+                "Zet `taal: ["
+                + ", ".join(sorted(set(declared) | set(missing)))
+                + "]` of corrigeer de lyrics. Sessie-uitschakelen: "
+                f"`--lyrics-lang`. Norm: {DOC_URL}."
+            ),
+        )
+    ]
+
+
+def _dictionary_findings_for_lang_cores(
+    cores: list[str],
+    *,
+    lang: str,
+    source_text: str,
+) -> list[DictSyllableFinding]:
+    """Dictionary-MISMATCH/UNKNOWN voor kernen van één concrete taal."""
     findings: list[DictSyllableFinding] = []
     # Per genormaliseerde oppervlaktevorm (niet alleen lemma): anders mist
     # een foute variant als elders in de bron al een toegestane vorm staat.
     seen: set[str] = set()
     for core in cores:
-        if not core_matches_lyrics_lang(core, lang):
-            continue
         key = syllable_lemma(core)
         if not key:
             continue
         surface_norm = _normalize_form(core)
-        dedupe = f"{key}\0{surface_norm}"
+        dedupe = f"{lang}\0{key}\0{surface_norm}"
         if dedupe in seen:
             continue
         seen.add(dedupe)
@@ -529,7 +642,339 @@ def replace_sung_token_in_text(text: str, surface: str, new_form: str) -> str:
         return f"{prefix}{_transfer_letter_case(core, target)}{suffix}"
 
     new = _TOKEN_RE.sub(_repl, text)
-    return _replace_lemma_in_scope_bridged_words(new, key, target)
+    new = _replace_lemma_in_scope_bridged_words(new, key, target)
+    return _replace_lemma_in_mvsa_bridged_words(new, key, target)
+
+
+def _replace_lemma_in_mvsa_bridged_words(
+    text: str, lemma_key: str, target_form: str
+) -> str:
+    """Herschrijf MVSA-woorden over recite-``)`` / ``(`` en ELM-posities.
+
+    Zelfde idee als VSA-scopebruggen: strip tot lettergreepdelen → canonieke
+    vorm. Bij gelijke telling: in-place. Bij N→M lettergrepen: L-posities
+    herschikken (krimpen/groeien). Stem-sync gebeurt apart via
+    ``resync_mvsa_voices_to_lyrics``.
+    """
+    if not text.strip() or "L:" not in text:
+        return text
+    try:
+        from .mvsa_validate import is_lyrics_stem, parse_regelidentifier
+    except Exception:
+        return text
+
+    lines = text.splitlines(keepends=True)
+    out: list[str] = []
+    changed_any = False
+    for line in lines:
+        raw = line.rstrip("\r\n")
+        eol = line[len(raw) :]
+        stripped = raw.lstrip()
+        lead = raw[: len(raw) - len(stripped)]
+        rid = parse_regelidentifier(stripped)
+        if not rid or not is_lyrics_stem(rid.stem_id):
+            out.append(line)
+            continue
+        label = stripped[: rid.match_end]
+        after_id = stripped[rid.match_end :]
+        prefix_sp = after_id[: len(after_id) - len(after_id.lstrip())]
+        content = after_id.lstrip()
+        new_content = _rewrite_mvsa_l_content(content, lemma_key, target_form)
+        if new_content != content:
+            changed_any = True
+            out.append(f"{lead}{label}{prefix_sp}{new_content}{eol}")
+        else:
+            out.append(line)
+    return "".join(out) if changed_any else text
+
+
+def _rewrite_mvsa_l_content(
+    content: str, lemma_key: str, target_form: str
+) -> str:
+    """Pas lemma-vervanging toe op één L-regelinhoud (maatstrepen behouden)."""
+    from dataclasses import replace
+
+    from .mvsa_align import _format_lpos_with_marks
+    from .mvsa_parse import parse_l_positions
+    from .mvsa_syllabify import _join_bar_segments, _join_l_tokens
+    from .mvsa_validate import _split_bars
+
+    target_syllables, target_seps = _syllables_and_separators(target_form)
+    if not target_syllables:
+        return content
+
+    split = _split_bars(content)
+    new_segs: list[str] = []
+    changed = False
+    for seg in split.segments:
+        positions = parse_l_positions(seg)
+        if not positions:
+            new_segs.append(seg.rstrip())
+            continue
+        working = [
+            replace(
+                p,
+                syllables=list(p.syllables),
+                links=list(p.links),
+                hard_links=list(p.hard_links),
+                marks_before=list(p.marks_before),
+                marks_after=list(p.marks_after),
+                elms=list(p.elms),
+            )
+            for p in positions
+        ]
+        if _rewrite_mvsa_positions_lemma(
+            working, lemma_key, target_syllables, target_seps
+        ):
+            changed = True
+            tokens = [_format_lpos_with_marks(p) for p in working]
+            new_segs.append(_join_l_tokens(tokens))
+        else:
+            new_segs.append(seg.rstrip())
+    if not changed:
+        return content
+    return _join_bar_segments(
+        new_segs,
+        split.bar_tokens,
+        list(split.bar_anchors),
+        split.leading_bar,
+    )
+
+
+def _mvsa_syllable_word_runs(
+    positions: list,
+) -> list[list[tuple[int, int]]]:
+    """Woordruns als ``(positie-index, lettergreep-index)`` — zelfde lijm als cores."""
+    runs: list[list[tuple[int, int]]] = []
+    current: list[tuple[int, int]] = []
+
+    def flush() -> None:
+        nonlocal current
+        if current:
+            runs.append(current)
+            current = []
+
+    for pi, pos in enumerate(positions):
+        for si, syl in enumerate(pos.syllables):
+            if not any(ch.isalpha() for ch in syl):
+                continue
+            if si == 0:
+                dash_into = (
+                    bool(current)
+                    and pos.recite
+                    and not pos.continues_word
+                    and pi > 0
+                    and not positions[pi - 1].recite
+                    and _bare_dash_elm(positions[pi - 1].elms)
+                )
+                if current and (pos.continues_word or dash_into):
+                    current.append((pi, si))
+                else:
+                    flush()
+                    current = [(pi, si)]
+            else:
+                linked = si - 1 < len(pos.links) and pos.links[si - 1]
+                if linked and current:
+                    current.append((pi, si))
+                else:
+                    flush()
+                    current = [(pi, si)]
+    flush()
+    return runs
+
+
+def _rewrite_mvsa_positions_lemma(
+    positions: list,
+    lemma_key: str,
+    target_syllables: list[str],
+    target_seps: list[str],
+) -> bool:
+    """True als minstens één woordrun is herschreven (ook N→M lettergrepen)."""
+    from .syllabify import _transfer_letter_case
+
+    target_form = _form_from_syls_seps(target_syllables, target_seps)
+    if syllable_lemma(target_form) != lemma_key:
+        return False
+
+    changed = False
+    # Achterstevoren: splice wijzigt indices van latere runs.
+    for run in reversed(_mvsa_syllable_word_runs(positions)):
+        if len(run) < 2:
+            # Eén lettergreep-deel: platte ``_TOKEN_RE``-replace dekt dat.
+            continue
+        surface = _mvsa_run_surface(positions, run)
+        if syllable_lemma(surface) != lemma_key:
+            continue
+        if _normalize_form(surface) == _normalize_form(target_form):
+            continue
+
+        # 1:1 in bestaande slots.
+        if len(run) == len(target_syllables):
+            part_seps = _separators_between_parts(
+                len(run), target_syllables, target_seps
+            )
+            if part_seps is None:
+                continue
+            for i, (pi, si) in enumerate(run):
+                old = positions[pi].syllables[si]
+                edges = _EDGE_PUNCT.match(old)
+                if edges:
+                    pre, core, suf = edges.group(1), edges.group(2), edges.group(3)
+                else:
+                    pre, core, suf = "", old, ""
+                new_core = _transfer_letter_case(core, target_syllables[i])
+                positions[pi].syllables[si] = f"{pre}{new_core}{suf}"
+            for i in range(len(run) - 1):
+                p0, s0 = run[i]
+                p1, _s1 = run[i + 1]
+                hard = part_seps[i] in {HARD_HYPHEN, "="}
+                if p0 == p1:
+                    if s0 < len(positions[p0].links):
+                        positions[p0].links[s0] = True
+                    if s0 < len(positions[p0].hard_links):
+                        positions[p0].hard_links[s0] = hard
+                    elif s0 == len(positions[p0].hard_links):
+                        positions[p0].hard_links.append(hard)
+                else:
+                    positions[p1].continues_word = True
+                    positions[p1].continues_word_hard = hard
+            changed = True
+            continue
+
+        # N→M: alleen cadens-ketens (één lettergreep per positie, aaneengesloten).
+        if not _mvsa_run_is_cadens_chain(positions, run):
+            continue
+        if _splice_mvsa_cadens_run(
+            positions, run, target_syllables, target_seps
+        ):
+            changed = True
+    return changed
+
+
+def _mvsa_run_is_cadens_chain(positions: list, run: list[tuple[int, int]]) -> bool:
+    """True als de run aaneengesloten cadens-posities is (1 lettergreep per pos)."""
+    pos_indices = [pi for pi, si in run]
+    if any(si != 0 for _pi, si in run):
+        return False
+    if len(pos_indices) != len(set(pos_indices)):
+        return False
+    if pos_indices != list(range(pos_indices[0], pos_indices[0] + len(pos_indices))):
+        return False
+    for pi in pos_indices:
+        pos = positions[pi]
+        if pos.recite or len(pos.syllables) != 1:
+            return False
+    return True
+
+
+def _splice_mvsa_cadens_run(
+    positions: list,
+    run: list[tuple[int, int]],
+    target_syllables: list[str],
+    target_seps: list[str],
+) -> bool:
+    """Vervang N cadens-posities door M nieuwe (krimpen of groeien)."""
+    from dataclasses import replace
+
+    from .mvsa_parse import LPosition
+    from .syllabify import _transfer_letter_case
+
+    if not target_syllables:
+        return False
+    first_pi = run[0][0]
+    last_pi = run[-1][0]
+    first = positions[first_pi]
+    last = positions[last_pi]
+
+    old_surface = _mvsa_run_surface(positions, run)
+    target_form = _form_from_syls_seps(target_syllables, target_seps)
+    cased_form = _transfer_letter_case(old_surface, target_form)
+    cased, cased_seps = _syllables_and_separators(cased_form)
+    if not cased:
+        cased, cased_seps = target_syllables, target_seps
+
+    first_edges = _EDGE_PUNCT.match(first.syllables[0])
+    last_edges = _EDGE_PUNCT.match(last.syllables[0])
+    pre = first_edges.group(1) if first_edges else ""
+    suf = last_edges.group(3) if last_edges else ""
+
+    new_pos: list = []
+    m = len(cased)
+    for i, syl in enumerate(cased):
+        hard = (
+            i > 0
+            and (i - 1) < len(cased_seps)
+            and cased_seps[i - 1] in {HARD_HYPHEN, "="}
+        )
+        text = syl
+        if i == 0:
+            text = f"{pre}{syl}"
+        if i == m - 1:
+            text = f"{text}{suf}"
+        if i == 0:
+            new_pos.append(
+                replace(
+                    first,
+                    recite=False,
+                    syllables=[text],
+                    links=[],
+                    hard_links=[],
+                    elms=list(first.elms) if first.elms else ["~"],
+                    continues_word=first.continues_word,
+                    continues_word_hard=first.continues_word_hard,
+                    marks_before=list(first.marks_before),
+                    marks_after=list(last.marks_after) if m == 1 else [],
+                )
+            )
+        else:
+            new_pos.append(
+                LPosition(
+                    recite=False,
+                    syllables=[text],
+                    elms=list(first.elms) if first.elms else ["_"],
+                    links=[],
+                    hard_links=[],
+                    continues_word=True,
+                    continues_word_hard=hard,
+                    marks_before=[],
+                    marks_after=list(last.marks_after) if i == m - 1 else [],
+                )
+            )
+    positions[first_pi : last_pi + 1] = new_pos
+    return True
+
+
+def _form_from_syls_seps(syllables: list[str], seps: list[str]) -> str:
+    if not syllables:
+        return ""
+    out = syllables[0]
+    for i, syl in enumerate(syllables[1:]):
+        sep = seps[i] if i < len(seps) else "-"
+        out += sep + syl
+    return out
+
+
+def _mvsa_run_surface(positions: list, run: list[tuple[int, int]]) -> str:
+    """Soft/hard-surface van een lettergreep-run (zonder ELMs/haakjes)."""
+    parts: list[str] = []
+    for i, (pi, si) in enumerate(run):
+        syl = positions[pi].syllables[si]
+        edges = _EDGE_PUNCT.match(syl)
+        core = edges.group(2) if edges else syl
+        if i == 0:
+            parts.append(core)
+            continue
+        p0, s0 = run[i - 1]
+        if p0 == pi:
+            hard = (
+                s0 < len(positions[pi].hard_links)
+                and positions[pi].hard_links[s0]
+            )
+        else:
+            hard = positions[pi].continues_word_hard
+        glue = HARD_HYPHEN if hard else "-"
+        parts.append(glue + core)
+    return "".join(parts)
 
 
 def _replace_lemma_in_scope_bridged_words(
@@ -558,11 +1003,7 @@ def _replace_lemma_in_scope_bridged_words(
     except Exception:
         return text
 
-    target_syllables = [
-        s
-        for s in re.split(r"[-|=]+", target_form)
-        if s and any(ch.isalpha() for ch in s)
-    ]
+    target_syllables, target_seps = _syllables_and_separators(target_form)
     if not target_syllables:
         return text
 
@@ -572,7 +1013,8 @@ def _replace_lemma_in_scope_bridged_words(
         if kind == "sep":
             out.extend(atom.source for atom in group)
             continue
-        # Word-run: letters per text/scope-atom (virtuele ``-`` op scopegrenzen).
+        # Word-run: letters per text/scope-atom (virtuele soft ``-`` op
+        # scopegrenzen; hard ``=`` hoort als apart tekst-atoom ertussen).
         pieces: list[str] = []
         letter_atoms: list = []
         for atom in group:
@@ -605,10 +1047,20 @@ def _replace_lemma_in_scope_bridged_words(
         if assignments is None:
             out.extend(atom.source for atom in group)
             continue
+        # Scheidingstekens tussen de N letterdelen (1:1 of rest in laatste).
+        part_seps = _separators_between_parts(
+            len(letter_atoms), target_syllables, target_seps
+        )
+        if part_seps is None:
+            out.extend(atom.source for atom in group)
+            continue
+
         letter_i = 0
         new_group: list[str] = []
         abort_run = False
-        for atom in group:
+        atom_i = 0
+        while atom_i < len(group):
+            atom = group[atom_i]
             if letter_i < len(letter_atoms) and atom is letter_atoms[letter_i]:
                 syls = assignments[letter_i]
                 new_core = _transfer_letter_case(
@@ -617,7 +1069,6 @@ def _replace_lemma_in_scope_bridged_words(
                 )
                 if atom.kind == "scope":
                     if len(syls) != 1:
-                        # Geen soft ``-`` in scope-inhoud.
                         abort_run = True
                         break
                     new_group.append(
@@ -636,16 +1087,83 @@ def _replace_lemma_in_scope_bridged_words(
                         new_group.append(f"{pre}{new_core}{suf}")
                     else:
                         new_group.append(new_core)
+
+                # Oude brugstreepjes ``-``/``=`` tussen dit en het volgende
+                # letterdeel overslaan; canonieke hard ``=`` opnieuw zetten.
+                atom_i += 1
+                while atom_i < len(group):
+                    nxt = group[atom_i]
+                    if (
+                        letter_i + 1 < len(letter_atoms)
+                        and nxt is letter_atoms[letter_i + 1]
+                    ):
+                        break
+                    if nxt.kind == "text" and _is_hyphen_junction_token(
+                        nxt.source
+                    ):
+                        atom_i += 1
+                        continue
+                    break
+                if letter_i < len(part_seps) and part_seps[letter_i] == "=":
+                    new_group.append(HARD_HYPHEN)
                 letter_i += 1
-            else:
-                new_group.append(atom.source)
+                continue
+
+            # Niet-letter-atoom buiten een brugzone: behouden.
+            new_group.append(atom.source)
+            atom_i += 1
+
         if abort_run or not new_group:
             out.extend(atom.source for atom in group)
         else:
-            out.extend(new_group)
-            changed_any = True
+            rebuilt = "".join(new_group)
+            out.append(rebuilt)
+            if rebuilt != "".join(atom.source for atom in group):
+                changed_any = True
 
-    return "".join(out) if (changed_any or out) else text
+    return "".join(out) if out else text
+
+
+def _syllables_and_separators(form: str) -> tuple[list[str], list[str]]:
+    """Splits ``me-de=eeu-wi-ge`` → lettergrepen + scheidingstekens ertussen."""
+    syllables: list[str] = []
+    seps: list[str] = []
+    buf: list[str] = []
+    for ch in form:
+        if ch in "-=":
+            if buf:
+                syllables.append("".join(buf))
+                buf = []
+                seps.append(ch)
+            elif seps:
+                seps[-1] = ch
+            continue
+        buf.append(ch)
+    if buf:
+        syllables.append("".join(buf))
+    return syllables, seps
+
+
+def _separators_between_parts(
+    n_parts: int, syllables: list[str], seps: list[str]
+) -> list[str] | None:
+    """Scheiding tussen N letterdelen (``-`` of ``=``), lengte N-1."""
+    n_syl = len(syllables)
+    if n_parts <= 0 or n_syl <= 0 or len(seps) != n_syl - 1:
+        return None
+    if n_parts == n_syl:
+        return list(seps)
+    if n_parts < n_syl:
+        # Eerste N-1 delen = eerste N-1 lettergrepen → eerste N-2 seps +
+        # sep vóór de restbundel in het laatste deel.
+        return list(seps[: n_parts - 1])
+    return None
+
+
+def _is_hyphen_junction_token(source: str) -> bool:
+    """True als het tekstatoom alleen een (legacy) brug ``-``/``=`` is."""
+    core = source.strip()
+    return core in {"-", "=", "-=", "=-"}
 
 
 def _assign_syllables_to_parts(
@@ -724,6 +1242,7 @@ def apply_replacements_to_source(
 
     Soft ``-`` hoort in de gezongen bron, niet in ``zoektekst`` (die is juist
     zonder zachte streepjes; hard ``=`` → zichtbaar ``-`` via zoektekst-extractie).
+    Bij .mvsa: na L-wijziging stem-``-``-houdtekens gelijk trekken aan L.
     """
     if not replacements:
         return text
@@ -731,11 +1250,24 @@ def apply_replacements_to_source(
 
     _meta, body, offset = parse_vsa_frontmatter_with_body_offset(text)
     if offset <= 0:
-        return apply_replacements_to_text(text, replacements)
+        new = apply_replacements_to_text(text, replacements)
+        return _maybe_resync_mvsa_after_replacements(text, new)
     new_body = apply_replacements_to_text(body, replacements)
     if new_body == body:
         return text
-    return text[:offset] + new_body
+    new = text[:offset] + new_body
+    return _maybe_resync_mvsa_after_replacements(text, new)
+
+
+def _maybe_resync_mvsa_after_replacements(before: str, after: str) -> str:
+    """Stem-sync na L-replace; no-op als niets MVSA-achtigs of geen wijziging."""
+    if after == before or "L:" not in after:
+        return after
+    try:
+        from .mvsa_syllabify import resync_mvsa_voices_to_lyrics
+    except Exception:
+        return after
+    return resync_mvsa_voices_to_lyrics(after)
 
 
 def prompt_dictionary_fixes(
@@ -758,6 +1290,10 @@ def prompt_dictionary_fixes(
     stdin = stdin or sys.stdin
     stdout = stdout or sys.stdout
     result = DictionaryPromptResult()
+    # C3/products/import zetten ``_force_noninteractive`` — hard weigeren,
+    # ook als een caller ``isatty`` overslaat.
+    if _force_noninteractive:
+        return result
     if not hasattr(stdin, "isatty") or not stdin.isatty():
         return result
 
@@ -768,13 +1304,19 @@ def prompt_dictionary_fixes(
         return result
 
     label = (source_id or "").strip()
+    if not label and source_path is not None and str(source_path).strip():
+        p = Path(source_path)
+        label = p.name or str(p)
     if label:
         print(f"--- {label} ---", file=stdout)
 
     try:
         for finding in actionable:
             loc = format_clickable_location(
-                source_path, finding.line, finding.column
+                source_path,
+                finding.line,
+                finding.column,
+                fallback=label or None,
             )
             if finding.code == CODE_MISMATCH:
                 aborted = _prompt_mismatch(
@@ -817,6 +1359,14 @@ def prompt_unknown_forms(
 
 
 def is_interactive_stdin(stdin=None) -> bool:
+    """Of we TTY-dictionary-prompts mogen tonen.
+
+    ``_force_noninteractive`` (C3/canoniciteitsgate) wint altijd — ook als
+    callers ``from … import is_interactive_stdin`` hebben gedaan vóór een
+    module-patch.
+    """
+    if _force_noninteractive:
+        return False
     stdin = stdin or sys.stdin
     return bool(hasattr(stdin, "isatty") and stdin.isatty())
 
@@ -835,9 +1385,11 @@ def _prompt_mismatch(
     from .syllabify import _transfer_letter_case
 
     cased = _transfer_letter_case(finding.surface, expected)
+    # Locatie + melding op één regel (pad blijft zichtbaar naast klikbare link).
     if location:
-        print(location, file=stdout)
-    print(finding.message_nl, file=stdout)
+        print(f"{location} {finding.message_nl}", file=stdout)
+    else:
+        print(finding.message_nl, file=stdout)
     print(
         f"[Enter/Spatie]: corrigeer de bron (`{finding.surface}` → `{cased}`)",
         file=stdout,
@@ -905,13 +1457,14 @@ def _prompt_unknown(
     if not suggestion:
         suggestion = surface_norm
 
-    if location:
-        print(location, file=stdout)
-    print(
+    msg = (
         f"Onbekend woord `{finding.surface}` — niet in "
-        f"{dictionary_path_label()}.",
-        file=stdout,
+        f"{dictionary_path_label()}."
     )
+    if location:
+        print(f"{location} {msg}", file=stdout)
+    else:
+        print(msg, file=stdout)
     default_hint = f"voeg `{suggestion}` toe"
     if not has_hyphen and suggestion != surface_norm:
         from .syllabify import _transfer_letter_case
@@ -963,7 +1516,20 @@ def _prompt_unknown(
     result.added_or_updated.append(written)
     if choice == "" and not has_hyphen and suggestion != surface_norm:
         # Enter op UNKNOWN zonder streepjes: alleen lijst (geen stille bronfix).
-        pass
+        print(f"Toegevoegd: {written}", file=stdout)
+        return False
+    if choice != "":
+        # Getypte hyphenvorm: canon én bron (zelfde als MISMATCH).
+        from .syllabify import _transfer_letter_case
+
+        result.replacements.append((finding.surface, written))
+        print(
+            f"Lijst: {written}; bron: `{finding.surface}` → "
+            f"`{_transfer_letter_case(finding.surface, written)}`",
+            file=stdout,
+        )
+        return False
+    # Enter met bestaande streepjes of suggestie = surface: alleen lijst.
     print(f"Toegevoegd: {written}", file=stdout)
     return False
 
@@ -1223,11 +1789,17 @@ def _find_surface_offset(text: str, surface: str) -> int:
     return -1
 
 
-def _find_syllable_chain_offset(text: str, surface: str) -> int:
+def _find_syllable_chain_offset(
+    text: str,
+    surface: str,
+    *,
+    allow_whitespace_bridge: bool = False,
+) -> int:
     """Offset van een hyphen-kern waarvan de delen in volgorde in ``text`` staan.
 
-    Tussen lettergrepen mag VSA-notatie staan (``{}`` ``\\`` ELMs), maar geen
-    spatie — anders is het een ander woord.
+    Tussen lettergrepen mag VSA-notatie staan (``{}`` ``\\`` ELMs). Standaard
+    geen spatie (anders een ander woord). Op MVSA-L mag wél whitespace: posities
+    ``Aan_ -U_`` vormen één lemma ``Aan-U`` (continues_word).
     """
     parts = [
         p
@@ -1238,8 +1810,11 @@ def _find_syllable_chain_offset(text: str, surface: str) -> int:
         return -1
     if len(parts) == 1:
         return _find_surface_offset(text, parts[0])
-    # Non-space, non-letter bridge (scopes/ELMs/EHM), case-insensitive letters.
-    bridge = r"[^\sA-Za-zÀ-ÖØ-öø-ÿ]*?"
+    # Non-letter bridge (scopes/ELMs/EHM/`&`/`_`); optioneel spaties (MVSA).
+    if allow_whitespace_bridge:
+        bridge = r"[^A-Za-zÀ-ÖØ-öø-ÿ]*?"
+    else:
+        bridge = r"[^\sA-Za-zÀ-ÖØ-öø-ÿ]*?"
     pattern = re.escape(parts[0]) + "".join(
         bridge + re.escape(p) for p in parts[1:]
     )
@@ -1295,35 +1870,62 @@ def _locate(source_text: str, surface: str) -> tuple[int, int]:
 
     # Bij .mvsa: bij voorkeur alleen op L-regels zoeken (geen @oct/@title).
     search_text, search_to_cleaned = _prefer_mvsa_lyrics_search_view(cleaned)
+    mvsa_lyrics_only = search_text is not cleaned and search_text != cleaned
 
-    # Eerst scope-brug/keten (``{\eeuw}{\en}``), dan exacte plat-token —
-    # anders vindt lemma-ruis het al-correcte ``eeu-wen`` vóór de foute vorm.
-    idx_in_search = _find_syllable_chain_offset(search_text, surface)
+    # Eerst scope-brug/keten (``{\eeuw}{\en}`` / MVSA ``Aan_ -U_``), dan plat-token.
+    idx_in_search = _find_syllable_chain_offset(
+        search_text,
+        surface,
+        allow_whitespace_bridge=mvsa_lyrics_only,
+    )
     if idx_in_search < 0:
         idx_in_search = _find_surface_offset(search_text, surface)
     if idx_in_search < 0:
-        # Laatste redmiddel: eerste niet-lege lyrics-regel in cleaned (nooit commentaar).
-        idx_cleaned = next(
-            (i for i, ch in enumerate(cleaned) if not ch.isspace()), 0
-        )
+        # Laatste redmiddel: eerste L-inhoud of eerste niet-meta bodyteken.
+        idx_cleaned = _fallback_lyrics_offset(cleaned, mvsa=mvsa_lyrics_only)
     else:
         idx_cleaned = search_to_cleaned(idx_in_search)
 
     idx_body = semantic_offset_to_source(offset_map, idx_cleaned)
     line, column = _offset_to_line_column(body, idx_body, line_base=line_base)
-    # Hard guard: nooit een commentaarregel rapporteren.
+    # Hard guard: nooit commentaar of @-directives rapporteren.
     rows = source_text.splitlines()
     if 1 <= line <= len(rows):
         stripped = rows[line - 1].lstrip()
-        if stripped.startswith("<!--") or stripped.startswith("#"):
+        if _is_non_lyric_report_line(stripped):
             for i, row in enumerate(rows[line:], start=line + 1):
                 s = row.lstrip()
-                if not s or s.startswith("<!--") or s.startswith("#") or s.startswith("-->"):
-                    continue
-                if s.startswith("---"):
+                if _is_non_lyric_report_line(s) or not s:
                     continue
                 return i, 1
     return line, column
+
+
+def _is_non_lyric_report_line(stripped: str) -> bool:
+    """True als deze regel geen zinvolle lyrics-locatie is voor dict-meldingen."""
+    if not stripped:
+        return True
+    if stripped.startswith("<!--") or stripped.startswith("#"):
+        return True
+    if stripped.startswith("-->"):
+        return True
+    if stripped.startswith("---"):
+        return True
+    if stripped.startswith("@"):
+        return True
+    return False
+
+
+def _fallback_lyrics_offset(cleaned: str, *, mvsa: bool) -> int:
+    """Offset voor wanneer de surface niet letterlijk in de bron staat."""
+    if mvsa:
+        for match in re.finditer(
+            r"^([ \t]*)(L\d*)([+]?):([ \t]*)(\S)",
+            cleaned,
+            re.MULTILINE,
+        ):
+            return match.start(5)
+    return next((i for i, ch in enumerate(cleaned) if not ch.isspace()), 0)
 
 
 def _prefer_mvsa_lyrics_search_view(

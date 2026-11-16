@@ -10,9 +10,11 @@ import argparse
 import sys
 from pathlib import Path
 
+from .cli_messages import path_label
 from .derived_path import derived_output_path
 from .input_paths import InputPathError, collect_cli_sources
 from .products_meta import freshness, load_meta, strip_retired_product_keys, write_meta
+from .syllable_dict_check import DICT_PROMPT_ABORT_RC
 
 # Universele standaardkeys (zelfde set voor vsa / mvsa / mscz products).
 # ``svg`` = één tall compacte sibling; ``--skip-svg`` laat svg weg.
@@ -48,6 +50,14 @@ def _log(msg: str, *, dry_run: bool, quiet: bool = False) -> None:
         return
     prefix = "dry-run: " if dry_run else ""
     print(f"{prefix}{msg}", flush=True)
+
+
+def _source_gate_rc(exc: object) -> int:
+    """C3-fout → 1; Esc/abort op dictionary-prompt → ``DICT_PROMPT_ABORT_RC``."""
+    issues = getattr(exc, "issues", None) or []
+    if any(getattr(i, "code", "") == "VSA-SYLLABLE-DICT-ABORTED" for i in issues):
+        return DICT_PROMPT_ABORT_RC
+    return 1
 
 
 def _log_meta(meta_name: str, *, quiet: bool = False) -> None:
@@ -241,7 +251,7 @@ def products_mvsa_one(
     _retire_standard_meta(bron, dry_run=dry_run, quiet=quiet)
     required = _required_keys(skip_svg=skip_svg, street="mvsa")
     if not _need_regen(bron, force=force, required_keys=required):
-        _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
+        _log(f"ok (meta): {path_label(bron)}", dry_run=dry_run, quiet=quiet)
         return 0
 
     try:
@@ -250,7 +260,7 @@ def products_mvsa_one(
         )
     except NonCanonicalSourceError as exc:
         emit_noncanonical_error(exc)
-        return 1
+        return _source_gate_rc(exc)
 
     products = _plan_universal_paths(bron, skip_svg=skip_svg, street="mvsa")
     _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
@@ -294,7 +304,7 @@ def products_mvsa_one(
         emit_noncanonical_error(exc)
         return 1
     except MvsaVsaError as exc:
-        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        print(f"{path_label(bron)}: ERROR: {exc}", file=sys.stderr)
         return 1
     except MvsaValidationError as exc:
         for d in exc.diagnostics:
@@ -309,10 +319,10 @@ def products_mvsa_one(
         MuseScoreNotFoundError,
         MuseScoreConvertError,
     ) as exc:
-        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        print(f"{path_label(bron)}: ERROR: {exc}", file=sys.stderr)
         return 1
     except Exception as exc:
-        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        print(f"{path_label(bron)}: ERROR: {exc}", file=sys.stderr)
         return 1
 
     meta = write_meta(bron, products)
@@ -352,7 +362,7 @@ def products_mscz_one(
     _retire_standard_meta(bron, dry_run=dry_run, quiet=quiet)
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
-        _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
+        _log(f"ok (meta): {path_label(bron)}", dry_run=dry_run, quiet=quiet)
         return 0
 
     try:
@@ -361,7 +371,7 @@ def products_mscz_one(
         )
     except NonCanonicalSourceError as exc:
         emit_noncanonical_error(exc)
-        return 1
+        return _source_gate_rc(exc)
 
     products = _plan_universal_paths(bron, skip_svg=skip_svg)
     _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
@@ -411,10 +421,10 @@ def products_mscz_one(
         MuseScoreNotFoundError,
         MuseScoreConvertError,
     ) as exc:
-        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        print(f"{path_label(bron)}: ERROR: {exc}", file=sys.stderr)
         return 1
     except Exception as exc:
-        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        print(f"{path_label(bron)}: ERROR: {exc}", file=sys.stderr)
         return 1
 
     meta = write_meta(bron, products)
@@ -460,7 +470,7 @@ def products_vsa_one(
     _retire_standard_meta(bron, dry_run=dry_run, quiet=quiet)
     required = _required_keys(skip_svg=skip_svg)
     if not _need_regen(bron, force=force, required_keys=required):
-        _log(f"ok (meta): {bron}", dry_run=dry_run, quiet=quiet)
+        _log(f"ok (meta): {path_label(bron)}", dry_run=dry_run, quiet=quiet)
         return 0
 
     try:
@@ -469,7 +479,7 @@ def products_vsa_one(
         )
     except NonCanonicalSourceError as exc:
         emit_noncanonical_error(exc)
-        return 1
+        return _source_gate_rc(exc)
 
     products = _plan_universal_paths(bron, skip_svg=skip_svg)
     _log_universal_plan(bron, products, dry_run=dry_run, quiet=quiet)
@@ -521,7 +531,7 @@ def products_vsa_one(
         emit_noncanonical_error(exc)
         return 1
     except IncludeVsaError as exc:
-        print(f"{bron}: {exc.message_nl}", file=sys.stderr)
+        print(f"{path_label(bron)}: {exc.message_nl}", file=sys.stderr)
         return 1
     except (
         MusicXMLExportError,
@@ -531,10 +541,10 @@ def products_vsa_one(
         MuseScoreNotFoundError,
         MuseScoreConvertError,
     ) as exc:
-        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        print(f"{path_label(bron)}: ERROR: {exc}", file=sys.stderr)
         return 1
     except Exception as exc:
-        print(f"{bron}: ERROR: {exc}", file=sys.stderr)
+        print(f"{path_label(bron)}: ERROR: {exc}", file=sys.stderr)
         return 1
 
     meta = write_meta(bron, products)
@@ -565,42 +575,50 @@ def run_street_products(
         print(str(exc), file=sys.stderr)
         return 1
     if not files:
-        print(f"{street} products: geen bronnen ({', '.join(suffixes)}) onder {path}.")
+        print(f"{street} products: geen bronnen ({', '.join(suffixes)}) onder {path_label(path)}.")
         return 1
+    # Hele batch non-interactief: ook score-ir-brug (import→kuiser) mag
+    # geen dictionary-TTY openen (syllabificatie.md · products/C3).
+    from .canonicity_gate import _noninteractive_validate
+
     exit_code = 0
-    for bron in files:
-        if street == "mvsa":
-            code = products_mvsa_one(
-                bron,
-                force=force,
-                dry_run=dry_run,
-                skip_svg=skip_svg,
-                quiet=quiet,
-                musescore=musescore,
-                allow_noncanonical=allow_noncanonical,
-            )
-        elif street == "mscz":
-            code = products_mscz_one(
-                bron,
-                force=force,
-                dry_run=dry_run,
-                skip_svg=skip_svg,
-                quiet=quiet,
-                musescore=musescore,
-                allow_noncanonical=allow_noncanonical,
-            )
-        else:
-            code = products_vsa_one(
-                bron,
-                force=force,
-                dry_run=dry_run,
-                skip_svg=skip_svg,
-                quiet=quiet,
-                musescore=musescore,
-                allow_noncanonical=allow_noncanonical,
-            )
-        if code:
-            exit_code = code
+    with _noninteractive_validate():
+        for bron in files:
+            if street == "mvsa":
+                code = products_mvsa_one(
+                    bron,
+                    force=force,
+                    dry_run=dry_run,
+                    skip_svg=skip_svg,
+                    quiet=quiet,
+                    musescore=musescore,
+                    allow_noncanonical=allow_noncanonical,
+                )
+            elif street == "mscz":
+                code = products_mscz_one(
+                    bron,
+                    force=force,
+                    dry_run=dry_run,
+                    skip_svg=skip_svg,
+                    quiet=quiet,
+                    musescore=musescore,
+                    allow_noncanonical=allow_noncanonical,
+                )
+            else:
+                code = products_vsa_one(
+                    bron,
+                    force=force,
+                    dry_run=dry_run,
+                    skip_svg=skip_svg,
+                    quiet=quiet,
+                    musescore=musescore,
+                    allow_noncanonical=allow_noncanonical,
+                )
+            if code == DICT_PROMPT_ABORT_RC:
+                # Esc/Ctrl+C: hele batch stoppen (syllabificatie-contract).
+                return code
+            if code:
+                exit_code = code
     return exit_code
 
 

@@ -63,9 +63,9 @@ mvsa ogg [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
 mvsa wav [-h] [-o OUTPUT] [--section SECTION] [--musescore PATH]
            [--keep-mxl PATH] path
-mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
-mvsa transpose [-h] --to TONIC [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] …
-mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}] …
+mvsa normalize [-h] [-o OUTPUT] [--pitch …] [--dry-run] [--verbose] …
+mvsa transpose [-h] --to TONIC [-o OUTPUT] [--pitch …] [--dry-run] [--verbose] …
+mvsa kuiser [-h] [-o OUTPUT] [--check] [--dry-run] [--verbose] [--pitch …] …
 mvsa syllabify [-h] [--dry-run] [--in-place] [--extension EXT] [--unsyllabify]
                [--config PAD] [--syllable-dictionary PAD]
                [--lyrics-lang {auto,nl,ksl}] path
@@ -150,7 +150,7 @@ TTY kun je overige dictionary-findings meteen corrigeren.
 | `--require-zoektekst`         | Nee       | Eis YAML-`zoektekst` gelijk aan body (catalogus); zie [zoektekst](zoektekst.md). | Uit     | —             |
 | `--config`                    | Nee       | Pad naar `vsa.toml` (o.a. `[syllabificatie] dictionary`).                        | auto    | —             |
 | `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt` (overschrijft auto/toml).    | auto    | —             |
-| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = Cyrillisch in lyrics → `ksl`, anders `nl`; of forceer.                  | `auto`  | —             |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = per woord Latijn→`nl` / Cyrillisch→`ksl`; of forceer één taal.          | `auto`  | —             |
 | `-h`, `--help`                | Nee       | Toon hulp voor dit subcommando.                                                  | —       | —             |
 
 ### Output
@@ -700,7 +700,8 @@ Score → `.mvsa` (werkbank): [`mxl mvsa`](mxl.md) / [`mscz mvsa`](mscz.md) — 
 
 ```text
 mvsa normalize [-h] [-o OUTPUT] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
-                   [--octave-style {@oct,none,marker}] [--no-align] path
+                   [--octave-style {@oct,none,marker}] [--no-align]
+                   [--dry-run] [--verbose] path
 ```
 
 ### Beschrijving
@@ -745,24 +746,26 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 
 ### Argumenten en opties
 
-| Naam             | Verplicht | Betekenis                                                                    | Default                     |
-| ---------------- | --------- | ---------------------------------------------------------------------------- | --------------------------- |
-| `path`           | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                           | —                           |
-| `--pitch`        | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` / `ag-vsa`                 | `preserve` bij `.mvsa`-bron |
-| `-o`, `--output` | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                             | `<stem>.normalized.mvsa`    |
-| `--octave-style` | Nee       | `@oct` (relatief, canoniek), `none` (absoluut), of `marker` (nog niet klaar) | `@oct`                      |
-| `--no-align`     | Nee       | Geen kolomuitlijning.                                                        | uit (wel alignen)           |
+| Naam              | Verplicht | Betekenis                                                                    | Default                     |
+| ----------------- | --------- | ---------------------------------------------------------------------------- | --------------------------- |
+| `path`            | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                           | —                           |
+| `--pitch`         | Nee       | `preserve` (default), of `doremi` / `a-g` / `vsa` / `ag-vsa`                 | `preserve` bij `.mvsa`-bron |
+| `-o`, `--output`  | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                             | `<stem>.normalized.mvsa`    |
+| `--octave-style`  | Nee       | `@oct` (relatief, canoniek), `none` (absoluut), of `marker` (nog niet klaar) | `@oct`                      |
+| `--no-align`      | Nee       | Geen kolomuitlijning.                                                        | uit (wel alignen)           |
+| `--dry-run`       | Nee       | Schrijf niets; noem doelbestanden die anders zouden worden weggeschreven.    | uit                         |
+| `--verbose`, `-v` | Nee       | Met `--dry-run`: begrensde unified diff per zo’n bestand.                    | uit                         |
 
 ### Output
 
-- **stdout**: `Geschreven: <pad>` bij succes.
-- **bestand**: genormaliseerde `.mvsa`.
+- **Zonder `--dry-run`:** `Geschreven: <pad>` bij succes; genormaliseerde `.mvsa` op schijf.
+- **Met `--dry-run`:** `would write: <doelpad>` voor elk bestand dat zou wijzigen; eindsummary `dry-run: N zou schrijven, M ongewijzigd`. Met `--verbose` ook een begrensde unified diff.
 
 ### Exit status
 
 | Exitcode | Betekenis                                          |
 | -------- | -------------------------------------------------- |
-| `0`      | Normalisatie geschreven.                           |
+| `0`      | Normalisatie geschreven (of dry-run zonder fout).  |
 | `1`      | Pad ontbreekt, validatiefout, of normalisatiefout. |
 
 ### Voorbeelden
@@ -771,6 +774,8 @@ Werkplan: [mvsa-conversions](../../plans/mvsa-conversions.md).
 mvsa normalize examples\mvsa\alleluia-toon-8.canonieke.mvsa -o generated\alleluia.normalized.mvsa
 mvsa normalize examples\mvsa\alleluia-toon-8.mvsa --pitch a-g -o generated\alleluia.ag.mvsa
 mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
+mvsa normalize examples\mvsa --dry-run
+mvsa normalize lied.mvsa --dry-run --verbose
 ```
 
 **Zie ook:** [`transpose`](#mvsa-transpose) (andere tonica),
@@ -785,7 +790,8 @@ mvsa normalize lied.mvsa --pitch doremi --octave-style @oct
 ```text
 mvsa transpose [-h] --to TONIC [-o OUTPUT]
                    [--pitch {doremi,a-g,vsa,ag-vsa}]
-                   [--octave-style {@oct,none,marker}] [--no-align] path
+                   [--octave-style {@oct,none,marker}] [--no-align]
+                   [--dry-run] [--verbose] path
 ```
 
 ### Beschrijving
@@ -820,25 +826,27 @@ Commentaren die de oude toonsoort noemen (bijv. `# drie mollen`) worden
 
 ### Argumenten en opties
 
-| Naam             | Verplicht | Betekenis                                                                    | Default                  |
-| ---------------- | --------- | ---------------------------------------------------------------------------- | ------------------------ |
-| `path`           | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                           | —                        |
-| `--to`           | Ja        | Doeltonica (`F4`, `Bb3`, of `F` = octaaf van bron-`@do`).                    | —                        |
-| `-o`, `--output` | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                             | `<stem>.transposed.mvsa` |
-| `--pitch`        | Nee       | `doremi` / `a-g` / `vsa` / `ag-vsa` (geen `preserve`)                        | `ag-vsa`                 |
-| `--octave-style` | Nee       | `@oct` (relatief), `none` (absoluut; niet met doremi), of `marker`           | `@oct`                   |
-| `--no-align`     | Nee       | Geen kolomuitlijning.                                                        | uit (wel alignen)        |
+| Naam              | Verplicht | Betekenis                                                                    | Default                  |
+| ----------------- | --------- | ---------------------------------------------------------------------------- | ------------------------ |
+| `path`            | Ja        | Bron-`.mvsa`-bestand of map met `.mvsa`-bestanden.                           | —                        |
+| `--to`            | Ja        | Doeltonica (`F4`, `Bb3`, of `F` = octaaf van bron-`@do`).                    | —                        |
+| `-o`, `--output`  | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                             | `<stem>.transposed.mvsa` |
+| `--pitch`         | Nee       | `doremi` / `a-g` / `vsa` / `ag-vsa` (geen `preserve`)                        | `ag-vsa`                 |
+| `--octave-style`  | Nee       | `@oct` (relatief), `none` (absoluut; niet met doremi), of `marker`           | `@oct`                   |
+| `--no-align`      | Nee       | Geen kolomuitlijning.                                                        | uit (wel alignen)        |
+| `--dry-run`       | Nee       | Schrijf niets; noem doelbestanden die anders zouden worden weggeschreven.    | uit                      |
+| `--verbose`, `-v` | Nee       | Met `--dry-run`: begrensde unified diff per zo’n bestand.                    | uit                      |
 
 ### Output
 
-- **stdout**: `Geschreven: <pad>` bij succes.
-- **bestand**: getransponeerde `.mvsa` (sibling of `-o`).
+- **Zonder `--dry-run`:** `Geschreven: <pad>`; getransponeerde `.mvsa` (sibling of `-o`).
+- **Met `--dry-run`:** zelfde vorm als [`normalize`](#mvsa-normalize) (`would write:` + summary; optioneel diff).
 
 ### Exit status
 
 | Exitcode | Betekenis                                          |
 | -------- | -------------------------------------------------- |
-| `0`      | Transpositie geschreven.                           |
+| `0`      | Transpositie geschreven (of dry-run zonder fout).  |
 | `1`      | Pad ontbreekt, validatiefout, of transpositiefout. |
 
 ### Voorbeelden
@@ -848,6 +856,7 @@ mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F4
 mvsa transpose examples\bug-cases\alleluia-9b-toon-3-vokn.mvsa --to F -o generated\alleluia.in-F.mvsa
 mvsa transpose examples\bug-cases --to F4
 mvsa transpose lied.mvsa --to Bb3 --pitch doremi -o generated\lied.in-Bb.mvsa
+mvsa transpose examples\bug-cases --to F4 --dry-run
 ```
 
 **Zie ook:** [`normalize`](#mvsa-normalize),
@@ -861,7 +870,8 @@ mvsa transpose lied.mvsa --to Bb3 --pitch doremi -o generated\lied.in-Bb.mvsa
 ### Synopsis
 
 ```text
-mvsa kuiser [-h] [-o OUTPUT] [--check] [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
+mvsa kuiser [-h] [-o OUTPUT] [--check] [--dry-run] [--verbose]
+                [--pitch {preserve,doremi,a-g,vsa,ag-vsa}]
                 [--octave-style {@oct,none,marker}] [--no-align] [--werkbank]
                 path [path …]
 ```
@@ -892,29 +902,36 @@ Authoring-pad naar de **canonieke schrijfvorm**. Contract **Q1–Q9**:
    `--werkbank`).
 10. **Q7** — na afloop (en na schrijven) geen validate-**errors**.
 
-**Q9:** `--check` (dry-run; exit 1 bij voorgenomen wijziging).
+**Q9:** `--check` (geen schrijven; exit 1 bij voorgenomen wijziging).
+`--dry-run` noemt doelbestanden die zouden wijzigen (optioneel `--verbose`
+met begrensde diff); exit blijft 0 tenzij er fouten zijn.
 
 Draft-syntax/layout:
 [syntax](../../specification-mvsa/syntax.md),
 [semantiek — layout](../../specification-mvsa/semantics.md#canonieke-layout-vs-tolerantie).
 
-Default schrijft **in-place**. Gebruik `--check` als dry-run (exit 1 als er
-iets zou wijzigen). Na afloop moet validate geen errors meer geven; bij
-conflicterende strepen faalt de kuiser met een duidelijke fout.
+Default schrijft **in-place**. Gebruik `--dry-run` om te zien wat zou
+wijzigen, of `--check` voor strikte controle (exit 1 bij diff). Na afloop
+moet validate geen errors meer geven; bij conflicterende strepen faalt de
+kuiser met een duidelijke fout.
 
 Gedrag t.o.v. `-` / `~` op L (draft-spec):
 
-- **Canoniek:** lone standaard-lengte zonder `~` (impliciet); `~` wél bij
-  `&`-melisma (`ziel~&~`; spaties rond `&` mogen voor kolomuitlijning) en na
-  recite-`)` bij niet-breve duur. Woordstreepje direct vóór de lettergreep
-  (`-li`), met spaties *ervóór* bij extra breedte (`…_&_  -li`).
+- **Canoniek:** lone standaard-lengte zonder `~` (impliciet), ook na
+  recite-`)` (`(ia)~` → `(ia)`; export behandelt beide als kwart). `~` wél
+  bij `&`-melisma (`ziel~&~`, `()~&~&.…`; spaties rond `&` mogen voor
+  kolomuitlijning) en na `)` alleen bij **niet-standaard** duur (`_`, `.`,
+  …). Woordstreepje direct vóór de lettergreep (`-li`), met spaties *ervóór*
+  bij extra breedte (`…_&_  -li`).
 - **Invoer:** kale ELM-`-` mag (o.a. melisma); kuiser herschrijft eenduidige
   gevallen naar `~` en laat daarna lone `~` weg.
 - **Ambigu** (`hei- li`, `li-&--ge`): waarschuwing op stderr met
   `bestand:regel:kolom` — geen stille collapse naar `hei-li`.
-- **Pyphen** (ontbrekende / verdachte woordstreepjes): advies-warnings;
-  geen validate-fout. Sync-telling blijft leidend; bij complexe
-  MuseScore-importlyrics soms `--no-align`.
+- **Woordstreepjes:** tip alleen als het samengevoegde woord in de
+  syllable-dictionary staat (geen Pyphen-ruis over losse woorden zoals
+  `in eeu…`). Pad in meldingen: kort (zonder `content-source/catalogus`);
+  regelnummers t.o.v. het hele bestand. Sync-telling blijft leidend; bij
+  complexe MuseScore-importlyrics soms `--no-align`.
 
 `normalize` blijft het conversiepad (pitch-herschrijf naar een apart
 uitvoerbestand). `transpose` verandert de tonica (`@do`). `kuiser` is het
@@ -922,21 +939,23 @@ dagelijkse authoring-commando.
 
 ### Argumenten en opties
 
-| Optie            | Verplicht | Beschrijving                                                 | Default    |
-| ---------------- | --------- | ------------------------------------------------------------ | ---------- |
-| `path`           | Ja        | `.mvsa`-bestand(en) of map(pen).                             | —          |
-| `-o`, `--output` | Nee       | Uitvoerpad (alleen bij precies één bronbestand).             | in-place   |
-| `--check`        | Nee       | Geen schrijfactie; exit 1 bij wijziging.                     | uit        |
-| `--pitch`        | Nee       | Zelfde als `normalize` (default preserve).                   | `preserve` |
-| `--octave-style` | Nee       | `@oct` / `none` / `marker` (zelfde als `normalize`).         | `@oct`     |
-| `--no-align`     | Nee       | Sla kolomuitlijning over.                                    | uit        |
-| `--werkbank`     | Nee       | Behoud import-/schetsbanners (Q6); default = catalogus-strip | uit        |
+| Optie             | Verplicht | Beschrijving                                                              | Default    |
+| ----------------- | --------- | ------------------------------------------------------------------------- | ---------- |
+| `path`            | Ja        | `.mvsa`-bestand(en) of map(pen).                                          | —          |
+| `-o`, `--output`  | Nee       | Uitvoerpad (alleen bij precies één bronbestand).                          | in-place   |
+| `--check`         | Nee       | Geen schrijven; exit 1 bij wijziging.                                     | uit        |
+| `--dry-run`       | Nee       | Schrijf niets; noem doelbestanden die anders zouden worden weggeschreven. | uit        |
+| `--verbose`, `-v` | Nee       | Met `--dry-run`: begrensde unified diff per zo’n bestand.                 | uit        |
+| `--pitch`         | Nee       | Zelfde als `normalize` (default preserve).                                | `preserve` |
+| `--octave-style`  | Nee       | `@oct` / `none` / `marker` (zelfde als `normalize`).                      | `@oct`     |
+| `--no-align`      | Nee       | Sla kolomuitlijning over.                                                 | uit        |
+| `--werkbank`      | Nee       | Behoud import-/schetsbanners (Q6); default = catalogus-strip              | uit        |
 
 ### Exit status
 
 | Exitcode | Betekenis                                                      |
 | -------- | -------------------------------------------------------------- |
-| `0`      | Klaar (of `--check` zonder wijziging).                         |
+| `0`      | Klaar (of `--check`/`--dry-run` zonder fout).                  |
 | `1`      | Pad ontbreekt, kuiser-/validatiefout, of `--check` met diff.   |
 
 ### Voorbeelden
@@ -944,6 +963,8 @@ dagelijkse authoring-commando.
 ```cmd
 mvsa kuiser examples\mvsa\alleluia-toon-8.mvsa
 mvsa kuiser examples\mvsa --check
+mvsa kuiser examples\mvsa --dry-run
+mvsa kuiser lied.mvsa --dry-run --verbose
 mvsa kuiser lied.mvsa -o generated\lied.kuiser.mvsa
 mvsa kuiser lied.mvsa --pitch a-g
 mvsa kuiser schets.mvsa --werkbank
@@ -956,41 +977,49 @@ mvsa kuiser schets.mvsa --werkbank
 ### Synopsis
 
 ```text
-mvsa syllabify [-h] [--dry-run] [--in-place] [--extension EXT] [--unsyllabify]
-               [--no-align] [--config PAD] [--syllable-dictionary PAD]
-               [--lyrics-lang {auto,nl,ksl}] path
+mvsa syllabify [-h] [--dry-run] [--verbose] [--in-place] [--extension EXT]
+               [--unsyllabify] [--no-align] [--config PAD]
+               [--syllable-dictionary PAD] [--lyrics-lang {auto,nl,ksl}] path
 ```
 
 ### Beschrijving
 
 Schrijfhulp voor **zing-deling** in `.mvsa` L-tekst — parallel aan
 [`vsa syllabify`](syllabify.md). Norm:
-[syllabificatie](../../formats/syllabificatie.md).
+[syllabificatie](../../formats/syllabificatie.md)
+(alleen L-zingtekst; structureel, commentaar en non-L blijven).
 
 | Onderdeel       | Gedrag                                                                                                                                                          |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Recite `(…)`    | Soft `-` tussen lettergrepen (spatie = woordgrens); dictionary wint op Pyphen                                                                                   |
+| Recite `(…)`    | Soft `-` tussen lettergrepen (spatie = woordgrens); dictionary wint op Pyphen; haakjes op woord-/lettergreepgrens                                               |
 | Cadens          | Eén L-positie zonder streepjes die meerlettergrepig is → hyphen-keten (`heerlijkheid_` → `heer_-lijk-heid_`); op elke stem evenveel `-`-holds, zodat sync klopt |
-| `--unsyllabify` | Soft `-` **binnen** recite weg; cadens-ketens worden niet samengevoegd                                                                                          |
+| Hard `=`        | Orthografisch koppelteken blijft; soft `-` wijzigt eromheen (zelfde idee als VSA)                                                                               |
+| Structureel     | Maat/herhaling, haakjes, ELMs/`&`, `[…]` (o.a. `[//.]`) blijven onaangeroerd                                                                                    |
+| Overslaan       | YAML-frontmatter (`zoektekst`), `@`-directives, S/A/T/B, `#`-commentaarregels, HTML-comments (`<!-- … -->`)                                                     |
+| `--unsyllabify` | Soft `-` **binnen** recite weg; cadens-ketens worden niet samengevoegd; hard `=` blijft                                                                         |
 | Resultaat       | Moet `mvsa validate` zonder errors doorstaan                                                                                                                    |
 
 Zelfde schrijfmodi als `vsa syllabify` / kuiser / zoektekst: **default
 schrijft in-place**; `--dry-run` = preview; `--extension .syl.mvsa` =
-sibling i.p.v. bron.
+sibling i.p.v. bron. Logging: eindsummary altijd; per-bestandregels alleen
+met `--verbose` / `-v` (zie [`vsa syllabify`](syllabify.md#output)).
+TTY-dictionarycorrecties worden ook geschreven als er nog dictionary-meldingen
+resten (zelfde als `vsa syllabify`).
 
 ### Argumenten en opties
 
-| Naam                          | Verplicht | Betekenis                                             | Default         | Beperkingen             |
-| ----------------------------- | --------- | ----------------------------------------------------- | --------------- | ----------------------- |
-| `path`                        | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.         | —               | Moet bestaan.           |
-| `--dry-run`                   | Nee       | Toon resultaat zonder te schrijven.                   | Uit (schrijven) | —                       |
-| `--in-place`                  | Nee       | Expliciet in-place (zelfde als default).              | Aan (impliciet) | Niet met `--extension`. |
-| `--extension EXT`             | Nee       | Sibling met deze extensie (eindigt op `.mvsa`).       | Uit             | Niet met `--in-place`.  |
-| `--unsyllabify`               | Nee       | Verwijder soft `-` in recite.                         | Uit             | —                       |
-| `--no-align`                  | Nee       | Sla kolomuitlijning na herschrijven over.             | Uit             | —                       |
-| `--config`                    | Nee       | Pad naar `vsa.toml`.                                  | auto            | —                       |
-| `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt`.  | auto            | —                       |
-| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = Cyrillisch → `ksl`, anders `nl`; of forceer. | `auto`          | —                       |
+| Naam                          | Verplicht | Betekenis                                                      | Default         | Beperkingen             |
+| ----------------------------- | --------- | -------------------------------------------------------------- | --------------- | ----------------------- |
+| `path`                        | Ja        | `.mvsa`-bestand of map met `.mvsa`-bestanden.                  | —               | Moet bestaan.           |
+| `--dry-run`                   | Nee       | Toon resultaat zonder te schrijven.                            | Uit (schrijven) | —                       |
+| `--verbose`, `-v`             | Nee       | Per bestand een statusregel (anders alleen summary).           | Uit             | —                       |
+| `--in-place`                  | Nee       | Expliciet in-place (zelfde als default).                       | Aan (impliciet) | Niet met `--extension`. |
+| `--extension EXT`             | Nee       | Sibling met deze extensie (eindigt op `.mvsa`).                | Uit             | Niet met `--in-place`.  |
+| `--unsyllabify`               | Nee       | Verwijder soft `-` in recite.                                  | Uit             | —                       |
+| `--no-align`                  | Nee       | Sla kolomuitlijning na herschrijven over.                      | Uit             | —                       |
+| `--config`                    | Nee       | Pad naar `vsa.toml`.                                           | auto            | —                       |
+| `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt`.           | auto            | —                       |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | `auto` = per woord Latijn→`nl` / Cyrillisch→`ksl`; of forceer. | `auto`          | —                       |
 
 ### Voorbeelden
 

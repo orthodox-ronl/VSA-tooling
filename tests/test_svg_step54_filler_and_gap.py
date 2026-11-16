@@ -10,7 +10,7 @@ from vsa.svg_renderer import SVGRenderer
 
 
 def test_filler_line_uses_text_dash_height_not_upper_glyph_height():
-    document = Parser(r"{/&/&/&/schon}").parse()
+    document = Parser(r"{/&\tij_&_}").parse()
     svg = SVGRenderer().render_document(document)
 
     assert "vsa-filler-line" in svg

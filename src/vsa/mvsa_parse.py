@@ -958,8 +958,9 @@ def parse_l_positions(measure: str) -> list[LPosition]:
 
     Reciteertoon: ``( … )`` met optionele ELM direct na ``)``. Binnen de
     haakjes scheiden spaties woorden en ``-`` lettergrepen. Zonder ELM na
-    ``)`` is de duur de recite-standaard (export: breve). ``~`` op L is alleen
-    nog ELM-duur, nooit recite-marker.
+    ``)`` zonder ELM: recite-standaardduur (export: kwart per lettergreep;
+    partituur-print mag S8-collapse). ``~`` op L is alleen ELM-duur, nooit
+    recite-marker.
 
     Bekende uitvoeraanwijzingen ``[…]`` (zie ``mvsa_marks``) plakken aan een
     L-positie en tellen niet mee voor sync.

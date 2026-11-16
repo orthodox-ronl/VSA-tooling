@@ -78,8 +78,11 @@ def build_scope_layout(
     if count <= 1:
         base_grid_width = text_width
     else:
+        # W = max(TB, Σ W[i]) — rendering.md „Kolombreedtes en rijhoogtes”.
+        # Extra breedte (en dus een opvulstreep) alleen als de glyphs samen
+        # niet in de lettergreep passen. Niet óók nog een cel bovenop de tekst.
         base_grid_width = max(
-            text_width + minimum_column_width,
+            text_width,
             count * minimum_column_width,
         )
 

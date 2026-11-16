@@ -9,11 +9,32 @@ def test_single_scope_has_positive_width():
     assert layout.width > 0
 
 
-def test_multi_modifier_scope_gets_filler_width():
-    document = Parser(r"{/&/&/&/schon}").parse()
-    layout = build_scope_layout(document.nodes[0])
+def test_short_syllable_gets_filler_when_glyphs_are_wider():
+    """{/&\\tij_&_}: twee ELM/EHM-kolommen passen niet in „tij”."""
+    document = Parser(r"{/&\tij_&_}").parse()
+    layout = build_scope_layout(
+        document.nodes[0],
+        text_font_size=20,
+        font_family="DejaVu Sans",
+        leading_safety=False,
+        trailing_safety=False,
+    )
 
-    assert layout.filler_width > 0
+    assert layout.filler_width > 2
+
+
+def test_wide_syllable_has_no_filler_when_glyphs_fit():
+    """{/&\\schouw_&_}: „schouw” is breed genoeg; geen streep naar de volgende lettergreep."""
+    document = Parser(r"{/&\schouw_&_}").parse()
+    layout = build_scope_layout(
+        document.nodes[0],
+        text_font_size=20,
+        font_family="DejaVu Sans",
+        leading_safety=False,
+        trailing_safety=False,
+    )
+
+    assert layout.filler_width == 0
 
 
 def test_short_scope_not_forced_to_old_large_width():

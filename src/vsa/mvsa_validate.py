@@ -417,7 +417,10 @@ def _add_syllable_dictionary_diagnostics(
     )
 
     findings = find_mvsa_dictionary_syllable_issues(text)
-    if is_interactive_stdin():
+    # Alleen TTY-prompten met bekend bestandspad. Zonder pad (o.a. interne
+    # ``validate_mvsa_text`` vanuit ``syllabify_mvsa_text``) geen tweede
+    # interactieve ronde zonder ``pad:regel:kolom:``.
+    if is_interactive_stdin() and path is not None and path.is_file():
         actionable = [
             f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
         ]
@@ -426,14 +429,22 @@ def _add_syllable_dictionary_diagnostics(
 
             session = prompt_dictionary_fixes(
                 actionable,
-                source_id=source_id_for_prompt(path) if path else None,
+                source_id=source_id_for_prompt(path),
                 source_path=path,
             )
-            if (
-                path is not None
-                and path.is_file()
-                and session.replacements
-            ):
+            if session.aborted:
+                diagnostics.append(
+                    MvsaDiagnostic(
+                        "VSA-SYLLABLE-DICT-ABORTED",
+                        "Interactieve syllable-dictionary-check afgebroken "
+                        "(Esc/Ctrl+C).",
+                        1,
+                        severity="error",
+                    )
+                )
+                # Geen path.write_text: Esc/Ctrl+C laat het .mvsa onaangeroerd.
+                return
+            if session.replacements:
                 working = text
                 try:
                     working = syllabify_mvsa_text(
@@ -448,18 +459,8 @@ def _add_syllable_dictionary_diagnostics(
                     path.write_text(working, encoding="utf-8", newline="\n")
                 findings = find_mvsa_dictionary_syllable_issues(working)
             else:
+                # ``=``/``+`` kan de lijst wijzigen zonder bronreplace.
                 findings = find_mvsa_dictionary_syllable_issues(text)
-            if session.aborted:
-                diagnostics.append(
-                    MvsaDiagnostic(
-                        "VSA-SYLLABLE-DICT-ABORTED",
-                        "Interactieve syllable-dictionary-check afgebroken "
-                        "(Esc/Ctrl+C).",
-                        1,
-                        severity="error",
-                    )
-                )
-                return
     for finding in findings:
         # Voorlopig warning: catalogus/examples zijn nog niet overal
         # dictionary-gesynchroniseerd. Lyrics-only blijft wél hard.
@@ -1322,7 +1323,9 @@ def _validate_system_l_marks(
 
 
 def format_diagnostic(d: MvsaDiagnostic, path: Path | None = None) -> str:
-    loc = f"{path}:" if path else ""
+    from .cli_messages import path_label
+
+    loc = f"{path_label(path)}:" if path else ""
     col = f"{d.column}:" if d.column is not None else ""
     head = f"{loc}{d.line}:{col} {d.severity}: {d.code}: {d.message}"
     if d.column is not None and d.source_line:

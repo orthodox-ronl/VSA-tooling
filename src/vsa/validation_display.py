@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from .validation_runner import ValidationMessage
 
 _SHORT_MESSAGES_NL: dict[str, str] = {
@@ -41,25 +39,12 @@ def validation_location_label(message: ValidationMessage) -> str:
 
 
 def _source_path_label(source: str) -> str:
+    from .cli_messages import path_label
+
     raw = (source or "").strip()
     if not raw:
         return "<onbekend>"
-
-    path = Path(raw)
-    try:
-        cwd = Path.cwd().resolve()
-        resolved = path.resolve() if path.is_absolute() else (cwd / path).resolve()
-        try:
-            relative = resolved.relative_to(cwd)
-            return relative.as_posix()
-        except ValueError:
-            pass
-        if path.is_absolute():
-            return resolved.as_posix()
-    except OSError:
-        pass
-
-    return raw.replace("\\", "/")
+    return path_label(raw)
 
 
 def validation_short_message(message: ValidationMessage) -> str:

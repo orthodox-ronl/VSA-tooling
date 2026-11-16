@@ -35,7 +35,9 @@ index. Soft-wrap system boundaries are **systeemovergangen** in the
 
 By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
 (canonieke schrijfvorm / normaalvorm: lone standaard-``~`` op L weggelaten,
-``~`` wél bij ``&``-melisma en na ``)``; maatstrepen sync, kolomuitlijning).
+``~`` wél bij ``&``-melisma en na ``)``; maatstrepen sync, kolomuitlijning)
+with ``dict_interactive=False`` — import is a conversion bridge (o.a.
+``products`` score-ir), not a TTY dictionary session.
 If kuiser fails validation, import still applies
 :func:`vsa.mvsa_align.align_mvsa_text`. ``align=False`` (CLI ``--no-align``)
 skips kuiser but still column-aligns slots and maatstrepen.
@@ -342,9 +344,15 @@ def import_score_to_mvsa(
         )
         if align:
             # Canonieke normaalvorm: lone ~ weg, bars sync, kolommen.
+            # Import is conversie (products/score-ir-brug), geen TTY-edit:
+            # dictionary-prompts horen bij ``mvsa kuiser`` / ``validate``.
             try:
                 text = kuiser_mvsa_text(
-                    text, pitch="preserve", octave_style=octave_style, align=True
+                    text,
+                    pitch="preserve",
+                    octave_style=octave_style,
+                    align=True,
+                    dict_interactive=False,
                 ).text
             except (MvsaKuiserError, MvsaValidationError):
                 # Kuiser kan falen op overige validatie; kolommen + maatstrepen
@@ -2175,13 +2183,17 @@ def _l_duration_suffix(
 ) -> str:
     """ELM-suffix for one L-positie.
 
-    Lone standaard-``~`` is impliciet en wordt weggelaten — behalve na
-    recite-``)`` (zonder ELM = breve) en in ``&``-melisma (``ziel~&~``).
+    Lone standaard-``~`` is impliciet (ook na recite-``)``: export behandelt
+    ``)`` en ``)~`` beide als kwart). ``~`` blijft in ``&``-melisma
+    (``ziel~&~``, ``()~&~&.``) en bij andere duur (``_``, ``.``, …).
+
+    ``after_recite`` is historisch; lone ``~`` wordt overal weggelaten.
     """
+    del after_recite  # API-compat; geen speciale post-``)``-``~`` meer.
     if not elms:
         return ""
     if len(elms) == 1:
-        if elms[0] == "~" and not after_recite:
+        if elms[0] == "~":
             return ""
         return elms[0]
     return "&".join(elms)
@@ -2201,8 +2213,8 @@ def _format_l_measure(positions: list[_Position]) -> str:
             # → ``dag-gaan``). Only light repair of false compounds / gaps.
             text = _repair_recite_underlay(raw) if raw.strip() else ""
             body = f"({text})" if text else "()"
-            # Explicit non-breve duration after ) if present (keep ``~``:
-            # bare ``)`` means breve, not quarter).
+            # Niet-standaard duur na ``)`` (``_``, ``.``, …). Lone ``~`` is
+            # impliciet — zelfde als kale ``)`` (export: kwart per lettergreep).
             if not n0.is_breve:
                 body += _l_duration_suffix(
                     [_duration_to_elm(n0.duration)], after_recite=True
@@ -2213,8 +2225,8 @@ def _format_l_measure(positions: list[_Position]) -> str:
         else:
             text = _clean_import_lyric_text(raw)
             elms = [_duration_to_elm(n.duration) for n in pos.notes]
-            # Lyric-less / extender-only slot: bare ``~`` is not an L-position —
-            # use empty recite ``()~`` so sync-telling matches the stem.
+            # Lyric-loos / extender: lege recite ``()`` (+ eventuele melisma-
+            # ELMs); bare ``~`` is geen L-positie.
             if not text:
                 piece = "()" + _l_duration_suffix(elms, after_recite=True)
             else:

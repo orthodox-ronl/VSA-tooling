@@ -34,7 +34,11 @@ Canoniek = [syntax](../specification-mvsa/syntax.md) /
 
 ## Syllabificatie
 
-Soft `-` in L-tekst (recite tussen haakjes én cadens-brug `)-…`). Hub:
+Soft `-` in L-tekst (recite tussen haakjes én cadens-brug `)-…`). Alleen de
+zingtekst op L verandert; maat/herhaling, haakjes, ELMs/`&`, `[…]`-marks
+(zoals `[//.]`), hard `=`, frontmatter/`zoektekst`, en commentaar (`#` én
+HTML) blijven staan — zelfde “niet-lyrics sparen”-idee als
+[`vsa syllabify`](../reference/cli/syllabify.md). Hub:
 [syllabificatie](syllabificatie.md). Schrijfhulp:
 [`mvsa syllabify`](../reference/cli/mvsa.md#mvsa-syllabify).
 

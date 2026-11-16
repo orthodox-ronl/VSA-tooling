@@ -221,7 +221,7 @@ mscz mvsa PATH [-o OUT] …
   export/validatie dragen de lopende toon over (beginanker reset) — zie
   [semantics — systeemovergangen](../specification-mvsa/semantics.md#lopende-toon-over-systeemovergangen).
 - Multi-lettergreep lyrics op één noot → recite `( … )`; lone extender →
-  lege recite `()~`; trailing `.` gestript.
+  lege recite `()` (lone `)~` is impliciet); trailing `.` gestript.
 - Default `--pitch ag-vsa` + `--octave-style @oct`: per systeem eerste noot
   a–g **relatief** (`Bb`, niet `Bb4`), daarna EHM, a–g-eindanker; daarna
   **kuiser-normaalvorm** (canonieke `~` op L, bars sync, kolommen inclusief

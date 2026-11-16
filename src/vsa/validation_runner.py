@@ -592,7 +592,9 @@ def _add_syllable_dictionary_findings(
 
     from .parser import Parser
     from .syllable_dict_check import (
+        CODE_LANG_SKIPPED,
         CODE_MISMATCH,
+        CODE_TAAL_MISMATCH,
         CODE_UNKNOWN,
         DOC_URL,
         apply_replacements_to_text,
@@ -685,7 +687,10 @@ def _add_syllable_dictionary_findings(
             )
 
     for finding in findings:
-        severity = "error"
+        if finding.code in {CODE_LANG_SKIPPED, CODE_TAAL_MISMATCH}:
+            severity = "warning"
+        else:
+            severity = "error"
         if config is not None:
             severity = config.validation.severity.get(finding.code, severity)
         if severity not in {"error", "warning"}:

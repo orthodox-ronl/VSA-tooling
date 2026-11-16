@@ -7,10 +7,12 @@ from __future__ import annotations
 
 import sys
 
+from .mvsa_marks import lookup_mark
 from .mvsa_parse import (
     LPosition,
     _ELMS,
     _attach_lyric_punct,
+    _consume_known_mark,
     _is_syllable_char,
     _is_woordstreepje,
     _read_elms,
@@ -21,8 +23,54 @@ from .mvsa_parse import (
 from .mvsa_validate import is_lyrics_stem, parse_regelidentifier, _split_bars
 
 
+def _extend_span_trailing_after_marks(s: str, i: int) -> int:
+    """Neem whitespace + ``attach=after``-marks mee in de L-token-span.
+
+    Stopt vóór ``attach=before`` (die hoort bij de volgende positie). Zelfde
+    mark-semantiek als ``parse_l_positions`` / ``_append_trailing_marks``.
+    """
+    n = len(s)
+    while True:
+        j = i
+        while j < n and s[j].isspace():
+            j += 1
+        mark, k, consumed = _consume_known_mark(s, j)
+        if not consumed or mark is None:
+            break
+        spec = lookup_mark(mark.raw)
+        if spec is None or spec.attach != "after":
+            break
+        i = k
+    return i
+
+
+def _consume_leading_before_marks(s: str, i: int) -> int:
+    """Sla ``attach=before``-marks (+ whitespace erna) over; index ná de marks."""
+    n = len(s)
+    while True:
+        mark, j, consumed = _consume_known_mark(s, i)
+        if not consumed or mark is None:
+            break
+        spec = lookup_mark(mark.raw)
+        if spec is None or spec.attach != "before":
+            break
+        i = j
+        while i < n and s[i].isspace():
+            i += 1
+    return i
+
+
+def _l_token_lyric_offset(token: str) -> int:
+    """Kolom van de zingtekst binnen een L-token (ná leading before-marks)."""
+    return _consume_leading_before_marks(token, 0)
+
+
 def _l_position_spans(measure: str) -> list[tuple[int, int]]:
-    """Return (start, end) spans for each L-position within ``measure``."""
+    """Return (start, end) spans for each L-position within ``measure``.
+
+    Spans bevatten ook plakkende ``[…]``-marks (before vóór de lyric, after
+    erna), zodat align/syllabify die structurele tokens niet weggooien.
+    """
     s = measure
     stripped = s.strip()
     if not stripped:
@@ -59,7 +107,30 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
         ):
             i += 1
             continue
-        start = i
+
+        mark, j, consumed = _consume_known_mark(stripped, i)
+        if consumed:
+            if mark is not None:
+                spec = lookup_mark(mark.raw)
+                if spec is not None and spec.attach == "after":
+                    # Wees-after-mark (hoort bij vorige positie); skip.
+                    i = j
+                    continue
+                if spec is None or spec.attach != "before":
+                    i = j
+                    continue
+            else:
+                # Onbekende/unclosed bracket — zelfde skip als parse.
+                i = j
+                continue
+            # before-mark(s): start van deze positie
+            start = i
+            i = _consume_leading_before_marks(stripped, i)
+        else:
+            start = i
+
+        if i >= n:
+            break
         if stripped[i] == "(":
             close = stripped.find(")", i + 1)
             if close < 0:
@@ -67,6 +138,7 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
             i = close + 1
             _, i = _read_elms(stripped, i, allow_bare_dash=False)
             _, i = _attach_lyric_punct(stripped, i, "")
+            i = _extend_span_trailing_after_marks(stripped, i)
             spans.append((start + offset, i + offset))
             pi += 1
             continue
@@ -88,16 +160,24 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
             ):
                 break
             break
+        i = _extend_span_trailing_after_marks(stripped, i)
         spans.append((start + offset, i + offset))
         pi += 1
     return spans
+
+
+def _format_lpos_with_marks(p: LPosition) -> str:
+    """``_format_lpos`` plus plakkende ``[…]``-marks (before/after)."""
+    before = "".join(f"[{m.raw}]" for m in p.marks_before)
+    after = "".join(f"[{m.raw}]" for m in p.marks_after)
+    return f"{before}{_format_lpos(p)}{after}"
 
 
 def _l_tokens(measure: str) -> list[str]:
     spans = _l_position_spans(measure)
     if spans:
         return [measure[a:b] for a, b in spans]
-    return [_format_lpos(p) for p in parse_l_positions(measure)]
+    return [_format_lpos_with_marks(p) for p in parse_l_positions(measure)]
 
 
 def _format_lpos(p: LPosition) -> str:
@@ -313,7 +393,8 @@ def _build_aligned_measure(
         if col < starts[i]:
             parts.append(" " * (starts[i] - col))
             col = starts[i]
-        out_anchors.append(col)
+        # Stem onder de zingtekst, niet onder leading ``[cresc]`` e.d.
+        out_anchors.append(col + _l_token_lyric_offset(contents[i]))
         parts.append(contents[i])
         col += len(contents[i])
 

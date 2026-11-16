@@ -6,13 +6,14 @@ Contract: ``docs/formats/kuiser.md`` (Q\\*). Pipeline:
    ``werkbank``;
 1. Q2/Q3 — document-``@``-blok + ``#maat N`` (:mod:`vsa.mvsa_kuiser_q23`);
 2. op L: eenduidige ELM-``-`` → ``~``; daarna lone standaard-``~`` weglaten
-   (impliciete kwart). ``~`` blijft bij ``&``-melisma (``ziel~&~``) en na
-   recite-``)`` (``()~`` / ``(ia)~`` — zonder ELM = breve). Samengestelde
+   (impliciete kwart), ook na recite-``)`` — ``(ia)~`` → ``(ia)`` (export
+   behandelt beide als kwart). ``~`` blijft bij ``&``-melisma (``ziel~&~``,
+   ``()~&~&.``) en bij niet-standaard duur na ``)`` (``(…)_``). Samengestelde
    ELM’s zoals ``-.`` blijven;
 3. waarschuwing bij ambiguë ``-`` (regel + kolom) — geen stille
    ``hei- li``→``hei-li``-collapse (dat breekt o.a. ``…_&_  -li``);
-4. semantische woordstreepjes: waarschuwing bij ontbrekende streepjes
-   wanneer Pyphen de lettergrepen exact zo zou splitsen;
+4. semantische woordstreepjes: tip alleen als losse lettergrepen een
+   lemma uit de syllable-dictionary vormen (geen Pyphen-ruis);
 5. maatstrepen syncen waar eenduidig (nodig vóór Q4);
 6. Q4/Q5 — soft ``-`` op L + dictionary-waarschuwingen
    (:mod:`vsa.mvsa_kuiser_q45`);
@@ -77,7 +78,9 @@ class KuiserWarning:
     message: str
 
     def format(self, path: Path | None = None) -> str:
-        loc = f"{path}:" if path else ""
+        from .cli_messages import path_label
+
+        loc = f"{path_label(path)}:" if path else ""
         return f"{loc}{self.line}:{self.column}: WARNING: {self.message}"
 
 
@@ -187,8 +190,8 @@ def _repair_systems(text: str) -> tuple[str, list[KuiserWarning]]:
         bom = "\ufeff"
         text = text[1:]
 
-    fm, body, _ = strip_yaml_frontmatter(text)
-    repaired_body, warnings = _repair_systems_body(body)
+    fm, body, line_base = strip_yaml_frontmatter(text)
+    repaired_body, warnings = _repair_systems_body(body, line_base=line_base)
     if not fm:
         return bom + repaired_body, warnings
 
@@ -204,8 +207,14 @@ def _repair_systems(text: str) -> tuple[str, list[KuiserWarning]]:
     return bom + repaired_body, warnings
 
 
-def _repair_systems_body(text: str) -> tuple[str, list[KuiserWarning]]:
-    """Zelfde als vroeger ``_repair_systems``, alleen op de body."""
+def _repair_systems_body(
+    text: str, *, line_base: int = 0
+) -> tuple[str, list[KuiserWarning]]:
+    """Zelfde als vroeger ``_repair_systems``, alleen op de body.
+
+    ``line_base`` = newlines vóór de body in het bronbestand (YAML), zodat
+    warnings het 1-gebaseerde regelnummer in het hele bestand tonen.
+    """
     lines = text.splitlines(keepends=True)
     out: list[str] = []
     warnings: list[KuiserWarning] = []
@@ -232,13 +241,20 @@ def _repair_systems_body(text: str) -> tuple[str, list[KuiserWarning]]:
             content = after_colon.lstrip()
             eol = lines[j][len(r) :] or "\n"
             system_lines.append(
-                (rid.stem_id, rid.ehm, content, eol, j + 1, content_start)
+                (
+                    rid.stem_id,
+                    rid.ehm,
+                    content,
+                    eol,
+                    j + 1 + line_base,
+                    content_start,
+                )
             )
             j += 1
 
         order = [mk for mk, *_ in system_lines]
         contents = {mk: c for mk, _, c, *_ in system_lines}
-        start_line = i + 1
+        start_line = i + 1 + line_base
 
         for mk, _ehm, content, _eol, line_no, content_start in system_lines:
             if not is_lyrics_stem(mk):
@@ -359,7 +375,13 @@ def _warn_missing_hyphens_in_run(
     line_no: int,
     content_start: int,
 ) -> list[KuiserWarning]:
-    """One warning per maximal unlinked run that Pyphen would hyphenate identically."""
+    """Warn only when unlinked parts match a known dictionary lemma.
+
+    Pyphen alleen is te luid (plakt losse woorden tot nep-compounds). Alleen
+    melden als het samengevoegde lemma in de syllable-dictionary staat.
+    """
+    from .syllable_dictionary import canonical_syllable_form
+
     if len(cores) < 2:
         return []
     if not all(_is_latin_core(c) for c in cores):
@@ -372,7 +394,7 @@ def _warn_missing_hyphens_in_run(
         grew_without_link = False
         while j < len(cores):
             if linked_to_prev[j]:
-                # Already-correct woordstreepjes: don't fold into a Pyphen-miss warning.
+                # Already-correct woordstreepjes: don't fold into a miss warning.
                 if grew_without_link:
                     break
                 group.append(cores[j])
@@ -396,13 +418,23 @@ def _warn_missing_hyphens_in_run(
                 continue
             break
         if grew_without_link:
+            joined = dehyphenate_dutch_word("".join(group))
+            canonical = canonical_syllable_form(joined)
+            if canonical is None:
+                i = j if j > i else i + 1
+                continue
+            canon_parts = canonical.split("-")
+            if [p.lower() for p in canon_parts] != [p.lower() for p in group]:
+                # Dictionary splits anders dan de losse stukken — geen tip.
+                i = j if j > i else i + 1
+                continue
             warnings.append(
                 KuiserWarning(
                     line_no,
                     content_start + 1,
-                    "ontbrekend woordstreepje op L: "
-                    f"{' '.join(group)} → {'-'.join(group)} (Pyphen). "
-                    "Canoniek: streepje direct vóór de volgende lettergreep.",
+                    "Op de L-regel missen woordstreepjes in één bekend woord: "
+                    f"{' '.join(group)} → schrijf {canonical} "
+                    "(streepje direct vóór elke volgende lettergreep).",
                 )
             )
         i = j if j > i else i + 1
@@ -469,7 +501,7 @@ def _canonicalize_l_standard_elms(content: str) -> str:
 
 
 def _omit_implicit_lone_tildes(content: str) -> str:
-    """Drop lone standaard-``~`` on L; keep melisma ``~&…`` and post-``)`` ELMs."""
+    """Drop lone standaard-``~`` on L (ook na ``)``); keep melisma ``~&…``."""
     s = content
     n = len(s)
     drop: list[tuple[int, int]] = []
@@ -502,8 +534,11 @@ def _omit_implicit_lone_tildes(content: str) -> str:
             if close < 0:
                 break
             i = close + 1
-            # Recite duration: keep ``~`` (bare ``)`` = breve).
-            _elms, i = _read_elms(s, i, allow_bare_dash=False)
+            # Zelfde als elders: lone ``~`` impliciet; ``~&…`` / ``_`` / ``.`` blijven.
+            elm_start = i
+            elms, i = _read_elms(s, i, allow_bare_dash=False)
+            if elms == ["~"]:
+                drop.append((elm_start, i))
             continue
 
         if _is_woordstreepje(s[i]) and not (

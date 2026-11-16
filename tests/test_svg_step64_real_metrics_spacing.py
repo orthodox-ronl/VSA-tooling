@@ -19,7 +19,7 @@ def test_eeu_is_wider_than_de_with_metrics():
 
 
 def test_multi_ehm_still_forces_filler_width():
-    node = Parser(r"{/&/&/&/schon}").parse().nodes[0]
+    node = Parser(r"{/&\tij_&_}").parse().nodes[0]
     layout = build_scope_layout(node)
 
     assert layout.filler_width > 0

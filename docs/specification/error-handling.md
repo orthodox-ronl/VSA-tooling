@@ -60,6 +60,9 @@ MuseScore niet gevonden, CLI-misbruik) volgen dezelfde leesbaarheid voor de
 
 1. **Locatie** — `pad:regel:kolom:` wanneer bekend; anders `pad:regel:` of
    alleen `pad:`; bij puur CLI-gebruik (geen bronbestand) alleen de tekst.
+   Cataloguspaden in logs zijn **kort**: zonder prefix
+   `content-source/catalogus/` (via `vsa.cli_messages.path_label`), zodat
+   `pad:regel:kolom` aanklikbaar blijft in de terminal.
 2. **Beschrijving** — volledige Nederlandse zin: wat er misgaat. Mag over
    **meerdere regels** (niet alles op één regel proppen).
 3. **Herstel** — daarna een `Hint:`-blok (ook meerregelig) met concrete

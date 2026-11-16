@@ -65,15 +65,19 @@ def add_allow_noncanonical_arg(parser: argparse.ArgumentParser) -> None:
 
 @contextmanager
 def _noninteractive_validate() -> Iterator[None]:
-    """C3 mag nooit TTY-prompts openen (dictionary-fix)."""
+    """C3 mag nooit TTY-prompts openen (dictionary-fix).
+
+    Zet ``syllable_dict_check._force_noninteractive`` — dat wint binnen
+    :func:`is_interactive_stdin` zelf, ook bij ``from X import``-bindings.
+    """
     from . import syllable_dict_check
 
-    original = syllable_dict_check.is_interactive_stdin
-    syllable_dict_check.is_interactive_stdin = lambda stdin=None: False  # type: ignore[assignment]
+    previous = syllable_dict_check._force_noninteractive
+    syllable_dict_check._force_noninteractive = True
     try:
         yield
     finally:
-        syllable_dict_check.is_interactive_stdin = original
+        syllable_dict_check._force_noninteractive = previous
 
 
 def check_canonical_source(

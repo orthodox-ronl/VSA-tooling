@@ -15,8 +15,26 @@ import sys
 from pathlib import Path
 
 
+def _strip_catalogus_prefixes(relative: Path) -> Path:
+    """``content-source/catalogus/…`` of ``catalogus/…`` → catalogus-relatief.
+
+    Korte paden blijven aanklikbaar in de terminal; lange prefixen knippen
+    de klikbare ``pad:regel:kolom``-link af.
+    """
+    parts = relative.parts
+    if (
+        len(parts) >= 2
+        and parts[0] in ("content-source", "content_source")
+        and parts[1] == "catalogus"
+    ):
+        return Path(*parts[2:]) if len(parts) > 2 else Path()
+    if parts and parts[0] == "catalogus":
+        return Path(*parts[1:]) if len(parts) > 1 else Path()
+    return relative
+
+
 def path_label(path: Path | str | None) -> str:
-    """Leesbaar pad t.o.v. cwd wanneer mogelijk (forward slashes)."""
+    """Kort, aanklikbaar pad (posix); catalogus-prefixen weggelaten."""
     if path is None:
         return ""
     raw = str(path).strip()
@@ -27,9 +45,22 @@ def path_label(path: Path | str | None) -> str:
         cwd = Path.cwd().resolve()
         resolved = p.resolve() if p.is_absolute() else (cwd / p).resolve()
         try:
-            return resolved.relative_to(cwd).as_posix()
+            relative = _strip_catalogus_prefixes(resolved.relative_to(cwd))
+            if str(relative) not in ("", "."):
+                return relative.as_posix()
         except ValueError:
             pass
+        # Sibling/bibliotheek: strip tot onder …/content-source/catalogus.
+        parts = resolved.parts
+        for i, part in enumerate(parts):
+            if (
+                part in ("content-source", "content_source")
+                and i + 1 < len(parts)
+                and parts[i + 1] == "catalogus"
+            ):
+                tail = parts[i + 2 :]
+                if tail:
+                    return Path(*tail).as_posix()
         if p.is_absolute():
             return resolved.as_posix()
     except OSError:

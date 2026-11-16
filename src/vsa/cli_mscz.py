@@ -13,7 +13,7 @@ from pathlib import Path
 
 from .cli_score_to_mvsa import add_score_to_mvsa_arguments, run_score_to_mvsa
 from .derived_path import derived_output_path
-from .cli_messages import emit_cli_error, emit_cli_exception
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .input_paths import InputPathError, collect_cli_sources
 
 _MSCZ_SUFFIXES = (".mscz",)
@@ -569,7 +569,7 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta = merge_street_product_meta(path, {MSCZ_CORE_KEYS[0]: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -612,7 +612,7 @@ def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
             exit_code = 1
             continue
         for written_path in written:
-            print(f"Geschreven: {written_path}")
+            print(f"Geschreven: {path_label(written_path)}")
         products, drop = svg_meta_products(path, written)
         meta = merge_street_product_meta(path, products, drop_keys=drop or None)
         if meta is not None:
@@ -661,7 +661,7 @@ def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta = merge_street_product_meta(path, {MSCZ_PDF_KEY: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -705,7 +705,7 @@ def _cmd_mscz_normalize(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written} (layout {profile})")
+        print(f"Geschreven: {path_label(written)} (layout {profile})")
     return exit_code
 
 
@@ -735,7 +735,7 @@ def _cmd_mscz_text(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {LYRICS_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -790,7 +790,7 @@ def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         if fmt == "mp3":
             meta = merge_street_product_meta(path, {MP3_KEY: written})
             if meta is not None:
@@ -858,10 +858,10 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta_products: dict[str, Path] = {"score-ir": out}
         if mxl_path is not None:
-            print(f"MusicXML: {mxl_path}")
+            print(f"MusicXML: {path_label(mxl_path)}")
             meta_products["from-ir"] = mxl_path
         meta = merge_street_product_meta(path, meta_products)
         if meta is not None:
@@ -905,7 +905,7 @@ def _cmd_mscz_product(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {MSCZ_PRODUCT_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)

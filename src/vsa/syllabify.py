@@ -69,6 +69,10 @@ def hyphenate_dutch_word(word: str) -> str:
 
     Leidende/sluitende leestekens (``,`` ``.`` enz.) horen niet in de
     Pyphen-kern: anders wordt ``Geest,`` ten onrechte ``Gees-t,``.
+
+    Bij ``--lyrics-lang auto``: dictionary wisselt per woord (Latijn→nl,
+    Cyrillisch→ksl). Bij force ``nl``/``ksl``: andere schrift ongemoeid.
+    Cyrillisch zonder dictionary-treffer: geen NL-Pyphen.
     """
     if not word:
         return word
@@ -79,9 +83,19 @@ def hyphenate_dutch_word(word: str) -> str:
     if not core or not any(ch.isalpha() for ch in core):
         return word
     from .syllable_dictionary import (
+        activate_concrete_lyrics_lang,
         allowed_syllable_forms,
         canonical_syllable_form,
+        core_matches_lyrics_lang,
+        get_lyrics_lang_mode,
+        lyrics_lang_for_core,
     )
+
+    mode = get_lyrics_lang_mode()
+    word_lang = lyrics_lang_for_core(core)
+    if mode in ("nl", "ksl") and not core_matches_lyrics_lang(core, mode):
+        return word
+    activate_concrete_lyrics_lang(word_lang)
 
     forms = allowed_syllable_forms(core)
     if forms is not None:
@@ -95,6 +109,9 @@ def hyphenate_dutch_word(word: str) -> str:
     if HARD_HYPHEN in core:
         return f"{prefix}{HARD_HYPHEN.join(hyphenate_dutch_word(part) if part else part for part in core.split(HARD_HYPHEN))}{suffix}"
     if "-" in core:
+        return word
+    if word_lang == "ksl":
+        # Geen Nederlandse Pyphen op Cyrillisch.
         return word
     return f"{prefix}{_dutch_dic().inserted(core)}{suffix}"
 
@@ -562,40 +579,50 @@ def _render_scope_aware_syllables(
         used.add(preferred)
         scope_owner[preferred] = part_index
 
-    # Bouw output lettergreep-voor-lettergreep.
-    # Leestekens horen buiten de letterkern: bewaar voorloop/achterloop
-    # (ook als aparte tekst-atomen ná een scope, bv. ``{/Adam},``).
-    def _is_letter_part(part: _ContentPart) -> bool:
-        return bool(part.plain) and any(ch.isalpha() for ch in part.plain)
+    # Leestekens op vaste offsets in de letterstroom (die niet verschuift),
+    # zodat ``{/Adam},`` → ``{/A}dam,`` en ``zie,{/daar}`` de komma houdt.
+    inserts_before: dict[int, str] = {}
+    inserts_after: dict[int, str] = {}
 
-    def _punct_fragment(part: _ContentPart) -> str:
-        return f"{part.prefix}{part.core}{part.suffix}"
+    def _add_insert(bucket: dict[int, str], at: int, frag: str) -> None:
+        if frag:
+            bucket[at] = bucket.get(at, "") + frag
 
-    letter_indices = [i for i, p in enumerate(parts) if _is_letter_part(p)]
-    first_letter = letter_indices[0] if letter_indices else -1
-    last_letter = letter_indices[-1] if letter_indices else -1
-
-    leading_punct = ""
-    trailing_punct = ""
-    for i, part in enumerate(parts):
-        if part.kind != "text" or _is_letter_part(part):
+    for part, (start, end) in zip(parts, part_ranges):
+        if part.kind != "text":
             continue
-        frag = _punct_fragment(part)
-        if not frag:
-            continue
-        if first_letter < 0 or i < first_letter:
-            leading_punct += frag
+        letter = bool(part.plain.replace("=", "")) and any(
+            ch.isalpha() for ch in part.plain
+        )
+        if letter:
+            _add_insert(inserts_before, start, part.prefix)
+            _add_insert(inserts_after, end, part.suffix)
         else:
-            trailing_punct += frag
-
-    letter_text_parts = [p for p in parts if p.kind == "text" and _is_letter_part(p)]
-    leading_prefix = letter_text_parts[0].prefix if letter_text_parts else ""
-    trailing_suffix = letter_text_parts[-1].suffix if letter_text_parts else ""
+            _add_insert(
+                inserts_before, start, f"{part.prefix}{part.core}{part.suffix}"
+            )
 
     out: list[str] = []
-    index = 0
-    emitted_leading = False
+    char_i = 0
 
+    def _flush_through(new_i: int) -> None:
+        """Schrijf inserts op offsets (char_i, new_i]; daarna after/before op new_i."""
+        nonlocal char_i
+        if new_i < char_i:
+            return
+        for at in range(char_i + 1, new_i + 1):
+            if at in inserts_after:
+                out.append(inserts_after.pop(at))
+            if at in inserts_before:
+                out.append(inserts_before.pop(at))
+        char_i = new_i
+
+    if 0 in inserts_before:
+        out.append(inserts_before.pop(0))
+    if 0 in inserts_after:
+        out.append(inserts_after.pop(0))
+
+    index = 0
     while index < n:
         if index in scope_owner:
             part = parts[scope_owner[index]]
@@ -604,27 +631,24 @@ def _render_scope_aware_syllables(
                     part.source, part.plain.replace("=", ""), syllables[index]
                 )
             )
+            _flush_through(char_i + len(syllables[index]))
             index += 1
             continue
         run: list[str] = []
+        advance = 0
         while index < n and index not in scope_owner:
             run.append(syllables[index])
+            advance += len(syllables[index])
             index += 1
-        core = "-".join(run)
-        prefix = ""
-        suffix = ""
-        if not emitted_leading and leading_prefix:
-            prefix = leading_prefix
-            emitted_leading = True
-        if index >= n and trailing_suffix:
-            suffix = trailing_suffix
-        out.append(f"{prefix}{core}{suffix}")
-        emitted_leading = True
+        out.append("-".join(run))
+        _flush_through(char_i + advance)
 
-    body = "".join(out)
-    if not body and (leading_prefix or trailing_suffix):
-        body = f"{leading_prefix}{trailing_suffix}"
-    return f"{leading_punct}{body}{trailing_punct}"
+    for at in sorted(set(inserts_before) | set(inserts_after)):
+        if at in inserts_after:
+            out.append(inserts_after.pop(at))
+        if at in inserts_before:
+            out.append(inserts_before.pop(at))
+    return "".join(out)
 
 
 def _rebuild_scope_source(source: str, old_plain: str, new_plain: str) -> str:

@@ -4,8 +4,20 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from vsa.cli_messages import emit_cli_error, format_cli_error
+from vsa.cli_messages import emit_cli_error, format_cli_error, path_label
 from vsa.cli import main as vsa_main
+
+
+def test_path_label_strips_content_source_catalogus(
+    tmp_path: Path, monkeypatch
+) -> None:
+    cat = tmp_path / "content-source" / "catalogus" / "lied" / "default" / "x"
+    cat.mkdir(parents=True)
+    f = cat / "lied-default-x.mvsa"
+    f.write_text("L: a\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert path_label(f) == "lied/default/x/lied-default-x.mvsa"
+    assert path_label(Path("catalogus") / "lied" / "a.mvsa") == "lied/a.mvsa"
 
 
 def test_format_cli_error_path_line_column() -> None:

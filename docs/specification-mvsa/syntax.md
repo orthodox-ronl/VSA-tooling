@@ -356,13 +356,13 @@ De hele groep is **één** lengte-positie (één hoogte-stuk per stem). Er is
 **geen** leading `~` meer als recite-marker. Optioneel volgt **direct na** `)`
 een ELM voor de duur van die positie.
 
-| Onderdeel                     | Betekenis                                                                                                                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `(` … `)`                     | Recite-run; spaties = woorden, `-` = lettergreepstreepjes; **geen** duur-/melisma-ELM op lettergrepen binnen de haakjes (`MVSA-RECITE-INTERIOR-ELM`)                           |
-| geen ELM na `)`               | Recite-standaardduur: **playback** = kwart per lettergreep; **MSCZ-print** bij `n ≥ 6` = 1–(n−2)–1 met breve-midden (zie [MSCZ-leesbaarheid](../formats/mscz-leesbaarheid.md)) |
-| ELM na `)` (`_`, `~`, `.`, …) | Andere duur op de **hele** recite-positie (`(Zoon van God)_`)                                                                                                                  |
-| `)-` + lettergreep            | **Woordstreepje** over de recite-grens (niet ELM-`-`)                                                                                                                          |
-| `~` elders op L               | Alleen **ELM-duur** (`hei~`, melisma-slots) — start **geen** recite                                                                                                            |
+| Onderdeel                     | Betekenis                                                                                                                                                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `(` … `)`                     | Recite-run; spaties = woorden, `-` = lettergreepstreepjes; **geen** duur-/melisma-ELM op lettergrepen binnen de haakjes (`MVSA-RECITE-INTERIOR-ELM`)                                                                                 |
+| geen ELM na `)` (of lone `~`) | Recite-standaardduur: **playback** = kwart per lettergreep; **MSCZ-print** bij `n ≥ 6` = 1–(n−2)–1 met breve-midden (zie [MSCZ-leesbaarheid](../formats/mscz-leesbaarheid.md)). Lone `)~` is invoer-tolerantie; canoniek = kale `)`. |
+| ELM na `)` (`_`, `.`, …)      | Andere duur op de **hele** recite-positie (`(Zoon van God)_`). Melisma na lege recite: `()~&~&.…`                                                                                                                                    |
+| `)-` + lettergreep            | **Woordstreepje** over de recite-grens (niet ELM-`-`)                                                                                                                                                                                |
+| `~` elders op L               | Alleen **ELM-duur** (`hei~`, melisma-slots) — start **geen** recite                                                                                                                                                                  |
 
 Kale ELM-`-` na `)` voegt geen nuttige duur toe t.o.v. de standaard (zelfde
 kwart-duur als `~`). Zet een streepje **achter** de `)` alleen als het woord
@@ -443,7 +443,7 @@ L: (Al-le-lu-ia,) (Al-le-lu-ia,) al-le lu_&-&-&_ i_ a__ ||
 # GOED: grens is de `)`, niet een ELM midden in de tekst.
 L: Komt_, (laat ons … voor) Chris_-tus_, ||
 
-# GOED: langere recite-duur met ELM na de sluiting (_ of ~, niet kale -).
+# GOED: langere recite-duur met ELM na de sluiting (_ / ., niet lone ~).
 L: (Zoon van God)_ |
 ```
 

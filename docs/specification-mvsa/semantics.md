@@ -81,8 +81,10 @@ ondersteunen `r`/`R`. Opeenvolgende rustslots mogen bij MusicXML-export tot
 Een L-stuk tussen `( … )` is een recite-run: meerdere lettergrepen (en
 eventueel meerdere woorden), **één** hoogte-stuk per stem en **één**
 lengte-positie. Alle lettergrepen in die run delen dus dezelfde toon én
-dezelfde duur. Optionele ELM **direct na** `)` zet die duur; zonder ELM
-geldt de recite-standaard (export: breve). **Geen** per-lettergreep-ELM
+dezelfde duur. Optionele ELM **direct na** `)` zet een **niet-standaard**
+duur (`_`, `.`, …); zonder ELM (of lone `~`, dat impliciet is) geldt de
+recite-standaard: export = **kwart per lettergreep**; partituur-print mag
+S8-collapse (breve-midden) bij lange runs. **Geen** per-lettergreep-ELM
 (`_`, `~`, `.`, `&`, …) **binnen** de haakjes — validate:
 `MVSA-RECITE-INTERIOR-ELM`. Uitgewerkte voorbeelden:
 [Syntax — reciteertoon](syntax.md#reciteertoon).
@@ -226,7 +228,7 @@ Het teken `~` is op de L-regel **alleen** ELM (duur). Recite markeer je met
 | Rol                       | Waar                                       | Voorbeeld          |
 | ------------------------- | ------------------------------------------ | ------------------ |
 | Recite-groep              | Tussen `(` en `)`                          | `(hei-li-ge)`      |
-| ELM (duur 1×, geen glyph) | Direct na lettergreep, na `)`, of als slot | `li~`, `(ia,)~`    |
+| ELM (duur 1×, geen glyph) | Direct na lettergreep, na `)`, of als slot | `li~`, `(ia,)_`    |
 
 **Gevolg:**
 
@@ -235,25 +237,28 @@ Het teken `~` is op de L-regel **alleen** ELM (duur). Recite markeer je met
 - In melisma’s heeft ELM-`~` de voorkeur boven ELM-`-` vóór een
   lettergreepstreepje: schrijf `li~&~-ge`, niet `li-&--ge` (dubbele `-` is
   ambigu voor lezer en kuiser).
-- **Canoniek** op L: lone standaard-lengte is **impliciet** (geen `~` na de
-  lettergreep). Schrijf `~` wél in `&`-melisma (`ziel~&~`) en na recite-`)`
-  als de duur geen breve is (`()~`, `(ia)~` — zonder ELM na `)` = breve).
-  Kale ELM-`-` is invoer-tolerantie (kuiser → eerst `~`, daarna lone `~`
-  weglaten). Woordstreepje met extra breedte: spaties **vóór** `-letter`
-  (`…_&_  -li`).
+- **Canoniek** op L: lone standaard-lengte is **impliciet** — geen `~` na
+  een lettergreep en geen `)~` (export behandelt `)` en `)~` beide als
+  kwart). Schrijf `~` wél in `&`-melisma (`ziel~&~`, `()~&~&.`) en zet na
+  `)` alleen een ELM als de duur **niet** standaard is (`(Zoon van God)_`).
+  Voorbeeld: `Hij~ ge-neest- al~ uw~ kwa_-len_.` →
+  `Hij ge-neest al uw kwa_-len_.` (soft `-` in `ge-neest` blijft; ELM-`-`
+  / lone `~` weg). Kale ELM-`-` is invoer-tolerantie (kuiser → eerst `~`,
+  daarna lone `~` weglaten). Woordstreepje met extra breedte: spaties
+  **vóór** `-letter` (`…_&_  -li`).
 
 De kuiser mag recite-haakjes niet stilzwijgend weghalen of ELM-`~` niet in
 woordstreepjes veranderen.
 
 ## Canonieke layout vs. tolerantie
 
-| Onderwerp              | Canoniek                                                                                                                                           | Kuiser                                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Standaard-lengte op L  | Lone `~` weggelaten; `~` bij `&`-melisma en na `)` (niet-breve); `-` hoort bij lettergrepen                                                        | Eenduidige ELM-`-` → `~`, daarna lone `~` weg; waarschuwt bij ambiguë `-` (regel + kolom)       |
-| Woordstreepjes         | `-` direct vóór de volgende lettergreep; bij breedte spaties *ervóór* (`hei  -li`)                                                                 | Geen stille `hei- li`→`hei-li`-collapse; Pyphen-warnings bij ontbrekende / verdachte streepjes  |
-| Maat-/sectiestrepen    | Op alle LSATB-regels op dezelfde posities                                                                                                          | Mag strepen van één regel naar de andere kopiëren als eenduidig                                 |
-| **Kolomuitlijning**    | Ankers + maatstrepen + `&` in melisma (spaties rond `&` neutraal): [Syntax — canonieke kolomuitlijning](syntax.md#canonieke-kolomuitlijning-lsatb) | Mag losser zijn; gegenereerde output en voorbeelden zijn strikt                                 |
-| Directives             | Sticky tot overrule                                                                                                                                | —                                                                                               |
+| Onderwerp              | Canoniek                                                                                                                                           | Kuiser                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Standaard-lengte op L  | Lone `~` weggelaten (ook na `)`); `~` bij `&`-melisma; na `)` alleen niet-standaard ELM (`_`, `.`, …); `-` hoort bij lettergrepen                  | Eenduidige ELM-`-` → `~`, daarna lone `~` weg; waarschuwt bij ambiguë `-` (regel + kolom)      |
+| Woordstreepjes         | `-` direct vóór de volgende lettergreep; bij breedte spaties *ervóór* (`hei  -li`)                                                                 | Geen stille `hei- li`→`hei-li`-collapse; Pyphen-warnings bij ontbrekende / verdachte streepjes |
+| Maat-/sectiestrepen    | Op alle LSATB-regels op dezelfde posities                                                                                                          | Mag strepen van één regel naar de andere kopiëren als eenduidig                                |
+| **Kolomuitlijning**    | Ankers + maatstrepen + `&` in melisma (spaties rond `&` neutraal): [Syntax — canonieke kolomuitlijning](syntax.md#canonieke-kolomuitlijning-lsatb) | Mag losser zijn; gegenereerde output en voorbeelden zijn strikt                                |
+| Directives             | Sticky tot overrule                                                                                                                                | —                                                                                              |
 
 **Semantiek** (sync-telling) hangt niet van kolommen af: ongelijke spaties mogen
 in losse invoer. De **standaardlayout** die tooling schrijft (en die in

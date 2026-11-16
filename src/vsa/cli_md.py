@@ -14,7 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-from .cli_messages import emit_cli_error, emit_cli_exception
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .derived_path import derived_output_path
 from .input_paths import InputPathError, collect_cli_sources
 
@@ -327,7 +327,7 @@ def _cmd_md_svg(ns: argparse.Namespace) -> int:
             exit_code = 1
             continue
         if not svg_paths:
-            print(f"{path}: geen :::vsa-notatie-blokken (geen SVG).", flush=True)
+            print(f"{path_label(path)}: geen :::vsa-notatie-blokken (geen SVG).", flush=True)
             continue
         for svg in svg_paths:
             print(f"Geschreven: {svg}")
@@ -413,7 +413,7 @@ def _cmd_md_text(ns: argparse.Namespace) -> int:
         out.parent.mkdir(parents=True, exist_ok=True)
         payload = text if text.endswith("\n") or text == "" else text + "\n"
         out.write_text(payload, encoding="utf-8", newline="\n")
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
     return exit_code
 
 

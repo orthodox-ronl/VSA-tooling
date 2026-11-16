@@ -126,7 +126,10 @@ bibliotheek `frontmatter-canoniek --check` buiten deze CLI.
 
 Daarna de bestaande authoring-kuiser + align/normalize-pad:
 
-- eenduidige ELM-`-` → `~`, lone `~` weg;
+- eenduidige ELM-`-` → `~`, lone `~` weg (ook na `)`; soft `-` in woorden
+  zoals `ge-neest` blijft; `~` in `&`-melisma blijft);
+- tip «missen woordstreepjes» alleen als het woord in de
+  syllable-dictionary staat (geen Pyphen-ruis over losse woorden);
 - maatstrepen syncen waar eenduidig;
 - canonieke kolomuitlijning inkl. `&`-kolommen;
 - optioneel `--pitch` / `--octave-style` zoals nu.

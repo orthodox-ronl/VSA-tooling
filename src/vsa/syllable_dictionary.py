@@ -2,10 +2,12 @@
 
 De org-lijst hoort in de **bibliotheek**-repo (of een andere content-repo).
 Twee talen: ``nl`` (Latijnse lyrics) en ``ksl`` (Cyrillische / kerkslavische
-lyrics). Default CLI-modus ``auto``: per bron Cyrillisch in lyrics → ``ksl``,
-anders ``nl``. Pad via CLI ``--syllable-dictionary``, ``vsa.toml``
-``[syllabificatie]``, omgevingsvariabele, of auto-detectie naast de
-werkmap / sibling ``bibliotheek``. Zonder pad: lege mapping (package-stub).
+lyrics). Default CLI-modus ``auto``: **per woord** Latijn → ``nl``,
+Cyrillisch → ``ksl`` (beide schriften in één bron). Force ``nl``/``ksl``
+via ``--lyrics-lang`` behandelt tijdelijk één schrift. Pad via CLI
+``--syllable-dictionary``, ``vsa.toml`` ``[syllabificatie]``,
+omgevingsvariabele, of auto-detectie naast de werkmap / sibling
+``bibliotheek``. Zonder pad: lege mapping (package-stub).
 """
 
 from __future__ import annotations
@@ -21,7 +23,7 @@ from .syllabify import HARD_HYPHEN, strip_soft_hyphens
 LYRICS_LANGS = ("nl", "ksl")
 LYRICS_LANG_MODES = ("auto", "nl", "ksl")
 DEFAULT_LYRICS_LANG_MODE = "auto"
-# Concrete fallback wanneer ``auto`` geen Cyrillisch ziet.
+# Concrete fallback (o.a. lege bron / padlabel zonder actieve kern).
 DEFAULT_LYRICS_LANG = "nl"
 
 # Historische relatieve naam (docs/tests); runtime gebruikt dictionary_file_path().
@@ -101,16 +103,27 @@ def set_lyrics_lang_mode(lang: str | None) -> None:
     clear_syllable_dictionary_cache()
 
 
+def lyrics_lang_for_core(core: str) -> str:
+    """Concrete taal voor één lyric-kern: Cyrillisch → ``ksl``, anders ``nl``."""
+    if core and _CYRILLIC_RE.search(core):
+        return "ksl"
+    return DEFAULT_LYRICS_LANG
+
+
 def detect_lyrics_lang_from_cores(cores: list[str] | tuple[str, ...]) -> str:
-    """``ksl`` als minstens één kern Cyrillisch bevat, anders ``nl``."""
+    """``ksl`` als minstens één kern Cyrillisch bevat, anders ``nl``.
+
+    Alleen voor legacy/samenvatting; ``auto``-controle loopt **per kern** via
+    :func:`lyrics_lang_for_core`.
+    """
     for core in cores:
-        if core and _CYRILLIC_RE.search(core):
+        if lyrics_lang_for_core(core) == "ksl":
             return "ksl"
     return DEFAULT_LYRICS_LANG
 
 
 def detect_lyrics_lang_from_text(text: str) -> str:
-    """``ksl`` bij Cyrillisch in de tekst, anders ``nl``."""
+    """``ksl`` bij Cyrillisch in de tekst, anders ``nl`` (legacy-samenvatting)."""
     if text and _CYRILLIC_RE.search(text):
         return "ksl"
     return DEFAULT_LYRICS_LANG
@@ -132,17 +145,20 @@ def activate_concrete_lyrics_lang(lang: str | None) -> Path | None:
 
 
 def ensure_lyrics_lang_for_cores(cores: list[str] | tuple[str, ...]) -> str:
-    """Activeer concrete taal: bij ``auto`` op basis van de kernen.
+    """Zorg dat er een concrete dictionary actief is.
 
-    Bij expliciet ``nl``/``ksl`` blijft een al gezet dictionary-pad staan
-    (handig voor tests/fixtures); alleen resolven als er nog geen pad is.
+    Bij modus ``auto``: geen enkele-taal-keuze meer voor heel de bron (dat
+    gebeurt per kern). Activeert ``nl`` als startpad zodat callers een
+    geldig padlabel hebben; de checker wisselt zelf per kern.
+    Bij expliciet ``nl``/``ksl``: die taal; pad alleen resolven als nog leeg.
     """
     global _active_lang
     mode = _active_mode
     if mode == "auto":
-        lang = detect_lyrics_lang_from_cores(cores)
-        activate_concrete_lyrics_lang(lang)
-        return lang
+        # Geen detect-one-for-all: per-woordpad in de checker/syllabify.
+        if _active_path is None:
+            activate_concrete_lyrics_lang(DEFAULT_LYRICS_LANG)
+        return _active_lang
     _active_lang = mode
     if _active_path is None:
         activate_concrete_lyrics_lang(mode)
@@ -150,13 +166,18 @@ def ensure_lyrics_lang_for_cores(cores: list[str] | tuple[str, ...]) -> str:
 
 
 def prepare_lyrics_lang_for_source(text: str) -> str:
-    """Activeer concrete taal vóór syllabify/validate op één brontekst."""
+    """Bereid lyrics-taal voor syllabify/validate op één brontekst.
+
+    Bij ``auto`` blijft de modus ``auto``; hypheneren wisselt per woord.
+    Bij force: activeer die concrete dictionary.
+    """
+    del text  # brontekst niet meer nodig voor één-taal-gok
     global _active_lang
     mode = _active_mode
     if mode == "auto":
-        lang = detect_lyrics_lang_from_text(text)
-        activate_concrete_lyrics_lang(lang)
-        return lang
+        if _active_path is None:
+            activate_concrete_lyrics_lang(DEFAULT_LYRICS_LANG)
+        return _active_lang
     _active_lang = mode
     if _active_path is None:
         activate_concrete_lyrics_lang(mode)
@@ -169,10 +190,44 @@ def core_matches_lyrics_lang(core: str, lang: str | None = None) -> bool:
     ``ksl``: bevat Cyrillisch. ``nl``: geen Cyrillisch (Latijn e.d.).
     """
     code = normalize_lyrics_lang(lang if lang is not None else _active_lang)
-    has_cyr = bool(_CYRILLIC_RE.search(core or ""))
-    if code == "ksl":
-        return has_cyr
-    return not has_cyr
+    return lyrics_lang_for_core(core or "") == code
+
+
+def parse_frontmatter_lyrics_langs(source_text: str) -> list[str] | None:
+    """Frontmatter ``taal`` als lijst codes (``nl``/``ksl``), of ``None``.
+
+    Accepteert string (``taal: nl``) of YAML-lijst (``taal: [nl, ksl]``).
+    Ongeldige/lege waarden → ``None`` (geen declaratie).
+    """
+    if not source_text or not str(source_text).lstrip().startswith("---"):
+        return None
+    try:
+        from .yaml_frontmatter import strip_yaml_frontmatter
+
+        meta, _body, _base = strip_yaml_frontmatter(source_text)
+    except Exception:
+        return None
+    if not isinstance(meta, dict):
+        return None
+    raw = meta.get("taal")
+    if raw is None:
+        return None
+    values: list[str]
+    if isinstance(raw, str):
+        values = [raw]
+    elif isinstance(raw, (list, tuple)):
+        values = [str(v) for v in raw]
+    else:
+        return None
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        code = str(value).strip().lower()
+        if code not in LYRICS_LANGS or code in seen:
+            continue
+        seen.add(code)
+        out.append(code)
+    return out or None
 
 
 def packaged_dictionary_file_path(lang: str | None = None) -> Path:
@@ -298,8 +353,8 @@ def apply_syllable_dictionary_from_config(
 ) -> Path | None:
     """Bewaar resolve-context + zet modus; bij ``nl``/``ksl`` meteen pad.
 
-    Bij modus ``auto`` nog geen pad: dat volgt per bron via
-    ``ensure_lyrics_lang_for_cores`` / ``prepare_lyrics_lang_for_source``.
+    Bij modus ``auto`` nog geen vast pad: validate/syllabify wisselen per
+    kern via ``activate_concrete_lyrics_lang``.
     """
     global _resolution_cli_path, _resolution_config_value, _resolution_config_dir
     _resolution_cli_path = cli_path

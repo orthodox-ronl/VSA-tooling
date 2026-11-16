@@ -50,6 +50,16 @@ van dat token.
    soft `-` op de zing-grenzen (`eeu-wig`, niet `eeuwig`).
 2. Hetzelfde geldt voor L-tekst in `.mvsa` (recite tussen haakjes, cadens
    met hyphen-keten): de zichtbare deling is de canonieke.
+   `mvsa syllabify` (en kolom-align) werken **alleen** op die zingtekst in
+   L-regels — parallel aan `vsa syllabify` op de VSA-body. Wat blijft staan:
+   maatstrepen en herhalingstekens (`|`, `|:`, `:|`), recite-haakjes `(…)`
+   (op woord- of lettergreepgrens), ELMs/`&`-kolommen, uitvoeraanwijzingen
+   `[…]` (zoals `[//.]`), hard `=` (orthografisch koppelteken), YAML-frontmatter
+   (inclusief `zoektekst`), `@`-directives, S/A/T/B, en commentaar
+   (`#`-regels én HTML-comments `<!-- … -->`). Alleen soft `-` in L-zingtekst
+   wijzigt. Voorbeelden:
+   [`syllabificatie-structural-marks.mvsa`](../../examples/mvsa/syllabificatie-structural-marks.mvsa),
+   [`syllabificatie-marks-hemelum.mvsa`](../../examples/mvsa/syllabificatie-marks-hemelum.mvsa).
 3. Scopes blijven de structurele zangposities: één lettergreep per scope.
    Soft `-` naast `{`/`}` hoort niet in de bron. Tooling mag letters tussen
    scope en platte tekst herverdelen (`{/A}dam`), maar zet geen soft `-`
@@ -84,25 +94,34 @@ vier of vijf lettergrepen) mogen **expliciete** extra vormen hebben via
 een regel die met `+` begint. Die lijst is de norm voor gezongen body-tekst
 (niet frontmatter, comments, ids of `lyrics.txt`).
 
-| Afspraak       | Inhoud                                                                                                                                 |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Talen          | `nl` (Latijn) en `ksl` (Cyrillisch); CLI `--lyrics-lang {auto,nl,ksl}` — default **`auto`**: Cyrillisch in lyrics → `ksl`, anders `nl` |
-| Canon (org)    | `bibliotheek/data/syllable_dictionary.nl.txt` en `.ksl.txt` (content-repo; commit/push daar)                                           |
-| Config         | `vsa.toml` → `[syllabificatie] dictionary = "…"` (historisch NL; bij `--lyrics-lang ksl` alleen als pad al op `.ksl.txt` eindigt)      |
-| CLI            | `--syllable-dictionary PAD` en `--lyrics-lang` op `vsa`/`mvsa` `validate` / `syllabify`                                                |
-| Env            | `VSA_SYLLABLE_DICTIONARY` (nl); `VSA_SYLLABLE_DICTIONARY_KSL` (ksl)                                                                    |
-| Auto           | `data/syllable_dictionary.<lang>.txt` in de werkmap, of sibling `bibliotheek/data/…`                                                   |
-| Loader         | `vsa.syllable_dictionary`                                                                                                              |
-| Vorm           | Eén hyphenvorm per regel (kleine letters); soft `-` / hard `=`; `#` = commentaar; `+vorm` = toegestaan alternatief voor het open lemma |
-| Primair / alt  | Regel zonder `+` = primaire vorm (syllabify-default); `+vorm` = zelfde lemma, ook OK bij validate                                      |
-| Volgorde       | Entries alfabetisch op **lemma** (daarna `+`-alts); TTY/append herschrijft gesorteerd                                                  |
-| Matching       | Lemma = letters zonder `-`/`=`, case-fold; validate OK als bronvorm ∈ {primair} ∪ {alts}                                               |
-| Schriftfilter  | `nl`: alleen kernen **zonder** Cyrillisch; `ksl`: alleen kernen **met** Cyrillisch (geen NL-Pyphen-voorstel)                           |
-| Onderhoud      | Wijziging in de content-repo, of interactief op TTY (schrijft naar het actieve pad)                                                    |
+| Afspraak       | Inhoud                                                                                                                                                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Talen          | `nl` (Latijn) en `ksl` (Cyrillisch); CLI `--lyrics-lang {auto,nl,ksl}`                                                                                                       |
+| Default `auto` | **Per woord:** Latijn → `syllable_dictionary.nl.txt`, Cyrillisch → `.ksl.txt`. Beide schriften in één bron worden nagelopen.                                                |
+| Force CLI      | `--lyrics-lang nl` of `ksl`: alleen dat schrift; andere taal overslaan + `VSA-SYLLABLE-LANG-SKIPPED`                                                                         |
+| Frontmatter    | `taal: nl` · `ksl` · of `[nl, ksl]` = welke talen in **dit** bestand horen; mismatch → `VSA-SYLLABLE-TAAL-MISMATCH` (warning). Geen sessie-uitschakelaar.                   |
+| Canon (org)    | `bibliotheek/data/syllable_dictionary.nl.txt` en `.ksl.txt` (content-repo; commit/push daar)                                                                                |
+| Config         | `vsa.toml` → `[syllabificatie] dictionary = "…"` (historisch NL; bij `--lyrics-lang ksl` alleen als pad al op `.ksl.txt` eindigt)                                           |
+| CLI            | `--syllable-dictionary PAD` en `--lyrics-lang` op `vsa`/`mvsa` `validate` / `syllabify`                                                                                     |
+| Env            | `VSA_SYLLABLE_DICTIONARY` (nl); `VSA_SYLLABLE_DICTIONARY_KSL` (ksl)                                                                                                         |
+| Pad-auto       | `data/syllable_dictionary.<lang>.txt` in de werkmap, of sibling `bibliotheek/data/…`                                                                                        |
+| Loader         | `vsa.syllable_dictionary`                                                                                                                                                   |
+| Vorm           | Eén hyphenvorm per regel (kleine letters); soft `-` / hard `=`; `#` = commentaar; `+vorm` = toegestaan alternatief voor het open lemma                                      |
+| Primair / alt  | Regel zonder `+` = primaire vorm (syllabify-default); `+vorm` = zelfde lemma, ook OK bij validate                                                                           |
+| Volgorde       | Entries alfabetisch op **lemma** (daarna `+`-alts); TTY/append herschrijft gesorteerd                                                                                       |
+| Matching       | Lemma = letters zonder `-`/`=`, case-fold; validate OK als bronvorm ∈ {primair} ∪ {alts}                                                                                    |
+| Schriftfilter  | Bij force `nl`/`ksl`: alleen kernen van dat schrift. Bij `auto`: geen uitsluiting — per kern de bijbehorende lijst (ksl: geen NL-Pyphen-voorstel)                           |
+| Onderhoud      | Wijziging in de content-repo, of interactief op TTY (schrijft naar het actieve pad)                                                                                         |
 
-Default `--lyrics-lang auto`: per bron kijkt validate/syllabify of de
-lyrics Cyrillisch bevatten → dan `syllable_dictionary.ksl.txt`, anders de
-nl-lijst. Forceer met `--lyrics-lang nl` of `ksl`.
+**`--lyrics-lang auto` (default):** validate/syllabify lopen **alle**
+lyric-woorden na. Elk woord met Cyrillisch gebruikt
+`syllable_dictionary.ksl.txt`; elk Latijns woord
+`syllable_dictionary.nl.txt`. Nooit: “één Cyrillisch teken → heel bestand
+alleen ksl”.
+
+**Force:** `--lyrics-lang nl` of `ksl` behandelt tijdelijk alleen dat
+schrift (sessie). Overgeslagen lyrics → één melding
+`VSA-SYLLABLE-LANG-SKIPPED` per bron. Frontmatter `taal` zet geen taal uit.
 
 Padvoorrang per gekozen taal: CLI-pad → (nl) `vsa.toml` → env →
 bestands-auto-detect. Andere repo’s zetten hun eigen lijst in hun
@@ -142,10 +161,12 @@ zonder een stapel verdere dictionary-meldingen.
 terug, en melden `VSA-SYLLABIFY-APPLIED` / `MVSA-SYLLABIFY-APPLIED`.
 `zoektekst` blijft onaangeroerd.
 
-| Code                         | Wanneer                                                                      | Standaard                                            |
-| ---------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `VSA-SYLLABLE-DICT-MISMATCH` | Lemma staat in de lijst, bronvorm wijkt af (bijv. `eeuwig` i.p.v. `eeu-wig`) | **error** (`.vsa`); op `.mvsa` voorlopig **warning** |
-| `VSA-SYLLABLE-DICT-UNKNOWN`  | Lemma ontbreekt, én het woord heeft soft `-`/`=` óf Pyphen ziet breuken      | **error** (`.vsa`); op `.mvsa` voorlopig **warning** |
+| Code                           | Wanneer                                                                                         | Standaard                                            |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `VSA-SYLLABLE-DICT-MISMATCH`   | Lemma staat in de lijst, bronvorm wijkt af (bijv. `eeuwig` i.p.v. `eeu-wig`)                    | **error** (`.vsa`); op `.mvsa` voorlopig **warning** |
+| `VSA-SYLLABLE-DICT-UNKNOWN`    | Lemma ontbreekt, én het woord heeft soft `-`/`=` óf Pyphen ziet breuken                         | **error** (`.vsa`); op `.mvsa` voorlopig **warning** |
+| `VSA-SYLLABLE-LANG-SKIPPED`    | CLI forceerde `nl`/`ksl` terwijl de bron ook lyrics van de andere taal heeft                    | **warning**                                          |
+| `VSA-SYLLABLE-TAAL-MISMATCH`   | Frontmatter `taal` dekt niet alle schriften in de lyrics (bijv. `taal: nl` + Cyrillisch in body) | **warning**                                          |
 
 Op een **TTY** kun je findings meteen afhandelen. Bij batch verschijnt
 `--- <catalogus-id> ---` per stuk. Elke vraag toont eerst een klikbare
@@ -158,8 +179,16 @@ de melding, dan de toetsen.
 | `UNKNOWN` (met of zonder streepjes)     | Voeg voorstel / huidige vorm toe aan de lijst               | `+`/`=` = huidige vorm in lijst; Tab = overslaan; Esc = stop; of typ andere vorm |
 
 Afbreken met **Esc** (of Ctrl+C): exitcode **2**; batch-validate/syllabify/kuiser
-gaan geen volgende bestanden meer langs. `+`/`=` schrijft de huidige vorm
-naar de woordenlijst (nieuw lemma, of `+`-alternatief als het lemma al bestaat).
+**én** `{straat} products` gaan geen volgende bestanden meer langs. `+`/`=`
+schrijft de huidige vorm naar de woordenlijst (nieuw lemma, of `+`-alternatief
+als het lemma al bestaat).
+
+**Products / C3:** `vsa`/`mvsa`/`mscz products` opent **geen**
+dictionary-TTY-prompt — ook niet via de score-ir-brug (`import` → kuiser
+op tijdelijke `.mvsa`). Canoniciteitscheck (C3) en import-kuiser zijn
+altijd non-interactief. Streepjesproblemen daar zijn harde fouten of
+(bij `.mvsa`) warnings zonder vraag. Interactief corrigeren hoort bij
+`validate` / `syllabify` / `kuiser`.
 
 In CI (geen TTY) blijven `MISMATCH` / `UNKNOWN` fouten tot bron of lijst
 handmatig klopt. Hints noemen dezelfde keuzes.
@@ -183,8 +212,9 @@ Implementatie: `vsa.syllable_dict_check` + `vsa.syllable_dictionary`.
 | 3    | TTY: bron meteen corrigeren of vorm accepteren in de lijst          | gedaan                                     |
 | 4    | Lijst in bibliotheek (of andere content-repo) + pad via config/CLI  | gedaan                                     |
 | 4b   | Lege `syllable_dictionary.ksl.txt` + `--lyrics-lang {nl,ksl}`       | gedaan                                     |
-| 4c   | Default `--lyrics-lang auto` (schrift-detectie per bron)            | gedaan                                     |
+| 4c   | Default `--lyrics-lang auto` (eerst: één taal per bron)             | gedaan (vervangen door 4e)                 |
 | 4d   | Catalogus-vulling ksl                                               | open                                       |
+| 4e   | `auto` = per woord nl+ksl; FM `taal`; `LANG-SKIPPED` / `TAAL-MISMATCH` | gedaan                                  |
 | 5.1  | Pitch-fix steekproef-leaf (transfiguratie-toon-7-hemelum)           | gedaan (`vsa mvsa` OK; zie cadens `{/e_}`) |
 | 5.1b | `mvsa validate` / `mvsa syllabify` (L-recite + sync-veilige cadens) | gedaan                                     |
 | 5.2  | Dry-run syllabify+validate die leaf (zonder TTY-auto)               | open (CLI klaar; leaf-dry-run apart)       |

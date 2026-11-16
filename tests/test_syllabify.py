@@ -112,7 +112,7 @@ def test_scope_claims_one_syllable_adam() -> None:
 
 
 def test_scope_redistribution_keeps_trailing_punctuation() -> None:
-    """Leestekens ná scopes blijven staan (geen VSA-syntax)."""
+    """Leestekens rond scopes blijven staan (geen VSA-syntax)."""
     assert syllabify_vsa_source("{/Adam},\n").text == "{/A}dam,\n"
     assert (
         syllabify_vsa_source("Jo{+\\han_}{/nes_}.\n").text
@@ -124,6 +124,9 @@ def test_scope_redistribution_keeps_trailing_punctuation() -> None:
     )
     assert syllabify_vsa_source("{/sche_}pping.\n").text == "{/schep_}ping.\n"
     assert syllabify_vsa_source("lijden,\n").text == "lij-den,\n"
+    # Komma vastgeplakt vóór een scope mag niet verdwijnen.
+    assert syllabify_vsa_source("zie,{/daar}\n").text == "zie,{/daar}\n"
+    assert syllabify_vsa_source("o Chris{/tus},\n").text == "o Chris{/tus},\n"
 
 
 def test_unsyllabify_removes_legacy_junction_hyphens() -> None:
@@ -201,16 +204,19 @@ def test_cli_default_writes_in_place(tmp_path: Path, capsys) -> None:
     assert main(["syllabify", str(path)]) == 0
     assert path.read_text(encoding="utf-8") == "lij-den\n"
     out = capsys.readouterr()
-    assert "lettergreepstreepje" in out.out
+    assert "syllabify: 1 bestand" in out.out
+    assert "streepjes toegevoegd" in out.out
+    assert str(path) not in out.out  # per-file alleen met --verbose
 
 
 def test_cli_in_place(tmp_path: Path, capsys) -> None:
     path = tmp_path / "voorbeeld.vsa"
     path.write_text("lijden\n", encoding="utf-8")
-    assert main(["syllabify", str(path), "--in-place"]) == 0
+    assert main(["syllabify", str(path), "--in-place", "--verbose"]) == 0
     assert path.read_text(encoding="utf-8") == "lij-den\n"
     out = capsys.readouterr()
     assert "lettergreepstreepje" in out.out
+    assert str(path) in out.out
 
 
 def test_cli_extension_writes_sibling(tmp_path: Path) -> None:
@@ -238,8 +244,12 @@ def test_cli_directory_in_place(tmp_path: Path, capsys) -> None:
     assert (tmp_path / "a.vsa").read_text(encoding="utf-8") == "eeu-wig\n"
     assert (sub / "b.vsa").read_text(encoding="utf-8") == "a-pos-tel\n"
     out = capsys.readouterr().out
-    assert "a.vsa" in out
-    assert "b.vsa" in out
+    assert "syllabify: 2 bestand" in out
+    assert "a.vsa" not in out  # zonder --verbose geen per-file
+    assert main(["syllabify", str(tmp_path), "--verbose"]) == 0
+    verbose_out = capsys.readouterr().out
+    assert "a.vsa" in verbose_out
+    assert "b.vsa" in verbose_out
 
 
 def test_cli_unsyllabify_in_place(tmp_path: Path) -> None:

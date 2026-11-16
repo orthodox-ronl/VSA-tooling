@@ -5,7 +5,7 @@ from vsa.svg_renderer import SVGRenderer
 
 
 def test_multi_ehm_scope_creates_filler_space():
-    document = Parser(r"{/&/&/&/schon}").parse()
+    document = Parser(r"{/&\tij_&_}").parse()
     layout = build_scope_layout(document.nodes[0])
 
     assert layout.filler_width > 0

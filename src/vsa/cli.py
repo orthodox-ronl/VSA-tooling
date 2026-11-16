@@ -25,7 +25,7 @@ from .parser import Parser
 from .svg_renderer import SVGRenderer
 from .validation_display import format_validation_message
 from .validation_runner import validate_path
-from .cli_messages import emit_cli_error, emit_cli_exception
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .derived_path import derived_output_path, derived_svg_output_path
 from .input_paths import InputPathError, collect_cli_sources
 from .resolve_catalogus import ResolveCatalogusError, write_resolved_markdown
@@ -583,6 +583,20 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
     )
+    m_normalize.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Schrijf niets; noem doelbestanden die anders zouden worden "
+            "weggeschreven."
+        ),
+    )
+    m_normalize.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Met --dry-run: toon ook een begrensde unified diff per bestand.",
+    )
     m_transpose = mvsa_sub.add_parser(
         "transpose",
         help="Transponeer .mvsa naar een opgegeven tonica (@do).",
@@ -645,6 +659,20 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--no-align",
         action="store_true",
         help="Sla canonieke kolomuitlijning over.",
+    )
+    m_transpose.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Schrijf niets; noem doelbestanden die anders zouden worden "
+            "weggeschreven."
+        ),
+    )
+    m_transpose.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Met --dry-run: toon ook een begrensde unified diff per bestand.",
     )
     m_score_ir = mvsa_sub.add_parser(
         "score-ir",
@@ -714,13 +742,15 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
             "Pas kuiser toe op .mvsa (contract docs/formats/kuiser.md Q1–Q9). "
             "Actief: Q6 banners (tenzij --werkbank), Q2/Q3, repair, Q4/Q5, "
             "Q8 normalize/align, Q1 YAML-FM/zoektekst, Q7 validate-gate. "
-            "Default: schrijf in-place. --check = dry-run (exit 1 bij wijziging). "
+            "Default: schrijf in-place. --dry-run = preview; "
+            "--check = geen schrijven + exit 1 bij wijziging. "
             "Optioneel --pitch zoals bij normalize."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "voorbeelden:\n"
             "  mvsa kuiser examples\\mvsa\\alleluia-toon-8.mvsa\n"
+            "  mvsa kuiser examples\\mvsa --dry-run\n"
             "  mvsa kuiser examples\\mvsa --check\n"
             "  mvsa kuiser lied.mvsa -o generated\\lied.kuiser.mvsa\n"
             "  mvsa kuiser lied.mvsa --pitch a-g"
@@ -744,7 +774,24 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
     m_kuiser.add_argument(
         "--check",
         action="store_true",
-        help="Dry-run: geen schrijfactie; exit 1 als er iets zou wijzigen.",
+        help=(
+            "Geen schrijven; exit 1 als er iets zou wijzigen "
+            "(strikte controle)."
+        ),
+    )
+    m_kuiser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Schrijf niets; noem doelbestanden die anders zouden worden "
+            "weggeschreven."
+        ),
+    )
+    m_kuiser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Met --dry-run: toon ook een begrensde unified diff per bestand.",
     )
     m_kuiser.add_argument(
         "--pitch",
@@ -806,6 +853,12 @@ def _build_mvsa_parser() -> argparse.ArgumentParser:
         "--dry-run",
         action="store_true",
         help="Toon resultaat zonder bestanden te schrijven (default: schrijf in-place).",
+    )
+    m_syllabify.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Per bestand een statusregel; zonder -v alleen een eindsummary.",
     )
     m_syllabify.add_argument(
         "--in-place",
@@ -1182,6 +1235,12 @@ def _build_parser():
         "--dry-run",
         action="store_true",
         help="Toon resultaat zonder bestanden te schrijven (default: schrijf in-place).",
+    )
+    syllabify.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Per bestand een statusregel; zonder -v alleen een eindsummary.",
     )
     syllabify.add_argument(
         "--in-place",
@@ -1569,8 +1628,8 @@ def _add_lyrics_lang_arg(parser) -> None:
         choices=("auto", "nl", "ksl"),
         default="auto",
         help=(
-            "Woordenlijst: auto = Cyrillisch in lyrics → ksl, anders nl; "
-            "of forceer nl / ksl. Default: auto."
+            "Woordenlijst: auto = per woord Latijn→nl / Cyrillisch→ksl; "
+            "of forceer alleen nl / ksl. Default: auto."
         ),
     )
 
@@ -1763,7 +1822,7 @@ def _cmd_svg(args, config):
             )
             exit_code = 1
             continue
-        print(f"SVG geschreven naar: {out}")
+        print(f"SVG geschreven naar: {path_label(out)}")
         from .street_products import merge_street_product_meta
 
         meta = merge_street_product_meta(input_path, {"svg": out})
@@ -1790,7 +1849,7 @@ def _cmd_process(args, config):
     print(f"{len(result.blocks)} assetbestand(en) gegenereerd")
 
     for block in result.blocks:
-        print(f"- {block.output_file}")
+        print(f"- {path_label(block.output_file)}")
 
     return 0
 
@@ -1903,7 +1962,7 @@ def _cmd_pdf(args, config):
             )
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {MSCZ_PDF_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -1971,7 +2030,7 @@ def _cmd_text(args) -> int:
             )
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {LYRICS_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -1979,7 +2038,13 @@ def _cmd_text(args) -> int:
 
 
 def _cmd_vsa_kuiser(args) -> int:
-    from .vsa_kuiser import VsaKuiserError, kuiser_vsa_path
+    from .cli_dry_run import (
+        DryRunCounters,
+        print_dry_run_summary,
+        read_text_if_exists,
+        report_would_write,
+    )
+    from .vsa_kuiser import VsaKuiserError, kuiser_vsa_path, kuiser_vsa_text
 
     files = _collect_paths_unique(
         [str(p) for p in args.path], suffixes=(".vsa",)
@@ -2002,21 +2067,50 @@ def _cmd_vsa_kuiser(args) -> int:
         )
         return 1
 
+    dry_run = bool(getattr(args, "dry_run", False))
+    verbose = bool(getattr(args, "verbose", False))
+    check = bool(args.check)
+    counters = DryRunCounters()
     would_change = 0
-    errors = 0
     for path in files:
         out = Path(args.output) if args.output is not None else None
+        target = out if out is not None else path
         try:
-            changed, warnings = kuiser_vsa_path(
-                path,
-                out,
-                check=args.check,
-                werkbank=bool(getattr(args, "werkbank", False)),
-                dict_interactive=None,
-            )
+            if dry_run:
+                text = path.read_text(encoding="utf-8-sig")
+                result = kuiser_vsa_text(
+                    text,
+                    source_path=path,
+                    werkbank=bool(getattr(args, "werkbank", False)),
+                    dict_interactive=None,
+                )
+                warnings = result.warnings
+                old = text if out is None else read_text_if_exists(target)
+                changed = report_would_write(
+                    target,
+                    old,
+                    result.text,
+                    dry_run=True,
+                    verbose=verbose,
+                )
+            else:
+                changed, warnings = kuiser_vsa_path(
+                    path,
+                    out,
+                    check=check,
+                    werkbank=bool(getattr(args, "werkbank", False)),
+                    dict_interactive=None,
+                )
+                if changed:
+                    if check:
+                        print(f"would change: {path_label(path)}")
+                    else:
+                        print(f"kuiser: {path_label(target)}")
+                else:
+                    print(f"ok: {path_label(path)}")
         except VsaKuiserError as exc:
             emit_cli_exception(exc, path=path)
-            errors += 1
+            counters = counters.plus(errors=1)
             continue
         for w in warnings:
             print(w.format(path), file=sys.stderr)
@@ -2024,17 +2118,14 @@ def _cmd_vsa_kuiser(args) -> int:
             return 2
         if changed:
             would_change += 1
-            if args.check:
-                print(f"would change: {path}")
-            else:
-                target = out if out is not None else path
-                print(f"kuiser: {target}")
+            counters = counters.plus(would_change=1)
         else:
-            print(f"ok: {path}")
+            counters = counters.plus(unchanged=1)
 
-    if errors:
+    print_dry_run_summary(counters, dry_run=dry_run)
+    if counters.errors:
         return 1
-    if args.check and would_change:
+    if check and would_change:
         return 1
     return 0
 
@@ -2103,7 +2194,7 @@ def _cmd_vsa_format(args) -> int:
             continue
         if dry_run:
             if multi:
-                print(f"=== {path} ===")
+                print(f"=== {path_label(path)} ===")
             sys.stdout.write(result.text)
             if not result.text.endswith("\n"):
                 sys.stdout.write("\n")
@@ -2119,18 +2210,56 @@ def _cmd_vsa_format(args) -> int:
         if changed:
             would_change += 1
             if check:
-                print(f"would change: {path}")
+                print(f"would change: {path_label(path)}")
             else:
                 target = out if out is not None else path
-                print(f"format: {target}")
+                print(f"format: {path_label(target)}")
         else:
-            print(f"ok: {path}")
+            print(f"ok: {path_label(path)}")
 
     if errors:
         return 1
     if check and would_change:
         return 1
     return 0
+
+
+def _syllabify_file_status(*, changed: bool, replacements: int, verb: str) -> str:
+    if not changed:
+        return "geen wijzigingen"
+    if replacements > 0:
+        return f"{replacements} lettergreepstreepje(s) {verb}"
+    return "tekst gewijzigd (geen streepjes erbij)"
+
+
+def _syllabify_run_summary(
+    *,
+    label: str,
+    n_files: int,
+    n_unchanged: int,
+    n_hyphen_files: int,
+    n_hyphen_total: int,
+    n_other_files: int,
+    verb: str,
+    dry_run: bool,
+) -> str:
+    parts = [f"{label}: {n_files} bestand(en)"]
+    if n_hyphen_files:
+        parts.append(
+            f"{n_hyphen_files} met streepjes {verb} ({n_hyphen_total}×)"
+        )
+    if n_other_files:
+        parts.append(f"{n_other_files} met andere tekstwijziging")
+    if n_unchanged:
+        parts.append(f"{n_unchanged} ongewijzigd")
+    if n_files and not (n_hyphen_files or n_other_files or n_unchanged):
+        parts.append("geen verwerkte bestanden")
+    text = " — ".join(parts) if len(parts) == 1 else (
+        f"{parts[0]} — " + ", ".join(parts[1:])
+    )
+    if dry_run:
+        text += " (dry-run)"
+    return text
 
 
 def _cmd_syllabify(args) -> int:
@@ -2155,6 +2284,7 @@ def _cmd_syllabify(args) -> int:
 
     # Uniform met kuiser/zoektekst: default schrijven; --dry-run = preview.
     dry_run = bool(args.dry_run)
+    verbose = bool(getattr(args, "verbose", False))
 
     files = _cli_collect_sources(args.path, (".vsa",))
     if files is None:
@@ -2163,6 +2293,11 @@ def _cmd_syllabify(args) -> int:
     multi = len(files) > 1 or source_path.is_dir()
     any_error = False
     verb = "verwijderd" if args.unsyllabify else "toegevoegd"
+    n_files = 0
+    n_unchanged = 0
+    n_hyphen_files = 0
+    n_hyphen_total = 0
+    n_other_files = 0
 
     for file_path in files:
         try:
@@ -2206,36 +2341,64 @@ def _cmd_syllabify(args) -> int:
                 )
             if dict_rc == 2:
                 return 2
+            # Schrijf eventuele TTY-correcties ook als er nog fouten resten.
             if dict_rc != 0:
+                if not dry_run and result.changed:
+                    target.write_text(result.text, encoding="utf-8")
                 any_error = True
                 continue
 
-        status = (
-            f"{result.replacements} lettergreepstreepje(s) {verb}"
-            if result.changed
-            else "geen wijzigingen"
+        n_files += 1
+        if not result.changed:
+            n_unchanged += 1
+        elif result.replacements > 0:
+            n_hyphen_files += 1
+            n_hyphen_total += result.replacements
+        else:
+            n_other_files += 1
+
+        status = _syllabify_file_status(
+            changed=result.changed,
+            replacements=result.replacements,
+            verb=verb,
         )
 
         if dry_run:
             if multi:
-                print(f"{file_path} -> {target}: {status} (dry-run)")
+                if verbose:
+                    print(f"{path_label(file_path)} -> {path_label(target)}: {status} (dry-run)")
             else:
                 sys.stdout.write(result.text)
                 if not result.text.endswith("\n"):
                     sys.stdout.write("\n")
-                print(
-                    f"(dry-run — {status}; bestand niet geschreven)",
-                    file=sys.stderr,
-                )
+                if verbose:
+                    print(
+                        f"(dry-run — {status}; bestand niet geschreven)",
+                        file=sys.stderr,
+                    )
             continue
 
         if result.changed or target != file_path:
             target.write_text(result.text, encoding="utf-8")
-        if target == file_path:
-            print(f"{file_path}: {status}")
-        else:
-            print(f"{file_path} -> {target}: {status}")
+        if verbose:
+            if target == file_path:
+                print(f"{path_label(file_path)}: {status}")
+            else:
+                print(f"{path_label(file_path)} -> {path_label(target)}: {status}")
 
+    print(
+        _syllabify_run_summary(
+            label="syllabify",
+            n_files=n_files,
+            n_unchanged=n_unchanged,
+            n_hyphen_files=n_hyphen_files,
+            n_hyphen_total=n_hyphen_total,
+            n_other_files=n_other_files,
+            verb=verb,
+            dry_run=dry_run,
+        ),
+        file=sys.stderr if (dry_run and not multi) else sys.stdout,
+    )
     return 1 if any_error else 0
 
 
@@ -2447,7 +2610,7 @@ def _cmd_musicxml(args, config):
                 exit_code = 1
                 continue
         written += 1
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta = merge_street_product_meta(path, {"mxl": out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -2537,7 +2700,7 @@ def _cmd_audio(args, config) -> int:
             )
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
         if format_name == "mp3":
@@ -3315,7 +3478,7 @@ def _cmd_zoektekst(args) -> int:
                         hint="Werk zoektekst bij met: vsa zoektekst <pad>",
                     )
             else:
-                print(f"{file_path}: OK")
+                print(f"{path_label(file_path)}: OK")
             continue
 
         result = apply_zoektekst(text, kind=kind)
@@ -3323,9 +3486,9 @@ def _cmd_zoektekst(args) -> int:
         if result.changed:
             changed_n += 1
             target.write_text(result.text, encoding="utf-8", newline="\n")
-            print(f"{file_path} -> {target}: zoektekst bijgewerkt")
+            print(f"{path_label(file_path)} -> {path_label(target)}: zoektekst bijgewerkt")
         else:
-            print(f"{file_path}: geen wijzigingen")
+            print(f"{path_label(file_path)}: geen wijzigingen")
 
     if args.check:
         return 1 if errors else 0
@@ -3403,9 +3566,9 @@ def _cmd_mvsa_score_ir(args) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         if mxl_path is not None:
-            print(f"MusicXML: {mxl_path}")
+            print(f"MusicXML: {path_label(mxl_path)}")
         from .street_products import merge_street_product_meta
 
         meta_products: dict[str, Path] = {"score-ir": out}
@@ -3489,7 +3652,7 @@ def _cmd_mvsa_musicxml(args) -> int:
                 emit_noncanonical_error(exc)
                 exit_code = 1
                 continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta = merge_street_product_meta(path, {meta_key: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -3548,7 +3711,7 @@ def _cmd_mvsa_mscz(args) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
         from .street_products import MSCZ_PRODUCT_KEY, merge_street_product_meta
@@ -3589,7 +3752,7 @@ def _cmd_mvsa_vsa(args) -> int:
             if all_voices:
                 written = convert_mvsa_path_all_voices(path)
                 for out in written:
-                    print(f"Geschreven: {out}")
+                    print(f"Geschreven: {path_label(out)}")
             else:
                 out = (
                     Path(args.output)
@@ -3597,13 +3760,13 @@ def _cmd_mvsa_vsa(args) -> int:
                     else default_mvsa_vsa_output(path)
                 )
                 convert_mvsa_to_vsa(path, out, voice=voice)
-                print(f"Geschreven: {out}")
+                print(f"Geschreven: {path_label(out)}")
         except MvsaVsaError as exc:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            print(f"{path_label(path)}: ERROR: {exc}", file=sys.stderr)
             exit_code = 1
             continue
     return exit_code
@@ -3644,7 +3807,7 @@ def _cmd_mvsa_text(args) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {LYRICS_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -3719,10 +3882,10 @@ def _cmd_vsa_score_ir(args) -> int:
             )
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta_products: dict[str, Path] = {"score-ir": out}
         if mxl_path is not None:
-            print(f"MusicXML: {mxl_path}")
+            print(f"MusicXML: {path_label(mxl_path)}")
             meta_products["from-ir"] = mxl_path
         meta = merge_street_product_meta(path, meta_products)
         if meta is not None:
@@ -3780,7 +3943,7 @@ def _cmd_vsa_mscz_product(args) -> int:
             )
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {MSCZ_PRODUCT_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -3849,7 +4012,7 @@ def _cmd_mvsa_pdf(args) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         if args.keep_mscz:
             print(f"MSCZ: {args.keep_mscz}")
         if args.keep_mxl:
@@ -3953,7 +4116,7 @@ def _cmd_mvsa_svg(args) -> int:
             exit_code = 1
             continue
         for written_path in written:
-            print(f"Geschreven: {written_path}")
+            print(f"Geschreven: {path_label(written_path)}")
         if keep_mscz is not None:
             print(f"MSCZ: {keep_mscz}")
         if keep_mxl is not None:
@@ -4038,7 +4201,7 @@ def _cmd_mvsa_audio(args) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
         if format_name == "mp3":
@@ -4049,7 +4212,19 @@ def _cmd_mvsa_audio(args) -> int:
 
 
 def _cmd_mvsa_normalize(args) -> int:
-    from .mvsa_normalize import MvsaNormalizeError, normalize_mvsa_path
+    from .cli_dry_run import (
+        DryRunCounters,
+        print_dry_run_summary,
+        read_text_if_exists,
+        report_would_write,
+        write_text_utf8,
+    )
+    from .mvsa_normalize import (
+        DEFAULT_IMPORT_PITCH,
+        DEFAULT_MVSA_PITCH,
+        MvsaNormalizeError,
+        normalize_mvsa_text,
+    )
     from .mvsa_validate import MvsaValidationError, format_diagnostic
 
     files = _cli_collect_sources(args.path, (".mvsa",))
@@ -4057,36 +4232,64 @@ def _cmd_mvsa_normalize(args) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args):
         return 1
-    exit_code = 0
+    dry_run = bool(getattr(args, "dry_run", False))
+    verbose = bool(getattr(args, "verbose", False))
+    counters = DryRunCounters()
     for path in files:
         out = (
             Path(args.output)
             if args.output
             else path.with_name(f"{path.stem}.normalized.mvsa")
         )
+        pitch = args.pitch
+        if pitch is None:
+            pitch = (
+                DEFAULT_MVSA_PITCH
+                if path.suffix.lower() == ".mvsa"
+                else DEFAULT_IMPORT_PITCH
+            )
         try:
-            normalize_mvsa_path(
-                path,
-                out,
-                pitch=args.pitch,
+            original = path.read_text(encoding="utf-8-sig")
+            new_text = normalize_mvsa_text(
+                original,
+                pitch=pitch,
                 octave_style=args.octave_style,
                 align=not args.no_align,
             )
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
-            exit_code = 1
+            counters = counters.plus(errors=1)
             continue
         except MvsaNormalizeError as exc:
             emit_cli_exception(exc, path=path)
-            exit_code = 1
+            counters = counters.plus(errors=1)
             continue
-        print(f"Geschreven: {out}")
-    return exit_code
+        old = read_text_if_exists(out)
+        changed = report_would_write(
+            out, old, new_text, dry_run=dry_run, verbose=verbose
+        )
+        if dry_run:
+            counters = counters.plus(
+                would_change=1 if changed else 0,
+                unchanged=0 if changed else 1,
+            )
+            continue
+        write_text_utf8(out, new_text)
+        print(f"Geschreven: {path_label(out)}")
+    print_dry_run_summary(counters, dry_run=dry_run)
+    return 1 if counters.errors else 0
 
 
 def _cmd_mvsa_transpose(args) -> int:
-    from .mvsa_transpose import MvsaTransposeError, transpose_mvsa_path
+    from .cli_dry_run import (
+        DryRunCounters,
+        print_dry_run_summary,
+        read_text_if_exists,
+        report_would_write,
+        write_text_utf8,
+    )
+    from .mvsa_transpose import MvsaTransposeError, transpose_mvsa_text
     from .mvsa_validate import MvsaValidationError, format_diagnostic
 
     files = _cli_collect_sources(args.path, (".mvsa",))
@@ -4094,7 +4297,9 @@ def _cmd_mvsa_transpose(args) -> int:
         return 1
     if _cli_reject_multi_single_opts(files, args):
         return 1
-    exit_code = 0
+    dry_run = bool(getattr(args, "dry_run", False))
+    verbose = bool(getattr(args, "verbose", False))
+    counters = DryRunCounters()
     for path in files:
         out = (
             Path(args.output)
@@ -4102,9 +4307,9 @@ def _cmd_mvsa_transpose(args) -> int:
             else path.with_name(f"{path.stem}.transposed.mvsa")
         )
         try:
-            transpose_mvsa_path(
-                path,
-                out,
+            original = path.read_text(encoding="utf-8-sig")
+            new_text = transpose_mvsa_text(
+                original,
                 to=args.to,
                 pitch=args.pitch,
                 octave_style=args.octave_style,
@@ -4113,18 +4318,36 @@ def _cmd_mvsa_transpose(args) -> int:
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
-            exit_code = 1
+            counters = counters.plus(errors=1)
             continue
         except MvsaTransposeError as exc:
             emit_cli_exception(exc, path=path)
-            exit_code = 1
+            counters = counters.plus(errors=1)
             continue
-        print(f"Geschreven: {out}")
-    return exit_code
+        old = read_text_if_exists(out)
+        changed = report_would_write(
+            out, old, new_text, dry_run=dry_run, verbose=verbose
+        )
+        if dry_run:
+            counters = counters.plus(
+                would_change=1 if changed else 0,
+                unchanged=0 if changed else 1,
+            )
+            continue
+        write_text_utf8(out, new_text)
+        print(f"Geschreven: {path_label(out)}")
+    print_dry_run_summary(counters, dry_run=dry_run)
+    return 1 if counters.errors else 0
 
 
 def _cmd_mvsa_kuiser(args) -> int:
-    from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_path
+    from .cli_dry_run import (
+        DryRunCounters,
+        print_dry_run_summary,
+        read_text_if_exists,
+        report_would_write,
+    )
+    from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_path, kuiser_mvsa_text
     from .mvsa_normalize import MvsaNormalizeError
     from .mvsa_validate import MvsaValidationError, format_diagnostic
 
@@ -4147,29 +4370,61 @@ def _cmd_mvsa_kuiser(args) -> int:
     if _cli_reject_multi_single_opts(files, args):
         return 1
 
+    dry_run = bool(getattr(args, "dry_run", False))
+    verbose = bool(getattr(args, "verbose", False))
+    check = bool(args.check)
+    counters = DryRunCounters()
     would_change = 0
-    errors = 0
     for path in files:
         out = Path(args.output) if args.output is not None else None
+        target = out if out is not None else path
         try:
-            changed, warnings = kuiser_mvsa_path(
-                path,
-                out,
-                pitch=args.pitch,
-                octave_style=args.octave_style,
-                align=not args.no_align,
-                check=args.check,
-                dict_interactive=None,
-                werkbank=bool(getattr(args, "werkbank", False)),
-            )
+            if dry_run:
+                text = path.read_text(encoding="utf-8-sig")
+                result = kuiser_mvsa_text(
+                    text,
+                    pitch=args.pitch,
+                    octave_style=args.octave_style,
+                    align=not args.no_align,
+                    dict_interactive=None,
+                    source_path=path,
+                    werkbank=bool(getattr(args, "werkbank", False)),
+                )
+                warnings = result.warnings
+                old = text if out is None else read_text_if_exists(target)
+                changed = report_would_write(
+                    target,
+                    old,
+                    result.text,
+                    dry_run=True,
+                    verbose=verbose,
+                )
+            else:
+                changed, warnings = kuiser_mvsa_path(
+                    path,
+                    out,
+                    pitch=args.pitch,
+                    octave_style=args.octave_style,
+                    align=not args.no_align,
+                    check=check,
+                    dict_interactive=None,
+                    werkbank=bool(getattr(args, "werkbank", False)),
+                )
+                if changed:
+                    if check:
+                        print(f"would change: {path_label(path)}")
+                    else:
+                        print(f"kuiser: {path_label(target)}")
+                else:
+                    print(f"ok: {path_label(path)}")
         except MvsaValidationError as exc:
             for d in exc.diagnostics:
                 print(format_diagnostic(d, path), file=sys.stderr)
-            errors += 1
+            counters = counters.plus(errors=1)
             continue
         except (MvsaKuiserError, MvsaNormalizeError) as exc:
             emit_cli_exception(exc, path=path)
-            errors += 1
+            counters = counters.plus(errors=1)
             continue
         for w in warnings:
             print(w.format(path), file=sys.stderr)
@@ -4177,17 +4432,14 @@ def _cmd_mvsa_kuiser(args) -> int:
             return 2
         if changed:
             would_change += 1
-            if args.check:
-                print(f"would change: {path}")
-            else:
-                target = out if out is not None else path
-                print(f"kuiser: {target}")
+            counters = counters.plus(would_change=1)
         else:
-            print(f"ok: {path}")
+            counters = counters.plus(unchanged=1)
 
-    if errors:
+    print_dry_run_summary(counters, dry_run=dry_run)
+    if counters.errors:
         return 1
-    if args.check and would_change:
+    if check and would_change:
         return 1
     return 0
 
@@ -4225,6 +4477,7 @@ def _cmd_mvsa_syllabify(args) -> int:
 
     # Uniform met kuiser/zoektekst: default schrijven; --dry-run = preview.
     dry_run = bool(args.dry_run)
+    verbose = bool(getattr(args, "verbose", False))
 
     files = _cli_collect_sources(args.path, (".mvsa",))
     if files is None:
@@ -4233,6 +4486,11 @@ def _cmd_mvsa_syllabify(args) -> int:
     multi = len(files) > 1 or source_path.is_dir()
     any_error = False
     verb = "verwijderd" if args.unsyllabify else "toegevoegd"
+    n_files = 0
+    n_unchanged = 0
+    n_hyphen_files = 0
+    n_hyphen_total = 0
+    n_other_files = 0
 
     for file_path in files:
         try:
@@ -4290,43 +4548,77 @@ def _cmd_mvsa_syllabify(args) -> int:
                 )
             if dict_rc == 2:
                 return 2
+            # Schrijf eventuele TTY-correcties ook als er nog fouten resten
+            # (zelfde gedrag als ``vsa syllabify``).
             if dict_rc != 0:
+                if not dry_run and result.changed:
+                    target.write_text(
+                        result.text, encoding="utf-8", newline="\n"
+                    )
                 any_error = True
                 continue
 
-        status = (
-            f"{result.replacements} lettergreepstreepje(s) {verb}"
-            if result.changed
-            else "geen wijzigingen"
+        n_files += 1
+        if not result.changed:
+            n_unchanged += 1
+        elif result.replacements > 0:
+            n_hyphen_files += 1
+            n_hyphen_total += result.replacements
+        else:
+            n_other_files += 1
+
+        status = _syllabify_file_status(
+            changed=result.changed,
+            replacements=result.replacements,
+            verb=verb,
         )
 
         if dry_run:
             if multi:
-                print(f"{file_path} -> {target}: {status} (dry-run)")
+                if verbose:
+                    print(f"{path_label(file_path)} -> {path_label(target)}: {status} (dry-run)")
             else:
                 sys.stdout.write(result.text)
                 if not result.text.endswith("\n"):
                     sys.stdout.write("\n")
-                print(
-                    f"(dry-run — {status}; bestand niet geschreven)",
-                    file=sys.stderr,
-                )
+                if verbose:
+                    print(
+                        f"(dry-run — {status}; bestand niet geschreven)",
+                        file=sys.stderr,
+                    )
             continue
 
         if result.changed or target != file_path:
             target.write_text(result.text, encoding="utf-8", newline="\n")
-        if target == file_path:
-            print(f"{file_path}: {status}")
-        else:
-            print(f"{file_path} -> {target}: {status}")
+        if verbose:
+            if target == file_path:
+                print(f"{path_label(file_path)}: {status}")
+            else:
+                print(f"{path_label(file_path)} -> {path_label(target)}: {status}")
 
+    print(
+        _syllabify_run_summary(
+            label="mvsa syllabify",
+            n_files=n_files,
+            n_unchanged=n_unchanged,
+            n_hyphen_files=n_hyphen_files,
+            n_hyphen_total=n_hyphen_total,
+            n_other_files=n_other_files,
+            verb=verb,
+            dry_run=dry_run,
+        ),
+        file=sys.stderr if (dry_run and not multi) else sys.stdout,
+    )
     return 1 if any_error else 0
 
 
 def _mvsa_syllabify_dictionary_gate(
     file_path: Path, source_text: str
 ) -> tuple[int, str]:
-    """Dictionary-check op .mvsa L-lyrics; op TTY corrigeren."""
+    """Dictionary-check op .mvsa L-lyrics; op TTY corrigeren.
+
+    Bij Esc/Ctrl+C: rc=2 en de tekst van vóór de gate (geen partial write).
+    """
     from .syllable_dict_check import (
         CODE_MISMATCH,
         CODE_UNKNOWN,
@@ -4350,9 +4642,6 @@ def _mvsa_syllabify_dictionary_gate(
                 source_id=source_id_for_prompt(file_path),
                 source_path=file_path,
             )
-            if prompt.replacements:
-                text = apply_replacements_to_source(text, prompt.replacements)
-                findings = find_mvsa_dictionary_syllable_issues(text)
             if prompt.aborted:
                 from .syllable_dict_check import DICT_PROMPT_ABORT_RC
 
@@ -4362,19 +4651,28 @@ def _mvsa_syllabify_dictionary_gate(
                     path=file_path,
                     hint="Herstart syllabify/validate om verder te gaan.",
                 )
-                return DICT_PROMPT_ABORT_RC, text
+                # Geen partial L/stem-wijzigingen teruggeven.
+                return DICT_PROMPT_ABORT_RC, source_text
+            if prompt.replacements:
+                text = apply_replacements_to_source(text, prompt.replacements)
+            # Altijd her-scannen: ``=``/``+`` wijzigt de lijst zonder replacements
+            # (zelfde als ``vsa syllabify``).
+            findings = find_mvsa_dictionary_syllable_issues(text)
 
-    fatal = [f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}]
-    for finding in findings:
+    # Na TTY: her-scan toont alleen nog openstaande findings (geen echo van
+    # net met ``=``/Enter afgehandelde vragen). Zonder TTY: zelfde lijst.
+    remaining = [
+        f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
+    ]
+    for finding in remaining:
         print(
             f"{file_path}:{finding.line}:{finding.column}: "
             f"{finding.code}: {finding.message_nl}",
-            file=sys.stderr if finding.code in {CODE_MISMATCH, CODE_UNKNOWN} else sys.stdout,
+            file=sys.stderr,
         )
         if finding.hint_nl:
             print(f"  hint: {finding.hint_nl}", file=sys.stderr)
     # Zelfde mildheid als mvsa validate: dictionary is warning, geen hard fail.
-    _ = fatal
     return 0, text
 
 
@@ -4426,7 +4724,7 @@ def _cmd_template_validate(args) -> int:
             )
             errors += 1
             continue
-        print(f"{yaml_path}: OK")
+        print(f"{path_label(yaml_path)}: OK")
     if errors:
         emit_cli_error(
             f"{errors} template(s) ongeldig.",

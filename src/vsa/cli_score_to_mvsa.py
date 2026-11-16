@@ -6,7 +6,7 @@ Alias: ``mvsa import`` (bestemmingstraat) — zie ``cli_import``.
 
 from __future__ import annotations
 
-from .cli_messages import emit_cli_error, emit_cli_exception
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 
 import argparse
 import sys
@@ -119,5 +119,5 @@ def run_score_to_mvsa(
         # Bibliotheek-importcontrole: sibling *.mscz.mvsa krijgt partituur-hash.
         if path.suffix.lower() == ".mscz" and is_mscz_import_mvsa(out):
             stamp_mscz_import_mvsa(out, path)
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
     return exit_code

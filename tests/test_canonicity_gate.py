@@ -41,6 +41,144 @@ def test_allow_noncanonical_skips(tmp_path: Path) -> None:
     require_canonical_source(dest, allow_noncanonical=True)
 
 
+def test_c3_never_opens_dictionary_tty_prompt(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """products/C3 mag geen streepjes-prompt tonen (ook op TTY)."""
+    from vsa import syllable_dict_check
+    from vsa.syllable_dict_check import DictSyllableFinding
+
+    dest = tmp_path / "lied.vsa"
+    dest.write_text("Va-der\n", encoding="utf-8")
+
+    def boom(*_a, **_k):
+        raise AssertionError("prompt_dictionary_fixes mag niet bij C3")
+
+    monkeypatch.setattr(
+        syllable_dict_check, "prompt_dictionary_fixes", boom
+    )
+    monkeypatch.setattr(
+        syllable_dict_check,
+        "find_dictionary_syllable_issues",
+        lambda *_a, **_k: [
+            DictSyllableFinding(
+                code="VSA-SYLLABLE-DICT-MISMATCH",
+                surface="Va-der",
+                expected="va-der",
+                line=1,
+                column=1,
+                message_nl="test mismatch",
+                hint_nl="",
+            )
+        ],
+    )
+    # Simuleer TTY: zonder force-flag zou validate prompten.
+    monkeypatch.setattr(
+        syllable_dict_check,
+        "is_interactive_stdin",
+        lambda stdin=None: (
+            False
+            if syllable_dict_check._force_noninteractive
+            else True
+        ),
+    )
+    issues = check_canonical_source(dest)
+    assert any(i.code == "VSA-SYLLABLE-DICT-MISMATCH" for i in issues)
+
+
+def test_products_batch_stops_on_dictionary_abort(monkeypatch) -> None:
+    """Esc (rc=2) stopt de hele products-batch — geen volgend bestand."""
+    from vsa import street_products
+    from vsa.syllable_dict_check import DICT_PROMPT_ABORT_RC
+
+    calls: list[Path] = []
+
+    def fake_one(bron, **_kwargs):
+        calls.append(bron)
+        return DICT_PROMPT_ABORT_RC
+
+    monkeypatch.setattr(street_products, "products_vsa_one", fake_one)
+    monkeypatch.setattr(
+        street_products,
+        "collect_cli_sources",
+        lambda *_a, **_k: [Path("a.vsa"), Path("b.vsa")],
+    )
+    rc = street_products.run_street_products("vsa", "catalogus")
+    assert rc == DICT_PROMPT_ABORT_RC
+    assert calls == [Path("a.vsa")]
+
+
+def test_import_passes_dict_interactive_false(monkeypatch) -> None:
+    """Import-kuiser (products score-ir-brug) zet dict_interactive=False."""
+    from vsa import mvsa_import, musicxml_satb_layout
+    from vsa.mvsa_kuiser import KuiserResult
+
+    seen: dict[str, object] = {}
+
+    def fake_kuiser(text, **kwargs):
+        seen.update(kwargs)
+        return KuiserResult(text=text, warnings=[])
+
+    monkeypatch.setattr(mvsa_import, "kuiser_mvsa_text", fake_kuiser)
+    monkeypatch.setattr(
+        mvsa_import,
+        "score_to_mvsa",
+        lambda *_a, **_k: "@do C4\nL: Va-der ||\nS: do re ||\n",
+    )
+    monkeypatch.setattr(
+        mvsa_import,
+        "parse_musicxml_satb",
+        lambda *_a, **_k: object(),
+    )
+    monkeypatch.setattr(
+        mvsa_import,
+        "read_musicxml_file",
+        lambda *_a, **_k: "<score/>",
+    )
+    monkeypatch.setattr(
+        musicxml_satb_layout,
+        "ensure_playback_musicxml",
+        lambda xml: xml,
+    )
+
+    text = mvsa_import.import_score_to_mvsa(Path("dummy.mxl"), align=True)
+    assert "Va-der" in text
+    assert seen.get("dict_interactive") is False
+
+
+def test_prompt_dictionary_fixes_respects_force_noninteractive() -> None:
+    """Hard refuse: force-flag → geen TTY ook bij isatty-stdin."""
+    from vsa import syllable_dict_check
+    from vsa.syllable_dict_check import (
+        DictSyllableFinding,
+        prompt_dictionary_fixes,
+    )
+
+    class _Tty:
+        def isatty(self) -> bool:
+            return True
+
+        def read(self, *_a, **_k):
+            raise AssertionError("geen stdin-read bij force_noninteractive")
+
+    finding = DictSyllableFinding(
+        code="VSA-SYLLABLE-DICT-MISMATCH",
+        surface="Va-der",
+        expected="va-der",
+        line=1,
+        column=1,
+        message_nl="test",
+        hint_nl="",
+    )
+    syllable_dict_check._force_noninteractive = True
+    try:
+        result = prompt_dictionary_fixes([finding], stdin=_Tty())
+    finally:
+        syllable_dict_check._force_noninteractive = False
+    assert not result.replacements
+    assert not result.aborted
+
+
 def _write_minimal_mscz(path: Path, *, mscx: str | None = None) -> None:
     import zipfile
 

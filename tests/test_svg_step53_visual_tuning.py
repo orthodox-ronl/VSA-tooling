@@ -15,7 +15,7 @@ def test_text_width_estimate_is_roomier():
 
 
 def test_multi_ehm_scope_forces_filler_space():
-    document = Parser(r"{/&/&/&/schon}").parse()
+    document = Parser(r"{/&\tij_&_}").parse()
     layout = build_scope_layout(document.nodes[0])
 
     assert layout.filler_width > 0
@@ -30,8 +30,15 @@ def test_single_ehm_glyph_is_capped_to_accent_width():
 
 
 def test_filler_line_uses_dash_height_not_upper_y():
-    document = Parser(r"{/&/&/&/schon}").parse()
+    document = Parser(r"{/&\tij_&_}").parse()
     svg = SVGRenderer().render_document(document)
 
     assert "vsa-filler-line" in svg
     assert 'y1="30.00"' in svg
+
+
+def test_wide_syllable_svg_has_no_filler_line():
+    document = Parser(r"{/aan}{/&\schouw_&_}{\de_}").parse()
+    svg = SVGRenderer().render_document(document)
+
+    assert "vsa-filler-line" not in svg

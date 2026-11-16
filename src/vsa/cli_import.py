@@ -15,7 +15,7 @@ docs/plans/straat-clis.md.
 
 from __future__ import annotations
 
-from .cli_messages import emit_cli_error, emit_cli_exception
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 
 import argparse
 import sys
@@ -251,7 +251,7 @@ def _mscz_from_mvsa(ns: argparse.Namespace) -> int:
             emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         if keep_mxl is not None:
             print(f"MXL: {keep_mxl}")
     return exit_code
