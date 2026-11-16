@@ -237,6 +237,8 @@ nav:
     - OSMD S8-recite (plan): plans/osmd-s8-recite.md
     - CoriB MVP (plan): plans/corib-mvp.md
     - plans/vsa-polyphony-proposal.md
+    - Migratieplan tooling ↔ bibliotheek: plans/migratieplan-tooling-bibliotheek.md
+    - Voorstel Cursor-regels: plans/cursor-regels-voorstel.md
 
 extra_css:
   - stylesheets/extra.css
