@@ -35,6 +35,17 @@ Bibliotheek gebruikt die nergens en de catalogus daar heeft geen manifesten.
 De `id:`-includes blijven in elk geval bestaan, als pad-id op de mappenstructuur
 (`resolve_catalogus_id`).
 
+**Niet te verwarren met de zoekfunctie op de site.** De zoekbalk in de bibliotheek en de
+koormappen is een andere functie en blijft ongemoeid. Die werkt zo: in bibliotheek bouwt
+`scripts/build_zoek_index.py` het bestand `static/zoek/index.json` uit de
+uitvoeringsvormen van de catalogus. De gezongen tekst komt uit `*.lyrics.txt`, die tooling
+maakt uit `.vsa`, `.mvsa` en `.mscz` (`vsa.text_export`, `write_lyrics_product`), en uit
+de zoektekst in de frontmatter (`vsa.zoektekst`). Deze keten gebruikt het `bron`-pakket
+niet. Daarom verandert er voor die zoekfunctie niets door keuze 4c; `lyrics` en
+`zoektekst` horen in `vsa.api` (keuze 2). Het enige dat in stap 4 raakt aan die keten, is
+de hernoeming van `scripts/catalogus.py` naar `catalogus_root.py`, omdat
+`build_zoek_index.py` daaruit importeert.
+
 
 ## 1. Exportketen
 
