@@ -34,7 +34,7 @@ jobs:
         with:
           repository: orthodox-ronl/bibliotheek
           path: vendor/bibliotheek
-          ref: main
+          ref: development
 
       - name: Setup Python
         uses: actions/setup-python@v6
