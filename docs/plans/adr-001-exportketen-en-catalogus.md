@@ -22,6 +22,20 @@ uitgevoerd of getest. Wat niet is gecontroleerd, staat er expliciet bij.
 Je mag per rij "akkoord" zeggen of een andere letter kiezen. Rij 3 hoeft alleen
 een "akkoord".
 
+**Open vraag bij keuze 4c (2026-11-20):** blijft de zoekfunctie bestaan? Het gaat om
+`zoek=`-includes, `@include-vsa zoek=` en de opdracht `vsa resolve-catalogus`.
+Bibliotheek gebruikt die nergens en de catalogus daar heeft geen manifesten.
+
+| Optie | Beschrijving                                                                                                                                           | Gevolg                                                                |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| i     | Verwijderen, met docs en tests (`docs/reference/cli/resolve-catalogus.md`, `tests/test_resolve_catalogus.py` en de `zoek`-delen van de include-tests). | Minder code; wie `zoek=` gebruikt, krijgt een duidelijke foutmelding. |
+| ii    | Behouden, maar opnieuw bouwen op de mappenstructuur van bibliotheek (zoeken op mapnamen).                                                              | Meer werk; gedrag wijkt af van nu.                                    |
+| iii   | Behouden zoals het is, maar het bron-pakket blijft dan nodig.                                                                                          | Botst met keuze 4c; niet mogelijk.                                    |
+
+De `id:`-includes blijven in elk geval bestaan, als pad-id op de mappenstructuur
+(`resolve_catalogus_id`).
+
+
 ## 1. Exportketen
 
 ### Wat er nu is
@@ -137,6 +151,23 @@ Bibliotheek gebruikt de API van het `bron`-pakket nergens (`docs/plans/migratiem
   `docs/reference/catalogus-cli.md` van `bron` moet verwijzen naar `vsa catalogus`.
 - `bibliotheek/scripts/catalogus.py` wordt `catalogus_root.py` (zoals in het plan).
 
+**Besluit (2026-11-20, eigenaar): keuze 4c.**
+
+Bevindingen bij het uitwerken (alleen gelezen in tooling en bibliotheek):
+
+- De catalogus van bibliotheek heeft **geen manifestbestanden** (0 yaml-bestanden onder
+  `content-source/catalogus`). Het `bron`-pakket zoekt juist op manifesten
+  (`zangstuk-id`, `variant-id`, `uitvoeringsvorm-id`, `representaties`, zie
+  `tests/test_include_vsa.py`). Voor de echte catalogus van bibliotheek kan dat
+  zoeken dus niets vinden.
+- De ids in de twee genoemde pagina's (`antifoon-1-weekdagen`, `antifoon-2-weekdagen`,
+  `antifoon-3-weekdagen`) bestaan niet in de catalogus; daar heten de mappen
+  `eerste-antifoon/weekdagen`, `tweede-antifoon/…`, `derde-antifoon/…`. Die includes
+  lossen dus nu al niet op tegen de actuele catalogus.
+- Daardoor is er in bibliotheek geen levende gebruiker van de `bron`-zoekfunctie. Of
+  het gedrag moet blijven bestaan, is een besluit over het product, niet over
+  verhuizen (zie de open vraag onder "Wat je moet beslissen").
+
 Alternatief (4b): top-level pakket `catalogus` behouden en alleen verhuizen. Dat laat
 het naamconflict staan en is daarom niet aanbevolen.
 
@@ -144,9 +175,9 @@ Alternatief (4c): het `bron`-pakket niet meenemen, maar de twee functies die het
 aanstuurt opnieuw bouwen op de catalogus-zoekfuncties die tooling al heeft
 (`input_paths.discover_catalogus_roots` en `resolve_catalogus_id`, die precies
 `content-source/catalogus` van bibliotheek doorzoeken). Het gaat om `id:`-includes in
-markdown (bibliotheek gebruikt die in 7 bestanden, bijvoorbeeld
-`:::include svg id:antifoon-1-weekdagen/…`) en de opdracht `vsa resolve-catalogus`
-(`zoek=`-includes). Voordeel: minder code (de 2.189 regels hoeven niet mee) en geen
+markdown (in bibliotheek alleen in `content-source/input/liturgikon/antifonen-liturgikon.md`
+en `liturgikon-feesteigen.md`, bijvoorbeeld `:::include svg id:antifoon-1-weekdagen/…`)
+en de opdracht `vsa resolve-catalogus` (`zoek=`-includes; bibliotheek gebruikt die nergens). Voordeel: minder code (de 2.189 regels hoeven niet mee) en geen
 `bron`-concepten meer. Nadeel: de functies moeten herschreven worden en de
 meeverhuisbare tests passen dan niet één-op-één. **Niet gecontroleerd:** of alle
 `zoek=`-gedragingen (dubbelzinnigheid, aliassen) met die eenvoudiger resolver te
