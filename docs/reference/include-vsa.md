@@ -1,11 +1,10 @@
 # `@include-vsa` referentie
 
-Status: geïmplementeerd voor `id=`, `lokaal=` en `zoek=`.
+Status: geïmplementeerd voor `id=` en `lokaal=`. `zoek=` is verwijderd (zie [Verwijderd: `zoek=`](#verwijderd-zoek)).
 
 ## Syntax
 
 ```vsa
-refrein: @include-vsa zoek="Troparion"
 refrein: @include-vsa id=troparion-geboorte-moeder-gods/troparion-geboorte-moeder-gods/liturgikon
 refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 ```
@@ -16,9 +15,8 @@ refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 | --------- | ------------------------------------- | ---------------------------- |
 | `id=`     | Catalogus; beide herkomsten           | Lokaal wint bij conflict     |
 | `lokaal=` | Catalogus; parochie `lokaal/`         | Lokale bron                  |
-| `zoek=`   | `catalogus.zoek` + `ZoekContext`      | Context uit ouder-`.vsa`     |
 
-De parameters zijn wederzijds exclusief.
+De twee parameters zijn wederzijds exclusief.
 
 Alleen de substring `@include-vsa ...` wordt vervangen; tekst ervoor blijft staan.
 
@@ -28,7 +26,6 @@ Alleen de substring `@include-vsa ...` wordt vervangen; tekst ervoor blijft staa
 | ---------------------------------- | ------------------------------------------ |
 | Geen match                         | Fout                                       |
 | Meerdere matches                   | Fout (`AmbiguousError`)                    |
-| Eén match + `ook_gevonden_in_bron` | Waarschuwing; build mag doorgaan           |
 
 ## Expand
 
@@ -36,11 +33,11 @@ De doel-`.vsa` wordt gelezen, frontmatter wordt gestript en de body wordt in-mem
 
 Het brondocument wordt niet gewijzigd.
 
-## Ambiguïteit oplossen
+## Verwijderd: `zoek=`
 
-1. Draai [`catalogus zoek --lijst`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek) met dezelfde context.
-2. Verfijn `zoek=` of `default.*` in de ouder-`.vsa`.
-3. Schakel na review over naar `@include-vsa lokaal=...` of `id=...`.
+`@include-vsa zoek="…"` en `:::include … zoek="…"` worden niet meer ondersteund
+en geven een foutmelding. Ook de opdracht `vsa resolve-catalogus` bestaat niet meer.
+Verwijs in plaats daarvan met `id=` of `lokaal=`, of met een bestandspad.
 
 ## Implementatiestatus
 
@@ -49,5 +46,5 @@ Het brondocument wordt niet gewijzigd.
 | `expand_include_vsa`                                  | Geïmplementeerd    |
 | `@include-vsa id=`                                    | Geïmplementeerd    |
 | `@include-vsa lokaal=`                                | Geïmplementeerd    |
-| `@include-vsa zoek=`                                  | Geïmplementeerd    |
+| `@include-vsa zoek=`                                  | Verwijderd         |
 | Integratie validate / svg / musicxml / build-markdown | Geïmplementeerd    |

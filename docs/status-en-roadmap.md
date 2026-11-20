@@ -25,9 +25,9 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 | `:::coria`                  | Werkend               | Blijft ondersteund als build-time directive/alias.                                                                                                                   |
 | Print/web directives        | Werkend met beperking | `web-only`, `print-only`, `keep-together`; nesting is nog niet toegestaan.                                                                                           |
 | Parochie-lokaal model       | Werkend in demo       | `lokaal/`, manifeststructuur en voorbeeldincludes zijn aanwezig.                                                                                                     |
-| Catalogus-resolutie         | Werkend               | `vsa resolve-catalogus` zet `zoek=` om naar `bron:` of `lokaal:`.                                                                                                    |
+| Catalogus-resolutie         | Beperkt               | `id:` / `lokaal:`-includes werken; `zoek=` en `vsa resolve-catalogus` zijn verwijderd.                                                                               |
 | Hugo-demo                   | Werkend als testbed   | Combineert praktijkmateriaal, documentatie, layouts en publicatieketen.                                                                                              |
-| mvsa (draft)                | Werkend conversies    | `mvsa`/`mvsa`: validate, normalize, kuiser, mxl, mscz, pdf, mp3, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md).        |
+| mvsa (draft)                | Werkend conversies    | `mvsa`/`mvsa`: validate, normalize, kuiser, mxl, mscz, pdf, mp3, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md).            |
 
 ## Beperkt of kwetsbaar
 
@@ -76,13 +76,10 @@ Te beslissen:
 
 ### 4. Parochie-/bronworkflow
 
-De richting is duidelijk: sjabloon of sessie met `zoek=`, resolver, validatie, build-markdown, Hugo, print/web-output. De praktische workflow kan nog eenvoudiger.
+De richting is duidelijk: sjabloon of sessie met `id:`- of `lokaal:`-includes, validatie, build-markdown, Hugo, print/web-output. `zoek=` en `vsa resolve-catalogus` zijn verwijderd. De praktische workflow kan nog eenvoudiger.
 
 Te beslissen:
 
-- Wanneer gebeurt `resolve-catalogus`: apart commando, automatisch, of beide?
-- Waar komt resolved output te staan?
-- Hoe gaan we om met ambiguiteit: strict fout, lijst, of interactieve keuze?
 - Hoe worden `bron:` assets voor Coria/MXL beschikbaar gemaakt?
 
 ## Nuttigste volgende stappen
@@ -118,9 +115,7 @@ Waarom: hier zit de meeste praktische waarde voor dagelijks gebruik.
 Resultaat:
 
 - Heldere voorbeeldworkflow in docs.
-- Betere checks op open `zoek=`.
-- Duidelijke outputlocatie voor resolved bestanden.
-- Indien nodig: helper-script voor resolve + validate + build.
+- Indien nodig: helper-script voor validate + build.
 
 ### Stap 3: commentaarmodel afronden
 

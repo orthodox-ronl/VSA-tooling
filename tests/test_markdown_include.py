@@ -576,6 +576,13 @@ def test_include_coria_requires_content_root(tmp_path):
         resolve_includes(':::include coria "melodie.vsa":::\n', source)
 
 
+def test_include_zoek_is_niet_meer_ondersteund(tmp_path: Path):
+    source = tmp_path / "pagina.md"
+    source.write_text("tekst\n", encoding="utf-8")
+    with pytest.raises(IncludeError, match="zoek= in :::include wordt niet meer ondersteund"):
+        resolve_includes(':::include svg zoek="Cherubijnenhymne":::\n', source)
+
+
 def test_include_bron_pdf_logical_reference(tmp_path: Path):
     bron_root = tmp_path / "bron"
     zangstuk_dir = bron_root / "zangstukken" / "antifoon-1-zondag"

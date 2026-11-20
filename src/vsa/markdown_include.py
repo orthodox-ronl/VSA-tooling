@@ -278,8 +278,8 @@ def resolve_includes(
 def _parse_include_directive(stripped: str) -> tuple[str | None, str, str | None] | None:
     if INCLUDE_ZOEK_EXPORT_PATTERN.match(stripped):
         raise IncludeError(
-            "Onopgeloste catalogus-zoekactie (zoek=) — draai eerst "
-            "'vsa resolve-catalogus' op dit bestand."
+            "zoek= in :::include wordt niet meer ondersteund. "
+            "Verwijs met een pad of met een catalogus-id (id:…)."
         )
 
     match = INCLUDE_EXPORT_PATTERN.match(stripped)
