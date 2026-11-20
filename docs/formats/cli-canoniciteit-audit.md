@@ -46,7 +46,6 @@ Prioriteit fase 3 (uit plan): eerst `products` / `mscz` / `text` / `svg` / `audi
 | `mvsa`                       | schets `.vsa.mvsa` | ext    | deel   | T6 waarschuwingen        | C3; C4 T1–T7                                             | midden   |
 | `template validate`          | formule-YAML       | n.v.t. | n.v.t. |                          | —                                                        | —        |
 | `process` / `build-markdown` | MD-workflow        | deel   | deel   |                          | per blok; documenteer                                    | laag     |
-| `resolve-catalogus`          | paden              | n.v.t. | n.v.t. |                          | —                                                        | —        |
 
 ---
 

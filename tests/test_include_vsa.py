@@ -130,25 +130,17 @@ def test_expand_cycle_detection(tmp_path: Path) -> None:
         prepare_vsa_body(vsa.read_text(encoding="utf-8"), vsa)
 
 
-def test_zoek_with_catalogus_fixture(tmp_path: Path) -> None:
+def test_zoek_is_niet_meer_ondersteund(tmp_path: Path) -> None:
     root = tmp_path / "content-source"
-    fixture = Path(__file__).resolve().parents[1].parent / "bron" / "tests" / "fixtures" / "alias-index"
-    if not fixture.is_dir():
-        pytest.skip("bron fixture ontbreekt")
     (root / "lokaal").mkdir(parents=True)
-    import shutil
-
-    shutil.copytree(fixture / "lokaal" / "cherubijnenhymne", root / "lokaal" / "cherubijnenhymne")
     host = root / "host.vsa"
     host.write_text(
-        '---\ndefault:\n  uitvoeringsvorm: Groningen\n---\n'
         '@include-vsa zoek="Cherubijnenhymne (Kastorski)"\n',
         encoding="utf-8",
     )
 
-    expanded, _ = prepare_vsa_body(host.read_text(encoding="utf-8"), host)
-    assert "@include-vsa" not in expanded
-    assert "Wij die door het" in expanded
+    with pytest.raises(IncludeVsaError, match="zoek= wordt niet meer ondersteund"):
+        prepare_vsa_body(host.read_text(encoding="utf-8"), host)
 
 
 def test_source_file_unchanged_after_expand(tmp_path: Path) -> None:

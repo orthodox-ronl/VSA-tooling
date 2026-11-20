@@ -28,7 +28,6 @@ from .validation_runner import validate_path
 from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .derived_path import derived_output_path, derived_svg_output_path
 from .input_paths import InputPathError, collect_cli_sources
-from .resolve_catalogus import ResolveCatalogusError, write_resolved_markdown
 from .syllabify import (
     normalize_output_extension,
     output_path_for,
@@ -1110,33 +1109,6 @@ def _build_parser():
         default=None,
     )
 
-    resolve_catalogus = subparsers.add_parser(
-        "resolve-catalogus",
-        help="Los :::include zoek= op naar catalogus-paden in markdown.",
-    )
-    resolve_catalogus.add_argument("path", help="Markdown-bestand met zoek= includes")
-    resolve_catalogus.add_argument(
-        "--content-root",
-        default=None,
-        help="Content-root (default: auto via lokaal/ in bovenliggende mappen)",
-    )
-    resolve_catalogus.add_argument(
-        "--bron-root",
-        default=None,
-        help="Bron-repo root (default: auto via vendor/bron of ../bron)",
-    )
-    resolve_catalogus.add_argument(
-        "-o",
-        "--output",
-        default=None,
-        help="Uitvoerbestand (default: overschrijf invoer)",
-    )
-    resolve_catalogus.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Toon resultaat zonder bestand te schrijven",
-    )
-
     from .kuiser_cli import add_kuiser_parser, dispatch_kuiser
 
     add_kuiser_parser(subparsers, street="vsa", implemented=True)
@@ -1553,9 +1525,6 @@ def _run(args):
 
     if args.command == "build-markdown":
         return _cmd_build_markdown(args, config)
-
-    if args.command == "resolve-catalogus":
-        return _cmd_resolve_catalogus(args)
 
     if args.command == "kuiser":
         from .kuiser_cli import dispatch_kuiser
@@ -2484,59 +2453,6 @@ def _syllabify_dictionary_gate(
             hint=finding.hint_nl,
         )
     return 1, source_text
-
-
-def _cmd_resolve_catalogus(args) -> int:
-    source_path = _cli_resolve_existing(
-        args.path,
-        hint="Geef een bestaand Markdown-bestand (.md).",
-    )
-    if source_path is None:
-        return 1
-    if not source_path.is_file():
-        emit_cli_error(
-            "Verwacht één Markdown-bestand, geen map.",
-            path=source_path,
-            hint="Geef een bestaand Markdown-bestand (.md).",
-        )
-        return 1
-    content_root = Path(args.content_root) if args.content_root else None
-    bron_root = Path(args.bron_root) if args.bron_root else None
-    output_path = Path(args.output) if args.output else None
-    try:
-        result = write_resolved_markdown(
-            source_path,
-            content_root=content_root,
-            bron_root=bron_root,
-            output_path=output_path,
-            dry_run=args.dry_run,
-        )
-    except ResolveCatalogusError as exc:
-        emit_cli_exception(
-            exc,
-            path=source_path,
-            hint="Controleer zoek= en catalogus-paden in dit Markdown-bestand.",
-        )
-        return 1
-
-    for warning in result.warnings:
-        emit_cli_error(
-            f"WARNING: {warning.code}: {warning.message_nl}",
-            path=source_path,
-            line=getattr(warning, "line", None),
-        )
-
-    if result.resolved_queries:
-        print(
-            f"Opgelost: {len(result.resolved_queries)} unieke zoek= "
-            f"({', '.join(result.resolved_queries)})"
-        )
-    else:
-        print("Geen zoek= includes gevonden.")
-
-    if args.dry_run:
-        print("(dry-run — bestand niet geschreven)")
-    return 0
 
 
 def _cmd_musicxml(args, config):

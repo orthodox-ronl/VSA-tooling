@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Verwijderd (breaking):** `zoek=` in `:::include` en `@include-vsa`, en de opdracht
+  `vsa resolve-catalogus`. Een include met `zoek=` geeft nu een foutmelding; gebruik
+  `id=` / `id:`, `lokaal=` / `lokaal:` of een bestandspad. De site-zoekfunctie
+  (`*.lyrics.txt`, zoektekst) is een andere keten en blijft ongewijzigd.
 - Docs/CLI-voorbeelden: overal `mvsa …` i.p.v. `vsa mvsa …` (bron = command);
   nested `vsa mvsa` verwijderd — alleen top-level `mvsa`
 - CLI: score → `.mvsa` is `mxl mvsa` / `mscz mvsa` (conventie bron→doel); `import` verwijderd uit `mvsa`/`mxl`/`mscz`

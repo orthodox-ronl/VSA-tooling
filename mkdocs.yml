@@ -202,7 +202,6 @@ nav:
       - reference/cli/build-markdown.md
       - reference/cli/markdown.md
       - reference/cli/pdf.md
-      - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
       - reference/cli/format.md
       - reference/cli/kuiser.md

@@ -14,11 +14,6 @@ from .markdown_coria import (
 )
 from .markdown_directives import process_directives
 from .markdown_include import IncludeError, resolve_includes
-from .resolve_catalogus import (
-    ResolveCatalogusError,
-    has_unresolved_zoek_includes,
-    resolve_catalogus_markdown,
-)
 from .include_vsa import prepare_markdown_block_body
 from .svg_display import notation_style_attr, svg_natural_width, vsa_shortcode
 from .svg_renderer import SVGRenderer
@@ -42,7 +37,7 @@ CONTENT_ASSET_SUFFIXES = {
     ".pdf",
 }
 
-# Catalogus-sjablonen/sessies: wel valideren/resolve-catalogus, nog geen Hugo-build.
+# Catalogus-sjablonen/sessies: wel valideren, nog geen Hugo-build.
 BUILD_EXCLUDE_DIR_NAMES = frozenset({})
 
 
@@ -185,16 +180,6 @@ def prepare_markdown_document(
     source = markdown_file.read_text(encoding="utf-8")
     if bron_root is None:
         bron_root = _discover_bron_root(content_root)
-    if has_unresolved_zoek_includes(source):
-        try:
-            source = resolve_catalogus_markdown(
-                source,
-                source_path=markdown_file,
-                content_root=content_root,
-                bron_root=bron_root,
-            ).text
-        except ResolveCatalogusError as exc:
-            raise IncludeError(exc.message_nl) from exc
     source = resolve_includes(
         source,
         source_path=markdown_file,
