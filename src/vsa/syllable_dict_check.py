@@ -14,6 +14,7 @@ from .syllabify import (
     HARD_HYPHEN,
     dutch_hyphen_positions,
     hyphenate_dutch_word,
+    strip_soft_hyphens,
 )
 from .syllable_dictionary import (
     LYRICS_LANGS,
@@ -169,6 +170,24 @@ def bare_sung_text(document: Document) -> str:
     return "".join(chunks)
 
 
+def _is_non_lyrics_word_core(core: str) -> bool:
+    """Of *core* geen zingwoord is (directive/pad), alleen voor dictionary/syllabify."""
+    lemma = syllable_lemma(core)
+    if not lemma:
+        return True
+    if lemma == "includevsa" or lemma.startswith("includevsa"):
+        return True
+    raw = strip_soft_hyphens(core).replace(HARD_HYPHEN, "")
+    if "/" in raw or "/" in lemma:
+        return True
+    if "=" in raw and any(
+        part.startswith(("lokaal", "id", "zoek", "catalogus"))
+        for part in raw.split("=", 1)[:1]
+    ):
+        return True
+    return False
+
+
 def iter_body_word_cores(bare: str) -> list[str]:
     """Woordkernen uit kale lyrics (leestekenrand weg; geen kale maatstrepen).
 
@@ -183,6 +202,8 @@ def iter_body_word_cores(bare: str) -> list[str]:
             continue
         core = _strip_lyric_markup(m.group(2))
         if not core or not any(ch.isalpha() for ch in core):
+            continue
+        if _is_non_lyrics_word_core(core):
             continue
         cores.append(core)
     return cores

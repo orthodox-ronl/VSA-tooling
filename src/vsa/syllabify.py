@@ -97,15 +97,16 @@ def hyphenate_dutch_word(word: str) -> str:
         return word
     activate_concrete_lyrics_lang(word_lang)
 
+    surface = core.casefold()
     forms = allowed_syllable_forms(core)
-    if forms is not None:
-        surface = core.casefold()
-        if surface in forms:
-            # Al een toegestane vorm (primair of ``+``-alternatief): behouden.
-            return word
-        canonical = canonical_syllable_form(core)
-        if canonical is not None:
+    if forms is not None and surface in forms:
+        # Al een toegestane vorm (primair of ``+``-alternatief): behouden.
+        return word
+    canonical = canonical_syllable_form(core)
+    if canonical is not None:
+        if canonical.casefold() != surface:
             return f"{prefix}{_transfer_letter_case(core, canonical)}{suffix}"
+        return word
     if HARD_HYPHEN in core:
         return f"{prefix}{HARD_HYPHEN.join(hyphenate_dutch_word(part) if part else part for part in core.split(HARD_HYPHEN))}{suffix}"
     if "-" in core:
