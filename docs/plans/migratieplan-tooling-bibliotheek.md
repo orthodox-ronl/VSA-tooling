@@ -123,6 +123,8 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   bestaande mechanisme wordt vastgelegd, er komt geen nieuw ontwerp). Beslis ook de naam en
   plek van de catalogus-code in tooling (stap 4) en waar de data
   (`zangstukken/`, `alias-blokken.yaml`) blijft.
+- Voorstel: [adr-001-exportketen-en-catalogus.md](adr-001-exportketen-en-catalogus.md),
+  met per vraag opties, een aanbeveling en een kolom voor het besluit.
 - Klaar als: ADR gemerged en in de contract-index gelinkt.
 
 ### 4. Catalogus-code naar tooling (`bron` eruit)
@@ -179,6 +181,11 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   (waar `vsa.toml` al naar verwijst). Test dat tooling-syllabify voor elke
   uitzondering dezelfde splitsing geeft; `nl_hyphen.py` wordt wrapper en
   daarna verwijderd.
+- Besluiten (2026-11-20, door de eigenaar): `eeuwen` wordt `eeu-wen`, conform
+  het woordenboek in bibliotheek; de uitzondering `eeuw-en` in `nl_hyphen.py`
+  vervalt. `koninkrijk` blijft `ko-nink-rijk`. Het woordenboek wijzigt verder
+  niet, behalve dat de overige uitzonderingen die er nog niet in staan worden
+  toegevoegd (12 woorden, zie de migratiematrix).
 - Klaar als: `nl_hyphen.py` weg is en geen consument meer eigen
   uitzonderingen bijhoudt.
 
