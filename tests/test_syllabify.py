@@ -216,7 +216,7 @@ def test_cli_in_place(tmp_path: Path, capsys) -> None:
     assert path.read_text(encoding="utf-8") == "lij-den\n"
     out = capsys.readouterr()
     assert "lettergreepstreepje" in out.out
-    assert str(path) in out.out
+    assert path.as_posix() in out.out
 
 
 def test_cli_extension_writes_sibling(tmp_path: Path) -> None:
@@ -257,6 +257,13 @@ def test_cli_unsyllabify_in_place(tmp_path: Path) -> None:
     path.write_text("eeu-wig a-pos-tel-{la_}\n", encoding="utf-8")
     assert main(["syllabify", str(path), "--unsyllabify", "--in-place"]) == 0
     assert path.read_text(encoding="utf-8") == "eeuwig apostel{la_}\n"
+
+
+def test_plus_forms_stay_and_wrong_form_is_corrected() -> None:
+    """Plusteken-vormen blijven; een foute vorm wordt de canonieke lijstvorm."""
+    source = "al-le-lu-i-a mij-nen-twil or-tho-do-xe eeuwi-ge\n"
+    result = syllabify_vsa_source(source)
+    assert result.text == "al-le-lu-i-a mij-nen-twil or-tho-do-xe eeu-wi-ge\n"
 
 
 def test_cli_rejects_in_place_with_extension(tmp_path: Path, capsys) -> None:

@@ -25,7 +25,7 @@ def test_mxl_help_exposes_normalize(capsys) -> None:
     assert exc.value.code == 0
     out = capsys.readouterr().out
     assert "normalize" in out
-    assert "{mvsa,mscz,validate,normalize}" in out
+    assert "{mvsa,mscz,validate,normalize,kuiser}" in out
 
 
 def test_mscz_help_exposes_normalize(capsys) -> None:

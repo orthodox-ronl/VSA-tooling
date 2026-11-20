@@ -28,7 +28,7 @@ def test_mscz_svg_writes_sibling(tmp_path: Path, capsys) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
     with patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_svg):
-        assert mscz_main(["svg", str(bron)]) == 0
+        assert mscz_main(["svg", str(bron), "--allow-noncanonical"]) == 0
     out = tmp_path / "lied.mscz.svg"
     assert out.is_file()
     assert "Geschreven:" in capsys.readouterr().out
@@ -39,7 +39,7 @@ def test_mscz_pdf_writes_output(tmp_path: Path, capsys) -> None:
     bron.write_bytes(b"PK\x03\x04fake")
     pdf = tmp_path / "out.pdf"
     with patch("vsa.mvsa_mscz.export_mscz_to_pdf", side_effect=_fake_pdf):
-        assert mscz_main(["pdf", str(bron), "-o", str(pdf)]) == 0
+        assert mscz_main(["pdf", str(bron), "-o", str(pdf), "--allow-noncanonical"]) == 0
     assert pdf.is_file()
     assert "Geschreven:" in capsys.readouterr().out
 

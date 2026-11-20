@@ -135,11 +135,21 @@ def test_compare_import_roundtrip_musical_ok(tmp_path: Path):
     assert report.musical_ok
 
 
+def _replace_l_stem_heer(mvsa_text: str, replacement: str) -> str:
+    """Vervang Heer op de L-stem. De eerste Heer staat in de zoektekst."""
+    needle = "L: Heer "
+    assert needle in mvsa_text
+    updated = mvsa_text.replace(needle, f"L: {replacement} ", 1)
+    assert "zoektekst:" in updated and "\n  Heer ontferm\n" in updated
+    return updated
+
+
 def test_compare_detects_lyric_change(tmp_path: Path):
     score = _write_musicxml(tmp_path)
     mvsa_text = import_score_to_mvsa(score)
-    broken = mvsa_text.replace("Heer", "Heerx", 1)
+    broken = _replace_l_stem_heer(mvsa_text, "Heerx")
     assert broken != mvsa_text
+    assert "L: Heerx " in broken
     mvsa_path = tmp_path / "broken.mvsa"
     mvsa_path.write_text(broken, encoding="utf-8")
 
@@ -267,7 +277,7 @@ def test_cli_compare_diff_exit(tmp_path: Path, capsys):
     score = _write_musicxml(tmp_path)
     mvsa_text = import_score_to_mvsa(score)
     mvsa_path = tmp_path / "broken.mvsa"
-    mvsa_path.write_text(mvsa_text.replace("Heer", "Heerx", 1), encoding="utf-8")
+    mvsa_path.write_text(_replace_l_stem_heer(mvsa_text, "Heerx"), encoding="utf-8")
 
     rc = mscz_main(["compare", str(score), str(mvsa_path)])
     out = capsys.readouterr().out
