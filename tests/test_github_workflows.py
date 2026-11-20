@@ -74,6 +74,9 @@ def test_vsa_ci_checks_out_bron_for_catalogus():
     text = Path(".github/workflows/vsa-ci.yml").read_text(encoding="utf-8")
     assert "repository: orthodox-ronl/bron" in text
     assert "path: vendor/bron" in text
+    assert "repository: orthodox-ronl/bibliotheek" in text
+    assert "path: vendor/bibliotheek" in text
+    assert "VSA_SYLLABLE_DICTIONARY" in text
     assert "scripts\\ci.cmd" in text
 
 
