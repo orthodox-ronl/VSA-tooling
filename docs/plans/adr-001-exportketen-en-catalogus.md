@@ -11,13 +11,13 @@ uitgevoerd of getest. Wat niet is gecontroleerd, staat er expliciet bij.
 
 ## Wat je moet beslissen
 
-| Nr  | Vraag                                                | Aanbeveling                                                               | Jouw keuze |
-| --  | --------------------------------------------------   | -----------------------------------------------------------------------   | ---------- |
-| 1   | Welke exportketen is de canonieke?                   | **Keuze C**: gefaseerd, één MusicXML-renderer, Score-IR blijft schermlaag |            |
-| 2   | Hoe roept bibliotheek tooling aan?                   | **Keuze 2a**: één API-module `vsa.api`, in-process                        |            |
-| 3   | Hoe pint bibliotheek de tooling-versie?              | Bestaand mechanisme vastleggen (geen nieuw ontwerp)                       |            |
-| 4   | Hoe heet de catalogus-code in tooling?               | **Keuze 4a**: subpakket `vsa.catalogus`, opdracht `vsa catalogus`         |            |
-| 5   | Waar blijft de data (`zangstukken/`, alias-blokken)? | **Keuze 5a**: voorlopig in `bron`, met instelbare data-root               |            |
+| Nr  | Vraag                                              | Aanbeveling                                                                                                               | Jouw keuze |
+| --  | -------------------------------------------------- | -----------------------------------------------------------------------                                                   | ---------- |
+| 1   | Welke exportketen is de canonieke?                 | **Keuze C**: gefaseerd, één MusicXML-renderer, Score-IR blijft schermlaag                                                 |            |
+| 2   | Hoe roept bibliotheek tooling aan?                 | **Keuze 2a**: één API-module `vsa.api`, in-process                                                                        |            |
+| 3   | Hoe pint bibliotheek de tooling-versie?            | Bestaand mechanisme vastleggen (geen nieuw ontwerp)                                                                       |            |
+| 4   | Wat gebeurt er met de catalogus-code uit `bron`?   | **Keuze 4a** (verhuizen als `vsa.catalogus`) of **4c** (niet meenemen, opnieuw bouwen op de eigen resolver); zie sectie 4 |            |
+| 5   | Welke catalogusdata gebruikt tooling nog?          | **Keuze 5a**: alleen de catalogus van bibliotheek; `bron` als gegevensbron vervalt                                        |            |
 
 Je mag per rij "akkoord" zeggen of een andere letter kiezen. Rij 3 hoeft alleen
 een "akkoord".
@@ -140,40 +140,45 @@ Bibliotheek gebruikt de API van het `bron`-pakket nergens (`docs/plans/migratiem
 Alternatief (4b): top-level pakket `catalogus` behouden en alleen verhuizen. Dat laat
 het naamconflict staan en is daarom niet aanbevolen.
 
-## 5. Waar blijft de data
+Alternatief (4c): het `bron`-pakket niet meenemen, maar de twee functies die het nu
+aanstuurt opnieuw bouwen op de catalogus-zoekfuncties die tooling al heeft
+(`input_paths.discover_catalogus_roots` en `resolve_catalogus_id`, die precies
+`content-source/catalogus` van bibliotheek doorzoeken). Het gaat om `id:`-includes in
+markdown (bibliotheek gebruikt die in 7 bestanden, bijvoorbeeld
+`:::include svg id:antifoon-1-weekdagen/…`) en de opdracht `vsa resolve-catalogus`
+(`zoek=`-includes). Voordeel: minder code (de 2.189 regels hoeven niet mee) en geen
+`bron`-concepten meer. Nadeel: de functies moeten herschreven worden en de
+meeverhuisbare tests passen dan niet één-op-één. **Niet gecontroleerd:** of alle
+`zoek=`-gedragingen (dubbelzinnigheid, aliassen) met die eenvoudiger resolver te
+dekken zijn. Daarvoor moet de code van het `bron`-pakket gelezen worden; dat doe ik
+alleen na jouw akkoord, omdat je hebt gezegd dat `bron` niet relevant is.
 
-### Wat er nu is
+## 5. Welke catalogusdata gebruikt tooling nog
 
-| Plek                                     | Inhoud                                                                                                                                      |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bron/zangstukken/`                      | 29 `yaml`-bestanden, 18 `vsa`-bestanden en afbeeldingen. Mappen als `troparion-zondag-toon-1`, `kondak-zondag-toon-1`, `antifoon-1-zondag`. |
-| `bron/catalogus/data/alias-blokken.yaml` | 234 regels: org-brede alias-blokken voor liturgische rollen.                                                                                |
-| `bibliotheek/content-source/catalogus/`  | 33 mappen als `alleluia`, `ektinia`, `tropaar`, `kondak`.                                                                                   |
+De catalogus van bibliotheek (`content-source/catalogus`, 33 mappen zoals
+`alleluia`, `ektinia`, `tropaar`) is de opvolger van `bron`. De map
+`zangstukken/` in `bron` telt niet meer mee.
 
-De mapnamen van `bron/zangstukken` en de catalogus in bibliotheek **overlappen niet**
-(0 gelijke namen). Het zijn dus twee aparte verzamelingen, geen kopieën.
+Wat in tooling nog aan `bron` hangt (`catalogus_bridge.discover_bron_root`): een
+optionele extra zoekmap met de naam `bron` waarin `zangstukken/` staat. Zonder die
+map geeft de functie `None` terug en blijft het zoeken in de catalogus van de
+gebruiker werken. Tooling noch bibliotheek verwijst naar `alias-blokken.yaml`
+(gecontroleerd in `src/`, `docs/`, `vsa.toml` en alle scripts en docs van bibliotheek).
 
-Tooling zoekt nu hard-gecodeerd naar een map met de naam `bron` (`vendor/bron` of
-`../bron`) met daarin `zangstukken/` (`catalogus_bridge.discover_bron_root`).
+### Voorstel (keuze 5a)
 
-### Opties
+- Tooling zoekt alleen nog de catalogus van bibliotheek (`discover_catalogus_roots`,
+  eventueel met een pad in `vsa.toml` of de omgevingsvariabele `VSA_CATALOGUS`).
+- De zoekfunctie naar een map met de naam `bron` en `zangstukken/` vervalt.
+- `alias-blokken.yaml` wordt niet meegenomen, omdat niets in tooling of
+  bibliotheek het gebruikt. Wil jij die aliassen toch ooit gebruiken, dan hoort dat
+  bestand in bibliotheek en niet in `bron`.
+- De normatieve catalogus-specificaties blijven waar ze staan; tooling linkt er
+  hoogstens naar. Verhuizen ervan is een eigen Wijzigingsanalyse volgens
+  `AI-INSTRUCTIONS.md` en valt buiten dit ADR.
 
-| Keuze | Beschrijving                                                                                                 | Voordeel                                                                             | Nadeel                                                           |
-| ----- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| 5a    | Data blijft in `bron` (dan alleen inhoud, geen code). Tooling krijgt een instelbare data-root in `vsa.toml`. | Geen inhoud verplaatsen; `bron` blijft vindbaar voor parochies die er al uit putten. | `bron` verdwijnt alleen als codebron, niet uit de keten.         |
-| 5b    | `zangstukken/` en alias-blokken verhuizen naar bibliotheek.                                                  | Eén repo voor inhoud.                                                                | Verhuist inhoud waar anderen mogelijk van afhangen; meer risico. |
-| 5c    | Eigen nieuwe inhoudsrepo.                                                                                    | Schone scheiding.                                                                    | Extra repo en extra beheer.                                      |
-
-### Aanbeveling: keuze 5a
-
-De instelbare data-root is bij alle keuzes nodig (plan, stap 4). Het verhuizen van
-inhoud is een aparte, moeilijk terug te draaien beslissing en hoeft niet in dit
-migratietraject te vallen. **Ik weet niet welke andere sites of parochies uit
-`bron` putten**; dat moet jij weten voordat 5b een optie wordt.
-
-De normatieve catalogus-specificaties (`bron/docs/specs/catalogus-*.md`) blijven
-voorlopig in `bron`; tooling linkt ernaar. Verhuizen ervan is een eigen
-Wijzigingsanalyse volgens `AI-INSTRUCTIONS.md` en valt buiten dit ADR.
+Alternatief (5b): `bron` als tweede catalogus blijven ondersteunen. Dat houdt de
+afhankelijkheid van `bron` in stand en is daarom niet aanbevolen.
 
 ## Gevolgen voor de volgende stappen
 
