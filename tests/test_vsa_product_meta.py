@@ -39,10 +39,9 @@ def test_vsa_mxl_merges_mxl_meta(tmp_path: Path) -> None:
 
 
 def test_vsa_svg_merges_svg_meta(tmp_path: Path) -> None:
-    examples = list((Path(__file__).resolve().parents[1] / "examples").rglob("*.vsa"))
-    if not examples:
-        pytest.skip("geen .vsa-examples")
-    src = examples[0]
+    src = Path(__file__).resolve().parents[1] / "examples" / "minimal" / "valid-demo.vsa"
+    if not src.is_file():
+        pytest.skip("valid-demo.vsa ontbreekt")
     bron = tmp_path / src.name
     bron.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     assert vsa_main(["svg", str(bron)]) == 0

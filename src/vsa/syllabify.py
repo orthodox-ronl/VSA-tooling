@@ -59,7 +59,7 @@ def _dutch_dic():
 HARD_HYPHEN = "="
 
 
-def hyphenate_dutch_word(word: str) -> str:
+def hyphenate_dutch_word(word: str, *, allow_pyphen: bool | None = None) -> str:
     """Voeg lettergreepstreepjes toe (canonieke lijst, anders Pyphen ``nl_NL``).
 
     Bestaande zachte ``-`` blijven leidend (geen her-hyphenatie), behalve als
@@ -114,7 +114,22 @@ def hyphenate_dutch_word(word: str) -> str:
     if word_lang == "ksl":
         # Geen Nederlandse Pyphen op Cyrillisch.
         return word
-    return f"{prefix}{_dutch_dic().inserted(core)}{suffix}"
+    from .syllable_dict_check import is_interactive_stdin
+
+    if allow_pyphen is None:
+        allow_pyphen = is_interactive_stdin()
+    if not allow_pyphen:
+        return word
+    return f"{prefix}{pyphen_hyphenate_core(core)}{suffix}"
+
+
+def pyphen_hyphenate_core(core: str) -> str:
+    """Pyphen ``nl_NL`` op de woordkern (voor TTY-syllabify en UNKNOWN-voorstellen)."""
+    if not core or not any(ch.isalpha() for ch in core):
+        return core
+    if "-" in core or HARD_HYPHEN in core:
+        return core
+    return _dutch_dic().inserted(core)
 
 
 def _transfer_letter_case(source: str, hyphenated: str) -> str:
@@ -391,6 +406,14 @@ def _atoms_from_text_with_comments(segment: str) -> list[_Atom]:
 
         line_content = segment[line_start:line_end]
         if is_vsa_comment_only_line(line_content, line_ending):
+            flush_plain()
+            atoms.append(_Atom("sep", line_content + line_ending))
+            index = next_index
+            continue
+
+        from .syllable_dict_check import _is_non_lyric_report_line
+
+        if _is_non_lyric_report_line(line_content.lstrip()):
             flush_plain()
             atoms.append(_Atom("sep", line_content + line_ending))
             index = next_index

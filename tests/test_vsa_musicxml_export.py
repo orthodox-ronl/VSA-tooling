@@ -42,9 +42,14 @@ def test_export_syllabify_adds_junction_lyric(tmp_path: Path) -> None:
     plain_texts = re.findall(
         r"<text[^>]*>([^<]*)</text>", _score_xml_from_mxl(plain)
     )
-    syl_texts = re.findall(r"<text[^>]*>([^<]*)</text>", _score_xml_from_mxl(syl))
+    syl_xml = _score_xml_from_mxl(syl)
+    syl_texts = re.findall(r"<text[^>]*>([^<]*)</text>", syl_xml)
+    syl_pairs = re.findall(
+        r"<syllabic>([^<]*)</syllabic>\s*<text>([^<]*)</text>", syl_xml
+    )
     assert "Hei" in plain_texts
-    assert "Hei-" in syl_texts
+    assert ("begin", "Hei") in syl_pairs
+    assert ("end", "lig") in syl_pairs
     # Canonieke bron ongewijzigd
     assert dest.read_text(encoding="utf-8") == _VALID.read_text(encoding="utf-8")
 

@@ -34,6 +34,7 @@ ENV_VAR_KSL = "VSA_SYLLABLE_DICTIONARY_KSL"
 _CYRILLIC_RE = re.compile(r"[\u0400-\u04FF]")
 
 _active_path: Path | None = None
+_dictionary_path_pinned: bool = False
 _active_mode: str = DEFAULT_LYRICS_LANG_MODE
 _active_lang: str = DEFAULT_LYRICS_LANG
 _resolution_cli_path: str | Path | None = None
@@ -131,17 +132,24 @@ def detect_lyrics_lang_from_text(text: str) -> str:
 
 def activate_concrete_lyrics_lang(lang: str | None) -> Path | None:
     """Zet concrete ``nl``/``ksl`` en resolve het dictionary-pad."""
-    global _active_lang
+    global _active_lang, _active_path
     code = normalize_lyrics_lang(lang)
     _active_lang = code
+    if _dictionary_path_pinned:
+        clear_syllable_dictionary_cache()
+        return _active_path
     path = resolve_syllable_dictionary_path(
         cli_path=_resolution_cli_path,
         config_value=_resolution_config_value,
         config_dir=_resolution_config_dir,
         lang=code,
     )
-    set_syllable_dictionary_path(path)
-    return path
+    if path is None:
+        _active_path = None
+    else:
+        _active_path = Path(path).expanduser().resolve()
+    clear_syllable_dictionary_cache()
+    return _active_path
 
 
 def ensure_lyrics_lang_for_cores(cores: list[str] | tuple[str, ...]) -> str:
@@ -155,10 +163,9 @@ def ensure_lyrics_lang_for_cores(cores: list[str] | tuple[str, ...]) -> str:
     global _active_lang
     mode = _active_mode
     if mode == "auto":
-        # Geen detect-one-for-all: per-woordpad in de checker/syllabify.
-        if _active_path is None:
-            activate_concrete_lyrics_lang(DEFAULT_LYRICS_LANG)
-        return _active_lang
+        lang = detect_lyrics_lang_from_cores(cores)
+        activate_concrete_lyrics_lang(lang)
+        return lang
     _active_lang = mode
     if _active_path is None:
         activate_concrete_lyrics_lang(mode)
@@ -241,11 +248,13 @@ def packaged_dictionary_file_path(lang: str | None = None) -> Path:
 
 def set_syllable_dictionary_path(path: Path | str | None) -> None:
     """Zet het actieve dictionary-pad (None = opnieuw resolven bij load)."""
-    global _active_path
+    global _active_path, _dictionary_path_pinned
     if path is None:
         _active_path = None
+        _dictionary_path_pinned = False
     else:
         _active_path = Path(path).expanduser().resolve()
+        _dictionary_path_pinned = True
     clear_syllable_dictionary_cache()
 
 

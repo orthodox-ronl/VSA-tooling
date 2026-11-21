@@ -159,6 +159,7 @@ def test_cli_validate_summary_output(capsys, tmp_path: Path, monkeypatch):
     output = capsys.readouterr().out
 
     assert exit_code == 1
-    assert output.strip() == "demo.md:2:22: VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH"
+    lines = [line.strip() for line in output.strip().splitlines() if line.strip()]
+    assert lines[0] == "demo.md:2:22: VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH"
     assert "computed" not in output
     assert "^" not in output

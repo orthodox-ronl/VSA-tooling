@@ -711,6 +711,58 @@ def test_locate_remaps_hash_comment_line_shift() -> None:
     assert lines[line - 1][column - 1 : column - 1 + len("lu-ja")] == "lu-ja"
 
 
+def test_at_directives_excluded_from_dictionary_cores() -> None:
+    """``@``-regels tellen niet als lyrics voor validate dictionary-check."""
+    from vsa.syllable_dict_check import (
+        CODE_UNKNOWN,
+        find_dictionary_syllable_issues,
+        iter_vsa_lyric_word_cores,
+    )
+
+    body = (
+        '@title "Proef"\n'
+        "@mode major\n"
+        "@oct S=0 A=0 T=-1 B=-1\n"
+        "on-be-kend-woord-xyz\n"
+    )
+    document = Parser(body).parse()
+    lemmas = {syllable_lemma(c) for c in iter_vsa_lyric_word_cores(document)}
+    assert lemmas.isdisjoint({"title", "mode", "major", "s0", "t1"})
+    findings = find_dictionary_syllable_issues(document, source_text=body)
+    assert not any(
+        syllable_lemma(f.surface) in {"title", "mode", "major", "s0", "t1"}
+        for f in findings
+    )
+    unknown = [f for f in findings if f.code == CODE_UNKNOWN]
+    assert len(unknown) == 1
+    assert unknown[0].line == 4
+    assert "on-be-kend-woord-xyz" in unknown[0].surface
+
+
+def test_kondak_copy_no_at_directive_dict_noise(tmp_path: Path) -> None:
+    import shutil
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "examples"
+        / "formule-tekst"
+        / "vsa-bestanden"
+        / "kondak-h-apostel-thaddeos-toon-4.vsa"
+    )
+    if not src.is_file():
+        return
+    dst = tmp_path / src.name
+    shutil.copyfile(src, dst)
+    result = validate_file(dst)
+    noise = ("title", "mode", "major", "S=0", "T=-1")
+    hits = [
+        m
+        for m in result.messages
+        if "SYLLABLE-DICT" in m.code and any(n in m.message_nl for n in noise)
+    ]
+    assert not hits, [m.message_nl for m in hits]
+
+
 def test_vsa_scope_boundaries_count_as_syllable_breaks() -> None:
     """Scopegrenzen = zing-deling; geen MISMATCH op ver{/heer}{\\lijkt}."""
     from vsa.syllable_dict_check import (

@@ -100,6 +100,8 @@ def test_resolve_ksl_ignores_nl_config(tmp_path: Path) -> None:
 
 
 def test_apply_lyrics_lang_ksl_loads_empty_file(tmp_path: Path) -> None:
+    set_syllable_dictionary_path(None)
+    clear_syllable_dictionary_cache()
     ksl = tmp_path / "syllable_dictionary.ksl.txt"
     ksl.write_text("# leeg stub\n", encoding="utf-8")
     apply_syllable_dictionary_from_config(cli_path=ksl, lang="ksl")
@@ -149,3 +151,27 @@ def test_detect_and_ensure_auto(tmp_path: Path) -> None:
     set_lyrics_lang("auto")
     set_syllable_dictionary_path(None)
     clear_syllable_dictionary_cache()
+
+
+def test_auto_mixed_script_uses_per_word_dictionary(tmp_path: Path) -> None:
+    from vsa.syllable_dict_check import CODE_UNKNOWN, find_dictionary_syllable_issues_from_cores
+
+    ksl = tmp_path / "syllable_dictionary.ksl.txt"
+    ksl.write_text("гос-по-ди\n", encoding="utf-8")
+    nl = tmp_path / "syllable_dictionary.nl.txt"
+    nl.write_text("a-men\n", encoding="utf-8")
+    apply_syllable_dictionary_from_config(lang="auto")
+    clear_syllable_dictionary_cache()
+    try:
+        findings = find_dictionary_syllable_issues_from_cores(
+            ["a-men", "xyznlonbekend", "Гос-по-ди"],
+            source_text="a-men xyznlonbekend Гос-по-ди\n",
+            lyrics_lang="auto",
+        )
+        by_surface = {f.surface: f for f in findings if f.code == CODE_UNKNOWN}
+        assert "xyznlonbekend" in by_surface
+        assert "(nl" in by_surface["xyznlonbekend"].message_nl
+        assert "Гос-по-ди" not in by_surface
+    finally:
+        set_syllable_dictionary_path(None)
+        clear_syllable_dictionary_cache()
