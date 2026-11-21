@@ -45,7 +45,7 @@ def test_free_text_outside_scope_allows_slashes_and_double_slashes(tmp_path: Pat
 
     path.write_text(
         r"""::: vsa-notatie
-[:] vrije tekst // met slash \ en gewone tekst [:]
+[:] vrije tekst // met slash \\ en ge-wo-ne tekst [:]
 :::
 """,
         encoding="utf-8",

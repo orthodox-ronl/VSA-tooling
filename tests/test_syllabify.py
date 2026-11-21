@@ -2,12 +2,15 @@
 
 from pathlib import Path
 
+import pytest
+
 from vsa.cli import main
 from vsa.syllabify import (
     hyphenate_dutch_word,
     iter_vsa_files,
     normalize_output_extension,
     output_path_for,
+    pyphen_hyphenate_core,
     syllabify_plain_text,
     syllabify_vsa_source,
     unsyllabify_plain_text,
@@ -15,11 +18,19 @@ from vsa.syllabify import (
 )
 
 
+@pytest.fixture
+def tty_syllabify(monkeypatch):
+    import vsa.syllable_dict_check as sdc
+
+    monkeypatch.setattr(sdc, "is_interactive_stdin", lambda: True)
+
+
 def test_hyphenate_dutch_examples() -> None:
     assert hyphenate_dutch_word("lijden") == "lij-den"
     assert hyphenate_dutch_word("onbederfelijke") == "on-be-der-fe-lij-ke"
     assert hyphenate_dutch_word("machteloze") == "mach-te-lo-ze"
-    assert hyphenate_dutch_word("marte") == "mar-te"
+    assert hyphenate_dutch_word("marte") == "marte"
+    assert pyphen_hyphenate_core("marte") == "mar-te"
     assert hyphenate_dutch_word("Gij") == "Gij"
     assert hyphenate_dutch_word("al-len") == "al-len"
 
@@ -54,7 +65,7 @@ def test_unsyllabify_plain_text() -> None:
     assert unsyllabify_plain_text("on-be-der-fe-lij-ke") == "onbederfelijke"
 
 
-def test_scopes_and_frontmatter_untouched() -> None:
+def test_scopes_and_frontmatter_untouched(tty_syllabify) -> None:
     source = (
         "---\n"
         "identificatie:\n"
@@ -76,7 +87,7 @@ def test_scopes_and_frontmatter_untouched() -> None:
     assert result.text.startswith("---\nidentificatie:")
 
 
-def test_no_hyphen_at_scope_boundaries() -> None:
+def test_no_hyphen_at_scope_boundaries(tty_syllabify) -> None:
     """Scope-accolade = lettergreepgrens: geen soft ``-`` ernaast."""
     source = "Voorloper van de Verlosser Jo{+\\han_}{/nes_}\n"
     result = syllabify_vsa_source(source)
@@ -90,7 +101,7 @@ def test_no_hyphen_at_scope_boundaries() -> None:
     assert back.text == source
 
 
-def test_scope_claims_one_syllable_schepping() -> None:
+def test_scope_claims_one_syllable_schepping(tty_syllabify) -> None:
     """Letters herverdeeld: scope = één lettergreep, rest in platte tekst."""
     source = "{/toen} de {/sche_}pping zag\n"
     result = syllabify_vsa_source(source)
@@ -101,7 +112,7 @@ def test_scope_claims_one_syllable_schepping() -> None:
     assert "}-" not in result.text
 
 
-def test_scope_claims_one_syllable_adam() -> None:
+def test_scope_claims_one_syllable_adam(tty_syllabify) -> None:
     """Meersyllabige scope-inhoud → eerste lettergreep in scope, rest erna."""
     source = "{/Adam} juicht\n"
     result = syllabify_vsa_source(source)
@@ -111,7 +122,7 @@ def test_scope_claims_one_syllable_adam() -> None:
     assert "}-" not in result.text
 
 
-def test_scope_redistribution_keeps_trailing_punctuation() -> None:
+def test_scope_redistribution_keeps_trailing_punctuation(tty_syllabify) -> None:
     """Leestekens rond scopes blijven staan (geen VSA-syntax)."""
     assert syllabify_vsa_source("{/Adam},\n").text == "{/A}dam,\n"
     assert (
@@ -216,7 +227,7 @@ def test_cli_in_place(tmp_path: Path, capsys) -> None:
     assert path.read_text(encoding="utf-8") == "lij-den\n"
     out = capsys.readouterr()
     assert "lettergreepstreepje" in out.out
-    assert str(path) in out.out
+    assert path.as_posix() in out.out
 
 
 def test_cli_extension_writes_sibling(tmp_path: Path) -> None:
@@ -257,6 +268,22 @@ def test_cli_unsyllabify_in_place(tmp_path: Path) -> None:
     path.write_text("eeu-wig a-pos-tel-{la_}\n", encoding="utf-8")
     assert main(["syllabify", str(path), "--unsyllabify", "--in-place"]) == 0
     assert path.read_text(encoding="utf-8") == "eeuwig apostel{la_}\n"
+
+
+def test_syllabify_leaves_unknown_word_without_tty(monkeypatch) -> None:
+    import vsa.syllable_dict_check as sdc
+
+    monkeypatch.setattr(sdc, "is_interactive_stdin", lambda: False)
+    result = syllabify_vsa_source("xyzonbekendwoord\n")
+    assert result.text == "xyzonbekendwoord\n"
+    assert not result.changed
+
+
+def test_plus_forms_stay_and_wrong_form_is_corrected() -> None:
+    """Plusteken-vormen blijven; een foute vorm wordt de canonieke lijstvorm."""
+    source = "al-le-lu-i-a mij-nen-twil or-tho-do-xe eeuwi-ge\n"
+    result = syllabify_vsa_source(source)
+    assert result.text == "al-le-lu-i-a mij-nen-twil or-tho-do-xe eeu-wi-ge\n"
 
 
 def test_cli_rejects_in_place_with_extension(tmp_path: Path, capsys) -> None:

@@ -10,7 +10,12 @@ from .monosyllable_exceptions import (
     EXCEPTIONS_RELATIVE_PATH,
     is_monosyllable_exception,
 )
-from .syllabify import HARD_HYPHEN, dutch_hyphen_positions, hyphenate_dutch_word
+from .syllabify import (
+    HARD_HYPHEN,
+    dutch_hyphen_positions,
+    hyphenate_dutch_word,
+    pyphen_hyphenate_core,
+)
 
 CODE = "VSA-SYLLABIFY-MISSING-HYPHENS"
 DOC_URL = "docs/formats/syllabificatie.md"
@@ -39,10 +44,12 @@ def find_missing_syllable_hyphens(
     """Zoek platte TextNode-tokens die Pyphen zou splitsen maar geen soft ``-`` hebben."""
     findings: list[MissingHyphenFinding] = []
     seen: set[tuple[int, int, str]] = set()
+    from .syllable_dict_check import _filtered_lyrics_text
+
     for node in getattr(document, "nodes", []):
         if not isinstance(node, TextNode):
             continue
-        text = node.text or ""
+        text = _filtered_lyrics_text(node.text or "").strip()
         if not text:
             continue
         base = getattr(node, "start", None)
@@ -58,7 +65,7 @@ def find_missing_syllable_hyphens(
                 # Dictionary-afwijkingen gaan via syllable_dict_check.
                 if canonical_syllable_form(core) is not None:
                     continue
-                suggestion = hyphenate_dutch_word(core)
+                suggestion = pyphen_hyphenate_core(core)
                 if suggestion == core or "-" not in suggestion:
                     continue
                 line, column = _line_column(source_text, base, abs_offset)

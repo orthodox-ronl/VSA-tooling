@@ -47,7 +47,7 @@ def test_mscz_mxl_writes_and_merges_meta(tmp_path: Path) -> None:
         "vsa.musicxml_playback_normalize.export_mscz_to_playback_mxl",
         side_effect=_fake_mxl,
     ):
-        assert mscz_main(["mxl", str(bron)]) == 0
+        assert mscz_main(["mxl", str(bron), "--allow-noncanonical"]) == 0
     meta_path = meta_path_for(bron)
     assert meta_path.is_file()
     data = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -56,7 +56,7 @@ def test_mscz_mxl_writes_and_merges_meta(tmp_path: Path) -> None:
     assert data["products"]["mxl"]["sha256"] == sha256_file(tmp_path / "lied.mscz.mxl")
 
     with patch("vsa.mvsa_mscz.export_mscz_to_pdf", side_effect=_fake_pdf):
-        assert mscz_main(["pdf", str(bron)]) == 0
+        assert mscz_main(["pdf", str(bron), "--allow-noncanonical"]) == 0
     data = json.loads(meta_path.read_text(encoding="utf-8"))
     assert set(data["products"]) == {"mxl", "pdf"}
     assert data["products"]["mxl"]["sha256"] == sha256_file(tmp_path / "lied.mscz.mxl")
@@ -68,14 +68,14 @@ def test_mscz_svg_meta_single_tall_not_bladreeks(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
     with patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_svg):
-        assert mscz_main(["svg", str(bron)]) == 0
+        assert mscz_main(["svg", str(bron), "--allow-noncanonical"]) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert set(data["products"]) == {"svg"}
     assert data["products"]["svg"]["file"] == "lied.mscz.svg"
 
     # Ook als de exporter per ongeluk meerdere pagina's teruggeeft: meta = één svg.
     with patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_bladreeks):
-        assert mscz_main(["svg", str(bron)]) == 0
+        assert mscz_main(["svg", str(bron), "--allow-noncanonical"]) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert set(data["products"]) == {"svg"}
     assert not any(k.startswith("svg-") for k in data["products"])
@@ -89,6 +89,8 @@ def test_mscz_pdf_skips_meta_when_not_sibling(tmp_path: Path, capsys) -> None:
     elsewhere = tmp_path / "out" / "x.pdf"
     elsewhere.parent.mkdir()
     with patch("vsa.mvsa_mscz.export_mscz_to_pdf", side_effect=_fake_pdf):
-        assert mscz_main(["pdf", str(bron), "-o", str(elsewhere)]) == 0
+        assert mscz_main(
+            ["pdf", str(bron), "-o", str(elsewhere), "--allow-noncanonical"]
+        ) == 0
     assert not meta_path_for(bron).exists()
     assert "products-meta key 'pdf' overgeslagen" in capsys.readouterr().err

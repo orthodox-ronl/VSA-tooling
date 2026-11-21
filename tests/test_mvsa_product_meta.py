@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+from tests.mvsa_minimal import MINIMAL_CANONICAL_MVSA
 from vsa.cli_mvsa import main as mvsa_main
 from vsa.products_meta import meta_path_for, sha256_file
 
@@ -41,10 +42,10 @@ def _fake_pdf(_src: Path, dest: Path, **_kwargs: object) -> Path:
 
 def test_mvsa_subs_merge_meta_keys(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mvsa"
-    bron.write_text("title: t\n---\nL  | a\nS  | a\n", encoding="utf-8")
+    bron.write_text(MINIMAL_CANONICAL_MVSA, encoding="utf-8")
 
     with patch("vsa.mvsa_musicxml.export_mvsa_path", side_effect=_fake_mxl):
-        assert mvsa_main(["mxl", str(bron)]) == 0
+        assert mvsa_main(["mxl", str(bron), "--allow-noncanonical"]) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert set(data["products"]) == {"mxl"}
     assert data["products"]["mxl"]["sha256"] == sha256_file(tmp_path / "lied.mvsa.mxl")

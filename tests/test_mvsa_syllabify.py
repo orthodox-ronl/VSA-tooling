@@ -596,7 +596,7 @@ def test_cli_verbose_prints_per_file(tmp_path: Path, capsys) -> None:
         ["syllabify", str(path), "--in-place", "--verbose", "--no-align"]
     ) == 0
     out = capsys.readouterr()
-    assert str(path) in out.out
+    assert path.as_posix() in out.out
     assert "lettergreepstreepje" in out.out or "toegevoegd" in out.out
 
 

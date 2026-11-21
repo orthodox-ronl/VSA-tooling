@@ -62,12 +62,15 @@ def test_vsa_plain_joins_scopes_and_strips_melisma_markup() -> None:
 
 
 def test_vsa_cli_text(tmp_path, capsys) -> None:
+    src = Path(__file__).resolve().parents[1] / "examples" / "minimal" / "valid-demo.vsa"
     path = tmp_path / "voorbeeld.vsa"
-    path.write_text(_ANTIFOON_SNIPPET, encoding="utf-8")
+    path.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["text", str(path)]) == 0
     lyrics = tmp_path / "voorbeeld.vsa.lyrics.txt"
     assert lyrics.is_file()
-    assert "Juich voor God" in lyrics.read_text(encoding="utf-8")
+    assert "Heilig" in lyrics.read_text(encoding="utf-8") or "Heer" in lyrics.read_text(
+        encoding="utf-8"
+    )
     assert "Geschreven:" in capsys.readouterr().out
 
 

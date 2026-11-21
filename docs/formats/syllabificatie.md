@@ -58,8 +58,8 @@ van dat token.
    (inclusief `zoektekst`), `@`-directives, S/A/T/B, en commentaar
    (`#`-regels én HTML-comments `<!-- … -->`). Alleen soft `-` in L-zingtekst
    wijzigt. Voorbeelden:
-   [`syllabificatie-structural-marks.mvsa`](../../examples/mvsa/syllabificatie-structural-marks.mvsa),
-   [`syllabificatie-marks-hemelum.mvsa`](../../examples/mvsa/syllabificatie-marks-hemelum.mvsa).
+   [`syllabificatie-structural-marks.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/development/examples/mvsa/syllabificatie-structural-marks.mvsa),
+   [`syllabificatie-marks-hemelum.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/development/examples/mvsa/syllabificatie-marks-hemelum.mvsa).
 3. Scopes blijven de structurele zangposities: één lettergreep per scope.
    Soft `-` naast `{`/`}` hoort niet in de bron. Tooling mag letters tussen
    scope en platte tekst herverdelen (`{/A}dam`), maar zet geen soft `-`
@@ -68,7 +68,7 @@ van dat token.
 ### Voorbeeld `.mvsa` (recite + cadens)
 
 Klein demo-bestand met meerdere recite-runs
-[`examples/mvsa/syllabificatie-recite-mini.mvsa`](../../examples/mvsa/syllabificatie-recite-mini.mvsa):
+[`examples/mvsa/syllabificatie-recite-mini.mvsa`](https://github.com/orthodox-ronl/VSA-tooling/blob/development/examples/mvsa/syllabificatie-recite-mini.mvsa):
 
 | L-fragment                      | Betekenis                                                           |
 | ------------------------------- | ------------------------------------------------------------------- |

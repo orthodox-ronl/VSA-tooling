@@ -8,12 +8,13 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .ast import ControlTokenNode, Document, ScopeNode, TextNode
+from .ast import ControlTokenNode, Document, PitchMarkerNode, ScopeNode, TextNode
 from .monosyllable_exceptions import is_monosyllable_exception
 from .syllabify import (
     HARD_HYPHEN,
     dutch_hyphen_positions,
     hyphenate_dutch_word,
+    strip_soft_hyphens,
 )
 from .syllable_dictionary import (
     LYRICS_LANGS,
@@ -140,6 +141,13 @@ def bare_sung_text(document: Document) -> str:
     """
     chunks: list[str] = []
     prev_lyric: str | None = None
+    prev_kind: type | None = None
+
+    def _word_break() -> None:
+        nonlocal prev_lyric
+        prev_lyric = None
+        if chunks and chunks[-1] not in (" ", "-"):
+            chunks.append(" ")
 
     def _emit_lyric(piece: str) -> None:
         nonlocal prev_lyric
@@ -160,13 +168,91 @@ def bare_sung_text(document: Document) -> str:
 
     for node in getattr(document, "nodes", []):
         if isinstance(node, TextNode):
-            _emit_lyric(node.text or "")
+            raw_text = node.text or ""
+            if raw_text and not raw_text.strip():
+                _word_break()
+                prev_kind = TextNode
+                continue
+            if prev_kind in (TextNode, PitchMarkerNode, ControlTokenNode):
+                _word_break()
+            piece = _filtered_lyrics_text(raw_text)
+            if not piece or not piece.strip():
+                if piece and piece.isspace():
+                    _word_break()
+                prev_kind = TextNode
+                continue
+            for line_no, line in enumerate(piece.splitlines()):
+                stripped = line.strip()
+                if not stripped:
+                    prev_lyric = None
+                    continue
+                if line_no > 0:
+                    _word_break()
+                if line != line.lstrip():
+                    # Spatie vóór lyrics in de bron = woordgrens (niet zing-deling).
+                    _word_break()
+                if _is_non_lyric_report_line(stripped):
+                    prev_lyric = None
+                    continue
+                _emit_lyric(stripped)
+                if line != line.rstrip():
+                    # Trailing spatie in de bron: woordgrens vóór evt. volgende scope.
+                    _word_break()
+            prev_kind = TextNode
         elif isinstance(node, ScopeNode):
             _emit_lyric(node.text or "")
-        elif isinstance(node, ControlTokenNode):
+            prev_kind = ScopeNode
+        elif isinstance(node, (ControlTokenNode, PitchMarkerNode)):
             chunks.append(" ")
             prev_lyric = None
+            prev_kind = type(node)
     return "".join(chunks)
+
+
+def _lyric_lines_from_text_node(text: str) -> list[str]:
+    """Regels uit een ``TextNode`` die lyrics mogen zijn (geen ``@`` / ``#`` / FM)."""
+    if not text:
+        return []
+    lines: list[str] = []
+    for raw in text.splitlines():
+        stripped = raw.lstrip()
+        if _is_non_lyric_report_line(stripped):
+            continue
+        if stripped:
+            lines.append(raw.strip())
+    return lines
+
+
+def _filtered_lyrics_text(text: str) -> str:
+    """``TextNode``-inhoud zonder ``@`` / ``#`` / commentaarregels; structuur behouden."""
+    if not text:
+        return ""
+    kept = []
+    for raw in text.splitlines(keepends=True):
+        line = raw.splitlines()[0] if raw else ""
+        ending = raw[len(line) :]
+        if _is_non_lyric_report_line(line.lstrip()):
+            continue
+        kept.append(line + ending)
+    return "".join(kept)
+
+
+def _is_non_lyrics_word_core(core: str) -> bool:
+    """Of *core* geen zingwoord is (directive/pad), alleen voor dictionary/syllabify."""
+    lemma = syllable_lemma(core)
+    if not lemma:
+        return True
+    if lemma == "includevsa" or lemma.startswith("includevsa"):
+        return True
+    raw = strip_soft_hyphens(core).replace(HARD_HYPHEN, "")
+    if "/" in raw or "/" in lemma:
+        return True
+    if "=" in raw and any(
+        part.startswith(("lokaal", "id", "zoek", "catalogus"))
+        for part in raw.split("=", 1)[:1]
+    ):
+        return True
+    return False
 
 
 def iter_body_word_cores(bare: str) -> list[str]:
@@ -183,6 +269,11 @@ def iter_body_word_cores(bare: str) -> list[str]:
             continue
         core = _strip_lyric_markup(m.group(2))
         if not core or not any(ch.isalpha() for ch in core):
+            continue
+        alpha = _alpha_core(core)
+        if len(alpha) <= 1:
+            continue
+        if _is_non_lyrics_word_core(core):
             continue
         cores.append(core)
     return cores
@@ -486,7 +577,9 @@ def _dictionary_findings_for_lang_cores(
         elif "-" not in core and HARD_HYPHEN not in core:
             if not dutch_hyphen_positions(_alpha_core(core)):
                 continue
-            suggestion = hyphenate_dutch_word(_alpha_core(core))
+            from .syllabify import pyphen_hyphenate_core
+
+            suggestion = pyphen_hyphenate_core(_alpha_core(core))
         else:
             suggestion = surface_norm
 
@@ -1913,6 +2006,10 @@ def _is_non_lyric_report_line(stripped: str) -> bool:
         return True
     if stripped.startswith("@"):
         return True
+    if stripped.endswith(":") and "{" not in stripped and "@" not in stripped:
+        head = stripped[:-1].strip()
+        if head and " " not in head:
+            return True
     return False
 
 
