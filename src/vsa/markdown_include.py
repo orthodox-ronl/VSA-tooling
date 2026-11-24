@@ -18,6 +18,7 @@ from .markdown_coria import (
     parse_coria_label,
     parse_coria_mode,
 )
+from .catalogus_bridge import is_logical_reference, resolve_logical_vsa_path
 from .svg_display import (
     DEFAULT_RELATIVE_SIZE,
     notation_style_attr,
@@ -25,17 +26,6 @@ from .svg_display import (
     vsa_shortcode,
 )
 from .yaml_frontmatter import frontmatter_to_block_metadata, parse_vsa_frontmatter
-
-try:
-    from .catalogus_bridge import (
-        discover_bron_root,
-        resolve_logical_vsa_path,
-    )
-    from catalogus.include_ref import is_logical_reference
-except ImportError:  # pragma: no cover - catalogus niet geïnstalleerd
-    is_logical_reference = None  # type: ignore[assignment]
-    discover_bron_root = None  # type: ignore[assignment]
-    resolve_logical_vsa_path = None  # type: ignore[assignment]
 
 EXPORT_TYPES = frozenset({"svg", "coria", "mxl"})
 
@@ -73,7 +63,6 @@ def resolve_includes(
     svg_assets_dir: Path | None = None,
     svg_assets_url_prefix: str = "/vsa",
     content_root: Path | None = None,
-    bron_root: Path | None = None,
     mxl_url_prefix: str = DEFAULT_MXL_URL_PREFIX,
     native_mxl_url_prefix: str = DEFAULT_NATIVE_MXL_URL_PREFIX,
     coria_html_url_prefix: str = DEFAULT_CORIA_HTML_URL_PREFIX,
@@ -129,7 +118,6 @@ def resolve_includes(
             rel_path,
             source_path=source_path,
             content_root=content_root,
-            bron_root=bron_root,
         )
 
         if export_type is not None:
@@ -184,8 +172,7 @@ def resolve_includes(
                 svg_assets_dir=svg_assets_dir,
                 svg_assets_url_prefix=svg_assets_url_prefix,
                 content_root=content_root,
-                bron_root=bron_root,
-                mxl_url_prefix=mxl_url_prefix,
+                    mxl_url_prefix=mxl_url_prefix,
                 native_mxl_url_prefix=native_mxl_url_prefix,
                 coria_html_url_prefix=coria_html_url_prefix,
                 design_font_size=design_font_size,
@@ -313,27 +300,17 @@ def _resolve_include_path(
     *,
     source_path: Path,
     content_root: Path | None,
-    bron_root: Path | None,
 ) -> Path:
-    if is_logical_reference is not None and is_logical_reference(rel_path):
+    if is_logical_reference(rel_path):
         if content_root is None:
             raise IncludeError(
                 f"content_root is verplicht voor logische referentie {rel_path!r}"
                 f" (vanuit {source_path})"
             )
-        if resolve_logical_vsa_path is None:
-            raise IncludeError(
-                "catalogus is niet geïnstalleerd; installeer bron-repo pakket "
-                "(pip install -e vendor/bron of ../bron)"
-            )
-        effective_bron_root = bron_root
-        if effective_bron_root is None and discover_bron_root is not None:
-            effective_bron_root = discover_bron_root(content_root)
         try:
             return resolve_logical_vsa_path(
                 rel_path,
                 content_root=content_root,
-                bron_root=effective_bron_root,
             )
         except Exception as exc:
             raise IncludeError(

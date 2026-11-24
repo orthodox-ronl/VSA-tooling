@@ -38,7 +38,6 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 | Directive-nesting     | Open besluit          | `web-only` binnen `keep-together` faalt nu bewust; praktijkmateriaal wil dit soms wel.                  |
 | Commentaar in VSA     | Deels opgelost        | HTML-commentaar en comment-only regels zijn aangepakt, maar een compleet commentaarmodel is nog nuttig. |
 | VSA-blok-afbakening   | Authoring-usability   | Vergeten `::: vsa-notatie` of afsluitende `:::` moet vroeg en duidelijk worden gemeld.                  |
-| `bron:` met Coria/MXL | Beperkt               | SVG op `bron:` werkt; Coria/MXL buiten `content-root` is nog niet glad.                                 |
 | AST/source maps       | Later                 | Nodig voor betere foutposities, editor-integratie en eventueel roundtrip tooling.                       |
 | Editor-ondersteuning  | Niet aanwezig         | VS Code highlighting en foutmarkering zouden dagelijks gebruik veel prettiger maken.                    |
 
@@ -80,7 +79,6 @@ De richting is duidelijk: sjabloon of sessie met `id:`- of `lokaal:`-includes, v
 
 Te beslissen:
 
-- Hoe worden `bron:` assets voor Coria/MXL beschikbaar gemaakt?
 
 ## Nuttigste volgende stappen
 

@@ -20,13 +20,6 @@ from .svg_renderer import SVGRenderer
 from .validation_runner import validate_file
 from .markdown_processor import ProcessValidationError
 
-try:
-    from .catalogus_bridge import discover_bron_root as _discover_bron_root
-except ImportError:  # pragma: no cover - catalogus niet geïnstalleerd
-
-    def _discover_bron_root(content_root=None):  # type: ignore[misc]
-        return None
-
 
 CONTENT_ASSET_SUFFIXES = {
     ".jpg",
@@ -123,7 +116,6 @@ def build_markdown_site(
             assets_url_prefix=assets_url_prefix,
             max_line_width=max_line_width,
             output_mode=output_mode,
-            bron_root=_discover_bron_root(input_dir),
             config=config,
         )
 
@@ -160,7 +152,6 @@ def prepare_markdown_document(
     assets_url_prefix: str = "/vsa",
     max_line_width: float = 800.0,
     output_mode: str = "img",
-    bron_root: Path | None = None,
     config: VSAConfig | None = None,
 ) -> tuple[str, list[Path]]:
     """Resolve includes/directives and replace VSA-blokken with SVG references.
@@ -178,15 +169,12 @@ def prepare_markdown_document(
     relative_size = svg_cfg.relative_size
 
     source = markdown_file.read_text(encoding="utf-8")
-    if bron_root is None:
-        bron_root = _discover_bron_root(content_root)
     source = resolve_includes(
         source,
         source_path=markdown_file,
         svg_assets_dir=assets_dir,
         svg_assets_url_prefix=assets_url_prefix,
         content_root=content_root,
-        bron_root=bron_root,
         design_font_size=design_font_size,
         relative_size=relative_size,
     )

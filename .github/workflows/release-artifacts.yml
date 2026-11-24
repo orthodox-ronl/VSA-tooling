@@ -21,13 +21,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Checkout bron repository
-        uses: actions/checkout@v5
-        with:
-          repository: orthodox-ronl/bron
-          path: vendor/bron
-          ref: main
-
       - name: Setup Python
         uses: actions/setup-python@v6
         with:

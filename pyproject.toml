@@ -8,9 +8,6 @@ version = "0.2.0"
 requires-python = ">=3.14"
 dependencies = [
     "PyYAML>=6.0",
-    # Let op: PyPI heeft een ánder package "catalogus" (Breezy).
-    # Installeer altijd eerst orthodox-ronl/bron (scripts/bootstrap.cmd).
-    "catalogus>=0.1.0",
     "markdown>=3.5",
     "pyphen>=0.14",
 ]

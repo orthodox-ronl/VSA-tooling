@@ -45,7 +45,6 @@ def run_markdown_pdf_cli(
     output: Path | None,
     config_path: str | None,
     content_root: str | None,
-    bron_root: str | None,
     max_line_width: float | None,
     chrome: str | None,
 ) -> int:
@@ -75,7 +74,6 @@ def run_markdown_pdf_cli(
             input_path,
             out,
             content_root=content_root,
-            bron_root=bron_root,
             config=config,
             max_line_width=max_line_width,
             chrome_command=chrome_command,
@@ -176,7 +174,6 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     svg.add_argument("--config", default=None)
     svg.add_argument("--content-root", default=None)
-    svg.add_argument("--bron-root", default=None)
     svg.add_argument("--max-line-width", type=float, default=None)
 
     text = sub.add_parser(
@@ -220,11 +217,6 @@ def _add_pdf_args(pdf: argparse.ArgumentParser) -> None:
         default=None,
         help="Content-root voor includes (map met lokaal/).",
     )
-    pdf.add_argument(
-        "--bron-root",
-        default=None,
-        help="Bron-repo root (default: auto).",
-    )
     pdf.add_argument("--max-line-width", type=float, default=None)
     pdf.add_argument(
         "--chrome",
@@ -250,7 +242,6 @@ def _cmd_md_pdf(ns: argparse.Namespace) -> int:
             output=out,
             config_path=ns.config,
             content_root=ns.content_root,
-            bron_root=ns.bron_root,
             max_line_width=ns.max_line_width,
             chrome=ns.chrome,
         )
@@ -293,7 +284,6 @@ def _cmd_md_svg(ns: argparse.Namespace) -> int:
         )
         if root is None:
             root = path.parent
-        bron = Path(ns.bron_root) if ns.bron_root else None
         from .validation_display import format_validation_message
 
         validation = validate_file(path, config=config)
@@ -311,7 +301,6 @@ def _cmd_md_svg(ns: argparse.Namespace) -> int:
                 assets_url_prefix=assets.name,
                 max_line_width=width,
                 output_mode="img",
-                bron_root=bron,
                 config=config,
             )
         except (IncludeError, DirectiveError, ProcessValidationError) as exc:
