@@ -47,6 +47,7 @@ tekortschiet — eerst YAML proberen (T7).
 | Situatie                                                              | Gedrag                                                                             |
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | CLI `--template ID`                                                   | Die id/alias wint altijd.                                                          |
+| `template:` in de `.vsa`-frontmatter                                  | Die id/alias wordt gebruikt (na CLI `--template`, vóór automatische selectie).     |
 | `formule:` = bestaande library-id/alias                               | Die gebruiken (geen kandidatenlijst).                                              |
 | `formule:` = genre (`stichier`, …) of anders `soort` + `toon`         | Kandidaten `{formule\|soort}-toon-{n}-…`.                                          |
 | Geen enkele passende formule                                          | **Harde fout** — geen stille Hemelum-/Groningen-default.                           |

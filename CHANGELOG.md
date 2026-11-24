@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fix (vsa mvsa):** `template:` in de frontmatter van de `.vsa` wordt gebruikt (CLI `--template` wint nog steeds). Voorheen gaf `soort`+`toon` met meerdere formules (bijv. tropaar toon 4: groningen/hemelum) `TEMPLATE-SELECT-AMBIGUOUS`, ook als de .vsa de template al noemde.
 - **Fix (mvsa validate):** een maatstreep gevolgd door een Unicode-spatie (bijv. U+2006, gebruikt om Cyrillische lyrics uit te lijnen) werd als eindanker gelezen (`MVSA-BAR-ANKER`); nu geldt elke witruimte als spatie.
 - **Fix (mvsa):** `heer -(lijkt …)` (streepje vóór het haakje) werd stil genegeerd; het telt nu als `heer (-lijkt …)`: de recite zet het woord voort (`ver-heer-lijkt`). Gevolg: ook in MusicXML/MuseScore loopt het woord door.
 - **Fix:** de interactieve vraag bij een onbekend woord noemde de láátst gecontroleerde lijst (bijv. `syllable_dictionary.ksl.txt` bij het Latijnse `Ky-ri-e`). De vraag noemt nu de lijst die bij het schrift van het woord hoort; het toevoegen zelf schreef al naar de juiste lijst.

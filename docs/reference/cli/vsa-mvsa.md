@@ -16,7 +16,7 @@ vsa mvsa --list-templates
 | Onderdeel          | Betekenis                                                                                          |
 | ------------------ | -------------------------------------------------------------------------------------------------- |
 | `bestand.vsa`      | Bron: melodie + tekst + frasen; frontmatter met **`soort`** en **`toon`** (T1); optioneel **`formule`** als de melodieformule ≠ `soort` |
-| `--template`       | Library-id of alias; zonder vlag: `formule`+`toon` of `soort`+`toon` (T1); ontbrekend/ambigu → fout |
+| `--template`       | Library-id of alias; zonder vlag: `template:` uit de .vsa-frontmatter, anders `formule`+`toon` of `soort`+`toon` (T1); ontbrekend/ambigu → fout |
 | `-o OUT`           | Uitvoerpad; default sibling `<stam>.vsa.mvsa` (naamgeving stem.brontype.doeltype); bij hergeneratie telt bestaande MVSA-`template` |
 | `--melody`         | Melodiestem (T2); default `S`                                                                      |
 | `--tempo`          | BPM in de MVSA; default **180** (tropaar/kondak); VSA-frontmatter negeert de converter             |
