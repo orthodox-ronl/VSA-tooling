@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from vsa.syllable_dictionary import (
     apply_syllable_dictionary_from_config,
     clear_syllable_dictionary_cache,
@@ -153,13 +155,22 @@ def test_detect_and_ensure_auto(tmp_path: Path) -> None:
     clear_syllable_dictionary_cache()
 
 
-def test_auto_mixed_script_uses_per_word_dictionary(tmp_path: Path) -> None:
+def test_auto_mixed_script_uses_per_word_dictionary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     from vsa.syllable_dict_check import CODE_UNKNOWN, find_dictionary_syllable_issues_from_cores
 
-    ksl = tmp_path / "syllable_dictionary.ksl.txt"
+    # ``auto`` zoekt zelf in ``<cwd>/data/``; wijs dus cwd naar de tmp-lijsten
+    # en laat een globale env-variabele (CI) ze niet overschrijven.
+    data = tmp_path / "data"
+    data.mkdir()
+    ksl = data / "syllable_dictionary.ksl.txt"
     ksl.write_text("гос-по-ди\n", encoding="utf-8")
-    nl = tmp_path / "syllable_dictionary.nl.txt"
+    nl = data / "syllable_dictionary.nl.txt"
     nl.write_text("a-men\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("VSA_SYLLABLE_DICTIONARY", raising=False)
+    monkeypatch.delenv("VSA_SYLLABLE_DICTIONARY_KSL", raising=False)
     apply_syllable_dictionary_from_config(lang="auto")
     clear_syllable_dictionary_cache()
     try:

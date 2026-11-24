@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from vsa.cli_md import main as md_main
@@ -68,7 +70,12 @@ def test_mvsa_validate_alias_works():
 
 
 def test_mvsa_validate_success_prints_single_ok(capsys):
-    assert mvsa_main(["validate", "examples/mvsa/alleluia-toon-8.mvsa"]) == 0
+    # Vast woordenboek-pad: de CLI leest anders ``vsa.toml`` (sibling
+    # bibliotheek), waardoor de uitkomst van die externe lijst afhangt.
+    fixture = Path(__file__).resolve().parent / "fixtures" / "syllable_dictionary.nl.txt"
+    assert mvsa_main(
+        ["validate", "examples/mvsa/alleluia-toon-8.mvsa", "--syllable-dictionary", str(fixture)]
+    ) == 0
     out = capsys.readouterr().out.strip()
     assert out == "OK"
     assert ": OK" not in out
