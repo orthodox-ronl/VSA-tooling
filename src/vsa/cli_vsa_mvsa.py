@@ -143,6 +143,7 @@ def run_vsa_mvsa(args: argparse.Namespace) -> int:
 
     assert result.output_path is not None
     print(f"Geschreven: {path_label(result.output_path)}")
+    invalid = _validate_output(result, source=args.path)
     print(
         f"template: {result.resolved.canonical_id}"
         + (
@@ -158,4 +159,40 @@ def run_vsa_mvsa(args: argparse.Namespace) -> int:
             print(f"  - {w}")
         if len(result.warnings) > 8:
             print(f"  … +{len(result.warnings) - 8} meer")
-    return 0
+    return 1 if invalid else 0
+
+
+def _validate_output(result, *, source) -> bool:
+    """Valideer de zojuist geschreven MVSA; meld errors. ``True`` = ongeldig.
+
+    Een conversie die een ongeldige MVSA oplevert is een fout in de conversie
+    (of in de bron), en moet hier al zichtbaar zijn, niet pas bij een latere
+    stap. Het bestand blijft staan zodat je het kunt bekijken.
+    """
+    from .cli_messages import emit_cli_error, path_label
+    from .mvsa_validate import validate_mvsa_text
+
+    errors = [
+        d
+        for d in validate_mvsa_text(result.text, path=result.output_path)
+        if d.severity == "error"
+    ]
+    if not errors:
+        return False
+    for d in errors:
+        emit_cli_error(
+            f"{d.code}: {d.message}",
+            path=result.output_path,
+            line=d.line,
+            column=d.column,
+        )
+    emit_cli_error(
+        f"De gegenereerde MVSA is ongeldig ({len(errors)} fout(en)).",
+        path=source,
+        hint=(
+            "Dit is meestal een fout in de conversie vsa→mvsa; het bestand "
+            f"{path_label(result.output_path)} is wel geschreven, zodat je het "
+            "kunt bekijken. Controleer ook de bron."
+        ),
+    )
+    return True
