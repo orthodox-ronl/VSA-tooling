@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-24 09:49 CET.
+   — branch <code>stap-4-id-op-bibliotheek</code>
+  , gebouwd 2026-11-24 09:54 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4214,34 +4214,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/cli/resolve-catalogus/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    vsa resolve-catalogus — zoek=-includes oplossen naar catalogus-paden
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../reference/cli/syllabify/" class="md-nav__link">
         
   
@@ -5524,16 +5496,14 @@ Zie <a href="../syntax/">syntax</a> en <a href="../semantics/">semantics</a>.</p
 <hr />
 <h2 id="bron-docsspecinclude-vsamd">Bron: <code>docs/spec/include-vsa.md</code><a class="headerlink" href="#bron-docsspecinclude-vsamd" title="Permanent link">&para;</a></h2>
 <h1 id="include-vsa-vsa-inline-includes"><code>@include-vsa</code> — VSA inline includes<a class="headerlink" href="#include-vsa-vsa-inline-includes" title="Permanent link">&para;</a></h1>
-<p>Status: <strong>geïmplementeerd</strong> (<code>id=</code> / <code>lokaal=</code> / <strong><code>zoek=</code></strong>).</p>
-<p>Normatief zoek-contract (bron): <a href="https://github.com/orthodox-ronl/bron/blob/main/docs/specs/catalogus-zoek-api.md">catalogus-zoek-api.md</a>.</p>
+<p>Status: <strong>geïmplementeerd</strong> (<code>id=</code> / <code>lokaal=</code>). <code>zoek=</code> is <strong>verwijderd</strong> (zie hieronder).</p>
 <hr />
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <p>In <a class="og-termref" href="/bron/terms/vsa-notatie" title="VSA-notatie: Het tekstgebaseerde notatieformaat waarmee liturgische zangteksten worden vastgelegd: een formeel gespecificeerde taal met scopes, modifiers en bracket-directives, parseeerbaar en valideerbaar door Vsa-tooling.">VSA-notatie</a> (één regel):</p>
-<div class="highlight"><pre><span></span><code>refrein: @include-vsa zoek="Troparion"
-refrein: @include-vsa id=troparion-geboorte-moeder-gods/troparion-geboorte-moeder-gods/liturgikon
+<div class="highlight"><pre><span></span><code>refrein: @include-vsa id=troparion-geboorte-moeder-gods/troparion-geboorte-moeder-gods/liturgikon
 refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 </code></pre></div>
-<p>Parameters <strong><code>zoek=</code></strong>, <strong><code>id=</code></strong>, <strong><code>lokaal=</code></strong> — wederzijds exclusief; geen pad.</p>
+<p>Parameters <strong><code>id=</code></strong> en <strong><code>lokaal=</code></strong> — wederzijds exclusief; geen pad. <code>@include-vsa zoek=</code> wordt niet meer ondersteund en geeft een foutmelding.</p>
 <p>Alleen de substring <code>@include-vsa …</code> wordt vervangen; <code>refrein:</code> blijft staan.</p>
 <hr />
 <h2 id="resolve">Resolve<a class="headerlink" href="#resolve" title="Permanent link">&para;</a></h2>
@@ -5552,10 +5522,6 @@ refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 <tr>
 <td><code>lokaal=</code></td>
 <td><code>catalogus</code> — parochie <code>lokaal/</code></td>
-</tr>
-<tr>
-<td><code>zoek=</code></td>
-<td><code>catalogus.zoek</code> (+ <code>ZoekContext</code> uit ouder-<code>.vsa</code> <code>default:</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -5576,26 +5542,12 @@ refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 <td>Meerdere matches</td>
 <td><strong>Fout</strong> (<code>AmbiguousError</code>)</td>
 </tr>
-<tr>
-<td>Eén match + <code>ook_gevonden_in_bron</code></td>
-<td><strong>Waarschuwing</strong> (build mag doorgaan)</td>
-</tr>
 </tbody>
 </table>
-<p>Bij ambiguïteit:</p>
-<ol>
-<li><a href="https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek"><code>catalogus zoek --lijst</code></a> met dezelfde context.</li>
-<li>Verfijn <code>zoek=</code> of <code>default.*</code> in ouder-<code>.vsa</code>.</li>
-<li>Of schakel over naar <strong><code>@include-vsa lokaal=…</code></strong> / <strong><code>id=…</code></strong> na review.</li>
-</ol>
 <hr />
-<h2 id="context-default">Context (<code>default.*</code>)<a class="headerlink" href="#context-default" title="Permanent link">&para;</a></h2>
-<p><code>default.*</code> in <strong>dezelfde</strong> frontmatter als <code>@include-vsa</code>. Conventie:</p>
-<ul>
-<li><strong><code>zoek=</code></strong> in sjablonen/sessies: liturgische rol in de zoekstring; feest in <code>default.gelegenheid</code>.</li>
-<li><strong><code>@include-vsa zoek=</code></strong> in <code>.vsa</code>: context uit <strong>ouder</strong>-<code>.vsa</code> frontmatter.</li>
-</ul>
-<p>Zie <a href="https://github.com/orthodox-ronl/bron/blob/main/docs/specs/catalogus-zoek-api.md">catalogus-zoek-api — twee contextlagen</a>.</p>
+<h2 id="verwijderd-zoek">Verwijderd: <code>zoek=</code><a class="headerlink" href="#verwijderd-zoek" title="Permanent link">&para;</a></h2>
+<p><code>@include-vsa zoek="…"</code> is verwijderd. Wie het gebruikt, krijgt de foutmelding
+«@include-vsa zoek= wordt niet meer ondersteund». Gebruik <code>id=</code> of <code>lokaal=</code>.</p>
 <hr />
 <h2 id="implementatiestatus">Implementatiestatus<a class="headerlink" href="#implementatiestatus" title="Permanent link">&para;</a></h2>
 <table>
@@ -5616,7 +5568,7 @@ refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 </tr>
 <tr>
 <td><code>@include-vsa zoek=</code></td>
-<td><strong>Geïmplementeerd</strong></td>
+<td><strong>Verwijderd</strong></td>
 </tr>
 <tr>
 <td>Integratie validate / svg / musicxml / build-markdown</td>
@@ -5694,12 +5646,10 @@ een logische referentie via <strong>catalogus</strong> (fase 3):</p>
 <pre><code>:::include svg id:zangstuk-id/variant-id/uitvoeringsvorm-id [parameters]:::
 :::include svg lokaal:…:::
 :::include svg bron:zangstuk-id/source-id:::
-:::include svg zoek="Troparion" [parameters]:::
 </code></pre>
-<p><strong>Fase 4 — catalogus-zoek:</strong> <code>zoek="…"</code> in sjablonen/sessies; <a href="../../reference/cli/resolve-catalogus/"><code>vsa resolve-catalogus</code></a>
-vervangt vóór build door <code>bron:…</code> / <code>lokaal:…</code>. Open <code>zoek=</code> in build → <strong>fout</strong>.
-Zie <a href="https://orthodox-ronl.github.io/bron/specs/catalogus-samenstelling-zangstuk/">catalogus-samenstelling-zangstuk</a>
-en <a href="../../guides/parochie-lokaal-vsa/">parochie-lokaal-vsa.md</a>.</p>
+<p><strong>Fase 4 (verwijderd) — catalogus-zoek:</strong> <code>zoek="…"</code> in <code>:::include</code> en de opdracht
+<code>vsa resolve-catalogus</code> bestaan niet meer. <code>:::include … zoek="…"</code> geeft een foutmelding;
+verwijs met een pad of met <code>id:…</code> / <code>lokaal:…</code>. Zie <a href="../../guides/parochie-lokaal-vsa/">parochie-lokaal-vsa.md</a>.</p>
 <p>Segmenten mogen <a class="og-termref" href="/bron/terms/alias" title="Alias: Een voor mensen leesbare naam of werknaam voor een entiteit (Zangstuk, Variant, Uitvoeringsvorm of Representatie), die op de invoergrens mag worden gebruikt en door een resolver wordt omgezet naar het Canonieke Id in opslag.">aliassen</a> zijn (<code>Hemelum</code> → <code>hemelum</code>). Zie
 <a href="https://orthodox-ronl.github.io/bron/reference/catalogus-cli/">catalogus-cli</a>.</p>
 <p>Ondersteunde bestandstypen:</p>
@@ -5938,7 +5888,7 @@ hoofdstuk-1.md (in submap hoofdstuk-1/) :::pagebreak::: :::include "melodie.vsa"
 </tr>
 <tr>
 <td><code>:::include &lt;type&gt; zoek="…"</code></td>
-<td>Geïmplementeerd (fase 4); resolve via <a href="../../reference/cli/resolve-catalogus/"><code>vsa resolve-catalogus</code></a></td>
+<td>Verwijderd; geeft een foutmelding</td>
 </tr>
 <tr>
 <td><code>coria</code> / <code>mxl</code> op <code>bron:</code> catalogus-pad</td>
@@ -5984,7 +5934,7 @@ in bron-docs; korte samenvatting blijft in sectie 3 en 3b hierboven.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-11
+        Bijgewerkt: 2026-11-20
         
       </p>
       

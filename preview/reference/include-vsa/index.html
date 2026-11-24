@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-24 09:49 CET.
+   — branch <code>stap-4-id-op-bibliotheek</code>
+  , gebouwd 2026-11-24 09:54 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4162,34 +4162,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../cli/resolve-catalogus/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    vsa resolve-catalogus — zoek=-includes oplossen naar catalogus-paden
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../cli/syllabify/" class="md-nav__link">
         
   
@@ -4750,10 +4722,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ambiguiteit-oplossen" class="md-nav__link">
+  <a href="#verwijderd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ambiguïteit oplossen
+        Verwijderd
       
     </span>
   </a>
@@ -5489,10 +5461,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ambiguiteit-oplossen" class="md-nav__link">
+  <a href="#verwijderd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ambiguïteit oplossen
+        Verwijderd
       
     </span>
   </a>
@@ -5536,11 +5508,9 @@
 
 
 <h1 id="include-vsa-referentie"><code>@include-vsa</code> referentie<a class="headerlink" href="#include-vsa-referentie" title="Permanent link">&para;</a></h1>
-<p>Status: geïmplementeerd voor <code>id=</code>, <code>lokaal=</code> en <code>zoek=</code>.</p>
+<p>Status: geïmplementeerd voor <code>id=</code>. <code>zoek=</code>, <code>lokaal=</code> en <code>bron:</code> zijn verwijderd (zie <a href="#verwijderd">Verwijderd</a>).</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>refrein: @include-vsa zoek="Troparion"
-refrein: @include-vsa id=troparion-geboorte-moeder-gods/troparion-geboorte-moeder-gods/liturgikon
-refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
+<div class="highlight"><pre><span></span><code>refrein: @include-vsa id=troparion-geboorte-moeder-gods/obikhod/groningen
 </code></pre></div>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
@@ -5554,55 +5524,39 @@ refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 <tbody>
 <tr>
 <td><code>id=</code></td>
-<td>Catalogus; beide herkomsten</td>
-<td>Lokaal wint bij conflict</td>
-</tr>
-<tr>
-<td><code>lokaal=</code></td>
-<td>Catalogus; parochie <code>lokaal/</code></td>
-<td>Lokale bron</td>
-</tr>
-<tr>
-<td><code>zoek=</code></td>
-<td><code>catalogus.zoek</code> + <code>ZoekContext</code></td>
-<td>Context uit ouder-<code>.vsa</code></td>
+<td>Pad onder <code>content-source/catalogus/</code> (zangstuk/variant/uitvoeringsvorm)</td>
+<td>Moet precies één <code>.vsa</code> opleveren</td>
 </tr>
 </tbody>
 </table>
-<p>De parameters zijn wederzijds exclusief.</p>
 <p>Alleen de substring <code>@include-vsa ...</code> wordt vervangen; tekst ervoor blijft staan.</p>
 <h2 id="resolve-contract">Resolve-contract<a class="headerlink" href="#resolve-contract" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Uitkomst catalogus</th>
+<th>Uitkomst</th>
 <th>Gedrag bij <code>@include-vsa</code> / <code>vsa validate</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Geen match</td>
+<td>Geen <code>.vsa</code> onder de map van id</td>
 <td>Fout</td>
 </tr>
 <tr>
-<td>Meerdere matches</td>
-<td>Fout (<code>AmbiguousError</code>)</td>
-</tr>
-<tr>
-<td>Eén match + <code>ook_gevonden_in_bron</code></td>
-<td>Waarschuwing; build mag doorgaan</td>
+<td>Meer dan één <code>.vsa</code></td>
+<td>Fout (<code>id</code> is niet uniek)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="expand">Expand<a class="headerlink" href="#expand" title="Permanent link">&para;</a></h2>
 <p>De doel-<code>.vsa</code> wordt gelezen, frontmatter wordt gestript en de body wordt in-memory ingevoegd.</p>
 <p>Het brondocument wordt niet gewijzigd.</p>
-<h2 id="ambiguiteit-oplossen">Ambiguïteit oplossen<a class="headerlink" href="#ambiguiteit-oplossen" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Draai <a href="https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek"><code>catalogus zoek --lijst</code></a> met dezelfde context.</li>
-<li>Verfijn <code>zoek=</code> of <code>default.*</code> in de ouder-<code>.vsa</code>.</li>
-<li>Schakel na review over naar <code>@include-vsa lokaal=...</code> of <code>id=...</code>.</li>
-</ol>
+<h2 id="verwijderd">Verwijderd<a class="headerlink" href="#verwijderd" title="Permanent link">&para;</a></h2>
+<p><code>@include-vsa zoek="…"</code>, <code>@include-vsa lokaal=…</code> en in markdown <code>:::include bron:…</code>
+worden niet meer ondersteund en geven een foutmelding. Ook de opdracht
+<code>vsa resolve-catalogus</code> en de optie <code>--bron-root</code> bestaan niet meer.
+Verwijs in plaats daarvan met <code>id=</code> of met een bestandspad.</p>
 <h2 id="implementatiestatus">Implementatiestatus<a class="headerlink" href="#implementatiestatus" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -5621,12 +5575,8 @@ refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 <td>Geïmplementeerd</td>
 </tr>
 <tr>
-<td><code>@include-vsa lokaal=</code></td>
-<td>Geïmplementeerd</td>
-</tr>
-<tr>
-<td><code>@include-vsa zoek=</code></td>
-<td>Geïmplementeerd</td>
+<td><code>@include-vsa lokaal=</code>, <code>bron:</code>, <code>zoek=</code></td>
+<td>Verwijderd</td>
 </tr>
 <tr>
 <td>Integratie validate / svg / musicxml / build-markdown</td>
@@ -5670,7 +5620,7 @@ refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-08-19
+        Bijgewerkt: 2026-11-24
         
       </p>
       
