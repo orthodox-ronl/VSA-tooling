@@ -123,6 +123,39 @@ def hyphenate_dutch_word(word: str, *, allow_pyphen: bool | None = None) -> str:
     return f"{prefix}{pyphen_hyphenate_core(core)}{suffix}"
 
 
+def hyphenate_token_parts(token: str) -> list[str]:
+    """Lettergrepen van één lyric-token, uit de canonieke lijst (migratiestap 7).
+
+    Leestekens blijven aan de rand van het eerste/laatste deel. Alleen woorden
+    uit de lijst (of met bestaande streepjes) worden verdeeld; een onbekend
+    woord blijft heel ``[token]``: de schrijver beslist, er wordt niet geraden.
+    """
+    raw = (token or "").replace("\xa0", " ").strip()
+    if not raw:
+        return []
+    hyphenated = hyphenate_dutch_word(raw, allow_pyphen=False)
+    return hyphenated.split("-") if "-" in hyphenated.strip("-") else [raw]
+
+
+def split_syllabic(orig: str, i: int, n: int) -> str:
+    """MusicXML/MuseScore ``syllabic`` van deel *i* van *n* na het splitsen van een lyric."""
+    if n <= 1:
+        return orig or "single"
+    last = i == n - 1
+    first = i == 0
+    if orig == "begin":
+        return "begin" if first else "middle"
+    if orig == "middle":
+        return "middle"
+    if orig == "end":
+        return "end" if last else "middle"
+    if first:
+        return "begin"
+    if last:
+        return "end"
+    return "middle"
+
+
 def pyphen_hyphenate_core(core: str) -> str:
     """Pyphen ``nl_NL`` op de woordkern (voor TTY-syllabify en UNKNOWN-voorstellen)."""
     if not core or not any(ch.isalpha() for ch in core):
