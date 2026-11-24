@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import re
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -53,6 +54,22 @@ DICT_PROMPT_ABORT_RC = 2
 
 # C3/products e.d.: forceer non-interactief ongeacht TTY of import-binding.
 _force_noninteractive: bool = False
+
+@contextmanager
+def force_noninteractive() -> Iterator[None]:
+    """Zet TTY-gedrag (prompts én Pyphen-gokken) tijdelijk uit.
+
+    Stille reparaties (validate/svg) mogen alleen woorden uit de lijst aanpassen;
+    onbekende woorden beslist de schrijver.
+    """
+    global _force_noninteractive
+    previous = _force_noninteractive
+    _force_noninteractive = True
+    try:
+        yield
+    finally:
+        _force_noninteractive = previous
+
 
 # Interne actiecodes van de TTY-lezer (niet als hyphenvorm typen).
 _ACTION_SKIP = "__skip__"

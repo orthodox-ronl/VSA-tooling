@@ -129,3 +129,67 @@ def test_validate_wijzigt_onbekend_woord_in_scopes_niet(
     assert any(m.code == "VSA-SYLLABLE-DICT-UNKNOWN" for m in result.messages)
     clear_syllable_dictionary_cache()
     set_syllable_dictionary_path(None)
+
+
+class _FakeTty:
+    def isatty(self) -> bool:
+        return True
+
+    def readline(self, *args) -> str:
+        return ""
+
+    def read(self, *args) -> str:
+        return ""
+
+
+def test_validate_in_terminal_raadt_geen_onbekende_woorden(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Regressie: in een terminal (TTY) voegde de stille reparatie Pyphen-gokken toe.
+
+    Alleen woorden uit de lijst mogen stil veranderen; `onbekendwoord` blijft staan.
+    """
+    import sys
+
+    dict_file = tmp_path / "dict.txt"
+    dict_file.write_text("recht-vaar-di-ge\nleer-lin-gen\n", encoding="utf-8")
+    set_syllable_dictionary_path(dict_file)
+    clear_syllable_dictionary_cache()
+    monkeypatch.setattr(sys, "stdin", _FakeTty())
+    # Geen prompt: alleen de stille reparatie testen.
+    import vsa.syllable_dict_check as check_mod
+
+    monkeypatch.setattr(
+        check_mod,
+        "prompt_dictionary_fixes",
+        lambda *a, **k: check_mod.DictionaryPromptResult(),
+    )
+
+    vsa_path = tmp_path / "lied.vsa"
+    vsa_path.write_text(
+        "onbekendwoord vrolijkheid {\\recht}{\\vaar_}dige\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    validate_path(vsa_path)
+    text = vsa_path.read_text(encoding="utf-8")
+    assert "onbekendwoord vrolijkheid" in text
+    assert "di-ge" in text  # woord uit de lijst: wel hersteld
+
+    mvsa_path = tmp_path / "lied.mvsa"
+    mvsa_path.write_text(
+        "@title \"t\"\n@do F4\n@mode major\n@oct S=0\n\n@sectie demo\n"
+        "L: Leerlingen onbekendwoord vrolijkheid heer_ |\n"
+        "S: a4 a4 a4 a4 |\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    validate_mvsa_path(mvsa_path)
+    lyrics = next(
+        line for line in mvsa_path.read_text(encoding="utf-8").splitlines()
+        if line.startswith("L:")
+    )
+    assert "onbekendwoord vrolijkheid" in lyrics
+    assert "lin-gen" in lyrics  # woord uit de lijst: wel hersteld
+    clear_syllable_dictionary_cache()
+    set_syllable_dictionary_path(None)
