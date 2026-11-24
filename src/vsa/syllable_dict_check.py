@@ -1671,6 +1671,9 @@ def _prompt_unknown(
     if not suggestion:
         suggestion = surface_norm
 
+    # De actieve lijst is na een controle van beide talen de láátste (ksl): kies
+    # hier de lijst die bij het schrift van dit woord hoort (zoals ``set_canonical_form``).
+    activate_concrete_lyrics_lang(lyrics_lang_for_core(finding.surface))
     msg = (
         f"Onbekend woord `{finding.surface}` — niet in "
         f"{dictionary_path_label()}."

@@ -994,3 +994,38 @@ def test_regelbegin_na_scope_is_woordgrens() -> None:
     cores = iter_vsa_lyric_word_cores(document)
     assert "be-vrijd" in cores and "en" in cores, cores
     assert not any(c.startswith("be-vrijd-") for c in cores), cores
+
+
+def test_prompt_unknown_names_dictionary_of_the_words_script(monkeypatch) -> None:
+    """Latijns woord: de vraag noemt de NL-lijst, ook als ksl als laatste actief was."""
+    from io import StringIO
+
+    from vsa.syllable_dict_check import (
+        DictionaryPromptResult,
+        DictSyllableFinding,
+        _prompt_unknown,
+    )
+    from vsa.syllable_dictionary import activate_concrete_lyrics_lang
+
+    import vsa.syllable_dict_check as check_mod
+    import vsa.syllable_dictionary as dict_mod
+
+    monkeypatch.setattr(
+        check_mod, "dictionary_path_label", lambda: f"lijst:{dict_mod._active_lang}"
+    )
+    activate_concrete_lyrics_lang("ksl")
+    finding = DictSyllableFinding(
+        code=CODE_UNKNOWN,
+        surface="Ky-ri-e",
+        expected=None,
+        line=1,
+        column=1,
+        message_nl="",
+        hint_nl="",
+    )
+    out = StringIO()
+    result = DictionaryPromptResult()
+    _prompt_unknown(finding, result, stdin=_Tty("\t"), stdout=out)
+    text = out.getvalue()
+    assert "lijst:nl" in text and "lijst:ksl" not in text, text
+    clear_syllable_dictionary_cache()
