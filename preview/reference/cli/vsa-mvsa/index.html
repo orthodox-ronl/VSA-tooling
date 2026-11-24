@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-24 13:50 CET.
+   — branch <code>vsa-mvsa-valideer-uitvoer</code>
+  , gebouwd 2026-11-24 14:38 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -4345,6 +4345,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#validatie-van-de-uitvoer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validatie van de uitvoer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uitvoer-vorm-t6" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5484,6 +5495,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#validatie-van-de-uitvoer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validatie van de uitvoer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uitvoer-vorm-t6" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5607,6 +5629,12 @@ vsa mvsa --list-templates
 </tr>
 </tbody>
 </table>
+<h2 id="validatie-van-de-uitvoer">Validatie van de uitvoer<a class="headerlink" href="#validatie-van-de-uitvoer" title="Permanent link">&para;</a></h2>
+<p>Na het schrijven valideert <code>vsa mvsa</code> de gegenereerde MVSA (<code>mvsa validate</code>-regels,
+alleen <strong>errors</strong>). Is die ongeldig, dan worden de fouten met bestand, regel en
+kolom gemeld en eindigt het commando met <strong>exitcode 1</strong>. Het bestand blijft staan
+zodat je het kunt bekijken. Zo zie je een conversiefout meteen en niet pas bij een
+latere stap (mxl, svg, audio).</p>
 <h2 id="uitvoer-vorm-t6">Uitvoer-vorm (T6)<a class="headerlink" href="#uitvoer-vorm-t6" title="Permanent link">&para;</a></h2>
 <p>De schets-MVSA volgt de gekuiste klaar-vorm (geen speelplan, geen <code>@blok</code>):</p>
 <ol>
