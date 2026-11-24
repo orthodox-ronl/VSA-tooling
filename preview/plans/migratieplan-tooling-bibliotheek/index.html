@@ -16,7 +16,7 @@
         <link rel="prev" href="../vsa-polyphony-proposal/">
       
       
-        <link rel="next" href="../cursor-regels-voorstel/">
+        <link rel="next" href="../adr-001-exportketen-en-catalogus/">
       
       
         
@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-24 10:16 CET.
+   — branch <code>docs-adr-001-en-migratiematrix</code>
+  , gebouwd 2026-11-24 10:19 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5483,6 +5483,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../adr-001-exportketen-en-catalogus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 (exportketen en catalogus)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migratiematrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migratiematrix tooling ↔ bibliotheek
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cursor-regels-voorstel/" class="md-nav__link">
         
   
@@ -5874,6 +5930,8 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   bestaande mechanisme wordt vastgelegd, er komt geen nieuw ontwerp). Beslis ook de naam en
   plek van de catalogus-code in tooling (stap 4) en waar de data
   (<code>zangstukken/</code>, <code>alias-blokken.yaml</code>) blijft.</li>
+<li>Voorstel: <a href="../adr-001-exportketen-en-catalogus/">adr-001-exportketen-en-catalogus.md</a>,
+  met per vraag opties, een aanbeveling en een kolom voor het besluit.</li>
 <li>Klaar als: ADR gemerged en in de contract-index gelinkt.</li>
 </ul>
 <h3 id="4-catalogus-code-naar-tooling-bron-eruit">4. Catalogus-code naar tooling (<code>bron</code> eruit)<a class="headerlink" href="#4-catalogus-code-naar-tooling-bron-eruit" title="Permanent link">&para;</a></h3>
@@ -5930,6 +5988,11 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   (waar <code>vsa.toml</code> al naar verwijst). Test dat tooling-syllabify voor elke
   uitzondering dezelfde splitsing geeft; <code>nl_hyphen.py</code> wordt wrapper en
   daarna verwijderd.</li>
+<li>Besluiten (2026-11-20, door de eigenaar): <code>eeuwen</code> wordt <code>eeu-wen</code>, conform
+  het woordenboek in bibliotheek; de uitzondering <code>eeuw-en</code> in <code>nl_hyphen.py</code>
+  vervalt. <code>koninkrijk</code> blijft <code>ko-nink-rijk</code>. Het woordenboek wijzigt verder
+  niet, behalve dat de overige uitzonderingen die er nog niet in staan worden
+  toegevoegd (12 woorden, zie de migratiematrix).</li>
 <li>Klaar als: <code>nl_hyphen.py</code> weg is en geen consument meer eigen
   uitzonderingen bijhoudt.</li>
 </ul>
@@ -6017,7 +6080,7 @@ alleen een smoke-test die bewijst dat de tooling-API is aangeroepen.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-16
+        Bijgewerkt: 2026-11-20
         
       </p>
       
