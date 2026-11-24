@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fix (mvsa):** `heer -(lijkt …)` (streepje vóór het haakje) werd stil genegeerd; het telt nu als `heer (-lijkt …)`: de recite zet het woord voort (`ver-heer-lijkt`). Gevolg: ook in MusicXML/MuseScore loopt het woord door.
 - **Fix:** de interactieve vraag bij een onbekend woord noemde de láátst gecontroleerde lijst (bijv. `syllable_dictionary.ksl.txt` bij het Latijnse `Ky-ri-e`). De vraag noemt nu de lijst die bij het schrift van het woord hoort; het toevoegen zelf schreef al naar de juiste lijst.
 - **Nieuw:** `@taal xx` voor passages in een taal zonder woordenlijst (`@taal ro`, `@taal el`, …; 2–3 kleine letters). In `.mvsa` accepteert de bestaande sticky `@taal` nu ook zulke codes (voorheen `MVSA-TAAL`); in `.vsa` kun je `@taal xx` als regel in de tekst zetten. Woorden in zo'n taal worden niet tegen de woordenlijst gecontroleerd en niet door `syllabify` aangepast. `@taal auto` zet de herkenning op schrift (nl/ksl) weer aan. Zie `docs/formats/syllabificatie.md`.
 - **Fix:** ook een regelbegin direct na een scope is een woordgrens in de woordenlijst-controle (`be{\vrijd_}⏎en` werd het "woord" `be-vrijd-en`).
