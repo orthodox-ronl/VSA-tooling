@@ -572,12 +572,12 @@ entries:
       - "hugo-output"
     termid: "concept:hugo-output"
     vsntag: "vsa-tooling"
-  - git_date: 2026-11-20T00:00:00.000Z
+  - git_date: 2026-11-24T00:00:00.000Z
     slug: "include-vsa"
     term: "include-vsa"
     termType: "concept"
     glossaryTerm: "@include-vsa"
-    glossaryText: "een string die met `@include-vsa` begint, precies één ondersteunde resolverparameter bevat (`id=` of `lokaal=`) en tijdens verwerking door de body van het doelbestand wordt vervangen."
+    glossaryText: "een string die met `@include-vsa` begint, precies één ondersteunde resolverparameter bevat (`id=`) en tijdens verwerking door de body van het doelbestand wordt vervangen."
     glossaryAlias: "VSA-inline-include"
     formPhrases:
       - "include-vsa"
@@ -585,7 +585,7 @@ entries:
       - "vsa-inline-include"
       - "vsa-inline-includes"
     glossaryNotes:
-      - "Voorbeeld: `refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa` — alleen de `@include-vsa …`-substring wordt vervangen."
+      - "Voorbeeld: `refrein: @include-vsa id=cherubijnenhymne/kastorski/groningen` — alleen de `@include-vsa …`-substring wordt vervangen."
     scopetag: "vsa-tooling"
     locator: "include-vsa.md"
     navurl: "https://orthodox-ronl.github.io/VSA-tooling/preview/terminologie/include-vsa"
