@@ -75,6 +75,8 @@ C3/C4**, canonieke uitzonderingenlijst):
 [reference/cli/input-pad.md](../reference/cli/input-pad.md).
 Per-commando status: [cli-canoniciteit-audit](cli-canoniciteit-audit.md).
 
+**Besluiten over de exportketen en de catalogus:** [ADR-001](../plans/adr-001-exportketen-en-catalogus.md) (aangenomen).
+
 **Bekende uitzonderingen** (samenvatting; volledige lijst + defaults in
 het CLI-contract; geen stille omzeiling; noem ze in man-pages):
 

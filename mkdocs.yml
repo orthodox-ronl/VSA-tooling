@@ -237,6 +237,8 @@ nav:
     - CoriB MVP (plan): plans/corib-mvp.md
     - plans/vsa-polyphony-proposal.md
     - Migratieplan tooling ↔ bibliotheek: plans/migratieplan-tooling-bibliotheek.md
+    - ADR-001 (exportketen en catalogus): plans/adr-001-exportketen-en-catalogus.md
+    - Migratiematrix tooling ↔ bibliotheek: plans/migratiematrix.md
     - Voorstel Cursor-regels: plans/cursor-regels-voorstel.md
 
 extra_css:
