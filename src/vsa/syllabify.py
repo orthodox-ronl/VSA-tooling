@@ -510,6 +510,14 @@ def _parse_text_part(source: str) -> _ContentPart | None:
     return _ContentPart("text", source, plain, prefix=prefix, core=core, suffix=suffix)
 
 
+def _word_in_syllable_dictionary(plain: str) -> bool:
+    """True als het woord (zonder scopes) in de canonieke lettergreeplijst staat."""
+    from .syllable_dictionary import allowed_syllable_forms
+
+    core = plain.replace("=", "")
+    return bool(core) and allowed_syllable_forms(core) is not None
+
+
 def _syllabify_word_run(atoms: list[_Atom]) -> str:
     parts = _content_parts(atoms)
     if not parts:
@@ -526,6 +534,10 @@ def _syllabify_word_run(atoms: list[_Atom]) -> str:
     # Canonieke deling; herverdeel letters zodat elke scope precies één
     # lettergreep heeft. Geen soft ``-`` naast ``{``/``}``.
     form = hyphenate_dutch_word(plain)
+    if form == plain and not _word_in_syllable_dictionary(plain):
+        # Onbekend woord zonder nieuwe streepjes: niets herverdelen. Het woord
+        # staat niet in de lijst, dus de schrijver beslist (zie validate: UNKNOWN).
+        return "".join(atom.source for atom in atoms)
     cased = _transfer_letter_case(plain, form)
     syllables = [s for s in re.split(r"[-|=]+", cased) if s]
     if not syllables:
