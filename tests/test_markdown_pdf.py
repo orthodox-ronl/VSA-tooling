@@ -215,12 +215,12 @@ def test_md_text_writes_sibling(tmp_path: Path, capsys):
 
 
 def test_pdf_resolves_catalogus_id_from_nested_cwd(tmp_path: Path, monkeypatch):
-    from test_include_vsa import _write_lokaal_tree
+    from test_include_vsa import HEMELUM_ID, HEMELUM_VSA, _write_vsa
 
     content = tmp_path / "content-source"
     nested = content / "praktijk" / "samenstellingen"
     nested.mkdir(parents=True)
-    _write_lokaal_tree(content)
+    _write_vsa(content, HEMELUM_ID, "hemelum", HEMELUM_VSA)
     source = nested / "liturgie.md"
     source.write_text(
         ':::include svg id:antifoon-1-weekdagen/liturgikon-weekdagen/hemelum '

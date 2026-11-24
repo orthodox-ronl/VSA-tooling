@@ -123,7 +123,6 @@ def main() -> int:
     parser.add_argument("--pip-r", action="append", default=[])
     parser.add_argument("--pip-e", action="append", default=[])
     parser.add_argument("--import", dest="imports", action="append", default=[])
-    parser.add_argument("--catalogus", action="store_true")
     parser.add_argument("--vsa-tool", action="store_true")
     parser.add_argument("--npm-install", action="store_true")
     args, _unknown = parser.parse_known_args()
@@ -151,8 +150,6 @@ def main() -> int:
             fail(f"requirements file not found: {path}")
 
     extras = list(args.pip_e)
-    if args.catalogus:
-        extras.append("catalogus:sibling")
     if args.vsa_tool:
         extras.append("vsa-tool:sibling")
 
@@ -164,17 +161,6 @@ def main() -> int:
 
     for rel in args.pip_r:
         pip_install(["-r", str(ROOT / rel)])
-
-    # bron-catalogus vóór vsa-tool, anders pakt pip het PyPI-package "catalogus" (Breezy).
-    if args.catalogus:
-        bron = sibling_or_vendor(os.path.join("..", "bron"), os.path.join("vendor", "bron"))
-        if bron is None:
-            fail(
-                "catalogus is not installed and bron was not found",
-                "Expected ..\\bron or vendor\\bron with pyproject.toml",
-                "Clone https://github.com/orthodox-ronl/bron next to this repo.",
-            )
-        pip_install(["-e", str(bron)])
 
     for spec in args.pip_e:
         pip_install(["-e", spec])

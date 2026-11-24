@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Verwijderd (breaking):** `zoek=` in `:::include` en `@include-vsa`, en de opdracht
+  `vsa resolve-catalogus`. Een include met `zoek=` geeft nu een foutmelding; gebruik
+  `id=` / `id:` of een bestandspad. De site-zoekfunctie
+  (`*.lyrics.txt`, zoektekst) is een andere keten en blijft ongewijzigd.
+- **Gewijzigd (breaking, migratie stap 4 deel 2):** `id=` / `id:` wijst nu naar een map onder
+  `content-source/catalogus/` (zangstuk/variant/uitvoeringsvorm) en moet precies één `.vsa`
+  opleveren. `lokaal=` / `lokaal:` en `bron:` vervallen en geven een foutmelding.
+  Het pakket `catalogus` uit `bron` is geen afhankelijkheid meer; de optie `--bron-root`
+  van `markdown svg` en `markdown pdf` en de bron-checkout in CI zijn verwijderd.
 - Docs/CLI-voorbeelden: overal `mvsa …` i.p.v. `vsa mvsa …` (bron = command);
   nested `vsa mvsa` verwijderd — alleen top-level `mvsa`
 - CLI: score → `.mvsa` is `mxl mvsa` / `mscz mvsa` (conventie bron→doel); `import` verwijderd uit `mvsa`/`mxl`/`mscz`

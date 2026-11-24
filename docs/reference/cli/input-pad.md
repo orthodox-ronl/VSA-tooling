@@ -281,7 +281,6 @@ mscz-S*, svg/lyrics-C4 — geen stille «klaar»; zie audit §Samenvatting.
 | `process` | Ja | Markdown-map |
 | `build-markdown` | Ja | invoermap |
 | `pdf` | Nee* | partituur-PDF (zie man-page; batch via products-straat elders) |
-| `resolve-catalogus` | Nee | één `.md` |
 | `syllabify` | Ja | `.vsa`; C3/C4-uitz. |
 | `format` | Ja | `.vsa`; `--dry-run` |
 | `kuiser` | Ja | `.vsa` |

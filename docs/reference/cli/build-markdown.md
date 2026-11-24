@@ -22,10 +22,8 @@ bestand:
    `<img>`-tag of Hugo-shortcode die naar de bijbehorende SVG verwijst;
 2. één SVG-bestand per [VSA-blok](@) in `assets_dir`.
 
-Publishbare bestanden met open `:::include … zoek="…"` includes worden
-automatisch opgelost via dezelfde stap als
-[`vsa resolve-catalogus`](resolve-catalogus.md); voor sjablonen en sessies
-buiten de publishbare structuur draai je die stap zelf vooraf.
+Een `:::include … zoek="…"` wordt niet meer ondersteund en geeft een
+foutmelding. Verwijs met een bestandspad of met een catalogus-id (`id:…`).
 
 Vóór het renderen valideert dit commando dezelfde controles als
 [`vsa validate`](validate.md) op de gevonden [VSA-blokken](@).
@@ -184,6 +182,5 @@ Exitcode: `1`. Er wordt geen Markdown of SVG geschreven.
 ## Zie ook
 
 - [`vsa validate`](validate.md), [`vsa process`](process.md) — losse stappen die `build-markdown` combineert.
-- [`vsa resolve-catalogus`](resolve-catalogus.md) — vereiste stap vóór build bij open `zoek=`-includes op niet-publishbare paden.
 - Workflow-uitleg: [svg-export.md](../../guides/svg-export.md), [musicxml-export.md](../../guides/musicxml-export.md) (voor `:::coria`/`:::include mxl` in dezelfde build)
 - `vsa.toml`-defaults: [config.md](../config.md)

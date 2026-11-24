@@ -576,35 +576,25 @@ def test_include_coria_requires_content_root(tmp_path):
         resolve_includes(':::include coria "melodie.vsa":::\n', source)
 
 
-def test_include_bron_pdf_logical_reference(tmp_path: Path):
-    bron_root = tmp_path / "bron"
-    zangstuk_dir = bron_root / "zangstukken" / "antifoon-1-zondag"
-    scan = zangstuk_dir / "sources" / "scan" / "koormap-003.pdf"
-    scan.parent.mkdir(parents=True)
-    scan.write_bytes(b"%PDF-1.4 test")
-    (zangstuk_dir / "zangstuk.yaml").write_text(
-        "id: antifoon-1-zondag\n"
-        "title: 1e antifoon (zondag)\n"
-        "sources:\n"
-        "  - id: groningen\n"
-        "    file: sources/scan/koormap-003.pdf\n",
-        encoding="utf-8",
-    )
+def test_include_zoek_is_niet_meer_ondersteund(tmp_path: Path):
+    source = tmp_path / "pagina.md"
+    source.write_text("tekst\n", encoding="utf-8")
+    with pytest.raises(IncludeError, match="zoek= in :::include wordt niet meer ondersteund"):
+        resolve_includes(':::include svg zoek="Cherubijnenhymne":::\n', source)
+
+
+def test_include_bron_verwijzing_is_niet_meer_ondersteund(tmp_path: Path):
     content_root = tmp_path / "content-source"
     page_dir = content_root / "praktijk" / "zondagen"
     page_dir.mkdir(parents=True)
     source = page_dir / "demo.md"
-    assets = tmp_path / "static" / "vsa"
-    result = resolve_includes(
-        ':::include bron:antifoon-1-zondag/groningen alt="scan":::\n',
-        source,
-        content_root=content_root,
-        bron_root=bron_root,
-        svg_assets_dir=assets,
-    )
-    assert 'class="scan-pdf"' in result
-    assert (assets / "koormap-003.pdf").is_file()
-    assert 'src="../../../vsa/koormap-003.pdf"' in result
+    with pytest.raises(IncludeError, match="bron= wordt niet meer ondersteund"):
+        resolve_includes(
+            ':::include bron:antifoon-1-zondag/groningen alt="scan":::\n',
+            source,
+            content_root=content_root,
+            svg_assets_dir=tmp_path / "static" / "vsa",
+        )
 
 
 def test_relative_static_vsa_href_with_relative_source_path(tmp_path: Path):

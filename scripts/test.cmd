@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d %~dp0\..
-call scripts\_ensure.cmd --catalogus --vsa-tool --pip-e ".[dev,rendering]" --import vsa --import pytest --import PIL
+call scripts\_ensure.cmd --vsa-tool --pip-e ".[dev,rendering]" --import vsa --import pytest --import PIL
 if errorlevel 1 exit /b 1
 call scripts\_msg.cmd section "=== pytest ==="
 python -m pytest %*

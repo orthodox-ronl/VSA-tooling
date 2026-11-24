@@ -14,23 +14,11 @@ from .markdown_coria import (
 )
 from .markdown_directives import process_directives
 from .markdown_include import IncludeError, resolve_includes
-from .resolve_catalogus import (
-    ResolveCatalogusError,
-    has_unresolved_zoek_includes,
-    resolve_catalogus_markdown,
-)
 from .include_vsa import prepare_markdown_block_body
 from .svg_display import notation_style_attr, svg_natural_width, vsa_shortcode
 from .svg_renderer import SVGRenderer
 from .validation_runner import validate_file
 from .markdown_processor import ProcessValidationError
-
-try:
-    from .catalogus_bridge import discover_bron_root as _discover_bron_root
-except ImportError:  # pragma: no cover - catalogus niet geïnstalleerd
-
-    def _discover_bron_root(content_root=None):  # type: ignore[misc]
-        return None
 
 
 CONTENT_ASSET_SUFFIXES = {
@@ -42,7 +30,7 @@ CONTENT_ASSET_SUFFIXES = {
     ".pdf",
 }
 
-# Catalogus-sjablonen/sessies: wel valideren/resolve-catalogus, nog geen Hugo-build.
+# Catalogus-sjablonen/sessies: wel valideren, nog geen Hugo-build.
 BUILD_EXCLUDE_DIR_NAMES = frozenset({})
 
 
@@ -128,7 +116,6 @@ def build_markdown_site(
             assets_url_prefix=assets_url_prefix,
             max_line_width=max_line_width,
             output_mode=output_mode,
-            bron_root=_discover_bron_root(input_dir),
             config=config,
         )
 
@@ -165,7 +152,6 @@ def prepare_markdown_document(
     assets_url_prefix: str = "/vsa",
     max_line_width: float = 800.0,
     output_mode: str = "img",
-    bron_root: Path | None = None,
     config: VSAConfig | None = None,
 ) -> tuple[str, list[Path]]:
     """Resolve includes/directives and replace VSA-blokken with SVG references.
@@ -183,25 +169,12 @@ def prepare_markdown_document(
     relative_size = svg_cfg.relative_size
 
     source = markdown_file.read_text(encoding="utf-8")
-    if bron_root is None:
-        bron_root = _discover_bron_root(content_root)
-    if has_unresolved_zoek_includes(source):
-        try:
-            source = resolve_catalogus_markdown(
-                source,
-                source_path=markdown_file,
-                content_root=content_root,
-                bron_root=bron_root,
-            ).text
-        except ResolveCatalogusError as exc:
-            raise IncludeError(exc.message_nl) from exc
     source = resolve_includes(
         source,
         source_path=markdown_file,
         svg_assets_dir=assets_dir,
         svg_assets_url_prefix=assets_url_prefix,
         content_root=content_root,
-        bron_root=bron_root,
         design_font_size=design_font_size,
         relative_size=relative_size,
     )

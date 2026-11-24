@@ -208,7 +208,7 @@ def validate_file(path: str | Path, config: VSAConfig | None = None) -> Validati
                 message_nl=exc.message_nl,
                 line=line_base + max(exc.line, 1),
                 category="include",
-                hint_nl="Controleer @include-vsa id=, lokaal= of zoek= en catalogus-registratie.",
+                hint_nl="Controleer @include-vsa id= of lokaal= en catalogus-registratie.",
             )
             return result
         for warning in warnings:
@@ -263,7 +263,7 @@ def _validate_markdown(path: Path, text: str, result: ValidationResult,
                 message_nl=exc.message_nl,
                 line=block.start_line + exc.line - 1,
                 category="include",
-                hint_nl="Controleer @include-vsa id=, lokaal= of zoek= en catalogus-registratie.",
+                hint_nl="Controleer @include-vsa id= of lokaal= en catalogus-registratie.",
             )
             continue
         for warning in warnings:

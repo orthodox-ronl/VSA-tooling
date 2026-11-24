@@ -87,7 +87,6 @@ def write_markdown_pdf(
     output_path: str | Path,
     *,
     content_root: str | Path | None = None,
-    bron_root: str | Path | None = None,
     config: VSAConfig | None = None,
     max_line_width: float | None = None,
     chrome_command: list[str] | None = None,
@@ -116,7 +115,6 @@ def write_markdown_pdf(
     root = Path(content_root) if content_root else discover_content_root(input_path)
     if root is None:
         root = input_path.parent
-    bron = Path(bron_root) if bron_root else None
 
     validation = validate_file(input_path, config=config)
     if not validation.ok:
@@ -135,7 +133,6 @@ def write_markdown_pdf(
                 assets_url_prefix="assets",
                 max_line_width=width,
                 output_mode="img",
-                bron_root=bron,
                 config=config,
             )
         except IncludeError as exc:

@@ -13,7 +13,7 @@ Een voorbeeld-Hugo-consumer staat in
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | VSA-notatie                | VSA-bronnen valideren, parsen en renderen naar SVG of MusicXML/MXL.                                                         |
 | Markdown-build             | Markdown met `::: vsa-notatie`, `:::include`, `:::coria` en print/web-directives omzetten naar publiceerbare content.       |
-| Parochie- en bronmateriaal | Lokale en bron-zangstukken via logische verwijzingen opnemen in samenstellingen, inclusief catalogus-resolutie met `zoek=`. |
+| Parochie- en bronmateriaal | Lokale en bron-zangstukken via logische verwijzingen opnemen in samenstellingen, via `id:`- en `lokaal:`-verwijzingen.      |
 
 ## Huidige status
 
@@ -26,7 +26,6 @@ functies zijn aanwezig:
 - VSA-blokken in Markdown inspecteren: `vsa blocks`
 - Markdown verwerken naar SVG-assets: `vsa process`
 - Markdown bouwen: `vsa build-markdown`
-- Catalogusverwijzingen oplossen: `vsa resolve-catalogus`
 
 De projectrichting en actuele open punten staan in
 [docs/status-en-roadmap.md](docs/status-en-roadmap.md).
@@ -41,12 +40,12 @@ test
 serve
 ```
 
-| Commando | Doel |
-| -------- | ---- |
-| `test` | pytest |
-| `check` | CI-spiegel |
-| `serve` / `serve-tev2` | MkDocs preview |
-| `build` | TEv2 + MkDocs (CI-pariteit) |
+| Commando               | Doel                        |
+| ---------------------- | --------------------------- |
+| `test`                 | pytest                      |
+| `check`                | CI-spiegel                  |
+| `serve` / `serve-tev2` | MkDocs preview              |
+| `build`                | TEv2 + MkDocs (CI-pariteit) |
 
 ```cmd
 vsa --version
@@ -65,7 +64,7 @@ Docs: `serve`. Voorbeeldconsumer: repo VSA-demo, commando's `check` / `serve`.
 | `examples/regression/`       | Vastgelegde input/output-cases voor regressies.                              |
 | `examples/consumer-minimal/` | Minimale Markdown/VSA-fixture voor CI-smoke.                                 |
 | `docs/`                      | Gebruikersdocs, specs, plannen (MkDocs-bron).                                |
-| `scripts/`                   | Windows-commando's (`test`, `check`, `serve`, `build`). |
+| `scripts/`                   | Windows-commando's (`test`, `check`, `serve`, `build`).                      |
 
 ## Documentatie
 
@@ -73,8 +72,8 @@ Gepubliceerde docs (MkDocs Material):
 
 | Omgeving                  | URL                                                       |
 | ------------------------- | --------------------------------------------------------- |
-| Productie (`main`)        | https://orthodox-ronl.github.io/VSA-tooling/         |
-| Preview (andere branches) | https://orthodox-ronl.github.io/VSA-tooling/preview/ |
+| Productie (`main`)        | https://orthodox-ronl.github.io/VSA-tooling/              |
+| Preview (andere branches) | https://orthodox-ronl.github.io/VSA-tooling/preview/      |
 
 Lokaal:
 
