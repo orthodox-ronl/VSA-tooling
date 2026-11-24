@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Nieuw (vsa mvsa):** valideert de zojuist geschreven MVSA; bij errors worden die met bestand/regel/kolom gemeld en eindigt het commando met exitcode 1 (bestand blijft staan).
 - **Fix (vsa mvsa):** een `_` achter een recite-lettergreep in de VSA-tekst (`{/ver}hoor_`, `tot_`) kwam binnen de haakjes terecht (`(ver-hoor_)`, fout `duur-/melisma-ELM binnen recite-haakjes`). De ELM staat nu ná `)`: `(ver-hoor)_`.
 - **Fix (vsa mvsa):** `template:` in de frontmatter van de `.vsa` wordt gebruikt (CLI `--template` wint nog steeds). Voorheen gaf `soort`+`toon` met meerdere formules (bijv. tropaar toon 4: groningen/hemelum) `TEMPLATE-SELECT-AMBIGUOUS`, ook als de .vsa de template al noemde.
 - **Fix (mvsa validate):** een maatstreep gevolgd door een Unicode-spatie (bijv. U+2006, gebruikt om Cyrillische lyrics uit te lijnen) werd als eindanker gelezen (`MVSA-BAR-ANKER`); nu geldt elke witruimte als spatie.

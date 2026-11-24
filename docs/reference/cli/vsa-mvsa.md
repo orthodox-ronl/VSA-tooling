@@ -22,6 +22,14 @@ vsa mvsa --list-templates
 | `--tempo`          | BPM in de MVSA; default **180** (tropaar/kondak); VSA-frontmatter negeert de converter             |
 | `--list-templates` | Toon ids onder de library-map                                                                      |
 
+## Validatie van de uitvoer
+
+Na het schrijven valideert `vsa mvsa` de gegenereerde MVSA (`mvsa validate`-regels,
+alleen **errors**). Is die ongeldig, dan worden de fouten met bestand, regel en
+kolom gemeld en eindigt het commando met **exitcode 1**. Het bestand blijft staan
+zodat je het kunt bekijken. Zo zie je een conversiefout meteen en niet pas bij een
+latere stap (mxl, svg, audio).
+
 ## Uitvoer-vorm (T6)
 
 De schets-MVSA volgt de gekuiste klaar-vorm (geen speelplan, geen `@blok`):
