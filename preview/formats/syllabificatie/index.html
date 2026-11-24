@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-24 11:39 CET.
+   — branch <code>taal-directive-onbekende-talen</code>
+  , gebouwd 2026-11-24 12:20 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5834,6 +5834,10 @@ een regel die met <code>+</code> begint. Die lijst is de norm voor gezongen body
 <td><code>taal: nl</code> · <code>ksl</code> · of <code>[nl, ksl]</code> = welke talen in <strong>dit</strong> bestand horen; mismatch → <code>VSA-SYLLABLE-TAAL-MISMATCH</code> (warning). Geen sessie-uitschakelaar.</td>
 </tr>
 <tr>
+<td><code>@taal xx</code></td>
+<td>Taal van een passage, voor talen <strong>zonder woordenlijst</strong> (<code>ro</code>, <code>el</code>, <code>ka</code>, …): <code>@taal ro</code> op een eigen regel geldt voor alles daarna tot de volgende <code>@taal</code>; <code>@taal auto</code> = terug naar herkenning op schrift. In <code>.mvsa</code> is het de bestaande sticky <code>@taal</code> (vóór de <code>L:</code>-regel), in <code>.vsa</code> een regel in de tekst. Woorden in zo'n taal worden <strong>niet gecontroleerd</strong> en <strong>niet door syllabify aangepast</strong>. Alleen <code>nl</code>/<code>ksl</code> hebben een lijst; Latijns schrift is anders niet van Nederlands te onderscheiden. Een code is 2–3 kleine letters.</td>
+</tr>
+<tr>
 <td>Canon (org)</td>
 <td><code>bibliotheek/data/syllable_dictionary.nl.txt</code> en <code>.ksl.txt</code> (content-repo; commit/push daar)</td>
 </tr>
@@ -6198,7 +6202,7 @@ geven dan te weinig recite-noten — gebruik validate-waarschuwing
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-20
+        Bijgewerkt: 2026-11-24
         
       </p>
       
