@@ -164,6 +164,12 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   partituurlayout (S2, S4).
 - Klaar als: elk bekend regressiegeval, bijvoorbeeld same-pitch melisma, in
   precies één pytest in tooling faalt en die test zijn contract-id noemt.
+- Status (2026-11-24): uitgevoerd in `tests/test_contract_vangnet.py` (M5a, K2,
+  K3, M10, S2, S4, S13/R7). Gecontroleerd door de code tijdelijk te breken: de
+  S13-collapse breken laat alleen de S13-test falen, de M5a-collapse breken alleen
+  de M5a-tests. **Niet gedekt:** SVG-golden (er is geen contract-id voor
+  SVG-uitvoer in de checklists gevonden) en MSCZ via MuseScore zelf (MuseScore is
+  hier niet geïnstalleerd; de MSCZ-postprocess is getest op synthetische XML).
 
 ### 6. Versheid
 
