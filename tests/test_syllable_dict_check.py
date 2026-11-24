@@ -969,3 +969,18 @@ def test_prompt_unknown_typed_form_queues_replacement(
     assert session.added_or_updated == ["xyz-zy-xab"]
     assert session.replacements == [(surface, "xyz-zy-xab")]
     clear_syllable_dictionary_cache()
+
+
+def test_regeleinde_na_leesteken_is_woordgrens() -> None:
+    """``{/mij_},⏎{/ver}{hoor_}`` is NIET één woord ``mij-,-ver-hoor``."""
+    from vsa.syllable_dict_check import bare_sung_text, iter_vsa_lyric_word_cores
+
+    body = (
+        "[:] Heer ik roep tot U ver{\\hoor_} {/mij_},\n"
+        "{/ver}{hoor_} {\\mij} o {/Heer_.},\n"
+    )
+    document = Parser(body).parse()
+    bare = bare_sung_text(document)
+    assert "mij-, ver-hoor" in bare
+    cores = iter_vsa_lyric_word_cores(document)
+    assert cores.count("ver-hoor") == 2 and not any("," in c for c in cores), cores
