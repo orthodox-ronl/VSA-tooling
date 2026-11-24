@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-24 10:21 CET.
+   — branch <code>stap-5-vangnet</code>
+  , gebouwd 2026-11-24 10:23 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5971,6 +5971,12 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   partituurlayout (S2, S4).</li>
 <li>Klaar als: elk bekend regressiegeval, bijvoorbeeld same-pitch melisma, in
   precies één pytest in tooling faalt en die test zijn contract-id noemt.</li>
+<li>Status (2026-11-24): uitgevoerd in <code>tests/test_contract_vangnet.py</code> (M5a, K2,
+  K3, M10, S2, S4, S13/R7). Gecontroleerd door de code tijdelijk te breken: de
+  S13-collapse breken laat alleen de S13-test falen, de M5a-collapse breken alleen
+  de M5a-tests. <strong>Niet gedekt:</strong> SVG-golden (er is geen contract-id voor
+  SVG-uitvoer in de checklists gevonden) en MSCZ via MuseScore zelf (MuseScore is
+  hier niet geïnstalleerd; de MSCZ-postprocess is getest op synthetische XML).</li>
 </ul>
 <h3 id="6-versheid">6. Versheid<a class="headerlink" href="#6-versheid" title="Permanent link">&para;</a></h3>
 <ul>
@@ -6080,7 +6086,7 @@ alleen een smoke-test die bewijst dat de tooling-API is aangeroepen.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-20
+        Bijgewerkt: 2026-11-24
         
       </p>
       
