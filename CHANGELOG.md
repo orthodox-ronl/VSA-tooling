@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fix:** `vsa validate`/`vsa svg` herschreven stil een onbekend woord in scopes (`{/e_}ren` werd `{/eren_}`). Woorden die niet in de lettergreeplijst staan blijven nu ongewijzigd; validate meldt ze als onbekend met een voorstel.
 - **Verwijderd (breaking):** `zoek=` in `:::include` en `@include-vsa`, en de opdracht
   `vsa resolve-catalogus`. Een include met `zoek=` geeft nu een foutmelding; gebruik
   `id=` / `id:` of een bestandspad. De site-zoekfunctie

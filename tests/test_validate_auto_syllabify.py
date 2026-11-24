@@ -99,3 +99,33 @@ def test_mvsa_validate_auto_repairs_recite_soft_hyphens(
     )
     clear_syllable_dictionary_cache()
     set_syllable_dictionary_path(None)
+
+
+def test_validate_wijzigt_onbekend_woord_in_scopes_niet(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Regressie: ``{/e_}ren`` werd stil ``{/eren_}`` terwijl `eren` niet in de lijst staat.
+
+    Onbekende woorden worden nooit door validate/svg herschreven; de schrijver
+    beslist (validate meldt UNKNOWN met een voorstel).
+    """
+    dict_file = tmp_path / "dict.txt"
+    dict_file.write_text("recht-vaar-di-ge\n", encoding="utf-8")
+    set_syllable_dictionary_path(dict_file)
+    clear_syllable_dictionary_cache()
+
+    import vsa.syllable_dict_check as check_mod
+
+    monkeypatch.setattr(check_mod, "is_interactive_stdin", lambda stdin=None: False)
+
+    vsa_path = tmp_path / "eren.vsa"
+    original = "[:] {/in} de {/e_}ren {is_} [:]\n"
+    vsa_path.write_text(original, encoding="utf-8", newline="\n")
+
+    result = validate_path(vsa_path)
+
+    assert vsa_path.read_text(encoding="utf-8") == original
+    assert not any(m.code == "VSA-SYLLABIFY-APPLIED" for m in result.messages)
+    assert any(m.code == "VSA-SYLLABLE-DICT-UNKNOWN" for m in result.messages)
+    clear_syllable_dictionary_cache()
+    set_syllable_dictionary_path(None)
