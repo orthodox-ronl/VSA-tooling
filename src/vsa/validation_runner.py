@@ -327,6 +327,16 @@ def _add_include_vsa_warning(
 def _auto_repair_vsa_soft_hyphens(
     path: Path, text: str, result: ValidationResult
 ) -> str:
+    """Stille reparatie; nooit met Pyphen-gokken op onbekende woorden (zie impl)."""
+    from .syllable_dict_check import force_noninteractive
+
+    with force_noninteractive():
+        return _auto_repair_vsa_soft_hyphens_impl(path, text, result)
+
+
+def _auto_repair_vsa_soft_hyphens_impl(
+    path: Path, text: str, result: ValidationResult
+) -> str:
     """Vul ontbrekende soft ``-`` in de body (zoals ``vsa syllabify``).
 
     Alleen wanneer dictionary-MISMATCH/UNKNOWN of ontbrekende streepjes

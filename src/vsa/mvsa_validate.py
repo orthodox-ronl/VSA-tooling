@@ -350,6 +350,16 @@ def validate_mvsa_text(
 def _auto_repair_mvsa_soft_hyphens(
     path: Path, text: str
 ) -> tuple[str, MvsaDiagnostic | None]:
+    """Stille reparatie; nooit met Pyphen-gokken op onbekende woorden (zie impl)."""
+    from .syllable_dict_check import force_noninteractive
+
+    with force_noninteractive():
+        return _auto_repair_mvsa_soft_hyphens_impl(path, text)
+
+
+def _auto_repair_mvsa_soft_hyphens_impl(
+    path: Path, text: str
+) -> tuple[str, MvsaDiagnostic | None]:
     """Vul ontbrekende soft ``-`` op L (zoals ``mvsa syllabify``).
 
     Alleen wanneer dictionary-MISMATCH/UNKNOWN afneemt. YAML-``zoektekst``
