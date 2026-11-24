@@ -107,6 +107,13 @@ STICKY_DIRECTIVES = frozenset({"do", "mode", "oct", "start", "taal"})
 ALLOWED_MODES = frozenset({"major", "minor"})
 ALLOWED_TALEN = frozenset({"nl", "ksl"})
 ALLOWED_TAAL_ARGS = frozenset({"nl", "ksl", "auto"})
+# Overige taalcodes (``@taal ro``, ``@taal el``): geen woordenlijst, dus geen controle.
+LANG_CODE_RE = re.compile(r"^[a-z]{2,3}$")
+
+
+def is_lyrics_lang_code(value: str | None) -> bool:
+    """ISO-achtige taalcode (2-3 kleine letters), bijv. ``ro``, ``el``, ``ka``."""
+    return bool(value) and LANG_CODE_RE.match(value) is not None
 
 
 def normalize_lyric_taal_key(marker: str) -> str:
@@ -840,7 +847,7 @@ def _validate_directive_value(
                 MvsaDiagnostic("MVSA-START", "leeg @start", line_no)
             )
     elif name == "taal":
-        if rest in ALLOWED_TAAL_ARGS:
+        if rest in ALLOWED_TAAL_ARGS or is_lyrics_lang_code(rest):
             return
         if looks_like_taal_assignments(rest):
             parts = split_directive_assignments(rest)

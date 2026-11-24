@@ -338,7 +338,51 @@ def _transform_vsa_source(text: str, body_fn) -> SyllabifyResult:
     )
 
 
+_TAAL_DIRECTIVE_RE = re.compile(r"^[ \t]*@taal[ \t]+([A-Za-z]{2,4})[ \t]*\r?$")
+_CHECKED_LANGS = frozenset({"nl", "ksl", "auto"})
+
+
 def _transform_vsa_body(body: str, *, unsyllabify: bool) -> SyllabifyResult:
+    """Zoals ``_transform_vsa_body_plain``, maar laat ``@taal xx``-stukken met rust.
+
+    Een taal zonder woordenlijst (``ro``, ``el``, …) wordt niet afgebroken of aangepast.
+    """
+    if "@taal" not in body:
+        return _transform_vsa_body_plain(body, unsyllabify=unsyllabify)
+    out: list[str] = []
+    buf: list[str] = []
+    skip = False
+    replacements = 0
+
+    def flush() -> None:
+        nonlocal replacements
+        if not buf:
+            return
+        chunk = "".join(buf)
+        buf.clear()
+        if skip:
+            out.append(chunk)
+            return
+        res = _transform_vsa_body_plain(chunk, unsyllabify=unsyllabify)
+        replacements += res.replacements
+        out.append(res.text)
+
+    for line in body.splitlines(keepends=True):
+        m = _TAAL_DIRECTIVE_RE.match(line.rstrip("\n"))
+        if m is None:
+            buf.append(line)
+            continue
+        flush()
+        out.append(line)
+        skip = m.group(1).lower() not in _CHECKED_LANGS
+    flush()
+    new_body = "".join(out)
+    return SyllabifyResult(
+        text=new_body, changed=new_body != body, replacements=replacements
+    )
+
+
+def _transform_vsa_body_plain(body: str, *, unsyllabify: bool) -> SyllabifyResult:
     document = Parser(body).parse()
     atoms = _atoms_from_document(body, document)
     pieces: list[str] = []
