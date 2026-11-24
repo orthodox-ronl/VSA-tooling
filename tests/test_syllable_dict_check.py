@@ -984,3 +984,13 @@ def test_regeleinde_na_leesteken_is_woordgrens() -> None:
     assert "mij-, ver-hoor" in bare
     cores = iter_vsa_lyric_word_cores(document)
     assert cores.count("ver-hoor") == 2 and not any("," in c for c in cores), cores
+
+
+def test_regelbegin_na_scope_is_woordgrens() -> None:
+    """``be{\\vrijd_}⏎en schenkt`` is NIET het woord ``be-vrijd-en``."""
+    from vsa.syllable_dict_check import iter_vsa_lyric_word_cores
+
+    document = Parser("Hij {/heeft} be{\\vrijd_}\nen schenkt ons {/ze_}{\\gen_}.\n").parse()
+    cores = iter_vsa_lyric_word_cores(document)
+    assert "be-vrijd" in cores and "en" in cores, cores
+    assert not any(c.startswith("be-vrijd-") for c in cores), cores

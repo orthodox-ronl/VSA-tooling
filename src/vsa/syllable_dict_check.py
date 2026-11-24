@@ -192,6 +192,10 @@ def bare_sung_text(document: Document) -> str:
                 continue
             if prev_kind in (TextNode, PitchMarkerNode, ControlTokenNode):
                 _word_break()
+            if raw_text[:1].isspace():
+                # Spatie of regeleinde direct na de vorige scope: woordgrens. Het
+                # lyric-filter hieronder gooit een leeg beginregeltje weg.
+                _word_break()
             piece = _filtered_lyrics_text(raw_text)
             if not piece or not piece.strip():
                 if piece and piece.isspace():
