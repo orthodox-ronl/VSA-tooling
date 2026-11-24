@@ -193,6 +193,14 @@ def clean_emit_frontmatter(
     return f"---\n{dumped}\n---"
 
 
+def _frontmatter_template(meta: dict[str, Any]) -> str | None:
+    """``template:`` uit de .vsa-frontmatter (leeg/afwezig → ``None``)."""
+    tpl = meta.get("template")
+    if tpl in (None, ""):
+        return None
+    return str(tpl).strip() or None
+
+
 def cycle_length_for_emit(template: dict[str, Any]) -> int:
     """Aantal frasen in één template-cyclus (voor ``@sectie cyclus-1``)."""
     cycle = template.get("cycle")
@@ -1352,7 +1360,9 @@ def convert_vsa_to_mvsa(
         path=src,
         output=out_path,
         library_root=library_root,
-        explicit=template,
+        # CLI ``--template`` wint; anders geldt ``template:`` uit de .vsa-frontmatter
+        # (de auteur heeft de formule dan zelf gekozen), vóór automatische selectie.
+        explicit=template or _frontmatter_template(meta),
     )
 
     resolved = load_resolved_template(tpl_name, library_root=library_root)

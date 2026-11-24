@@ -621,3 +621,34 @@ def test_convert_print_wrap_last_phrase_two_measures(tmp_path: Path) -> None:
     assert after.count("\nL:") == 2
     assert "gaan" in after
     assert "rust" in after or "le_" in after
+
+
+@pytest.mark.skipif(not ELIA.is_file(), reason="corpus toon 4 ontbreekt")
+def test_vsa_frontmatter_template_wint_van_ambiguiteit(tmp_path: Path) -> None:
+    """Toon 4 heeft groningen én hemelum; ``template:`` in de .vsa beslist."""
+    text = ELIA.read_text(encoding="utf-8")
+    text = re.sub(r"(?m)^template:.*\n", "", text)
+    text = re.sub(r"(?m)^bron:.*\n(?:[ \t]+.*\n)*", "", text)
+    base = tmp_path / "tropaar-x-toon-4-zonderbron.vsa"
+    base.write_text(text, encoding="utf-8")
+    with pytest.raises(TemplateLibraryError) as exc:
+        convert_vsa_to_mvsa(base, write=False)
+    assert exc.value.code == "TEMPLATE-SELECT-AMBIGUOUS"
+
+    for tpl in ("tropaar-toon-4-hemelum", "tropaar-toon-4-groningen"):
+        met = tmp_path / f"tropaar-x-toon-4-{tpl[-8:]}.vsa"
+        met.write_text(
+            text.replace("\n---\n", f"\ntemplate: {tpl}\n---\n", 1),
+            encoding="utf-8",
+        )
+        result = convert_vsa_to_mvsa(met, write=False)
+        assert result.resolved.formula_id == tpl
+
+    # CLI --template wint van de frontmatter
+    met = tmp_path / "tropaar-x-toon-4-cli.vsa"
+    met.write_text(
+        text.replace("\n---\n", "\ntemplate: tropaar-toon-4-groningen\n---\n", 1),
+        encoding="utf-8",
+    )
+    result = convert_vsa_to_mvsa(met, template="tropaar-toon-4-hemelum", write=False)
+    assert result.resolved.formula_id == "tropaar-toon-4-hemelum"
