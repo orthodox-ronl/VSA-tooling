@@ -1,9 +1,9 @@
-# ADR-001 (voorstel): exportketen, publieke API en catalogus-code
+# ADR-001: exportketen, publieke API en catalogus-code
 
-Status: **voorstel, wacht op besluit** (2026-11-20). Niet normatief. Dit is stap 3
+Status: **aangenomen** (2026-11-24, eigenaar Riek). Niet normatief. Dit is stap 3
 van het [migratieplan](migratieplan-tooling-bibliotheek.md). Het document wijzigt
-geen code. Zodra de keuzes hieronder zijn gemaakt, wordt de status "aangenomen"
-en volgt een link in de [contract-index](../formats/contract-index.md).
+geen code. De keuzes staan in de kolom "Jouw keuze"; de link staat in de
+[contract-index](../formats/contract-index.md).
 
 Gebruikte feiten komen uit de broncode van `VSA-tooling` (`development`),
 `bibliotheek` (`development`, `12ae194`) en `bron` (`main`, `ee369a9`). Er is niets
@@ -13,16 +13,16 @@ uitgevoerd of getest. Wat niet is gecontroleerd, staat er expliciet bij.
 
 | Nr  | Vraag                                              | Aanbeveling                                                                                                               | Jouw keuze |
 | --  | -------------------------------------------------- | -----------------------------------------------------------------------                                                   | ---------- |
-| 1   | Welke exportketen is de canonieke?                 | **Keuze C**: gefaseerd, één MusicXML-renderer, Score-IR blijft schermlaag                                                 |            |
-| 2   | Hoe roept bibliotheek tooling aan?                 | **Keuze 2a**: één API-module `vsa.api`, in-process                                                                        |            |
-| 3   | Hoe pint bibliotheek de tooling-versie?            | Bestaand mechanisme vastleggen (geen nieuw ontwerp)                                                                       |            |
-| 4   | Wat gebeurt er met de catalogus-code uit `bron`?   | **Keuze 4a** (verhuizen als `vsa.catalogus`) of **4c** (niet meenemen, opnieuw bouwen op de eigen resolver); zie sectie 4 |            |
-| 5   | Welke catalogusdata gebruikt tooling nog?          | **Keuze 5a**: alleen de catalogus van bibliotheek; `bron` als gegevensbron vervalt                                        |            |
+| 1   | Welke exportketen is de canonieke?                 | **Keuze C**: gefaseerd, één MusicXML-renderer, Score-IR blijft schermlaag                                                 | **C** (akkoord) |
+| 2   | Hoe roept bibliotheek tooling aan?                 | **Keuze 2a**: één API-module `vsa.api`, in-process                                                                        | **2a** (akkoord) |
+| 3   | Hoe pint bibliotheek de tooling-versie?            | Bestaand mechanisme vastleggen (geen nieuw ontwerp)                                                                       | **akkoord** |
+| 4   | Wat gebeurt er met de catalogus-code uit `bron`?   | **Keuze 4a** (verhuizen als `vsa.catalogus`) of **4c** (niet meenemen, opnieuw bouwen op de eigen resolver); zie sectie 4 | **4c** (2026-11-20) |
+| 5   | Welke catalogusdata gebruikt tooling nog?          | **Keuze 5a**: alleen de catalogus van bibliotheek; `bron` als gegevensbron vervalt                                        | **5a** (akkoord) |
 
 Je mag per rij "akkoord" zeggen of een andere letter kiezen. Rij 3 hoeft alleen
 een "akkoord".
 
-**Open vraag bij keuze 4c (2026-11-20):** blijft de zoekfunctie bestaan? Het gaat om
+**Open vraag bij keuze 4c (2026-11-20; besloten: optie i, verwijderen; uitgevoerd in PR #78/#79):** blijft de zoekfunctie bestaan? Het gaat om
 `zoek=`-includes, `@include-vsa zoek=` en de opdracht `vsa resolve-catalogus`.
 Bibliotheek gebruikt die nergens en de catalogus daar heeft geen manifesten.
 
