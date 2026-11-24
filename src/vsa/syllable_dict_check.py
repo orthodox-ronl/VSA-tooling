@@ -145,8 +145,18 @@ def format_clickable_location(
     return f"{display}:{loc_line}:{loc_col}:"
 
 
-def bare_sung_text(document: Document) -> str:
+_TAAL_LINE_RE = re.compile(r"^\s*@taal\s+([A-Za-z]{2,4})\s*$")
+
+
+def bare_sung_text(
+    document: Document,
+    *,
+    marks: list[tuple[int, str | None]] | None = None,
+) -> str:
     """Alleen gezongen lyrics uit de VSA-AST (geen directives/metadata).
+
+    ``marks`` (optioneel, wordt gevuld): ``(offset in de uitvoer, taalcode)`` voor elke
+    ``@taal xx``-regel in de lyrics (``None`` = ``auto``/terug naar schrift).
 
     Neemt ``TextNode``- en ``ScopeNode``-tekst; maatstrepen/control tokens
     worden spaties. Soft ``-`` / hard ``=`` blijven staan.
@@ -183,47 +193,73 @@ def bare_sung_text(document: Document) -> str:
         chunks.append(piece)
         prev_lyric = piece
 
+    def _text_node(raw_text: str) -> None:
+        nonlocal prev_kind, prev_lyric
+        if raw_text and not raw_text.strip():
+            _word_break()
+            prev_kind = TextNode
+            return
+        if prev_kind in (TextNode, PitchMarkerNode, ControlTokenNode):
+            _word_break()
+        if raw_text[:1].isspace():
+            # Spatie of regeleinde direct na de vorige scope: woordgrens. Het
+            # lyric-filter hieronder gooit een leeg beginregeltje weg.
+            _word_break()
+        piece = _filtered_lyrics_text(raw_text)
+        if not piece or not piece.strip():
+            if piece and piece.isspace():
+                _word_break()
+            prev_kind = TextNode
+            return
+        for line_no, line in enumerate(piece.splitlines()):
+            stripped = line.strip()
+            if not stripped:
+                prev_lyric = None
+                continue
+            if line_no > 0:
+                _word_break()
+            if line != line.lstrip():
+                # Spatie vóór lyrics in de bron = woordgrens (niet zing-deling).
+                _word_break()
+            if _is_non_lyric_report_line(stripped):
+                prev_lyric = None
+                continue
+            _emit_lyric(stripped)
+            if line != line.rstrip():
+                # Trailing spatie in de bron: woordgrens vóór evt. volgende scope.
+                _word_break()
+        if piece[-1:].isspace():
+            # Regeleinde (of spatie) na de laatste tekst: woordgrens vóór de
+            # volgende scope. ``splitlines`` gooit het einde weg, dus hier expliciet.
+            _word_break()
+        prev_kind = TextNode
+
     for node in getattr(document, "nodes", []):
         if isinstance(node, TextNode):
             raw_text = node.text or ""
-            if raw_text and not raw_text.strip():
-                _word_break()
-                prev_kind = TextNode
+            if marks is None or "@taal" not in raw_text:
+                _text_node(raw_text)
                 continue
-            if prev_kind in (TextNode, PitchMarkerNode, ControlTokenNode):
-                _word_break()
-            if raw_text[:1].isspace():
-                # Spatie of regeleinde direct na de vorige scope: woordgrens. Het
-                # lyric-filter hieronder gooit een leeg beginregeltje weg.
-                _word_break()
-            piece = _filtered_lyrics_text(raw_text)
-            if not piece or not piece.strip():
-                if piece and piece.isspace():
-                    _word_break()
-                prev_kind = TextNode
-                continue
-            for line_no, line in enumerate(piece.splitlines()):
-                stripped = line.strip()
-                if not stripped:
-                    prev_lyric = None
+            # ``@taal xx``-regels splitsen de tekst; per stuk de gewone verwerking.
+            buf: list[str] = []
+            for raw_line in raw_text.splitlines(keepends=True):
+                m = _TAAL_LINE_RE.match(raw_line)
+                if m is None:
+                    buf.append(raw_line)
                     continue
-                if line_no > 0:
-                    _word_break()
-                if line != line.lstrip():
-                    # Spatie vóór lyrics in de bron = woordgrens (niet zing-deling).
-                    _word_break()
-                if _is_non_lyric_report_line(stripped):
-                    prev_lyric = None
-                    continue
-                _emit_lyric(stripped)
-                if line != line.rstrip():
-                    # Trailing spatie in de bron: woordgrens vóór evt. volgende scope.
-                    _word_break()
-            if piece[-1:].isspace():
-                # Regeleinde (of spatie) na de laatste tekst: woordgrens vóór de
-                # volgende scope. ``splitlines`` gooit het einde weg, dus hier expliciet.
+                if buf:
+                    _text_node("".join(buf))
+                    buf = []
                 _word_break()
-            prev_kind = TextNode
+                code = m.group(1).lower()
+                marks.append(
+                    (
+                        sum(len(c) for c in chunks),
+                        None if code == "auto" else code,
+                    )
+                )
+            if buf:
+                _text_node("".join(buf))
         elif isinstance(node, ScopeNode):
             _emit_lyric(node.text or "")
             prev_kind = ScopeNode
@@ -280,14 +316,14 @@ def _is_non_lyrics_word_core(core: str) -> bool:
     return False
 
 
-def iter_body_word_cores(bare: str) -> list[str]:
+def _iter_body_word_cores_with_pos(bare: str) -> list[tuple[str, int]]:
     """Woordkernen uit kale lyrics (leestekenrand weg; geen kale maatstrepen).
 
     Recite-haakjes ``(``/``)`` en ELMs (``_`` ``~`` ``.`` …) tellen niet mee
     voor de woordenlijst — zelfde idee als bij syllabify. ``Al-le-(lu-ja`` →
     kern ``Al-le-lu-ja``. HTML/``#``-commentaar hoort niet in ``bare``.
     """
-    cores: list[str] = []
+    cores: list[tuple[str, int]] = []
     for match in _TOKEN_RE.finditer(bare):
         m = _EDGE_PUNCT.match(match.group(0))
         if not m:
@@ -300,8 +336,13 @@ def iter_body_word_cores(bare: str) -> list[str]:
             continue
         if _is_non_lyrics_word_core(core):
             continue
-        cores.append(core)
+        cores.append((core, match.start()))
     return cores
+
+
+def iter_body_word_cores(bare: str) -> list[str]:
+    """Woordkernen uit kale lyrics (zie :func:`_iter_body_word_cores_with_pos`)."""
+    return [core for core, _pos in _iter_body_word_cores_with_pos(bare)]
 
 
 def _strip_recite_parens(text: str) -> str:
@@ -337,13 +378,35 @@ def _bare_dash_elm(elms: list[str] | None) -> bool:
     return bool(elms) and "-" in elms
 
 
+def iter_vsa_lyric_word_cores_tagged(
+    document: Document,
+) -> list[tuple[str, str | None]]:
+    """``(woordkern, taalcode)``; taalcode uit de laatste ``@taal xx``-regel ervoor."""
+    marks: list[tuple[int, str | None]] = []
+    bare = bare_sung_text(document, marks=marks)
+    out: list[tuple[str, str | None]] = []
+    for core, pos in _iter_body_word_cores_with_pos(bare):
+        lang: str | None = None
+        for offset, code in marks:
+            if offset <= pos:
+                lang = code
+            else:
+                break
+        out.append((core, lang))
+    return out
+
+
 def iter_vsa_lyric_word_cores(document: Document) -> list[str]:
     """Canonieke lyrics-woorden uit een geparste VSA-body (geen frontmatter)."""
-    return iter_body_word_cores(bare_sung_text(document))
+    return [core for core, _lang in iter_vsa_lyric_word_cores_tagged(document)]
 
 
-def iter_mvsa_lyric_word_cores(source: str) -> list[str]:
-    """Canonieke lyrics-woorden uit .mvsa: alleen L-regels, met soft ``-``/``=``.
+def iter_mvsa_lyric_word_cores_tagged(
+    source: str,
+) -> list[tuple[str, str | None]]:
+    """``(woordkern, taalcode)`` uit .mvsa; taalcode = sticky ``@taal`` bij die L-regel.
+
+    Canonieke lyrics-woorden uit .mvsa: alleen L-regels, met soft ``-``/``=``.
 
     Geen ``@title`` / ``@do`` / zoektekst / commentaar / S/A/T/B-regels.
 
@@ -358,14 +421,16 @@ def iter_mvsa_lyric_word_cores(source: str) -> list[str]:
 
     doc = parse_mvsa(source)
     parts: list[str] = []
+    part_langs: list[str | None] = []
     open_word = False
-    word_chunks: list[str] = []
+    word_chunks: list[tuple[str, str | None]] = []
     prev_lpos: LPosition | None = None
 
     def flush() -> None:
-        nonlocal parts, open_word, prev_lpos
-        word_chunks.extend(parts)
+        nonlocal parts, part_langs, open_word, prev_lpos
+        word_chunks.extend(zip(parts, part_langs))
         parts = []
+        part_langs = []
         open_word = False
         prev_lpos = None
 
@@ -378,6 +443,7 @@ def iter_mvsa_lyric_word_cores(source: str) -> list[str]:
                 for marker in system.markers:
                     if not is_lyrics_stem(marker):
                         continue
+                    marker_lang = _marker_lang(system, marker)
                     for lpos in measure.lyrics.get(marker) or []:
                         joined = join_lyric_syllables(
                             lpos.syllables, lpos.links, lpos.hard_links
@@ -407,15 +473,31 @@ def iter_mvsa_lyric_word_cores(source: str) -> list[str]:
                                 parts[-1] = parts[-1] + glue + joined
                             else:
                                 parts.append(joined)
+                                part_langs.append(marker_lang)
                         else:
                             parts.append(joined)
+                            part_langs.append(marker_lang)
                         open_word = False
                         prev_lpos = lpos
     flush()
-    cores: list[str] = []
-    for chunk in word_chunks:
-        cores.extend(iter_body_word_cores(chunk))
+    cores: list[tuple[str, str | None]] = []
+    for chunk, lang in word_chunks:
+        cores.extend((core, lang) for core in iter_body_word_cores(chunk))
     return cores
+
+
+def _marker_lang(system, marker: str) -> str | None:
+    """Sticky ``@taal`` voor deze lyrics-marker (``None`` = geen/auto)."""
+    context = getattr(system, "context", None)
+    if context is None:
+        return None
+    lang = context.taal_for(marker)
+    return lang.lower() if isinstance(lang, str) else None
+
+
+def iter_mvsa_lyric_word_cores(source: str) -> list[str]:
+    """Canonieke lyrics-woorden uit .mvsa (zie :func:`iter_mvsa_lyric_word_cores_tagged`)."""
+    return [core for core, _lang in iter_mvsa_lyric_word_cores_tagged(source)]
 
 
 def find_dictionary_syllable_issues(
@@ -425,10 +507,12 @@ def find_dictionary_syllable_issues(
     lyrics_lang: str | None = None,
 ) -> list[DictSyllableFinding]:
     """Vergelijk VSA-lyrics (AST) met de canonieke lijst."""
+    tagged = iter_vsa_lyric_word_cores_tagged(document)
     return find_dictionary_syllable_issues_from_cores(
-        iter_vsa_lyric_word_cores(document),
+        [core for core, _lang in tagged],
         source_text=source_text,
         lyrics_lang=lyrics_lang,
+        core_langs=[lang for _core, lang in tagged],
     )
 
 
@@ -437,13 +521,23 @@ def find_dictionary_syllable_issues_from_cores(
     *,
     source_text: str = "",
     lyrics_lang: str | None = None,
+    core_langs: list[str | None] | None = None,
 ) -> list[DictSyllableFinding]:
     """Vergelijk gegeven lyrics-woordkernen met de canonieke lijst.
+
+    ``core_langs`` (parallel aan ``cores``): expliciete ``@taal`` per woord. Een taal
+    zonder woordenlijst (alles behalve ``nl``/``ksl``/``auto``) wordt niet gecontroleerd.
 
     ``lyrics_lang``: ``auto`` (per woord Latijn→nl / Cyrillisch→ksl),
     ``nl`` of ``ksl`` (alleen dat schrift). Zonder argument: actieve
     CLI-modus (default ``auto``).
     """
+    if core_langs is not None:
+        cores = [
+            core
+            for core, lang in zip(cores, core_langs)
+            if lang in (None, "auto", "nl", "ksl")
+        ]
     if lyrics_lang is not None:
         mode = normalize_lyrics_lang_mode(lyrics_lang)
     else:
@@ -635,8 +729,10 @@ def find_mvsa_dictionary_syllable_issues(
     lyrics_lang: str | None = None,
 ) -> list[DictSyllableFinding]:
     """Dictionary-check op .mvsa: uitsluitend L-lyrics."""
+    tagged = iter_mvsa_lyric_word_cores_tagged(source)
     return find_dictionary_syllable_issues_from_cores(
-        iter_mvsa_lyric_word_cores(source),
+        [core for core, _lang in tagged],
+        core_langs=[lang for _core, lang in tagged],
         source_text=source,
         lyrics_lang=lyrics_lang,
     )

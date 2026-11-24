@@ -16,6 +16,7 @@ from .mvsa_validate import (
     ALLOWED_MODES,
     ALLOWED_TALEN,
     ALLOWED_TAAL_ARGS,
+    is_lyrics_lang_code,
     BLOK_ID_RE,
     DIRECTIVE_NAME_RE,
     DO_RE,
@@ -339,8 +340,10 @@ def parse_mvsa(text: str) -> ParsedDocument:
                 if name == "taal":
                     # Sticky: ``@taal nl|ksl|auto`` of ``@taal L=nl L1=ksl``.
                     # Quoted: document-meta (en sticky als de string ``nl``/``ksl`` is).
-                    if rest in ALLOWED_TAAL_ARGS or looks_like_taal_assignments(
-                        rest
+                    if (
+                        rest in ALLOWED_TAAL_ARGS
+                        or is_lyrics_lang_code(rest)
+                        or looks_like_taal_assignments(rest)
                     ):
                         _apply_directive(ctx, name, rest)
                     else:
@@ -576,7 +579,9 @@ def _apply_directive(ctx: StickyContext, name: str, rest: str) -> None:
         if rest == "auto":
             ctx.taal = None
             ctx.taal_lyrics.pop("L", None)
-        elif rest in ALLOWED_TALEN:
+        elif rest in ALLOWED_TALEN or is_lyrics_lang_code(rest):
+            # nl/ksl sturen ook de translit-richting; andere codes (ro, el, …)
+            # zijn alleen label + 'geen woordenlijst' voor de controle.
             ctx.taal = rest
             ctx.taal_lyrics["L"] = rest
         elif looks_like_taal_assignments(rest):

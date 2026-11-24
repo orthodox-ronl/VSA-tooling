@@ -25,7 +25,7 @@ def test_taal_sticky_parsed() -> None:
 
 
 def test_taal_invalid_value() -> None:
-    text = "@taal fr\nL: a_ |\nS: do |\n"
+    text = "@taal frans\nL: a_ |\nS: do |\n"
     diags = validate_mvsa_text(text)
     assert any(d.code == "MVSA-TAAL" for d in diags)
 
