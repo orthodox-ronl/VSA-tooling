@@ -60,7 +60,7 @@ Er zijn twee volledige MusicXML-renderers:
 Beide bevatten melisma-logica, net als `score_ir.py` en `score_ir_musicxml.py`.
 Daar komen de terugkerende bugs vandaan: een fix in de ene renderer raakt de andere
 niet. `export_bron_to_mxl` is geen derde renderer, maar kiest op bestandsextensie
-tussen deze wegen (zie `docs/plans/migratiematrix.md`, sectie 1; dat bestand staat nog op de branch `migratiematrix`).
+tussen deze wegen (zie [migratiematrix](migratiematrix.md), sectie 1).
 
 Score-IR (`score_ir.py`) is bedoeld voor schermweergave en de partituurlaag, niet
 als vervanging van MusicXML (zie [partituur-ir.md](partituur-ir.md), "Non-goals").
