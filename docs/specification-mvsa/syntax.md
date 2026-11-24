@@ -404,6 +404,7 @@ L: (Al-le-lu-ia, Al-le-lu-ia, Al)_-le-lu_&-&-&_ i_ a__ ||
 | `(… Al)-` alleén | Losse `-` na `)`: **woordstreepje zonder vervolg** — vermijd; geen ELM-duur |
 | `(… Al)-le-…`    | Recite tot “Al”, daarna “le…” als **zelfde woord** (canonieke vorm)         |
 | `heer (-lijkt…)` | Cadens/open, daarna recite: soft `-` **in** de haakjes (zelfde woord)       |
+| `heer -(lijkt…)` | Zelfde als `(-lijkt…)`: `-` **vóór** het haakje (na een spatie) hoort bij het woord |
 | `(… Al)_`        | Recite met duur `_` (halve); streepje hoort hier niet                       |
 
 #### Interacties met `-` en ELM-`~`

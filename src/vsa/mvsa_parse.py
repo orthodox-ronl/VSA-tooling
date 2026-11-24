@@ -975,11 +975,17 @@ def parse_l_positions(measure: str) -> list[LPosition]:
         return []
     positions: list[LPosition] = []
     pending_before: list[Mark] = []
+    # ``-(lijkt …)``: woordstreepje vóór het haakje = zelfde als ``(-lijkt …)``.
+    pending_bridge: tuple[bool, bool] | None = None  # (aanwezig, hard)
     i = 0
     n = len(s)
 
     while i < n:
         if s[i].isspace():
+            i += 1
+            continue
+        if _is_woordstreepje(s[i]) and i + 1 < n and s[i + 1] == "(":
+            pending_bridge = (True, _woordstreepje_is_hard(s[i]))
             i += 1
             continue
         if s[i] in ",;:!?":
@@ -1019,6 +1025,10 @@ def parse_l_positions(measure: str) -> list[LPosition]:
                 cont_word,
                 cont_hard,
             ) = _parse_recite_interior(interior)
+            if pending_bridge is not None and not cont_word:
+                cont_word = True
+                cont_hard = pending_bridge[1]
+            pending_bridge = None
             # After ')': duration ELMs only — bare '-' is woordstreepje, not ELM.
             elm_list, i = _read_elms(s, i, allow_bare_dash=False)
             before = pending_before
