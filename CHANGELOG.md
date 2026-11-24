@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fix:** de woordenlijst-controle plakte woorden over een regeleinde heen aan elkaar (`{/mij_},` + volgende regel `{/ver}{hoor_}` werd het "woord" `mij-,-ver-hoor`). Een regeleinde na lyric-tekst is nu altijd een woordgrens.
 - **Nieuw (migratie stap 7):** `vsa.syllabify.hyphenate_token_parts` (lettergrepen van één lyric-token uit de canonieke lijst; onbekende woorden blijven heel) en `vsa.syllabify.split_syllabic`. Vervangen `nl_hyphen.py` in bibliotheek. `eeuwen` is `eeu-wen`.
 - **Fix:** in een terminal (TTY) voegden `validate`/`svg` bij `.vsa` en `.mvsa` stil Pyphen-gokken toe aan onbekende woorden (`onbekendwoord` werd `on-be-kend-woord`). De stille reparatie past nu alleen woorden uit de lettergreeplijst aan. Het commando `syllabify` (met TTY-vragen) is ongewijzigd.
 - **Fix:** `vsa validate`/`vsa svg` herschreven stil een onbekend woord in scopes (`{/e_}ren` werd `{/eren_}`). Woorden die niet in de lettergreeplijst staan blijven nu ongewijzigd; validate meldt ze als onbekend met een voorstel.

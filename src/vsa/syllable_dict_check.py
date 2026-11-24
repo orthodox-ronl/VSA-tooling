@@ -215,6 +215,10 @@ def bare_sung_text(document: Document) -> str:
                 if line != line.rstrip():
                     # Trailing spatie in de bron: woordgrens vóór evt. volgende scope.
                     _word_break()
+            if piece[-1:].isspace():
+                # Regeleinde (of spatie) na de laatste tekst: woordgrens vóór de
+                # volgende scope. ``splitlines`` gooit het einde weg, dus hier expliciet.
+                _word_break()
             prev_kind = TextNode
         elif isinstance(node, ScopeNode):
             _emit_lyric(node.text or "")
