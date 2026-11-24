@@ -1000,10 +1000,10 @@ def _read_bar_anchor(content: str, start: int) -> tuple[str | None, int]:
     ``(None, start)``. Non-empty glued text is returned as-is; callers validate.
     """
     n = len(content)
-    if start >= n or content[start] in " \t":
+    if start >= n or content[start].isspace():
         return None, start
     j = start
-    while j < n and content[j] not in " \t":
+    while j < n and not content[j].isspace():
         if _bar_starts_at(content, j):
             break
         j += 1
