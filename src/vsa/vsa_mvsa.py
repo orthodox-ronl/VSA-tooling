@@ -711,16 +711,36 @@ def _format_syllable_l(
     return _escape_lyric_punct(body, punct)
 
 
+def _split_trailing_lyric_elm(lyric: str) -> tuple[str, str]:
+    """``hoor_`` → (``hoor``, ``_``); leestekens blijven achter de lettergreep."""
+    core, punct = _lyric_core_and_punct((lyric or "").strip())
+    m = re.search(r"_+$", core)
+    if not m:
+        return (lyric or "").strip(), ""
+    return core[: m.start()] + punct, m.group(0)
+
+
 def _recite_l_text(notes: list[MappedNote]) -> str:
-    """``(Al-le-lu-ia)`` — geen ELM in de haakjes (MVSA negeert die); alleen tekst."""
+    """``(Al-le-lu-ia)`` — geen ELM in de haakjes (MVSA-eis); alleen tekst.
+
+    Staat er in de VSA-tekst een ``_`` achter een recite-lettergreep
+    (``…ver-hoor_``), dan hoort die ELM ná ``)``: ``(ver-hoor)_``. Alle
+    lettergrepen in ``( )`` delen immers één duur.
+    """
     bits: list[_LAtom] = []
+    tail_elm = ""
     for n in notes:
         if not (n.lyric or "").strip():
             continue
+        lyric, elm = _split_trailing_lyric_elm(n.lyric)
+        tail_elm = elm  # alleen die van de laatste lettergreep telt
+        if elm:
+            n = replace(n, lyric=lyric)
         text = _format_syllable_l(n, include_elm=False)
         bits.append(_LAtom(text=text, syllabic=n.syllabic or "single", role="recite"))
     inner = _hyphen_join_texts(bits) if bits else "-"
-    return f"({inner})"
+    return f"({inner}){tail_elm}"
+
 
 def _group_l_atom(group: list[MappedNote]) -> _LAtom:
     text_notes = [n for n in group if (n.lyric or "").strip()]
