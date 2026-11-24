@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.mvsa_minimal import MINIMAL_CANONICAL_MVSA
 from vsa.cli_mvsa import main as mvsa_main
 from vsa.derived_path import (
     derived_output_path,
@@ -63,7 +64,7 @@ def test_mvsa_mscz_default_out_appends_brontype(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     src = tmp_path / "lied.mvsa"
-    src.write_text("@title \"t\"\n\n@sectie a\nL a\nS do\n", encoding="utf-8")
+    src.write_text(MINIMAL_CANONICAL_MVSA, encoding="utf-8")
     captured: dict[str, Path] = {}
 
     def fake_export(path, out, **kwargs):  # noqa: ANN001
@@ -80,7 +81,7 @@ def test_mvsa_mxl_default_out_appends_brontype(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     src = tmp_path / "lied.mvsa"
-    src.write_text("@title \"t\"\n\n@sectie a\nL a\nS do\n", encoding="utf-8")
+    src.write_text(MINIMAL_CANONICAL_MVSA, encoding="utf-8")
     captured: dict[str, Path] = {}
 
     def fake_export(path, out, **kwargs):  # noqa: ANN001
@@ -88,7 +89,7 @@ def test_mvsa_mxl_default_out_appends_brontype(
         out.write_text("<score-partwise/>", encoding="utf-8")
 
     monkeypatch.setattr("vsa.mvsa_musicxml.export_mvsa_path", fake_export)
-    assert mvsa_main(["mxl", str(src)]) == 0
+    assert mvsa_main(["mxl", str(src), "--allow-noncanonical"]) == 0
     assert captured["out"] == tmp_path / "lied.mvsa.mxl"
 
 
@@ -109,7 +110,7 @@ def test_mscz_mxl_default_out_appends_brontype(
         "vsa.musicxml_playback_normalize.export_mscz_to_playback_mxl",
         fake_export,
     )
-    assert mscz_main(["mxl", str(src)]) == 0
+    assert mscz_main(["mxl", str(src), "--allow-noncanonical"]) == 0
     assert captured["out"] == tmp_path / "lied.mscz.mxl"
 
 
@@ -139,7 +140,7 @@ def test_mvsa_audio_subcommand_sets_format(
     fmt: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     src = tmp_path / "lied.mvsa"
-    src.write_text("@title \"t\"\n\n@sectie a\nL a\nS do\n", encoding="utf-8")
+    src.write_text(MINIMAL_CANONICAL_MVSA, encoding="utf-8")
     captured: dict[str, object] = {}
 
     def fake_export(path, out, **kwargs):  # noqa: ANN001

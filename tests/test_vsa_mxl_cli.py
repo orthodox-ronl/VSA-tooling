@@ -24,7 +24,7 @@ def test_vsa_mxl_sibling_default(tmp_path: Path, capsys) -> None:
     bron = tmp_path / "lied.vsa"
     bron.write_text("{tekst}", encoding="utf-8")
     with patch("vsa.cli._export_vsa_to_musicxml", side_effect=_fake_export_mxl):
-        assert vsa_main(["mxl", str(bron)]) == 0
+        assert vsa_main(["mxl", str(bron), "--allow-noncanonical"]) == 0
     assert (tmp_path / "lied.vsa.mxl").is_file()
     assert "Geschreven:" in capsys.readouterr().out
 
@@ -34,7 +34,9 @@ def test_vsa_musicxml_alias_same_shape(tmp_path: Path) -> None:
     bron.write_text("{tekst}", encoding="utf-8")
     out = tmp_path / "out.mxl"
     with patch("vsa.cli._export_vsa_to_musicxml", side_effect=_fake_export_mxl):
-        assert vsa_main(["musicxml", str(bron), "-o", str(out)]) == 0
+        assert vsa_main(
+            ["musicxml", str(bron), "-o", str(out), "--allow-noncanonical"]
+        ) == 0
     assert out.is_file()
 
 

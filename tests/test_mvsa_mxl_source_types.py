@@ -56,7 +56,7 @@ def test_mvsa_validate_mscz_no_utf8_crash(capsys, tmp_path: Path) -> None:
     err = capsys.readouterr().err
     assert code == 1
     assert "utf-8" not in err.lower()
-    assert "Geen .mvsa gevonden" in err
+    assert "weigert .mscz" in err
 
 
 def test_mvsa_mscz_rejects_mscz_source(capsys, tmp_path: Path) -> None:

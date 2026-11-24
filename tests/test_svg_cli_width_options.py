@@ -31,7 +31,7 @@ def test_process_markdown_file_accepts_max_line_width(tmp_path: Path):
 
     input_file.write_text(
         """::: vsa-notatie
-{tekst} {tekst} {tekst} {tekst} {tekst} {tekst}
+[:] a-men a-men a-men a-men a-men a-men [:]
 :::
 """,
         encoding="utf-8",
@@ -51,7 +51,7 @@ def test_build_markdown_site_accepts_max_line_width(tmp_path: Path):
 
     (input_dir / "demo.md").write_text(
         """::: vsa-notatie
-{tekst} {tekst} {tekst} {tekst} {tekst} {tekst}
+[:] a-men a-men a-men a-men a-men a-men [:]
 :::
 """,
         encoding="utf-8",

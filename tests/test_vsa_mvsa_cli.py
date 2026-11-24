@@ -189,7 +189,7 @@ def test_select_template_id_ambiguous_without_hint() -> None:
 
 def test_select_template_id_missing() -> None:
     with pytest.raises(TemplateLibraryError, match="geen template"):
-        select_template_id(soort="stichier", toon=3)
+        select_template_id(soort="onbestaand-xyz", toon=1)
 
 
 def test_select_template_id_formule_overrides_soort() -> None:

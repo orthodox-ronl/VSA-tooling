@@ -1511,7 +1511,7 @@ def _pyphen_matches_syllables(cores: list[str]) -> bool:
     if not cores:
         return False
     joined = "".join(cores)
-    hyp_parts = hyphenate_dutch_word(joined).split("-")
+    hyp_parts = hyphenate_dutch_word(joined, allow_pyphen=True).split("-")
     return len(hyp_parts) == len(cores) and all(
         hyp_parts[k].casefold() == cores[k].casefold()
         for k in range(len(cores))
@@ -1599,7 +1599,7 @@ def _hyphenate_underlay_word(word: str) -> str:
         return word
     if "-" in core:
         return core + punct
-    return hyphenate_dutch_word(core) + punct
+    return hyphenate_dutch_word(core, allow_pyphen=True) + punct
 
 
 def _merge_hyphen_word_list(words: list[str]) -> list[str]:
@@ -1734,7 +1734,7 @@ def _extend_pending_single(pending: str, nxt: str) -> str:
     n_core, n_punct = _split_syllable_punct(nxt)
     p_plain = dehyphenate_dutch_word(p_core)
     n_plain = dehyphenate_dutch_word(n_core)
-    glued = hyphenate_dutch_word(p_plain + n_plain) + n_punct
+    glued = hyphenate_dutch_word(p_plain + n_plain, allow_pyphen=True) + n_punct
     if p_plain[:1].isupper() and glued[:1].islower():
         glued = glued[0].upper() + glued[1:]
     return glued
@@ -1769,7 +1769,7 @@ def _format_units_as_words(units: list[tuple[str, str]]) -> list[str]:
     last_punct = _split_syllable_punct(units[-1][1])[1]
     if len(units) <= 3:
         joined = "".join(cores)
-        hyp = hyphenate_dutch_word(joined)
+        hyp = hyphenate_dutch_word(joined, allow_pyphen=True)
         hyp_parts = hyp.split("-")
         absorb_letter = (
             len(cores) >= 2
@@ -2040,7 +2040,7 @@ def _combined_is_one_syllable(left: str, right: str) -> bool:
     ra = _lyric_core(right)
     if not la or not ra or len(ra) != 1:
         return False
-    return len(hyphenate_dutch_word(la + ra).split("-")) == 1
+    return len(hyphenate_dutch_word(la + ra, allow_pyphen=True).split("-")) == 1
 
 
 def _merge_fragment_lyric_positions(positions: list[_Position]) -> list[_Position]:
@@ -2345,7 +2345,7 @@ def _merge_underlay_syllable_gaps(words: list[str]) -> list[str]:
                 continue
             if _can_hyphenate_syllables(cores):
                 last_punct = _split_syllable_punct(chunk[-1])[1]
-                hyp = hyphenate_dutch_word("".join(cores)) + last_punct
+                hyp = hyphenate_dutch_word("".join(cores), allow_pyphen=True) + last_punct
                 if chunk[0][:1].isupper() and hyp[:1].islower():
                     hyp = hyp[0].upper() + hyp[1:]
                 out.append(hyp)
@@ -2378,7 +2378,9 @@ def _extend_hyphen_stem_with_fragment(words: list[str]) -> list[str]:
                 and r_core.casefold() not in ("de", "te")
                 and _can_hyphenate_syllables(left_bits + [r_core])
             ):
-                hyp = hyphenate_dutch_word("".join(left_bits + [r_core]))
+                hyp = hyphenate_dutch_word(
+                    "".join(left_bits + [r_core]), allow_pyphen=True
+                )
                 if words[i][:1].isupper() and hyp[:1].islower():
                     hyp = hyp[0].upper() + hyp[1:]
                 out.append(hyp + r_punct)

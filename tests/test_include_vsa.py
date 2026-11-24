@@ -48,7 +48,7 @@ def test_discover_content_root_from_relative_name_in_nested_cwd(
     assert discover_content_root(Path("page.md")) == content.resolve()
 
 
-TROPARION_BODY = "[:] refrein melodie [:]\n"
+TROPARION_BODY = "[:] re-frein me-lo-die [:]\n"
 
 
 def test_expand_lokaal_partial_line(tmp_path: Path) -> None:
@@ -192,9 +192,9 @@ def test_validate_expanded_antifoon(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     antifoon.write_text(
-        "[:] Couplet een. [:]\n\n"
-        "refrein: @include-vsa lokaal=troparion-geboorte-moeder-gods/obikhod/groningen\n\n"
-        "[:] Couplet twee. [:]\n",
+        "[:] Cou-plet een. [:]\n\n"
+        "re-frein: @include-vsa lokaal=troparion-geboorte-moeder-gods/obikhod/groningen\n\n"
+        "[:] Cou-plet twee. [:]\n",
         encoding="utf-8",
     )
 
@@ -202,6 +202,6 @@ def test_validate_expanded_antifoon(tmp_path: Path) -> None:
     assert result.ok, [m.message_nl for m in result.messages if m.severity == "error"]
 
     expanded, _ = prepare_vsa_body(antifoon.read_text(encoding="utf-8"), antifoon)
-    assert "refrein melodie" in expanded
+    assert "re-frein me-lo-die" in expanded
     assert "@include-vsa" not in expanded
-    assert expanded.index("refrein:") < expanded.index("refrein melodie")
+    assert expanded.index("re-frein:") < expanded.index("re-frein me-lo-die")

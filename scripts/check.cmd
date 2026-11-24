@@ -1,6 +1,10 @@
 @echo off
 setlocal
 cd /d %~dp0\..
+rem Expliciet woordenboek wanneer vendor\bibliotheek (CI-checkout) aanwezig is.
+if exist vendor\bibliotheek\data\syllable_dictionary.nl.txt (
+  if not defined VSA_SYLLABLE_DICTIONARY set VSA_SYLLABLE_DICTIONARY=vendor\bibliotheek\data\syllable_dictionary.nl.txt
+)
 call scripts\_msg.cmd section "=== VSA check (CI-spiegel) ==="
 call scripts\_ensure.cmd --catalogus --vsa-tool --pip-e ".[dev,rendering]" --import vsa --import pytest --import PIL
 if errorlevel 1 exit /b 1

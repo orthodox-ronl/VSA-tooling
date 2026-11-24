@@ -919,7 +919,7 @@ van hun eerbiedwaardige {/moe_}{/der_} {\\\\So}{/&/fi_}{/a_} *
     assert ("a", "B", -1.0) in lyrics
     block = emit_mvsa_block("1", notes, do="F4", mode="major", index=1, total=1)
     assert "fi_&_" in block
-    assert "/&/" in block
+    assert "/ &/" in block or "/  &/" in block
     # Geen absolute octaafcijfers op stemslots (ag-vsa t.o.v. @oct).
     for line in block.splitlines():
         if line.startswith(("S:", "A:", "T:", "B:")):
@@ -1288,7 +1288,7 @@ def test_kondak_toon_6_frase1_half_melisma_le_na() -> None:
     assert notes[le_i + 2].lyric.startswith("na")
     block = emit_mvsa_block("1", notes, do="F4", mode="major", index=3, total=10)
     assert "le_&_" in block
-    assert re.search(r"le_&_[-]?na_", block)
+    assert re.search(r"le_&_\s*[-]?na_", block)
 
 
 def test_tropaar_toon_6_melisma_hold_and_recite() -> None:

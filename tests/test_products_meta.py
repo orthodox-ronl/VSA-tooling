@@ -503,7 +503,7 @@ def test_mscz_products_tall_svg_meta_drops_bladreeks(tmp_path: Path) -> None:
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
     ]
     with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
-        assert products_mscz_one(bron, force=True) == 0
+        assert products_mscz_one(bron, force=True, allow_noncanonical=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     keys = set(data["products"])
@@ -514,7 +514,7 @@ def test_mscz_products_tall_svg_meta_drops_bladreeks(tmp_path: Path) -> None:
     path = tmp_path / entry["file"]
     assert path.is_file()
     assert entry["sha256"] == sha256_file(path)
-    assert products_mscz_one(bron, force=False) == 0
+    assert products_mscz_one(bron, force=False, allow_noncanonical=True) == 0
 
 
 def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
@@ -524,7 +524,7 @@ def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
     ]
     with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
-        assert products_mscz_one(bron, force=True) == 0
+        assert products_mscz_one(bron, force=True, allow_noncanonical=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert "svg" in data["products"]
     assert data["products"]["svg"]["file"] == "lied.mscz.svg"

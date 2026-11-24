@@ -29,6 +29,13 @@ jobs:
           path: vendor/bron
           ref: main
 
+      - name: Checkout bibliotheek repository
+        uses: actions/checkout@v5
+        with:
+          repository: orthodox-ronl/bibliotheek
+          path: vendor/bibliotheek
+          ref: development
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -40,4 +47,12 @@ jobs:
 
       - name: Run VSA CI
         shell: cmd
-        run: scripts\ci.cmd
+        env:
+          # Expliciet pad (VSA_SYLLABLE_DICTIONARY); vsa.toml wint in de CLI, daarom
+          # junction zodat ../bibliotheek/data/… op CI bestaat (zelfde als lokaal sibling).
+          VSA_SYLLABLE_DICTIONARY: vendor/bibliotheek/data/syllable_dictionary.nl.txt
+        run: |
+          if not exist ..\bibliotheek (
+            mklink /J ..\bibliotheek vendor\bibliotheek
+          )
+          scripts\ci.cmd

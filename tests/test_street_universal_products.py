@@ -112,7 +112,7 @@ def test_mscz_products_writes_universal_keys(tmp_path: Path) -> None:
         ),
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_svg),
     ):
-        assert products_mscz_one(bron, force=True) == 0
+        assert products_mscz_one(bron, force=True, allow_noncanonical=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     keys = set(data["products"])
     assert set(UNIVERSAL_PRODUCT_KEYS).issubset(keys)
@@ -125,7 +125,7 @@ def test_mscz_mp3_writes_sibling(tmp_path: Path, capsys) -> None:
     bron = tmp_path / "lied.mscz"
     bron.write_bytes(b"PK\x03\x04fake")
     with patch("vsa.audio_export.export_to_audio", side_effect=_fake_mp3):
-        assert mscz_main(["mp3", str(bron)]) == 0
+        assert mscz_main(["mp3", str(bron), "--allow-noncanonical"]) == 0
     assert (tmp_path / "lied.mscz.mp3").is_file()
     assert "Geschreven:" in capsys.readouterr().out
 
