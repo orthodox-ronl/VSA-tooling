@@ -42,5 +42,5 @@ output-mode = "shortcode"
 
     assert (
         '{{< vsa src="/vsa/demo-block-1.svg" alt="VSA notatie" '
-        'scale="calc(3.4 * var(--vsa-size, 1.25) * 1em)" >}}'
+        'scale="calc(3.1 * var(--vsa-size, 1.25) * 1em)" >}}'
     ) in content

@@ -22,6 +22,15 @@ Canoniek = muziek-only, trim/viewBox op inhoud; geen blad-chrome. C1–C4:
 
 Geen frontmatter in de SVG. Titel/colofon horen in `index.md.pdf`, niet hier.
 
+## Witruimte
+
+De SVG wordt na het tekenen **bijgesneden tot de getekende inhoud** (lijnen,
+cirkels, tekst): links/rechts 6 en boven/onder 4 eenheden rand, ongeacht lege
+rijen, commentaar of structuur boven de notatie. Instelbaar in `vsa.toml`
+onder `[rendering.svg]`: `trim` (standaard `true`), `trim-padding-x`,
+`trim-padding-y`. De viewBox blijft `0 0 breedte hoogte`; de inhoud staat in
+een groep `vsa-trim` met een `translate`.
+
 ## Syllabificatie
 
 **Strip** soft `-` in zichtbare underlay: de schermtekst loopt door zonder

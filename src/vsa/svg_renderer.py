@@ -136,7 +136,16 @@ class SVGRenderer:
 
         parts.append("</g>")
         parts.append("</svg>")
-        return "\n".join(parts)
+        svg = "\n".join(parts)
+        if self.svg_config.trim:
+            from .svg_ink_trim import trim_vsa_svg
+
+            svg = trim_vsa_svg(
+                svg,
+                pad_x=self.svg_config.trim_padding_x,
+                pad_y=self.svg_config.trim_padding_y,
+            )
+        return svg
 
     def _compute_extra_top(self, lines) -> float:
         """Extra top padding so the highest stacked glyph tip stays above y=0."""
