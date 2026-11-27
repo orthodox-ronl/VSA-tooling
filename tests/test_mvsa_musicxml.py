@@ -144,8 +144,8 @@ B: -             f3  -   |
         assert ("end", "men") in lyrics, layout
 
 
-def test_partituur_recite_hides_internal_hyphens_keeps_bridge():
-    """R8: binnen recite geen hyphen-glyphs; brug na ``)`` blijft."""
+def test_partituur_recite_toont_alle_streepjes():
+    """R8 (herzien): partituur-SVG toont alle streepjes, ook binnen recite."""
     text = """\
 @do F4
 @mode major
@@ -163,11 +163,12 @@ B: -             f3  -   |
     )
     assert ("begin", "wan") in playback
     assert ("middle", "neer") in playback or ("end", "neer") in playback
-    assert ("single", "wan") in partituur
-    assert ("single", "neer") in partituur
+    assert ("begin", "wan") in partituur
+    assert ("end", "neer") in partituur
     assert ("begin", "ge") in partituur
     assert ("end", "ko") in partituur or ("middle", "ko") in partituur
     assert ("single", "ge") not in partituur
+    assert partituur == playback
 
 
 def test_parse_l_recite_optional_elm():

@@ -26,9 +26,12 @@ Geen frontmatter. Default witte achtergrond; `--transparent` leeg.
 
 ## Syllabificatie
 
-Underlay volgens MuseScore/OSMD-pad; soft `-` in bron. Schermstrip waar
-van toepassing — [syllabificatie](syllabificatie.md). Lyric-bboxes niet
-aan elkaar plakken (trailing space / postprocess).
+Underlay volgens MuseScore/OSMD-pad. **Contract:** een partituur-SVG (`.mvsa.svg`,
+`.mscz.svg`) toont **alle** lettergreep-streepjes — ook binnen recite
+(`wor-de ge-hei-ligd`) en bij melisma’s (`ko_-me_`), net als `.mvsa.mxl`. De
+afgeleide `.vsa.svg` toont ze juist **niet** ([vsa-svg](vsa-svg.md)).
+Schermstrip waar van toepassing — [syllabificatie](syllabificatie.md).
+Lyric-bboxes niet aan elkaar plakken (trailing space / postprocess).
 
 ## Melisma en binding
 

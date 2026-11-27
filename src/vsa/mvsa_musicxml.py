@@ -1073,8 +1073,9 @@ def _syllabic_for_recite_index(
     ``opens_hyphen`` is True when the *next L-positie* continues the word
     (woordstreepje na ``)``, bv. ``(… ge)-ko``).
 
-    Partituur (R8): geen zichtbare streepjes *binnen* de recite; wel de
-    brug naar de volgende L-positie (en vanuit een vorige).
+    Partituur-SVG (R8, herzien): een partituur toont **alle** streepjes,
+    ook binnen de recite (``wor-de ge-hei-ligd``); alleen de ``.vsa``-SVG
+    laat ze weg. ``layout`` blijft in de signatuur voor aanroepers.
     """
     n = len(lpos.syllables) if lpos.syllables else 0
     opens_within = index + 1 < n and index < len(lpos.links) and lpos.links[index]
@@ -1084,13 +1085,8 @@ def _syllabic_for_recite_index(
     )
     continues_from_prev_pos = index == 0 and lpos.continues_word
 
-    if layout == "partituur":
-        # Alleen bruggen over L-grenzen; interne zing-deling zonder hyphen-glyph.
-        opens = opens_to_next_pos
-        continues = continues_from_prev_pos
-    else:
-        opens = opens_within or opens_to_next_pos
-        continues = continues_within or continues_from_prev_pos
+    opens = opens_within or opens_to_next_pos
+    continues = continues_within or continues_from_prev_pos
 
     if continues and opens:
         return "middle"

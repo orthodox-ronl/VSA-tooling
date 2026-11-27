@@ -50,7 +50,7 @@ binnen elke recite op het blad.
 
 | Regel | Inhoud                                                                                                                                   |
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| R8    | Recite-underlay: geen zichtbare soft `-` *binnen* recite; MusicXML `syllabic` begin/middle/end + brugstreepjes over woordgrenzen blijven |
+| R8    | Recite-underlay: ook binnen recite alle streepjes (partituur-SVG); MusicXML `syllabic` begin/middle/end per lettergreep |
 | Bron  | Zing-deling = noot-aantal; zie [syllabificatie](syllabificatie.md)                                                                       |
 
 Voorbeeld: bron `ver-heer-lijkt` → op blad syllabic begin/middle/end (en
@@ -120,7 +120,7 @@ brontype; products naast de bron wel.
 | S8  | Recite-print spacers / breve bij `n ≥ 6` (partituur) | [canonical-checklists](canonical-checklists.md) |
 | M10 | **Geen** print-collapse in Coria-playback-`.mxl`     | zelfde hub §MXL                                 |
 | R5  | Maatlengte = som noten + spacers; spacers `play=0`   | [mscz-leesbaarheid](mscz-leesbaarheid.md)       |
-| R8  | Geen interne hyphen-glyphs in recite-underlay        | zelfde                                          |
+| R8  | Alle hyphen-glyphs in recite-underlay (partituur) | zelfde                                          |
 
 Semantiek deelt de kern met MXL; layout divergeert (Coria = vier parts).
 
