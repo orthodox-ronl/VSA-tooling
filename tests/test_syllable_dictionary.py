@@ -88,3 +88,22 @@ def test_plus_alt_rejects_wrong_lemma() -> None:
         assert False, "expected ValueError"
     except ValueError as exc:
         assert "open groep" in str(exc) or "hoort bij" in str(exc)
+
+
+def test_commentaar_boven_woord_blijft_bij_sorteren(tmp_path):
+    from vsa.syllable_dict_check import rewrite_dictionary_sorted
+
+    p = tmp_path / "d.txt"
+    p.write_text(
+        "# kop\n\nzon-der\n# let op: eigennaam\n# tweede regel\nbe-gin\n"
+        "# bij de alt\n+beg-in\n",
+        encoding="utf-8",
+    )
+    rewrite_dictionary_sorted(p)
+    assert p.read_text(encoding="utf-8") == (
+        "# kop\n\n"
+        "# let op: eigennaam\n# tweede regel\n# bij de alt\nbe-gin\n+beg-in\n"
+        "zon-der\n"
+    )
+    rewrite_dictionary_sorted(p)  # idempotent
+    assert p.read_text(encoding="utf-8").count("# let op") == 1

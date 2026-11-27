@@ -107,7 +107,7 @@ een regel die met `+` begint. Die lijst is de norm voor gezongen body-tekst
 | Env            | `VSA_SYLLABLE_DICTIONARY` (nl); `VSA_SYLLABLE_DICTIONARY_KSL` (ksl)                                                                                                         |
 | Pad-auto       | `data/syllable_dictionary.<lang>.txt` in de werkmap, of sibling `bibliotheek/data/…`                                                                                        |
 | Loader         | `vsa.syllable_dictionary`                                                                                                                                                   |
-| Vorm           | Eén hyphenvorm per regel (kleine letters); soft `-` / hard `=`; `#` = commentaar; `+vorm` = toegestaan alternatief voor het open lemma                                      |
+| Vorm           | Eén hyphenvorm per regel (kleine letters); soft `-` / hard `=`; `#` = commentaar (boven de lijst: kop; tussen de woorden: hoort bij de **eerstvolgende** woordregel en blijft daar bij sorteren staan); `+vorm` = toegestaan alternatief voor het open lemma                                      |
 | Primair / alt  | Regel zonder `+` = primaire vorm (syllabify-default); `+vorm` = zelfde lemma, ook OK bij validate                                                                           |
 | Volgorde       | Entries alfabetisch op **lemma** (daarna `+`-alts); TTY/append herschrijft gesorteerd                                                                                       |
 | Matching       | Lemma = letters zonder `-`/`=`, case-fold; validate OK als bronvorm ∈ {primair} ∪ {alts}                                                                                    |
