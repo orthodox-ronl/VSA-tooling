@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from functools import lru_cache
 from pathlib import Path
 
@@ -391,6 +391,8 @@ class SyllableEntry:
 
     primary: str
     alts: frozenset[str] = frozenset()
+    # ``#``-regels direct boven de vorm; blijven bij sorteren bij dit woord.
+    comment: tuple[str, ...] = field(default=(), compare=False)
 
     def allowed(self) -> frozenset[str]:
         return frozenset({self.primary}) | self.alts
@@ -433,9 +435,13 @@ def parse_syllable_dictionary_text(
 
     entries: dict[str, SyllableEntry] = {}
     open_key: str | None = None
+    pending: list[str] = []
     for lineno, raw in enumerate(lines[i:], start=i + 1):
         line = raw.strip()
-        if not line or line.startswith("#"):
+        if not line:
+            continue
+        if line.startswith("#"):
+            pending.append(line)
             continue
         is_alt = line.startswith("+")
         form = line[1:].strip().casefold() if is_alt else line.casefold()
@@ -454,11 +460,15 @@ def parse_syllable_dictionary_text(
                     f"lemma {key!r}, open groep is {open_key!r}"
                 )
             current = entries[open_key]
+            if pending:
+                entries[open_key] = replace(
+                    current, comment=current.comment + tuple(pending)
+                )
+                current = entries[open_key]
+                pending = []
             if form == current.primary or form in current.alts:
                 continue
-            entries[open_key] = SyllableEntry(
-                current.primary, current.alts | {form}
-            )
+            entries[open_key] = replace(current, alts=current.alts | {form})
             continue
 
         existing = entries.get(key)
@@ -469,7 +479,12 @@ def parse_syllable_dictionary_text(
                 f"(gebruik ``+{form}`` voor een toegestaan alternatief)"
             )
         if existing is None:
-            entries[key] = SyllableEntry(form, frozenset())
+            entries[key] = SyllableEntry(form, frozenset(), tuple(pending))
+        elif pending:
+            entries[key] = replace(
+                existing, comment=existing.comment + tuple(pending)
+            )
+        pending = []
         open_key = key
     return header, entries
 

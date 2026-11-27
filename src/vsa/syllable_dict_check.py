@@ -6,7 +6,7 @@ import re
 import sys
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from .ast import ControlTokenNode, Document, PitchMarkerNode, ScopeNode, TextNode
@@ -775,8 +775,8 @@ def set_canonical_form(form: str, *, allow_replace: bool = True) -> str:
                 f"lemma {key!r} staat al als {existing.primary!r}, "
                 f"niet {normalized!r}"
             )
-        by_lemma[key] = SyllableEntry(
-            existing.primary, existing.alts | {normalized}
+        by_lemma[key] = replace(
+            existing, alts=existing.alts | {normalized}
         )
     else:
         by_lemma[key] = SyllableEntry(normalized, frozenset())
@@ -821,6 +821,7 @@ def _write_sorted_dictionary(
     for lemma in sorted(by_lemma.keys()):
         value = by_lemma[lemma]
         if isinstance(value, SyllableEntry):
+            lines.extend(value.comment)
             lines.append(value.primary)
             for alt in sorted(value.alts):
                 lines.append(f"+{alt}")
