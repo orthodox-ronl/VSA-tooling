@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fix (syllabify):** een regel die met `#` begint (broncommentaar) kreeg streepjes (`over` werd `o-ver`) als er in dezelfde passage geen `<!--` stond. `#`-regels blijven nu altijd onaangeroerd, bij `syllabify` en `--unsyllabify`.
 - **Nieuw (vsa mvsa):** valideert de zojuist geschreven MVSA; bij errors worden die met bestand/regel/kolom gemeld en eindigt het commando met exitcode 1 (bestand blijft staan).
 - **Fix (vsa mvsa):** een `_` achter een recite-lettergreep in de VSA-tekst (`{/ver}hoor_`, `tot_`) kwam binnen de haakjes terecht (`(ver-hoor_)`, fout `duur-/melisma-ELM binnen recite-haakjes`). De ELM staat nu ná `)`: `(ver-hoor)_`.
 - **Fix (vsa mvsa):** `template:` in de frontmatter van de `.vsa` wordt gebruikt (CLI `--template` wint nog steeds). Voorheen gaf `soort`+`toon` met meerdere formules (bijv. tropaar toon 4: groningen/hemelum) `TEMPLATE-SELECT-AMBIGUOUS`, ook als de .vsa de template al noemde.
