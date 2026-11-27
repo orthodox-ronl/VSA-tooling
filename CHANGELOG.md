@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fix (mvsa svg/mxl-partituur):** in recite (`(Uw Naam wor-de ge-hei-ligd)`) kwamen de lettergreep-streepjes niet in de partituur-SVG: R8 verborg ze doelbewust. Contract herzien: een partituur-SVG toont **alle** streepjes (ook binnen recite); alleen de `.vsa.svg` laat ze weg. Producten moeten opnieuw gegenereerd worden (`products --force`).
 - **Nieuw (vsa svg):** de SVG wordt na het tekenen bijgesneden tot de getekende inhoud (rand 6 links/rechts, 4 boven/onder). Lege rijen of commentaar boven de notatie geven geen witruimte meer. Uit te zetten met `rendering.svg.trim = false`; zie `docs/formats/vsa-svg.md`. Bestaande svg's worden korter; daarmee verandert de `scale` in gegenereerde markdown mee.
 - **Fix (syllabify):** een regel die met `#` begint (broncommentaar) kreeg streepjes (`over` werd `o-ver`) als er in dezelfde passage geen `<!--` stond. `#`-regels blijven nu altijd onaangeroerd, bij `syllabify` en `--unsyllabify`.
 - **Nieuw (vsa mvsa):** valideert de zojuist geschreven MVSA; bij errors worden die met bestand/regel/kolom gemeld en eindigt het commando met exitcode 1 (bestand blijft staan).

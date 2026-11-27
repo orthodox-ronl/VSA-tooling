@@ -264,7 +264,7 @@ aanroep vanuit `vsa validate` na geslaagde parse. Alleen **platte**
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | MusicXML / audio / recite-noten (aantal posities) | **Vertrouw** de bron-deling; geen stille Pyphen als bron van waarheid                                          |
 | SVG (VSA-blad) / zoektekst / `vsa text` / lyrics  | **Strip** soft `-`; hard `=` wordt zichtbaar `-`                                                               |
-| MSCZ print / partituur-recite                     | Soft `-` / hyphen-glyphs **binnen** recite verborgen (R8); noot-aantal = bron-deling; brug `(…)-cadens` blijft |
+| MSCZ print / partituur-recite                     | Alle hyphen-glyphs zichtbaar, ook binnen recite (R8, herzien); noot-aantal = bron-deling; brug `(…)-cadens` blijft |
 | `vsa syllabify`                                   | Schrijfhulp op de bron; geen verplichte products-stap                                                          |
 
 Zie ook [zoektekst.md](zoektekst.md) (niet-gesyllabiseerde platte tekst voor
