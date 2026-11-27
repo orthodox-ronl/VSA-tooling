@@ -292,3 +292,20 @@ def test_cli_rejects_in_place_with_extension(tmp_path: Path, capsys) -> None:
     assert main(["syllabify", str(path), "--in-place", "--extension", ".syl.vsa"]) == 1
     err = capsys.readouterr().err
     assert "--in-place" in err and "--extension" in err
+
+
+def test_hash_commentaarregel_wordt_niet_gehypheneerd() -> None:
+    """``#``-regels zijn broncommentaar: nooit streepjes erin (ook zonder <!--)."""
+    text = (
+        "---\ntemplate: kondak-toon-2-groningen\n---\n"
+        "# Dit is commentaar over gedrag\n"
+        "Kon-dak {Heer} over\n"
+    )
+    out = syllabify_vsa_source(text).text
+    assert "# Dit is commentaar over gedrag\n" in out
+    assert "o-ver" in out.splitlines()[-1]
+
+    gestreept = text.replace("commentaar over", "com-men-taar o-ver")
+    assert "# Dit is com-men-taar o-ver gedrag\n" in unsyllabify_vsa_source(
+        gestreept
+    ).text

@@ -436,7 +436,9 @@ def _atoms_from_document(body: str, document) -> list[_Atom]:
 def _atoms_from_text_segment(segment: str) -> list[_Atom]:
     if not segment:
         return []
-    if "<!--" in segment:
+    # ``#``-regels zijn broncommentaar en blijven net als HTML-commentaar
+    # onaangeroerd (nooit hypheneren).
+    if "<!--" in segment or "#" in segment:
         return _atoms_from_text_with_comments(segment)
     return _atoms_from_plain_text(segment)
 
