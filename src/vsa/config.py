@@ -37,6 +37,10 @@ class SVGRenderingConfig:
     pitch_marker_gap: float = 4.0
     margin_x: float = 8.0
     margin_y: float = 8.0
+    # Na het tekenen bijsnijden tot de inhoud (+ kleine rand); zie svg_ink_trim.
+    trim: bool = True
+    trim_padding_x: float = 6.0
+    trim_padding_y: float = 4.0
     filler_offset_y: float = -6.0
     # Display size vs surrounding markdown ``1em`` (CSS ``--vsa-size`` default).
     relative_size: float = 1.25
@@ -178,6 +182,12 @@ def _load_svg_rendering_config(config: SVGRenderingConfig, data: dict):
         config.margin_x = _non_negative_float(data["margin-x"], "rendering.svg.margin-x")
     if "margin-y" in data:
         config.margin_y = _non_negative_float(data["margin-y"], "rendering.svg.margin-y")
+    if "trim" in data:
+        config.trim = bool(data["trim"])
+    if "trim-padding-x" in data:
+        config.trim_padding_x = _non_negative_float(data["trim-padding-x"], "rendering.svg.trim-padding-x")
+    if "trim-padding-y" in data:
+        config.trim_padding_y = _non_negative_float(data["trim-padding-y"], "rendering.svg.trim-padding-y")
     if "filler-offset-y" in data:
         config.filler_offset_y = float(data["filler-offset-y"])
 
