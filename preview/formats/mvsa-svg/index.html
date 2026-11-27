@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-27 15:44 CET.
+   — branch <code>fix/svg-recite-streepjes</code>
+  , gebouwd 2026-11-27 20:00 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5755,9 +5755,12 @@ Layout: <a href="../mscz/#layoutprofielen---layout"><code>.mscz</code> layoutpro
 <h2 id="inhoud-en-metadata">Inhoud en metadata<a class="headerlink" href="#inhoud-en-metadata" title="Permanent link">&para;</a></h2>
 <p>Geen frontmatter. Default witte achtergrond; <code>--transparent</code> leeg.</p>
 <h2 id="syllabificatie">Syllabificatie<a class="headerlink" href="#syllabificatie" title="Permanent link">&para;</a></h2>
-<p>Underlay volgens MuseScore/OSMD-pad; soft <code>-</code> in bron. Schermstrip waar
-van toepassing — <a href="../syllabificatie/">syllabificatie</a>. Lyric-bboxes niet
-aan elkaar plakken (trailing space / postprocess).</p>
+<p>Underlay volgens MuseScore/OSMD-pad. <strong>Contract:</strong> een partituur-SVG (<code>.mvsa.svg</code>,
+<code>.mscz.svg</code>) toont <strong>alle</strong> lettergreep-streepjes — ook binnen recite
+(<code>wor-de ge-hei-ligd</code>) en bij melisma’s (<code>ko_-me_</code>), net als <code>.mvsa.mxl</code>. De
+afgeleide <code>.vsa.svg</code> toont ze juist <strong>niet</strong> (<a href="../vsa-svg/">vsa-svg</a>).
+Schermstrip waar van toepassing — <a href="../syllabificatie/">syllabificatie</a>.
+Lyric-bboxes niet aan elkaar plakken (trailing space / postprocess).</p>
 <h2 id="melisma-en-binding">Melisma en binding<a class="headerlink" href="#melisma-en-binding" title="Permanent link">&para;</a></h2>
 <p>S13 / R7 via partituurketen; OSMD-pad: zelfde bedoeling.</p>
 <h2 id="transliteratie">Transliteratie<a class="headerlink" href="#transliteratie" title="Permanent link">&para;</a></h2>
@@ -5846,7 +5849,7 @@ mvsa svg examples\mvsa\1a-vredeslitanie.mvsa -o generated\spike-svg\1a-osmd.svg 
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-14
+        Bijgewerkt: 2026-11-27
         
       </p>
       
