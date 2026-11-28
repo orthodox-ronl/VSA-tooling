@@ -143,7 +143,8 @@ def write_meta(
     with exactly the keys in *products*.
 
     ``merge=True`` (individuele product-subs): keep other product keys when
-    existing meta is schema 2 and ``bron_sha256`` still matches; otherwise
+    existing meta is schema 2 or 3 and ``bron_sha256`` still matches (schema 3: ook
+    invoer ongewijzigd; schema 2 heeft geen invoer en wordt zo opgewaardeerd); otherwise
     write only the keys from this run (no silent mix of old/new bron).
 
     *drop_keys*: after merge (or on the new set), remove these product keys
@@ -164,9 +165,12 @@ def write_meta(
         existing = load_meta(bron)
         if (
             existing is not None
-            and existing.get("schema") == SCHEMA_VERSION
+            and existing.get("schema") in _LEESBARE_SCHEMAS
             and _bron_sha256_matches(existing, bron_sha)
-            and not verschillen(existing.get("invoer"), payload["invoer"])
+            and (
+                existing.get("schema") == SCHEMA_VERSION_LEGACY
+                or not verschillen(existing.get("invoer"), payload["invoer"])
+            )
         ):
             kept = existing.get("products")
             if isinstance(kept, dict) and kept:
