@@ -179,6 +179,15 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   stempels; stamp-fallback weg.
 - Klaar als: `stamp_ok_or_meta` nergens meer voorkomt en
   `scripts/product_meta.py` weg is of alleen nog een dunne wrapper.
+- **Afstemming met de "straten"-lijn in bibliotheek (2026-11-28):** de
+  bibliotheek bouwt één graaf (`scripts/plan.py`) die per bronsoort weet welke
+  producten eruit komen; `fix` loopt die graaf af, zodat één run genoeg is.
+  Deze stap levert daarvoor de **ene versheidsfunctie** in tooling
+  (`vsa.products_meta.freshness`), inclusief verborgen invoer (woordenlijst,
+  template, recept-versie). De graaf in bibliotheek roept die functie aan;
+  tooling bouwt zelf geen graaf. Wijzigingen in `product_meta.py`,
+  `check_*` en `sync_*` in bibliotheek gaan via de straten-chat (zie
+  `WERKVERDELING.md`).
 
 ### 7. Syllaben
 
@@ -203,6 +212,12 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   Elk delegeert aan de tooling-API; bibliotheek houdt alleen filter en beleid.
 - Klaar als: geen `need_mxl`/`need_svg`-logica meer in bibliotheek en per
   script één smoke-test die bewijst dat de tooling-API wordt aangeroepen.
+- **Aangepast (2026-11-28):** deze stap gaat op in "Eén straat, één fix"
+  (Taak 3 van de straten-chat in bibliotheek, `plan.py` en `fix.py`). Elk
+  `sync_*`- en `check_*`-script wordt daar een dunne aanroep van dezelfde
+  graaf-onderdelen. Tooling levert alleen de API per product ("maak product X
+  uit bron Y"); het omschrijven van de scripts zelf valt onder die taak. Het
+  klaar-als hierboven blijft gelden en wordt daar gemeten.
 
 ### 9. Export-kern ontleden (tooling)
 
@@ -215,6 +230,10 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   bijgewerkt.
 - Klaar als: geen exporter meer een eigen kopie van melisma/recite-logica
   heeft en `mvsa_musicxml.py` aanmerkelijk kleiner is.
+- **Eerst afstemmen:** de werkplannen `eigen-partituur-svg.md` en
+  `partituur-ir.md` (open PR's #76 en #77) raken dezelfde export- en
+  Score-IR-keten. Begin pas aan een slice als duidelijk is welke bestanden
+  daar nog worden gewijzigd; meld de slice eerst in `WERKVERDELING.md`.
 
 ### 10. Opruimen
 
