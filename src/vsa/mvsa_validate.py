@@ -358,8 +358,10 @@ def _auto_repair_mvsa_soft_hyphens(
     path: Path, text: str
 ) -> tuple[str, MvsaDiagnostic | None]:
     """Stille reparatie; nooit met Pyphen-gokken op onbekende woorden (zie impl)."""
-    from .syllable_dict_check import force_noninteractive
+    from .syllable_dict_check import force_noninteractive, validate_rewrite_disabled
 
+    if validate_rewrite_disabled():
+        return text, None
     with force_noninteractive():
         return _auto_repair_mvsa_soft_hyphens_impl(path, text)
 

@@ -1420,6 +1420,22 @@ def _rebuild_scope_source(source: str, old_plain: str, new_plain: str) -> str:
     return "{" + inner[:idx] + new_plain + inner[idx + len(old_plain) :] + "}"
 
 
+def validate_rewrite_disabled() -> bool:
+    """``True`` als validate bronnen niet stil mag herschrijven.
+
+    Zet ``VSA_VALIDATE_NO_REWRITE=1`` (bijv. in CI): validate meldt dan de
+    afwijking van de woordenlijst als fout, zonder het bronbestand te wijzigen.
+    Lokaal blijft de automatische reparatie (``VSA-SYLLABIFY-APPLIED``) gelden.
+    """
+    import os
+
+    return os.environ.get("VSA_VALIDATE_NO_REWRITE", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+
 def apply_replacements_to_file(
     path: Path,
     replacements: list[tuple[str, str]],
