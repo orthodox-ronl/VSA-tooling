@@ -189,6 +189,38 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   `check_*` en `sync_*` in bibliotheek gaan via de straten-chat (zie
   `WERKVERDELING.md`).
 
+#### Ontwerp versheid (concept, 2026-11-28, ter bijsturing)
+
+Eén vingerafdruk per product, berekend door `vsa.products_meta`:
+
+1. **Samenstelling.** `invoer_sha256` = hash over: de bytes van de bron
+   (zoals ze ná `validate` op schijf staan), de woorden-component, de
+   template-component en de recept-versie. Elke component staat ook apart in de
+   meta onder `invoer`, zodat `freshness` kan zeggen *wat* veranderde.
+2. **Woorden.** De woordkernen uit de bron (bestaande
+   `iter_vsa_lyric_word_cores` en `iter_mvsa_lyric_word_cores`) met per woord
+   de vorm uit de woordenlijst (of "onbekend"); hash over de gesorteerde
+   paren. Een wijziging in de woordenlijst maakt dus alleen producten
+   verouderd die dat woord gebruiken.
+3. **Template.** De hash van het template dat de bron in zijn frontmatter noemt
+   (`template_library`); zonder template een lege component.
+4. **Recept-versie.** Een getal per productsoort (`RECEPT_VERSIE` in
+   `vsa.products_meta`), met de hand opgehoogd in dezelfde PR als een bewuste
+   wijziging van de export-uitkomst. De tooling-commit telt **niet** mee.
+5. **Schema 3.** `products-meta` krijgt `invoer`; `bron_sha256` blijft staan.
+   `freshness` geeft `stale` met reden, bijvoorbeeld "woordenlijst: 'melodie'
+   veranderd" of "recept mvsa 3 -> 4".
+6. **Overgang.** Schema 2 blijft leesbaar: standaard (`invoer="los"`) geldt de
+   bestaande bron-hash-controle, met de reden "oud schema". `invoer="streng"`
+   eist schema 3. Een eenmalig commando schrijft de `invoer` voor producten
+   die nu `ok` zijn en laat verouderde staan. De bibliotheek schakelt naar
+   `streng` zodra de straten-graaf klaar is.
+7. **PDF's.** Zelfde functie met een lokale sidecar (PDF's staan niet in git);
+   niet in deze stap.
+8. **Open vragen.** (a) Welke producten hangen werkelijk van het template af?
+   (b) Wie hoogt de recept-versie op: voorstel is de PR die de export wijzigt,
+   met een regel in `CHANGELOG.md`.
+
 ### 7. Syllaben
 
 - Uitvoerder: Sonnet 5.5.
