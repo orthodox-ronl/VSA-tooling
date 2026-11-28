@@ -189,7 +189,17 @@ Elke stap wordt uitgevoerd volgens dezelfde regels die Cursor al gebruikt
   `check_*` en `sync_*` in bibliotheek gaan via de straten-chat (zie
   `WERKVERDELING.md`).
 
-#### Ontwerp versheid (concept, 2026-11-28, ter bijsturing)
+#### Ontwerp versheid (2026-11-28; tooling-deel gebouwd)
+
+**Stand:** de tooling-kant staat in `vsa.products_invoer` en
+`vsa.products_meta` (schema 3, `freshness(..., invoer="los"|"streng")`,
+`upgrade_meta`). Afwijkingen van dit ontwerp: de standaardstand `los` kijkt
+alleen naar de bron-hash, omdat de woorden-vergelijking de actieve woordenlijst
+nodig heeft (anders lijkt elk product verouderd); `streng` doet de hele
+vingerafdruk. Het template telt alleen voor een `.vsa`. De omzetting van schema 2
+is een functie (`upgrade_meta`), nog geen CLI-commando. Wat nog moet: de
+bibliotheek schakelt de sporen om naar deze ene functie en naar `streng`
+(straten-chat), en vult de PDF-sidecar aan.
 
 Eén vingerafdruk per product, berekend door `vsa.products_meta`:
 

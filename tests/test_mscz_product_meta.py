@@ -51,7 +51,7 @@ def test_mscz_mxl_writes_and_merges_meta(tmp_path: Path) -> None:
     meta_path = meta_path_for(bron)
     assert meta_path.is_file()
     data = json.loads(meta_path.read_text(encoding="utf-8"))
-    assert data["schema"] == 2
+    assert data["schema"] == 3
     assert "generated_at" in data["products"]["mxl"]
     assert data["products"]["mxl"]["sha256"] == sha256_file(tmp_path / "lied.mscz.mxl")
 

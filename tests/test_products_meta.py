@@ -11,6 +11,7 @@ import pytest
 from vsa.cli_mvsa import main as mvsa_main
 from vsa.products_meta import (
     SCHEMA_VERSION,
+    SCHEMA_VERSION_LEGACY,
     freshness,
     load_meta,
     meta_path_for,
@@ -195,7 +196,7 @@ def test_freshness_ok_without_legacy_product_generated_at(tmp_path: Path) -> Non
     meta_path_for(bron).write_text(
         json.dumps(
             {
-                "schema": SCHEMA_VERSION,
+                "schema": SCHEMA_VERSION_LEGACY,
                 "bron": bron.name,
                 "bron_sha256": sha256_file(bron),
                 "generated_at": "2026-01-01T00:00:00+00:00",
