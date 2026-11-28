@@ -5,7 +5,7 @@ Canonieke bron per formule: ``docs/.../library/<id>/template.yaml``.
 Afgeleiden staan naast die YAML. Na elke YAML-wijziging:
 
   python scripts\\sync_library_templates.py
-  python scripts\\sync_library_templates.py tropaar-toon-4 groningen-tropaar-toon-4
+  python scripts\\sync_library_templates.py tropaar-toon-4-hemelum tropaar-toon-4-groningen
   python scripts\\sync_library_templates.py --check
 
 ``--check`` schrijft niets; exit 1 als een afgeleide ontbreekt of afwijkt.

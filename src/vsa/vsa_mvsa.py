@@ -19,14 +19,13 @@ from typing import Any
 from .music import Pitch
 from .mvsa_align import align_mvsa_text
 from .mvsa_normalize import (
+    format_abc_writing_oct,
     format_ehm,
     pitch_to_degree_and_chrom,
 )
 from .pitch_resolver import (
     PitchResolver,
-    _pitch_to_midi,
     degree_to_pitch,
-    pitch_in_do_octave,
 )
 from .template_instance import (
     MappedNote,
@@ -41,9 +40,17 @@ from .template_library import (
     DEFAULT_VOICE_OCT,
     ResolvedTemplate,
     TemplateLibraryError,
+    list_templates_for_soort_toon,
     load_resolved_template,
+    select_template_id,
 )
-from .vsa_stanzas import ensure_stanza_stars, extract_stanza_notes
+from .vsa_stanzas import (
+    SoftPhraseJoint,
+    apply_phrase_separators,
+    ensure_stanza_stars,
+    extract_stanza_notes,
+    soft_phrase_joints,
+)
 from .yaml_frontmatter import parse_vsa_frontmatter
 
 # Schrijfoctaven synchroon met @oct-regel (T5 emit / Coria-MXL).
@@ -58,9 +65,9 @@ TEMPLATE_DERIVED_WARNING_BANNER = """\
 #  #   DIT BESTAND IS AFGELEID UIT VSA + TEMPLATE EN IS EEN SCHETS.         #  #
 #  #   CONTROLEER VÓÓR OPNAME IN DE CATALOGUS TEN MINSTE:                   #  #
 #  #   - duren (halve noten ``_`` blijven eigen L-posities; recite = kwart) #  #
-#  #   - melisma-ELMs (``{/&/fi~&~}`` vs ``{/&/fi_}`` → parser-verdubbeling)#  #
+#  #   - melisma-slots (``_&_`` / ``~&~`` voor stem-sync; later samentrekken)#  #
 #  #   - recite-haakjes, woordstreepjes, A/T/B t.o.v. S                     #  #
-#  #   - regels hieronder die met ``# WAARSCHUWING:`` beginnen              #  #
+#  #   - eventuele regels hieronder met ``# WAARSCHUWING:``                 #  #
 #  #                                                                        #  #
 #  ##########################################################################  #\
 """
@@ -77,56 +84,121 @@ def format_emit_warnings(warnings: list[str]) -> list[str]:
     return lines
 
 
-# Frontmatter-velden die in de afgeleide MVSA blijven (playback → @-regels).
+# Catalogusvelden uit de VSA → MVSA-frontmatter (T6). Playback (do/mode/tempo)
+# hoort in ``@``-regels, niet hier. Volgorde: bij elkaar horende sleutels
+# bij elkaar (``soort`` direct boven ``toon``; template-ids bij elkaar).
 _EMIT_FRONTMATTER_KEYS = (
     "titel",
-    "partituur",
-    "toon",
     "taal",
-    "bron",
     "soort",
+    "toon",
+    "formule",
+    "template",
+    "template_opgegeven",
+    "partituur",
+    "bron",
     "gelegenheid",
+    "gelegenheden",
     "zoektekst",
+    "gebruikt-in",
+    "corpus_id",
 )
 
+class _LiteralZoektekst(str):
+    """Zoektekst als YAML literal block (``|``), frase per regel."""
 
-def clean_emit_frontmatter(meta: dict[str, Any]) -> str:
-    """YAML-frontmatter voor schets-MVSA: catalogusvelden, geen do/mode/tempo.
 
-    Spiegel van de gekuiste klaar-MVSA's: titel/partituur/toon/taal/bron/soort/
-    gelegenheid/zoektekst. Playback staat in ``@do`` / ``@mode`` / ``@tempo``.
+def clean_emit_frontmatter(
+    meta: dict[str, Any],
+    *,
+    template_id: str | None = None,
+    template_opgegeven: str | None = None,
+) -> str:
+    """YAML-frontmatter voor schets-MVSA: catalogusvelden + formule-id (T6).
+
+    Neemt nuttige VSA-frontmatter over (titel, soort, toon, taal, bron,
+    gelegenheid, zoektekst, …). Geen ``do`` / ``mode`` / ``tempo`` (die
+    staan in ``@``-regels vlak boven ``@oct``). ``template`` = feitelijk
+    gebruikte formule-id (na alias/``same_as``); ``template_opgegeven``
+    alleen als die afwijkt van ``template``.
     """
-    if not meta:
+    if not meta and not template_id:
         return ""
+    src = dict(meta or {})
+    # Legacy aliassen → canonieke sleutels.
+    if src.get("titel") in (None, "") and src.get("title") not in (None, ""):
+        src["titel"] = src["title"]
+    if src.get("soort") in (None, "") and src.get("genre") not in (None, ""):
+        src["soort"] = src["genre"]
+    if src.get("toon") in (None, "") and src.get("tone") not in (None, ""):
+        src["toon"] = src["tone"]
+
+    tid = str(template_id or src.get("template") or "").strip()
+    asked = str(
+        template_opgegeven
+        if template_opgegeven is not None
+        else (src.get("template_opgegeven") or "")
+    ).strip()
+
     out: dict[str, Any] = {}
-    if meta.get("titel") not in (None, ""):
-        out["titel"] = meta["titel"]
-    elif meta.get("title") not in (None, ""):
-        out["titel"] = meta["title"]
     for key in _EMIT_FRONTMATTER_KEYS:
-        if key == "titel":
+        if key == "template":
+            if tid:
+                out["template"] = tid
             continue
-        val = meta.get(key)
+        if key == "template_opgegeven":
+            if asked and tid and asked != tid:
+                out["template_opgegeven"] = asked
+            continue
+        val = src.get(key)
         if val is None or val == "":
             continue
+        if isinstance(val, (list, dict)) and len(val) == 0:
+            continue
         out[key] = val
+
     if not out:
         return ""
+
+    zt = out.get("zoektekst")
+    if isinstance(zt, str) and "\n" in zt:
+        out["zoektekst"] = _LiteralZoektekst(zt.replace("\r\n", "\n").strip("\n"))
+
     try:
         import yaml
     except ImportError:
-        # Zeldzaam: zonder PyYAML alleen titel als platte YAML.
-        title = out.get("titel")
-        if not title:
-            return ""
-        return f"---\ntitel: {title}\n---"
-    dumped = yaml.safe_dump(
+        lines = ["---"]
+        for k, v in out.items():
+            lines.append(f"{k}: {v}")
+        lines.append("---")
+        return "\n".join(lines)
+
+    class _Dumper(yaml.SafeDumper):
+        pass
+
+    def _rep_lit(dumper: yaml.SafeDumper, data: _LiteralZoektekst) -> yaml.Node:
+        return dumper.represent_scalar(
+            "tag:yaml.org,2002:str", str(data), style="|"
+        )
+
+    _Dumper.add_representer(_LiteralZoektekst, _rep_lit)
+    dumped = yaml.dump(
         out,
+        Dumper=_Dumper,
         allow_unicode=True,
         sort_keys=False,
         default_flow_style=False,
+        width=1000,
     ).rstrip()
     return f"---\n{dumped}\n---"
+
+
+def _frontmatter_template(meta: dict[str, Any]) -> str | None:
+    """``template:`` uit de .vsa-frontmatter (leeg/afwezig → ``None``)."""
+    tpl = meta.get("template")
+    if tpl in (None, ""):
+        return None
+    return str(tpl).strip() or None
 
 
 def cycle_length_for_emit(template: dict[str, Any]) -> int:
@@ -257,38 +329,6 @@ def _continues_word(prev_syl: str, cur_syl: str) -> bool:
     return prev_syl in ("begin", "middle") and cur_syl in ("middle", "end")
 
 
-def _abc_body(pitch: Pitch) -> str:
-    alter = int(pitch.alter)
-    step = pitch.step
-    if alter == -2:
-        return f"{step.lower()}bb"
-    if alter == -1:
-        return "Bb" if step == "B" else f"{step.lower()}b"
-    if alter == 1:
-        return f"{step.lower()}#"
-    if alter == 2:
-        return f"{step.lower()}##"
-    return step.lower()
-
-
-def format_abc_writing_oct(pitch: Pitch, schrijf_do: Pitch) -> str:
-    """a–g t.o.v. schrijf-do: ``f``, ``c``, ``f+``, ``Bb`` — geen ``f4``."""
-    body = _abc_body(pitch)
-    base = pitch_in_do_octave(
-        schrijf_do, pitch.step, float(pitch.alter), oct_delta=0
-    )
-    delta = (_pitch_to_midi(pitch) - _pitch_to_midi(base)) // 12
-    if delta == 0:
-        return body
-    if delta == 1:
-        return f"{body}+"
-    if delta == -1:
-        return f"{body}-"
-    if delta > 1:
-        return f"{body}+{delta}"
-    return f"{body}{delta}"
-
-
 def _escape_lyric_punct(core_with_elm: str, punct: str) -> str:
     """Zinspunt ``.`` escapen (`\\.`) zodat het geen ELM-duur wordt."""
     if not punct:
@@ -312,8 +352,26 @@ def _lyric_core_and_punct(lyric: str) -> tuple[str, str]:
 @dataclass
 class _LAtom:
     text: str
-    syllabic: str
+    syllabic: str  # laatste lettergreep (woorddoorloop ná dit atom)
     role: str
+    first_syllabic: str = ""  # eerste lettergreep (woorddoorloop in dit atom)
+
+    def __post_init__(self) -> None:
+        if not self.first_syllabic:
+            self.first_syllabic = self.syllabic
+
+
+def _prefix_recite_word_continuation(recite_txt: str) -> str:
+    """``(lijkt …)`` → ``(-lijkt …)``: soft ``-`` hoort ín de haakjes (T5).
+
+    Geen wees-``-`` vóór ``(`` (dat breekt MVSA-SYNC na align). Hard ``=``
+    idem: ``(=…)``.
+    """
+    if not recite_txt.startswith("(") or len(recite_txt) < 2:
+        return recite_txt
+    if recite_txt[1] in "-=":
+        return recite_txt
+    return f"(-{recite_txt[1:]}"
 
 
 def _melisma_pitch_slot(
@@ -381,26 +439,32 @@ def _emit_voice_ag_vsa(
 
 
 def _join_l_atoms(atoms: list[_LAtom]) -> str:
-    """Lettergreepstreepjes; recite-atom heeft al ``(…)``; woord over grens → ``)-``."""
+    """Lettergreepstreepjes; recite-atom heeft al ``(…)``.
+
+    Woord over grens recite→cadens: ``)-heer``. Woord cadens→recite (of
+    recite→recite): soft ``-`` **in** de volgende haakjes ``(-lijkt …)`` —
+    geen wees-``-`` vóór ``(`` (T5 / MVSA-SYNC).
+    """
     if not atoms:
         return ""
     parts: list[str] = []
     i = 0
+    prev_end_syl: str | None = None
     while i < len(atoms):
         if atoms[i].role == "recite":
-            # text is al "(Al-le-lu-ia)"; eventueel woord doorloop ná ')'
-            # Alleen non-recite-vervolg (``)-mach_``). Een volgend recite-atom
-            # niet met ``-(…`` plakken: dat maakt wees-``-`` vóór ``(`` en
-            # breekt MVSA-SYNC na kolomalign (T5).
             recite_txt = atoms[i].text
+            if prev_end_syl is not None and _continues_word(
+                prev_end_syl, atoms[i].first_syllabic
+            ):
+                recite_txt = _prefix_recite_word_continuation(recite_txt)
+            # Alleen non-recite-vervolg (``)-mach_``). Volgend recite krijgt
+            # desnoods ``(-…`` via prev_end_syl hierboven — niet ``)-(``.
             j = i + 1
             if (
                 j < len(atoms)
                 and atoms[j].role != "recite"
                 and _continues_word(atoms[i].syllabic, atoms[j].syllabic)
             ):
-                # Zeldzaam: syllabic op recite-stuk is 'single'; doorloop via
-                # laatste lettergreep in de haakjes — gebruik cadence-syllabic.
                 cont = [atoms[j]]
                 k = j + 1
                 while (
@@ -412,22 +476,32 @@ def _join_l_atoms(atoms: list[_LAtom]) -> str:
                 ):
                     cont.append(atoms[k])
                     k += 1
-                # "(…ver)-nie" — strip sluit-haakje, plak )-vervolg
                 if recite_txt.endswith(")"):
                     parts.append(
                         f"{recite_txt[:-1]})-{_hyphen_join_texts(cont)}"
                     )
                 else:
                     parts.append(f"{recite_txt}-{_hyphen_join_texts(cont)}")
+                prev_end_syl = cont[-1].syllabic
                 i = k
             else:
                 parts.append(recite_txt)
+                prev_end_syl = atoms[i].syllabic
                 i = j
             continue
         j = i + 1
         while j < len(atoms) and atoms[j].role != "recite":
             j += 1
-        parts.append(_hyphen_join_texts(atoms[i:j]))
+        chunk = atoms[i:j]
+        text = _hyphen_join_texts(chunk)
+        if prev_end_syl is not None and _continues_word(
+            prev_end_syl, chunk[0].first_syllabic
+        ):
+            # Cadens-vervolg ná eerdere cadens/recite zonder )-join-pad.
+            if not text.startswith(("-", "=")):
+                text = f"-{text}"
+        parts.append(text)
+        prev_end_syl = chunk[-1].syllabic
         i = j
     return " ".join(parts)
 
@@ -609,33 +683,14 @@ def collect_emit_warnings(
     *,
     index: int,
 ) -> list[str]:
-    """Detecteer bekende VSA/template-valkuilen die de emit niet stil mag ‘fixen’."""
-    warnings: list[str] = []
-    i = 0
-    while i < len(notes):
-        n = notes[i]
-        if not (n.lyric or "").strip():
-            i += 1
-            continue
-        melisma = [n]
-        j = i + 1
-        while j < len(notes) and not (notes[j].lyric or "").strip():
-            melisma.append(notes[j])
-            j += 1
-        if len(melisma) >= 2:
-            elms = [elm_token(x) or "~" for x in melisma]
-            # Alleen hinten bij verdachte verdubbeling: zelfde niet-default ELM
-            # op alle slots. Expliciet ``_&_`` in de VSA is geldig — controleer
-            # of de bron niet ``{/&/…_}`` (één _) was (parser kopieert dan _).
-            if len(set(elms)) == 1 and elms[0] not in ("", "~"):
-                warnings.append(
-                    f"frase {index}/{phrase_id!r}: melisma op {n.lyric!r} heeft "
-                    f"{len(melisma)}× ELM {elms[0]!r}. Klopt dat met de bron-VSA? "
-                    f"Expliciet `_&_` (enz.) is ok; één `_` bij `/&/` wordt door de "
-                    f"parser verdubbeld (vaak bedoeld als ~&~)."
-                )
-        i = j
-    return warnings
+    """Hook voor specifieke emit-``# WAARSCHUWING:``-regels (T6).
+
+    Geen actieve detecties meer: herhaalde melisma-ELM (``_&_`` / ``~&~``) is
+    normaal bij stem-sync en hoort geen hint. Parameters blijven voor API-
+    stabiliteit / toekomstige checks.
+    """
+    del phrase_id, notes, index
+    return []
 
 
 def _format_syllable_l(
@@ -656,21 +711,42 @@ def _format_syllable_l(
     return _escape_lyric_punct(body, punct)
 
 
+def _split_trailing_lyric_elm(lyric: str) -> tuple[str, str]:
+    """``hoor_`` → (``hoor``, ``_``); leestekens blijven achter de lettergreep."""
+    core, punct = _lyric_core_and_punct((lyric or "").strip())
+    m = re.search(r"_+$", core)
+    if not m:
+        return (lyric or "").strip(), ""
+    return core[: m.start()] + punct, m.group(0)
+
+
 def _recite_l_text(notes: list[MappedNote]) -> str:
-    """``(Al-le-lu-ia)`` — geen ELM in de haakjes (MVSA negeert die); alleen tekst."""
+    """``(Al-le-lu-ia)`` — geen ELM in de haakjes (MVSA-eis); alleen tekst.
+
+    Staat er in de VSA-tekst een ``_`` achter een recite-lettergreep
+    (``…ver-hoor_``), dan hoort die ELM ná ``)``: ``(ver-hoor)_``. Alle
+    lettergrepen in ``( )`` delen immers één duur.
+    """
     bits: list[_LAtom] = []
+    tail_elm = ""
     for n in notes:
         if not (n.lyric or "").strip():
             continue
+        lyric, elm = _split_trailing_lyric_elm(n.lyric)
+        tail_elm = elm  # alleen die van de laatste lettergreep telt
+        if elm:
+            n = replace(n, lyric=lyric)
         text = _format_syllable_l(n, include_elm=False)
         bits.append(_LAtom(text=text, syllabic=n.syllabic or "single", role="recite"))
     inner = _hyphen_join_texts(bits) if bits else "-"
-    return f"({inner})"
+    return f"({inner}){tail_elm}"
+
 
 def _group_l_atom(group: list[MappedNote]) -> _LAtom:
     text_notes = [n for n in group if (n.lyric or "").strip()]
     head = text_notes[0] if text_notes else group[0]
     role = str(head.template_event.get("role") or "")
+    first_syl = (text_notes[0].syllabic if text_notes else head.syllabic) or "single"
     if role == "recite":
         last_syl = "single"
         for n in reversed(group):
@@ -681,6 +757,7 @@ def _group_l_atom(group: list[MappedNote]) -> _LAtom:
             text=_recite_l_text(group),
             syllabic=last_syl,
             role="recite",
+            first_syllabic=first_syl,
         )
     melisma_elms: list[str] = []
     if text_notes:
@@ -710,9 +787,18 @@ def _group_l_atom(group: list[MappedNote]) -> _LAtom:
                     )
                 )
             text = _hyphen_join_texts(bits)
+            last_syl = (extra[-1].syllabic or "single")
+        else:
+            last_syl = text_notes[0].syllabic or "single"
     else:
         text = "-"
-    return _LAtom(text=text, syllabic=head.syllabic or "single", role=role)
+        last_syl = head.syllabic or "single"
+    return _LAtom(
+        text=text,
+        syllabic=last_syl,
+        role=role,
+        first_syllabic=first_syl,
+    )
 
 
 def _stem_groups_from_l_groups(
@@ -752,6 +838,45 @@ def _stem_groups_from_l_groups(
             for n in text_notes[1:]:
                 stem_groups.append([n])
     return stem_groups
+
+
+def split_notes_by_source_line(
+    notes: list[MappedNote],
+) -> list[list[MappedNote]]:
+    """Splits één frase in maat-chunks op VSA-print-wraps (T6).
+
+    Ingesprongen vervolgregels horen bij **dezelfde** template-frase, maar
+    krijgen elk een eigen MVSA-maat — analoog aan hoe ``vsa svg`` fysieke
+    bronregels als aparte regels tekent. ``source_line == 0`` (synthetische
+    of handmatige noten) blijft bij de lopende chunk.
+    """
+    if not notes:
+        return []
+    known = [n.source_line for n in notes if n.source_line > 0]
+    if len(set(known)) <= 1:
+        return [notes]
+    chunks: list[list[MappedNote]] = []
+    current: list[MappedNote] = []
+    current_line: int | None = None
+    for n in notes:
+        line = n.source_line
+        if not current:
+            current = [n]
+            current_line = line if line > 0 else None
+            continue
+        if line <= 0 or (current_line is not None and line == current_line):
+            current.append(n)
+            continue
+        if current_line is None:
+            current.append(n)
+            current_line = line
+            continue
+        chunks.append(current)
+        current = [n]
+        current_line = line
+    if current:
+        chunks.append(current)
+    return chunks
 
 
 def emit_mvsa_block(
@@ -824,23 +949,33 @@ def emit_mapped_document(
     """Volledige MVSA-tekst (T6): commentaar + @-kop + systemen, geen speelplan.
 
     Secties ``cyclus-1`` / ``herhaling`` / ``laatste`` wanneer
-    ``with_sections`` (standaard; uit voor toon 3).
+    ``with_sections`` (standaard; uit voor toon 3). Print-wraps binnen
+    één frase → meerdere maten (systemen) onder dezelfde sectie.
     """
     warnings: list[str] = []
     n = len(mapped)
     phrase_ids = [pid for pid, _ in mapped]
-    systems = [
-        emit_mvsa_block(
-            pid,
-            notes,
-            do=do,
-            mode=mode,
-            index=i,
-            total=n,
-            warnings=warnings,
-        )
-        for i, (pid, notes) in enumerate(mapped, start=1)
-    ]
+    # (phrase_index_0based, system_text) — wrap-chunks delen de frase-index.
+    systems: list[tuple[int, str]] = []
+    for i, (pid, notes) in enumerate(mapped, start=1):
+        chunks = split_notes_by_source_line(notes)
+        for ci, chunk in enumerate(chunks):
+            # Waarschuwingen één keer per frase (niet per wrap-maat).
+            warn_sink = warnings if ci == 0 else None
+            systems.append(
+                (
+                    i - 1,
+                    emit_mvsa_block(
+                        pid,
+                        chunk,
+                        do=do,
+                        mode=mode,
+                        index=i,
+                        total=n,
+                        warnings=warn_sink,
+                    ),
+                )
+            )
     parts: list[str] = []
     if frontmatter.strip():
         parts.append(frontmatter.rstrip())
@@ -865,10 +1000,10 @@ def emit_mapped_document(
     parts.append("")
 
     prev_section: str | None = None
-    for i, system in enumerate(systems):
+    for phrase_i, system in systems:
         if with_sections:
             sec = section_id_for_phrase_index(
-                i,
+                phrase_i,
                 phrase_ids,
                 cycle_len=cycle_len,
                 final_id=final_id,
@@ -987,6 +1122,206 @@ def _vsa_body_as_comment(body: str) -> str:
     return "\n".join(lines)
 
 
+def find_fitting_alternate_templates(
+    vsa_text: str,
+    *,
+    failed: ResolvedTemplate,
+    soort: str | None,
+    toon: int | str | None,
+    library_root: Path | None = None,
+    melody_voice: str = "S",
+    source_name: str = "",
+) -> list[str]:
+    """Andere formules voor dezelfde soort+toon die wél mappen (T4-suggestie).
+
+    Schrijft niets. Slaat kandidaten over met dezelfde formule-id als
+    ``failed`` (bijv. tropaar↔kondak via ``same_as``).
+    """
+    soort_s = (soort or "").strip().lower() or None
+    if not soort_s or toon in (None, ""):
+        return []
+    candidates = list_templates_for_soort_toon(
+        soort_s, toon, library_root=library_root
+    )
+    failed_ids = {
+        failed.canonical_id,
+        failed.formula_id,
+        failed.requested_id,
+    }
+    if failed.requested_raw:
+        failed_ids.add(failed.requested_raw)
+    fitting: list[str] = []
+    for cand in candidates:
+        if cand in failed_ids:
+            continue
+        try:
+            alt = load_resolved_template(cand, library_root=library_root)
+        except TemplateLibraryError:
+            continue
+        if alt.formula_id in failed_ids or alt.canonical_id in failed_ids:
+            continue
+        try:
+            map_vsa_to_template(
+                alt.doc,
+                vsa_text,
+                source=source_name or "vsa",
+                melody_voice=melody_voice,
+            )
+        except TemplateInstanceError:
+            continue
+        fitting.append(alt.canonical_id)
+    return fitting
+
+
+def format_alternate_template_hint(
+    *,
+    failed_id: str,
+    fitting: list[str],
+    source: Path | str,
+) -> str:
+    """Beheerderstekst: welke formule wél past + kopieerbaar ``vsa mvsa``-commando."""
+    if not fitting:
+        return ""
+    src = Path(source)
+    # Leesbaar pad; quotes als er spaties inzitten.
+    src_s = str(src)
+    if " " in src_s:
+        src_s = f'"{src_s}"'
+    lines = [
+        f"De gekozen formule {failed_id} past niet op deze VSA.",
+        f"Deze VSA past wél op: {', '.join(fitting)}.",
+        "Opnieuw proberen:",
+    ]
+    for tid in fitting:
+        lines.append(f"  vsa mvsa {src_s} --template {tid}")
+    return "\n".join(lines)
+
+
+@dataclass(frozen=True)
+class PhraseSeparatorFix:
+    """Werkende gok: ontbrekende `*`/`**` op één of meer soft joints."""
+
+    edits: dict[int, str]
+    joints: tuple[SoftPhraseJoint, ...]
+    phrase_ids: tuple[str, ...]
+
+
+def _phrase_separator_candidates(
+    joints: list[SoftPhraseJoint],
+) -> list[dict[int, str]]:
+    """Kleine zoekruimte: eerst één joint, daarna paren (max 3 joints)."""
+    if not joints:
+        return []
+    limited = joints[:3]
+    out: list[dict[int, str]] = []
+    # Laatste soft joint: ** eerst (vaak vóór slotfrase); elders * eerst.
+    last_i = limited[-1].line_index
+    for j in reversed(limited):
+        markers = ("**", "*") if j.line_index == last_i else ("*", "**")
+        for mark in markers:
+            out.append({j.line_index: mark})
+    if len(limited) >= 2:
+        a, b = limited[-2], limited[-1]
+        out.append({a.line_index: "*", b.line_index: "**"})
+        out.append({a.line_index: "*", b.line_index: "*"})
+    # Uniek houden, volgorde bewaren.
+    seen: set[tuple[tuple[int, str], ...]] = set()
+    unique: list[dict[int, str]] = []
+    for edits in out:
+        key = tuple(sorted(edits.items()))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(edits)
+    return unique
+
+
+def find_fitting_phrase_separator_fix(
+    *,
+    frontmatter: str,
+    body: str,
+    template: dict[str, Any],
+    melody_voice: str = "S",
+    source_name: str = "vsa",
+) -> PhraseSeparatorFix | None:
+    """T4: gok ontbrekende frasescheiders; return eerste edit die wél mappt.
+
+    Geen stille auto-fix van het bronbestand — alleen diagnose voor de Hint.
+    """
+    joints = soft_phrase_joints(body)
+    if not joints:
+        return None
+    joint_by_idx = {j.line_index: j for j in joints}
+    for edits in _phrase_separator_candidates(joints):
+        trial_body = apply_phrase_separators(body, edits)
+        norm_body, _ = ensure_stanza_stars(trial_body)
+        trial_text = frontmatter + norm_body
+        try:
+            mapped = map_vsa_to_template(
+                template,
+                trial_text,
+                source=source_name,
+                melody_voice=melody_voice,
+            )
+        except TemplateInstanceError:
+            continue
+        used: list[SoftPhraseJoint] = []
+        for idx, mark in sorted(edits.items()):
+            base = joint_by_idx.get(idx)
+            if base is None:
+                continue
+            used.append(
+                SoftPhraseJoint(
+                    line_index=idx,
+                    line_text=f"{base.line_text.rstrip()} {mark}",
+                )
+            )
+        return PhraseSeparatorFix(
+            edits=dict(edits),
+            joints=tuple(used),
+            phrase_ids=tuple(pid for pid, _ in mapped),
+        )
+    return None
+
+
+def format_phrase_separator_hint(fix: PhraseSeparatorFix) -> str:
+    """Beheerderstekst: ontbrekende `*`/`**` + werkende regel(s)."""
+    if not fix.joints:
+        return ""
+    n = len(fix.phrase_ids)
+    ids = ", ".join(fix.phrase_ids) if fix.phrase_ids else "—"
+    lines = [
+        "Waarschijnlijk ontbreekt een frasescheiding (`*` of `**`) tussen "
+        "twee regels die nu als één frase worden gelezen.",
+        f"Met deze wijziging paste de mapping wél ({n} frasen: {ids}):",
+    ]
+    for joint in fix.joints:
+        lines.append(f"  {joint.line_text}")
+    marks = sorted({m for m in fix.edits.values()})
+    if marks == ["**"]:
+        lines.append(
+            "Zet `**` (sterke scheiding, vaak vóór de slotfrase) aan het "
+            "eind van die regel in het .vsa-bestand."
+        )
+    elif marks == ["*"]:
+        lines.append(
+            "Zet `*` (frasescheiding) aan het eind van die regel in het "
+            ".vsa-bestand."
+        )
+    else:
+        lines.append(
+            "Zet de getoonde `*` / `**` aan het eind van die regel(s) in "
+            "het .vsa-bestand."
+        )
+    return "\n".join(lines)
+
+
+def default_vsa_mvsa_output(source: Path | str) -> Path:
+    """Default-uitvoerpad: ``lied.vsa`` → ``lied.vsa.mvsa`` (stem.brontype.doeltype)."""
+    src = Path(source)
+    return src.with_name(f"{src.name}.mvsa")
+
+
 def convert_vsa_to_mvsa(
     source: Path | str,
     *,
@@ -1001,8 +1336,11 @@ def convert_vsa_to_mvsa(
 ) -> VsaMvsaResult:
     """VSA + library-template → schets-MVSA-tekst (T1–T7).
 
-    ``template``: canonieke id of playbook-alias; default Hemelum toon 4.
-    ``same_as``-aliases (tropaar-toon-2 → kondak-toon-2) worden opgelost.
+    ``template``: canonieke id of alias (CLI ``--template``). Zonder
+    expliciete keuze: templates zoeken op ``formule``+``toon`` als
+    ``formule`` in de VSA staat, anders ``soort``+``toon`` (T1);
+    ontbrekend → harde fout; één → gebruiken; meerdere → bestaande
+    uitvoer-``.mvsa`` of bron/leaf. Geen stille Hemelum-default.
     """
     src = Path(source)
     if not src.is_file():
@@ -1013,19 +1351,106 @@ def convert_vsa_to_mvsa(
             code="VSA-MVSA-EXT",
         )
 
-    resolved = load_resolved_template(template, library_root=library_root)
     raw = src.read_text(encoding="utf-8")
     fm, body = restore_vsa(raw)
     meta, _ = parse_vsa_frontmatter(fm + body)
     norm_body, _ = ensure_stanza_stars(body)
     vsa_text = fm + norm_body
 
-    mapped = map_vsa_to_template(
-        resolved.doc,
-        vsa_text,
-        source=src.name,
-        melody_voice=melody_voice,
+    out_path: Path | None = None
+    if output is not None:
+        out_path = Path(output)
+    elif write:
+        out_path = default_vsa_mvsa_output(src)
+
+    bron_u = None
+    bron = meta.get("bron")
+    if isinstance(bron, dict):
+        bron_u = bron.get("uitgangspunt")
+    elif isinstance(bron, str):
+        bron_u = bron
+
+    liturgische_soort = meta.get("soort") or meta.get("genre")
+    formule_meta = meta.get("formule")
+    tpl_name = select_template_id(
+        soort=liturgische_soort,
+        toon=meta.get("toon") or meta.get("tone"),
+        formule=str(formule_meta) if formule_meta not in (None, "") else None,
+        bron=str(bron_u) if bron_u else None,
+        path=src,
+        output=out_path,
+        library_root=library_root,
+        # CLI ``--template`` wint; anders geldt ``template:`` uit de .vsa-frontmatter
+        # (de auteur heeft de formule dan zelf gekozen), vóór automatische selectie.
+        explicit=template or _frontmatter_template(meta),
     )
+
+    resolved = load_resolved_template(tpl_name, library_root=library_root)
+
+    try:
+        mapped = map_vsa_to_template(
+            resolved.doc,
+            vsa_text,
+            source=src.name,
+            melody_voice=melody_voice,
+        )
+    except TemplateInstanceError as exc:
+        # T4: harde fout blijft; eerst frasescheiding gokken, dan andere formules.
+        hint_parts: list[str] = []
+        base_hint = (exc.hint_nl or "").rstrip()
+        if base_hint:
+            hint_parts.append(base_hint)
+
+        sep_fix = find_fitting_phrase_separator_fix(
+            frontmatter=fm,
+            body=norm_body,
+            template=resolved.doc,
+            melody_voice=melody_voice,
+            source_name=src.name,
+        )
+        if sep_fix is not None:
+            sep_hint = format_phrase_separator_hint(sep_fix)
+            if sep_hint:
+                hint_parts.append(sep_hint)
+
+        alt_soort = (
+            str(formule_meta).strip().lower()
+            if formule_meta not in (None, "")
+            else liturgische_soort
+        )
+        # Volledige formule-id: geen zinvolle «andere soort»-suggestie.
+        if alt_soort and "-toon-" in str(alt_soort):
+            alt_soort = liturgische_soort
+        fitting = find_fitting_alternate_templates(
+            vsa_text,
+            failed=resolved,
+            soort=alt_soort,
+            toon=meta.get("toon") or meta.get("tone"),
+            library_root=library_root,
+            melody_voice=melody_voice,
+            source_name=src.name,
+        )
+        alt_hint = format_alternate_template_hint(
+            failed_id=resolved.canonical_id,
+            fitting=fitting,
+            source=src,
+        )
+        if alt_hint:
+            hint_parts.append(alt_hint)
+
+        if len(hint_parts) > (1 if base_hint else 0):
+            raise TemplateInstanceError(
+                exc.message_nl,
+                code=exc.code,
+                hint_nl="\n".join(hint_parts).strip(),
+                source=exc.source or str(src),
+                line=exc.line,
+                column=exc.column,
+                phrase_id=exc.phrase_id,
+                lyric=exc.lyric,
+                note_index=exc.note_index,
+            ) from exc
+        raise
 
     title = meta.get("title") or meta.get("titel") or src.stem
     if tempo is None:
@@ -1063,7 +1488,13 @@ def convert_vsa_to_mvsa(
     formula = resolved.doc
     fm_out = ""
     if include_frontmatter:
-        fm_out = clean_emit_frontmatter(meta)
+        # Feitelijk = formule met frasen; opgegeven = ruwe CLI/FM/infer-string.
+        asked = resolved.requested_raw or tpl_name
+        fm_out = clean_emit_frontmatter(
+            meta,
+            template_id=resolved.formula_id,
+            template_opgegeven=str(asked) if asked else None,
+        )
     text, warnings = emit_mapped_document(
         mapped,
         do=str(formula["do"]),
@@ -1082,15 +1513,18 @@ def convert_vsa_to_mvsa(
         final_id=str(formula.get("final") or "laatste"),
     )
 
-    out_path: Path | None = None
-    if output is not None:
-        out_path = Path(output)
-    elif write:
-        out_path = src.with_suffix(".mvsa")
-
     if out_path is not None:
+        # Atomisch schrijven: bestaande ``.vsa.mvsa`` (met template:) blijft
+        # staan tot de nieuwe inhoud klaar is — nodig voor T1-disambiguatie
+        # bij een volgende products-run.
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(text, encoding="utf-8", newline="\n")
+        tmp = out_path.with_name(out_path.name + ".tmp")
+        try:
+            tmp.write_text(text, encoding="utf-8", newline="\n")
+            tmp.replace(out_path)
+        finally:
+            if tmp.is_file():
+                tmp.unlink(missing_ok=True)
 
     return VsaMvsaResult(
         text=text,

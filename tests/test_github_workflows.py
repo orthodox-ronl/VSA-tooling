@@ -70,10 +70,13 @@ def test_vsa_ci_uses_consumer_minimal():
     assert "hugo-demo" not in check
 
 
-def test_vsa_ci_checks_out_bron_for_catalogus():
+def test_vsa_ci_gebruikt_bibliotheek_en_niet_meer_bron():
     text = Path(".github/workflows/vsa-ci.yml").read_text(encoding="utf-8")
-    assert "repository: orthodox-ronl/bron" in text
-    assert "path: vendor/bron" in text
+    assert "orthodox-ronl/bron" not in text
+    assert "vendor/bron" not in text
+    assert "repository: orthodox-ronl/bibliotheek" in text
+    assert "path: vendor/bibliotheek" in text
+    assert "VSA_SYLLABLE_DICTIONARY" in text
     assert "scripts\\ci.cmd" in text
 
 

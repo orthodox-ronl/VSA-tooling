@@ -25,57 +25,27 @@ class IncludeVsaWarning:
     line: int
 
 
-try:
-    from catalogus import ZoekContext, zoek_met_roots
-    from catalogus.errors import AmbiguousError, CatalogusError, NotFoundError
-
-    from .catalogus_bridge import discover_bron_root, resolve_logical_vsa_path
-except ImportError:  # pragma: no cover - catalogus niet geïnstalleerd
-    ZoekContext = None  # type: ignore[misc, assignment]
-
-    def discover_bron_root(content_root=None):  # type: ignore[misc]
-        return None
-
-    def resolve_logical_vsa_path(*args, **kwargs):  # type: ignore[misc]
-        raise IncludeVsaError(
-            "catalogus-package niet beschikbaar; installeer catalogus uit bron-repo.",
-            line=1,
-        )
-
-    def zoek_met_roots(*args, **kwargs):  # type: ignore[misc]
-        raise IncludeVsaError(
-            "catalogus-package niet beschikbaar; installeer catalogus uit bron-repo.",
-            line=1,
-        )
-
-    class NotFoundError(Exception):  # type: ignore[no-redef]
-        pass
-
-    class AmbiguousError(Exception):  # type: ignore[no-redef]
-        pass
-
-    class CatalogusError(Exception):  # type: ignore[no-redef]
-        pass
+from .catalogus_bridge import resolve_logical_vsa_path
 
 
 INCLUDE_VSA_PATTERN = re.compile(
     r"@include-vsa\s+(?:"
     r'zoek="([^"]*)"|'
     r"id=([^\s]+)|"
-    r"lokaal=([^\s]+)"
+    r"lokaal=([^\s]+)"  # vervallen; geeft een duidelijke foutmelding
     r")"
 )
 
 
 def discover_content_root(source_path: Path) -> Path | None:
-    """Zoek parochie content-source (map met ``lokaal/``) omhoog vanaf ``source_path``.
+    """Zoek parochie content-source (map met ``catalogus/``) omhoog vanaf ``source_path``.
 
     ``source_path`` mag relatief zijn (bijv. alleen de bestandsnaam in de cwd);
-    zonder ``resolve()`` stopt de walk bij ``.`` en wordt ``lokaal/`` in een
+    zonder ``resolve()`` stopt de walk bij ``.`` en wordt ``catalogus/`` in een
     bovenliggende map gemist.
     """
     for parent in Path(source_path).resolve().parents:
-        if (parent / "lokaal").is_dir():
+        if (parent / "catalogus").is_dir():
             return parent
     return None
 
@@ -85,21 +55,11 @@ def parse_session_frontmatter(text: str) -> tuple[dict, str]:
     return parse_vsa_frontmatter(text)
 
 
-def build_zoek_context(frontmatter: dict | None, *, bronnen: object | None = None) -> ZoekContext | None:
-    if ZoekContext is None:
-        return None
-    fm = frontmatter if isinstance(frontmatter, dict) else {}
-    bronnen_value = bronnen if bronnen is not None else fm.get("bronnen")
-    return ZoekContext.from_default_mapping(fm.get("default"), bronnen=bronnen_value)
-
-
 def expand_include_vsa(
     text: str,
     *,
     source_path: Path,
-    zoek_context: ZoekContext | None = None,
     content_root: Path | None = None,
-    bron_root: Path | None = None,
     include_stack: list[Path] | None = None,
 ) -> tuple[str, list[IncludeVsaWarning]]:
     """Vervang ``@include-vsa`` door ingesloten VSA-body (brondocument ongewijzigd)."""
@@ -116,17 +76,12 @@ def expand_include_vsa(
         raise IncludeVsaError(f"Lege waarde voor @include-vsa {kind}=", line=line_no)
 
     resolved_root = content_root.resolve() if content_root else discover_content_root(source_path)
-    resolved_bron = bron_root
-    if resolved_bron is None and resolved_root is not None:
-        resolved_bron = discover_bron_root(resolved_root)
 
     target_path, warnings = _resolve_target(
         kind,
         value.strip(),
         line_no=line_no,
-        zoek_context=zoek_context,
         content_root=resolved_root,
-        bron_root=resolved_bron,
     )
 
     target_resolved = target_path.resolve()
@@ -138,13 +93,10 @@ def expand_include_vsa(
     included_fm, included_body = parse_vsa_frontmatter(included_raw)
     included_body = _trim_vsa_body(included_body)
 
-    nested_context = build_zoek_context(included_fm) or zoek_context
     included_expanded, nested_warnings = expand_include_vsa(
         included_body,
         source_path=target_resolved,
-        zoek_context=nested_context,
         content_root=resolved_root,
-        bron_root=resolved_bron,
         include_stack=include_stack + [target_resolved],
     )
 
@@ -154,9 +106,7 @@ def expand_include_vsa(
     rest, rest_warnings = expand_include_vsa(
         new_text,
         source_path=source_path,
-        zoek_context=zoek_context,
         content_root=resolved_root,
-        bron_root=resolved_bron,
         include_stack=include_stack,
     )
     return rest, [*warnings, *nested_warnings, *rest_warnings]
@@ -167,19 +117,14 @@ def prepare_vsa_body(
     source_path: Path,
     *,
     content_root: Path | None = None,
-    bron_root: Path | None = None,
     session_frontmatter: dict | None = None,
 ) -> tuple[str, list[IncludeVsaWarning]]:
     """Expand ``@include-vsa`` in VSA-body (na optionele frontmatter-strip)."""
-    frontmatter, body = parse_vsa_frontmatter(text)
-    fm = session_frontmatter if session_frontmatter is not None else frontmatter
-    context = build_zoek_context(fm)
+    _, body = parse_vsa_frontmatter(text)
     return expand_include_vsa(
         body,
         source_path=source_path,
-        zoek_context=context,
         content_root=content_root,
-        bron_root=bron_root,
     )
 
 
@@ -189,21 +134,13 @@ def prepare_markdown_block_body(
     markdown_path: Path,
     markdown_text: str,
     content_root: Path | None = None,
-    bron_root: Path | None = None,
 ) -> tuple[str, list[IncludeVsaWarning]]:
     """Expand ``@include-vsa`` in een ``::: vsa-notatie`` blok."""
-    fm, _ = parse_session_frontmatter(markdown_text)
-    context = build_zoek_context(fm)
     root = content_root or discover_content_root(markdown_path)
-    bron = bron_root
-    if bron is None and root is not None:
-        bron = discover_bron_root(root)
     return expand_include_vsa(
         block_body,
         source_path=markdown_path,
-        zoek_context=context,
         content_root=root,
-        bron_root=bron,
     )
 
 
@@ -220,64 +157,29 @@ def _resolve_target(
     value: str,
     *,
     line_no: int,
-    zoek_context: ZoekContext | None,
     content_root: Path | None,
-    bron_root: Path | None,
 ) -> tuple[Path, list[IncludeVsaWarning]]:
     warnings: list[IncludeVsaWarning] = []
 
     if kind in ("id", "lokaal"):
         if content_root is None:
             raise IncludeVsaError(
-                "Geen content-root (parochie content-source met lokaal/) gevonden "
+                "Geen content-root (content-source met catalogus/) gevonden "
                 f"voor @include-vsa {kind}={value!r}.",
                 line=line_no,
             )
         reference = f"{kind}:{value}"
         try:
-            path = resolve_logical_vsa_path(
-                reference,
-                content_root=content_root,
-                bron_root=bron_root,
-            )
-        except (ValueError, CatalogusError) as exc:
+            path = resolve_logical_vsa_path(reference, content_root=content_root)
+        except ValueError as exc:
             raise IncludeVsaError(str(exc), line=line_no) from exc
         return path, warnings
 
-    if content_root is None and bron_root is None:
-        raise IncludeVsaError(
-            f"Geen content-root of bron-root voor @include-vsa zoek={value!r}.",
-            line=line_no,
-        )
-    try:
-        result = zoek_met_roots(
-            value,
-            content_root=content_root,
-            bron_root=bron_root,
-            context=zoek_context,
-        )
-    except NotImplementedError as exc:
-        raise IncludeVsaError(str(exc), line=line_no) from exc
-    except NotFoundError as exc:
-        raise IncludeVsaError(str(exc), line=line_no) from exc
-    except AmbiguousError as exc:
-        raise IncludeVsaError(str(exc), line=line_no) from exc
-    except ValueError as exc:
-        raise IncludeVsaError(str(exc), line=line_no) from exc
-
-    if result.has_ook_in_bron:
-        pads = ", ".join(result.ook_gevonden_in_bron)
-        warnings.append(
-            IncludeVsaWarning(
-                code="VSA-INCLUDE-VSA-BRON-HINT",
-                message_nl=(
-                    f"Ook gevonden in bron: {pads} — controleer of "
-                    f"{result.catalogus_pad} de bedoelde uitvoeringsvorm is."
-                ),
-                line=line_no,
-            )
-        )
-    return result.path, warnings
+    raise IncludeVsaError(
+        "@include-vsa zoek= wordt niet meer ondersteund. "
+        "Gebruik id=<zangstuk>/<variant>/<uitvoeringsvorm>.",
+        line=line_no,
+    )
 
 
 def _trim_vsa_body(body: str) -> str:

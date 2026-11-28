@@ -1,12 +1,12 @@
 ---
-title: Tropaar HH Vaders Startsi van Optina, Toon 4
+soort: tropaar
+toon: 4
+template: tropaar-toon-4
+bron: Koorinstructie wo 14 okt sept 2026 (Hemelum)
 do: F4
 mode: major
 tempo: 120
-genre: tropaar
-tone: 4
-template: tropaar-toon-4
-bron: Koorinstructie wo 14 okt sept 2026 (Hemelum)
+title: Tropaar HH Vaders Startsi van Optina, Toon 4
 ---
 
 # === pad: VSA + template → MVSA (Fase A herstart) ===

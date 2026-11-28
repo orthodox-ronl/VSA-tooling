@@ -35,7 +35,9 @@ index. Soft-wrap system boundaries are **systeemovergangen** in the
 
 By default the result is run through :func:`vsa.mvsa_kuiser.kuiser_mvsa_text`
 (canonieke schrijfvorm / normaalvorm: lone standaard-``~`` op L weggelaten,
-``~`` wél bij ``&``-melisma en na ``)``; maatstrepen sync, kolomuitlijning).
+``~`` wél bij ``&``-melisma en na ``)``; maatstrepen sync, kolomuitlijning)
+with ``dict_interactive=False`` — import is a conversion bridge (o.a.
+``products`` score-ir), not a TTY dictionary session.
 If kuiser fails validation, import still applies
 :func:`vsa.mvsa_align.align_mvsa_text`. ``align=False`` (CLI ``--no-align``)
 skips kuiser but still column-aligns slots and maatstrepen.
@@ -66,14 +68,15 @@ from .mvsa_align import align_mvsa_text
 from .mvsa_kuiser import MvsaKuiserError, kuiser_mvsa_text
 from .mvsa_normalize import (
     DEFAULT_IMPORT_PITCH,
-    OCTAVE_STYLES,
     REWRITE_PITCH_FORMS,
     canonicalize_pitch_form,
-    format_abc_scientific,
+    check_octave_style,
+    format_abc,
     format_doremi,
     format_ehm,
     pitch_to_degree_and_chrom,
 )
+from .mvsa_normalize import MvsaNormalizeError
 from .mvsa_validate import MvsaValidationError
 from .pitch_resolver import _SCALE_INTERVALS, parse_pitch_string
 from .syllabify import dehyphenate_dutch_word, hyphenate_dutch_word
@@ -281,15 +284,10 @@ def import_score_to_mvsa(
             f"onbekende --pitch {pitch!r}; kies uit "
             f"doremi, a-g (of abc), vsa, ag-vsa"
         )
-    if octave_style not in OCTAVE_STYLES:
-        raise MvsaImportError(
-            f"onbekende --octave-style {octave_style!r}; "
-            f"kies uit {', '.join(OCTAVE_STYLES)}"
-        )
-    if octave_style == "marker":
-        raise MvsaImportError(
-            "octave-style 'marker' is nog niet geïmplementeerd; gebruik @oct"
-        )
+    try:
+        check_octave_style(octave_style, pitch)
+    except MvsaNormalizeError as exc:
+        raise MvsaImportError(str(exc)) from exc
     if system_soft_width < 1:
         raise MvsaImportError(
             f"system_soft_width moet ≥ 1 zijn; kreeg {system_soft_width}"
@@ -340,14 +338,21 @@ def import_score_to_mvsa(
         text = score_to_mvsa(
             score,
             pitch_form=pitch,
+            octave_style=octave_style,
             section_id=section_id,
             system_soft_width=system_soft_width,
         )
         if align:
             # Canonieke normaalvorm: lone ~ weg, bars sync, kolommen.
+            # Import is conversie (products/score-ir-brug), geen TTY-edit:
+            # dictionary-prompts horen bij ``mvsa kuiser`` / ``validate``.
             try:
                 text = kuiser_mvsa_text(
-                    text, pitch="preserve", octave_style=octave_style, align=True
+                    text,
+                    pitch="preserve",
+                    octave_style=octave_style,
+                    align=True,
+                    dict_interactive=False,
                 ).text
             except (MvsaKuiserError, MvsaValidationError):
                 # Kuiser kan falen op overige validatie; kolommen + maatstrepen
@@ -523,6 +528,7 @@ def score_to_mvsa(
     score: _Score,
     *,
     pitch_form: str,
+    octave_style: str = "@oct",
     section_id: str = "schets",
     system_soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
 ) -> str:
@@ -536,7 +542,8 @@ def score_to_mvsa(
         f"@do {score.do}",
         f"@mode {score.mode}",
     ]
-    if any(v != 0 for v in writing_oct.values()):
+    # Absolute a–g (``none``) negeert @oct; laat de directive dan weg.
+    if octave_style != "none" and any(v != 0 for v in writing_oct.values()):
         assign = " ".join(f"{k}={writing_oct[k]}" for k in ("S", "A", "T", "B"))
         lines.append(f"@oct {assign}")
     lines.append("")
@@ -577,6 +584,7 @@ def score_to_mvsa(
                 do=do_p,
                 intervals=intervals,
                 writing_oct=writing_oct[letter],
+                octave_style=octave_style,
                 last_pitch=last_pitch[letter],
             )
             voice_segs[letter].append(seg)
@@ -587,6 +595,9 @@ def score_to_mvsa(
         soft_width=system_soft_width,
         pitch_form=pitch_form,
         score=score,
+        do=do_p,
+        writing_oct=writing_oct,
+        octave_style=octave_style,
     )
 
     if pitch_form == "ag-vsa":
@@ -603,6 +614,7 @@ def score_to_mvsa(
                         do=do_p,
                         intervals=intervals,
                         writing_oct=writing_oct[letter],
+                        octave_style=octave_style,
                         last_pitch=last_p,
                         prev_degree=prev_deg,
                         absolute_first=abs_first,
@@ -627,6 +639,9 @@ def score_to_mvsa(
                 bars,
                 pitch_form=pitch_form,
                 end_pitch=_last_sounding_in_range(score, letter, start, end),
+                do=do_p,
+                writing_oct=writing_oct[letter],
+                octave_style=octave_style,
             )
             lines.append(
                 f"{letter}: {_join_measure_segs(chunk_v[letter], voice_bars)}"
@@ -675,16 +690,32 @@ def _bars_with_system_eindanker(
     *,
     pitch_form: str,
     end_pitch: Pitch | None,
+    do: Pitch | None = None,
+    writing_oct: int = 0,
+    octave_style: str = "@oct",
 ) -> list[str]:
-    """Glue absolute pitch onto the last bar for ``vsa`` / ``ag-vsa``.
+    """Glue a–g pitch onto the last bar for ``vsa`` / ``ag-vsa``.
 
-    Lyrics lines keep bare bars; stem lines get e.g. ``||a4`` / ``|f#4`` so
-    ``mvsa validate`` can catch pitch drift after edits (``MVSA-BAR-ANKER``).
+    Lyrics lines keep bare bars; stem lines get e.g. ``||a`` / ``|f#`` (of
+    ``||a4`` bij ``octave-style=none``) zodat ``mvsa validate`` pitch-drift
+    na edits kan vangen (``MVSA-BAR-ANKER``). Zonder ``do`` (breedte-schatting):
+    wetenschappelijk cijfer als bovengrens.
     """
     if pitch_form not in ("vsa", "ag-vsa") or not bars or end_pitch is None:
         return bars
+    if do is None:
+        from .mvsa_normalize import format_abc_scientific
+
+        token = format_abc_scientific(end_pitch)
+    else:
+        token = format_abc(
+            end_pitch,
+            do=do,
+            writing_oct=writing_oct,
+            octave_style=octave_style,
+        )
     out = list(bars)
-    out[-1] = f"{out[-1]}{format_abc_scientific(end_pitch)}"
+    out[-1] = f"{out[-1]}{token}"
     return out
 
 
@@ -708,6 +739,9 @@ def _system_content_width(
     final_system: bool,
     pitch_form: str = "doremi",
     score: _Score | None = None,
+    do: Pitch | None = None,
+    writing_oct: dict[str, int] | None = None,
+    octave_style: str = "@oct",
 ) -> int:
     """Max length of ``L:/S:/A:/T:/B:`` lines for measures ``[start, end)``."""
     n = end - start
@@ -718,6 +752,7 @@ def _system_content_width(
     else:
         bars = ["|"] * n
     widths = [len(f"L: {_join_measure_segs(l_segs[start:end], bars)}")]
+    octs = writing_oct or {}
     for letter in "SATB":
         ep = (
             _last_sounding_in_range(score, letter, start, end)
@@ -725,7 +760,12 @@ def _system_content_width(
             else None
         )
         voice_bars = _bars_with_system_eindanker(
-            bars, pitch_form=pitch_form, end_pitch=ep
+            bars,
+            pitch_form=pitch_form,
+            end_pitch=ep,
+            do=do,
+            writing_oct=octs.get(letter, 0),
+            octave_style=octave_style,
         )
         joined = _join_measure_segs(voice_segs[letter][start:end], voice_bars)
         widths.append(len(f"{letter}: {joined}"))
@@ -739,6 +779,9 @@ def _pack_system_ranges(
     soft_width: int = DEFAULT_SYSTEM_SOFT_WIDTH,
     pitch_form: str = "doremi",
     score: _Score | None = None,
+    do: Pitch | None = None,
+    writing_oct: dict[str, int] | None = None,
+    octave_style: str = "@oct",
 ) -> list[tuple[int, int]]:
     """Pack measure indices into ``[start, end)`` ranges under soft_width.
 
@@ -765,6 +808,9 @@ def _pack_system_ranges(
             final_system=False,
             pitch_form=pitch_form,
             score=score,
+            do=do,
+            writing_oct=writing_oct,
+            octave_style=octave_style,
         )
         if start < i and width > soft_width:
             ranges.append((start, i))
@@ -1465,7 +1511,7 @@ def _pyphen_matches_syllables(cores: list[str]) -> bool:
     if not cores:
         return False
     joined = "".join(cores)
-    hyp_parts = hyphenate_dutch_word(joined).split("-")
+    hyp_parts = hyphenate_dutch_word(joined, allow_pyphen=True).split("-")
     return len(hyp_parts) == len(cores) and all(
         hyp_parts[k].casefold() == cores[k].casefold()
         for k in range(len(cores))
@@ -1553,7 +1599,7 @@ def _hyphenate_underlay_word(word: str) -> str:
         return word
     if "-" in core:
         return core + punct
-    return hyphenate_dutch_word(core) + punct
+    return hyphenate_dutch_word(core, allow_pyphen=True) + punct
 
 
 def _merge_hyphen_word_list(words: list[str]) -> list[str]:
@@ -1688,7 +1734,7 @@ def _extend_pending_single(pending: str, nxt: str) -> str:
     n_core, n_punct = _split_syllable_punct(nxt)
     p_plain = dehyphenate_dutch_word(p_core)
     n_plain = dehyphenate_dutch_word(n_core)
-    glued = hyphenate_dutch_word(p_plain + n_plain) + n_punct
+    glued = hyphenate_dutch_word(p_plain + n_plain, allow_pyphen=True) + n_punct
     if p_plain[:1].isupper() and glued[:1].islower():
         glued = glued[0].upper() + glued[1:]
     return glued
@@ -1723,7 +1769,7 @@ def _format_units_as_words(units: list[tuple[str, str]]) -> list[str]:
     last_punct = _split_syllable_punct(units[-1][1])[1]
     if len(units) <= 3:
         joined = "".join(cores)
-        hyp = hyphenate_dutch_word(joined)
+        hyp = hyphenate_dutch_word(joined, allow_pyphen=True)
         hyp_parts = hyp.split("-")
         absorb_letter = (
             len(cores) >= 2
@@ -1994,7 +2040,7 @@ def _combined_is_one_syllable(left: str, right: str) -> bool:
     ra = _lyric_core(right)
     if not la or not ra or len(ra) != 1:
         return False
-    return len(hyphenate_dutch_word(la + ra).split("-")) == 1
+    return len(hyphenate_dutch_word(la + ra, allow_pyphen=True).split("-")) == 1
 
 
 def _merge_fragment_lyric_positions(positions: list[_Position]) -> list[_Position]:
@@ -2137,13 +2183,17 @@ def _l_duration_suffix(
 ) -> str:
     """ELM-suffix for one L-positie.
 
-    Lone standaard-``~`` is impliciet en wordt weggelaten — behalve na
-    recite-``)`` (zonder ELM = breve) en in ``&``-melisma (``ziel~&~``).
+    Lone standaard-``~`` is impliciet (ook na recite-``)``: export behandelt
+    ``)`` en ``)~`` beide als kwart). ``~`` blijft in ``&``-melisma
+    (``ziel~&~``, ``()~&~&.``) en bij andere duur (``_``, ``.``, …).
+
+    ``after_recite`` is historisch; lone ``~`` wordt overal weggelaten.
     """
+    del after_recite  # API-compat; geen speciale post-``)``-``~`` meer.
     if not elms:
         return ""
     if len(elms) == 1:
-        if elms[0] == "~" and not after_recite:
+        if elms[0] == "~":
             return ""
         return elms[0]
     return "&".join(elms)
@@ -2163,8 +2213,8 @@ def _format_l_measure(positions: list[_Position]) -> str:
             # → ``dag-gaan``). Only light repair of false compounds / gaps.
             text = _repair_recite_underlay(raw) if raw.strip() else ""
             body = f"({text})" if text else "()"
-            # Explicit non-breve duration after ) if present (keep ``~``:
-            # bare ``)`` means breve, not quarter).
+            # Niet-standaard duur na ``)`` (``_``, ``.``, …). Lone ``~`` is
+            # impliciet — zelfde als kale ``)`` (export: kwart per lettergreep).
             if not n0.is_breve:
                 body += _l_duration_suffix(
                     [_duration_to_elm(n0.duration)], after_recite=True
@@ -2175,8 +2225,8 @@ def _format_l_measure(positions: list[_Position]) -> str:
         else:
             text = _clean_import_lyric_text(raw)
             elms = [_duration_to_elm(n.duration) for n in pos.notes]
-            # Lyric-less / extender-only slot: bare ``~`` is not an L-position —
-            # use empty recite ``()~`` so sync-telling matches the stem.
+            # Lyric-loos / extender: lege recite ``()`` (+ eventuele melisma-
+            # ELMs); bare ``~`` is geen L-positie.
             if not text:
                 piece = "()" + _l_duration_suffix(elms, after_recite=True)
             else:
@@ -2295,7 +2345,7 @@ def _merge_underlay_syllable_gaps(words: list[str]) -> list[str]:
                 continue
             if _can_hyphenate_syllables(cores):
                 last_punct = _split_syllable_punct(chunk[-1])[1]
-                hyp = hyphenate_dutch_word("".join(cores)) + last_punct
+                hyp = hyphenate_dutch_word("".join(cores), allow_pyphen=True) + last_punct
                 if chunk[0][:1].isupper() and hyp[:1].islower():
                     hyp = hyp[0].upper() + hyp[1:]
                 out.append(hyp)
@@ -2328,7 +2378,9 @@ def _extend_hyphen_stem_with_fragment(words: list[str]) -> list[str]:
                 and r_core.casefold() not in ("de", "te")
                 and _can_hyphenate_syllables(left_bits + [r_core])
             ):
-                hyp = hyphenate_dutch_word("".join(left_bits + [r_core]))
+                hyp = hyphenate_dutch_word(
+                    "".join(left_bits + [r_core]), allow_pyphen=True
+                )
                 if words[i][:1].isupper() and hyp[:1].islower():
                     hyp = hyp[0].upper() + hyp[1:]
                 out.append(hyp + r_punct)
@@ -2388,6 +2440,7 @@ def _format_voice_measure(
     do: Pitch,
     intervals: list[int],
     writing_oct: int,
+    octave_style: str = "@oct",
     last_pitch: Pitch | None = None,
     prev_degree: int | None = None,
     absolute_first: bool = False,
@@ -2396,13 +2449,19 @@ def _format_voice_measure(
 
     ``last_pitch`` carries across measures so holds stay readable.
     For ``ag-vsa``, ``prev_degree`` / ``absolute_first`` carry within one
-    LSATB system (absolute a–g on the first sounding note, then EHM).
+    LSATB system (a–g on the first sounding note, then EHM).
 
     Returns ``(segment, new_last_pitch, prev_degree, absolute_first)``.
     """
     tokens: list[str] = []
-    # vsa keeps a local prev_degree reset per measure (absolute doremi first).
+    # vsa keeps a local prev_degree reset per measure (doremi first).
     local_prev: int | None = None if pitch_form == "vsa" else prev_degree
+
+    def _abc(p: Pitch) -> str:
+        return format_abc(
+            p, do=do, writing_oct=writing_oct, octave_style=octave_style
+        )
+
     for pos in positions:
         slots: list[str] = []
         for note in pos.notes:
@@ -2410,14 +2469,14 @@ def _format_voice_measure(
                 slots.append("r")
                 continue
             if pitch_form == "ag-vsa" and absolute_first:
-                slots.append(format_abc_scientific(note.pitch))
+                slots.append(_abc(note.pitch))
                 deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)
                 local_prev = deg
                 absolute_first = False
             elif last_pitch is not None and note.pitch == last_pitch:
                 slots.append("-")
             elif pitch_form == "abc":
-                slots.append(format_abc_scientific(note.pitch))
+                slots.append(_abc(note.pitch))
                 deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)
                 local_prev = deg
             elif pitch_form == "doremi":
@@ -2426,7 +2485,7 @@ def _format_voice_measure(
                 local_prev = deg
             elif pitch_form == "ag-vsa":
                 if local_prev is None:
-                    slots.append(format_abc_scientific(note.pitch))
+                    slots.append(_abc(note.pitch))
                 else:
                     slots.append(format_ehm(local_prev, note.pitch, do, intervals))
                 deg, _ = pitch_to_degree_and_chrom(do, note.pitch, intervals)

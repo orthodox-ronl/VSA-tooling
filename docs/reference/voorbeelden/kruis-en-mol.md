@@ -113,7 +113,7 @@ laddertoon = ladderstap **zonder** nieuwe halftoon-prefix (zie voorbeeld A).
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 vsa validate examples\docs-walkthroughs\halftoon-accidens-cursor.vsa
-vsa musicxml examples\docs-walkthroughs\halftoon-accidens-cursor.vsa generated\halftoon-accidens.musicxml
+vsa mxl examples\docs-walkthroughs\halftoon-accidens-cursor.vsa -o generated\halftoon-accidens.musicxml
 ```
 
 Meer combinaties:

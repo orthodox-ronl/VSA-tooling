@@ -123,9 +123,7 @@ Renderers bepalen zelf hoe de abstracte betekenis wordt uitgewerkt.
 
 # `@include-vsa` — VSA inline includes
 
-Status: **geïmplementeerd** (`id=` / `lokaal=` / **`zoek=`**).
-
-Normatief zoek-contract (bron): [catalogus-zoek-api.md](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/catalogus-zoek-api.md).
+Status: **geïmplementeerd** (`id=` / `lokaal=`). `zoek=` is **verwijderd** (zie hieronder).
 
 ---
 
@@ -134,12 +132,11 @@ Normatief zoek-contract (bron): [catalogus-zoek-api.md](https://github.com/ortho
 In [VSA-notatie](@bron) (één regel):
 
 ```vsa
-refrein: @include-vsa zoek="Troparion"
 refrein: @include-vsa id=troparion-geboorte-moeder-gods/troparion-geboorte-moeder-gods/liturgikon
 refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
 ```
 
-Parameters **`zoek=`**, **`id=`**, **`lokaal=`** — wederzijds exclusief; geen pad.
+Parameters **`id=`** en **`lokaal=`** — wederzijds exclusief; geen pad. `@include-vsa zoek=` wordt niet meer ondersteund en geeft een foutmelding.
 
 Alleen de substring `@include-vsa …` wordt vervangen; `refrein: ` blijft staan.
 
@@ -151,7 +148,6 @@ Alleen de substring `@include-vsa …` wordt vervangen; `refrein: ` blijft staan
 | --------- | -------------------------------------------------------------- |
 | `id=`     | `catalogus` — beide herkomsten; lokaal wint bij conflict       |
 | `lokaal=` | `catalogus` — parochie `lokaal/`                               |
-| `zoek=`   | `catalogus.zoek` (+ `ZoekContext` uit ouder-`.vsa` `default:`) |
 
 Expand: lees doel-`.vsa`, strip frontmatter, splice body **in-memory** (brondocument ongewijzigd).
 
@@ -159,24 +155,13 @@ Expand: lees doel-`.vsa`, strip frontmatter, splice body **in-memory** (brondocu
 | ---------------------------------- | --------------------------------------------------------------- |
 | Geen match                         | **Fout**                                                        |
 | Meerdere matches                   | **Fout** (`AmbiguousError`)                                     |
-| Eén match + `ook_gevonden_in_bron` | **Waarschuwing** (build mag doorgaan)                           |
-
-Bij ambiguïteit:
-
-1. [`catalogus zoek --lijst`](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/#catalogus-zoek) met dezelfde context.
-2. Verfijn `zoek=` of `default.*` in ouder-`.vsa`.
-3. Of schakel over naar **`@include-vsa lokaal=…`** / **`id=…`** na review.
 
 ---
 
-## Context (`default.*`)
+## Verwijderd: `zoek=`
 
-`default.*` in **dezelfde** frontmatter als `@include-vsa`. Conventie:
-
-- **`zoek=`** in sjablonen/sessies: liturgische rol in de zoekstring; feest in `default.gelegenheid`.
-- **`@include-vsa zoek=`** in `.vsa`: context uit **ouder**-`.vsa` frontmatter.
-
-Zie [catalogus-zoek-api — twee contextlagen](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/catalogus-zoek-api.md).
+`@include-vsa zoek="…"` is verwijderd. Wie het gebruikt, krijgt de foutmelding
+«@include-vsa zoek= wordt niet meer ondersteund». Gebruik `id=` of `lokaal=`.
 
 ---
 
@@ -186,7 +171,7 @@ Zie [catalogus-zoek-api — twee contextlagen](https://github.com/orthodox-ronl/
 | ------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
 | `expand_include_vsa` in [`include_vsa.py`](https://github.com/orthodox-ronl/VSA-tooling/blob/main/src/vsa/include_vsa.py)      | **Geïmplementeerd** |
 | `@include-vsa id=` / `lokaal=`                                                                                                 | **Geïmplementeerd** |
-| `@include-vsa zoek=`                                                                                                           | **Geïmplementeerd** |
+| `@include-vsa zoek=`                                                                                                           | **Verwijderd**      |
 | Integratie validate / svg / musicxml / build-markdown                                                                          | **Geïmplementeerd** |
 
 ---
@@ -195,11 +180,17 @@ Zie [catalogus-zoek-api — twee contextlagen](https://github.com/orthodox-ronl/
 
 # VSA-commentaar
 
-Binnen een `::: vsa-notatie` blok mag HTML-commentaar voorkomen:
+In `.vsa` en in `::: vsa-notatie` / `.mvsa` mag broncommentaar op twee manieren:
 
 ```text
-<!-- dit is commentaar -->
+<!-- dit is HTML-commentaar (mag ook inline op een regel) -->
+# dit is regelcommentaar (hele regel, zoals in MVSA)
 ```
+
+Beide vormen gelden voor **VSA en MVSA**. Regelcommentaar begint na
+eventuele spaties/tabs met `#`. In VSA blijft `#` **binnen** een scope
+(halftoon, bijvoorbeeld `{#-Cis}`) gewone notatie — alleen een **hele
+regel** die met `#` begint is commentaar.
 
 ## Regels
 
@@ -212,9 +203,10 @@ Binnen een `::: vsa-notatie` blok mag HTML-commentaar voorkomen:
 - Commentaar heeft geen invloed op [afgeleide](@bron) artefacten.
 - Commentaar mag niet als tekstnode worden behandeld.
 - Commentaar mag niet als whitespace worden behandeld.
-- Commentaar mag niet als newline worden behandeld.
+- Commentaar mag niet als newline worden behandeld (geen lege regel in SVG e.d.).
 - Commentaar mag geen invloed hebben op positionering, spacing of layout.
 - Commentaar mag niet in SVG, HTML, JSON, MusicXML of andere [afgeleide](@bron) artefacten terechtkomen.
+- Bij **foutmeldingen** tellen commentaarregels wél mee in regelnummer en kolom (bestand-absoluut).
 
 ---
 
@@ -272,12 +264,10 @@ een logische referentie via **catalogus** (fase 3):
     :::include svg id:zangstuk-id/variant-id/uitvoeringsvorm-id [parameters]:::
     :::include svg lokaal:…:::
     :::include svg bron:zangstuk-id/source-id:::
-    :::include svg zoek="Troparion" [parameters]:::
 
-**Fase 4 — catalogus-zoek:** `zoek="…"` in sjablonen/sessies; [`vsa resolve-catalogus`](../reference/cli/resolve-catalogus.md)
-vervangt vóór build door `bron:…` / `lokaal:…`. Open `zoek=` in build → **fout**.
-Zie [catalogus-samenstelling-zangstuk](https://orthodox-ronl.github.io/bron/specs/catalogus-samenstelling-zangstuk/)
-en [parochie-lokaal-vsa.md](../guides/parochie-lokaal-vsa.md).
+**Fase 4 (verwijderd) — catalogus-zoek:** `zoek="…"` in `:::include` en de opdracht
+`vsa resolve-catalogus` bestaan niet meer. `:::include … zoek="…"` geeft een foutmelding;
+verwijs met een pad of met `id:…` / `lokaal:…`. Zie [parochie-lokaal-vsa.md](../guides/parochie-lokaal-vsa.md).
 
 Segmenten mogen [aliassen](@bron) zijn (`Hemelum` → `hemelum`). Zie
 [catalogus-cli](https://orthodox-ronl.github.io/bron/reference/catalogus-cli/).
@@ -478,7 +468,7 @@ Authoring-syntax voor **export** (niet conversie) is contractueel vastgelegd in 
   [coria](https://orthodox-ronl.github.io/bron/reference/exporttype-coria/),
   [mxl](https://orthodox-ronl.github.io/bron/reference/exporttype-mxl/)
 
-Conversie ([`vsa svg`](../reference/cli/svg.md), [`vsa musicxml`](../reference/cli/musicxml.md)):
+Conversie ([`vsa svg`](../reference/cli/svg.md), [`vsa mxl`](../reference/cli/musicxml.md)):
 [Conversiemechanismen](https://orthodox-ronl.github.io/bron/reference/conversiemechanismen/)
 ([conversiemechanisme](@bron)).
 
@@ -490,7 +480,7 @@ Conversie ([`vsa svg`](../reference/cli/svg.md), [`vsa musicxml`](../reference/c
 | `:::coria "melodie.vsa"`                      | Geïmplementeerd                                                                                        |
 | `:::include svg\|coria\|mxl "…"`              | Geïmplementeerd; zie demo `export-demo.md`                                                             |
 | `:::include svg id:…` / `lokaal:…` / `bron:…` | Geïmplementeerd (fase 3); zie demo `antifonen-hemelum.md`                                              |
-| `:::include <type> zoek="…"`                  | Geïmplementeerd (fase 4); resolve via [`vsa resolve-catalogus`](../reference/cli/resolve-catalogus.md) |
+| `:::include <type> zoek="…"`                  | Verwijderd; geeft een foutmelding                                                                      |
 | `coria` / `mxl` op `bron:` catalogus-pad      | Beperkt — `.vsa` buiten content-root                                                                   |
 
 Parameters (`alt`, `scale`, `label`, `mode`) — volledige beschrijving per [exporttype](@bron)

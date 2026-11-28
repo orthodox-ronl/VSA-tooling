@@ -17,15 +17,16 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | [Hugo-output](@) genereren                              | [`vsa build-markdown …`](../reference/cli/build-markdown.md)                                                                                                                                 |
 | Pagina-Markdown naar A4-PDF (`index.md.pdf`)            | [`markdown pdf <bestand.md>`](../reference/cli/markdown.md#markdown-pdf)                                                                                                                     |
 | Partituur-PDF uit `.vsa`                                | [`vsa pdf <pad.vsa>`](../reference/cli/pdf.md)                                                                                                                                               |
-| `zoek=`-includes oplossen naar catalogus                | [`vsa resolve-catalogus <bestand.md>`](../reference/cli/resolve-catalogus.md)                                                                                                                |
-| Lettergreepstreepjes (bestand of map)                   | [`vsa syllabify <pad>`](../reference/cli/syllabify.md)                                                                                                                                       |
+| Lettergreepstreepjes (bestand of map)                   | [`vsa syllabify <pad>`](../reference/cli/syllabify.md) (`.vsa`) / [`mvsa syllabify <pad>`](../reference/cli/mvsa.md#mvsa-syllabify) (`.mvsa`)                                                |
+| Strofe-layout in `.vsa` (`*` / `/` / regels; preview)   | [`vsa format`](../reference/cli/format.md) (`--dry-run` toont resultaat) — [vsa-format](../formats/vsa-format.md)                                                                            |
 | Platte gezongen tekst uit `.vsa`                        | [`vsa text <pad.vsa>`](../reference/cli/text.md)                                                                                                                                             |
 | Platte gezongen tekst uit `.mvsa` of `.mscz`            | [`mvsa text`](../reference/cli/mvsa.md#mvsa-text) / [`mscz text`](../reference/cli/mscz.md)                                                                                                  |
-| MusicXML exporteren                                     | [`vsa musicxml <input.vsa> <output.mxl>`](../reference/cli/musicxml.md) (Coria: `--syllabify`)                                                                                               |
+| MusicXML exporteren                                     | [`vsa mxl <pad.vsa> [-o …]`](../reference/cli/musicxml.md) (Coria: `--syllabify`; alias `musicxml`)                                                                                          |
 | Standaardproducten (geen partituur-PDF)                 | [`vsa products`](../reference/cli/products.md) / [`mvsa products`](../reference/cli/mvsa.md#mvsa-products) / [`mscz products`](../reference/cli/mscz.md)                                     |
 | `.vsa` canonieke notatie controleren                    | [`vsa validate`](../reference/cli/validate.md) (geen aparte `vsa normalize`)                                                                                                                 |
 | mvsa valideren (draft)                                  | [`mvsa validate <pad>`](../reference/cli/mvsa.md#mvsa-validate)                                                                                                                              |
 | `.mvsa` normaliseren (spelling / uitlijning)            | [`mvsa normalize`](../reference/cli/mvsa.md#mvsa-normalize)                                                                                                                                  |
+| `.mvsa` / `.vsa` kuisen (authoring → canoniek)          | [`mvsa kuiser`](../reference/cli/mvsa.md#mvsa-kuiser) (Q\*) · [`vsa kuiser`](../reference/cli/kuiser.md) (V1–V8) — [kuiser](../formats/kuiser.md)                                            |
 | `.mxl` naar Coria/playback-profiel                      | [`mxl normalize`](../reference/cli/mxl.md)                                                                                                                                                   |
 | mvsa → SATB MusicXML (draft)                            | [`mvsa mxl <pad> [-o …] [--section …]`](../reference/cli/mvsa.md#mvsa-mxl)                                                                                                                   |
 | mvsa → Score-IR JSON (partituur; scherm/CoriB)          | [`mvsa score-ir <pad> [-o …]`](../reference/cli/mvsa.md#mvsa-score-ir)                                                                                                                       |
@@ -40,7 +41,7 @@ man-pagina's onder [CLI-referentie](../reference/cli/index.md).
 | mvsa → preview-audio (draft)                            | [`mvsa mp3`/`ogg`/`wav`](../reference/cli/mvsa.md#mvsa-mp3) (of top-level [`vsa audio`](../reference/cli/audio.md))                                                                          |
 | MusicXML / MuseScore → `.mvsa` (**werkbank**)           | [`mxl mvsa`](../reference/cli/mxl.md) / [`mscz mvsa`](../reference/cli/mscz.md)                                                                                                              |
 | Score ↔ `.mvsa` controleren (t.o.v. verse import)       | [`mscz compare`](../reference/cli/mscz.md#mscz-compare)                                                                                                                                      |
-| Score → mvsa + ankers (navigatie / foutzoeken)          | `mxl mvsa …` / `mscz mvsa …` (default `ag-vsa`) daarna [`validate`](../reference/cli/mvsa.md#mvsa-validate)                                                                                  |
+| Score → mvsa + ankers (navigatie / foutzoeken)          | `mxl mvsa …` / `mscz mvsa …` (default `ag-vsa` + relatieve a–g); bladcijfers: `--octave-style none`; daarna [`validate`](../reference/cli/mvsa.md#mvsa-validate)                             |
 | `.mvsa` naar andere tonica (toonsoort)                  | [`mvsa transpose <pad> --to F4`](../reference/cli/mvsa.md#mvsa-transpose)                                                                                                                    |
 | `.mvsa` leren schrijven                                 | [mvsa schrijven 101](mvsa-schrijven-101.md)                                                                                                                                                  |
 
@@ -68,7 +69,7 @@ vsa blocks examples\minimal\031_markdown_block_metadata.md --json
 ```
 
 ```cmd
-vsa musicxml mijn-lied.vsa mijn-lied.mxl
+vsa mxl mijn-lied.vsa -o mijn-lied.mxl
 ```
 
 ```cmd
@@ -83,6 +84,7 @@ canonieke `.vsa` of `.mvsa` — zie [zoektekst](../formats/zoektekst.md).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
+vsa format examples\minimal\001_plain_text.vsa --dry-run
 vsa zoektekst examples\mvsa\alleluia-toon-1.mvsa
 vsa zoektekst examples\mvsa --check
 ```

@@ -1,0 +1,11 @@
+# Hemelum / Liturgikon tropaar toon 8 = zelfde formule als kondak-toon-8-hemelum.
+
+spec_version: draft-v0
+id: tropaar-toon-8-hemelum
+genre: tropaar
+tone: 8
+do: F4
+mode: major
+pitches_status: provisional
+source: "Liturgikon / Hemelum — tropaar toon 8 (= kondak-toon-8-hemelum)"
+same_as: kondak-toon-8-hemelum

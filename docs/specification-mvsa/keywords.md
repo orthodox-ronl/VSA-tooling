@@ -511,7 +511,8 @@ zet. De keys zijn dezelfde **lyrics-identifiers** als op de lyrics-regels
 | `ksl`             | Hulptekst = Latijn (uit kerkslavische bronletters)            |
 | `nl`              | Hulptekst = Cyrillisch (uit Nederlandse bronletters)          |
 | `auto`            | Per lettergreep detecteren (default als je `@taal` weglaat)   |
-| ander label       | Alleen Coria-naam (bv. `aap`); richting blijft auto/detect    |
+| andere taalcode (`ro`, `el`, …) | **Geen** transliteratie voor deze passage (er zijn geen regels voor) |
+| vrij label op een eigen lyrics-id (`Lap=aap`) | Alleen Coria-naam; richting blijft auto/detect |
 
 **Coria-partnamen** (`--translit-as-parts`): één MusicXML-part per
 **stem × lyrics-laag**, genaamd `{stemidentifier} ({label})` — bijvoorbeeld

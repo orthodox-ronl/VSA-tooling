@@ -85,6 +85,23 @@ Bij gedragswijzigingen: in **dezelfde** ronde man-pagina’s, handleidingen
 cross-links bijwerken. Zie `.cursor/rules/docs-sync-with-code.mdc`.
 Geen «docs later».
 
+### 6. Gedeeld CLI-contract (G1–G8)
+
+Elk (sub)commando volgt
+[`docs/reference/cli/input-pad.md`](docs/reference/cli/input-pad.md):
+straat-puur, padresolutie (bestand/map/korte lookup/catalogus-id),
+C3/C4-toets + uitzonderingen, sibling-uitvoer, gedeelde vlaggen
+(`--dry-run`, `-h` met defaults), exitcodes, docs-sync.
+
+- Helpers: `vsa.input_paths.collect_cli_sources` /
+  `resolve_cli_path` (via `_cli_collect_sources` /
+  `_cli_resolve_existing` in `cli.py`).
+- Geen ad-hoc `Path.rglob` in `src/vsa/cli*.py` zonder
+  `# G2-allow: …`.
+- Handhaving: `tests/test_cli_input_contract_scan.py` +
+  `.cursor/rules/cli-input-bestand-of-map.mdc`.
+- Inventaris van commando’s bijhouden op de contractpagina.
+
 ---
 
 ## Ontwikkelomgeving
@@ -196,7 +213,8 @@ Hergebruik: `docs/guides/reuse-vsa-tooling.md`.
 lezen (maatstrepen, collapse-regels, MuseScore `position`, Coria vs print).
 
 **Contracten (alle formaten / OSMD):** start bij
-[`docs/formats/contract-index.md`](docs/formats/contract-index.md).
+[`docs/formats/contract-index.md`](docs/formats/contract-index.md)
+(§Contract-skelet, §Canoniciteit C1–C4, §Nieuwe regel → naleving).
 **MVSA → MXL/MSCZ:** checklists in
 [`docs/formats/canonical-checklists.md`](docs/formats/canonical-checklists.md)
 (M-reeks Coria, S-reeks partituur). Same-pitch melisma samentrekken geldt voor
@@ -204,7 +222,7 @@ lezen (maatstrepen, collapse-regels, MuseScore `position`, Coria vs print).
 **VSA + template → MVSA:** T1–T7 in
 [`docs/specification-vsa-templates/vsa-mvsa-contract.md`](docs/specification-vsa-templates/vsa-mvsa-contract.md)
 (melodiestem default S, override A/T/B). Cursor-regels:
-`contracten-eerst.mdc`, `mvsa-export-contracten.mdc`.
+`contracten-eerst.mdc`, `canonieke-bestanden.mdc`, `mvsa-export-contracten.mdc`.
 
 ### Belangrijke grenzen
 
@@ -282,6 +300,7 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 | `docs-sync-with-code.mdc`             | Bij codewijziging alle gerelateerde docs mee bijwerken        |
 | `mvsa-export-contracten.mdc`          | MXL/MSCZ volgt checklists (M5a/S13)                           |
 | `contracten-eerst.mdc`                | Altijd [contract-index](docs/formats/contract-index.md) eerst |
+| `canonieke-bestanden.mdc`             | Skelet-H2’s, C1–C4, dekking, nieuwe-regel → naleving          |
 
 Na bulk-tabellen: `python scripts/align_markdown_tables.py <pad>`.
 

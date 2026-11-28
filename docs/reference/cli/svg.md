@@ -28,10 +28,16 @@ scherm). Dit commando verwerkt **geen** Markdownblokken — voor Markdown
 met [VSA-blokken](@) gebruik je [`vsa process`](process.md) of
 [`vsa build-markdown`](build-markdown.md).
 
+In de standaard-``.vsa.svg`` verdwijnen zachte lettergreepstreepjes uit de
+zichtbare lyrics (`hei-lig` → `heilig`); een hard `=` blijft als gewoon
+streepje zichtbaar. Dat volgt het formatcontract
+[vsa-SVG — Syllabificatie](../../formats/vsa-svg.md#syllabificatie).
+
 Met `--translit` / `--translit-modus` (vorm A): onder elke gezongen tekst
 een tweede regel met transliteratie; in scopes de volgorde EHM → bron →
-translit → ELM. Regelbreedte en `viewBox` meten `max(bron, translit)` per
-lettergreep, zodat bredere Cyrillische regels niet rechts afkappen. Zie
+translit → ELM. Bij translit blijft de zing-deling (soft `-`) zichtbaar.
+Regelbreedte en `viewBox` meten `max(bron, translit)` per lettergreep,
+zodat bredere Cyrillische regels niet rechts afkappen. Zie
 [productmodel §5a](../../plans/kerkslavisch-transliteratie.md#5a-besluiten-productmodel-nu).
 
 `vsa svg` valideert de invoer niet expliciet vooraf; een parsefout leidt tot

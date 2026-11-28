@@ -3,7 +3,7 @@ slug: include-vsa
 term: include-vsa
 termType: concept
 glossaryTerm: "@include-vsa"
-glossaryText: "een string die met `@include-vsa` begint, precies één ondersteunde resolverparameter bevat (`zoek=`, `id=` of `lokaal=`) en tijdens verwerking door de body van het doelbestand wordt vervangen."
+glossaryText: "een string die met `@include-vsa` begint, precies één ondersteunde resolverparameter bevat (`id=`) en tijdens verwerking door de body van het doelbestand wordt vervangen."
 glossaryAlias: VSA-inline-include
 formPhrases:
   - "@include-vsa"
@@ -11,7 +11,7 @@ formPhrases:
   - vsa-inline-include
   - vsa-inline-includes
 glossaryNotes:
-  - "Voorbeeld: `refrein: @include-vsa zoek=\"Troparion\"` — alleen de `@include-vsa …`-substring wordt vervangen."
+  - "Voorbeeld: `refrein: @include-vsa id=cherubijnenhymne/kastorski/groningen` — alleen de `@include-vsa …`-substring wordt vervangen."
 ---
 
 # @include-vsa
@@ -23,11 +23,11 @@ regel blijft bestaan.
 Voorbeeld:
 
 ```text
-refrein: @include-vsa lokaal=cherubijnenhymne/kastorski/groningen/groningen-vsa
+refrein: @include-vsa id=cherubijnenhymne/kastorski/groningen
 ```
 
 Goede/valide voorbeelden van @include-vsa zijn:
-- Exact één van `zoek=` / `id=` / `lokaal=`
+- Exact één resolverparameter: `id=` (pad onder `content-source/catalogus`, precies één `.vsa`)
 - Alleen de directive-substring wordt vervangen
 
 Geen goede/niet valide voorbeelden van @include-vsa zijn:

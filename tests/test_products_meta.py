@@ -11,6 +11,7 @@ import pytest
 from vsa.cli_mvsa import main as mvsa_main
 from vsa.products_meta import (
     SCHEMA_VERSION,
+    SCHEMA_VERSION_LEGACY,
     freshness,
     load_meta,
     meta_path_for,
@@ -195,7 +196,7 @@ def test_freshness_ok_without_legacy_product_generated_at(tmp_path: Path) -> Non
     meta_path_for(bron).write_text(
         json.dumps(
             {
-                "schema": SCHEMA_VERSION,
+                "schema": SCHEMA_VERSION_LEGACY,
                 "bron": bron.name,
                 "bron_sha256": sha256_file(bron),
                 "generated_at": "2026-01-01T00:00:00+00:00",
@@ -258,7 +259,9 @@ def test_mvsa_products_skip_svg_writes_meta(tmp_path: Path) -> None:
             side_effect=_lyr,
         ),
     ):
-        assert products_mvsa_one(dest, skip_svg=True) == 0
+        assert products_mvsa_one(
+            dest, skip_svg=True, allow_noncanonical=True
+        ) == 0
     meta_path = meta_path_for(dest)
     assert meta_path.is_file()
     data = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -334,7 +337,9 @@ def test_vsa_products_minimal(tmp_path: Path) -> None:
             side_effect=_lyr,
         ),
     ):
-        code = products_vsa_one(dest, skip_svg=False)
+        code = products_vsa_one(
+            dest, skip_svg=False, allow_noncanonical=True
+        )
     if code != 0:
         pytest.skip("voorbeeld-.vsa faalde export (niet regressie-meta)")
     assert meta_path_for(dest).is_file()
@@ -499,7 +504,7 @@ def test_mscz_products_tall_svg_meta_drops_bladreeks(tmp_path: Path) -> None:
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
     ]
     with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
-        assert products_mscz_one(bron, force=True) == 0
+        assert products_mscz_one(bron, force=True, allow_noncanonical=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     keys = set(data["products"])
@@ -510,7 +515,7 @@ def test_mscz_products_tall_svg_meta_drops_bladreeks(tmp_path: Path) -> None:
     path = tmp_path / entry["file"]
     assert path.is_file()
     assert entry["sha256"] == sha256_file(path)
-    assert products_mscz_one(bron, force=False) == 0
+    assert products_mscz_one(bron, force=False, allow_noncanonical=True) == 0
 
 
 def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
@@ -520,7 +525,7 @@ def test_mscz_products_single_svg_meta_key(tmp_path: Path) -> None:
         patch("vsa.mvsa_mscz.export_mscz_to_svg", side_effect=_fake_single_svg),
     ]
     with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
-        assert products_mscz_one(bron, force=True) == 0
+        assert products_mscz_one(bron, force=True, allow_noncanonical=True) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert "svg" in data["products"]
     assert data["products"]["svg"]["file"] == "lied.mscz.svg"
@@ -531,11 +536,18 @@ def test_mvsa_products_tall_svg_meta_key(tmp_path: Path) -> None:
     bron = tmp_path / "lied.mvsa"
     bron.write_text("title: t\n---\nL  | a\nS  | a\n", encoding="utf-8")
 
+    def _vsa(_b: Path, out: Path, **_k: object) -> Path:
+        out.write_text("do\n", encoding="utf-8")
+        return out
+
     ctx = list(_fake_universal_rest()) + [
         patch("vsa.mvsa_mscz.export_mvsa_to_svg", side_effect=_fake_single_svg),
+        patch("vsa.mvsa_vsa.convert_mvsa_to_vsa", side_effect=_vsa),
     ]
-    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6]:
-        assert products_mvsa_one(bron, force=True) == 0
+    with ctx[0], ctx[1], ctx[2], ctx[3], ctx[4], ctx[5], ctx[6], ctx[7]:
+        assert products_mvsa_one(
+            bron, force=True, allow_noncanonical=True
+        ) == 0
     data = json.loads(meta_path_for(bron).read_text(encoding="utf-8"))
     assert data["schema"] == SCHEMA_VERSION
     keys = set(data["products"])

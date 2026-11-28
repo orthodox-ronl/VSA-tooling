@@ -8,7 +8,7 @@
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa validate examples\mvsa
 mvsa validate examples\mvsa\alleluia-toon-8.mvsa
-mvsa musicxml examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
+mvsa mxl examples\mvsa\kleine-intocht-zondag-hemelum.mvsa --section schets-a-bladcijfer -o generated\intocht-a.mxl
 ```
 
 `validate`: exitcode `0` = geen errors (warnings mogen). Exitcode `1` = minstens één error.

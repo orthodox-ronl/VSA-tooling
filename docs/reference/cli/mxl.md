@@ -18,12 +18,13 @@ precies één bron. Zie [Invoer bestand of map](input-pad.md).
 ## Synopsis
 
 ```text
-mxl [-h] {mvsa,mscz,validate,normalize} …
+mxl [-h] {mvsa,mscz,validate,normalize,kuiser} …
 mxl mvsa [-h] [-o OUTPUT] [--pitch {doremi,a-g,vsa,ag-vsa}] [--do PITCH]
-         [--octave-style {@oct,marker}] [--section SECTION] [--no-align] path
+         [--octave-style {@oct,none,marker}] [--section SECTION] [--no-align] path
 mxl mscz [-h] [-o OUTPUT] [--musescore PATH] path
 mxl validate [-h] [--profile {satb,mono}] path
 mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
+mxl kuiser [-h] path…
 ```
 
 ## Subcommando's
@@ -34,9 +35,12 @@ mxl normalize [-h] [-o OUTPUT] [--apply-timing] path
 | `mscz`      | Naar checklist-`.mscz`: eerst partituur-layout (SA/TB), dan MuseScore. Default: `<bronnaam>.mscz` (bijv. `lied.mxl.mscz`).               |
 | `validate`  | Lees-gate: M2/M8/M18 (monofone parts), M20 (note-kindvolgorde), Coria-importer-tags, meta (source ≠ licentie). Profiel `satb` of `mono`. |
 | `normalize` | Schrijf playback-MXL: explode + piano + sanitize (incl. canonieke note-volgorde M20); met `--apply-timing` ook recite/pauzes.            |
+| `kuiser`    | Nog geen spec → foutmelding ([kuiser.md](../../formats/kuiser.md)).                                                                      |
 
-**`mvsa`-opties** (`--pitch` default `ag-vsa`, `--no-align`, soft-wrap ~80,
-eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm): zie
+**`mvsa`-opties** (`--pitch` default `ag-vsa`, `--octave-style` default `@oct`
+= relatieve a–g; `none` = bladcijfers; `--no-align`, soft-wrap ~80,
+eindankers bij `ag-vsa`/`vsa`, kuiser-normaalvorm inclusief `&`-kolommen met
+padding-spaties rond `&`): zie
 [score naar mvsa](../../formats/mvsa.md#score-naar-mvsa). Bij complexe lyrics
 soms `--no-align`; sync-telling blijft leidend. Default `--section schets`.
 
@@ -64,6 +68,6 @@ scripts\mxl.cmd -h
 - [Invoer bestand of map](input-pad.md)
 - [`mvsa`](mvsa.md) — bron `.mvsa`
 - [`mscz`](mscz.md) — bron `.mscz` (`mscz mvsa` / `mscz mxl`)
-- [`vsa musicxml`](musicxml.md) — eenstemmig `.vsa` → MusicXML
+- [`vsa mxl`](musicxml.md) — eenstemmig `.vsa` → MusicXML
 - [`vsa text`](text.md) — platte gezongen tekst uit `.mxl` / `.musicxml` (zoekindex)
 - [`vsa audio`](audio.md) — `.mscz` → mp3 via genormaliseerde playback-MXL

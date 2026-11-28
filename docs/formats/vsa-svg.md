@@ -1,15 +1,77 @@
 # Muziek-only SVG uit `.vsa` (scherm)
 
 Afgeleide **SVG** met alleen de VSA-notatie (geen titel/colofon). Bedoeld
-voor schermweergave op catalogus- en koormap-pagina’s (shortcode `muziek`).
-Zelfde productrol als [mvsa-SVG](mvsa-svg.md); andere tekenpipeline
-(native VSA-renderer i.p.v. MuseScore).
+voor schermweergave. Zelfde productrol als [mvsa-SVG](mvsa-svg.md); andere
+pipeline (native VSA-renderer). Start: [contract-index](contract-index.md).
 
-| Onderwerp       | Waar                                                                      |
-| --------------- | ------------------------------------------------------------------------- |
-| CLI             | [`vsa svg`](../reference/cli/svg.md)                                      |
-| Sibling-naam    | ``lied.vsa`` → ``lied.vsa.svg`` (default)                                 |
-| mvsa-equivalent | [mvsa-SVG](mvsa-svg.md) · [`mvsa svg`](../reference/cli/mvsa.md#mvsa-svg) |
+## Identiteit
+
+| Veld     | Waarde                                           |
+| -------- | ------------------------------------------------ |
+| Extensie | `.svg` (sibling `.vsa.svg`)                      |
+| Rol      | Standaardproduct (meta-key `svg` bij vsa-straat) |
+| Sibling  | `lied.vsa` → `lied.vsa.svg`                      |
+| Wanneer  | Catalogus-/koormap-scherm zonder MuseScore       |
+
+## Canoniciteit
+
+Canoniek = muziek-only, trim/viewBox op inhoud; geen blad-chrome. C1–C4:
+[contract-index §C\*](contract-index.md#canoniciteit-en-conversiegates-c).
+
+## Inhoud en metadata
+
+Geen frontmatter in de SVG. Titel/colofon horen in `index.md.pdf`, niet hier.
+
+## Witruimte
+
+De SVG wordt na het tekenen **bijgesneden tot de getekende inhoud** (lijnen,
+cirkels, tekst): links/rechts 6 en boven/onder 4 eenheden rand, ongeacht lege
+rijen, commentaar of structuur boven de notatie. Instelbaar in `vsa.toml`
+onder `[rendering.svg]`: `trim` (standaard `true`), `trim-padding-x`,
+`trim-padding-y`. De viewBox blijft `0 0 breedte hoogte`; de inhoud staat in
+een groep `vsa-trim` met een `translate`.
+
+## Syllabificatie
+
+**Strip** soft `-` in zichtbare underlay: de schermtekst loopt door zonder
+lettergreepstreepjes (`hei-lig` → `heilig`). Hard `=` wordt wel een zichtbaar
+streepje (`mede=eeuwige` → `mede-eeuwige`). Uitzondering: translit-product
+houdt de zing-deling zichtbaar — zie [syllabificatie](syllabificatie.md) ·
+[translit-svg](translit-svg.md).
+
+## Melisma en binding
+
+Volgt VSA-renderregels / K2; hyphen ≠ melisma.
+
+Een opvulstreep rechts van een lettergreep wordt alleen getekend als de
+ELM- en EHM-glyphs van die lettergreep samen breder zijn dan de tekst.
+Norm: [rendering — kolombreedtes](../specification/rendering.md#kolombreedtes-en-rijhoogtes).
+
+## Transliteratie
+
+n.v.t. op standaard `.vsa.svg`. Tweede schrift: [translit-svg](translit-svg.md).
+
+## Stemmen en partijen
+
+n.v.t. (eenstemmig).
+
+## Leesbaarheid
+
+Alleen notatie; geen overlapping met titelblokken (die ontbreken bewust).
+
+## Herkomst
+
+Merge key `svg` in [products-meta](products-meta.md).
+
+## Conversies
+
+| Bron   | CLI                                  |
+| ------ | ------------------------------------ |
+| `.vsa` | [`vsa svg`](../reference/cli/svg.md) |
+
+## Validatie
+
+Visueel + products-versheid.
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
@@ -17,6 +79,7 @@ vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa
 vsa svg examples\docs-walkthroughs\svg-phrase-kort.vsa -o generated\vsa\phrase.vsa.svg
 ```
 
-Een pagina-PDF (`index.md.pdf`, via `markdown pdf`) mag titel of andere
-bladinfo bevatten. Die informatie hoort niet in deze SVG. Een
-`.vsa.pdf` is geen standaardproduct en geen download voor de site.
+## Zie ook
+
+- [mvsa-svg](mvsa-svg.md) · [translit-svg](translit-svg.md)
+- [Formaten & CLI — overzicht](index.md)

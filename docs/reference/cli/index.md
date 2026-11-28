@@ -19,12 +19,13 @@ cd /d C:\Git\orthodox-ronl\VSA-tooling
 Paden in commando's zijn relatief aan die map, tenzij je een absoluut pad
 opgeeft.
 
-## Invoer: bestand of map
+## Gedeeld CLI-contract (generieke eigenschappen)
 
-Waar een commando bronbestanden leest, is de afspraak: **één bestand** of
-**een map** (recursief alle passende extensies). Gedeelde helper:
-`vsa.input_paths.collect_input_files`. Inventaris (welke commando’s dit al
-doen): [input-pad](input-pad.md).
+Elk (sub)commando deelt vaste eigenschappen G1–G8: straat-puur,
+padresolutie, **C3/C4-toets** (canonieke invoer/uitvoer + uitzonderingen),
+sibling-uitvoer, gedeelde vlaggen (`--dry-run`, `-h` met defaults),
+exitcodes, docs-sync. Norm + inventaris + handhaving (scan-test):
+[input-pad](input-pad.md).
 
 ## Algemene syntax
 
@@ -43,7 +44,7 @@ vsa [--config CONFIG] [--version] <subcommando> …
 | `--version`       | Nee       | Toon de geïnstalleerde versie en stop direct (subcommando wordt genegeerd).                                                             |
 | `-h`, `--help`    | Nee       | Toon hulp. Werkt zowel op `vsa --help` als op `vsa <subcommando> --help`.                                                               |
 
-Sommige subcommando's (`svg`, `process`, `build-markdown`, `musicxml`, `pdf`)
+Sommige subcommando's (`svg`, `process`, `build-markdown`, `mxl`, `pdf`)
 accepteren `--config` ook als **subcommando-optie**. Die overschrijft dan de
 globale `--config`.
 
@@ -72,14 +73,15 @@ echo %ERRORLEVEL%
 | [`build-markdown`](build-markdown.md)            | Genereer Hugo-geschikte Markdown én SVG-assets uit content-source.                                            |
 | [`markdown`](markdown.md)                        | Markdown-straat: `markdown pdf` / `markdown svg` / `markdown text` (site-PDF, VSA-SVG’s, platte tekst).       |
 | [`pdf`](pdf.md)                                  | Partituur-PDF uit `.vsa` (MuseScore). Pagina-PDF: [`markdown pdf`](markdown.md#markdown-pdf).                 |
-| [`resolve-catalogus`](resolve-catalogus.md)      | Los `:::include … zoek="…"` op naar catalogus-paden (`bron:…` / `lokaal:…`).                                  |
 | [`syllabify`](syllabify.md)                      | Lettergreepstreepjes in VSA-tekst, ook op scope-grenzen (bestand/map; Pyphen nl_NL).                          |
+| [`format`](format.md)                            | Strofe-layout in `.vsa` (`*`/`/`/newline; regels of flow; `--dry-run` / `--wrap`).                            |
+| [`kuiser`](kuiser.md)                            | Authoring-opkuis `.vsa` (V1–V8: FM, zoektekst, syllabify, validate).                                          |
 | [`text`](text.md)                                | Platte gezongen tekst uit `.vsa` / `.mvsa` / MusicXML / `.mscz` (zoekindex).                                  |
 | [`zoektekst`](zoektekst.md)                      | Vul/controleer YAML-`zoektekst` in canonieke `.vsa` / `.mvsa` (editorzoeken).                                 |
-| [`musicxml`](musicxml.md)                        | Exporteer [VSA](@) naar MusicXML (`.mxl` of `.musicxml`); playback + Coria-finalize; optioneel `--syllabify`. |
+| [`mxl`](musicxml.md)                             | Exporteer `.vsa` naar MusicXML (`.mxl`/`.musicxml`); `PATH [-o]`; alias `musicxml`; optioneel `--syllabify`.  |
 | [`products`](products.md)                        | Standaardproducten + `*.products-meta.json` (geen partituur-PDF); ook `mvsa`/`mscz products`.                 |
 | [`audio`](audio.md)                              | Exporteer naar audio (``.mp3``) voor preview-luisteren (via MuseScore).                                       |
-| [`vsa mvsa`](vsa-mvsa.md)                        | `.vsa` + formule-template → schets-`.mvsa` (T1–T7; default Hemelum toon 4).                                   |
+| [`vsa mvsa`](vsa-mvsa.md)                        | `.vsa` + formule-template → schets-`.vsa.mvsa` (T1–T7).                                                       |
 | [`mvsa`](mvsa.md)                                | Draft: bron `.mvsa` — validate/normalize/transpose/mxl/mscz/pdf/mp3 (`mvsa`).                                 |
 | [`mxl`](mxl.md)                                  | Bron `.mxl`/`.musicxml`: `mxl mvsa`; `mxl mscz`; validate/normalize.                                          |
 | [`mscz`](mscz.md)                                | Bron `.mscz`: `mvsa`; `mxl`; `svg`; `pdf`; `normalize`; text; `compare`; `products`.                          |

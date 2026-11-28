@@ -115,6 +115,24 @@ def test_export_rejects_unknown_suffix(tmp_path: Path):
         export_to_audio(src, tmp_path / "out.mp3")
 
 
+def test_vsa_playback_mxl_uses_products_export_without_auto_syllabify(
+    tmp_path: Path,
+):
+    """Audio uit .vsa deelt export met products-MXL; deling staat in de bron."""
+    from vsa.audio_export import _write_playback_mxl
+
+    src = tmp_path / "lied.vsa"
+    src.write_text("eeu-wig\n", encoding="utf-8")
+    out = tmp_path / "lied.mxl"
+    with patch("vsa.vsa_musicxml_export.export_vsa_to_musicxml") as export:
+        _write_playback_mxl(src, out)
+    export.assert_called_once()
+    _args, kwargs = export.call_args
+    assert _args[0] == src
+    assert _args[1] == out
+    assert kwargs.get("syllabify") is False
+
+
 def test_last_audible_end_ignores_trailing_silence(tmp_path: Path):
     wav = tmp_path / "tone_then_silence.wav"
     write_silent_padded_pcm16_fixture(

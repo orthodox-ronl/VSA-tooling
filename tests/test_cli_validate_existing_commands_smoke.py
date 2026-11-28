@@ -40,19 +40,22 @@ def test_cli_parse_ast_smoke(capsys, tmp_path: Path):
     assert '"type": "Document"' in output
 
 
-def test_cli_musicxml_batch_smoke(capsys, tmp_path: Path):
+def test_cli_mxl_batch_smoke(capsys, tmp_path: Path):
     input_dir = tmp_path / "content-source"
     vsa_dir = input_dir / "demo"
     vsa_dir.mkdir(parents=True)
-    (vsa_dir / "demo.vsa").write_text("{tekst}", encoding="utf-8")
-    output_dir = tmp_path / "mxl"
+    a = vsa_dir / "a.vsa"
+    b = vsa_dir / "b.vsa"
+    a.write_text("{tekst}", encoding="utf-8")
+    b.write_text("{tekst}", encoding="utf-8")
 
-    exit_code = main(["musicxml", str(input_dir), str(output_dir)])
+    exit_code = main(["mxl", str(input_dir)])
     output = capsys.readouterr().out
 
     assert exit_code == 0
     assert "MXL-bestand(en) geschreven" in output
-    assert list(output_dir.rglob("*.mxl"))
+    assert (vsa_dir / "a.vsa.mxl").is_file()
+    assert (vsa_dir / "b.vsa.mxl").is_file()
 
 
 def test_cli_template_validate_library_smoke(capsys):
@@ -66,4 +69,4 @@ def test_cli_template_validate_library_smoke(capsys):
     output = capsys.readouterr()
     assert exit_code == 0
     assert "OK" in output.out
-    assert "tropaar-toon-4" in output.out
+    assert "tropaar-toon-4-hemelum" in output.out

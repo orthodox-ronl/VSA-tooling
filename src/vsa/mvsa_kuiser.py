@@ -1,17 +1,25 @@
 """Kuiser: canonieke authoring-vorm voor .mvsa (draft-v0).
 
-Past de kuiser-toleranties uit de draft-spec toe:
+Contract: ``docs/formats/kuiser.md`` (Q\\*). Pipeline:
 
-1. op L: eenduidige ELM-``-`` → ``~``; daarna lone standaard-``~`` weglaten
-   (impliciete kwart). ``~`` blijft bij ``&``-melisma (``ziel~&~``) en na
-   recite-``)`` (``()~`` / ``(ia)~`` — zonder ELM = breve). Samengestelde
+0. Q6 — strip import-/schetsbanners (:mod:`vsa.mvsa_kuiser_q67`), tenzij
+   ``werkbank``;
+1. Q2/Q3 — document-``@``-blok + ``#maat N`` (:mod:`vsa.mvsa_kuiser_q23`);
+2. op L: eenduidige ELM-``-`` → ``~``; daarna lone standaard-``~`` weglaten
+   (impliciete kwart), ook na recite-``)`` — ``(ia)~`` → ``(ia)`` (export
+   behandelt beide als kwart). ``~`` blijft bij ``&``-melisma (``ziel~&~``,
+   ``()~&~&.``) en bij niet-standaard duur na ``)`` (``(…)_``). Samengestelde
    ELM’s zoals ``-.`` blijven;
-2. waarschuwing bij ambiguë ``-`` (regel + kolom) — geen stille
+3. waarschuwing bij ambiguë ``-`` (regel + kolom) — geen stille
    ``hei- li``→``hei-li``-collapse (dat breekt o.a. ``…_&_  -li``);
-3. semantische woordstreepjes: waarschuwing bij ontbrekende streepjes
-   wanneer Pyphen de lettergrepen exact zo zou splitsen;
-4. maatstrepen syncen waar eenduidig;
-5. daarna :func:`vsa.mvsa_normalize.normalize_mvsa_text` (pitch + align).
+4. semantische woordstreepjes: tip alleen als losse lettergrepen een
+   lemma uit de syllable-dictionary vormen (geen Pyphen-ruis);
+5. maatstrepen syncen waar eenduidig (nodig vóór Q4);
+6. Q4/Q5 — soft ``-`` op L + dictionary-waarschuwingen
+   (:mod:`vsa.mvsa_kuiser_q45`);
+7. Q8 — :func:`vsa.mvsa_normalize.normalize_mvsa_text` (pitch + align);
+8. Q1 — YAML-FM / zoektekst (:mod:`vsa.mvsa_kuiser_q1`);
+9. Q7 — validate zonder errors; Q9 = ``--check``.
 
 Canonieke woordstreep met extra breedte: spaties **vóór** het streepje
 (``hei_&_&_  -li``), nooit ``hei-_&…`` / ``le-  lu``.
@@ -70,7 +78,9 @@ class KuiserWarning:
     message: str
 
     def format(self, path: Path | None = None) -> str:
-        loc = f"{path}:" if path else ""
+        from .cli_messages import path_label
+
+        loc = f"{path_label(path)}:" if path else ""
         return f"{loc}{self.line}:{self.column}: WARNING: {self.message}"
 
 
@@ -86,9 +96,33 @@ def kuiser_mvsa_text(
     pitch: str = DEFAULT_MVSA_PITCH,
     octave_style: str = "@oct",
     align: bool = True,
+    source_path: Path | str | None = None,
+    dict_interactive: bool | None = None,
+    werkbank: bool = False,
 ) -> KuiserResult:
-    """Return kuiser-canonieke mvsa-tekst + eventuele waarschuwingen."""
-    repaired, warnings = _repair_systems(text)
+    """Return kuiser-canonieke mvsa-tekst + eventuele waarschuwingen.
+
+    Volgorde: Q6 (banners, tenzij ``werkbank``) → Q2/Q3 → repair →
+    Q4/Q5 → normalize/align (Q8) → Q1 → Q7 (validate zonder errors).
+    Q9 = ``--check``. Zie docs/formats/kuiser.md.
+
+    ``dict_interactive``: zie :func:`vsa.mvsa_kuiser_q45.apply_q4_q5`.
+    """
+    from .mvsa_kuiser_q1 import apply_q1
+    from .mvsa_kuiser_q23 import apply_q2_q3
+    from .mvsa_kuiser_q45 import apply_q4_q5
+    from .mvsa_kuiser_q67 import apply_q6, assert_q7_valid
+
+    prepared = apply_q6(text, werkbank=werkbank)
+    prepared = apply_q2_q3(prepared, source_path=source_path)
+    repaired, repair_warnings = _repair_systems(prepared)
+    repaired, q45_warnings = apply_q4_q5(
+        repaired,
+        align=align,
+        dict_interactive=dict_interactive,
+        source_path=source_path,
+    )
+    warnings = [*repair_warnings, *q45_warnings]
     try:
         out = normalize_mvsa_text(
             repaired, pitch=pitch, octave_style=octave_style, align=align
@@ -98,9 +132,8 @@ def kuiser_mvsa_text(
     except MvsaNormalizeError as exc:
         raise MvsaKuiserError(str(exc), line=exc.line) from exc
 
-    errors = [d for d in validate_mvsa_text(out) if d.severity == "error"]
-    if errors:
-        raise MvsaValidationError(errors)
+    out = apply_q1(out, source_path=source_path)
+    assert_q7_valid(out)
     return KuiserResult(text=out, warnings=warnings)
 
 
@@ -112,14 +145,25 @@ def kuiser_mvsa_path(
     octave_style: str = "@oct",
     align: bool = True,
     check: bool = False,
+    dict_interactive: bool | None = None,
+    werkbank: bool = False,
 ) -> tuple[bool, list[KuiserWarning]]:
     """Kuis ``path``. Returns ``(changed, warnings)``.
 
     ``out`` None → in-place. ``check`` True → geen schrijfactie.
+    ``werkbank`` True → behoud import-/schetsbanners (Q6).
     """
+    from .mvsa_kuiser_q67 import assert_q7_valid
+
     text = path.read_text(encoding="utf-8-sig")
     result = kuiser_mvsa_text(
-        text, pitch=pitch, octave_style=octave_style, align=align
+        text,
+        pitch=pitch,
+        octave_style=octave_style,
+        dict_interactive=dict_interactive,
+        align=align,
+        source_path=path,
+        werkbank=werkbank,
     )
     changed = result.text != text
     if check:
@@ -128,11 +172,49 @@ def kuiser_mvsa_path(
     if changed or out is not None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(result.text, encoding="utf-8", newline="\n")
+        # Q7: na schrijven opnieuw (bestand moet error-vrij openen).
+        assert_q7_valid(target.read_text(encoding="utf-8-sig"))
     return changed, result.warnings
 
 
 def _repair_systems(text: str) -> tuple[str, list[KuiserWarning]]:
-    """L-ELM-canonisatie + ambigu-dash-warnings + maatstreep-sync."""
+    """L-ELM-canonisatie + ambigu-dash-warnings + maatstreep-sync.
+
+    YAML-frontmatter blijft onaangeroerd (geneste sleutels zoals
+    ``bron.bewerking`` lijken anders op een stemregel ``B…:``).
+    """
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    bom = ""
+    if text.startswith("\ufeff"):
+        bom = "\ufeff"
+        text = text[1:]
+
+    fm, body, line_base = strip_yaml_frontmatter(text)
+    repaired_body, warnings = _repair_systems_body(body, line_base=line_base)
+    if not fm:
+        return bom + repaired_body, warnings
+
+    # Behoud bestaande FM-bytes; alleen body repareren.
+    if text.startswith("---"):
+        close = text.find("\n---", 3)
+        if close != -1:
+            fm_bytes = text[: close + len("\n---")]
+            rest = text[close + len("\n---") :]
+            lead = rest[: len(rest) - len(rest.lstrip("\n"))]
+            return bom + fm_bytes + lead + repaired_body, warnings
+
+    return bom + repaired_body, warnings
+
+
+def _repair_systems_body(
+    text: str, *, line_base: int = 0
+) -> tuple[str, list[KuiserWarning]]:
+    """Zelfde als vroeger ``_repair_systems``, alleen op de body.
+
+    ``line_base`` = newlines vóór de body in het bronbestand (YAML), zodat
+    warnings het 1-gebaseerde regelnummer in het hele bestand tonen.
+    """
     lines = text.splitlines(keepends=True)
     out: list[str] = []
     warnings: list[KuiserWarning] = []
@@ -159,13 +241,20 @@ def _repair_systems(text: str) -> tuple[str, list[KuiserWarning]]:
             content = after_colon.lstrip()
             eol = lines[j][len(r) :] or "\n"
             system_lines.append(
-                (rid.stem_id, rid.ehm, content, eol, j + 1, content_start)
+                (
+                    rid.stem_id,
+                    rid.ehm,
+                    content,
+                    eol,
+                    j + 1 + line_base,
+                    content_start,
+                )
             )
             j += 1
 
         order = [mk for mk, *_ in system_lines]
         contents = {mk: c for mk, _, c, *_ in system_lines}
-        start_line = i + 1
+        start_line = i + 1 + line_base
 
         for mk, _ehm, content, _eol, line_no, content_start in system_lines:
             if not is_lyrics_stem(mk):
@@ -286,7 +375,13 @@ def _warn_missing_hyphens_in_run(
     line_no: int,
     content_start: int,
 ) -> list[KuiserWarning]:
-    """One warning per maximal unlinked run that Pyphen would hyphenate identically."""
+    """Warn only when unlinked parts match a known dictionary lemma.
+
+    Pyphen alleen is te luid (plakt losse woorden tot nep-compounds). Alleen
+    melden als het samengevoegde lemma in de syllable-dictionary staat.
+    """
+    from .syllable_dictionary import canonical_syllable_form
+
     if len(cores) < 2:
         return []
     if not all(_is_latin_core(c) for c in cores):
@@ -299,7 +394,7 @@ def _warn_missing_hyphens_in_run(
         grew_without_link = False
         while j < len(cores):
             if linked_to_prev[j]:
-                # Already-correct woordstreepjes: don't fold into a Pyphen-miss warning.
+                # Already-correct woordstreepjes: don't fold into a miss warning.
                 if grew_without_link:
                     break
                 group.append(cores[j])
@@ -323,13 +418,23 @@ def _warn_missing_hyphens_in_run(
                 continue
             break
         if grew_without_link:
+            joined = dehyphenate_dutch_word("".join(group))
+            canonical = canonical_syllable_form(joined)
+            if canonical is None:
+                i = j if j > i else i + 1
+                continue
+            canon_parts = canonical.split("-")
+            if [p.lower() for p in canon_parts] != [p.lower() for p in group]:
+                # Dictionary splits anders dan de losse stukken — geen tip.
+                i = j if j > i else i + 1
+                continue
             warnings.append(
                 KuiserWarning(
                     line_no,
                     content_start + 1,
-                    "ontbrekend woordstreepje op L: "
-                    f"{' '.join(group)} → {'-'.join(group)} (Pyphen). "
-                    "Canoniek: streepje direct vóór de volgende lettergreep.",
+                    "Op de L-regel missen woordstreepjes in één bekend woord: "
+                    f"{' '.join(group)} → schrijf {canonical} "
+                    "(streepje direct vóór elke volgende lettergreep).",
                 )
             )
         i = j if j > i else i + 1
@@ -396,12 +501,13 @@ def _canonicalize_l_standard_elms(content: str) -> str:
 
 
 def _omit_implicit_lone_tildes(content: str) -> str:
-    """Drop lone standaard-``~`` on L; keep melisma ``~&…`` and post-``)`` ELMs."""
+    """Drop lone standaard-``~`` on L (ook na ``)``); keep melisma ``~&…``."""
     s = content
     n = len(s)
     drop: list[tuple[int, int]] = []
     i = 0
     while i < n:
+        progress_at = i
         bar = _bar_starts_at(s, i)
         if bar:
             i += len(bar)
@@ -428,8 +534,11 @@ def _omit_implicit_lone_tildes(content: str) -> str:
             if close < 0:
                 break
             i = close + 1
-            # Recite duration: keep ``~`` (bare ``)`` = breve).
-            _elms, i = _read_elms(s, i, allow_bare_dash=False)
+            # Zelfde als elders: lone ``~`` impliciet; ``~&…`` / ``_`` / ``.`` blijven.
+            elm_start = i
+            elms, i = _read_elms(s, i, allow_bare_dash=False)
+            if elms == ["~"]:
+                drop.append((elm_start, i))
             continue
 
         if _is_woordstreepje(s[i]) and not (
@@ -472,6 +581,10 @@ def _omit_implicit_lone_tildes(content: str) -> str:
                 continue
             break
 
+        if i == progress_at:
+            # Onverwacht teken (bijv. wees-``&``): voorkom oneindige lus.
+            i += 1
+
     if not drop:
         return content
     parts: list[str] = []
@@ -489,6 +602,7 @@ def _bare_elm_dash_indices(s: str) -> list[int]:
     i = 0
     n = len(s)
     while i < n:
+        progress_at = i
         bar = _bar_starts_at(s, i)
         if bar:
             i += len(bar)
@@ -553,6 +667,9 @@ def _bare_elm_dash_indices(s: str) -> list[int]:
                 i += 1
                 continue
             break
+
+        if i == progress_at:
+            i += 1
     return found
 
 
@@ -580,9 +697,27 @@ def _read_elms_dash_indices(
         if elm == "-":
             dash_at.append(i)
         i += len(elm)
-        if i < n and s[i] == "&":
-            i += 1
-            continue
+        # Spaties rond ``&`` (zelfde als ``_read_elms``).
+        j = i
+        while j < n and s[j].isspace():
+            j += 1
+        if j < n and s[j] == "&":
+            k = j + 1
+            while k < n and s[k].isspace():
+                k += 1
+            next_elm = None
+            for e in _ELMS:
+                if not s.startswith(e, k):
+                    continue
+                if e == "-" and k + 1 < n and _is_syllable_char(s[k + 1]):
+                    continue
+                if e == "-" and not allow_bare_dash:
+                    continue
+                next_elm = e
+                break
+            if next_elm is not None:
+                i = k
+                continue
         break
     return dash_at, i
 

@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .cli_score_to_mvsa import add_score_to_mvsa_arguments, run_score_to_mvsa
 from .derived_path import derived_output_path
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .input_paths import InputPathError, collect_cli_sources
 
 _MXL_SUFFIXES = (".mxl", ".musicxml", ".xml")
@@ -29,6 +30,10 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_mxl_validate(ns)
     if ns.mxl_command == "normalize":
         return _cmd_mxl_normalize(ns)
+    if ns.mxl_command == "kuiser":
+        from .kuiser_cli import dispatch_kuiser
+
+        return dispatch_kuiser(ns)
     parser.print_help()
     return 1
 
@@ -37,16 +42,19 @@ def _collect(path: str | Path) -> list[Path] | None:
     try:
         return collect_cli_sources(path, suffixes=_MXL_SUFFIXES)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=path,
+            hint="Geef één .mxl/.musicxml-bestand of een map met zulke bestanden.",
+        )
         return None
 
 
 def _reject_multi_output(files: list[Path], output: str | None) -> bool:
     if len(files) > 1 and output:
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling- of in-place-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling- of in-place-output per bron.",
         )
         return True
     return False
@@ -70,6 +78,8 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Checklist Coria/playback (M2/M8/Coria-tags/meta).\n"
             "  normalize PATH [-o OUT] [--apply-timing]\n"
             "      Normaliseer naar playback-profiel.\n"
+            "  kuiser PATH …\n"
+            "      Authoring-kuiser (nog geen spec → fout; zie docs/formats/kuiser.md).\n"
             "\n"
             "PATH = één bronbestand of map (recursief). "
             "-o alleen bij precies één bron.\n"
@@ -85,7 +95,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mxl_command",
         required=True,
-        metavar="{mvsa,mscz,validate,normalize}",
+        metavar="{mvsa,mscz,validate,normalize,kuiser}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -167,6 +177,9 @@ def _build_parser() -> argparse.ArgumentParser:
             "Default uit (MVSA-achtige bron)."
         ),
     )
+    from .kuiser_cli import add_kuiser_parser
+
+    add_kuiser_parser(sub, street="mxl", implemented=False)
     return parser
 
 
@@ -180,11 +193,19 @@ def _cmd_mxl_validate(ns: argparse.Namespace) -> int:
     for path in files:
         findings = validate_playback_mxl_path(path, profile=ns.profile)
         if not findings:
-            print(f"OK ({ns.profile}): {path}")
+            print(f"OK ({ns.profile}): {path_label(path)}")
             continue
         for f in findings:
-            print(f"{path}: {f.code}: {f.message}", file=sys.stderr)
-        print(f"{path}: {len(findings)} checklist-fout(en)", file=sys.stderr)
+            emit_cli_error(
+                f"{f.code}: {f.message}",
+                path=path,
+                hint="Normaliseer met: mxl normalize <pad>  (of herstel de bron).",
+            )
+        emit_cli_error(
+            f"{len(findings)} checklist-fout(en).",
+            path=path,
+            hint="Los de regels hierboven op; zie canonical-checklists M*.",
+        )
         exit_code = 1
     return exit_code
 
@@ -207,7 +228,7 @@ def _cmd_mxl_normalize(ns: argparse.Namespace) -> int:
                 apply_timing=bool(ns.apply_timing),
             )
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         print(f"Geschreven: {dest}")
@@ -252,16 +273,16 @@ def _cmd_mxl_to_mscz(ns: argparse.Namespace) -> int:
                 )
                 apply_partituur_mscz_conventions(out)
             except (MuseScoreNotFoundError, MuseScoreConvertError, MsczPartituurError) as exc:
-                print(f"{path}: ERROR: {exc}", file=sys.stderr)
+                emit_cli_exception(exc, path=path)
                 exit_code = 1
                 continue
             except Exception as exc:
-                print(f"{path}: ERROR: {exc}", file=sys.stderr)
+                emit_cli_exception(exc, path=path)
                 exit_code = 1
                 continue
         finally:
             tmp_mxl.unlink(missing_ok=True)
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
     return exit_code
 
 

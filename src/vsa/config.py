@@ -37,6 +37,10 @@ class SVGRenderingConfig:
     pitch_marker_gap: float = 4.0
     margin_x: float = 8.0
     margin_y: float = 8.0
+    # Na het tekenen bijsnijden tot de inhoud (+ kleine rand); zie svg_ink_trim.
+    trim: bool = True
+    trim_padding_x: float = 6.0
+    trim_padding_y: float = 4.0
     filler_offset_y: float = -6.0
     # Display size vs surrounding markdown ``1em`` (CSS ``--vsa-size`` default).
     relative_size: float = 1.25
@@ -70,11 +74,21 @@ class AudioConfig:
 
 
 @dataclass
+class SyllabificatieConfig:
+    """Pad naar canonieke syllable-dictionary (content-repo)."""
+
+    dictionary: str | None = None
+
+
+@dataclass
 class VSAConfig:
     rendering: RenderingConfig = field(default_factory=RenderingConfig)
     hugo: HugoConfig = field(default_factory=HugoConfig)
     validation: ValidationConfig = field(default_factory=ValidationConfig)
     audio: AudioConfig = field(default_factory=AudioConfig)
+    syllabificatie: SyllabificatieConfig = field(default_factory=SyllabificatieConfig)
+    # Map van het geladen vsa.toml (voor relatieve dictionary-paden).
+    config_dir: Path | None = None
 
 
 def load_config(path: str | Path | None = None) -> VSAConfig:
@@ -88,12 +102,14 @@ def load_config(path: str | Path | None = None) -> VSAConfig:
     if not path.exists():
         return config
 
+    config.config_dir = path.resolve().parent
     data = tomllib.loads(path.read_text(encoding="utf-8"))
 
     rendering = data.get("rendering", {})
     hugo = data.get("hugo", {})
     validation = data.get("validation", {})
     audio = data.get("audio", {})
+    syllabificatie = data.get("syllabificatie", {})
 
     if "max-line-width" in rendering:
         config.rendering.max_line_width = _positive_float(
@@ -119,6 +135,10 @@ def load_config(path: str | Path | None = None) -> VSAConfig:
 
     if isinstance(audio, dict) and "format" in audio:
         config.audio.format = _normalize_audio_format(audio["format"])
+
+    if isinstance(syllabificatie, dict) and "dictionary" in syllabificatie:
+        value = str(syllabificatie["dictionary"]).strip()
+        config.syllabificatie.dictionary = value or None
 
     return config
 
@@ -162,6 +182,12 @@ def _load_svg_rendering_config(config: SVGRenderingConfig, data: dict):
         config.margin_x = _non_negative_float(data["margin-x"], "rendering.svg.margin-x")
     if "margin-y" in data:
         config.margin_y = _non_negative_float(data["margin-y"], "rendering.svg.margin-y")
+    if "trim" in data:
+        config.trim = bool(data["trim"])
+    if "trim-padding-x" in data:
+        config.trim_padding_x = _non_negative_float(data["trim-padding-x"], "rendering.svg.trim-padding-x")
+    if "trim-padding-y" in data:
+        config.trim_padding_y = _non_negative_float(data["trim-padding-y"], "rendering.svg.trim-padding-y")
     if "filler-offset-y" in data:
         config.filler_offset_y = float(data["filler-offset-y"])
 

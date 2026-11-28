@@ -13,6 +13,8 @@ from .vsa_comments import (
     semantic_offset_to_source,
     strip_vsa_html_comments_with_offset_map,
 )
+from .yaml_frontmatter import strip_yaml_frontmatter
+
 
 # Characters that form the base of an EHM (direction or same-tone).
 _BASE_MODIFIER_CHARS: frozenset[str] = frozenset("/\\-~")
@@ -44,6 +46,8 @@ class ValidationMessage:
 class ValidationResult:
     ok: bool = True
     messages: list[ValidationMessage] = field(default_factory=list)
+    # Gebruiker stopte TTY-dictionary-check (`q`) — batch niet voortzetten.
+    interactive_aborted: bool = False
 
     def add_error(self, source, code, message_nl, line=1, column=1,
                   category="general", hint_nl="", doc_url=""):
@@ -77,6 +81,8 @@ class ValidationResult:
     def extend(self, other):
         if not other.ok:
             self.ok = False
+        if getattr(other, "interactive_aborted", False):
+            self.interactive_aborted = True
         self.messages.extend(other.messages)
 
     def has_errors(self):
@@ -86,42 +92,113 @@ class ValidationResult:
         return any(message.severity == "warning" for message in self.messages)
 
 
+_VSA_VALIDATE_SUFFIXES = frozenset({".vsa", ".md", ".markdown"})
+_VSA_VALIDATE_SUFFIX_LIST = tuple(sorted(_VSA_VALIDATE_SUFFIXES))
+
+
 def validate_path(path: str | Path, config: VSAConfig | None = None) -> ValidationResult:
-    path = Path(path)
+    """Valideer bestand, map, korte lookup of catalogus-id (G2).
 
-    if path.is_file():
-        return validate_file(path, config=config)
+    Lege map / soort-map zonder passende ``.vsa``/``.md`` → OK (zelfde als
+    ``validate.cmd`` op een map zonder VSA-bronnen). Ontbrekend pad → fout.
+    """
+    from .input_paths import InputPathError, collect_input_files, resolve_cli_path
 
-    if path.is_dir():
-        result = ValidationResult()
-        files = sorted(
-            list(path.rglob("*.md")) +
-            list(path.rglob("*.markdown")) +
-            list(path.rglob("*.vsa"))
+    raw = Path(path)
+    target: Path | None
+    if raw.exists():
+        target = raw
+    else:
+        try:
+            target = resolve_cli_path(path)
+        except InputPathError:
+            target = None
+
+    if target is not None and target.is_file():
+        return validate_file(target, config=config)
+
+    if target is not None and target.is_dir():
+        files = collect_input_files(
+            target, suffixes=_VSA_VALIDATE_SUFFIX_LIST, resolve_ids=False
         )
+        result = ValidationResult()
         for file in files:
             result.extend(validate_file(file, config=config))
+            if result.interactive_aborted:
+                break
+        return result
+
+    # Catalogus-id / stam (geen bestaande map via korte lookup).
+    try:
+        files = collect_input_files(path, suffixes=_VSA_VALIDATE_SUFFIX_LIST)
+    except InputPathError as exc:
+        result = ValidationResult()
+        result.add_error(
+            source=str(path),
+            code="VSA-PATH-NOT-FOUND",
+            message_nl=str(exc),
+            category="path",
+            hint_nl=(
+                "Controleer of het pad bestaat, of geef een catalogus-id "
+                "(docs/reference/cli/input-pad.md)."
+            ),
+        )
         return result
 
     result = ValidationResult()
-    result.add_error(
-        source=str(path),
-        code="VSA-PATH-NOT-FOUND",
-        message_nl="Pad niet gevonden.",
-        category="path",
-        hint_nl="Controleer of het opgegeven pad bestaat en niet eindigt op een losse backslash.",
-    )
+    for file in files:
+        result.extend(validate_file(file, config=config))
+        if result.interactive_aborted:
+            break
     return result
 
 
 def validate_file(path: str | Path, config: VSAConfig | None = None) -> ValidationResult:
     path = Path(path)
-    text = path.read_text(encoding="utf-8")
     result = ValidationResult()
+    suffix = path.suffix.lower()
+    if suffix not in _VSA_VALIDATE_SUFFIXES:
+        hint = (
+            f"Voor .mvsa: mvsa validate {path}."
+            if suffix == ".mvsa"
+            else "Gebruik de CLI die bij het brontype hoort (vsa / mvsa / mxl / …)."
+        )
+        result.add_error(
+            source=str(path),
+            code="VSA-WRONG-FILE-TYPE",
+            message_nl=(
+                f"vsa validate verwacht .vsa of Markdown "
+                f"(.md/.markdown); kreeg {suffix or '(geen extensie)'}."
+            ),
+            category="path",
+            hint_nl=hint,
+        )
+        return result
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        result.add_error(
+            source=str(path),
+            code="VSA-ENCODING-ERROR",
+            message_nl=(
+                f"Bestand is geen geldige UTF-8-tekst "
+                f"(byte {exc.object[exc.start]:#04x} op positie {exc.start})."
+            ),
+            category="encoding",
+            hint_nl=(
+                "Sla het bestand opnieuw op als UTF-8 "
+                "(bijv. in Cursor/VS Code rechtsonder de encoding kiezen)."
+            ),
+        )
+        return result
 
     if path.suffix.lower() in [".md", ".markdown"]:
         _validate_markdown(path, text, result, config=config)
     else:
+        # Body-regels zijn 1-gebaseerd ná frontmatter; line_base telt alle
+        # regels vóór de body (YAML-kop, lege regels) mee in het bronbestand.
+        text = _auto_repair_vsa_soft_hyphens(path, text, result)
+        _meta, _body, line_base = strip_yaml_frontmatter(text)
         try:
             expanded, warnings = prepare_vsa_body(text, path)
         except IncludeVsaError as exc:
@@ -129,19 +206,27 @@ def validate_file(path: str | Path, config: VSAConfig | None = None) -> Validati
                 source=str(path),
                 code="VSA-INCLUDE-VSA-ERROR",
                 message_nl=exc.message_nl,
-                line=exc.line,
+                line=line_base + max(exc.line, 1),
                 category="include",
-                hint_nl="Controleer @include-vsa id=, lokaal= of zoek= en catalogus-registratie.",
+                hint_nl="Controleer @include-vsa id= of lokaal= en catalogus-registratie.",
             )
             return result
         for warning in warnings:
-            _add_include_vsa_warning(result, str(path), warning)
+            _add_include_vsa_warning(
+                result,
+                str(path),
+                IncludeVsaWarning(
+                    code=warning.code,
+                    message_nl=warning.message_nl,
+                    line=line_base + max(warning.line, 1),
+                ),
+            )
         _validate_vsa_text(
             str(path),
             expanded,
             result,
             config=config,
-            source_line_offset=0,
+            source_line_offset=line_base,
         )
 
     return result
@@ -178,7 +263,7 @@ def _validate_markdown(path: Path, text: str, result: ValidationResult,
                 message_nl=exc.message_nl,
                 line=block.start_line + exc.line - 1,
                 category="include",
-                hint_nl="Controleer @include-vsa id=, lokaal= of zoek= en catalogus-registratie.",
+                hint_nl="Controleer @include-vsa id= of lokaal= en catalogus-registratie.",
             )
             continue
         for warning in warnings:
@@ -237,6 +322,86 @@ def _add_include_vsa_warning(
         line=warning.line,
         category="include",
     )
+
+
+def _auto_repair_vsa_soft_hyphens(
+    path: Path, text: str, result: ValidationResult
+) -> str:
+    """Stille reparatie; nooit met Pyphen-gokken op onbekende woorden (zie impl)."""
+    from .syllable_dict_check import force_noninteractive, validate_rewrite_disabled
+
+    if validate_rewrite_disabled():
+        return text
+    with force_noninteractive():
+        return _auto_repair_vsa_soft_hyphens_impl(path, text, result)
+
+
+def _auto_repair_vsa_soft_hyphens_impl(
+    path: Path, text: str, result: ValidationResult
+) -> str:
+    """Vul ontbrekende soft ``-`` in de body (zoals ``vsa syllabify``).
+
+    Alleen wanneer dictionary-MISMATCH/UNKNOWN of ontbrekende streepjes
+    verdwijnen na syllabify. YAML-``zoektekst`` blijft onaangeroerd.
+    Schrijft het bestand terug als er iets wijzigt.
+    """
+    from .parser import Parser
+    from .syllabify import syllabify_vsa_source
+    from .syllable_dict_check import (
+        CODE_MISMATCH,
+        CODE_UNKNOWN,
+        find_dictionary_syllable_issues,
+    )
+    from .syllabify_validate import find_missing_syllable_hyphens
+    from .vsa_comments import strip_vsa_html_comments_with_offset_map
+
+    def _hard_issues(source: str) -> tuple[int, int]:
+        _fm, body, _ = strip_yaml_frontmatter(source)
+        body, _ = strip_vsa_html_comments_with_offset_map(body)
+        try:
+            document = Parser(body).parse()
+        except Exception:
+            return 0, 0
+        dict_n = sum(
+            1
+            for f in find_dictionary_syllable_issues(document, source_text=body)
+            if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
+        )
+        miss_n = len(find_missing_syllable_hyphens(document, source_text=body))
+        return dict_n, miss_n
+
+    before_dict, before_miss = _hard_issues(text)
+    if before_dict == 0 and before_miss == 0:
+        return text
+
+    repaired = syllabify_vsa_source(text)
+    if not repaired.changed:
+        return text
+
+    after_dict, after_miss = _hard_issues(repaired.text)
+    if after_dict > before_dict or (
+        after_dict == before_dict and after_miss >= before_miss
+    ):
+        # Geen verbetering → niet stil herschrijven.
+        return text
+
+    path.write_text(repaired.text, encoding="utf-8", newline="\n")
+    result.add_warning(
+        source=str(path),
+        code="VSA-SYLLABIFY-APPLIED",
+        message_nl=(
+            f"Ontbrekende lettergreepstreepjes aangevuld "
+            f"({repaired.replacements} wijziging(en); zelfde als "
+            f"`vsa syllabify`). Bestand bijgewerkt."
+        ),
+        category="syllabify",
+        hint_nl=(
+            "Controleer de diff; soft `-` horen in de body, niet in "
+            "`zoektekst`. Norm: docs/formats/syllabificatie.md."
+        ),
+        doc_url="docs/formats/syllabificatie.md",
+    )
+    return repaired.text
 
 
 def _validate_vsa_text(source: str, text: str, result: ValidationResult,
@@ -348,11 +513,214 @@ def _validate_vsa_text(source: str, text: str, result: ValidationResult,
                 doc_url=diagnostic.doc_url,
             )
 
+    _add_syllabify_findings(
+        source=source,
+        document=document,
+        semantic_text=semantic_text,
+        text=text,
+        offset_map=offset_map,
+        source_line_offset=source_line_offset,
+        result=result,
+        config=config,
+    )
+    _add_syllable_dictionary_findings(
+        source=source,
+        document=document,
+        semantic_text=semantic_text,
+        text=text,
+        offset_map=offset_map,
+        source_line_offset=source_line_offset,
+        result=result,
+        config=config,
+    )
+
 
 def _semantic_options_from_config(config: VSAConfig | None):
     if config is None:
         return SemanticValidationOptions()
     return SemanticValidationOptions(severity_overrides=dict(config.validation.severity))
+
+
+def _add_syllabify_findings(
+    *,
+    source: str,
+    document,
+    semantic_text: str,
+    text: str,
+    offset_map,
+    source_line_offset: int,
+    result: ValidationResult,
+    config: VSAConfig | None,
+) -> None:
+    from .syllabify_validate import (
+        CODE as SYLLABIFY_CODE,
+        DEFAULT_SEVERITY as SYLLABIFY_DEFAULT_SEVERITY,
+        DOC_URL as SYLLABIFY_DOC_URL,
+        find_missing_syllable_hyphens,
+        format_missing_hyphen_message,
+    )
+
+    severity = SYLLABIFY_DEFAULT_SEVERITY
+    if config is not None:
+        severity = config.validation.severity.get(SYLLABIFY_CODE, severity)
+    if severity not in {"error", "warning"}:
+        severity = SYLLABIFY_DEFAULT_SEVERITY
+
+    for finding in find_missing_syllable_hyphens(document, source_text=semantic_text):
+        line, column = _source_line_column(
+            text,
+            semantic_text,
+            offset_map,
+            finding.line,
+            finding.column,
+            source_line_offset,
+        )
+        message_nl, hint_nl = format_missing_hyphen_message(finding)
+        result.add_message(
+            source=source,
+            code=SYLLABIFY_CODE,
+            message_nl=message_nl,
+            line=line,
+            column=column,
+            severity=severity,
+            category="syllabify",
+            hint_nl=hint_nl,
+            doc_url=SYLLABIFY_DOC_URL,
+        )
+
+
+def _add_syllable_dictionary_findings(
+    *,
+    source: str,
+    document,
+    semantic_text: str,
+    text: str,
+    offset_map,
+    source_line_offset: int,
+    result: ValidationResult,
+    config: VSAConfig | None,
+) -> None:
+    from pathlib import Path
+
+    from .parser import Parser
+    from .syllable_dict_check import (
+        CODE_LANG_SKIPPED,
+        CODE_MISMATCH,
+        CODE_TAAL_MISMATCH,
+        CODE_UNKNOWN,
+        DOC_URL,
+        apply_replacements_to_text,
+        find_dictionary_syllable_issues,
+        is_interactive_stdin,
+        prompt_dictionary_fixes,
+    )
+
+    # Locate op volledige body (met commentaar in bron, maar _locate negeert
+    # HTML/#-commentaar) → bestand-absolute regels na ``source_line_offset``.
+    findings = find_dictionary_syllable_issues(
+        document, source_text=text
+    )
+    if is_interactive_stdin():
+        actionable = [
+            f
+            for f in findings
+            if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
+        ]
+        if actionable:
+            from .input_paths import source_id_for_prompt
+
+            path = Path(source)
+            from dataclasses import replace as _dc_replace
+
+            mapped = [
+                _dc_replace(
+                    f,
+                    line=f.line + source_line_offset,
+                    column=f.column,
+                )
+                for f in actionable
+            ]
+            session = prompt_dictionary_fixes(
+                mapped,
+                source_id=source_id_for_prompt(path),
+                source_path=path,
+            )
+            if session.replacements:
+                from .syllable_dict_check import apply_replacements_to_source
+                from .syllabify import syllabify_vsa_source
+
+                # Bestand: syllabify (scopes) + body-only lemma-vervangingen.
+                if path.suffix.lower() == ".vsa" and path.is_file():
+                    raw = path.read_text(encoding="utf-8")
+                    raw = syllabify_vsa_source(raw).text
+                    raw = apply_replacements_to_source(
+                        raw, session.replacements
+                    )
+                    path.write_text(raw, encoding="utf-8", newline="\n")
+                    _fm, body, _ = strip_yaml_frontmatter(raw)
+                    semantic_text, _ = strip_vsa_html_comments_with_offset_map(
+                        body
+                    )
+                else:
+                    semantic_text = apply_replacements_to_text(
+                        semantic_text, session.replacements
+                    )
+                try:
+                    document = Parser(semantic_text).parse()
+                except Exception:
+                    pass
+            if session.aborted:
+                result.interactive_aborted = True
+                # Geen verdere dictionary-/syllabify-meldingen voor dit bestand.
+                result.messages = [
+                    m
+                    for m in result.messages
+                    if m.code
+                    not in {
+                        CODE_MISMATCH,
+                        CODE_UNKNOWN,
+                        "VSA-SYLLABIFY-MISSING-HYPHENS",
+                        "VSA-SYLLABIFY-APPLIED",
+                    }
+                ]
+                result.add_error(
+                    source=source,
+                    code="VSA-SYLLABLE-DICT-ABORTED",
+                    message_nl=(
+                        "Interactieve syllable-dictionary-check afgebroken "
+                        "(Esc/Ctrl+C)."
+                    ),
+                    category="syllabify",
+                    hint_nl="Herstart validate om verder te gaan.",
+                )
+                return
+            findings = find_dictionary_syllable_issues(
+                document, source_text=text
+            )
+
+    for finding in findings:
+        if finding.code in {CODE_LANG_SKIPPED, CODE_TAAL_MISMATCH}:
+            severity = "warning"
+        else:
+            severity = "error"
+        if config is not None:
+            severity = config.validation.severity.get(finding.code, severity)
+        if severity not in {"error", "warning"}:
+            severity = "error"
+        # _locate gaf body-relatieve regels; frontmatter-offset erbij.
+        line = finding.line + source_line_offset
+        column = finding.column
+        result.add_message(
+            source=source,
+            code=finding.code,
+            message_nl=finding.message_nl,
+            line=line,
+            column=column,
+            severity=severity,
+            category="syllabify",
+            hint_nl=finding.hint_nl,
+            doc_url=DOC_URL,
+        )
 
 
 def _first_scope_issue(text: str):

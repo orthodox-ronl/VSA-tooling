@@ -13,6 +13,7 @@ from pathlib import Path
 
 from .cli_score_to_mvsa import add_score_to_mvsa_arguments, run_score_to_mvsa
 from .derived_path import derived_output_path
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .input_paths import InputPathError, collect_cli_sources
 
 _MSCZ_SUFFIXES = (".mscz",)
@@ -40,6 +41,9 @@ def main(argv: list[str] | None = None) -> int:
             skip_svg=bool(getattr(ns, "skip_svg", False)),
             quiet=bool(getattr(ns, "quiet", False)),
             musescore=musescore,
+            allow_noncanonical=bool(
+                getattr(ns, "allow_noncanonical", False)
+            ),
         )
     if ns.mscz_command == "mxl":
         return _cmd_mscz_to_mxl(ns)
@@ -55,6 +59,10 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_mscz_product(ns)
     if ns.mscz_command == "normalize":
         return _cmd_mscz_normalize(ns)
+    if ns.mscz_command == "kuiser":
+        from .kuiser_cli import dispatch_kuiser
+
+        return dispatch_kuiser(ns)
     if ns.mscz_command == "text":
         return _cmd_mscz_text(ns)
     if ns.mscz_command == "compare":
@@ -67,19 +75,35 @@ def _collect(path: str | Path) -> list[Path] | None:
     try:
         return collect_cli_sources(path, suffixes=_MSCZ_SUFFIXES)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=path,
+            hint="Geef één .mscz-bestand of een map met .mscz-bestanden.",
+        )
         return None
 
 
 def _reject_multi_output(files: list[Path], output: str | None) -> bool:
     if len(files) > 1 and output:
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return True
     return False
+
+
+def _add_allow_noncanonical(parser: argparse.ArgumentParser) -> None:
+    from .canonicity_gate import add_allow_noncanonical_arg
+
+    add_allow_noncanonical_arg(parser)
+
+
+def _gate_mscz_source(ns: argparse.Namespace, path: Path) -> bool:
+    """C3 structureel; True = stop deze bron."""
+    from .canonicity_gate import cli_gate_source
+
+    return cli_gate_source(path, ns)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -102,6 +126,8 @@ def _build_parser() -> argparse.ArgumentParser:
             "      Individuele producten (alleen .mscz).\n"
             "  normalize PATH …\n"
             "      Layoutprofiel op bestaand .mscz.\n"
+            "  kuiser PATH …\n"
+            "      Authoring-kuiser (nog geen spec → fout; zie docs/formats/kuiser.md).\n"
             "  compare SCORE MVSA …\n"
             "      SCORE = .mscz of MusicXML.\n"
             "\n"
@@ -117,7 +143,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(
         dest="mscz_command",
         required=True,
-        metavar="{mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,text,compare,products}",
+        metavar="{mvsa,import,mxl,svg,pdf,mp3,ogg,wav,score-ir,mscz,normalize,kuiser,text,compare,products}",
     )
     to_mvsa = sub.add_parser(
         "mvsa",
@@ -166,6 +192,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(mxl)
 
     svg = sub.add_parser(
         "svg",
@@ -215,6 +242,7 @@ def _build_parser() -> argparse.ArgumentParser:
             "Default: witte rechthoek achter de notatie."
         ),
     )
+    _add_allow_noncanonical(svg)
 
     pdf = sub.add_parser(
         "pdf",
@@ -249,6 +277,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(pdf)
 
     from .audio_export import AUDIO_FORMATS
 
@@ -276,6 +305,7 @@ def _build_parser() -> argparse.ArgumentParser:
             default=None,
             help="Pad naar MuseScore-executable (default: auto).",
         )
+        _add_allow_noncanonical(audio_p)
 
     score_ir = sub.add_parser(
         "score-ir",
@@ -308,6 +338,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(score_ir)
 
     mscz_prod = sub.add_parser(
         "mscz",
@@ -332,6 +363,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore (ongebruikt bij pure normalize; default: auto).",
     )
+    _add_allow_noncanonical(mscz_prod)
+
+    from .kuiser_cli import add_kuiser_parser
+
+    add_kuiser_parser(sub, street="mscz", implemented=False)
 
     normalize = sub.add_parser(
         "normalize",
@@ -413,6 +449,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Pad naar MuseScore-executable (default: auto).",
     )
+    _add_allow_noncanonical(text)
 
     compare = sub.add_parser(
         "compare",
@@ -483,16 +520,21 @@ def _cmd_mscz_compare(ns: argparse.Namespace) -> int:
             strict_duration=bool(ns.strict_duration),
         )
     except MsczCompareError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(exc)
         return 1
     except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(exc)
         return 1
     sys.stdout.write(format_report(report))
     return 0 if report.musical_ok else 1
 
 
 def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+        require_canonical_mxl_target,
+    )
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .musicxml_playback_normalize import export_mscz_to_playback_mxl
     from .street_products import MSCZ_CORE_KEYS, merge_street_product_meta
@@ -503,20 +545,31 @@ def _cmd_mscz_to_mxl(ns: argparse.Namespace) -> int:
     if _reject_multi_output(files, ns.output):
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = Path(ns.output) if ns.output else derived_output_path(path, ".mxl")
         try:
             export_mscz_to_playback_mxl(path, out, musescore=musescore)
+            require_canonical_mxl_target(
+                out, bron=path, allow_noncanonical=allow
+            )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta = merge_street_product_meta(path, {MSCZ_CORE_KEYS[0]: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -538,6 +591,9 @@ def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
     white_background = not bool(ns.transparent)
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = Path(ns.output) if ns.output else derived_output_path(path, ".svg")
         try:
             written = export_mscz_to_svg(
@@ -548,15 +604,15 @@ def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
                 white_background=white_background,
             )
         except (MvsaMsczError, MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         for written_path in written:
-            print(f"Geschreven: {written_path}")
+            print(f"Geschreven: {path_label(written_path)}")
         products, drop = svg_meta_products(path, written)
         meta = merge_street_product_meta(path, products, drop_keys=drop or None)
         if meta is not None:
@@ -565,6 +621,10 @@ def _cmd_mscz_svg(ns: argparse.Namespace) -> int:
 
 
 def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .musescore_cli import MuseScoreConvertError, MuseScoreNotFoundError
     from .mvsa_mscz import MvsaMsczError, export_mscz_to_pdf
     from .street_products import MSCZ_PDF_KEY, merge_street_product_meta
@@ -575,20 +635,33 @@ def _cmd_mscz_pdf(ns: argparse.Namespace) -> int:
     if _reject_multi_output(files, ns.output):
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = Path(ns.output) if ns.output else derived_output_path(path, ".pdf")
         try:
-            export_mscz_to_pdf(path, out, musescore=musescore)
+            export_mscz_to_pdf(
+                path,
+                out,
+                musescore=musescore,
+                allow_noncanonical=allow,
+            )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (MvsaMsczError, MuseScoreNotFoundError, MuseScoreConvertError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta = merge_street_product_meta(path, {MSCZ_PDF_KEY: out})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -611,7 +684,7 @@ def _cmd_mscz_normalize(ns: argparse.Namespace) -> int:
     try:
         style_overrides = build_partituur_style_overrides(**_partituur_style_kwargs(ns))
     except MsczPartituurError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(exc)
         return 1
     exit_code = 0
     for path in files:
@@ -625,14 +698,14 @@ def _cmd_mscz_normalize(ns: argparse.Namespace) -> int:
                 style_overrides=style_overrides or None,
             )
         except (MsczLayoutError, MsczPartituurError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written} (layout {profile})")
+        print(f"Geschreven: {path_label(written)} (layout {profile})")
     return exit_code
 
 
@@ -648,6 +721,9 @@ def _cmd_mscz_text(ns: argparse.Namespace) -> int:
     musescore = Path(ns.musescore) if ns.musescore else None
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output
@@ -656,10 +732,10 @@ def _cmd_mscz_text(ns: argparse.Namespace) -> int:
         try:
             written = write_lyrics_product(path, out, musescore=musescore)
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {LYRICS_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)
@@ -668,6 +744,10 @@ def _cmd_mscz_text(ns: argparse.Namespace) -> int:
 
 def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
     from .audio_export import AUDIO_FORMATS, AudioExportError, export_to_audio
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
+    )
     from .street_products import MP3_KEY, merge_street_product_meta
 
     fmt = ns.mscz_command
@@ -679,8 +759,12 @@ def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
     if _reject_multi_output(files, ns.output):
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output
@@ -688,17 +772,25 @@ def _cmd_mscz_audio(ns: argparse.Namespace) -> int:
         )
         try:
             written = export_to_audio(
-                path, out, format_name=fmt, musescore=musescore
+                path,
+                out,
+                format_name=fmt,
+                musescore=musescore,
+                allow_noncanonical=allow,
             )
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except AudioExportError as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         if fmt == "mp3":
             meta = merge_street_product_meta(path, {MP3_KEY: written})
             if meta is not None:
@@ -710,6 +802,10 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
     from .score_ir_musicxml import (
         ScoreIrMusicxmlError,
         export_score_ir_path_to_musicxml,
+    )
+    from .canonicity_gate import (
+        NonCanonicalTargetError,
+        emit_noncanonical_error,
     )
     from .street_product_export import (
         StreetProductExportError,
@@ -724,8 +820,12 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
         return 1
     musescore = Path(ns.musescore) if ns.musescore else None
     mxl_opt = getattr(ns, "musicxml", None)
+    allow = bool(getattr(ns, "allow_noncanonical", False))
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output
@@ -738,21 +838,30 @@ def _cmd_mscz_score_ir(ns: argparse.Namespace) -> int:
             else:
                 mxl_path = Path(mxl_opt)
         try:
-            export_bron_to_score_ir(path, out, musescore=musescore)
+            export_bron_to_score_ir(
+                path,
+                out,
+                musescore=musescore,
+                allow_noncanonical=allow,
+            )
             if mxl_path is not None:
                 export_score_ir_path_to_musicxml(out, mxl_path)
+        except NonCanonicalTargetError as exc:
+            emit_noncanonical_error(exc)
+            exit_code = 1
+            continue
         except (StreetProductExportError, ScoreIrMusicxmlError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
         meta_products: dict[str, Path] = {"score-ir": out}
         if mxl_path is not None:
-            print(f"MusicXML: {mxl_path}")
+            print(f"MusicXML: {path_label(mxl_path)}")
             meta_products["from-ir"] = mxl_path
         meta = merge_street_product_meta(path, meta_products)
         if meta is not None:
@@ -776,6 +885,9 @@ def _cmd_mscz_product(ns: argparse.Namespace) -> int:
     musescore = Path(ns.musescore) if ns.musescore else None
     exit_code = 0
     for path in files:
+        if _gate_mscz_source(ns, path):
+            exit_code = 1
+            continue
         out = (
             Path(ns.output)
             if ns.output
@@ -786,14 +898,14 @@ def _cmd_mscz_product(ns: argparse.Namespace) -> int:
                 path, out, musescore=musescore
             )
         except StreetProductExportError as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
-        print(f"Geschreven: {written}")
+        print(f"Geschreven: {path_label(written)}")
         meta = merge_street_product_meta(path, {MSCZ_PRODUCT_KEY: written})
         if meta is not None:
             print(f"Meta: {meta.name}", flush=True)

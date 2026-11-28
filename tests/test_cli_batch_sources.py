@@ -168,7 +168,7 @@ def test_vsa_audio_empty_dir(tmp_path: Path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     d = tmp_path / "empty"
     d.mkdir()
-    rc = main(["audio", str(d), str(tmp_path / "out")])
+    rc = main(["mp3", str(d)])
     assert rc == 1
     assert "Geen passende" in capsys.readouterr().err
 
@@ -181,9 +181,8 @@ def test_vsa_audio_dir_rejects_keep_mxl(tmp_path: Path, monkeypatch, capsys):
     _minimal_vsa(d / "two.vsa", "Heer")
     rc = main(
         [
-            "audio",
+            "mp3",
             str(d),
-            str(tmp_path / "out"),
             "--keep-mxl",
             str(tmp_path / "keep.mxl"),
         ]

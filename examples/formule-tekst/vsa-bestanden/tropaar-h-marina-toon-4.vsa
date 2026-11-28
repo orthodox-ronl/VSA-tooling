@@ -1,12 +1,12 @@
 ---
-title: Tropaar H. Marina, Toon 4
+soort: tropaar
+toon: 4
+template: tropaar-toon-4
+bron: Groningen
 do: F4
 mode: major
 tempo: 120
-genre: tropaar
-tone: 4
-template: tropaar-toon-4
-bron: Groningen
+title: Tropaar H. Marina, Toon 4
 ---
 
 # === pad: VSA + template → MVSA (Fase A herstart) ===

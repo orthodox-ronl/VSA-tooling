@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from vsa.corpus_vsa import count_stanzas
 from vsa.vsa_stanzas import (
+    apply_phrase_separators,
     ensure_stanza_stars,
     extract_stanza_notes,
     fold_indent_continuations,
     music_phrase_lines,
+    soft_phrase_joints,
 )
 
 
@@ -109,3 +111,23 @@ def test_music_phrase_lines_skips_html_and_hash() -> None:
     lines = music_phrase_lines(body)
     assert len(lines) == 1
     assert "echte frase wrap" == " ".join(lines[0].split())
+
+
+def test_soft_phrase_joints_skips_indent_and_existing_star() -> None:
+    body = (
+        "eerste regel *\n"
+        "tweede zonder ster\n"
+        "    indent wrap\n"
+        "derde regel\n"
+    )
+    joints = soft_phrase_joints(body)
+    # Scheiding hoort ná de wrap-regel (laatste fysieke regel van de frase).
+    assert [j.line_index for j in joints] == [2]
+    assert "indent wrap" in joints[0].line_text
+
+
+def test_apply_phrase_separators_appends_marker() -> None:
+    body = "alfa\nbravo\n"
+    out = apply_phrase_separators(body, {0: "**"})
+    assert out.splitlines()[0] == "alfa **"
+    assert out.splitlines()[1] == "bravo"

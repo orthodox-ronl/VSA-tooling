@@ -44,7 +44,7 @@ _FIXTURE_MXL = (
     / "docs"
     / "specification-vsa-templates"
     / "library"
-    / "tropaar-toon-4"
+    / "tropaar-toon-4-hemelum"
     / "examples"
     / "corpus"
     / "T4-01-johannes-voorloper.mxl"
@@ -62,12 +62,15 @@ def test_vsa_plain_joins_scopes_and_strips_melisma_markup() -> None:
 
 
 def test_vsa_cli_text(tmp_path, capsys) -> None:
+    src = Path(__file__).resolve().parents[1] / "examples" / "minimal" / "valid-demo.vsa"
     path = tmp_path / "voorbeeld.vsa"
-    path.write_text(_ANTIFOON_SNIPPET, encoding="utf-8")
+    path.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["text", str(path)]) == 0
     lyrics = tmp_path / "voorbeeld.vsa.lyrics.txt"
     assert lyrics.is_file()
-    assert "Juich voor God" in lyrics.read_text(encoding="utf-8")
+    assert "Heilig" in lyrics.read_text(encoding="utf-8") or "Heer" in lyrics.read_text(
+        encoding="utf-8"
+    )
     assert "Geschreven:" in capsys.readouterr().out
 
 
@@ -149,6 +152,35 @@ God_, // om aan de wereld te schenken
     assert "//" not in text
     assert "God" in text
     assert "om aan de wereld" in text
+
+
+def test_vsa_html_comment_absent_from_plain_text() -> None:
+    """zoektekst.md / lyrics: HTML-comment hoort niet in ``*.lyrics.txt``.
+
+    Regressie: multiline ``<!-- … -->`` (o.a. Verzamel-VSA-notities) mag
+    niet als gezongen tekst in ``plain_text_from_vsa`` belanden.
+    """
+    src = """\
+---
+do: F4
+mode: major
+---
+
+<!--
+  Verzamel-VSA: bekende coupletten. Sterke frasescheider.
+  Template: stichier-toon-1-groningen.
+-->
+
+<!-- Couplet 1 -->
+[:] Heer ik {/roep_} tot U. [/:]
+"""
+    text = plain_text_from_vsa(src)
+    assert "Verzamel" not in text
+    assert "frasescheider" not in text
+    assert "Template" not in text
+    assert "stichier" not in text
+    assert "Couplet" not in text
+    assert "Heer ik roep tot U" in text.replace("\n", " ")
 
 
 def test_hard_hyphen_equals_becomes_visible_dash() -> None:

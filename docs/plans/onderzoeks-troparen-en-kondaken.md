@@ -231,7 +231,7 @@ Daar-in hebt gij de hei-lig-heid {/ge}{/&\von_&_}{\den_},
 Conventie voor mapping-toets: **één template-frase per regel**; `*` markeert
 frasegrens (toegevoegd waar die ontbrak). Ingesprongen doorloopregels zijn
 samengevoegd. `**` blijft waar al aanwezig (overgang naar slotfrase). Corpus:
-[`../specification-vsa-templates/library/tropaar-toon-4/notes/corpus.md`](../specification-vsa-templates/library/tropaar-toon-4/notes/corpus.md).
+[`../specification-vsa-templates/library/tropaar-toon-4-hemelum/notes/corpus.md`](../specification-vsa-templates/library/tropaar-toon-4-hemelum/notes/corpus.md).
 
 ---
 

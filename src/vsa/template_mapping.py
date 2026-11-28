@@ -131,6 +131,44 @@ def assign_stanzas_to_phrases(
             seq = [str(x) for x in step["sequence"]]
             for pid in seq:
                 _check_phrase(pid, phrase_id_set)
+            # Speelplan eindigend op «laatste»: eerste n frasen volgen het
+            # prefix van het plan; de allerlaatste frase altijd op «laatste».
+            # Kortere VSA → korter speelplan; langer dan het plan → harde fout.
+            if seq and seq[-1] == "laatste" and not rest:
+                left = stanza_count - len(result)
+                max_n = len(seq)
+                plan_txt = ", ".join(seq)
+                if left > max_n:
+                    already = len(result)
+                    total = stanza_count
+                    raise TemplateMappingError(
+                        f"Deze VSA heeft {total} frasen"
+                        + (
+                            f" ({already} al toegewezen, nog {left} over)"
+                            if already
+                            else ""
+                        )
+                        + f", maar het speelplan van dit template heeft maar "
+                        f"{max_n} plaatsen: {plan_txt}. "
+                        f"Regel: de eerste {max_n - 1} frasen volgen dat "
+                        f"speelplan (zonder «laatste»); de allerlaatste frase "
+                        f"hoort altijd op «laatste». Meer dan {max_n} frasen "
+                        f"past niet bij deze formule — splits of herschrijf "
+                        f"de VSA, of kies een ander template."
+                    )
+                if left < 1:
+                    raise TemplateMappingError(
+                        f"speelplan eindigt op «laatste» maar er blijven "
+                        f"geen frasen over (stanza_count={stanza_count})"
+                    )
+                if left == 1:
+                    result.append("laatste")
+                else:
+                    prefix = seq[:-1]
+                    result.extend(prefix[: left - 1])
+                    result.append("laatste")
+                idx += 1
+                continue
             result.extend(seq)
             idx += 1
             continue

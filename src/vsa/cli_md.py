@@ -14,6 +14,7 @@ import re
 import sys
 from pathlib import Path
 
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
 from .derived_path import derived_output_path
 from .input_paths import InputPathError, collect_cli_sources
 
@@ -44,7 +45,6 @@ def run_markdown_pdf_cli(
     output: Path | None,
     config_path: str | None,
     content_root: str | None,
-    bron_root: str | None,
     max_line_width: float | None,
     chrome: str | None,
 ) -> int:
@@ -54,10 +54,10 @@ def run_markdown_pdf_cli(
     from .markdown_processor import ProcessValidationError
 
     if input_path.suffix.lower() not in {".md", ".markdown"}:
-        print(
-            f"markdown pdf weigert {input_path.suffix or '(geen extensie)'}; "
-            f"gebruik een .md-bestand: markdown pdf {input_path}",
-            file=sys.stderr,
+        emit_cli_error(
+            f"markdown pdf weigert {input_path.suffix or '(geen extensie)'}.",
+            path=input_path,
+            hint=f"Gebruik een .md-bestand: markdown pdf {input_path}",
         )
         return 1
     out = (
@@ -74,7 +74,6 @@ def run_markdown_pdf_cli(
             input_path,
             out,
             content_root=content_root,
-            bron_root=bron_root,
             config=config,
             max_line_width=max_line_width,
             chrome_command=chrome_command,
@@ -85,12 +84,14 @@ def run_markdown_pdf_cli(
                 print(line)
         return 1
     except PdfError as exc:
-        print(f"ERROR: {exc.message_nl}", file=sys.stderr)
-        if exc.hint_nl:
-            print(exc.hint_nl, file=sys.stderr)
+        emit_cli_exception(exc, path=input_path)
         return 1
     except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=input_path,
+            hint="Controleer de Markdown en of Chrome/Edge voor PDF beschikbaar is.",
+        )
         return 1
     print(f"PDF geschreven naar: {result}")
     return 0
@@ -100,16 +101,19 @@ def _collect(path: str | Path) -> list[Path] | None:
     try:
         return collect_cli_sources(path, suffixes=_MD_SUFFIXES)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        emit_cli_exception(
+            exc,
+            path=path,
+            hint="Geef één .md-bestand of een map met Markdown-bestanden.",
+        )
         return None
 
 
 def _reject_multi_output(files: list[Path], output: str | None) -> bool:
     if len(files) > 1 and output:
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return True
     return False
@@ -170,7 +174,6 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     svg.add_argument("--config", default=None)
     svg.add_argument("--content-root", default=None)
-    svg.add_argument("--bron-root", default=None)
     svg.add_argument("--max-line-width", type=float, default=None)
 
     text = sub.add_parser(
@@ -214,11 +217,6 @@ def _add_pdf_args(pdf: argparse.ArgumentParser) -> None:
         default=None,
         help="Content-root voor includes (map met lokaal/).",
     )
-    pdf.add_argument(
-        "--bron-root",
-        default=None,
-        help="Bron-repo root (default: auto).",
-    )
     pdf.add_argument("--max-line-width", type=float, default=None)
     pdf.add_argument(
         "--chrome",
@@ -244,7 +242,6 @@ def _cmd_md_pdf(ns: argparse.Namespace) -> int:
             output=out,
             config_path=ns.config,
             content_root=ns.content_root,
-            bron_root=ns.bron_root,
             max_line_width=ns.max_line_width,
             chrome=ns.chrome,
         )
@@ -287,7 +284,6 @@ def _cmd_md_svg(ns: argparse.Namespace) -> int:
         )
         if root is None:
             root = path.parent
-        bron = Path(ns.bron_root) if ns.bron_root else None
         from .validation_display import format_validation_message
 
         validation = validate_file(path, config=config)
@@ -305,19 +301,22 @@ def _cmd_md_svg(ns: argparse.Namespace) -> int:
                 assets_url_prefix=assets.name,
                 max_line_width=width,
                 output_mode="img",
-                bron_root=bron,
                 config=config,
             )
         except (IncludeError, DirectiveError, ProcessValidationError) as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(
+                exc,
+                path=path,
+                hint="Controleer :::vsa-notatie-blokken en includes in dit bestand.",
+            )
             exit_code = 1
             continue
         if not svg_paths:
-            print(f"{path}: geen :::vsa-notatie-blokken (geen SVG).", flush=True)
+            print(f"{path_label(path)}: geen :::vsa-notatie-blokken (geen SVG).", flush=True)
             continue
         for svg in svg_paths:
             print(f"Geschreven: {svg}")
@@ -393,13 +392,17 @@ def _cmd_md_text(ns: argparse.Namespace) -> int:
                 path.read_text(encoding="utf-8")
             )
         except Exception as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(
+                exc,
+                path=path,
+                hint="Controleer of het Markdown-bestand leesbaar is (UTF-8).",
+            )
             exit_code = 1
             continue
         out.parent.mkdir(parents=True, exist_ok=True)
         payload = text if text.endswith("\n") or text == "" else text + "\n"
         out.write_text(payload, encoding="utf-8", newline="\n")
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
     return exit_code
 
 

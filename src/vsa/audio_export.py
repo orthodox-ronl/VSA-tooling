@@ -69,12 +69,16 @@ def export_musicxml_to_audio(
     musescore: Path | None = None,
     format_name: str | None = None,
     trailing_pad_ms: int = DEFAULT_TRAILING_PAD_MS,
+    allow_noncanonical: bool = False,
 ) -> Path:
     """Convert an existing ``.mxl`` / ``.musicxml`` to audio via MuseScore.
 
     MuseScore renders to a temporary ``.wav``; trailing silence is trimmed
     (checklist A5) before encoding to the requested format with ffmpeg.
+    Daarna structurele C4 (container-header).
     """
+    from .canonicity_gate import require_canonical_audio_target
+
     source = Path(source)
     out = resolve_audio_output_path(out, format_name=format_name)
     if not source.is_file():
@@ -101,6 +105,9 @@ def export_musicxml_to_audio(
             raise AudioExportError(str(exc)) from exc
     finally:
         render_wav.unlink(missing_ok=True)
+    require_canonical_audio_target(
+        out, allow_noncanonical=allow_noncanonical
+    )
     return out
 
 
@@ -113,6 +120,7 @@ def export_to_audio(
     section_id: str | None = None,
     keep_mxl: Path | None = None,
     trailing_pad_ms: int = DEFAULT_TRAILING_PAD_MS,
+    allow_noncanonical: bool = False,
 ) -> Path:
     """Export ``.mxl`` / ``.vsa`` / ``.mvsa`` / ``.mscz`` to audio.
 
@@ -142,6 +150,7 @@ def export_to_audio(
             musescore=musescore,
             format_name=format_name,
             trailing_pad_ms=trailing_pad_ms,
+            allow_noncanonical=allow_noncanonical,
         )
 
     tmp_mxl: Path | None = None
@@ -169,6 +178,7 @@ def export_to_audio(
             musescore=musescore,
             format_name=format_name,
             trailing_pad_ms=trailing_pad_ms,
+            allow_noncanonical=allow_noncanonical,
         )
     finally:
         if tmp_mxl is not None:
@@ -219,28 +229,18 @@ def _write_playback_mxl(
 
 
 def _export_vsa_to_mxl(path: Path, mxl_path: Path) -> None:
-    from .block_parser import DEFAULT_METADATA
-    from .include_vsa import IncludeVsaError, prepare_vsa_body
-    from .markdown_newline_policy import preserve_vsa_source_newlines
-    from .musicxml_package import write_musicxml_output
-    from .musicxml_renderer import MusicXMLExportError, MusicXMLRenderer
-    from .parser import Parser
-    from .yaml_frontmatter import frontmatter_to_block_metadata, parse_vsa_frontmatter
+    """Zelfde playback-MXL als ``vsa products`` / ``export_bron_to_mxl`` (.vsa).
 
-    text = path.read_text(encoding="utf-8")
-    frontmatter, _vsa_body = parse_vsa_frontmatter(text)
+    Geen stille Pyphen: zing-deling staat in de bron
+    ([syllabificatie](docs/formats/syllabificatie.md)). Wel Coria-finalize.
+    """
+    from .include_vsa import IncludeVsaError
+    from .musicxml_renderer import MusicXMLExportError
+    from .vsa_musicxml_export import export_vsa_to_musicxml
+
     try:
-        vsa_body, _ = prepare_vsa_body(text, path)
+        export_vsa_to_musicxml(path, mxl_path, syllabify=False)
     except IncludeVsaError as exc:
         raise AudioExportError(exc.message_nl) from exc
-    fm_meta = frontmatter_to_block_metadata(frontmatter)
-    metadata = dict(DEFAULT_METADATA)
-    metadata.update(fm_meta)
-    explicit_keys = set(fm_meta.keys())
-    document = Parser(preserve_vsa_source_newlines(vsa_body)).parse()
-    try:
-        renderer = MusicXMLRenderer(metadata=metadata, explicit_keys=explicit_keys)
-        xml_str = renderer.render(document)
     except MusicXMLExportError as exc:
         raise AudioExportError(f"fout bij MusicXML-export: {exc}") from exc
-    write_musicxml_output(mxl_path, xml_str)

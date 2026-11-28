@@ -90,7 +90,7 @@ def test_invalid_pitches_code() -> None:
 
 
 def test_invalid_mode_rejected() -> None:
-    doc = load_template(EXAMPLES_VALID / "tropaar-toon-4" / "template.yaml")
+    doc = load_template(EXAMPLES_VALID / "tropaar-toon-4-hemelum" / "template.yaml")
     doc["mode"] = "dorian"
     with pytest.raises(TemplateValidationError) as exc:
         validate_template(doc, known_ids=KNOWN_IDS)
@@ -98,7 +98,7 @@ def test_invalid_mode_rejected() -> None:
 
 
 def test_anchor_with_spaces_is_canonicalized() -> None:
-    doc = load_template(EXAMPLES_VALID / "tropaar-toon-4" / "template.yaml")
+    doc = load_template(EXAMPLES_VALID / "tropaar-toon-4-hemelum" / "template.yaml")
     event = doc["phrases"][1]["events"][1]
     assert event.get("anchor") == "e.st."
     event["anchor"] = "e. st."

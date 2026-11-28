@@ -147,6 +147,9 @@ class MappedNote:
     syllabic: str = "single"
     show_anchor: bool = False
     melody_voice: str = "S"  # T2: welke MVSA-stem de VSA-pitch krijgt
+    # 1-based bronregel in de VSA (0 = onbekend). Print-wraps → meerdere
+    # maten bij emit (T6); template-mapping blijft één frase.
+    source_line: int = 0
 
 
 def midi_of(pitch: Pitch) -> int:
@@ -467,10 +470,14 @@ def map_vsa_to_template(
             code=CODE_TEXT_MAPPING,
             hint_nl=(
                 "Het aantal VSA-frasen moet passen bij sequence / text_mapping / "
-                "mapping_plans van de template. Tel frasen via losse `*`/`/` of "
-                "sterke `**`/`//` (vóór laatste); EHMs in scopes tellen niet mee. "
-                "Zonder `*`/`**` telt elke niet-ingesprongen regel als frase. "
-                "Ingesprongen vervolgregels horen bij dezelfde frase (print-wrap)."
+                "mapping_plans van de template. Bij een speelplan dat op "
+                "«laatste» eindigt (bijv. toon 3): de eerste frasen volgen het "
+                "prefix; de allerlaatste frase altijd «laatste»; meer frasen "
+                "dan het speelplan is een harde fout. Tel frasen via `*`/`/` of "
+                "sterke `**`/`//` (spaties optioneel; ook na een punt: `.*`). "
+                "EHMs in scopes tellen niet mee. Zonder `*`/`**` telt elke "
+                "niet-ingesprongen regel als frase. Ingesprongen vervolgregels "
+                "horen bij dezelfde frase (print-wrap)."
             ),
             source=source,
         ) from exc
@@ -671,12 +678,16 @@ def _map_tail(
         lyric = note.lyric or "(melisma)"
         expected_txt = ", ".join(expected) if expected else "—"
         return TemplateInstanceError(
-            f"hoogte-mismatch: VSA {lyric!r} = {got}, geen passend template-S-slot "
-            f"meer (verwacht o.a. {expected_txt})",
+            (
+                f"hoogte-mismatch op lettergreep {lyric!r} (klinkend {got}).\n"
+                f"Geen passend slot meer in de melodiestem van de formule "
+                f"(verwacht o.a. {expected_txt})."
+            ),
             code=CODE_PITCH_MISMATCH,
             hint_nl=(
-                "Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte cadensgraden "
-                "van de template volgen, of kies een andere frase/cadenspad."
+                "Pas de VSA-hoogtemarkeringen aan zodat ze de verplichte "
+                "cadensgraden van de template volgen, of kies een andere "
+                "frase/cadenspad."
             ),
             source=source,
             line=note.line,
@@ -776,6 +787,7 @@ def _map_tail(
                 if nxt.get("anchor") in ("l.st.", "vl.st.", "e.st."):
                     break
                 event_i += 1
+                prev_line = out[-1].source_line if out else 0
                 out.append(
                     MappedNote(
                         lyric="",
@@ -785,6 +797,7 @@ def _map_tail(
                         syllabic="end",
                         show_anchor=False,
                         melody_voice=get_melody_voice(),
+                        source_line=prev_line,
                     )
                 )
         if index < len(notes) and pitches_match(
@@ -807,6 +820,11 @@ def _map_tail(
         last_lyric_used = True
         for extra in tail[event_i:]:
             s_pitch = degree_pitch(melody_degree(extra), do, mode)
+            prev_line = (
+                out[-1].source_line
+                if out
+                else int(notes[-1].line or 0)
+            )
             out.append(
                 MappedNote(
                     lyric="" if last_lyric_used else notes[-1].lyric,
@@ -816,6 +834,7 @@ def _map_tail(
                     syllabic="end" if last_lyric_used else "single",
                     show_anchor=extra.get("anchor") == "l.lgr.",
                     melody_voice=get_melody_voice(),
+                    source_line=prev_line,
                 )
             )
             last_lyric_used = True
@@ -909,4 +928,5 @@ def _assign(note: VsaNote, event: dict[str, Any], *, show_anchor: bool) -> Mappe
         syllabic=note.syllabic,
         show_anchor=show_anchor and bool(event.get("anchor")),
         melody_voice=get_melody_voice(),
+        source_line=int(note.line or 0),
     )

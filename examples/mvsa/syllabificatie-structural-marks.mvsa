@@ -1,0 +1,23 @@
+# Structurele L-tokens die syllabify/align moeten sparen (niet alleen soft ``-``).
+# Norm: docs/formats/syllabificatie.md · mvsa.md §Syllabificatie
+#
+# Bevat: herhaling ``|:`` / ``:|``, maatstreep ``|``, recite ``(…)``,
+# cadens-brug ``)-``, caesura ``[//.]``, before/after-marks, ``&``-kolom, ELMs.
+#
+# Probeer:  mvsa validate examples\mvsa\syllabificatie-structural-marks.mvsa
+#           mvsa syllabify examples\mvsa\syllabificatie-structural-marks.mvsa --dry-run
+
+@title "syllabificatie-structural-marks"
+@do F4
+@mode major
+@oct S=0
+
+@sectie demo
+L: |: (De Naam des He-ren zij ge)-ze_-gend_ [//.] | (van nu af tot) in eeu_-wig-heid_. [//.] :|
+S: |:  a4                          -   -          | -               g4 a4   -   -            :|
+
+L: [cresc](Eer aan de Va-der) Geest_ [/cresc] |
+S:          a4                 -              |
+
+L: Va-der ze_&_-gen__ [ferm] |
+S: a4 -     /&-  \           |

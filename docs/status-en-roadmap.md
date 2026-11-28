@@ -17,7 +17,7 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 | Semantische validatie       | Werkend               | Onder andere modifier-aantallen en hoogte-marker-controles; het bekende voorbeeld met een foute laatste marker wordt gedetecteerd.                                   |
 | Meerdere hoogte-markeringen | Werkend               | Parser, validator en SVG-rendering ondersteunen dit.                                                                                                                 |
 | SVG-rendering               | Werkend               | Inclusief multiline/wrapping, spacingbeleid en regressietests.                                                                                                       |
-| MusicXML/MXL-export         | Werkend               | Beschikbaar via `vsa musicxml`; profielen voor playback/engraving.                                                                                                   |
+| MusicXML/MXL-export         | Werkend               | Beschikbaar via `vsa mxl` (alias `musicxml`); profielen voor playback/engraving.                                                                                     |
 | Audio-export (preview)      | Werkend               | `vsa audio` / `mvsa mp3` → ``.mp3`` via MuseScore; site-knop is consumer.                                                                                            |
 | Markdown VSA-blokken        | Werkend               | `::: vsa-notatie` en alias `::: vsa`; mvsa: `::: mvsa-notatie` / `::: mvsa`.                                                                                         |
 | Hugo build-markdown         | Werkend               | Genereert Markdown en SVG-assets voor Hugo.                                                                                                                          |
@@ -25,9 +25,9 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 | `:::coria`                  | Werkend               | Blijft ondersteund als build-time directive/alias.                                                                                                                   |
 | Print/web directives        | Werkend met beperking | `web-only`, `print-only`, `keep-together`; nesting is nog niet toegestaan.                                                                                           |
 | Parochie-lokaal model       | Werkend in demo       | `lokaal/`, manifeststructuur en voorbeeldincludes zijn aanwezig.                                                                                                     |
-| Catalogus-resolutie         | Werkend               | `vsa resolve-catalogus` zet `zoek=` om naar `bron:` of `lokaal:`.                                                                                                    |
+| Catalogus-resolutie         | Beperkt               | `id:` / `lokaal:`-includes werken; `zoek=` en `vsa resolve-catalogus` zijn verwijderd.                                                                               |
 | Hugo-demo                   | Werkend als testbed   | Combineert praktijkmateriaal, documentatie, layouts en publicatieketen.                                                                                              |
-| mvsa (draft)                | Werkend conversies    | `mvsa`/`mvsa`: validate, normalize, kuiser, mxl, mscz, pdf, mp3, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md).        |
+| mvsa (draft)                | Werkend conversies    | `mvsa`/`mvsa`: validate, normalize, kuiser, mxl, mscz, pdf, mp3, import; backlog: [specification-mvsa/open-points.md](specification-mvsa/open-points.md).            |
 
 ## Beperkt of kwetsbaar
 
@@ -38,7 +38,6 @@ De parser, validator, SVG-renderer, MusicXML-export en Hugo-buildketen zijn aanw
 | Directive-nesting     | Open besluit          | `web-only` binnen `keep-together` faalt nu bewust; praktijkmateriaal wil dit soms wel.                  |
 | Commentaar in VSA     | Deels opgelost        | HTML-commentaar en comment-only regels zijn aangepakt, maar een compleet commentaarmodel is nog nuttig. |
 | VSA-blok-afbakening   | Authoring-usability   | Vergeten `::: vsa-notatie` of afsluitende `:::` moet vroeg en duidelijk worden gemeld.                  |
-| `bron:` met Coria/MXL | Beperkt               | SVG op `bron:` werkt; Coria/MXL buiten `content-root` is nog niet glad.                                 |
 | AST/source maps       | Later                 | Nodig voor betere foutposities, editor-integratie en eventueel roundtrip tooling.                       |
 | Editor-ondersteuning  | Niet aanwezig         | VS Code highlighting en foutmarkering zouden dagelijks gebruik veel prettiger maken.                    |
 
@@ -76,14 +75,10 @@ Te beslissen:
 
 ### 4. Parochie-/bronworkflow
 
-De richting is duidelijk: sjabloon of sessie met `zoek=`, resolver, validatie, build-markdown, Hugo, print/web-output. De praktische workflow kan nog eenvoudiger.
+De richting is duidelijk: sjabloon of sessie met `id:`- of `lokaal:`-includes, validatie, build-markdown, Hugo, print/web-output. `zoek=` en `vsa resolve-catalogus` zijn verwijderd. De praktische workflow kan nog eenvoudiger.
 
 Te beslissen:
 
-- Wanneer gebeurt `resolve-catalogus`: apart commando, automatisch, of beide?
-- Waar komt resolved output te staan?
-- Hoe gaan we om met ambiguiteit: strict fout, lijst, of interactieve keuze?
-- Hoe worden `bron:` assets voor Coria/MXL beschikbaar gemaakt?
 
 ## Nuttigste volgende stappen
 
@@ -118,9 +113,7 @@ Waarom: hier zit de meeste praktische waarde voor dagelijks gebruik.
 Resultaat:
 
 - Heldere voorbeeldworkflow in docs.
-- Betere checks op open `zoek=`.
-- Duidelijke outputlocatie voor resolved bestanden.
-- Indien nodig: helper-script voor resolve + validate + build.
+- Indien nodig: helper-script voor validate + build.
 
 ### Stap 3: commentaarmodel afronden
 

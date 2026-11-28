@@ -6,6 +6,8 @@ Alias: ``mvsa import`` (bestemmingstraat) — zie ``cli_import``.
 
 from __future__ import annotations
 
+from .cli_messages import emit_cli_error, emit_cli_exception, path_label
+
 import argparse
 import sys
 from pathlib import Path
@@ -31,7 +33,10 @@ def add_score_to_mvsa_arguments(parser: argparse.ArgumentParser) -> None:
         default="ag-vsa",
         help=(
             "Doel-spelling (default: ag-vsa). "
-            "a-g = toonnamen met cijfer; abc = alias."
+            "doremi = laddergraden; a-g (alias abc) = toonnamen "
+            "(octaaf via --octave-style); "
+            "vsa = doremi-anker + EHM; "
+            "ag-vsa = eerste a–g per systeem + EHM + eindanker."
         ),
     )
     parser.add_argument(
@@ -42,9 +47,14 @@ def add_score_to_mvsa_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--octave-style",
-        choices=["@oct", "marker"],
+        choices=["@oct", "marker", "none"],
         default="@oct",
-        help="Schrijfoctaaf-stijl (default: @oct).",
+        help=(
+            "Octaafschrijfwijze voor a–g/ag-vsa (default: @oct): "
+            "@oct = relatief t.o.v. schrijf-do (Bb, c+); "
+            "none = wetenschappelijk absoluut (Bb4; niet met doremi); "
+            "marker = nog niet geïmplementeerd."
+        ),
     )
     parser.add_argument(
         "--section",
@@ -70,13 +80,17 @@ def run_score_to_mvsa(
     try:
         files = collect_cli_sources(ns.path, suffixes=suffixes)
     except InputPathError as exc:
-        print(str(exc), file=sys.stderr)
+        want = ", ".join(suffixes)
+        emit_cli_exception(
+            exc,
+            path=ns.path,
+            hint=f"Geef één bestand met extensie {want}, of een map met zulke bestanden.",
+        )
         return 1
     if len(files) > 1 and ns.output:
-        print(
-            "-o/--output is alleen toegestaan bij precies één bronbestand "
-            "(bij een map: sibling-output per bron).",
-            file=sys.stderr,
+        emit_cli_error(
+            "-o/--output is alleen toegestaan bij precies één bronbestand.",
+            hint="Laat -o weg bij een map; dan komt sibling-output naast elke bron.",
         )
         return 1
     musescore = Path(ns.musescore) if getattr(ns, "musescore", None) else None
@@ -99,11 +113,11 @@ def run_score_to_mvsa(
                 do=getattr(ns, "do", None),
             )
         except MvsaImportError as exc:
-            print(f"{path}: ERROR: {exc}", file=sys.stderr)
+            emit_cli_exception(exc, path=path)
             exit_code = 1
             continue
         # Bibliotheek-importcontrole: sibling *.mscz.mvsa krijgt partituur-hash.
         if path.suffix.lower() == ".mscz" and is_mscz_import_mvsa(out):
             stamp_mscz_import_mvsa(out, path)
-        print(f"Geschreven: {out}")
+        print(f"Geschreven: {path_label(out)}")
     return exit_code

@@ -107,7 +107,7 @@ frontmatter-`title` (anders bestandsstem). Coria-MXL is instance zonder
 recite-collapse.
 
 Andere genres/tonen gebruiken dezelfde mapper (`map_vsa_to_template`) en
-renderers; de corpus-CLI is tropaar-toon-4 totdat hun `pitches_status` geen
+renderers; de corpus-CLI is tropaar-toon-4-hemelum totdat hun `pitches_status` geen
 `provisional` meer is.
 
 ## MVSA → MSCZ-partituur (niet template)

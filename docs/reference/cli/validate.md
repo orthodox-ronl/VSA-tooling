@@ -11,7 +11,8 @@ verdere verwerking (SVG, Hugo-Markdown, MusicXML).
 ## Synopsis
 
 ```text
-vsa validate [-h] [--config CONFIG] [--summary] path
+vsa validate [-h] [--config CONFIG] [--syllable-dictionary PAD]
+             [--lyrics-lang {auto,nl,ksl}] [--summary] path
 ```
 
 ## Beschrijving
@@ -25,25 +26,31 @@ vsa validate [-h] [--config CONFIG] [--summary] path
 | [parser](@) | of de [VSA](@) naar interne structuur kan worden omgezet                   |
 | semantiek   | of hoogte- en [lengte-modifiers](@) logisch (in aantal) bij elkaar passen  |
 
-`path` mag verwijzen naar één bestand of naar een map:
+`path` volgt het [gedeelde CLI-contract](input-pad.md) (G2): bestand, map,
+korte lookup of catalogus-id (incl. soort-map zoals `alleluia`). C3/C4
+n.v.t. — validate mag juist niet-canonieke bron tonen.
 
 | Input          | Voorbeeld                                     | Gedrag                                             |
 | -------------- | --------------------------------------------- | -------------------------------------------------- |
 | `.vsa`-bestand | `examples\minimal\001_plain_text.vsa`         | Controleert één VSA-bestand.                       |
+| Geen `.mvsa`   | (weigert)                                     | Gebruik `mvsa validate` voor `.mvsa`.              |
 | `.md`-bestand  | `pagina.md`                                   | Controleert alle [VSA-blokken](@) in dat bestand.  |
 | Map            | `examples\consumer-minimal\content-source`    | Zoekt recursief naar `.vsa`, `.md` en `.markdown`. |
+| Soort-map / id | `alleluia`, `tropaar/…/hemelum`               | Zelfde G2 als bibliotheek-`validate.cmd`.          |
 
 Als er meerdere fouten zijn, toont de tool ze zoveel mogelijk allemaal in één
 keer — je hoeft niet telkens één fout te herstellen en opnieuw te draaien.
 
 ## Argumenten en opties
 
-| Naam               | Verplicht | Betekenis                                                                                | Default                               | Beperkingen   |
-| ------------------ | --------- | ---------------------------------------------------------------------------------------- | ------------------------------------- | ------------- |
-| `path`             | Ja        | Bestand of map om te controleren.                                                        | —                                     | Moet bestaan. |
-| `--config CONFIG`  | Nee       | Pad naar een alternatief `vsa.toml` (severity-overrides, zie [config.md](../config.md)). | Auto-detectie van `vsa.toml`          | —             |
-| `--summary`        | Nee       | Compacte, eenregelige foutmeldingen tonen, zonder broncontextregel.                      | Uit (volledige context met bronregel) | —             |
-| `-h`, `--help`     | Nee       | Toon hulp voor dit subcommando.                                                          | —                                     | —             |
+| Naam                          | Verplicht | Betekenis                                                                                         | Default                               | Beperkingen   |
+| ----------------------------- | --------- | ------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------- |
+| `path`                        | Ja        | Bestand of map om te controleren.                                                                 | —                                     | Moet bestaan. |
+| `--config CONFIG`             | Nee       | Pad naar een alternatief `vsa.toml` (severity-overrides, zie [config.md](../config.md)).          | Auto-detectie van `vsa.toml`          | —             |
+| `--syllable-dictionary`       | Nee       | Pad naar `syllable_dictionary.nl.txt` of `.ksl.txt` (overschrijft auto-detect / toml).            | auto                                  | —             |
+| `--lyrics-lang {auto,nl,ksl}` | Nee       | Woordenlijst: `auto` = per woord Latijn→`nl` / Cyrillisch→`ksl`; of forceer één taal.             | `auto`                                | —             |
+| `--summary`                   | Nee       | Compacte, eenregelige foutmeldingen tonen, zonder broncontextregel.                               | Uit (volledige context met bronregel) | —             |
+| `-h`, `--help`                | Nee       | Toon hulp voor dit subcommando.                                                                   | —                                     | —             |
 
 ## Output
 
@@ -141,18 +148,21 @@ soort fouten tegelijk wilt zien.
 
 ### Veelvoorkomende foutcodes
 
-| Foutcode                                   | Betekenis                                         | Wat doen?                                                                |
-| ------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------ |
-| `VSA-SYNTAX-EMPTY-SCOPE`                   | `{}` gevonden                                     | Zet tekst of een [zangelement](@) in de [scope](@).                      |
-| `VSA-SYNTAX-UNCLOSED-SCOPE`                | `{tekst` zonder `}`                               | Sluit de [scope](@) af.                                                  |
-| `VSA-SYNTAX-UNEXPECTED-CLOSE-BRACE`        | Losse `}`                                         | Verwijder of herstel de [scope](@).                                      |
-| `VSA-SYNTAX-WHITESPACE-IN-SCOPE`           | Spatie binnen `{...}`                             | Splits tekst buiten de scope of gebruik correcte notatie.                |
-| `VSA-SYNTAX-UNCLOSED-PITCH-MARKER`         | `[` zonder `]`                                    | Sluit de [pitch-marker](@) af.                                           |
-| `VSA-SYNTAX-PITCH-MARKER-MISSING-COLON`    | Pitch-marker zonder `:`                           | Gebruik bijvoorbeeld `[:]`.                                              |
-| `VSA-SYNTAX-INVALID-PITCH-TRANSITION`      | Ongeldige toonhoogte-overgang                     | Gebruik `[<oude-EHM>:<nieuwe-EHM>]` met geldige EHM-waarden.             |
-| `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`     | Aantallen hoogte-/lengteposities passen niet      | Controleer samengestelde [modifiers](@).                                 |
-| `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`      | Berekende hoogte komt niet overeen met marker     | Pas de eindmarkering of de scope-modifiers aan; of gebruik een overgang. |
-| `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH`   | Linkerhoogte van `[oud:nieuw]` klopt niet         | Laat de linker-EHM overeenkomen met de huidige cursor.                   |
+| Foutcode                                   | Betekenis                                         | Wat doen?                                                                                                                                                                                 |
+| ------------------------------------------ | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VSA-SYNTAX-EMPTY-SCOPE`                   | `{}` gevonden                                     | Zet tekst of een [zangelement](@) in de [scope](@).                                                                                                                                       |
+| `VSA-SYNTAX-UNCLOSED-SCOPE`                | `{tekst` zonder `}`                               | Sluit de [scope](@) af.                                                                                                                                                                   |
+| `VSA-SYNTAX-UNEXPECTED-CLOSE-BRACE`        | Losse `}`                                         | Verwijder of herstel de [scope](@).                                                                                                                                                       |
+| `VSA-SYNTAX-WHITESPACE-IN-SCOPE`           | Spatie binnen `{...}`                             | Splits tekst buiten de scope of gebruik correcte notatie.                                                                                                                                 |
+| `VSA-SYNTAX-UNCLOSED-PITCH-MARKER`         | `[` zonder `]`                                    | Sluit de [pitch-marker](@) af.                                                                                                                                                            |
+| `VSA-SYNTAX-PITCH-MARKER-MISSING-COLON`    | Pitch-marker zonder `:`                           | Gebruik bijvoorbeeld `[:]`.                                                                                                                                                               |
+| `VSA-SYNTAX-INVALID-PITCH-TRANSITION`      | Ongeldige toonhoogte-overgang                     | Gebruik `[<oude-EHM>:<nieuwe-EHM>]` met geldige EHM-waarden.                                                                                                                              |
+| `VSA-SEMANTIC-MODIFIER-COUNT-MISMATCH`     | Aantallen hoogte-/lengteposities passen niet      | Controleer samengestelde [modifiers](@).                                                                                                                                                  |
+| `VSA-SEMANTIC-HEIGHT-MARKER-MISMATCH`      | Berekende hoogte komt niet overeen met marker     | Pas de eindmarkering of de scope-modifiers aan; of gebruik een overgang.                                                                                                                  |
+| `VSA-SEMANTIC-PITCH-TRANSITION-MISMATCH`   | Linkerhoogte van `[oud:nieuw]` klopt niet         | Laat de linker-EHM overeenkomen met de huidige cursor.                                                                                                                                    |
+| `VSA-SYLLABIFY-MISSING-HYPHENS`            | Plat woord mist soft `-` terwijl Pyphen splitst   | Soft `-` in de bron, of woord op `monosyllable_exceptions.nl.txt`; zie [syllabificatie](../../formats/syllabificatie.md). Standaard **warning**.                                          |
+| `VSA-SYLLABLE-DICT-MISMATCH`               | Bronvorm ≠ canonieke syllable-dictionary          | Op TTY: Enter = vervang in `.vsa`; `a` = accepteer vorm in lijst. Lijstpad: `vsa.toml` / `--syllable-dictionary`; [syllabificatie](../../formats/syllabificatie.md). Standaard **error**. |
+| `VSA-SYLLABLE-DICT-UNKNOWN`                | Lemma ontbreekt in syllable-dictionary            | Op TTY: Enter = vorm toevoegen (schrijft naar geconfigureerde lijst); `v` = bron + lijst. Standaard **error**.                                                                            |
 
 Zie [diagnostics.md](../diagnostics.md) voor de volledige lijst en severity-instellingen.
 

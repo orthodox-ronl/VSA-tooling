@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- **Fix (translit):** een passage in een andere taal (`@taal ro`, `el`, …) werd met de Nederlandse regels naar Cyrillisch omgezet; die krijgt nu geen transliteratie.
+- **Fix (translit):** `Kyrie` werd `Кй-ри-е`; nu `Ки-ри-е`.
+- **Nieuw:** `vsa.transliterate.translit_modi_for_source` bepaalt uit de gezongen tekst welke transliteraties een bron nodig heeft (stemregels en commentaar tellen niet mee).
+- **Nieuw (migratie stap 6, products-meta schema 3):** de sidecar bewaart een invoer-vingerafdruk (`invoer`: bron, de woorden die de bron zingt met hun vorm in de woordenlijst, template van een `.vsa`, recept-versie). `freshness()` meldt voortaan *wat* veranderde ("woordenlijst: een gebruikt woord is veranderd", "recept 1 -> 2"). Een ander woord in de woordenlijst maakt alleen producten verouderd die dat woord gebruiken. `freshness()` blijft standaard (`invoer="los"`) alleen op de bron-hash letten; `freshness(bron, invoer="streng")` vergelijkt de hele invoer, eist schema 3 en `upgrade_meta(bron)` zet schema 2 om als alles nu `ok` is. Nieuwe hulp: `vsa.syllable_dictionary.lyrics_lang_scope`. Recept-versie ophogen (`RECEPT_VERSIE`) in dezelfde PR die een export bewust wijzigt. Zie `docs/formats/products-meta.md`.
+- **Nieuw (validate):** met `VSA_VALIDATE_NO_REWRITE=1` herschrijft `vsa validate` / `mvsa validate` bronnen niet meer stil (`*-SYLLABIFY-APPLIED`); afwijkingen van de woordenlijst blijven gewone fouten. Bedoeld voor CI, zodat een gewijzigde woordenlijst niet pas na het valideren tot een verouderd product leidt. Lokaal verandert er niets.
+- **Nieuw (woordenlijst):** `#`-commentaar tussen de woorden van `syllable_dictionary.*.txt` blijft bij het eerstvolgende woord staan als het bestand wordt gesorteerd (voorheen ging het verloren). Commentaar onderaan het bestand, zonder woord eronder, blijft niet bewaard.
+- **Fix (mvsa svg/mxl-partituur):** in recite (`(Uw Naam wor-de ge-hei-ligd)`) kwamen de lettergreep-streepjes niet in de partituur-SVG: R8 verborg ze doelbewust. Contract herzien: een partituur-SVG toont **alle** streepjes (ook binnen recite); alleen de `.vsa.svg` laat ze weg. Producten moeten opnieuw gegenereerd worden (`products --force`).
+- **Nieuw (vsa svg):** de SVG wordt na het tekenen bijgesneden tot de getekende inhoud (rand 6 links/rechts, 4 boven/onder). Lege rijen of commentaar boven de notatie geven geen witruimte meer. Uit te zetten met `rendering.svg.trim = false`; zie `docs/formats/vsa-svg.md`. Bestaande svg's worden korter; daarmee verandert de `scale` in gegenereerde markdown mee.
+- **Fix (syllabify):** een regel die met `#` begint (broncommentaar) kreeg streepjes (`over` werd `o-ver`) als er in dezelfde passage geen `<!--` stond. `#`-regels blijven nu altijd onaangeroerd, bij `syllabify` en `--unsyllabify`.
+- **Nieuw (vsa mvsa):** valideert de zojuist geschreven MVSA; bij errors worden die met bestand/regel/kolom gemeld en eindigt het commando met exitcode 1 (bestand blijft staan).
+- **Fix (vsa mvsa):** een `_` achter een recite-lettergreep in de VSA-tekst (`{/ver}hoor_`, `tot_`) kwam binnen de haakjes terecht (`(ver-hoor_)`, fout `duur-/melisma-ELM binnen recite-haakjes`). De ELM staat nu ná `)`: `(ver-hoor)_`.
+- **Fix (vsa mvsa):** `template:` in de frontmatter van de `.vsa` wordt gebruikt (CLI `--template` wint nog steeds). Voorheen gaf `soort`+`toon` met meerdere formules (bijv. tropaar toon 4: groningen/hemelum) `TEMPLATE-SELECT-AMBIGUOUS`, ook als de .vsa de template al noemde.
+- **Fix (mvsa validate):** een maatstreep gevolgd door een Unicode-spatie (bijv. U+2006, gebruikt om Cyrillische lyrics uit te lijnen) werd als eindanker gelezen (`MVSA-BAR-ANKER`); nu geldt elke witruimte als spatie.
+- **Fix (mvsa):** `heer -(lijkt …)` (streepje vóór het haakje) werd stil genegeerd; het telt nu als `heer (-lijkt …)`: de recite zet het woord voort (`ver-heer-lijkt`). Gevolg: ook in MusicXML/MuseScore loopt het woord door.
+- **Fix:** de interactieve vraag bij een onbekend woord noemde de láátst gecontroleerde lijst (bijv. `syllable_dictionary.ksl.txt` bij het Latijnse `Ky-ri-e`). De vraag noemt nu de lijst die bij het schrift van het woord hoort; het toevoegen zelf schreef al naar de juiste lijst.
+- **Nieuw:** `@taal xx` voor passages in een taal zonder woordenlijst (`@taal ro`, `@taal el`, …; 2–3 kleine letters). In `.mvsa` accepteert de bestaande sticky `@taal` nu ook zulke codes (voorheen `MVSA-TAAL`); in `.vsa` kun je `@taal xx` als regel in de tekst zetten. Woorden in zo'n taal worden niet tegen de woordenlijst gecontroleerd en niet door `syllabify` aangepast. `@taal auto` zet de herkenning op schrift (nl/ksl) weer aan. Zie `docs/formats/syllabificatie.md`.
+- **Fix:** ook een regelbegin direct na een scope is een woordgrens in de woordenlijst-controle (`be{\vrijd_}⏎en` werd het "woord" `be-vrijd-en`).
+- **Fix:** de woordenlijst-controle plakte woorden over een regeleinde heen aan elkaar (`{/mij_},` + volgende regel `{/ver}{hoor_}` werd het "woord" `mij-,-ver-hoor`). Een regeleinde na lyric-tekst is nu altijd een woordgrens.
+- **Nieuw (migratie stap 7):** `vsa.syllabify.hyphenate_token_parts` (lettergrepen van één lyric-token uit de canonieke lijst; onbekende woorden blijven heel) en `vsa.syllabify.split_syllabic`. Vervangen `nl_hyphen.py` in bibliotheek. `eeuwen` is `eeu-wen`.
+- **Fix:** in een terminal (TTY) voegden `validate`/`svg` bij `.vsa` en `.mvsa` stil Pyphen-gokken toe aan onbekende woorden (`onbekendwoord` werd `on-be-kend-woord`). De stille reparatie past nu alleen woorden uit de lettergreeplijst aan. Het commando `syllabify` (met TTY-vragen) is ongewijzigd.
+- **Fix:** `vsa validate`/`vsa svg` herschreven stil een onbekend woord in scopes (`{/e_}ren` werd `{/eren_}`). Woorden die niet in de lettergreeplijst staan blijven nu ongewijzigd; validate meldt ze als onbekend met een voorstel.
+- **Verwijderd (breaking):** `zoek=` in `:::include` en `@include-vsa`, en de opdracht
+  `vsa resolve-catalogus`. Een include met `zoek=` geeft nu een foutmelding; gebruik
+  `id=` / `id:` of een bestandspad. De site-zoekfunctie
+  (`*.lyrics.txt`, zoektekst) is een andere keten en blijft ongewijzigd.
+- **Gewijzigd (breaking, migratie stap 4 deel 2):** `id=` / `id:` wijst nu naar een map onder
+  `content-source/catalogus/` (zangstuk/variant/uitvoeringsvorm) en moet precies één `.vsa`
+  opleveren. `lokaal=` / `lokaal:` en `bron:` vervallen en geven een foutmelding.
+  Het pakket `catalogus` uit `bron` is geen afhankelijkheid meer; de optie `--bron-root`
+  van `markdown svg` en `markdown pdf` en de bron-checkout in CI zijn verwijderd.
 - Docs/CLI-voorbeelden: overal `mvsa …` i.p.v. `vsa mvsa …` (bron = command);
   nested `vsa mvsa` verwijderd — alleen top-level `mvsa`
 - CLI: score → `.mvsa` is `mxl mvsa` / `mscz mvsa` (conventie bron→doel); `import` verwijderd uit `mvsa`/`mxl`/`mscz`

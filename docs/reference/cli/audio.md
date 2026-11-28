@@ -28,7 +28,7 @@ precies één bron. Zie [Invoer bestand of map](input-pad.md).
 | `input`-type              | Gedrag                                                                 |
 | ------------------------- | ---------------------------------------------------------------------- |
 | ``.mxl`` / ``.musicxml``  | Direct MuseScore → audio                                               |
-| ``.vsa``                  | Eerst playback-MusicXML, dan MuseScore → audio                         |
+| ``.vsa``                  | Eerst playback-MusicXML (zelfde pad als products-MXL: bron-deling, geen stille syllabify + Coria-finalize; zie [syllabificatie](../../formats/syllabificatie.md)), dan MuseScore → audio |
 | ``.mvsa``                 | Eerst playback-MusicXML (vier parts), dan MuseScore → audio            |
 | ``.mscz``                 | Fallback: MuseScore → ``.mxl``, dan → audio                            |
 | map                       | Alle passende bestanden eronder; ``output`` = uitvoermap               |
@@ -79,4 +79,4 @@ vsa audio generated\lied.mxl generated\lied --format ogg
 - [Invoer bestand of map](input-pad.md)
 - [Formaat `.mp3` / audio](../../formats/audio.md)
 - [`mvsa mp3` / `ogg` / `wav`](mvsa.md#mvsa-mp3)
-- [`vsa musicxml`](musicxml.md) (playback-``.mxl``)
+- [`vsa mxl`](musicxml.md) (playback-``.mxl``)

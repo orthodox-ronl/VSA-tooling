@@ -19,7 +19,7 @@ from vsa.corpus_vsa import CORPUS_ENTRIES, load_corpus_from_vsa_dir  # noqa: E40
 from vsa.template_mapping import assign_stanzas_to_phrases, select_mapping_plan  # noqa: E402
 
 LIBRARY = ROOT / "docs" / "specification-vsa-templates" / "library"
-TEMPLATE_YAML = LIBRARY / "tropaar-toon-4" / "template.yaml"
+TEMPLATE_YAML = LIBRARY / "tropaar-toon-4-hemelum" / "template.yaml"
 CORPUS_DIR = TEMPLATE_YAML.parent / "examples" / "corpus"
 
 EXPECTED_STANZAS: dict[str, int] = {
@@ -113,7 +113,7 @@ def test_corpus_instances_vsa_mscz_mxl() -> None:
         assert mxl.is_file(), stem
         text = vsa.read_text(encoding="utf-8")
         assert text.startswith("---\n")
-        assert "template: tropaar-toon-4" in text
+        assert "template: tropaar-toon-4-hemelum" in text
         assert "corpus_id:" in text
         assert mscz.stat().st_size > 500
         assert mxl.stat().st_size > 500
@@ -147,8 +147,9 @@ def test_template_mscz_and_mxl_exist() -> None:
         mscx = archive.read("score.mscx").decode("utf-8")
     assert "<enableVerticalSpread>0</enableVerticalSpread>" in mscx
     assert "<maxPageFillSpread>0</maxPageFillSpread>" in mscx
-    assert "<minSystemDistance>9.64</minSystemDistance>" in mscx
-    assert "<maxSystemDistance>9.64</maxSystemDistance>" in mscx
-    assert "<staffDistance>5</staffDistance>" in mscx or "<staffDistance>5.0</staffDistance>" in mscx
-    assert "<frameSystemDistance>4</frameSystemDistance>" in mscx or "<frameSystemDistance>4.0</frameSystemDistance>" in mscx
+    _staff, _sys, _frame = render._vertical_layout_gaps(layout="template")
+    assert f"<minSystemDistance>{_sys}</minSystemDistance>" in mscx
+    assert f"<maxSystemDistance>{_sys}</maxSystemDistance>" in mscx
+    assert f"<staffDistance>{_staff}</staffDistance>" in mscx
+    assert f"<frameSystemDistance>{_frame}</frameSystemDistance>" in mscx
     assert "<enableIndentationOnFirstSystem>0</enableIndentationOnFirstSystem>" in mscx

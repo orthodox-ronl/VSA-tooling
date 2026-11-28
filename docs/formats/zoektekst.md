@@ -13,6 +13,8 @@ tekst, ook als ze de id of mapnaam niet precies kennen.
 In de notatie-body staan woorden vaak onderbroken door lettergreepstreepjes en
 hoogte-/duurmarkeringen. Daarom hoort de **niet-gesyllabiseerde** platte tekst
 ook in het bronbestand zelf — niet als handmatige kopie, maar als afgeleid veld.
+Zing-deling in de body zelf: [syllabificatie](syllabificatie.md) (soft `-`
+strip voor deze extractie).
 
 ## Afspraken
 
@@ -25,7 +27,7 @@ ook in het bronbestand zelf — niet als handmatige kopie, maar als afgeleid vel
 | Bron van waarheid     | De notatie-body (VSA-tekst of L-regel(s)); `zoektekst` is afgeleid                                                                                                                                                                                                                                                                                                                                              |
 | Onderhoud             | Tooling vult of vernieuwt het veld; de beheerder typt `zoektekst` niet handmatig bij                                                                                                                                                                                                                                                                                                                            |
 | Equivalentie          | Genormaliseerd gelijk aan extractie uit de body (zie hieronder) — **zonder** het `zoektekst`-veld zelf mee te lezen                                                                                                                                                                                                                                                                                             |
-| Sibling `.lyrics.txt` | **Standaardproduct** (meta-key `lyrics`): `{straat} text` / `{straat} products` schrijft `*.lyrics.txt` naast elke notatiebron (`.vsa` / `.mvsa` / `.mscz`) voor site-/indexzoeken. YAML-`zoektekst` blijft daarnaast voor editorzoeken *in* canonieke `.vsa`/`.mvsa`. Zie [contract-index](contract-index.md#universele-productcatalogus) · [naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie) |
+| Sibling `.lyrics.txt` | **Standaardproduct** (meta-key `lyrics`): formatcontract [lyrics.txt](lyrics.txt.md). `{straat} text` / `{straat} products` schrijft `*.lyrics.txt` naast elke notatiebron. YAML-`zoektekst` blijft voor editorzoeken *in* `.vsa`/`.mvsa`. Zie [contract-index](contract-index.md#universele-productcatalogus) · [naamgeving](canonical-checklists.md#bestandsnaamgeving-conventie)                             |
 
 ## Schrijfwijze
 
@@ -85,8 +87,17 @@ HTML-commentaren zonder vast contract.
    elke reeks spaties, tabs of newlines wordt één spatie.
 4. Na normalisatie moeten `zoektekst` en de body-extractie **gelijk** zijn.
 
-Tooling schrijft bij voorkeur `zoektekst: >-` als één doorlopende alinea. Een
-blokscalar `|` met regeleinden mag, zolang de genormaliseerde vorm klopt.
+Tooling schrijft bij voorkeur `zoektekst: |-` met **één frase per regel**,
+volgens de frasering van de grondtekst:
+
+- **`.vsa`:** dezelfde frasescheiders als elders in VSA — `*` / `/` /
+  `**` / `//` (spaties optioneel; ook vastgeplakt aan een punt: `.*`).
+  Zonder die markers: logische bronregels na `ensure_stanza_stars`.
+- **`.mvsa`:** regeleinden uit de L-extractie.
+
+De scheiders zelf horen **niet** in de zoektekst. Equivalentie blijft op
+genormaliseerde spaties (regeleinden tellen als spatie). Een oude
+`>-`-alinea is inhoudelijk oké tot herschrijven.
 
 ## Wat dit niet is
 

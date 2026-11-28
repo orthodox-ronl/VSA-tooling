@@ -198,8 +198,11 @@ def export_mscz_to_pdf(
     out: Path,
     *,
     musescore: Path | None = None,
+    allow_noncanonical: bool = False,
 ) -> Path:
     """Convert an existing ``.mscz`` to MuseScore print-PDF (zangers)."""
+    from .canonicity_gate import require_canonical_pdf_target
+
     mscz = Path(mscz)
     out = Path(out)
     if out.suffix.lower() != ".pdf":
@@ -212,6 +215,7 @@ def export_mscz_to_pdf(
         convert_with_musescore(mscz, out, musescore=musescore)
     except (MuseScoreNotFoundError, MuseScoreConvertError) as exc:
         raise MvsaMsczError(str(exc)) from exc
+    require_canonical_pdf_target(out, allow_noncanonical=allow_noncanonical)
     return out
 
 
@@ -240,6 +244,7 @@ def export_mvsa_to_pdf(
     cue_font: str | None = None,
     cue_font_size: float | None = None,
     measure_spacing: float | None = None,
+    allow_noncanonical: bool = False,
 ) -> Path:
     """Export ``.mvsa`` to print-PDF via partituur ``.mscz`` (zangers).
 
@@ -290,7 +295,12 @@ def export_mvsa_to_pdf(
             cue_font_size=cue_font_size,
             measure_spacing=measure_spacing,
         )
-        export_mscz_to_pdf(mscz_path, out, musescore=musescore)
+        export_mscz_to_pdf(
+            mscz_path,
+            out,
+            musescore=musescore,
+            allow_noncanonical=allow_noncanonical,
+        )
     finally:
         if tmp_mscz is not None:
             tmp_mscz.unlink(missing_ok=True)

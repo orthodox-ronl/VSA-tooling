@@ -453,6 +453,7 @@ def export_mvsa_path_to_score_ir(
     section_id: str | None = None,
     bibliotheek_id: str | None = None,
     allow_import_sync_errors: bool = False,
+    allow_noncanonical: bool = False,
 ) -> None:
     path = Path(path)
     if path.suffix.lower() != ".mvsa":
@@ -469,7 +470,11 @@ def export_mvsa_path_to_score_ir(
         allow_import_sync_errors=allow_import_sync_errors,
     )
     from .atomic_io import write_text
+    from .canonicity_gate import require_canonical_score_ir_target
 
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
     write_text(out, payload, encoding="utf-8", newline="\n")
+    require_canonical_score_ir_target(
+        out, allow_noncanonical=allow_noncanonical
+    )

@@ -1,0 +1,6 @@
+# Kerkslavische zing-deling (Cyrillisch) — package-stub.
+# Canon: bibliotheek/data/syllable_dictionary.ksl.txt (of eigen repo-lijst).
+# Pad: vsa validate|syllabify --lyrics-lang ksl [--syllable-dictionary PAD]
+#   of: env VSA_SYLLABLE_DICTIONARY_KSL
+#   of: auto-detect data/syllable_dictionary.ksl.txt / sibling bibliotheek
+# Initieel leeg; vullen via TTY/catalogus-review.

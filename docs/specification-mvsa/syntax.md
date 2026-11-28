@@ -119,7 +119,21 @@ editor onder elkaar. Per **maat**, binnen één LSATB-systeem:
    - op elke stemregel: het **eerste teken** van het bijbehorende hoogte-stuk
      (`fa`, `mi&do&re&mi`, `f#4`, `/`, …).
 
-4. Maatstrepen (`|`, `||`, `|:`, `:|`, `:||`) staan op **dezelfde
+4. **`&`-kolommen in melisma.** Als een L-positie één of meer `&` bevat
+   (melisma-ELM’s), staan die `&`-tekens op **dezelfde kolom** als de
+   bijbehorende `&` op S/A/T/B. Tooling vult slots met spaties tot de breedte
+   van het breedste slot op die plek (vaak op L, soms op de stem), bijvoorbeeld
+   `Heer_&_` naast `Bb  &/` of `hoor_  &~` naast `/&\`. **Spaties direct vóór
+   of na `&`** (tussen ELM/hoogte-slots) zijn bewust toegestaan en
+   **semantisch neutraal** — ze tellen niet als extra slot en wijzigen de
+   duur/toon niet; ze bestaan alleen voor kolomuitlijning. Compacte handvorm
+   (`ziel~&~`, `Bb&/`) blijft geldig; canonieke tooling mag padding schrijven
+   (`ziel~  &~`, `Bb  &/`). Een leidend woordstreepje op L (`-neer_&_` na
+   `wan-`) hoort bij de **lijm tussen posities**, niet bij de slotbreedte vóór
+   `&` — anders schuift de stem-`&` één kolom te ver. Zonder `&` op L geldt
+   deze regel niet.
+
+5. Maatstrepen (`|`, `||`, `|:`, `:|`, `:||`) staan op **dezelfde
    kolomposities** op alle LSATB-regels van het systeem: na elke maat begint
    de streep in VSCode in dezelfde kolom. De standaardlayout vult spaties aan
    het eind van een maat zo nodig aan tot die strepen onder elkaar vallen.
@@ -141,7 +155,7 @@ meer breedte nodig hebben (`hei_&_&_  -li`, niet `hei_&_&_-li`).
 L: (Al-le-lu-ia, Al-le-lu-ia, Al)-le  -lu_&-&-&_         i_  a__  ||
 S: fa                             so   mi&do&re&mi       fa  mi   ||
 A: re                             re   do&fa-&si-&do     re  si-  ||
-T: la-                            so-  so-&mi-&so-&so-   la- so-# ||
+T: la-                            so-  so-&mi&so-&so-    la- so-# ||
 ```
 
 Hier deelt `(` de kolom met `fa`/`re`/`la-`; de `l` van `-le` deelt de kolom
@@ -149,6 +163,16 @@ met `so`/`re`/`so-`; de `l` van `-lu_…` deelt de kolom met `mi&…` / `do&…`
 `so-&…`; en `||` staat op alle regels in dezelfde kolom. Omdat `so-` drie
 tekens breed is, staat er ruimte vóór het woordstreepje (`le  -lu`), niet
 eráchter.
+
+`&`-align binnen één melisma-positie (regel 4), compact voorbeeld:
+
+```text
+L: Heer_&_  ver-hoor_  &~ ||
+S: Bb  &/   /     &\\      ||
+```
+
+De `&` onder `Heer_` en onder `hoor_` staan in dezelfde kolom op L en S;
+extra spaties zitten in het smallere slot vóór die `&`.
 
 **Validatie** eist deze kolommen **niet**: alleen de positietelling telt
 ([Semantiek](semantics.md#sync-contract-lengte-posities)). Losse invoer mag
@@ -312,9 +336,12 @@ bedoelde.
 ### Melisma (vorm A)
 
 Meerdere slots op één lettergreep: één L-stuk met `&` tussen ELM-slots, bijvoorbeeld
-`Ster~&~&~` of `God_.&_.`. In de canonieke **MSCZ**/MusicXML-export staat de
-lyric op de **eerste** noot met een **extender** (`<extend/>`), zodat de zanger
-ziet hoe lang de lettergreep aanhoudt.
+`Ster~&~&~` of `God_.&_.`. Spaties rond `&` binnen dat L-stuk (of in het
+bijbehorende hoogte-stuk) zijn toegestaan voor
+[canonieke `&`-kolommen](#canonieke-kolomuitlijning-lsatb) en zijn semantisch
+neutraal. In de canonieke **MSCZ**/MusicXML-export staat de lyric op de
+**eerste** noot met een **extender** (`<extend/>`), zodat de zanger ziet hoe
+lang de lettergreep aanhoudt.
 
 ### Reciteertoon
 
@@ -329,13 +356,13 @@ De hele groep is **één** lengte-positie (één hoogte-stuk per stem). Er is
 **geen** leading `~` meer als recite-marker. Optioneel volgt **direct na** `)`
 een ELM voor de duur van die positie.
 
-| Onderdeel                     | Betekenis                                                                                                                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `(` … `)`                     | Recite-run; spaties = woorden, `-` = lettergreepstreepjes                                                                                                                      |
-| geen ELM na `)`               | Recite-standaardduur: **playback** = kwart per lettergreep; **MSCZ-print** bij `n ≥ 6` = 1–(n−2)–1 met breve-midden (zie [MSCZ-leesbaarheid](../formats/mscz-leesbaarheid.md)) |
-| ELM na `)` (`_`, `~`, `.`, …) | Andere duur op de randnoten / lettergrepen (`(Zoon van God)_`)                                                                                                                 |
-| `)-` + lettergreep            | **Woordstreepje** over de recite-grens (niet ELM-`-`)                                                                                                                          |
-| `~` elders op L               | Alleen **ELM-duur** (`hei~`, melisma-slots) — start **geen** recite                                                                                                            |
+| Onderdeel                     | Betekenis                                                                                                                                                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `(` … `)`                     | Recite-run; spaties = woorden, `-` = lettergreepstreepjes; **geen** duur-/melisma-ELM op lettergrepen binnen de haakjes (`MVSA-RECITE-INTERIOR-ELM`)                                                                                 |
+| geen ELM na `)` (of lone `~`) | Recite-standaardduur: **playback** = kwart per lettergreep; **MSCZ-print** bij `n ≥ 6` = 1–(n−2)–1 met breve-midden (zie [MSCZ-leesbaarheid](../formats/mscz-leesbaarheid.md)). Lone `)~` is invoer-tolerantie; canoniek = kale `)`. |
+| ELM na `)` (`_`, `.`, …)      | Andere duur op de **hele** recite-positie (`(Zoon van God)_`). Melisma na lege recite: `()~&~&.…`                                                                                                                                    |
+| `)-` + lettergreep            | **Woordstreepje** over de recite-grens (niet ELM-`-`)                                                                                                                                                                                |
+| `~` elders op L               | Alleen **ELM-duur** (`hei~`, melisma-slots) — start **geen** recite                                                                                                                                                                  |
 
 Kale ELM-`-` na `)` voegt geen nuttige duur toe t.o.v. de standaard (zelfde
 kwart-duur als `~`). Zet een streepje **achter** de `)` alleen als het woord
@@ -376,6 +403,8 @@ L: (Al-le-lu-ia, Al-le-lu-ia, Al)_-le-lu_&-&-&_ i_ a__ ||
 | `(… Al-)`        | Eind-`-` in de groep: **geen** lettergreepverbinding, **geen** ELM (dood)   |
 | `(… Al)-` alleén | Losse `-` na `)`: **woordstreepje zonder vervolg** — vermijd; geen ELM-duur |
 | `(… Al)-le-…`    | Recite tot “Al”, daarna “le…” als **zelfde woord** (canonieke vorm)         |
+| `heer (-lijkt…)` | Cadens/open, daarna recite: soft `-` **in** de haakjes (zelfde woord)       |
+| `heer -(lijkt…)` | Zelfde als `(-lijkt…)`: `-` **vóór** het haakje (na een spatie) hoort bij het woord |
 | `(… Al)_`        | Recite met duur `_` (halve); streepje hoort hier niet                       |
 
 #### Interacties met `-` en ELM-`~`
@@ -389,12 +418,21 @@ L: (Al-le-lu-ia, Al-le-lu-ia, Al)_-le-lu_&-&-&_ i_ a__ ||
 | `Chris_-tus_`             | Twee lengte-posities; `-` tussen posities = zelfde woord                  |
 | `(… voor) Chris_`         | Recite eindigt bij `)`; nieuwe positie (nieuw woord)                      |
 | `(… Al)-le_…`             | Recite eindigt bij `)`; `-` = zelfde woord doorlopend                     |
+| `(… aan_)`                | **Fout** (`MVSA-RECITE-INTERIOR-ELM`): ELM hoort niet in de haakjes       |
+| `(… voor) Uw aan_…`       | Canoniek: `aan_` als aparte positie buiten de recite                      |
 | `-` op de **stemregel**   | EHM “zelfde toon” — los van lyrics-haakjes                                |
 | `so-` op de **stemregel** | Octaafsuffix — geen lettergreepstreepje                                   |
 
 #### Randgevallen
 
 ```text
+# FOUT: ELM op een lettergreep ín de recite (alle lettergrepen delen één duur).
+L: (op-stij-gen voor Uw aan_)-ge_ …
+
+# GOED: duur-ELM buiten de haakjes, of op de hele recite ná ')'.
+L: (op-stij-gen voor) Uw aan_-ge_ …
+L: (Zoon van God)_ …
+
 # FOUT: zonder haakjes is dit geen recite; spaties maken aparte L-stukken.
 L: Al-le-lu-ia, Al-le-lu-ia, …
 
@@ -406,7 +444,7 @@ L: (Al-le-lu-ia,) (Al-le-lu-ia,) al-le lu_&-&-&_ i_ a__ ||
 # GOED: grens is de `)`, niet een ELM midden in de tekst.
 L: Komt_, (laat ons … voor) Chris_-tus_, ||
 
-# GOED: langere recite-duur met ELM na de sluiting (_ of ~, niet kale -).
+# GOED: langere recite-duur met ELM na de sluiting (_ / ., niet lone ~).
 L: (Zoon van God)_ |
 ```
 

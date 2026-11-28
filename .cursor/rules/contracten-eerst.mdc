@@ -17,6 +17,10 @@ of content wijzigen, niet pas na een bugmelding:
    (bijv. S8, M5a, S13, K2/K3, L3/L4, S2/S4, layout `partituur`,
    **T1–T7**).
 4. Wijzig normatieve tekst **alleen** in die hub; elders alleen linken.
+5. Formatpagina’s volgen §Contract-skelet; bij nieuwe/gewijzigde regels
+   ook §Nieuwe regel → contracten → naleving en
+   [`canonieke-bestanden.mdc`](canonieke-bestanden.mdc) (C1–C4,
+   alle toepasselijke contracten, naleving starten).
 
 **VSA + template → MVSA (T1–T7):** canonieke hub
 [`docs/specification-vsa-templates/vsa-mvsa-contract.md`](docs/specification-vsa-templates/vsa-mvsa-contract.md)

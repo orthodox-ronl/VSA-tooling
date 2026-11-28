@@ -1,59 +1,104 @@
 # Score-IR (`.score-ir.json`) — schermtussenmodel (draft)
 
-Contracten (S8/S13 e.d.): [contract-index](contract-index.md).
+JSON-tussenmodel voor schermweergave (koormap / shortcode `muziek`, later
+CoriB). Geen MuseScore-bestand; geen A4/colofon. Start:
+[contract-index](contract-index.md).
 
-JSON-tussenmodel voor schermweergave (koormap / shortcode `muziek`,
-later CoriB). Geen MuseScore-bestand; geen A4/colofon. Het productcontract
-geldt voor **elke** notatiebron (`.vsa` / `.mvsa` / `.mscz`); de
-bronstraat bepaalt alleen de CLI (`vsa score-ir` / `mvsa score-ir` /
-`mscz score-ir`). Zie
-[contract-index — universele productcatalogus](contract-index.md#universele-productcatalogus).
+## Identiteit
 
-**Productieschermpad:** Score-IR → MusicXML (uit IR) → OSMD. Print/blad blijft
-MuseScore. Brugcontract: [partituur-ir §7](../plans/partituur-ir.md).
-Bedoelde printvorm = checklists; OSMD-emit: [osmd-s8-recite](../plans/osmd-s8-recite.md).
+| Veld     | Waarde                                                   |
+| -------- | -------------------------------------------------------- |
+| Extensie | `.score-ir.json`                                         |
+| Rol      | Standaardproduct (meta-key `score-ir`)                   |
+| Sibling  | `{bron}.score-ir.json` (bijv. `lied.mvsa.score-ir.json`) |
+| Wanneer  | Schermpad vóór OSMD; product uit elke notatiebron        |
 
-**Sibling-artifacts** (naamgeving `{bron}.score-ir.json` /
-`{bron}.from-ir.musicxml`):
+Bijbehorend emit-product: [from-ir](from-ir.md)
+(`{bron}.from-ir.musicxml`).
 
-| Artifact                         | Voorbeeld                     |
-| -------------------------------- | ----------------------------- |
-| Score-IR JSON                    | `lied.mvsa.score-ir.json`     |
-| MusicXML uit IR (OSMD)           | `lied.mscz.from-ir.musicxml`  |
+## Canoniciteit
 
-Schrijf beide met ``{straat} score-ir … --musicxml`` (zonder pad; werkt
-ook op een map). Alleen de eigen bronextensie per straat.
+Canoniek = velden/printvorm volgens [partituur-ir](../plans/partituur-ir.md)
+(S8/S13 e.d.). C1–C4:
+[contract-index §C\*](contract-index.md#canoniciteit-en-conversiegates-c).
 
-**Print-eindvorm (S8/S13):** Score-IR bewaart recite-spacers
-(`print.spacer` / `print.breveHead`) en compacte same-pitch melisma’s
-(ELM o.a. ``__.`` voor gestipte whole); from-ir MusicXML emitteert die
-voor het schermpad (zelfde informatiedichtheid als blad-SVG, geen
-MuseScore-paginamodel). `lyricIndex` volgt per stem de volgorde van
-lyric-dragende noten, niet de event-index van S. Details:
-[partituur-ir §4.4](../plans/partituur-ir.md).
+## Inhoud en metadata
+
+| Onderwerp    | Regel                                      |
+| ------------ | ------------------------------------------ |
+| Frontmatter  | n.v.t. (JSON-schema in partituur-ir)       |
+| Encoding     | UTF-8 JSON                                 |
+| `lyricIndex` | Per stem volgorde van lyric-dragende noten |
+
+## Syllabificatie
+
+Underlay/syllabic-intentie in IR; zichtbare soft `-` niet als bronnorm in
+JSON. Bron (C3) moet canonieke zing-deling hebben.
+
+## Melisma en binding
+
+| Id  | Regel                                               |
+| --  | -----                                               |
+| S13 | Compacte same-pitch melisma’s (o.a. gestipte ELM)   |
+| S8  | Recite-spacers (`print.spacer` / `print.breveHead`) |
+
+## Transliteratie
+
+n.v.t. tenzij IR die laag modelleert (standaard: bronlyrics).
+
+## Stemmen en partijen
+
+Structuur van de notatiebron (SATB e.d.).
+
+## Leesbaarheid
+
+Bedoelde printvorm = checklists; scherm-emit:
+[osmd-s8-recite](../plans/osmd-s8-recite.md). Geen MuseScore-paginamodel.
+
+## Herkomst
+
+Merge key `score-ir` (+ vaak `from-ir`) in [products-meta](products-meta.md).
+
+## Conversies
+
+| Richting                          | CLI                         |
+| --------------------------------- | --------------------------- |
+| `.vsa`/`.mvsa`/`.mscz` → Score-IR | `{straat} score-ir`         |
+| Score-IR → from-ir MusicXML       | zelfde CLI met `--musicxml` |
+| → OSMD-SVG                        | `mvsa svg --engine osmd`    |
+
+## Validatie
+
+Velden/regressies via partituur-ir + exporttests.
+
+**C4 (fase 3):** na schrijven van Score-IR controleert
+`require_canonical_score_ir_target` dat de JSON leesbaar is, `format` /
+`profile` kloppen, `measures` een lijst is, en from-ir-emit
+(`score_ir_to_musicxml`) slaagt. Aangesloten op `{straat} score-ir` /
+`products` (key `score-ir`). Uitzondering: `--allow-noncanonical`.
+Nog geen aparte S8/S13-checklistgate op het JSON-bestand.
+
+---
+
+## Recite / print-collapse (type-specifiek)
+
+| Id  | Regel                                                |
+| --  | -----                                                |
+| S8  | Spacers/breve in IR; from-ir emit markers voor OSMD  |
+| M10 | n.v.t. — geen Coria-playback-collapse in dit product |
 
 **S8 / OSMD (contract A1):** `print.spacer` → from-ir
-`<stem>none</stem>` + `<notehead>none</notehead>` (lyrics blijven op de
-noot). Dat is een **stabiele marker** voor de scherm-OSMD-adapter, geen
-belofte dat OSMD/VexFlow de kop zelf verbergt (peiling:
-[osmd-s8-recite](../plans/osmd-s8-recite.md)). Productpad
-`mvsa svg --engine osmd` past A1 toe in
-[`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg) (`s8-a1-adapter.js`):
-spacer-hide én MuseScore-``||O||``-path op breve-midden; lyrics
-Source Sans 3. Bibliotheek-embed via `score-osmd.js`. Breve-midden in
-from-ir: `notehead breve` + `stem none` (geen `type=breve`).
-
-| Onderwerp                         | Waar                                                                                 |
-| --------------------------------- | ------------------------------------------------------------------------------------ |
-| Contract (velden, partituur)      | [partituur-ir](../plans/partituur-ir.md)                                             |
-| Scherm- / CoriB-brug              | [partituur-ir §7](../plans/partituur-ir.md)                                          |
-| CLI                               | `{straat} score-ir` — o.a. [`mvsa score-ir`](../reference/cli/mvsa.md#mvsa-score-ir) |
-| Score-IR → MusicXML (OSMD)        | `vsa.score_ir_musicxml` · CLI ``--musicxml``                                         |
-| Browser-spike                     | `examples/spikes/partituur-browser/`                                                 |
+`<stem>none</stem>` + `<notehead>none</notehead>`. Adapter:
+[`scripts/osmd-svg`](https://github.com/orthodox-ronl/VSA-tooling/tree/main/scripts/osmd-svg).
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
 mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa --musicxml
 mvsa score-ir examples\mvsa --musicxml
-mvsa score-ir examples\mvsa\1a-vredeslitanie.mvsa -o generated\score-ir\1a.score-ir.json --musicxml generated\score-ir\1a.from-ir.musicxml
 ```
+
+## Zie ook
+
+- [from-ir](from-ir.md) · [mvsa-svg](mvsa-svg.md)
+- [partituur-ir](../plans/partituur-ir.md)
+- [Formaten & CLI — overzicht](index.md)

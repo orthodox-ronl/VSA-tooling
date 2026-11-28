@@ -1,51 +1,52 @@
 # MusicXML exporteren
 
-Met [`vsa musicxml`](../reference/cli/musicxml.md) zet je [VSA-notatie](@bron) om naar **`.mxl`** (gecomprimeerd MusicXML, standaard)
+Met [`vsa mxl`](../reference/cli/musicxml.md) zet je [VSA-notatie](@bron) om naar **`.mxl`** (gecomprimeerd MusicXML, standaard)
 of naar platte **`.musicxml`**. Open het in MuseScore of speel af op
 [Coria](https://coria.nl).
 
 Deze pagina is de workflow-uitleg (profielen, Coria, mappen, opties). Voor de
 volledige CLI-syntax, alle argumenten en foutgevallen: zie de man-pagina
-[`vsa musicxml`](../reference/cli/musicxml.md). Voor siblings + meta in één
+[`vsa mxl`](../reference/cli/musicxml.md). Voor siblings + meta in één
 keer: [`vsa products`](../reference/cli/products.md) (tijdelijke syllabify +
 Coria-finalize op de MXL; SVG uit de ongewijzigde bron; geen `.vsa.pdf`).
 
-Bij het **`playback`**-profiel schrijft `vsa musicxml` altijd Coria-klare
+Bij het **`playback`**-profiel schrijft `vsa mxl` altijd Coria-klare
 MusicXML (finalize: sanitize + voortekens, geen DOCTYPE). Optioneel
 `--syllabify` voor tijdelijke lettergreepstreepjes zonder de `.vsa` te
-wijzigen.
+wijzigen. Vorm: `vsa mxl PATH [-o OUTPUT]` (gelijk aan `mvsa mxl` /
+`mscz mxl`).
 
 ## Snel starten
 
-Eén bestand ([docs-fixture](@): tropaar zondag toon 3):
+Eén bestand ([docs-fixture](@): tropaar zondag toon 3), sibling of `-o`:
 
 ```cmd
 cd /d C:\Git\orthodox-ronl\VSA-tooling
-vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie.mxl
+vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa -o generated\mxl\oefenmelodie.mxl
 ```
 
-Zonder extensie krijg je ook `.mxl`:
+Zonder extensie op `-o` krijg je ook `.mxl`:
 
 ```cmd
-vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie
+vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa -o generated\mxl\oefenmelodie
 ```
 
 Platte MusicXML (bijv. voor MuseScore-bewerking):
 
 ```cmd
-vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie.musicxml
+vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa -o generated\mxl\oefenmelodie.musicxml
 ```
 
-Of expliciet:
+Of via `--format` bij sibling-default:
 
 ```cmd
-vsa musicxml examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa generated\mxl\oefenmelodie --format musicxml
+vsa mxl examples\docs-walkthroughs\coria-oefenlink\oefenmelodie.vsa --format musicxml
 ```
 
-Bij map-export (standaard `.mxl` per `.vsa`-bestand):
+Bij map-export (sibling `.mxl` naast elk `.vsa`):
 
 ```cmd
-vsa musicxml content-source\praktijk output\mxl
+vsa mxl content-source\praktijk
 ```
 
 ## Oefenen in Coria
@@ -213,7 +214,7 @@ identificatie:
 
 ## Twee exportprofielen
 
-Standaard gebruikt [`vsa musicxml`](../reference/cli/musicxml.md) het **`playback`**-profiel. Dat is bedoeld
+Standaard gebruikt [`vsa mxl`](../reference/cli/musicxml.md) het **`playback`**-profiel. Dat is bedoeld
 voor afspelen en import zonder handmatige opschoning — onder andere Coria en
 MuseScore na roundtrip.
 
@@ -235,7 +236,7 @@ muziek:
 Of via de commandoregel:
 
 ```cmd
-vsa musicxml lied.vsa lied.mxl --musicxml-profile engraving
+vsa mxl lied.vsa -o lied.mxl --musicxml-profile engraving
 ```
 
 ## Tips

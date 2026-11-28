@@ -1,0 +1,6 @@
+# Geen canonieke org-lijst meer in VSA-tooling.
+# Canon: bibliotheek/data/syllable_dictionary.nl.txt (of eigen repo-lijst).
+# Pad: vsa.toml [syllabificatie] dictionary = "…"
+#   of: vsa validate|syllabify --syllable-dictionary PAD
+#   of: env VSA_SYLLABLE_DICTIONARY
+#   of: auto-detect data/syllable_dictionary.nl.txt / sibling bibliotheek

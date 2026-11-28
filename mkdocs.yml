@@ -94,13 +94,21 @@ nav:
       - .vsa: formats/vsa.md
       - .mvsa: formats/mvsa.md
       - Score-IR: formats/score-ir.md
+      - from-ir (OSMD MusicXML): formats/from-ir.md
+      - vsa-SVG (scherm): formats/vsa-svg.md
       - mvsa-SVG (koormap): formats/mvsa-svg.md
+      - translit-SVG: formats/translit-svg.md
       - .mxl / .musicxml: formats/mxl.md
       - .mscz: formats/mscz.md
+      - lyrics.txt: formats/lyrics.txt.md
       - .mp3 / audio: formats/audio.md
+      - Products-meta: formats/products-meta.md
       - .midi / .mid: formats/midi.md
-    - Contract-index: formats/contract-index.md
-    - Products-meta (herkomst-sidecar): formats/products-meta.md
+    - Contract-index (skelet, C*, dekking): formats/contract-index.md
+    - Kuiser (Q*/V*): formats/kuiser.md
+    - vsa format (strofen): formats/vsa-format.md
+    - CLI-canoniciteit-audit: formats/cli-canoniciteit-audit.md
+    - Syllabificatie (zing-deling): formats/syllabificatie.md
     - Canonieke checklists (mxl/mscz): formats/canonical-checklists.md
     - MSCZ-leesbaarheid: formats/mscz-leesbaarheid.md
     - Commando's:
@@ -108,7 +116,7 @@ nav:
       - mvsa: reference/cli/mvsa.md
       - mxl: reference/cli/mxl.md
       - mscz: reference/cli/mscz.md
-      - vsa musicxml: reference/cli/musicxml.md
+      - vsa mxl: reference/cli/musicxml.md
       - vsa products: reference/cli/products.md
       - vsa audio: reference/cli/audio.md
     - Scripts (cmd): formats/scripts.md
@@ -194,8 +202,9 @@ nav:
       - reference/cli/build-markdown.md
       - reference/cli/markdown.md
       - reference/cli/pdf.md
-      - reference/cli/resolve-catalogus.md
       - reference/cli/syllabify.md
+      - reference/cli/format.md
+      - reference/cli/kuiser.md
       - reference/cli/musicxml.md
       - reference/cli/vsa-mvsa.md
       - reference/cli/products.md
@@ -227,6 +236,10 @@ nav:
     - OSMD S8-recite (plan): plans/osmd-s8-recite.md
     - CoriB MVP (plan): plans/corib-mvp.md
     - plans/vsa-polyphony-proposal.md
+    - Migratieplan tooling ↔ bibliotheek: plans/migratieplan-tooling-bibliotheek.md
+    - ADR-001 (exportketen en catalogus): plans/adr-001-exportketen-en-catalogus.md
+    - Migratiematrix tooling ↔ bibliotheek: plans/migratiematrix.md
+    - Voorstel Cursor-regels: plans/cursor-regels-voorstel.md
 
 extra_css:
   - stylesheets/extra.css

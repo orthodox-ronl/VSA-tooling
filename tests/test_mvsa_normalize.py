@@ -151,7 +151,7 @@ B-: - ||
     assert "S:" in out
 
 
-def test_normalize_ag_vsa_absolute_first_ehm_eindanker():
+def test_normalize_ag_vsa_relative_first_ehm_eindanker():
     text = """\
 @do F4
 @mode major
@@ -167,11 +167,73 @@ B: g3 a3 bb3 ||
     diags = validate_mvsa_text(out)
     assert not [d for d in diags if d.severity == "error"], (diags, out)
     s = next(ln for ln in out.splitlines() if ln.startswith("S:"))
-    # Absolute a–g first; EHM after; absolute eindanker; no S-: identifier.
+    # Relatieve a–g first; EHM after; relatief eindanker; no S-: identifier.
     assert "S-:" not in out
-    assert re.search(r"^S:\s*[Bb]b4\b", s), s
+    assert re.search(r"^S:\s*[Bb]b\b", s), s
+    assert not re.search(r"^S:\s*[Bb]b4\b", s), s
     assert re.search(r"[/\\]", s), s
+    assert re.search(r"\|\|d\s*$", s), s
+    before = export_mvsa_to_musicxml(text, section_id="demo")
+    after = export_mvsa_to_musicxml(out, section_id="demo")
+    assert _all_pitches(before) == _all_pitches(after)
+
+
+def test_normalize_ag_vsa_none_keeps_scientific():
+    text = """\
+@do F4
+@mode major
+
+@sectie demo
+L: a_ b_ c_ ||
+S: bb4 c5 d5 ||
+A: g4 a4 bb4 ||
+T: d4 e4 f4 ||
+B: g3 a3 bb3 ||
+"""
+    out = normalize_mvsa_text(text, pitch="ag-vsa", octave_style="none", align=False)
+    s = next(ln for ln in out.splitlines() if ln.startswith("S:"))
+    assert re.search(r"^S:\s*[Bb]b4\b", s), s
     assert re.search(r"\|\|d5\s*$", s), s
+
+
+def test_normalize_octave_style_none_rejects_doremi():
+    text = """\
+@do F4
+@mode major
+
+@sectie demo
+L: a_ ||
+S: fa ||
+A: re ||
+T: la ||
+B: re ||
+"""
+    from vsa.mvsa_normalize import MvsaNormalizeError
+
+    with pytest.raises(MvsaNormalizeError, match="none.*doremi"):
+        normalize_mvsa_text(text, pitch="doremi", octave_style="none")
+
+
+def test_normalize_abc_relative_with_oct():
+    text = """\
+@do F4
+@mode major
+@oct S=0 A=0 T=-1 B=-1
+
+@sectie demo
+L: a_ ||
+S: bb4 ||
+A: g4 ||
+T: d4 ||
+B: g3 ||
+"""
+    out = normalize_mvsa_text(text, pitch="a-g", octave_style="@oct", align=False)
+    s = next(ln for ln in out.splitlines() if ln.startswith("S:"))
+    b = next(ln for ln in out.splitlines() if ln.startswith("B:"))
+    assert re.search(r"^S:\s*[Bb]b\b", s), s
+    assert not re.search(r"[Bb]b4", s), s
+    # B met writing_oct=-1: g3 ligt in schrijf-do-octaaf → kale g
+    assert re.search(r"^B:\s*g\b", b), b
     before = export_mvsa_to_musicxml(text, section_id="demo")
     after = export_mvsa_to_musicxml(out, section_id="demo")
     assert _all_pitches(before) == _all_pitches(after)
@@ -199,5 +261,5 @@ B: g3 ||
     s_lines = [ln for ln in out.splitlines() if ln.startswith("S:")]
     assert len(s_lines) == 2
     for ln in s_lines:
-        assert re.search(r"^S:\s*[Bb]b4\b", ln), ln
-        assert re.search(r"\|\|[Bb]b4\s*$", ln), ln
+        assert re.search(r"^S:\s*[Bb]b\b", ln), ln
+        assert re.search(r"\|\|[Bb]b\s*$", ln), ln

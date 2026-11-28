@@ -13,6 +13,9 @@ experimenten en eerdere beslissingen. De **draft-specificatie** staat in
 [`docs/specification-mvsa/`](../specification-mvsa/README.md). Bij conflict over
 mvsa-regels wint die draft. Wat uit de oude polyfonie-schets nog open is, staat
 in §10 en in [specification-mvsa/open-points.md](../specification-mvsa/open-points.md).
+Actueel: spaties rond `&` in melisma zijn toegestaan voor
+[canonieke `&`-kolommen](../specification-mvsa/syntax.md#canonieke-kolomuitlijning-lsatb)
+(semantisch neutraal); compacte voorbeelden hieronder (`ziel~&~`) blijven geldig.
 
 Templates (laag 2/3) komen alleen aan bod waar de syntax daarop moet anticiperen
 (`~` voor de [reciteertoon](https://github.com/orthodox-ronl/bron/blob/main/docs/specs/terminologie.md)).
@@ -571,7 +574,7 @@ Een kale streep is geen marker (geen VSA-`[:]`-equivalent).
 
 Zelfde bestandsvorm: een `tropaar-toon-4`-stemtemplate is dan een set
 S/A/T/B-regels per frase; per tropaar schrijf je vooral nieuwe L-regels met `~`.
-YAML in [`library/tropaar-toon-4/`](../specification-vsa-templates/library/tropaar-toon-4/README.md)
+YAML in [`library/tropaar-toon-4-hemelum/`](../specification-vsa-templates/library/tropaar-toon-4-hemelum/README.md)
 blijft voorlopig leidend tot mvsa die rol overneemt.
 
 ---
@@ -688,5 +691,5 @@ events heeft, en of `@include` een alias van `=` mag zijn.
 5. §9–§10 (beslissingen + open punten).
 6. §11 blokhergebruik + `examples/mvsa/trisagion-8a-slav-hemelum.mvsa`
    (experimenteel, niet normatief).
-7. Daarna [tropaar-toon-4](../specification-vsa-templates/library/tropaar-toon-4/README.md)
+7. Daarna [tropaar-toon-4-hemelum](../specification-vsa-templates/library/tropaar-toon-4-hemelum/README.md)
    als je stemregels als formule-slots wilt hergebruiken.

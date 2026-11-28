@@ -7,21 +7,70 @@ from __future__ import annotations
 
 import sys
 
+from .mvsa_marks import lookup_mark
 from .mvsa_parse import (
     LPosition,
     _ELMS,
     _attach_lyric_punct,
+    _consume_known_mark,
     _is_syllable_char,
     _is_woordstreepje,
     _read_elms,
     escape_lyric_periods_for_mvsa,
     parse_l_positions,
+    split_voice_measure_tokens,
 )
 from .mvsa_validate import is_lyrics_stem, parse_regelidentifier, _split_bars
 
 
+def _extend_span_trailing_after_marks(s: str, i: int) -> int:
+    """Neem whitespace + ``attach=after``-marks mee in de L-token-span.
+
+    Stopt vóór ``attach=before`` (die hoort bij de volgende positie). Zelfde
+    mark-semantiek als ``parse_l_positions`` / ``_append_trailing_marks``.
+    """
+    n = len(s)
+    while True:
+        j = i
+        while j < n and s[j].isspace():
+            j += 1
+        mark, k, consumed = _consume_known_mark(s, j)
+        if not consumed or mark is None:
+            break
+        spec = lookup_mark(mark.raw)
+        if spec is None or spec.attach != "after":
+            break
+        i = k
+    return i
+
+
+def _consume_leading_before_marks(s: str, i: int) -> int:
+    """Sla ``attach=before``-marks (+ whitespace erna) over; index ná de marks."""
+    n = len(s)
+    while True:
+        mark, j, consumed = _consume_known_mark(s, i)
+        if not consumed or mark is None:
+            break
+        spec = lookup_mark(mark.raw)
+        if spec is None or spec.attach != "before":
+            break
+        i = j
+        while i < n and s[i].isspace():
+            i += 1
+    return i
+
+
+def _l_token_lyric_offset(token: str) -> int:
+    """Kolom van de zingtekst binnen een L-token (ná leading before-marks)."""
+    return _consume_leading_before_marks(token, 0)
+
+
 def _l_position_spans(measure: str) -> list[tuple[int, int]]:
-    """Return (start, end) spans for each L-position within ``measure``."""
+    """Return (start, end) spans for each L-position within ``measure``.
+
+    Spans bevatten ook plakkende ``[…]``-marks (before vóór de lyric, after
+    erna), zodat align/syllabify die structurele tokens niet weggooien.
+    """
     s = measure
     stripped = s.strip()
     if not stripped:
@@ -58,7 +107,30 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
         ):
             i += 1
             continue
-        start = i
+
+        mark, j, consumed = _consume_known_mark(stripped, i)
+        if consumed:
+            if mark is not None:
+                spec = lookup_mark(mark.raw)
+                if spec is not None and spec.attach == "after":
+                    # Wees-after-mark (hoort bij vorige positie); skip.
+                    i = j
+                    continue
+                if spec is None or spec.attach != "before":
+                    i = j
+                    continue
+            else:
+                # Onbekende/unclosed bracket — zelfde skip als parse.
+                i = j
+                continue
+            # before-mark(s): start van deze positie
+            start = i
+            i = _consume_leading_before_marks(stripped, i)
+        else:
+            start = i
+
+        if i >= n:
+            break
         if stripped[i] == "(":
             close = stripped.find(")", i + 1)
             if close < 0:
@@ -66,6 +138,7 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
             i = close + 1
             _, i = _read_elms(stripped, i, allow_bare_dash=False)
             _, i = _attach_lyric_punct(stripped, i, "")
+            i = _extend_span_trailing_after_marks(stripped, i)
             spans.append((start + offset, i + offset))
             pi += 1
             continue
@@ -87,16 +160,24 @@ def _l_position_spans(measure: str) -> list[tuple[int, int]]:
             ):
                 break
             break
+        i = _extend_span_trailing_after_marks(stripped, i)
         spans.append((start + offset, i + offset))
         pi += 1
     return spans
+
+
+def _format_lpos_with_marks(p: LPosition) -> str:
+    """``_format_lpos`` plus plakkende ``[…]``-marks (before/after)."""
+    before = "".join(f"[{m.raw}]" for m in p.marks_before)
+    after = "".join(f"[{m.raw}]" for m in p.marks_after)
+    return f"{before}{_format_lpos(p)}{after}"
 
 
 def _l_tokens(measure: str) -> list[str]:
     spans = _l_position_spans(measure)
     if spans:
         return [measure[a:b] for a, b in spans]
-    return [_format_lpos(p) for p in parse_l_positions(measure)]
+    return [_format_lpos_with_marks(p) for p in parse_l_positions(measure)]
 
 
 def _format_lpos(p: LPosition) -> str:
@@ -154,7 +235,13 @@ def _format_elms(elms: list[str]) -> str:
 
 
 def _voice_tokens(measure: str) -> list[str]:
-    return [t for t in measure.split() if t]
+    """Stem tokens; compact ``&``-padding so slot-align starts clean."""
+    out: list[str] = []
+    for raw in split_voice_measure_tokens(measure):
+        compact = "&".join(p.strip() for p in raw.split("&"))
+        if compact:
+            out.append(compact)
+    return out
 
 
 def _place_at_anchors(tokens: list[str], anchors: list[int]) -> str:
@@ -168,6 +255,55 @@ def _place_at_anchors(tokens: list[str], anchors: list[int]) -> str:
     return "".join(buf).rstrip()
 
 
+def _pad_ampersand_slots(parts: list[str], widths: list[int]) -> str:
+    """Left-align each ``&``-slot in ``widths`` so ``&`` columns line up."""
+    if len(parts) <= 1:
+        return parts[0] if parts else ""
+    out: list[str] = []
+    for i, part in enumerate(parts):
+        if i < len(parts) - 1:
+            out.append(part.ljust(widths[i]))
+        else:
+            out.append(part)
+    return "&".join(out)
+
+
+def _align_ampersands_in_position(
+    l_tok: str, voice_toks: list[str]
+) -> tuple[str, list[str]]:
+    """Pad L and stem tokens so each ``&`` shares a column (when L has ``&``).
+
+    Leading woordstreepje ``-`` op L (``-neer_&_``) hoort bij de lijm tussen
+    posities, niet bij de slotbreedte vóór ``&`` — anders schuift de stem-``&``
+    één kolom te ver t.o.v. de L-``&`` na het terugplaatsen van die ``-``.
+    """
+    if "&" not in l_tok:
+        return l_tok, voice_toks
+    prefix = ""
+    core = l_tok
+    if core.startswith("-"):
+        prefix = "-"
+        core = core[1:]
+    if "&" not in core:
+        return l_tok, voice_toks
+    l_parts = core.split("&")
+    v_parts_rows = [vt.split("&") for vt in voice_toks]
+    n_slots = len(l_parts)
+    for row in v_parts_rows:
+        if len(row) != n_slots:
+            # Slot-telling verschilt: geen &-pad (validate vangt SYNC).
+            return l_tok, voice_toks
+    widths = [len(l_parts[i]) for i in range(n_slots)]
+    for row in v_parts_rows:
+        for i, part in enumerate(row):
+            if len(part) > widths[i]:
+                widths[i] = len(part)
+    # Laatste slot: geen trailing pad nodig voor &-align.
+    new_l = prefix + _pad_ampersand_slots(l_parts, widths)
+    new_v = [_pad_ampersand_slots(row, widths) for row in v_parts_rows]
+    return new_l, new_v
+
+
 def _build_aligned_measure(
     l_tokens: list[str], voice_rows: list[list[str]]
 ) -> tuple[str, list[str]]:
@@ -177,6 +313,9 @@ def _build_aligned_measure(
     stem-token needs an extra column so voice tokens stay space-separated).
     Extra width for long stem-tokens is absorbed in gaps, never by turning
     the joining '-' into an ELM (no ``le-  lu``).
+
+    When an L-token contains ``&``, each ``&`` is aligned under the matching
+    ``&`` on S/A/T/B (padding slots with spaces; see syntax.md).
     """
     n = len(l_tokens)
     if n == 0:
@@ -185,9 +324,19 @@ def _build_aligned_measure(
         if len(row) != n:
             raise ValueError(f"positietelling L={n} vs stem={len(row)}")
 
+    # Eerst &-slots binnen posities uitlijnen (kan L en stemtokens verbreden).
+    padded_l: list[str] = []
+    padded_voices: list[list[str]] = [list(row) for row in voice_rows]
+    for i in range(n):
+        v_at_i = [row[i] for row in padded_voices]
+        new_l, new_v = _align_ampersands_in_position(l_tokens[i], v_at_i)
+        padded_l.append(new_l)
+        for ri, vt in enumerate(new_v):
+            padded_voices[ri][i] = vt
+
     contents: list[str] = []
     glues: list[str] = []
-    for i, raw in enumerate(l_tokens):
+    for i, raw in enumerate(padded_l):
         if i == 0:
             glues.append("")
             contents.append(raw)
@@ -198,8 +347,10 @@ def _build_aligned_measure(
             glues.append(" ")
             contents.append(raw)
 
-    if voice_rows:
-        voice_w = [max(len(row[i]) for row in voice_rows) for i in range(n)]
+    if padded_voices:
+        voice_w = [
+            max(len(row[i]) for row in padded_voices) for i in range(n)
+        ]
     else:
         voice_w = [len(contents[i]) for i in range(n)]
 
@@ -242,12 +393,13 @@ def _build_aligned_measure(
         if col < starts[i]:
             parts.append(" " * (starts[i] - col))
             col = starts[i]
-        out_anchors.append(col)
+        # Stem onder de zingtekst, niet onder leading ``[cresc]`` e.d.
+        out_anchors.append(col + _l_token_lyric_offset(contents[i]))
         parts.append(contents[i])
         col += len(contents[i])
 
     l_out = "".join(parts).rstrip()
-    voice_out = [_place_at_anchors(row, out_anchors) for row in voice_rows]
+    voice_out = [_place_at_anchors(row, out_anchors) for row in padded_voices]
     return l_out, voice_out
 
 
@@ -320,6 +472,31 @@ def _align_system_contents(contents: dict[str, str], order: list[str]) -> dict[s
 
 
 def align_mvsa_text(text: str) -> str:
+    """Kolomuitlijning; YAML-frontmatter wordt niet aangeraakt."""
+    from .yaml_frontmatter import strip_yaml_frontmatter
+
+    bom = ""
+    if text.startswith("\ufeff"):
+        bom = "\ufeff"
+        text = text[1:]
+
+    fm, body, _ = strip_yaml_frontmatter(text)
+    aligned_body = _align_mvsa_body(body)
+    if not fm:
+        return bom + aligned_body
+
+    if text.startswith("---"):
+        close = text.find("\n---", 3)
+        if close != -1:
+            fm_bytes = text[: close + len("\n---")]
+            rest = text[close + len("\n---") :]
+            lead = rest[: len(rest) - len(rest.lstrip("\n"))]
+            return bom + fm_bytes + lead + aligned_body
+
+    return bom + aligned_body
+
+
+def _align_mvsa_body(text: str) -> str:
     lines = text.splitlines(keepends=True)
     out: list[str] = []
     i = 0

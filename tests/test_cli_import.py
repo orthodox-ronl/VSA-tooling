@@ -19,7 +19,8 @@ def test_mvsa_import_rejects_wrong_extension(tmp_path: Path, capsys) -> None:
     bad.write_text("title: t\n---\na4.\n", encoding="utf-8")
     assert mvsa_main(["import", str(bad)]) == 1
     err = capsys.readouterr().err
-    assert "niet is toegestaan" in err
+    assert "weigert .vsa" in err
+    assert "Hint:" in err
     assert ".mscz" in err
 
 
@@ -28,7 +29,8 @@ def test_mscz_import_rejects_wrong_extension(tmp_path: Path, capsys) -> None:
     bad.write_text("title: t\n---\na4.\n", encoding="utf-8")
     assert mscz_main(["import", str(bad)]) == 1
     err = capsys.readouterr().err
-    assert "niet is toegestaan" in err
+    assert "weigert .vsa" in err
+    assert "Hint:" in err
     assert ".mvsa" in err
 
 

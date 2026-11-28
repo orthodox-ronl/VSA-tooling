@@ -107,6 +107,13 @@ STICKY_DIRECTIVES = frozenset({"do", "mode", "oct", "start", "taal"})
 ALLOWED_MODES = frozenset({"major", "minor"})
 ALLOWED_TALEN = frozenset({"nl", "ksl"})
 ALLOWED_TAAL_ARGS = frozenset({"nl", "ksl", "auto"})
+# Overige taalcodes (``@taal ro``, ``@taal el``): geen woordenlijst, dus geen controle.
+LANG_CODE_RE = re.compile(r"^[a-z]{2,3}$")
+
+
+def is_lyrics_lang_code(value: str | None) -> bool:
+    """ISO-achtige taalcode (2-3 kleine letters), bijv. ``ro``, ``el``, ``ka``."""
+    return bool(value) and LANG_CODE_RE.match(value) is not None
 
 
 def normalize_lyric_taal_key(marker: str) -> str:
@@ -189,6 +196,8 @@ class MvsaDiagnostic:
     message: str
     line: int
     severity: str = "error"
+    column: int | None = None  # 1-based in de bronregel; None = onbekend
+    source_line: str | None = None  # voor caret onder de ELM
 
 
 @dataclass(frozen=True)
@@ -262,6 +271,9 @@ class _RawLine:
     content: str
     ehm: str | None = None
     is_lyrics: bool = False
+    # 0-based index van ``content[0]`` in de ongestrippte bronregel.
+    content_col0: int = 0
+    source_line: str = ""
 
     @property
     def identity(self) -> str:
@@ -296,7 +308,12 @@ class MvsaValidationError(Exception):
         super().__init__(f"{len(errors)} mvsa error(s)")
 
 
-def validate_mvsa_text(text: str, *, source: str = "<mvsa>") -> list[MvsaDiagnostic]:
+def validate_mvsa_text(
+    text: str,
+    *,
+    source: str = "<mvsa>",
+    path: Path | None = None,
+) -> list[MvsaDiagnostic]:
     """Return diagnostics (errors and warnings). Empty list = OK."""
     if text.startswith("\ufeff"):
         text = text[1:]
@@ -326,20 +343,171 @@ def validate_mvsa_text(text: str, *, source: str = "<mvsa>") -> list[MvsaDiagnos
     for d in doc.diagnostics:
         if d.code in _MERGE_FROM_PARSE:
             diagnostics.append(d)
+    write_path = path
+    if write_path is None and source not in {"<mvsa>", ""}:
+        candidate = Path(source)
+        if candidate.is_file():
+            write_path = candidate
+    _add_syllable_dictionary_diagnostics(
+        text, diagnostics, path=write_path
+    )
     return diagnostics
+
+
+def _auto_repair_mvsa_soft_hyphens(
+    path: Path, text: str
+) -> tuple[str, MvsaDiagnostic | None]:
+    """Stille reparatie; nooit met Pyphen-gokken op onbekende woorden (zie impl)."""
+    from .syllable_dict_check import force_noninteractive, validate_rewrite_disabled
+
+    if validate_rewrite_disabled():
+        return text, None
+    with force_noninteractive():
+        return _auto_repair_mvsa_soft_hyphens_impl(path, text)
+
+
+def _auto_repair_mvsa_soft_hyphens_impl(
+    path: Path, text: str
+) -> tuple[str, MvsaDiagnostic | None]:
+    """Vul ontbrekende soft ``-`` op L (zoals ``mvsa syllabify``).
+
+    Alleen wanneer dictionary-MISMATCH/UNKNOWN afneemt. YAML-``zoektekst``
+    en niet-L-regels blijven onaangeroerd. Schrijft het bestand terug bij
+    verbetering.
+    """
+    from .mvsa_syllabify import MvsaSyllabifyError, syllabify_mvsa_text
+    from .syllable_dict_check import (
+        CODE_MISMATCH,
+        CODE_UNKNOWN,
+        find_mvsa_dictionary_syllable_issues,
+    )
+
+    def _dict_issues(source: str) -> int:
+        return sum(
+            1
+            for f in find_mvsa_dictionary_syllable_issues(source)
+            if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
+        )
+
+    before = _dict_issues(text)
+    if before == 0:
+        return text, None
+
+    try:
+        repaired = syllabify_mvsa_text(text, unsyllabify=False, align=True)
+    except MvsaSyllabifyError:
+        return text, None
+    if not repaired.changed:
+        return text, None
+
+    after = _dict_issues(repaired.text)
+    if after >= before:
+        return text, None
+
+    path.write_text(repaired.text, encoding="utf-8", newline="\n")
+    note = MvsaDiagnostic(
+        "MVSA-SYLLABIFY-APPLIED",
+        (
+            f"Ontbrekende lettergreepstreepjes op L aangevuld "
+            f"({repaired.replacements} wijziging(en); zelfde als "
+            f"`mvsa syllabify`). Bestand bijgewerkt."
+        ),
+        1,
+        severity="warning",
+    )
+    return repaired.text, note
+
+
+def _add_syllable_dictionary_diagnostics(
+    text: str,
+    diagnostics: list[MvsaDiagnostic],
+    *,
+    path: Path | None = None,
+) -> None:
+    """Alleen L-lyrics tegen de canonieke syllable-dictionary (geen @-meta)."""
+    from .mvsa_syllabify import MvsaSyllabifyError, syllabify_mvsa_text
+    from .syllable_dict_check import (
+        CODE_MISMATCH,
+        CODE_UNKNOWN,
+        apply_replacements_to_source,
+        find_mvsa_dictionary_syllable_issues,
+        is_interactive_stdin,
+        prompt_dictionary_fixes,
+    )
+
+    findings = find_mvsa_dictionary_syllable_issues(text)
+    # Alleen TTY-prompten met bekend bestandspad. Zonder pad (o.a. interne
+    # ``validate_mvsa_text`` vanuit ``syllabify_mvsa_text``) geen tweede
+    # interactieve ronde zonder ``pad:regel:kolom:``.
+    if is_interactive_stdin() and path is not None and path.is_file():
+        actionable = [
+            f for f in findings if f.code in {CODE_MISMATCH, CODE_UNKNOWN}
+        ]
+        if actionable:
+            from .input_paths import source_id_for_prompt
+
+            session = prompt_dictionary_fixes(
+                actionable,
+                source_id=source_id_for_prompt(path),
+                source_path=path,
+            )
+            if session.aborted:
+                diagnostics.append(
+                    MvsaDiagnostic(
+                        "VSA-SYLLABLE-DICT-ABORTED",
+                        "Interactieve syllable-dictionary-check afgebroken "
+                        "(Esc/Ctrl+C).",
+                        1,
+                        severity="error",
+                    )
+                )
+                # Geen path.write_text: Esc/Ctrl+C laat het .mvsa onaangeroerd.
+                return
+            if session.replacements:
+                working = text
+                try:
+                    working = syllabify_mvsa_text(
+                        working, unsyllabify=False, align=True
+                    ).text
+                except MvsaSyllabifyError:
+                    pass
+                working = apply_replacements_to_source(
+                    working, session.replacements
+                )
+                if working != text:
+                    path.write_text(working, encoding="utf-8", newline="\n")
+                findings = find_mvsa_dictionary_syllable_issues(working)
+            else:
+                # ``=``/``+`` kan de lijst wijzigen zonder bronreplace.
+                findings = find_mvsa_dictionary_syllable_issues(text)
+    for finding in findings:
+        # Voorlopig warning: catalogus/examples zijn nog niet overal
+        # dictionary-gesynchroniseerd. Lyrics-only blijft wél hard.
+        diagnostics.append(
+            MvsaDiagnostic(
+                finding.code,
+                finding.message_nl,
+                finding.line,
+                severity="warning",
+            )
+        )
 
 
 def validate_mvsa_path(path: Path) -> list[MvsaDiagnostic]:
     text = path.read_text(encoding="utf-8-sig")
-    return validate_mvsa_text(text, source=str(path))
+    text, applied = _auto_repair_mvsa_soft_hyphens(path, text)
+    diagnostics = validate_mvsa_text(text, source=str(path), path=path)
+    if applied is not None:
+        diagnostics.insert(0, applied)
+    return diagnostics
 
 
-def collect_mvsa_files(path: Path) -> list[Path]:
+def collect_mvsa_files(path: Path | str) -> list[Path]:
     """Verzamel ``.mvsa``-paden. Geen binaire bestanden (``.mscz`` e.d.).
 
-    Verkeerde bestands-extensie of ontbrekend pad → lege lijst (callers
-    checken ``exists()`` / tonen «geen .mvsa»). Map-scan via
-    ``collect_input_files``.
+    Verkeerde bestands-extensie → lege lijst. Ontbrekend pad of onbekende
+    catalogus-id → :exc:`~vsa.input_paths.InputPathError` (callers tonen
+    de melding). Map-/id-scan via ``collect_input_files``.
     """
     from .input_paths import InputPathError, collect_input_files
 
@@ -349,7 +517,10 @@ def collect_mvsa_files(path: Path) -> list[Path]:
     try:
         return collect_input_files(path, suffixes=(".mvsa",))
     except InputPathError:
-        return []
+        # Bestaand pad zonder matches: lege lijst. Ontbrekend/id-fout: opnieuw.
+        if path.exists():
+            return []
+        raise
 
 
 # ---------------------------------------------------------------------------
@@ -480,7 +651,11 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                         i + 1 + line_base,
                     )
                 )
-            content = s2[rid.match_end :].lstrip()
+            raw_line = lines[i]
+            lead = len(raw_line) - len(raw_line.lstrip())
+            after = s2[rid.match_end :]
+            content = after.lstrip()
+            content_col0 = lead + rid.match_end + (len(after) - len(content))
             system_lines.append(
                 _RawLine(
                     i + 1 + line_base,
@@ -488,6 +663,8 @@ def _parse_document(text: str, diagnostics: list[MvsaDiagnostic]) -> list[_Secti
                     content,
                     ehm=rid.ehm,
                     is_lyrics=rid.is_lyrics,
+                    content_col0=content_col0,
+                    source_line=raw_line.rstrip("\r\n"),
                 )
             )
             i += 1
@@ -672,7 +849,7 @@ def _validate_directive_value(
                 MvsaDiagnostic("MVSA-START", "leeg @start", line_no)
             )
     elif name == "taal":
-        if rest in ALLOWED_TAAL_ARGS:
+        if rest in ALLOWED_TAAL_ARGS or is_lyrics_lang_code(rest):
             return
         if looks_like_taal_assignments(rest):
             parts = split_directive_assignments(rest)
@@ -825,10 +1002,10 @@ def _read_bar_anchor(content: str, start: int) -> tuple[str | None, int]:
     ``(None, start)``. Non-empty glued text is returned as-is; callers validate.
     """
     n = len(content)
-    if start >= n or content[start] in " \t":
+    if start >= n or content[start].isspace():
         return None, start
     j = start
-    while j < n and content[j] not in " \t":
+    while j < n and not content[j].isspace():
         if _bar_starts_at(content, j):
             break
         j += 1
@@ -900,6 +1077,7 @@ def _validate_section(section: _Section, diagnostics: list[MvsaDiagnostic]) -> N
         _validate_system_sync(system, diagnostics)
         _validate_system_height_tokens(system, diagnostics)
         _validate_system_l_marks(system, diagnostics)
+        _validate_system_recite_interior_elms(system, diagnostics)
         # ``||`` midden in een sectie is normaal (dubbele maatstreep / Coria);
         # geen MVSA-SECTIE-EARLY meer — sectie eindigt alleen bij @sectie/EOF.
 
@@ -956,8 +1134,12 @@ def _validate_system_sync(system: _System, diagnostics: list[MvsaDiagnostic]) ->
 
 
 def _voice_position_slots(measure: str) -> list[int]:
-    tokens = measure.split()
-    return [max(1, token.count("&") + 1) if token else 0 for token in tokens if token]
+    from .mvsa_parse import split_voice_measure_tokens
+
+    tokens = split_voice_measure_tokens(measure)
+    return [
+        max(1, token.count("&") + 1) if token else 0 for token in tokens if token
+    ]
 
 
 def _l_position_slots(measure: str) -> list[int]:
@@ -988,6 +1170,66 @@ def _validate_system_height_tokens(
                             f"{marker}: onbekende hoogte-token {slot!r} "
                             f"(maat {mi + 1}, positie {pi + 1}, slot {si + 1})",
                             rl.line_no,
+                        )
+                    )
+
+
+def _validate_system_recite_interior_elms(
+    system: _System, diagnostics: list[MvsaDiagnostic]
+) -> None:
+    """Geen duur-/melisma-ELM binnen ``(…)`` (``MVSA-RECITE-INTERIOR-ELM``)."""
+    from .mvsa_parse import find_recite_interior_elms
+
+    for marker, rl in system.lines.items():
+        if not (rl.is_lyrics or is_lyrics_stem(marker)):
+            continue
+        # Offsets in ``rl.content``: segment start within the full L-content.
+        content = rl.content
+        split = _split_bars(content)
+        seg_base = 0
+        for mi, seg in enumerate(split.segments):
+            # Locate this segment in ``content`` (bar-split drops bar tokens).
+            found_at = content.find(seg, seg_base)
+            if found_at < 0:
+                found_at = seg_base
+            seg_base = found_at + len(seg)
+            i = 0
+            n = len(seg)
+            while i < n:
+                if seg[i] != "(":
+                    i += 1
+                    continue
+                open_at = i
+                close = seg.find(")", i + 1)
+                if close < 0:
+                    interior = seg[i + 1 :]
+                    i = n
+                else:
+                    interior = seg[i + 1 : close]
+                    i = close + 1
+                hits = find_recite_interior_elms(interior)
+                if not hits:
+                    continue
+                for elm, interior_off in hits:
+                    # 1-based kolom in de bronregel.
+                    col0 = (
+                        rl.content_col0
+                        + found_at
+                        + open_at
+                        + 1
+                        + interior_off
+                    )
+                    diagnostics.append(
+                        MvsaDiagnostic(
+                            "MVSA-RECITE-INTERIOR-ELM",
+                            f"{marker}: maat {mi + 1}: duur-/melisma-ELM "
+                            f"{elm!r} binnen recite-haakjes. "
+                            f"Alle lettergrepen in `(…)` delen één duur; "
+                            f"zet ELM ná `)` of haal de lettergreep uit de "
+                            f"haakjes.",
+                            rl.line_no,
+                            column=col0 + 1,
+                            source_line=rl.source_line or None,
                         )
                     )
 
@@ -1100,5 +1342,12 @@ def _validate_system_l_marks(
 
 
 def format_diagnostic(d: MvsaDiagnostic, path: Path | None = None) -> str:
-    loc = f"{path}:" if path else ""
-    return f"{loc}{d.line}: {d.severity}: {d.code}: {d.message}"
+    from .cli_messages import path_label
+
+    loc = f"{path_label(path)}:" if path else ""
+    col = f"{d.column}:" if d.column is not None else ""
+    head = f"{loc}{d.line}:{col} {d.severity}: {d.code}: {d.message}"
+    if d.column is not None and d.source_line:
+        caret = " " * max(0, d.column - 1) + "^"
+        return f"{head}\n{d.source_line}\n{caret}"
+    return head

@@ -1,12 +1,12 @@
 ---
-title: Tropaar Profeet Elia, Toon 4, Liturgikon p.266-267
+soort: tropaar
+toon: 4
+template: tropaar-toon-4
+bron: V. Jewsewy
 do: F4
 mode: major
 tempo: 120
-genre: tropaar
-tone: 4
-template: tropaar-toon-4
-bron: V. Jewsewy
+title: Tropaar Profeet Elia, Toon 4, Liturgikon p.266-267
 ---
 
 # === pad: VSA + template → MVSA (Fase A herstart) ===
