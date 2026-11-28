@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Nieuw:** `vsa.products_meta.drop_product_keys` haalt product-keys uit de meta zonder iets anders te wijzigen (voor opgeruimde transliteratiebestanden).
 - **Fix (translit):** een passage in een andere taal (`@taal ro`, `el`, …) werd met de Nederlandse regels naar Cyrillisch omgezet; die krijgt nu geen transliteratie.
 - **Fix (translit):** `Kyrie` werd `Кй-ри-е`; nu `Ки-ри-е`.
 - **Nieuw:** `vsa.transliterate.translit_modi_for_source` bepaalt uit de gezongen tekst welke transliteraties een bron nodig heeft (stemregels en commentaar tellen niet mee).
