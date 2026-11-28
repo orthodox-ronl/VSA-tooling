@@ -11,7 +11,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Iterable, Literal
 
 from .products_invoer import RECEPT_VERSIE, bereken_invoer, verschillen
 
@@ -200,16 +200,27 @@ def strip_retired_product_keys(
     Does not delete product files. An empty ``products`` object is left
     untouched so a following products-run can replace the sidecar.
     """
+    return drop_product_keys(bron, RETIRED_FROM_PRODUCTS, dry_run=dry_run)
+
+
+def drop_product_keys(
+    bron: Path, keys: Iterable[str], *, dry_run: bool = False
+) -> list[str]:
+    """Haal product-keys uit de meta; al het andere blijft zoals het is.
+
+    Anders dan ``write_meta(..., drop_keys=...)`` blijven schema, bron-hash,
+    invoer-vingerafdruk en overige producten ongemoeid, ook als de bron
+    intussen gewijzigd is (er wordt niets als vers gemarkeerd).
+    """
     existing = load_meta(bron)
     if not existing or existing.get("schema") not in _LEESBARE_SCHEMAS:
         return []
     products = existing.get("products")
     if not isinstance(products, dict):
         return []
-    dropped = [key for key in list(products) if key in RETIRED_FROM_PRODUCTS]
-    if not dropped:
-        return []
-    if dry_run:
+    wanted = set(keys)
+    dropped = [key for key in list(products) if key in wanted]
+    if not dropped or dry_run:
         return dropped
     for key in dropped:
         products.pop(key, None)

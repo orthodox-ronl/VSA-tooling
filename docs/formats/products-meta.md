@@ -177,6 +177,9 @@ schema-2-meta zonder per-product-tijdstip mag `freshness()` nog lezen.
 Individuele product-subs: `write_meta(..., merge=True)` — zie
 [straat-CLIs fase 7](../plans/straat-clis.md).
 
+Productbestanden opgeruimd (bijv. overbodige transliteraties): gebruik
+`drop_product_keys`. Dat haalt alleen die keys weg en markeert niets als vers.
+
 ### Schema 1 (legacy)
 
 Oude sidecars met alleen bestandsnamen (`"mxl": "lied.mvsa.mxl"`) zijn
