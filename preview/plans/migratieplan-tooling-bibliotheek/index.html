@@ -98,7 +98,7 @@
   
   <strong>Preview</strong>
    — branch <code>development</code>
-  , gebouwd 2026-11-28 16:50 CET.
+  , gebouwd 2026-11-28 20:40 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5394,6 +5394,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="6. Versheid">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ontwerp-versheid-concept-2026-11-28-ter-bijsturing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ontwerp versheid (concept, 2026-11-28, ter bijsturing)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -5713,6 +5730,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="6. Versheid">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ontwerp-versheid-concept-2026-11-28-ter-bijsturing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ontwerp versheid (concept, 2026-11-28, ter bijsturing)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -5996,6 +6030,37 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   <code>check_*</code> en <code>sync_*</code> in bibliotheek gaan via de straten-chat (zie
   <code>WERKVERDELING.md</code>).</li>
 </ul>
+<h4 id="ontwerp-versheid-concept-2026-11-28-ter-bijsturing">Ontwerp versheid (concept, 2026-11-28, ter bijsturing)<a class="headerlink" href="#ontwerp-versheid-concept-2026-11-28-ter-bijsturing" title="Permanent link">&para;</a></h4>
+<p>Eén vingerafdruk per product, berekend door <code>vsa.products_meta</code>:</p>
+<ol>
+<li><strong>Samenstelling.</strong> <code>invoer_sha256</code> = hash over: de bytes van de bron
+   (zoals ze ná <code>validate</code> op schijf staan), de woorden-component, de
+   template-component en de recept-versie. Elke component staat ook apart in de
+   meta onder <code>invoer</code>, zodat <code>freshness</code> kan zeggen <em>wat</em> veranderde.</li>
+<li><strong>Woorden.</strong> De woordkernen uit de bron (bestaande
+   <code>iter_vsa_lyric_word_cores</code> en <code>iter_mvsa_lyric_word_cores</code>) met per woord
+   de vorm uit de woordenlijst (of "onbekend"); hash over de gesorteerde
+   paren. Een wijziging in de woordenlijst maakt dus alleen producten
+   verouderd die dat woord gebruiken.</li>
+<li><strong>Template.</strong> De hash van het template dat de bron in zijn frontmatter noemt
+   (<code>template_library</code>); zonder template een lege component.</li>
+<li><strong>Recept-versie.</strong> Een getal per productsoort (<code>RECEPT_VERSIE</code> in
+   <code>vsa.products_meta</code>), met de hand opgehoogd in dezelfde PR als een bewuste
+   wijziging van de export-uitkomst. De tooling-commit telt <strong>niet</strong> mee.</li>
+<li><strong>Schema 3.</strong> <code>products-meta</code> krijgt <code>invoer</code>; <code>bron_sha256</code> blijft staan.
+   <code>freshness</code> geeft <code>stale</code> met reden, bijvoorbeeld "woordenlijst: 'melodie'
+   veranderd" of "recept mvsa 3 -&gt; 4".</li>
+<li><strong>Overgang.</strong> Schema 2 blijft leesbaar: standaard (<code>invoer="los"</code>) geldt de
+   bestaande bron-hash-controle, met de reden "oud schema". <code>invoer="streng"</code>
+   eist schema 3. Een eenmalig commando schrijft de <code>invoer</code> voor producten
+   die nu <code>ok</code> zijn en laat verouderde staan. De bibliotheek schakelt naar
+   <code>streng</code> zodra de straten-graaf klaar is.</li>
+<li><strong>PDF's.</strong> Zelfde functie met een lokale sidecar (PDF's staan niet in git);
+   niet in deze stap.</li>
+<li><strong>Open vragen.</strong> (a) Welke producten hangen werkelijk van het template af?
+   (b) Wie hoogt de recept-versie op: voorstel is de PR die de export wijzigt,
+   met een regel in <code>CHANGELOG.md</code>.</li>
+</ol>
 <h3 id="7-syllaben">7. Syllaben<a class="headerlink" href="#7-syllaben" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Uitvoerder: Sonnet 5.5.</li>
