@@ -193,3 +193,29 @@ def test_validate_in_terminal_raadt_geen_onbekende_woorden(
     assert "lin-gen" in lyrics  # woord uit de lijst: wel hersteld
     clear_syllable_dictionary_cache()
     set_syllable_dictionary_path(None)
+
+
+def test_validate_schrijft_niet_als_rewrite_uitstaat(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """CI-modus: afwijking van de woordenlijst is een fout, bron blijft gelijk."""
+    dict_file = tmp_path / "dict.txt"
+    dict_file.write_text("recht-vaar-di-ge\neeu-wi-ge\n", encoding="utf-8")
+    set_syllable_dictionary_path(dict_file)
+    clear_syllable_dictionary_cache()
+
+    import vsa.syllable_dict_check as check_mod
+
+    monkeypatch.setattr(check_mod, "is_interactive_stdin", lambda stdin=None: False)
+    monkeypatch.setenv("VSA_VALIDATE_NO_REWRITE", "1")
+    vsa_path = tmp_path / "lied.vsa"
+    bron = (
+        "---\nzoektekst: |-\n  de rechtvaardige\n---\n\n"
+        "{\\recht}{\\vaar_}dige eeuwi{\\ge}\n"
+    )
+    vsa_path.write_text(bron, encoding="utf-8", newline="\n")
+    result = validate_path(vsa_path)
+    assert vsa_path.read_text(encoding="utf-8") == bron
+    assert not any(m.code == "VSA-SYLLABIFY-APPLIED" for m in result.messages)
+    clear_syllable_dictionary_cache()
+    set_syllable_dictionary_path(None)

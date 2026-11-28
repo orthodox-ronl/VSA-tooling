@@ -328,8 +328,10 @@ def _auto_repair_vsa_soft_hyphens(
     path: Path, text: str, result: ValidationResult
 ) -> str:
     """Stille reparatie; nooit met Pyphen-gokken op onbekende woorden (zie impl)."""
-    from .syllable_dict_check import force_noninteractive
+    from .syllable_dict_check import force_noninteractive, validate_rewrite_disabled
 
+    if validate_rewrite_disabled():
+        return text
     with force_noninteractive():
         return _auto_repair_vsa_soft_hyphens_impl(path, text, result)
 
