@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fix (products-meta):** `write_meta(merge=True)` gooide de andere product-keys weg als de bestaande sidecar nog schema 2 was (alleen schema 3 werd samengevoegd); nu worden schema 2 en 3 samengevoegd en schema 2 zo opgewaardeerd. Gaf in de bibliotheek `meta-missing` na `fix`.
 - **Nieuw:** `vsa.products_meta.drop_product_keys` haalt product-keys uit de meta zonder iets anders te wijzigen (voor opgeruimde transliteratiebestanden).
 - **Fix (translit):** een passage in een andere taal (`@taal ro`, `el`, …) werd met de Nederlandse regels naar Cyrillisch omgezet; die krijgt nu geen transliteratie.
 - **Fix (translit):** `Kyrie` werd `Кй-ри-е`; nu `Ки-ри-е`.

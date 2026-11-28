@@ -158,3 +158,26 @@ def test_bron_hash_blijft_in_meta(lied: Path) -> None:
     _schrijf(lied)
     meta = json.loads(meta_path_for(lied).read_text())
     assert meta["bron_sha256"] == sha256_file(lied) == meta["invoer"]["bron"]
+
+
+def test_merge_behoudt_keys_van_schema2_sidecar(tmp_path):
+    """Regressie: merge op een oude (schema 2) sidecar mag keys niet weggooien."""
+    import json
+
+    from vsa.products_meta import meta_path_for, write_meta
+
+    bron = tmp_path / "lied.vsa"
+    bron.write_text("@taal nl\n\nL: a\n", encoding="utf-8")
+    mxl = tmp_path / "lied.vsa.mxl"
+    mxl.write_bytes(b"x")
+    mp3 = tmp_path / "lied.vsa.mp3"
+    mp3.write_bytes(b"y")
+    write_meta(bron, {"mxl": mxl, "mp3": mp3})
+    pad = meta_path_for(bron)
+    data = json.loads(pad.read_text(encoding="utf-8"))
+    data["schema"] = 2
+    data.pop("invoer", None)
+    pad.write_text(json.dumps(data), encoding="utf-8")
+    write_meta(bron, {"mp3": mp3}, merge=True)
+    nieuw = json.loads(pad.read_text(encoding="utf-8"))
+    assert set(nieuw["products"]) == {"mxl", "mp3"}
