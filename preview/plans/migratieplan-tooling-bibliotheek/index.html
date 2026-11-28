@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-28 10:03 CET.
+   — branch <code>plan-straten-afstemming</code>
+  , gebouwd 2026-11-28 15:35 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5986,6 +5986,15 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   stempels; stamp-fallback weg.</li>
 <li>Klaar als: <code>stamp_ok_or_meta</code> nergens meer voorkomt en
   <code>scripts/product_meta.py</code> weg is of alleen nog een dunne wrapper.</li>
+<li><strong>Afstemming met de "straten"-lijn in bibliotheek (2026-11-28):</strong> de
+  bibliotheek bouwt één graaf (<code>scripts/plan.py</code>) die per bronsoort weet welke
+  producten eruit komen; <code>fix</code> loopt die graaf af, zodat één run genoeg is.
+  Deze stap levert daarvoor de <strong>ene versheidsfunctie</strong> in tooling
+  (<code>vsa.products_meta.freshness</code>), inclusief verborgen invoer (woordenlijst,
+  template, recept-versie). De graaf in bibliotheek roept die functie aan;
+  tooling bouwt zelf geen graaf. Wijzigingen in <code>product_meta.py</code>,
+  <code>check_*</code> en <code>sync_*</code> in bibliotheek gaan via de straten-chat (zie
+  <code>WERKVERDELING.md</code>).</li>
 </ul>
 <h3 id="7-syllaben">7. Syllaben<a class="headerlink" href="#7-syllaben" title="Permanent link">&para;</a></h3>
 <ul>
@@ -6010,6 +6019,12 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   Elk delegeert aan de tooling-API; bibliotheek houdt alleen filter en beleid.</li>
 <li>Klaar als: geen <code>need_mxl</code>/<code>need_svg</code>-logica meer in bibliotheek en per
   script één smoke-test die bewijst dat de tooling-API wordt aangeroepen.</li>
+<li><strong>Aangepast (2026-11-28):</strong> deze stap gaat op in "Eén straat, één fix"
+  (Taak 3 van de straten-chat in bibliotheek, <code>plan.py</code> en <code>fix.py</code>). Elk
+  <code>sync_*</code>- en <code>check_*</code>-script wordt daar een dunne aanroep van dezelfde
+  graaf-onderdelen. Tooling levert alleen de API per product ("maak product X
+  uit bron Y"); het omschrijven van de scripts zelf valt onder die taak. Het
+  klaar-als hierboven blijft gelden en wordt daar gemeten.</li>
 </ul>
 <h3 id="9-export-kern-ontleden-tooling">9. Export-kern ontleden (tooling)<a class="headerlink" href="#9-export-kern-ontleden-tooling" title="Permanent link">&para;</a></h3>
 <ul>
@@ -6022,6 +6037,10 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   bijgewerkt.</li>
 <li>Klaar als: geen exporter meer een eigen kopie van melisma/recite-logica
   heeft en <code>mvsa_musicxml.py</code> aanmerkelijk kleiner is.</li>
+<li><strong>Eerst afstemmen:</strong> de werkplannen <code>eigen-partituur-svg.md</code> en
+  <code>partituur-ir.md</code> (open PR's #76 en #77) raken dezelfde export- en
+  Score-IR-keten. Begin pas aan een slice als duidelijk is welke bestanden
+  daar nog worden gewijzigd; meld de slice eerst in <code>WERKVERDELING.md</code>.</li>
 </ul>
 <h3 id="10-opruimen">10. Opruimen<a class="headerlink" href="#10-opruimen" title="Permanent link">&para;</a></h3>
 <ul>
@@ -6086,7 +6105,7 @@ alleen een smoke-test die bewijst dat de tooling-API is aangeroepen.</p>
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-24
+        Bijgewerkt: 2026-11-28
         
       </p>
       
