@@ -29,6 +29,8 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 - **Zoektekst / lyrics:** YAML-`zoektekst` in canonieke `.vsa`/`.mvsa`
   ([zoektekst](zoektekst.md)); sibling-product `*.lyrics.txt` via
   `{straat} text` / `{straat} products` (meta-key `lyrics`).
+- **Taal en schrift** (begrippen, namen, transliteratie):
+  [taal-en-schrift](taal-en-schrift.md).
 - **Syllabificatie (zing-deling):** soft `-` in de bron;
   [syllabificatie](syllabificatie.md) · schrijfhulp
   [`vsa syllabify`](../reference/cli/syllabify.md).

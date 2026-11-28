@@ -1,0 +1,17 @@
+---
+description: Taal en schrift zijn twee dingen — norm voor namen, docs en code
+alwaysApply: true
+---
+
+# Taal en schrift
+
+**Norm (lees die, herformuleer niet):** `docs/formats/taal-en-schrift.md`.
+
+- **Taal** = wat gezongen wordt (`nl`, `ksl`, `ro`). **Schrift** = de letters
+  (`latn`, `cyrl`).
+- In de bron: Nederlands in Latijns schrift, Kerkslavisch in Cyrillisch schrift.
+- Een transliteratie verandert het schrift, niet de taal.
+- `Kyrie eleison` is Nederlands; andere talen (`@taal ro`) krijgen geen
+  transliteratie.
+- Geen nieuwe namen die een taalcode voor een schrift gebruiken.
+- Schrijf «transliteratie» / «translit», niet «hulptekst».

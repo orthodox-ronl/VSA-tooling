@@ -3,6 +3,7 @@
 Afgeleide SVG waarin een **tweede schriftlaag** (transliteratie) zichtbaar
 is voor scherm/download. Start: [contract-index](contract-index.md).
 Plan/diepte: [kerkslavisch-transliteratie](../plans/kerkslavisch-transliteratie.md).
+Begrippen en namen: [taal en schrift](taal-en-schrift.md).
 
 ## Identiteit
 
