@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/inzet-beginnoten</code>
-  , gebouwd 2026-11-28 20:50 CET.
+   — branch <code>feat/versheid-invoer</code>
+  , gebouwd 2026-11-28 20:54 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -1295,15 +1295,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#schema-2-normatief" class="md-nav__link">
+  <a href="#schema-3-normatief" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Schema 2 (normatief)
+        Schema 3 (normatief)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Schema 2 (normatief)">
+    <nav class="md-nav" aria-label="Schema 3 (normatief)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1311,6 +1311,17 @@
     <span class="md-ellipsis">
       
         Wie schrijft welke keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invoer-schema-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoer (schema 3)
       
     </span>
   </a>
@@ -5787,15 +5798,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#schema-2-normatief" class="md-nav__link">
+  <a href="#schema-3-normatief" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Schema 2 (normatief)
+        Schema 3 (normatief)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Schema 2 (normatief)">
+    <nav class="md-nav" aria-label="Schema 3 (normatief)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5803,6 +5814,17 @@
     <span class="md-ellipsis">
       
         Wie schrijft welke keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invoer-schema-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoer (schema 3)
       
     </span>
   </a>
@@ -5906,7 +5928,7 @@
 
 
 <h1 id="products-meta-herkomst-sidecar">Products-meta (herkomst-sidecar)<a class="headerlink" href="#products-meta-herkomst-sidecar" title="Permanent link">&para;</a></h1>
-<p><strong>Contract-id:</strong> products-meta · schema <strong>2</strong>.<br />
+<p><strong>Contract-id:</strong> products-meta · schema <strong>3</strong> (schema 2 blijft leesbaar).<br />
 Canonieke hub voor versheid/herkomst van street-<code>products</code>. Elders alleen
 linken. Start: <a href="../contract-index/">contract-index</a>.</p>
 <h2 id="identiteit">Identiteit<a class="headerlink" href="#identiteit" title="Permanent link">&para;</a></h2>
@@ -5940,7 +5962,7 @@ linken. Start: <a href="../contract-index/">contract-index</a>.</p>
 <p>Canoniek = schema <strong>2</strong> + invarianten hieronder. C1–C4:
 <a href="../contract-index/#canoniciteit-en-conversiegates-c">contract-index §C*</a>.</p>
 <h2 id="inhoud-en-metadata">Inhoud en metadata<a class="headerlink" href="#inhoud-en-metadata" title="Permanent link">&para;</a></h2>
-<p>UTF-8 JSON. Velden: zie §Schema 2. Geen muzikale inhoud.</p>
+<p>UTF-8 JSON. Velden: zie §Schema 3. Geen muzikale inhoud.</p>
 <h2 id="syllabificatie">Syllabificatie<a class="headerlink" href="#syllabificatie" title="Permanent link">&para;</a></h2>
 <p>n.v.t.</p>
 <h2 id="melisma-en-binding">Melisma en binding<a class="headerlink" href="#melisma-en-binding" title="Permanent link">&para;</a></h2>
@@ -5970,11 +5992,18 @@ stempelbestand. Daarin staan bron-hash, product-hashes en de koppeling.</p>
 </code></pre></div>
 <p>Voorbeelden: <code>lied.vsa.products-meta.json</code>, <code>lied.mvsa.products-meta.json</code>,
 <code>lied.mscz.products-meta.json</code>.</p>
-<h2 id="schema-2-normatief">Schema 2 (normatief)<a class="headerlink" href="#schema-2-normatief" title="Permanent link">&para;</a></h2>
+<h2 id="schema-3-normatief">Schema 3 (normatief)<a class="headerlink" href="#schema-3-normatief" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"bron"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lied.mvsa"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"bron_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex sha256 van de bronbytes&gt;"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"invoer"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"bron"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex sha256 van de bronbytes&gt;"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"woorden"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex sha256 over de gezongen woorden en hun vorm in de woordenlijst, of leeg&gt;"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex sha256 van het template (alleen .vsa), of leeg&gt;"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"recept"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;hex sha256 over bovenstaande vier&gt;"</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">"generated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;UTC ISO-8601&gt;"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">"mxl"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -6002,7 +6031,7 @@ stempelbestand. Daarin staan bron-hash, product-hashes en de koppeling.</p>
 <tr>
 <td><code>schema</code></td>
 <td>Ja</td>
-<td>Exact <code>2</code> voor dit contract.</td>
+<td><code>3</code> voor nieuwe sidecars; <code>2</code> (zonder <code>invoer</code>) blijft leesbaar.</td>
 </tr>
 <tr>
 <td><code>bron</code></td>
@@ -6013,6 +6042,11 @@ stempelbestand. Daarin staan bron-hash, product-hashes en de koppeling.</p>
 <td><code>bron_sha256</code></td>
 <td>Ja</td>
 <td>SHA-256 (hex, lowercase) van de <strong>huidige</strong> bronbytes bij schrijven.</td>
+</tr>
+<tr>
+<td><code>invoer</code></td>
+<td>Schema 3</td>
+<td>Vingerafdruk van alles wat de producten bepaalt (zie §Invoer).</td>
 </tr>
 <tr>
 <td><code>generated_at</code></td>
@@ -6065,14 +6099,56 @@ legacy <code>svg-N</code> tot products opnieuw is gedraaid.</p>
   herschrijf alleen de keys van deze run (of eis <code>--force</code> / volle
   <code>products</code>); geen stille mix van oude en nieuwe bron.</li>
 </ul>
+<h3 id="invoer-schema-3">Invoer (schema 3)<a class="headerlink" href="#invoer-schema-3" title="Permanent link">&para;</a></h3>
+<p>Eén vingerafdruk per bron: wat bepaalt of afgeleide producten nog kloppen.
+Berekend door <code>vsa.products_invoer.bereken_invoer</code>. Elk deel staat apart in
+de meta, zodat <code>freshness()</code> kan zeggen <strong>wat</strong> veranderde.</p>
+<table>
+<thead>
+<tr>
+<th>Deel</th>
+<th>Wat erin zit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bron</code></td>
+<td>SHA-256 van de bronbytes (zoals ze op schijf staan, dus ná <code>validate</code>).</td>
+</tr>
+<tr>
+<td><code>woorden</code></td>
+<td>De woorden die de bron zingt, met hun toegestane vormen in de woordenlijst. Een ander woord in de lijst verandert dit niet.</td>
+</tr>
+<tr>
+<td><code>template</code></td>
+<td>Inhoud van het template van een <code>.vsa</code> (<code>template:</code> in de frontmatter, anders de gewone keuze). Leeg bij <code>.mvsa</code> en <code>.mscz</code>.</td>
+</tr>
+<tr>
+<td><code>recept</code></td>
+<td>Getal per bronsoort (<code>RECEPT_VERSIE</code> in <code>vsa.products_invoer</code>, ook als <code>vsa.products_meta.RECEPT_VERSIE</code>).</td>
+</tr>
+</tbody>
+</table>
+<p>Woorden in een taal zonder woordenlijst (<code>@taal ro</code>) tellen niet mee. De
+tooling-commit telt <strong>niet</strong> mee.</p>
+<p><strong>Recept-versie ophogen:</strong> in dezelfde pull request die de uitkomst van een
+export bewust wijzigt, met een regel in <code>CHANGELOG.md</code>. Daarna zijn alle
+producten van die bronsoort <code>stale</code> tot ze opnieuw gemaakt zijn.</p>
+<p><strong>Twee standen.</strong> <code>freshness(bron)</code> (standaard <code>invoer="los"</code>) kijkt alleen
+naar de bron-hash, ook bij schema 3, en meldt bij schema 2 "oud schema".
+<code>freshness(bron, invoer="streng")</code> eist schema 3 en vergelijkt de hele
+invoer. Gebruik <code>streng</code> pas als bij het controleren dezelfde woordenlijst
+actief is als bij het schrijven; anders lijkt elk product verouderd. <code>upgrade_meta(bron)</code> zet
+schema 2 om naar schema 3 <strong>alleen als alles nu <code>ok</code> is</strong>; verouderde
+producten blijven ongemoeid en moeten eerst opnieuw gemaakt worden.</p>
 <p>Nieuwe schrijfacties zetten <code>products.*.generated_at</code>. Bestaande
 schema-2-meta zonder per-product-tijdstip mag <code>freshness()</code> nog lezen.
 Individuele product-subs: <code>write_meta(..., merge=True)</code> — zie
 <a href="../../plans/straat-clis/">straat-CLIs fase 7</a>.</p>
 <h3 id="schema-1-legacy">Schema 1 (legacy)<a class="headerlink" href="#schema-1-legacy" title="Permanent link">&para;</a></h3>
 <p>Oude sidecars met alleen bestandsnamen (<code>"mxl": "lied.mvsa.mxl"</code>) zijn
-<strong>stale</strong>: <code>freshness()</code> eist schema 2. Opnieuw <code>… products</code> schrijft
-schema 2.</p>
+<strong>stale</strong>: <code>freshness()</code> eist schema 2 of 3. Opnieuw <code>… products</code> schrijft
+schema 3.</p>
 <h2 id="invariante-hard">Invariante (hard)<a class="headerlink" href="#invariante-hard" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Schrijver = exporteur.</strong> Alleen tooling street-<code>products</code> of een
@@ -6084,10 +6160,11 @@ schema 2.</p>
    die run. Na een individuele product-sub kloppen minstens de keys die
    die sub net schreef (plus behouden keys alleen als bron-hash gelijk
    bleef).</li>
-<li><strong>Bron wijzigt → meta mag niet oud blijven.</strong> Als de bytes van de bron
-   niet meer gelijk zijn aan <code>bron_sha256</code>, is de hele sidecar <strong>stale</strong>.
-   Geen productregel uit die meta mag dan als “nog geldig” gelden.</li>
-<li><strong>Product-hash moet kloppen (schema 2).</strong> Voor elke vermelde key: het
+<li><strong>Invoer wijzigt → meta mag niet oud blijven.</strong> Als de bytes van de bron
+   niet meer gelijk zijn aan <code>bron_sha256</code>, of (schema 3) een ander deel van
+   <code>invoer</code> (woorden, template, recept) wijkt af, is de hele sidecar
+   <strong>stale</strong>. Geen productregel uit die meta mag dan als “nog geldig” gelden.</li>
+<li><strong>Product-hash moet kloppen.</strong> Voor elke vermelde key: het
    bestand <code>file</code> bestaat naast de bron, en <code>sha256_file(file) == sha256</code>.
    Faalt dat → <strong>stale</strong> of <strong>missing</strong> (niet “ok”).</li>
 <li><strong>Geen wees-claims.</strong> Er mag in meta geen productregel staan voor een
@@ -6102,13 +6179,13 @@ van bron of product is meta niet meer <code>ok</code> tot opnieuw <code>products
 <thead>
 <tr>
 <th>Status</th>
-<th>Betekenis (schema 2)</th>
+<th>Betekenis</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>ok</code></td>
-<td>Meta aanwezig; <code>bron_sha256</code> = huidige bron; alle vereiste keys: file bestaat + hash</td>
+<td>Meta aanwezig; bron en (schema 3) invoer kloppen; alle vereiste keys: file + hash</td>
 </tr>
 <tr>
 <td><code>missing</code></td>
@@ -6116,7 +6193,7 @@ van bron of product is meta niet meer <code>ok</code> tot opnieuw <code>products
 </tr>
 <tr>
 <td><code>stale</code></td>
-<td>Bron-hash of product-hash wijkt af, of meta ongeldig/incompleet</td>
+<td>Bron, invoer of product-hash wijkt af, of meta ongeldig/incompleet</td>
 </tr>
 <tr>
 <td><code>no_meta</code></td>
@@ -6137,7 +6214,7 @@ check (<code>--only-invalid</code>); die vervangt deze herkomst-sidecar niet.</p
 <tbody>
 <tr>
 <td>Tooling <code>vsa</code>/<code>mvsa</code>/<code>mscz products</code></td>
-<td>Schrijft sidecar bij elke geslaagde export (universele keys; schema 2)</td>
+<td>Schrijft sidecar bij elke geslaagde export (universele keys; schema 3)</td>
 </tr>
 <tr>
 <td>Tooling <code>{straat} {product}</code></td>
@@ -6165,6 +6242,10 @@ check (<code>--only-invalid</code>); die vervangt deze herkomst-sidecar niet.</p
 <tr>
 <td>Schema 2 (product-<code>sha256</code>)</td>
 <td><strong>gedaan</strong> in tooling (<code>products_meta.py</code>)</td>
+</tr>
+<tr>
+<td>Schema 3 (<code>invoer</code>, <code>upgrade_meta</code>)</td>
+<td><strong>gedaan</strong> in tooling (stap 6); bibliotheek schakelt over naar <code>invoer="streng"</code> later</td>
 </tr>
 <tr>
 <td>Schema 2 product-<code>generated_at</code></td>
@@ -6226,7 +6307,7 @@ check (<code>--only-invalid</code>); die vervangt deze herkomst-sidecar niet.</p
       
       
       <p class="og-footer-stamps">
-        Bijgewerkt: 2026-11-14
+        Bijgewerkt: 2026-11-28
         
       </p>
       

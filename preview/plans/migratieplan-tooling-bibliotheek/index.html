@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>feat/inzet-beginnoten</code>
-  , gebouwd 2026-11-28 20:50 CET.
+   — branch <code>feat/versheid-invoer</code>
+  , gebouwd 2026-11-28 20:54 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -5398,10 +5398,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#ontwerp-versheid-concept-2026-11-28-ter-bijsturing" class="md-nav__link">
+  <a href="#ontwerp-versheid-2026-11-28-tooling-deel-gebouwd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ontwerp versheid (concept, 2026-11-28, ter bijsturing)
+        Ontwerp versheid (2026-11-28; tooling-deel gebouwd)
       
     </span>
   </a>
@@ -5734,10 +5734,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#ontwerp-versheid-concept-2026-11-28-ter-bijsturing" class="md-nav__link">
+  <a href="#ontwerp-versheid-2026-11-28-tooling-deel-gebouwd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ontwerp versheid (concept, 2026-11-28, ter bijsturing)
+        Ontwerp versheid (2026-11-28; tooling-deel gebouwd)
       
     </span>
   </a>
@@ -6030,7 +6030,16 @@ implementaties</strong>, niet uit losse fouten. Vastgestelde situatie:</p>
   <code>check_*</code> en <code>sync_*</code> in bibliotheek gaan via de straten-chat (zie
   <code>WERKVERDELING.md</code>).</li>
 </ul>
-<h4 id="ontwerp-versheid-concept-2026-11-28-ter-bijsturing">Ontwerp versheid (concept, 2026-11-28, ter bijsturing)<a class="headerlink" href="#ontwerp-versheid-concept-2026-11-28-ter-bijsturing" title="Permanent link">&para;</a></h4>
+<h4 id="ontwerp-versheid-2026-11-28-tooling-deel-gebouwd">Ontwerp versheid (2026-11-28; tooling-deel gebouwd)<a class="headerlink" href="#ontwerp-versheid-2026-11-28-tooling-deel-gebouwd" title="Permanent link">&para;</a></h4>
+<p><strong>Stand:</strong> de tooling-kant staat in <code>vsa.products_invoer</code> en
+<code>vsa.products_meta</code> (schema 3, <code>freshness(..., invoer="los"|"streng")</code>,
+<code>upgrade_meta</code>). Afwijkingen van dit ontwerp: de standaardstand <code>los</code> kijkt
+alleen naar de bron-hash, omdat de woorden-vergelijking de actieve woordenlijst
+nodig heeft (anders lijkt elk product verouderd); <code>streng</code> doet de hele
+vingerafdruk. Het template telt alleen voor een <code>.vsa</code>. De omzetting van schema 2
+is een functie (<code>upgrade_meta</code>), nog geen CLI-commando. Wat nog moet: de
+bibliotheek schakelt de sporen om naar deze ene functie en naar <code>streng</code>
+(straten-chat), en vult de PDF-sidecar aan.</p>
 <p>Eén vingerafdruk per product, berekend door <code>vsa.products_meta</code>:</p>
 <ol>
 <li><strong>Samenstelling.</strong> <code>invoer_sha256</code> = hash over: de bytes van de bron
