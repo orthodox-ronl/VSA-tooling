@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field, replace
 from functools import lru_cache
 from pathlib import Path
@@ -150,6 +152,19 @@ def activate_concrete_lyrics_lang(lang: str | None) -> Path | None:
         _active_path = Path(path).expanduser().resolve()
     clear_syllable_dictionary_cache()
     return _active_path
+
+
+@contextmanager
+def lyrics_lang_scope(lang: str) -> Iterator[None]:
+    """Gebruik tijdelijk de woordenlijst van ``lang``; daarna de oude toestand terug."""
+    global _active_lang, _active_path
+    bewaard = (_active_lang, _active_path)
+    activate_concrete_lyrics_lang(lang)
+    try:
+        yield
+    finally:
+        _active_lang, _active_path = bewaard
+        clear_syllable_dictionary_cache()
 
 
 def ensure_lyrics_lang_for_cores(cores: list[str] | tuple[str, ...]) -> str:

@@ -1,6 +1,6 @@
 """Sidecar ``*.products-meta.json`` for street ``products`` freshness.
 
-Normative hub: ``docs/formats/products-meta.md`` (schema 2).
+Normative hub: ``docs/formats/products-meta.md`` (schema 3; schema 2 blijft leesbaar).
 No M*/S* content contract — only provenance/freshness.
 """
 
@@ -13,14 +13,24 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-SCHEMA_VERSION = 2
+from .products_invoer import RECEPT_VERSIE, bereken_invoer, verschillen
+
+__all__ = ["RECEPT_VERSIE"]
+
+SCHEMA_VERSION = 3
+#: Eerder schema zonder ``invoer``: leesbaar, geen volledige versheidscontrole.
+SCHEMA_VERSION_LEGACY = 2
 META_SUFFIX = ".products-meta.json"
 
 # Geen standaardproduct meer. ``{straat} products`` haalt deze keys uit de
 # sidecar. Een losse ``mvsa pdf`` / ``mscz pdf`` mag ``pdf`` daarna weer mergen.
 RETIRED_FROM_PRODUCTS = frozenset({"pdf"})
 
+_LEESBARE_SCHEMAS = (SCHEMA_VERSION, SCHEMA_VERSION_LEGACY)
+
 Freshness = Literal["ok", "missing", "stale", "no_meta"]
+#: ``los``: schema 2 telt mee op bron-hash; ``streng``: alleen schema 3 (met invoer).
+InvoerModus = Literal["los", "streng"]
 
 
 @dataclass(frozen=True)
@@ -92,7 +102,7 @@ def build_meta(
     generated_at: str | None = None,
     product_generated_at: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Build schema-2 meta; each product has ``file`` + ``sha256`` + ``generated_at``."""
+    """Build schema-3 meta; each product has ``file`` + ``sha256`` + ``generated_at``."""
     stamp = generated_at or utc_now_iso()
     product_entries: dict[str, dict[str, str]] = {}
     for key, path in sorted(products.items()):
@@ -102,10 +112,12 @@ def build_meta(
         product_entries[key] = build_product_entry(
             path, generated_at=per_key or stamp
         )
+    invoer = bereken_invoer(bron)
     return {
         "schema": SCHEMA_VERSION,
         "bron": bron.name,
-        "bron_sha256": bron_sha256 or sha256_file(bron),
+        "bron_sha256": bron_sha256 or invoer["bron"],
+        "invoer": invoer,
         "generated_at": stamp,
         "products": product_entries,
     }
@@ -154,6 +166,7 @@ def write_meta(
             existing is not None
             and existing.get("schema") == SCHEMA_VERSION
             and _bron_sha256_matches(existing, bron_sha)
+            and not verschillen(existing.get("invoer"), payload["invoer"])
         ):
             kept = existing.get("products")
             if isinstance(kept, dict) and kept:
@@ -188,7 +201,7 @@ def strip_retired_product_keys(
     untouched so a following products-run can replace the sidecar.
     """
     existing = load_meta(bron)
-    if not existing or existing.get("schema") != SCHEMA_VERSION:
+    if not existing or existing.get("schema") not in _LEESBARE_SCHEMAS:
         return []
     products = existing.get("products")
     if not isinstance(products, dict):
@@ -256,8 +269,17 @@ def freshness(
     bron: Path,
     *,
     required_keys: set[str] | None = None,
+    invoer: InvoerModus = "los",
 ) -> tuple[Freshness, str]:
-    """Fast check: schema 2 + bron-hash + product files + product-hashes.
+    """Check: schema + invoer-vingerafdruk + product files + product-hashes.
+
+    ``invoer="los"`` (standaard): alleen de bron-hash telt, ook bij schema 3.
+    ``invoer="streng"``: schema 3 is verplicht en de hele invoer (bron,
+    woorden uit de woordenlijst, template, recept-versie) moet nog gelijk
+    zijn; de reden zegt wat veranderde. Gebruik ``streng`` pas als de actieve
+    woordenlijst bij het controleren dezelfde is als bij het schrijven.
+    Schema 2 (zonder invoer) geeft bij ``los`` "oud schema" en bij ``streng``
+    ``stale``.
 
     If *required_keys* is set, only those product keys are required.
     Otherwise every key in meta ``products`` must exist and match.
@@ -271,14 +293,20 @@ def freshness(
     if meta is None:
         return "no_meta", f"geen {meta_path_for(bron).name}"
     schema = meta.get("schema")
-    if schema != SCHEMA_VERSION:
+    if schema not in _LEESBARE_SCHEMAS:
         return "stale", f"meta schema {schema!r} (verwacht {SCHEMA_VERSION})"
+    if schema == SCHEMA_VERSION_LEGACY and invoer == "streng":
+        return "stale", "oud schema: geen invoer-vingerafdruk"
     stored = meta.get("bron_sha256")
     if not isinstance(stored, str) or not stored:
         return "stale", "meta zonder bron_sha256"
     actual = sha256_file(bron)
     if stored != actual:
         return "stale", "bron_sha256 wijkt af van huidige bron"
+    if schema == SCHEMA_VERSION and invoer == "streng":
+        redenen = verschillen(meta.get("invoer"), bereken_invoer(bron))
+        if redenen:
+            return "stale", "invoer: " + "; ".join(redenen)
     products = meta.get("products")
     if not isinstance(products, dict) or not products:
         return "stale", "meta zonder products"
@@ -300,4 +328,33 @@ def freshness(
             return "stale", f"product '{key}' zonder sha256"
         if sha256_file(path) != expected:
             return "stale", f"product '{key}' sha256 wijkt af van bestand"
+    if schema == SCHEMA_VERSION_LEGACY:
+        return "ok", "meta en producten in orde (oud schema, geen invoer-vingerafdruk)"
     return "ok", "meta en producten in orde"
+
+
+def upgrade_meta(bron: Path, *, dry_run: bool = False) -> bool:
+    """Zet schema-2-meta om naar schema 3, alleen als alles nu nog ``ok`` is.
+
+    De vingerafdruk wordt van de huidige invoer genomen; dat is alleen eerlijk
+    als de producten nu kloppen. Verouderde of ontbrekende producten blijven
+    daarom ongemoeid (``False``): maak ze eerst opnieuw.
+    """
+    meta = load_meta(bron)
+    if not meta or meta.get("schema") != SCHEMA_VERSION_LEGACY:
+        return False
+    if freshness(bron)[0] != "ok":
+        return False
+    if dry_run:
+        return True
+    meta["schema"] = SCHEMA_VERSION
+    meta["invoer"] = bereken_invoer(bron)
+    from .atomic_io import write_text
+
+    write_text(
+        meta_path_for(bron),
+        json.dumps(meta, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return True

@@ -60,7 +60,7 @@ Rijen = bron, kolommen = doel. Diagonaal = normaliseren naar canonieke vorm.
 | [`.mscz`](mscz.md)                | MuseScore-partituur                 | [checklists](canonical-checklists.md) · templates                                       | [`mscz`](../reference/cli/mscz.md)                                                       |
 | [lyrics.txt](lyrics.txt.md)       | Platte gezongen tekst               | strip soft `-`                                                                          | `{straat} text`                                                                          |
 | [`.mp3` / audio](audio.md)        | Preview-luisteren (afgeleide)       | checklist A\*                                                                           | [`vsa audio`](../reference/cli/audio.md)                                                 |
-| [products-meta](products-meta.md) | Herkomst-sidecar                    | schema 2                                                                                | `{straat} products`                                                                      |
+| [products-meta](products-meta.md) | Herkomst-sidecar                    | schema 3                                                                                | `{straat} products`                                                                      |
 | [`.midi` / `.mid`](midi.md)       | Los MIDI (niet gepland)             | superseded door audio                                                                   | —                                                                                        |
 
 ## Commando’s
