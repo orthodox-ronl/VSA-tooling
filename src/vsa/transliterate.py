@@ -10,6 +10,7 @@ Bevroren keuzes (expert-review + K&K): zie
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Literal
 
 Direction = Literal["ksl_to_latin", "nl_to_cyrillic"]
@@ -184,6 +185,10 @@ _NL_TO_CYR_SINGLE: dict[str, str] = {
 # Hele-woord overrides (lowercase → Cyrillisch; case via ``_case_like``).
 _NL_OVERRIDES: dict[str, str] = {
     "heer": "хиир",
+    # Kyrie (eleison): in het Nederlands gezongen; ``y`` klinkt als ``ie``.
+    # Per lettergreep (``ky``) en als heel woord.
+    "ky": "ки",
+    "kyrie": "кирие",
     "amen": "аминь",
     "amin": "аминь",
     "amin'": "аминь",
@@ -229,6 +234,62 @@ def detect_direction(text: str) -> Direction | None:
     if cyr:
         return "ksl_to_latin"
     return None
+
+
+# Talen waarvoor transliteratieregels bestaan. ``None``/``auto``: niet opgegeven,
+# dus Nederlands of Kerkslavisch, af te lezen aan het schrift.
+_TRANSLIT_TALEN = frozenset({"nl", "ksl", "auto"})
+
+
+def taal_allows_translit(taal: str | None) -> bool:
+    """False voor een andere taal (``@taal ro``, ``el``, …): niet translitereren."""
+    return taal is None or taal.strip().lower() in _TRANSLIT_TALEN
+
+
+def _lyric_text_for_translit(path: Path) -> str:
+    """Alleen de gezongen tekst die voor transliteratie in aanmerking komt.
+
+    Geen stemregels, frontmatter of commentaar. In ``.mvsa`` tellen passages
+    in een taal zonder transliteratieregels niet mee.
+    """
+    source = path.read_text(encoding="utf-8")
+    if path.suffix.lower() == ".vsa":
+        from .text_export import plain_text_from_vsa
+
+        return plain_text_from_vsa(source)
+
+    from .mvsa_parse import parse_mvsa
+    from .mvsa_validate import is_lyrics_stem
+
+    parts: list[str] = []
+    for section in parse_mvsa(source).sections:
+        for system in section.systems:
+            primary = next((m for m in system.markers if is_lyrics_stem(m)), None)
+            if primary is None:
+                continue
+            if not taal_allows_translit(system.context.taal_for("L")):
+                continue
+            for measure in system.measures:
+                for position in measure.lyrics.get(primary) or []:
+                    parts.extend(position.syllables)
+    return " ".join(parts)
+
+
+def translit_modi_for_source(path: Path | str) -> tuple[str, ...]:
+    """Welke transliteraties een ``.vsa``/``.mvsa`` nodig heeft: ``nls``, ``ksl``.
+
+    Cyrillische gezongen tekst → ``nls``; Latijnse gezongen tekst → ``ksl``.
+    """
+    p = Path(path)
+    if p.suffix.lower() not in {".vsa", ".mvsa"}:
+        return ()
+    text = _lyric_text_for_translit(p)
+    modi: list[str] = []
+    if has_cyrillic(text):
+        modi.append("nls")
+    if any(c.isalpha() and not _is_cyrillic_char(c) for c in text):
+        modi.append("ksl")
+    return tuple(modi)
 
 
 def _case_like(src: str, mapped: str) -> str:

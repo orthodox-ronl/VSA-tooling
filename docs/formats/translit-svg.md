@@ -23,7 +23,12 @@ zichtbare translit-laag volgens `--translit` / `--translit-modus`
 ## Inhoud en metadata
 
 Geen eigen frontmatter. Richting filtert welke passages lyric 2 mogen
-krijgen (`nls` = ksl→Latijn; `ksl` = nl→Cyrillisch).
+krijgen (`nls` = ksl→Latijn; `ksl` = nl→Cyrillisch). Een passage in een
+andere taal (`@taal ro`, `el`, …) krijgt geen transliteratie.
+
+Welke varianten een bron nodig heeft, bepaalt
+`vsa.transliterate.translit_modi_for_source`: alleen de gezongen tekst telt,
+niet de stemregels, frontmatter of commentaar.
 
 ## Syllabificatie
 

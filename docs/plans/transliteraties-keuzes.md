@@ -14,6 +14,7 @@
 - Nl→Cyrillisch: `Heer`→`Хиир`; `en`/`den`→`эн`/`дэн`; `Eer`→`Ир`;
   `ee`→`ей` (uitz. `eeuwen`→`эувен`); `ij`→`ей`; `ui` begin→`ау`, midden→`ёй`;
   `g`→`х`; overrides `Amen`→`Аминь`, `Christus`→`Христус`, enz.
+- `Kyrie` (eleison) geldt als Nederlands: `Ky`→`Ки` (`Ки-ри-е`).
 
 Open: expert stuurt later meer `е`/`e`-patronen → kleine tabelupdate.
 

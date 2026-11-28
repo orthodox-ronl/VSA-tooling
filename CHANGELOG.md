@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **Fix (translit):** een passage in een andere taal (`@taal ro`, `el`, …) werd met de Nederlandse regels naar Cyrillisch omgezet; die krijgt nu geen transliteratie.
+- **Fix (translit):** `Kyrie` werd `Кй-ри-е`; nu `Ки-ри-е`.
+- **Nieuw:** `vsa.transliterate.translit_modi_for_source` bepaalt uit de gezongen tekst welke transliteraties een bron nodig heeft (stemregels en commentaar tellen niet mee).
 - **Nieuw (validate):** met `VSA_VALIDATE_NO_REWRITE=1` herschrijft `vsa validate` / `mvsa validate` bronnen niet meer stil (`*-SYLLABIFY-APPLIED`); afwijkingen van de woordenlijst blijven gewone fouten. Bedoeld voor CI, zodat een gewijzigde woordenlijst niet pas na het valideren tot een verouderd product leidt. Lokaal verandert er niets.
 - **Nieuw (woordenlijst):** `#`-commentaar tussen de woorden van `syllable_dictionary.*.txt` blijft bij het eerstvolgende woord staan als het bestand wordt gesorteerd (voorheen ging het verloren). Commentaar onderaan het bestand, zonder woord eronder, blijft niet bewaard.
 - **Fix (mvsa svg/mxl-partituur):** in recite (`(Uw Naam wor-de ge-hei-ligd)`) kwamen de lettergreep-streepjes niet in de partituur-SVG: R8 verborg ze doelbewust. Contract herzien: een partituur-SVG toont **alle** streepjes (ook binnen recite); alleen de `.vsa.svg` laat ze weg. Producten moeten opnieuw gegenereerd worden (`products --force`).

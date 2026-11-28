@@ -877,10 +877,14 @@ def _system_to_events(
         raise MvsaExportError("geen lyrics-regel in systeem", line=system.start_line)
     primary_lyric = lyric_markers[0]
     parallel_lyrics = lyric_markers[1:]
+    from .transliterate import taal_allows_translit
+
+    primary_taal = ctx.taal_for(primary_lyric)
+    # Een passage in een andere taal dan nl/ksl (``@taal ro``) krijgt geen
+    # transliteratie. Vrije labels op eigen lyrics-ids (``Lap=aap``) tellen niet.
+    translit_here = translit and taal_allows_translit(ctx.taal_for("L"))
     hulp_direction = (
-        _direction_from_sticky_taal(ctx.taal_for(primary_lyric))
-        if translit
-        else None
+        _direction_from_sticky_taal(primary_taal) if translit_here else None
     )
 
     voice_markers = [m for m in system.markers if not is_lyrics_stem(m)]
@@ -965,7 +969,7 @@ def _system_to_events(
                     include_directions=(layout == "playback" or key == "S"),
                     include_jump_nav=(layout == "partituur" and key == "S"),
                 )
-                if translit:
+                if translit_here:
                     _apply_translit_to_notes(
                         notes,
                         direction=hulp_direction,
