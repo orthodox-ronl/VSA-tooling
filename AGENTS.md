@@ -39,6 +39,14 @@ en `.cursor/rules/orthodox-ronl-terminologie.mdc`.
 
 ---
 
+## Taal en schrift
+
+Taal (`nl`, `ksl`, `ro`) en schrift (`latn`, `cyrl`) zijn twee verschillende
+dingen. Norm: [docs/formats/taal-en-schrift.md](docs/formats/taal-en-schrift.md);
+agentregel: `.cursor/rules/taal-en-schrift.mdc`.
+
+---
+
 ## LLM Coding Guidelines
 
 <!-- Gebaseerd op https://github.com/multica-ai/andrej-karpathy-skills -->
@@ -293,6 +301,7 @@ CI checkt `bron` uit naar `vendor/bron` (`ref: main`).
 | Regel                                 | Doel                                                          |
 | ------------------------------------- | ------------------------------------------------------------- |
 | `orthodox-ronl-terminologie.mdc`      | Glossary + R1–R5                                              |
+| `taal-en-schrift.mdc`                 | Taal ≠ schrift; norm in `docs/formats/taal-en-schrift.md`     |
 | `branch-afstemming.mdc`               | Geen stille branch-wissel; CoriB → `corib`                    |
 | `copy-pasteable-cli-commands.mdc`     | cmd-blokken voor gebruiker                                    |
 | `markdown-table-layout.mdc`           | Tabel-alignment in markdown-bron                              |
