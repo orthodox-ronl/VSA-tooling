@@ -1,0 +1,12 @@
+# Tropaar toon 1 Groningen = zelfde formule als kondak-toon-1-groningen
+# (do=F4 major). Geen aparte D4-minor-schets meer.
+
+spec_version: draft-v0
+id: tropaar-toon-1-groningen
+genre: tropaar
+tone: 1
+do: F4
+mode: major
+pitches_status: provisional
+source: "Koormap Groningen — tropaar zondag toon 1 (= kondak-toon-1-groningen)"
+same_as: kondak-toon-1-groningen
