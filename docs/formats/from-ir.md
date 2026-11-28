@@ -78,3 +78,18 @@ Zelfde bedoeling als partituur (S8), andere emit dan MuseScore-`.mscz`.
 
 - [score-ir](score-ir.md) · [mvsa-svg](mvsa-svg.md)
 - [Formaten & CLI — overzicht](index.md)
+
+## Beginnoten
+
+`vsa.beginnoten` leest de beginnoten voor de inzet; consumenten rekenen dit
+niet zelf uit.
+
+| Bron | Uitkomst |
+| ---- | -------- |
+| `*.from-ir.musicxml` met twee partijen | Eerste klinkende noot van S (deel 1, `voice` 1), A (deel 1, `voice` 2), T (deel 2, `voice` 1) en B (deel 2, `voice` 2). Rusten tellen niet. Ontbreekt een stem: geen uitkomst. |
+| `.vsa` | Eerste noot van de melodie, zonder stemletter. |
+
+Per noot: de Nederlandse notennaam zonder octaaf (`A`, `Es`, `Fis`, `Bes`,
+`B`) en de laddergraad `do re mi fa so la ti`, met `b` of `#` ervoor bij een
+toon buiten de ladder. Do is bij MusicXML de majeurtoon van de voortekens en
+bij `.vsa` de `do` uit de frontmatter (standaard F4).
