@@ -97,8 +97,8 @@
             
   
   <strong>Preview</strong>
-   — branch <code>development</code>
-  , gebouwd 2026-11-28 21:20 CET.
+   — branch <code>taal-schrift-meta-drop</code>
+  , gebouwd 2026-11-28 21:35 CET.
   <a href="https://orthodox-ronl.github.io/VSA-tooling/">Live documentatie (main)</a>.
   
 
@@ -6145,6 +6145,8 @@ producten blijven ongemoeid en moeten eerst opnieuw gemaakt worden.</p>
 schema-2-meta zonder per-product-tijdstip mag <code>freshness()</code> nog lezen.
 Individuele product-subs: <code>write_meta(..., merge=True)</code> — zie
 <a href="../../plans/straat-clis/">straat-CLIs fase 7</a>.</p>
+<p>Productbestanden opgeruimd (bijv. overbodige transliteraties): gebruik
+<code>drop_product_keys</code>. Dat haalt alleen die keys weg en markeert niets als vers.</p>
 <h3 id="schema-1-legacy">Schema 1 (legacy)<a class="headerlink" href="#schema-1-legacy" title="Permanent link">&para;</a></h3>
 <p>Oude sidecars met alleen bestandsnamen (<code>"mxl": "lied.mvsa.mxl"</code>) zijn
 <strong>stale</strong>: <code>freshness()</code> eist schema 2 of 3. Opnieuw <code>… products</code> schrijft
